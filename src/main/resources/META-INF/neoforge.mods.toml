@@ -30,3 +30,10 @@ type="optional"
 versionRange="[15,)"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="jei"
+type="optional"
+versionRange="[19,)"
+ordering="NONE"
+side="CLIENT"
