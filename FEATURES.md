@@ -17,11 +17,12 @@ NeoForge 1.21.1 · Minecraft 1.21.1
 - Pickaxe-minable
 
 ### Junk Drawer
-- Stores up to **32,768** of a single item type (accepts any item, including damageable/NBT)
-- No player UI — automation only (hoppers, pipes via `IItemHandler`)
-- Locks to first item type inserted; stays locked at count 0 after drain
-- Use Whiteout Tape (crafting grid or right-click) to clear the lock when empty
-- Drops itself with stored item data intact when broken
+- Stores up to **32,768 individual items**, one per slot (no stacking)
+- Accepts **only** items that Manila Folders reject: damageable items (tools, armour, weapons) and items with non-default component data (enchanted books, named items, potions, etc.)
+- No locking — any qualifying item may be freely added or removed at any time
+- No player UI — automation only (hoppers, pipes, AE2 storage bus via `IItemHandler`)
+- All slots exposed via `IItemHandler`; slot count is dynamic (grows/shrinks with contents)
+- Drops itself with full contents intact when broken
 - Recipe: iron blocks on corners, iron bars on edges, chest in center (`BIB/ICI/BIB`)
 - Pickaxe-minable
 
@@ -84,7 +85,7 @@ Adds block tooltip overlays when looking at IntelliStore blocks:
 | Block | Tooltip |
 |-------|---------|
 | Filing Cabinet | Open / Closed state; item icon + "Xk of Yk ItemName" per occupied folder |
-| Junk Drawer | "Empty" or "Xk of Yk ItemName" |
+| Junk Drawer | "Empty" or "X / Yk items" |
 | Fluid Tank | "Empty" or "Xk mB of Yk mB FluidName" |
 
 Counts are abbreviated: exact below 1000, `Xk` from 1,000, `XM` from 1,000,000.

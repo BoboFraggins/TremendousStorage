@@ -8,12 +8,14 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * The Junk Drawer block — a plain cube that stores up to 32,768 of a single item type.
+ * The Junk Drawer block — stores up to 32,768 individual items, one per slot.
+ *
+ * <p>Accepts only items that Manila Folders reject: damageable items (tools, armour, weapons)
+ * and items with non-default component data (enchanted books, named items, potions, etc.).
+ * There is no locking — any qualifying item may be freely added or removed at any time.
  *
  * <p>There is no player-facing UI. All item movement is via hoppers, pipes, or any mod that
- * reads the {@link net.neoforged.neoforge.items.IItemHandler} capability. The block locks to
- * the first item type inserted and stays locked (even at count 0) until cleared with
- * Whiteout Tape in the crafting grid.
+ * reads the {@link net.neoforged.neoforge.items.IItemHandler} capability.
  */
 public class JunkDrawerBlock extends BaseEntityBlock {
 

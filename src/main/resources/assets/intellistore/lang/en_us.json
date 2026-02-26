@@ -26,7 +26,7 @@
   "jade.intellistore.filing_cabinet.slot": "%2$s of %3$s %1$s",
 
   "jade.intellistore.junk_drawer.empty": "Empty",
-  "jade.intellistore.junk_drawer.contents": "%1$s of %2$s %3$s",
+  "jade.intellistore.junk_drawer.total": "%1$s / %2$s items",
 
   "jade.intellistore.fluid_tank.empty": "Empty",
   "jade.intellistore.fluid_tank.contents": "%1$s mB of %2$s mB %3$s"

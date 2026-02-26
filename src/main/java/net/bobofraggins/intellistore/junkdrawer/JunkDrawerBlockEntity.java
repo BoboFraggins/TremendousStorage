@@ -1,104 +1,107 @@
 package net.bobofraggins.intellistore.junkdrawer;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.bobofraggins.intellistore.register.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Stores a single item type in quantities up to {@value #CAPACITY}.
+ * Stores up to {@value #CAPACITY} individual items, one per slot.
  *
- * <p>Unlike Manila Folders, the Junk Drawer accepts any item — including damageable tools,
- * items with NBT data, and anything else folders reject. There is no player-facing UI; all
- * interaction is via hoppers, pipes, or automation mods through the {@link JunkDrawerItemHandler}
- * IItemHandler capability.
+ * <p>The Junk Drawer is the complement of Manila Folders: it accepts <em>only</em> items that
+ * folders reject — specifically, items that are damageable (tools, armour, weapons) or that
+ * carry non-default component data (enchanted books, named items, potions, etc.). Plain
+ * stackable items with no extra data are refused.
  *
- * <p>The drawer is unlocked (empty storedItem) when empty and locks to the first item type
- * inserted. It stays locked at count 0 after drain (same behaviour as Manila Folders) so that
- * automation pulling from the drawer doesn't accidentally re-purpose it mid-chain. Use a Whiteout
- * Tape in the crafting grid to unlock it again.
+ * <p>There is no locking. Any qualifying item may be added or removed at any time. All slots
+ * are exposed via the {@link JunkDrawerItemHandler} {@code IItemHandler} capability so that
+ * automation mods (Applied Energistics, Refined Storage, hoppers, pipes) can query and manage
+ * every item independently.
+ *
+ * <p>No player-facing UI — all interaction is via automation.
  */
 public class JunkDrawerBlockEntity extends BlockEntity {
 
-    public static final long CAPACITY = 32_768L;
+    public static final int CAPACITY = 32_768;
 
-    private ItemStack storedType = ItemStack.EMPTY; // count is always 1; used as the type key
-    private long count = 0L;
+    private final List<ItemStack> items = new ArrayList<>();
 
     public JunkDrawerBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.JUNK_DRAWER_BE_TYPE.get(), pos, state);
     }
 
     // -------------------------------------------------------------------------
+    // Item filter
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns true if the stack qualifies for storage in the Junk Drawer.
+     *
+     * <p>Accepts items that are damageable OR that carry non-default component data (enchantments,
+     * custom name, potion effects, etc.). This is the precise complement of what Manila Folders
+     * accept.
+     */
+    public static boolean accepts(ItemStack stack) {
+        if (stack.isEmpty()) return false;
+        return stack.isDamageableItem()
+                || !stack.getComponents().equals(stack.getItem().components());
+    }
+
+    // -------------------------------------------------------------------------
     // Accessors
     // -------------------------------------------------------------------------
 
+    public int size() {
+        return items.size();
+    }
+
+    @Override
     public boolean isEmpty() {
-        return storedType.isEmpty() || count == 0;
+        return items.isEmpty();
     }
 
-    /** Returns the item type stored, with count 1, or EMPTY if unlocked. */
-    public ItemStack getStoredType() {
-        return storedType;
+    public boolean isFull() {
+        return items.size() >= CAPACITY;
     }
 
-    public long getCount() {
-        return count;
+    /** Returns the item at {@code index} (count == 1), or {@link ItemStack#EMPTY}. */
+    public ItemStack get(int index) {
+        if (index < 0 || index >= items.size()) return ItemStack.EMPTY;
+        return items.get(index);
     }
 
     /**
-     * Attempts to insert {@code amount} items of the given type.
+     * Appends one copy (count = 1) of the given stack.
      *
-     * @return number of items that could NOT be inserted (the remainder).
+     * @return true if the item was added; false if the drawer is full or the item is not accepted.
      */
-    public long insert(ItemStack type, long amount) {
-        if (amount <= 0) return 0;
-
-        if (storedType.isEmpty()) {
-            // Unlock → lock to this type
-            storedType = type.copyWithCount(1);
-        } else if (!ItemStack.isSameItemSameComponents(storedType, type)) {
-            return amount; // wrong type
-        }
-
-        long space = CAPACITY - count;
-        long toInsert = Math.min(amount, space);
-        count += toInsert;
+    public boolean addItem(ItemStack stack) {
+        if (isFull() || !accepts(stack)) return false;
+        items.add(stack.copyWithCount(1));
         setChanged();
-        return amount - toInsert;
+        return true;
     }
 
     /**
-     * Extracts up to {@code amount} items.
+     * Removes and returns the item at {@code index}.
      *
-     * @return the extracted stack (may be smaller than requested).
+     * @return the removed stack (count == 1), or {@link ItemStack#EMPTY} if out of range.
      */
-    public ItemStack extract(long amount) {
-        if (storedType.isEmpty() || count == 0) return ItemStack.EMPTY;
-
-        long toExtract = Math.min(amount, Math.min(storedType.getMaxStackSize(), count));
-        if (toExtract <= 0) return ItemStack.EMPTY;
-
-        count -= toExtract;
+    public ItemStack removeItem(int index) {
+        if (index < 0 || index >= items.size()) return ItemStack.EMPTY;
+        ItemStack removed = items.remove(index);
         setChanged();
-        return storedType.copyWithCount((int) toExtract);
-    }
-
-    /**
-     * Clears the stored item type, resetting the drawer to unlocked state.
-     * Only valid when count == 0.
-     */
-    public void clearType() {
-        storedType = ItemStack.EMPTY;
-        count = 0;
-        setChanged();
+        return removed;
     }
 
     // -------------------------------------------------------------------------
@@ -118,31 +121,26 @@ public class JunkDrawerBlockEntity extends BlockEntity {
     // NBT serialization
     // -------------------------------------------------------------------------
 
-    private static final String TAG_STORED_TYPE = "StoredType";
-    private static final String TAG_COUNT = "Count";
+    private static final String TAG_ITEMS = "Items";
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        if (!storedType.isEmpty()) {
-            tag.put(TAG_STORED_TYPE, storedType.save(registries));
+        ListTag list = new ListTag();
+        for (ItemStack stack : items) {
+            list.add(stack.save(registries));
         }
-        tag.putLong(TAG_COUNT, count);
+        tag.put(TAG_ITEMS, list);
     }
 
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        if (tag.contains(TAG_STORED_TYPE)) {
-            storedType = ItemStack.parse(registries, tag.getCompound(TAG_STORED_TYPE))
-                    .orElse(ItemStack.EMPTY);
-            if (!storedType.isEmpty()) {
-                storedType = storedType.copyWithCount(1);
-            }
-        } else {
-            storedType = ItemStack.EMPTY;
+        items.clear();
+        ListTag list = tag.getList(TAG_ITEMS, Tag.TAG_COMPOUND);
+        for (int i = 0; i < list.size(); i++) {
+            ItemStack.parse(registries, list.getCompound(i)).ifPresent(items::add);
         }
-        count = tag.getLong(TAG_COUNT);
     }
 
     // -------------------------------------------------------------------------
@@ -157,13 +155,5 @@ public class JunkDrawerBlockEntity extends BlockEntity {
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
-    }
-
-    // -------------------------------------------------------------------------
-    // Server tick (no-op — kept for symmetry with Filing Cabinet)
-    // -------------------------------------------------------------------------
-
-    public static void serverTick(Level level, BlockPos pos, BlockState state, JunkDrawerBlockEntity be) {
-        // intentionally empty
     }
 }

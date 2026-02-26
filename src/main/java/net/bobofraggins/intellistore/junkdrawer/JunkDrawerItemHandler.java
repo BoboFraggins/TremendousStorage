@@ -4,23 +4,25 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
 /**
- * Exposes the Junk Drawer as a single-slot {@link IItemHandler} for hoppers and automation.
+ * Exposes the Junk Drawer as a dynamic-slot {@link IItemHandler} for automation.
  *
- * <p>The single slot presents up to {@code min(maxStackSize, count)} items for extraction,
- * and accepts any item for insertion (including damageable and NBT items).
+ * <p>Slot count equals the number of items currently stored (one slot per item). Slots are
+ * indexed 0..size-1 and each holds exactly one item (stack size 1). The slot count changes as
+ * items are inserted and extracted — automation mods such as Applied Energistics handle this
+ * correctly by re-querying slot count on each interaction.
  *
  * <p>Insert rules:
  * <ol>
- *   <li>If the drawer is unlocked, it locks to the inserted item type and inserts.
- *   <li>If the drawer is locked to a matching item, inserts up to remaining capacity.
- *   <li>If the drawer is locked to a different item, the stack is returned unchanged.
+ *   <li>Items that are neither damageable nor carry non-default component data are refused.
+ *   <li>If the drawer is full (32,768 items), the entire stack is returned.
+ *   <li>Each item in the incoming stack is inserted individually (count 1 per slot) until
+ *       capacity is reached; any remainder is returned.
  * </ol>
  *
  * <p>Extract rules:
  * <ol>
- *   <li>If the drawer is unlocked or count == 0, returns EMPTY.
- *   <li>Extracts up to {@code min(amount, maxStackSize, count)} items.
- *   <li>The drawer stays locked at count 0 after drain.
+ *   <li>Extracts the item at the given slot index (count 1).
+ *   <li>Out-of-range slot indices return EMPTY.
  * </ol>
  */
 public class JunkDrawerItemHandler implements IItemHandler {
@@ -33,66 +35,46 @@ public class JunkDrawerItemHandler implements IItemHandler {
 
     @Override
     public int getSlots() {
-        return 1;
+        return be.size();
     }
 
     @Override
     public int getSlotLimit(int slot) {
-        return (int) Math.min(Integer.MAX_VALUE, JunkDrawerBlockEntity.CAPACITY);
+        return 1;
     }
 
     @Override
     public boolean isItemValid(int slot, ItemStack stack) {
-        if (stack.isEmpty()) return false;
-        ItemStack stored = be.getStoredType();
-        if (stored.isEmpty()) return true; // unlocked — accepts anything
-        return ItemStack.isSameItemSameComponents(stored, stack);
+        return JunkDrawerBlockEntity.accepts(stack);
     }
 
     @Override
     public ItemStack getStackInSlot(int slot) {
-        ItemStack type = be.getStoredType();
-        if (type.isEmpty() || be.getCount() == 0) return ItemStack.EMPTY;
-        int visible = (int) Math.min(type.getMaxStackSize(), be.getCount());
-        return type.copyWithCount(visible);
+        return be.get(slot);
     }
 
     @Override
     public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (stack.isEmpty()) return ItemStack.EMPTY;
+        if (!JunkDrawerBlockEntity.accepts(stack)) return stack;
 
-        ItemStack stored = be.getStoredType();
-        if (!stored.isEmpty() && !ItemStack.isSameItemSameComponents(stored, stack)) {
-            return stack; // locked to a different type
-        }
-
-        long space = JunkDrawerBlockEntity.CAPACITY - be.getCount();
-        if (space <= 0) return stack;
-
-        long toInsert = Math.min(stack.getCount(), space);
-        int remainder = (int) (stack.getCount() - toInsert);
+        int toInsert = stack.getCount();
+        int canInsert = Math.min(toInsert, JunkDrawerBlockEntity.CAPACITY - be.size());
+        if (canInsert <= 0) return stack;
 
         if (!simulate) {
-            be.insert(stack, toInsert);
+            for (int i = 0; i < canInsert; i++) {
+                be.addItem(stack);
+            }
         }
 
+        int remainder = toInsert - canInsert;
         return remainder == 0 ? ItemStack.EMPTY : stack.copyWithCount(remainder);
     }
 
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (amount <= 0) return ItemStack.EMPTY;
-
-        ItemStack type = be.getStoredType();
-        if (type.isEmpty() || be.getCount() == 0) return ItemStack.EMPTY;
-
-        long toExtract = Math.min(amount, Math.min(type.getMaxStackSize(), be.getCount()));
-        if (toExtract <= 0) return ItemStack.EMPTY;
-
-        if (!simulate) {
-            return be.extract(toExtract);
-        }
-
-        return type.copyWithCount((int) toExtract);
+        if (slot < 0 || slot >= be.size()) return ItemStack.EMPTY;
+        if (simulate) return be.get(slot).copy();
+        return be.removeItem(slot);
     }
 }
