@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.filingcabinet;
 
 import net.bobofraggins.intellistore.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.manillafolder.ManillaFolderItem;
+import net.bobofraggins.intellistore.util.CountFormat;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -121,8 +122,6 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
 
     /** Formats a count as e.g. "4k" when ≥ 1000, or the exact number otherwise. */
     public static String formatCount(long n) {
-        if (n >= 1_000_000) return (n / 1_000_000) + "M";
-        if (n >= 1_000) return (n / 1_000) + "k";
-        return Long.toString(n);
+        return CountFormat.format(n);
     }
 }

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " B ",
+    "IFI",
+    " I "
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:emerald_block"
+    },
+    "I": {
+      "item": "minecraft:emerald"
+    },
+    "F": {
+      "item": "intellistore:diamond_manila_folder"
+    }
+  },
+  "result": {
+    "id": "intellistore:emerald_manila_folder",
+    "count": 1
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " B ",
+    "IFI",
+    " I "
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:netherite_block"
+    },
+    "I": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "F": {
+      "item": "intellistore:emerald_manila_folder"
+    }
+  },
+  "result": {
+    "id": "intellistore:netherite_manila_folder",
+    "count": 1
+  }
+}

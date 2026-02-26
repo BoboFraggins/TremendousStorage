@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.manillafolder;
 
 import java.util.List;
+import net.bobofraggins.intellistore.util.CountFormat;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -59,8 +60,12 @@ public class ManillaFolderItem extends Item {
         } else {
             ItemStack stored = contents.storedItem().get();
             lines.add(Component.translatable(
-                    "item.intellistore.manila_folder.contents", contents.count(), stored.getHoverName()));
+                    "item.intellistore.manila_folder.contents",
+                    CountFormat.format(contents.count()),
+                    stored.getHoverName()));
         }
-        lines.add(Component.translatable("item.intellistore.manila_folder.capacity", tier.getDefaultCapacity()));
+        lines.add(Component.translatable(
+                "item.intellistore.manila_folder.capacity",
+                CountFormat.format(tier.getDefaultCapacity())));
     }
 }

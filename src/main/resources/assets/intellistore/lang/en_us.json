@@ -4,6 +4,18 @@
 
   "block.intellistore.junk_drawer": "Junk Drawer",
 
+  "item.intellistore.paper_manila_folder": "Manila Folder",
+  "item.intellistore.copper_manila_folder": "Copper Folder",
+  "item.intellistore.iron_manila_folder": "Iron Folder",
+  "item.intellistore.gold_manila_folder": "Gold Folder",
+  "item.intellistore.diamond_manila_folder": "Diamond Folder",
+  "item.intellistore.emerald_manila_folder": "Emerald Folder",
+  "item.intellistore.netherite_manila_folder": "Netherite Folder",
+
+  "item.intellistore.manila_folder.empty": "Empty",
+  "item.intellistore.manila_folder.contents": "%1$s %2$s",
+  "item.intellistore.manila_folder.capacity": "Capacity: %1$s",
+
   "item.intellistore.whiteout_tape": "Whiteout Tape",
 
   "itemGroup.intellistore": "IntelliStore",
