@@ -2,6 +2,8 @@
   "block.intellistore.filing_cabinet": "Filing Cabinet",
   "block.intellistore.filing_cabinet.full": "The filing cabinet is full.",
 
+  "item.intellistore.whiteout_tape": "Whiteout Tape",
+
   "itemGroup.intellistore": "IntelliStore",
 
   "jade.intellistore.filing_cabinet.open": "Open",

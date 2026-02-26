@@ -12,6 +12,8 @@ import net.bobofraggins.intellistore.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.intellistore.manillafolder.FolderStorageRecipe;
 import net.bobofraggins.intellistore.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.manillafolder.ManillaFolderItem;
+import net.bobofraggins.intellistore.whiteout.FolderTapeRecipe;
+import net.bobofraggins.intellistore.whiteout.WhiteoutTapeItem;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -86,6 +88,13 @@ public final class Registration {
                             .build(null));
 
     // -------------------------------------------------------------------------
+    // Items — whiteout tape
+    // -------------------------------------------------------------------------
+
+    public static final DeferredHolder<Item, WhiteoutTapeItem> WHITEOUT_TAPE =
+            ITEMS.register("whiteout_tape", WhiteoutTapeItem::new);
+
+    // -------------------------------------------------------------------------
     // Items — one entry per tier
     // -------------------------------------------------------------------------
 
@@ -151,6 +160,21 @@ public final class Registration {
                 }
             });
 
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderTapeRecipe>>
+            FOLDER_TAPE_RECIPE = RECIPE_SERIALIZERS.register("folder_tape", () -> new RecipeSerializer<>() {
+        @Override
+        public com.mojang.serialization.MapCodec<FolderTapeRecipe> codec() {
+            return FolderTapeRecipe.CODEC;
+        }
+
+        @Override
+        public net.minecraft.network.codec.StreamCodec<
+                        net.minecraft.network.RegistryFriendlyByteBuf, FolderTapeRecipe>
+                streamCodec() {
+            return FolderTapeRecipe.STREAM_CODEC;
+        }
+    });
+
     // -------------------------------------------------------------------------
     // Creative tab
     // -------------------------------------------------------------------------
@@ -164,6 +188,7 @@ public final class Registration {
                         for (FolderTier tier : FolderTier.values()) {
                             output.accept(MANILA_FOLDERS.get(tier).get());
                         }
+                        output.accept(WHITEOUT_TAPE.get());
                     })
                     .build());
 
