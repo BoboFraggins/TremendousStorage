@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "intellistore:filing_cabinet"
+    "intellistore:filing_cabinet",
+    "intellistore:junk_drawer"
   ]
 }

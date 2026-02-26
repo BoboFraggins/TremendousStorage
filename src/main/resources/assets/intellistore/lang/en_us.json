@@ -2,11 +2,16 @@
   "block.intellistore.filing_cabinet": "Filing Cabinet",
   "block.intellistore.filing_cabinet.full": "The filing cabinet is full.",
 
+  "block.intellistore.junk_drawer": "Junk Drawer",
+
   "item.intellistore.whiteout_tape": "Whiteout Tape",
 
   "itemGroup.intellistore": "IntelliStore",
 
   "jade.intellistore.filing_cabinet.open": "Open",
   "jade.intellistore.filing_cabinet.closed": "Closed",
-  "jade.intellistore.filing_cabinet.slot": "%s × %s"
+  "jade.intellistore.filing_cabinet.slot": "%2$s of %3$s %1$s",
+
+  "jade.intellistore.junk_drawer.empty": "Empty",
+  "jade.intellistore.junk_drawer.contents": "%1$s of %2$s %3$s"
 }

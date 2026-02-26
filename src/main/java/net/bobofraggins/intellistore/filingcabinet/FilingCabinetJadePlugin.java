@@ -44,7 +44,7 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        registration.registerBlockComponent(FolderDataProvider.INSTANCE, FilingCabinetBlockEntity.class);
+        registration.registerBlockComponent(FolderDataProvider.INSTANCE, FilingCabinetBlock.class);
     }
 
     // -------------------------------------------------------------------------
@@ -74,8 +74,9 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
 
                 ItemStack stored = contents.storedItem().get();
                 CompoundTag entry = new CompoundTag();
-                entry.putString("id", stored.getItem().arch$registryName().toString());
+                entry.putString("id", net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stored.getItem()).toString());
                 entry.putLong("count", contents.count());
+                entry.putLong("capacity", ((ManillaFolderItem) folder.getItem()).getCapacity());
                 // Serialize the full ItemStack so we can reconstruct it client-side for the icon
                 entry.put("stack", stored.save(accessor.getLevel().registryAccess()));
                 list.add(entry);
@@ -105,14 +106,23 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
             for (int i = 0; i < items.size(); i++) {
                 CompoundTag entry = items.getCompound(i);
                 long count = entry.getLong("count");
+                long capacity = entry.getLong("capacity");
                 ItemStack stack = ItemStack.parseOptional(
                         accessor.getLevel().registryAccess(), entry.getCompound("stack"));
                 if (stack.isEmpty()) continue;
                 tooltip.add(Component.translatable(
                         "jade.intellistore.filing_cabinet.slot",
                         stack.getHoverName(),
-                        count));
+                        formatCount(count),
+                        formatCount(capacity)));
             }
         }
+    }
+
+    /** Formats a count as e.g. "4k" when ≥ 1000, or the exact number otherwise. */
+    public static String formatCount(long n) {
+        if (n >= 1_000_000) return (n / 1_000_000) + "M";
+        if (n >= 1_000) return (n / 1_000) + "k";
+        return Long.toString(n);
     }
 }

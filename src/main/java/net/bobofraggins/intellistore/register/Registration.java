@@ -6,6 +6,9 @@ import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.filingcabinet.FilingCabinetBlock;
 import net.bobofraggins.intellistore.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.filingcabinet.FilingCabinetItemHandler;
+import net.bobofraggins.intellistore.junkdrawer.JunkDrawerBlock;
+import net.bobofraggins.intellistore.junkdrawer.JunkDrawerBlockEntity;
+import net.bobofraggins.intellistore.junkdrawer.JunkDrawerItemHandler;
 import net.bobofraggins.intellistore.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.manillafolder.FolderExtractRecipe;
 import net.bobofraggins.intellistore.manillafolder.FolderMergeRecipe;
@@ -85,6 +88,24 @@ public final class Registration {
                     "filing_cabinet",
                     () -> BlockEntityType.Builder
                             .of(FilingCabinetBlockEntity::new, FILING_CABINET.get())
+                            .build(null));
+
+    public static final DeferredBlock<JunkDrawerBlock> JUNK_DRAWER =
+            BLOCKS.register(
+                    "junk_drawer",
+                    () -> new JunkDrawerBlock(BlockBehaviour.Properties.of()
+                            .strength(5.0f, 1000.0f)
+                            .requiresCorrectToolForDrops()
+                            .sound(SoundType.METAL)));
+
+    public static final DeferredHolder<Item, BlockItem> JUNK_DRAWER_ITEM =
+            ITEMS.registerSimpleBlockItem("junk_drawer", JUNK_DRAWER);
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<JunkDrawerBlockEntity>>
+            JUNK_DRAWER_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "junk_drawer",
+                    () -> BlockEntityType.Builder
+                            .of(JunkDrawerBlockEntity::new, JUNK_DRAWER.get())
                             .build(null));
 
     // -------------------------------------------------------------------------
@@ -185,6 +206,7 @@ public final class Registration {
                     .icon(() -> MANILA_FOLDERS.get(FolderTier.IRON).get().getDefaultInstance())
                     .displayItems((params, output) -> {
                         output.accept(FILING_CABINET_ITEM.get());
+                        output.accept(JUNK_DRAWER_ITEM.get());
                         for (FolderTier tier : FolderTier.values()) {
                             output.accept(MANILA_FOLDERS.get(tier).get());
                         }
@@ -211,5 +233,9 @@ public final class Registration {
                 Capabilities.ItemHandler.BLOCK,
                 FILING_CABINET_BE_TYPE.get(),
                 (be, side) -> new FilingCabinetItemHandler(be));
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                JUNK_DRAWER_BE_TYPE.get(),
+                (be, side) -> new JunkDrawerItemHandler(be));
     }
 }
