@@ -1,0 +1,10 @@
+{
+  "block.intellistore.filing_cabinet": "Filing Cabinet",
+  "block.intellistore.filing_cabinet.full": "The filing cabinet is full.",
+
+  "itemGroup.intellistore": "IntelliStore",
+
+  "jade.intellistore.filing_cabinet.open": "Open",
+  "jade.intellistore.filing_cabinet.closed": "Closed",
+  "jade.intellistore.filing_cabinet.slot": "%s × %s"
+}

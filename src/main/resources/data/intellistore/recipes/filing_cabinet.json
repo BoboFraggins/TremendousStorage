@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    "ICI",
+    "III"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_bars" },
+    "C": { "item": "minecraft:chest" }
+  },
+  "result": {
+    "id": "intellistore:filing_cabinet",
+    "count": 1
+  }
+}

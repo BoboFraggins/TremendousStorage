@@ -51,8 +51,13 @@ configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
 
+repositories {
+    maven { url "https://api.modrinth.com/maven" }
+}
+
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
+    compileOnly "maven.modrinth:jade:15.9.2+neoforge"
 }
 
 tasks.withType(ProcessResources).configureEach {
