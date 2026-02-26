@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.whiteout;
 
 import com.mojang.serialization.MapCodec;
+import net.bobofraggins.intellistore.fluidtank.FluidTankContents;
 import net.bobofraggins.intellistore.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.manillafolder.ManillaFolderItem;
 import net.bobofraggins.intellistore.register.Registration;
@@ -16,13 +17,13 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
 /**
- * Crafting recipe: Whiteout Tape + a locked-but-empty Manila Folder → unlocked folder.
+ * Crafting recipe: Whiteout Tape + a locked-but-empty Manila Folder or Fluid Tank → unlocked item.
  *
  * <p>The tape loses one durability per use via {@link #getRemainingItems}. When the tape
  * would exceed its max damage it is fully consumed (not returned as a broken item).
  *
- * <p>The recipe requires exactly two non-empty slots: one tape and one folder that is
- * locked (has a stored item type) but has a count of zero.
+ * <p>The recipe requires exactly two non-empty slots: one tape and one lockable item that is
+ * locked (has a stored type) but has a count/amount of zero.
  */
 public class FolderTapeRecipe extends CustomRecipe {
 
@@ -56,10 +57,24 @@ public class FolderTapeRecipe extends CustomRecipe {
         return ItemStack.EMPTY;
     }
 
+    private static ItemStack findTankItem(CraftingInput input) {
+        for (int i = 0; i < input.size(); i++) {
+            ItemStack s = input.getItem(i);
+            if (s.has(Registration.FLUID_TANK_CONTENTS.get())) return s;
+        }
+        return ItemStack.EMPTY;
+    }
+
     /** True if the folder is locked (has a stored item type) but currently empty (count == 0). */
-    private static boolean isLockedEmpty(ItemStack folder) {
+    private static boolean isFolderLockedEmpty(ItemStack folder) {
         FolderContents contents = ManillaFolderItem.getContents(folder);
         return contents.storedItem().isPresent() && contents.count() == 0;
+    }
+
+    /** True if the tank item is locked to a fluid type but has amount == 0. */
+    private static boolean isTankLockedEmpty(ItemStack tank) {
+        FluidTankContents contents = tank.getOrDefault(Registration.FLUID_TANK_CONTENTS.get(), FluidTankContents.EMPTY);
+        return contents.isLocked() && contents.amount() == 0;
     }
 
     // -------------------------------------------------------------------------
@@ -69,7 +84,7 @@ public class FolderTapeRecipe extends CustomRecipe {
     @Override
     public boolean matches(CraftingInput input, Level level) {
         ItemStack tape = ItemStack.EMPTY;
-        ItemStack folder = ItemStack.EMPTY;
+        ItemStack target = ItemStack.EMPTY; // folder or tank
 
         for (int i = 0; i < input.size(); i++) {
             ItemStack s = input.getItem(i);
@@ -78,25 +93,38 @@ public class FolderTapeRecipe extends CustomRecipe {
             if (s.getItem() instanceof WhiteoutTapeItem) {
                 if (!tape.isEmpty()) return false; // two tapes
                 tape = s;
-            } else if (s.getItem() instanceof ManillaFolderItem) {
-                if (!folder.isEmpty()) return false; // two folders
-                folder = s;
+            } else if (s.getItem() instanceof ManillaFolderItem || s.has(Registration.FLUID_TANK_CONTENTS.get())) {
+                if (!target.isEmpty()) return false; // two targets
+                target = s;
             } else {
                 return false; // unexpected item
             }
         }
 
-        if (tape.isEmpty() || folder.isEmpty()) return false;
-        return isLockedEmpty(folder);
+        if (tape.isEmpty() || target.isEmpty()) return false;
+
+        if (target.getItem() instanceof ManillaFolderItem) {
+            return isFolderLockedEmpty(target);
+        } else {
+            return isTankLockedEmpty(target);
+        }
     }
 
     @Override
     public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
         ItemStack folder = findFolder(input);
-        if (folder.isEmpty()) return ItemStack.EMPTY;
+        if (!folder.isEmpty()) {
+            return ManillaFolderItem.setContents(folder.copyWithCount(1), FolderContents.EMPTY);
+        }
 
-        // Return the folder with contents cleared (storedItem = empty, count = 0)
-        return ManillaFolderItem.setContents(folder.copyWithCount(1), FolderContents.EMPTY);
+        ItemStack tank = findTankItem(input);
+        if (!tank.isEmpty()) {
+            ItemStack result = tank.copyWithCount(1);
+            result.set(Registration.FLUID_TANK_CONTENTS.get(), FluidTankContents.EMPTY);
+            return result;
+        }
+
+        return ItemStack.EMPTY;
     }
 
     @Override

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " G ",
+    " J ",
+    " B "
+  ],
+  "key": {
+    "G": { "item": "minecraft:glass" },
+    "J": { "item": "intellistore:junk_drawer" },
+    "B": { "item": "minecraft:bucket" }
+  },
+  "result": {
+    "id": "intellistore:fluid_tank",
+    "count": 1
+  }
+}

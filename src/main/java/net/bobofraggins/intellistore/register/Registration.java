@@ -6,6 +6,10 @@ import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.filingcabinet.FilingCabinetBlock;
 import net.bobofraggins.intellistore.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.filingcabinet.FilingCabinetItemHandler;
+import net.bobofraggins.intellistore.fluidtank.FluidTankBlock;
+import net.bobofraggins.intellistore.fluidtank.FluidTankBlockEntity;
+import net.bobofraggins.intellistore.fluidtank.FluidTankContents;
+import net.bobofraggins.intellistore.fluidtank.FluidTankFluidHandler;
 import net.bobofraggins.intellistore.junkdrawer.JunkDrawerBlock;
 import net.bobofraggins.intellistore.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.junkdrawer.JunkDrawerItemHandler;
@@ -68,44 +72,59 @@ public final class Registration {
                     .networkSynchronized(FolderContents.STREAM_CODEC)
                     .build());
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<FluidTankContents>> FLUID_TANK_CONTENTS =
+            DATA_COMPONENTS.register("fluid_tank_contents", () -> DataComponentType.<FluidTankContents>builder()
+                    .persistent(FluidTankContents.CODEC)
+                    .networkSynchronized(FluidTankContents.STREAM_CODEC)
+                    .build());
+
     // -------------------------------------------------------------------------
     // Blocks + block entities
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<FilingCabinetBlock> FILING_CABINET =
-            BLOCKS.register(
-                    "filing_cabinet",
-                    () -> new FilingCabinetBlock(BlockBehaviour.Properties.of()
-                            .strength(5.0f, 1000.0f)
-                            .requiresCorrectToolForDrops()
-                            .sound(SoundType.WOOD)));
+    public static final DeferredBlock<FilingCabinetBlock> FILING_CABINET = BLOCKS.register(
+            "filing_cabinet",
+            () -> new FilingCabinetBlock(BlockBehaviour.Properties.of()
+                    .strength(5.0f, 1000.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.WOOD)));
 
     public static final DeferredHolder<Item, BlockItem> FILING_CABINET_ITEM =
             ITEMS.registerSimpleBlockItem("filing_cabinet", FILING_CABINET);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FilingCabinetBlockEntity>>
-            FILING_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register(
-                    "filing_cabinet",
-                    () -> BlockEntityType.Builder
-                            .of(FilingCabinetBlockEntity::new, FILING_CABINET.get())
-                            .build(null));
+            FILING_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register("filing_cabinet", () -> BlockEntityType.Builder.of(
+                    FilingCabinetBlockEntity::new, FILING_CABINET.get())
+            .build(null));
 
-    public static final DeferredBlock<JunkDrawerBlock> JUNK_DRAWER =
-            BLOCKS.register(
-                    "junk_drawer",
-                    () -> new JunkDrawerBlock(BlockBehaviour.Properties.of()
-                            .strength(5.0f, 1000.0f)
-                            .requiresCorrectToolForDrops()
-                            .sound(SoundType.METAL)));
+    public static final DeferredBlock<JunkDrawerBlock> JUNK_DRAWER = BLOCKS.register(
+            "junk_drawer",
+            () -> new JunkDrawerBlock(BlockBehaviour.Properties.of()
+                    .strength(5.0f, 1000.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)));
 
     public static final DeferredHolder<Item, BlockItem> JUNK_DRAWER_ITEM =
             ITEMS.registerSimpleBlockItem("junk_drawer", JUNK_DRAWER);
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<JunkDrawerBlockEntity>>
-            JUNK_DRAWER_BE_TYPE = BLOCK_ENTITY_TYPES.register(
-                    "junk_drawer",
-                    () -> BlockEntityType.Builder
-                            .of(JunkDrawerBlockEntity::new, JUNK_DRAWER.get())
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<JunkDrawerBlockEntity>> JUNK_DRAWER_BE_TYPE =
+            BLOCK_ENTITY_TYPES.register(
+                    "junk_drawer", () -> BlockEntityType.Builder.of(JunkDrawerBlockEntity::new, JUNK_DRAWER.get())
+                            .build(null));
+
+    public static final DeferredBlock<FluidTankBlock> FLUID_TANK = BLOCKS.register(
+            "fluid_tank",
+            () -> new FluidTankBlock(BlockBehaviour.Properties.of()
+                    .strength(3.0f, 1000.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.GLASS)));
+
+    public static final DeferredHolder<Item, BlockItem> FLUID_TANK_ITEM =
+            ITEMS.registerSimpleBlockItem("fluid_tank", FLUID_TANK);
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidTankBlockEntity>> FLUID_TANK_BE_TYPE =
+            BLOCK_ENTITY_TYPES.register(
+                    "fluid_tank", () -> BlockEntityType.Builder.of(FluidTankBlockEntity::new, FLUID_TANK.get())
                             .build(null));
 
     // -------------------------------------------------------------------------
@@ -181,20 +200,20 @@ public final class Registration {
                 }
             });
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderTapeRecipe>>
-            FOLDER_TAPE_RECIPE = RECIPE_SERIALIZERS.register("folder_tape", () -> new RecipeSerializer<>() {
-        @Override
-        public com.mojang.serialization.MapCodec<FolderTapeRecipe> codec() {
-            return FolderTapeRecipe.CODEC;
-        }
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderTapeRecipe>> FOLDER_TAPE_RECIPE =
+            RECIPE_SERIALIZERS.register("folder_tape", () -> new RecipeSerializer<>() {
+                @Override
+                public com.mojang.serialization.MapCodec<FolderTapeRecipe> codec() {
+                    return FolderTapeRecipe.CODEC;
+                }
 
-        @Override
-        public net.minecraft.network.codec.StreamCodec<
-                        net.minecraft.network.RegistryFriendlyByteBuf, FolderTapeRecipe>
-                streamCodec() {
-            return FolderTapeRecipe.STREAM_CODEC;
-        }
-    });
+                @Override
+                public net.minecraft.network.codec.StreamCodec<
+                                net.minecraft.network.RegistryFriendlyByteBuf, FolderTapeRecipe>
+                        streamCodec() {
+                    return FolderTapeRecipe.STREAM_CODEC;
+                }
+            });
 
     // -------------------------------------------------------------------------
     // Creative tab
@@ -207,6 +226,7 @@ public final class Registration {
                     .displayItems((params, output) -> {
                         output.accept(FILING_CABINET_ITEM.get());
                         output.accept(JUNK_DRAWER_ITEM.get());
+                        output.accept(FLUID_TANK_ITEM.get());
                         for (FolderTier tier : FolderTier.values()) {
                             output.accept(MANILA_FOLDERS.get(tier).get());
                         }
@@ -234,8 +254,8 @@ public final class Registration {
                 FILING_CABINET_BE_TYPE.get(),
                 (be, side) -> new FilingCabinetItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                JUNK_DRAWER_BE_TYPE.get(),
-                (be, side) -> new JunkDrawerItemHandler(be));
+                Capabilities.ItemHandler.BLOCK, JUNK_DRAWER_BE_TYPE.get(), (be, side) -> new JunkDrawerItemHandler(be));
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK, FLUID_TANK_BE_TYPE.get(), (be, side) -> new FluidTankFluidHandler(be));
     }
 }

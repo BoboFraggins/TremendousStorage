@@ -3,6 +3,7 @@
   "block.intellistore.filing_cabinet.full": "The filing cabinet is full.",
 
   "block.intellistore.junk_drawer": "Junk Drawer",
+  "block.intellistore.fluid_tank": "Fluid Tank",
 
   "item.intellistore.paper_manila_folder": "Manila Folder",
   "item.intellistore.copper_manila_folder": "Copper Folder",
@@ -25,5 +26,8 @@
   "jade.intellistore.filing_cabinet.slot": "%2$s of %3$s %1$s",
 
   "jade.intellistore.junk_drawer.empty": "Empty",
-  "jade.intellistore.junk_drawer.contents": "%1$s of %2$s %3$s"
+  "jade.intellistore.junk_drawer.contents": "%1$s of %2$s %3$s",
+
+  "jade.intellistore.fluid_tank.empty": "Empty",
+  "jade.intellistore.fluid_tank.contents": "%1$s mB of %2$s mB %3$s"
 }

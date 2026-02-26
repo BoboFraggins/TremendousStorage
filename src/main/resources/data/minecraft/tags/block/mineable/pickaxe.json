@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "intellistore:filing_cabinet",
-    "intellistore:junk_drawer"
+    "intellistore:junk_drawer",
+    "intellistore:fluid_tank"
   ]
 }

@@ -1,0 +1,53 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "all": "intellistore:block/filing_cabinet_side",
+    "particle": "intellistore:block/filing_cabinet_side"
+  },
+  "elements": [
+    {
+      "comment": "Full cube with north face omitted — the window is transparent there",
+      "from": [0, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "south": { "uv": [0, 0, 16, 16], "texture": "#all", "cullface": "south" },
+        "east":  { "uv": [0, 0, 16, 16], "texture": "#all", "cullface": "east" },
+        "west":  { "uv": [0, 0, 16, 16], "texture": "#all", "cullface": "west" },
+        "up":    { "uv": [0, 0, 16, 16], "texture": "#all", "cullface": "up" },
+        "down":  { "uv": [0, 0, 16, 16], "texture": "#all", "cullface": "down" }
+      }
+    },
+    {
+      "comment": "North border — left strip (x=0..2)",
+      "from": [0, 0, 0],
+      "to": [2, 16, 16],
+      "faces": {
+        "north": { "uv": [0, 0, 2, 16], "texture": "#all", "cullface": "north" }
+      }
+    },
+    {
+      "comment": "North border — right strip (x=14..16)",
+      "from": [14, 0, 0],
+      "to": [16, 16, 16],
+      "faces": {
+        "north": { "uv": [14, 0, 16, 16], "texture": "#all", "cullface": "north" }
+      }
+    },
+    {
+      "comment": "North border — top strip (y=14..16, x=2..14)",
+      "from": [2, 14, 0],
+      "to": [14, 16, 16],
+      "faces": {
+        "north": { "uv": [2, 0, 14, 2], "texture": "#all", "cullface": "north" }
+      }
+    },
+    {
+      "comment": "North border — bottom strip (y=0..2, x=2..14)",
+      "from": [2, 0, 0],
+      "to": [14, 2, 16],
+      "faces": {
+        "north": { "uv": [2, 14, 14, 16], "texture": "#all", "cullface": "north" }
+      }
+    }
+  ]
+}
