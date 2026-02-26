@@ -163,8 +163,7 @@ public class JunkDrawerBlockEntity extends BlockEntity {
     // Server tick (no-op — kept for symmetry with Filing Cabinet)
     // -------------------------------------------------------------------------
 
-    public static void serverTick(
-            Level level, BlockPos pos, BlockState state, JunkDrawerBlockEntity be) {
+    public static void serverTick(Level level, BlockPos pos, BlockState state, JunkDrawerBlockEntity be) {
         // intentionally empty
     }
 }

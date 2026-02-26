@@ -74,35 +74,26 @@ public class FilingCabinetModel {
         PartDefinition root = mesh.getRoot();
 
         // Cabinet body — static parts
-        root.addOrReplaceChild(CABINET_BACK,
-                CubeListBuilder.create().texOffs(16, 0).addBox(-7, -8, 7, 14, 16, 1),
-                PartPose.ZERO);
-        root.addOrReplaceChild(CABINET_SIDE1,
-                CubeListBuilder.create().texOffs(0, 0).addBox(-8, -8, -8, 1, 16, 16),
-                PartPose.ZERO);
-        root.addOrReplaceChild(CABINET_SIDE2,
-                CubeListBuilder.create().texOffs(15, 0).addBox(7, -8, -8, 1, 16, 16),
-                PartPose.ZERO);
-        root.addOrReplaceChild(CABINET_TOP,
-                CubeListBuilder.create().texOffs(2, 1).addBox(-7, -8, -8, 14, 2, 15),
-                PartPose.ZERO);
-        root.addOrReplaceChild(CABINET_BOTTOM,
-                CubeListBuilder.create().texOffs(3, 0).addBox(-7, 6, -8, 14, 2, 15),
-                PartPose.ZERO);
+        root.addOrReplaceChild(
+                CABINET_BACK, CubeListBuilder.create().texOffs(16, 0).addBox(-7, -8, 7, 14, 16, 1), PartPose.ZERO);
+        root.addOrReplaceChild(
+                CABINET_SIDE1, CubeListBuilder.create().texOffs(0, 0).addBox(-8, -8, -8, 1, 16, 16), PartPose.ZERO);
+        root.addOrReplaceChild(
+                CABINET_SIDE2, CubeListBuilder.create().texOffs(15, 0).addBox(7, -8, -8, 1, 16, 16), PartPose.ZERO);
+        root.addOrReplaceChild(
+                CABINET_TOP, CubeListBuilder.create().texOffs(2, 1).addBox(-7, -8, -8, 14, 2, 15), PartPose.ZERO);
+        root.addOrReplaceChild(
+                CABINET_BOTTOM, CubeListBuilder.create().texOffs(3, 0).addBox(-7, 6, -8, 14, 2, 15), PartPose.ZERO);
 
         // Drawer — animated parts
-        root.addOrReplaceChild(DRAWER_SIDE1,
-                CubeListBuilder.create().texOffs(18, 0).addBox(-7, -6, -7, 1, 12, 14),
-                PartPose.ZERO);
-        root.addOrReplaceChild(DRAWER_SIDE2,
-                CubeListBuilder.create().texOffs(18, 0).addBox(6, -6, -7, 1, 12, 14),
-                PartPose.ZERO);
-        root.addOrReplaceChild(DRAWER_FRONT,
-                CubeListBuilder.create().texOffs(16, 48).addBox(-7, -6, -8, 14, 12, 1),
-                PartPose.ZERO);
-        root.addOrReplaceChild(DRAWER_BOTTOM,
-                CubeListBuilder.create().texOffs(2, 2).addBox(-7, 5, -7, 14, 1, 14),
-                PartPose.ZERO);
+        root.addOrReplaceChild(
+                DRAWER_SIDE1, CubeListBuilder.create().texOffs(18, 0).addBox(-7, -6, -7, 1, 12, 14), PartPose.ZERO);
+        root.addOrReplaceChild(
+                DRAWER_SIDE2, CubeListBuilder.create().texOffs(18, 0).addBox(6, -6, -7, 1, 12, 14), PartPose.ZERO);
+        root.addOrReplaceChild(
+                DRAWER_FRONT, CubeListBuilder.create().texOffs(16, 48).addBox(-7, -6, -8, 14, 12, 1), PartPose.ZERO);
+        root.addOrReplaceChild(
+                DRAWER_BOTTOM, CubeListBuilder.create().texOffs(2, 2).addBox(-7, 5, -7, 14, 1, 14), PartPose.ZERO);
 
         return LayerDefinition.create(mesh, 64, 64);
     }
@@ -115,8 +106,8 @@ public class FilingCabinetModel {
      * Renders the cabinet. {@code drawerOffset} drives the drawer Z translation
      * (already interpolated with partial tick by the caller).
      */
-    public void renderAll(PoseStack poseStack, VertexConsumer consumer,
-            int packedLight, int packedOverlay, float drawerOffset) {
+    public void renderAll(
+            PoseStack poseStack, VertexConsumer consumer, int packedLight, int packedOverlay, float drawerOffset) {
         // Static cabinet body
         cabinetBack.render(poseStack, consumer, packedLight, packedOverlay);
         cabinetSide1.render(poseStack, consumer, packedLight, packedOverlay);

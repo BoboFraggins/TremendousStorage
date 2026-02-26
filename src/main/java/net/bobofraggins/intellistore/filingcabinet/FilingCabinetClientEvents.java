@@ -20,7 +20,6 @@ public final class FilingCabinetClientEvents {
 
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(
-                Registration.FILING_CABINET_BE_TYPE.get(), FilingCabinetRenderer::new);
+        event.registerBlockEntityRenderer(Registration.FILING_CABINET_BE_TYPE.get(), FilingCabinetRenderer::new);
     }
 }

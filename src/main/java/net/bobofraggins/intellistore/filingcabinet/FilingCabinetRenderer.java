@@ -55,8 +55,7 @@ public class FilingCabinetRenderer implements BlockEntityRenderer<FilingCabinetB
         Direction facing = state.getValue(FilingCabinetBlock.FACING);
 
         // Interpolate drawer offset between previous and current tick values
-        float drawerOffset = be.prevDrawerOffset
-                + (be.drawerOffset - be.prevDrawerOffset) * partialTick;
+        float drawerOffset = be.prevDrawerOffset + (be.drawerOffset - be.prevDrawerOffset) * partialTick;
 
         poseStack.pushPose();
 
@@ -95,11 +94,7 @@ public class FilingCabinetRenderer implements BlockEntityRenderer<FilingCabinetB
     }
 
     private void renderFolder(
-            ItemStack stack,
-            PoseStack poseStack,
-            MultiBufferSource bufferSource,
-            int packedLight,
-            int packedOverlay) {
+            ItemStack stack, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
 
         poseStack.pushPose();
         // Local offset and scale to sit the folder nicely inside the drawer

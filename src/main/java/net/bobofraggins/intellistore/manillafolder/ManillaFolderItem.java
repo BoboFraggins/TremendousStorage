@@ -65,7 +65,6 @@ public class ManillaFolderItem extends Item {
                     stored.getHoverName()));
         }
         lines.add(Component.translatable(
-                "item.intellistore.manila_folder.capacity",
-                CountFormat.format(tier.getDefaultCapacity())));
+                "item.intellistore.manila_folder.capacity", CountFormat.format(tier.getDefaultCapacity())));
     }
 }

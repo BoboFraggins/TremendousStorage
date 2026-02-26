@@ -67,8 +67,8 @@ public class JunkDrawerJadePlugin implements IWailaPlugin {
                 return;
             }
 
-            ItemStack stack = ItemStack.parseOptional(
-                    accessor.getLevel().registryAccess(), data.getCompound(KEY_STACK));
+            ItemStack stack =
+                    ItemStack.parseOptional(accessor.getLevel().registryAccess(), data.getCompound(KEY_STACK));
             if (stack.isEmpty()) return;
 
             long count = data.getLong(KEY_COUNT);

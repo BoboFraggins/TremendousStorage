@@ -47,16 +47,14 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
     /**
      * Server-side tick — no-op; all interaction state is synced via {@link #getUpdatePacket()}.
      */
-    public static void serverTick(
-            Level level, BlockPos pos, BlockState state, FilingCabinetBlockEntity be) {
+    public static void serverTick(Level level, BlockPos pos, BlockState state, FilingCabinetBlockEntity be) {
         // intentionally empty
     }
 
     /**
      * Client-side tick: smoothly animates the drawer toward its target offset.
      */
-    public static void clientTick(
-            Level level, BlockPos pos, BlockState state, FilingCabinetBlockEntity be) {
+    public static void clientTick(Level level, BlockPos pos, BlockState state, FilingCabinetBlockEntity be) {
         be.prevDrawerOffset = be.drawerOffset;
         if (be.isOpen) {
             be.drawerOffset = Math.max(OFFSET_OPEN, be.drawerOffset - OFFSET_SPEED);

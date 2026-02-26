@@ -1,5 +1,6 @@
 package net.bobofraggins.intellistore.filingcabinet;
 
+import com.mojang.serialization.MapCodec;
 import net.bobofraggins.intellistore.manillafolder.ManillaFolderItem;
 import net.bobofraggins.intellistore.register.Registration;
 import net.minecraft.core.BlockPos;
@@ -11,7 +12,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import com.mojang.serialization.MapCodec;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
@@ -80,11 +80,11 @@ public class FilingCabinetBlock extends BaseEntityBlock {
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {
         if (level.isClientSide()) {
-            return createTickerHelper(type, Registration.FILING_CABINET_BE_TYPE.get(),
-                    FilingCabinetBlockEntity::clientTick);
+            return createTickerHelper(
+                    type, Registration.FILING_CABINET_BE_TYPE.get(), FilingCabinetBlockEntity::clientTick);
         }
-        return createTickerHelper(type, Registration.FILING_CABINET_BE_TYPE.get(),
-                FilingCabinetBlockEntity::serverTick);
+        return createTickerHelper(
+                type, Registration.FILING_CABINET_BE_TYPE.get(), FilingCabinetBlockEntity::serverTick);
     }
 
     @Override
@@ -121,8 +121,7 @@ public class FilingCabinetBlock extends BaseEntityBlock {
 
         int slot = be.firstEmptySlot();
         if (slot < 0) {
-            player.displayClientMessage(
-                    Component.translatable("block.intellistore.filing_cabinet.full"), true);
+            player.displayClientMessage(Component.translatable("block.intellistore.filing_cabinet.full"), true);
             return ItemInteractionResult.FAIL;
         }
 

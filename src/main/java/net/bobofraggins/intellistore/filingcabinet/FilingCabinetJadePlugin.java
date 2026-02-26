@@ -75,7 +75,11 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
 
                 ItemStack stored = contents.storedItem().get();
                 CompoundTag entry = new CompoundTag();
-                entry.putString("id", net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stored.getItem()).toString());
+                entry.putString(
+                        "id",
+                        net.minecraft.core.registries.BuiltInRegistries.ITEM
+                                .getKey(stored.getItem())
+                                .toString());
                 entry.putLong("count", contents.count());
                 entry.putLong("capacity", ((ManillaFolderItem) folder.getItem()).getCapacity());
                 // Serialize the full ItemStack so we can reconstruct it client-side for the icon
@@ -97,9 +101,8 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
             CompoundTag data = accessor.getServerData();
 
             boolean open = data.getBoolean(KEY_OPEN);
-            tooltip.add(Component.translatable(open
-                    ? "jade.intellistore.filing_cabinet.open"
-                    : "jade.intellistore.filing_cabinet.closed"));
+            tooltip.add(Component.translatable(
+                    open ? "jade.intellistore.filing_cabinet.open" : "jade.intellistore.filing_cabinet.closed"));
 
             ListTag items = data.getList(KEY_ITEMS, Tag.TAG_COMPOUND);
             if (items.isEmpty()) return;
@@ -108,8 +111,8 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
                 CompoundTag entry = items.getCompound(i);
                 long count = entry.getLong("count");
                 long capacity = entry.getLong("capacity");
-                ItemStack stack = ItemStack.parseOptional(
-                        accessor.getLevel().registryAccess(), entry.getCompound("stack"));
+                ItemStack stack =
+                        ItemStack.parseOptional(accessor.getLevel().registryAccess(), entry.getCompound("stack"));
                 if (stack.isEmpty()) continue;
                 tooltip.add(Component.translatable(
                         "jade.intellistore.filing_cabinet.slot",
