@@ -32,7 +32,9 @@ import net.bobofraggins.intellistore.ui.NetworkInterfaceMenu;
 public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProvider {
 
     /** Lazily built; {@code null} = stale. */
-    private NetworkScanResult cachedScan = null;
+    private NetworkScanResult cachedScan    = null;
+    /** Lazily built alongside {@link #cachedScan}; {@code null} = stale. */
+    private NiItemHandler      cachedHandler = null;
 
     public NetworkInterfaceBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.NETWORK_INTERFACE_BE_TYPE.get(), pos, state);
@@ -69,8 +71,11 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
      * Insert = highest-priority first; extract = lowest-priority first.
      */
     public IItemHandler getItemHandler() {
-        NetworkScanResult s = getScan();
-        return s == null ? null : new NiItemHandler(s.insertOrder());
+        if (getScan() == null) return null;
+        if (cachedHandler == null) {
+            cachedHandler = new NiItemHandler(cachedScan.insertOrder());
+        }
+        return cachedHandler;
     }
 
     // -------------------------------------------------------------------------
@@ -79,7 +84,8 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
 
     @Override
     public void setChanged() {
-        cachedScan = null; // invalidate before capability notification fires
+        cachedScan    = null; // invalidate before capability notification fires
+        cachedHandler = null;
         super.setChanged();
         if (level != null) {
             level.invalidateCapabilities(worldPosition);

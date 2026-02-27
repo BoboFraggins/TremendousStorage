@@ -164,41 +164,38 @@ public final class NetworkInterfaceBFS {
             BlockPos niPos, Direction tubeDir, TubeBlockEntity tubeBE,
             List<HandlerEntry> handlerEntries, List<String> storageKeys) {
 
+        // Fetch block entity once and reuse for both priority resolution and UI key lookup
+        BlockEntity neighborBE = adjPos.equals(niPos) ? null : level.getBlockEntity(adjPos);
+
         // Resolve IItemHandler capability
         IItemHandler handler = level.getCapability(
                 Capabilities.ItemHandler.BLOCK, adjPos, tubeDir.getOpposite());
         if (handler != null) {
-            Priority priority = resolvePriority(level, adjPos, tubeBE, tubeDir.ordinal());
+            Priority priority = resolvePriority(tubeBE, tubeDir.ordinal(), neighborBE);
             handlerEntries.add(new HandlerEntry(handler, priority));
         }
 
         // Record block type for UI list
-        String key = blockListKey(level, adjPos, adjState, niPos);
+        String key = blockListKey(neighborBE);
         if (key != null) storageKeys.add(key);
     }
 
     /** Returns the translation key for the UI list, or {@code null} if the block should be hidden. */
-    private static String blockListKey(ServerLevel level, BlockPos pos, BlockState state,
-            BlockPos niPos) {
-        if (pos.equals(niPos)) return null; // don't list ourselves
-
-        BlockEntity be = level.getBlockEntity(pos);
+    private static String blockListKey(BlockEntity be) {
         if (be instanceof FilingCabinetBlockEntity)        return "block.intellistore.filing_cabinet";
         if (be instanceof JunkDrawerBlockEntity)           return "block.intellistore.junk_drawer";
         if (be instanceof BulkStorageContainerBlockEntity) return "block.intellistore.bulk_storage_container";
         if (be instanceof FluidTankBlockEntity)            return "block.intellistore.fluid_tank";
-        return null; // skip foreign blocks
+        return null;
     }
 
     private static Priority resolvePriority(
-            ServerLevel level, BlockPos neighborPos,
-            TubeBlockEntity tubeBE, int faceIndex) {
+            TubeBlockEntity tubeBE, int faceIndex, BlockEntity neighborBE) {
 
         if (tubeBE != null && tubeBE.hasAttachment(faceIndex)) {
             return tubeBE.getAttachmentPriority(faceIndex);
         }
 
-        BlockEntity neighborBE = level.getBlockEntity(neighborPos);
         if (neighborBE instanceof FilingCabinetBlockEntity fc)        return fc.getPriority();
         if (neighborBE instanceof JunkDrawerBlockEntity jd)           return jd.getPriority();
         if (neighborBE instanceof BulkStorageContainerBlockEntity bs) return bs.getPriority();

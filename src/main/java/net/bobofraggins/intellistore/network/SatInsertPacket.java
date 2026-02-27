@@ -1,14 +1,12 @@
 package net.bobofraggins.intellistore.network;
 
 import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
-import net.bobofraggins.intellistore.storagetransceiver.StorageAccessTerminalBFS;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -23,7 +21,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * much as possible into the network via the NI item handler. Any remainder stays
  * in the inventory slot. Sends back an updated {@link SatContentsPacket} after.
  */
-public record SatInsertPacket(BlockPos satPos, int playerSlot)
+public record SatInsertPacket(BlockPos niPos, int playerSlot)
         implements CustomPacketPayload {
 
     public static final Type<SatInsertPacket> TYPE = new Type<>(
@@ -31,7 +29,7 @@ public record SatInsertPacket(BlockPos satPos, int playerSlot)
 
     public static final StreamCodec<FriendlyByteBuf, SatInsertPacket> STREAM_CODEC =
             StreamCodec.composite(
-                    BlockPos.STREAM_CODEC, SatInsertPacket::satPos,
+                    BlockPos.STREAM_CODEC, SatInsertPacket::niPos,
                     StreamCodec.of(FriendlyByteBuf::writeVarInt, FriendlyByteBuf::readVarInt),
                     SatInsertPacket::playerSlot,
                     SatInsertPacket::new);
@@ -44,7 +42,6 @@ public record SatInsertPacket(BlockPos satPos, int playerSlot)
     public static void handle(SatInsertPacket packet, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
-            ServerLevel level = (ServerLevel) player.level();
 
             // Validate slot index
             int slot = packet.playerSlot();
@@ -53,10 +50,7 @@ public record SatInsertPacket(BlockPos satPos, int playerSlot)
             ItemStack inSlot = player.getInventory().getItem(slot);
             if (inSlot.isEmpty()) return;
 
-            BlockPos niPos = StorageAccessTerminalBFS.findNI(level, packet.satPos());
-            if (niPos == null) return;
-
-            BlockEntity be = level.getBlockEntity(niPos);
+            BlockEntity be = player.level().getBlockEntity(packet.niPos());
             if (!(be instanceof NetworkInterfaceBlockEntity ni)) return;
 
             IItemHandler handler = ni.getItemHandler();

@@ -1,5 +1,6 @@
 package net.bobofraggins.intellistore.networkinterface;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -18,17 +19,41 @@ import net.neoforged.neoforge.items.IItemHandler;
  * {@link #isItemValid}, and {@link #extractItem}) is based on
  * {@link #insertOrder} for read consistency; extraction internally resolves
  * the same flat slot index but walks handlers in {@link #extractOrder}.
+ *
+ * <p>Slot resolution uses a prefix-sum array built at construction time so that
+ * {@link #getSlots()} and per-slot lookups are O(1) / O(log n) rather than
+ * iterating all handlers on every call.
  */
 public class NiItemHandler implements IItemHandler {
 
     private final List<IItemHandler> insertOrder;
     private final List<IItemHandler> extractOrder;
 
+    /**
+     * Prefix sums for insertOrder: {@code insertPrefixSums[i]} is the total slot count
+     * of handlers 0..i-1. Length is {@code insertOrder.size() + 1}; the last entry is
+     * the total slot count of the whole network.
+     */
+    private final int[] insertPrefixSums;
+    /** Same structure for extractOrder. */
+    private final int[] extractPrefixSums;
+
     public NiItemHandler(List<IItemHandler> insertOrder) {
         this.insertOrder = List.copyOf(insertOrder);
         List<IItemHandler> rev = new ArrayList<>(insertOrder);
         Collections.reverse(rev);
         this.extractOrder = List.copyOf(rev);
+
+        this.insertPrefixSums  = buildPrefixSums(this.insertOrder);
+        this.extractPrefixSums = buildPrefixSums(this.extractOrder);
+    }
+
+    private static int[] buildPrefixSums(List<IItemHandler> handlers) {
+        int[] sums = new int[handlers.size() + 1];
+        for (int i = 0; i < handlers.size(); i++) {
+            sums[i + 1] = sums[i] + handlers.get(i).getSlots();
+        }
+        return sums;
     }
 
     // -------------------------------------------------------------------------
@@ -37,28 +62,29 @@ public class NiItemHandler implements IItemHandler {
 
     private record SlotRef(IItemHandler handler, int localSlot) {}
 
+    /**
+     * Maps a flat slot index to a specific handler + local slot using binary search
+     * on the prefix-sum array — O(log n) in the number of handlers.
+     */
+    private SlotRef resolveSlot(int flatSlot, List<IItemHandler> order, int[] prefixSums) {
+        if (flatSlot < 0 || flatSlot >= prefixSums[prefixSums.length - 1]) return null;
+        // Binary search: find largest i such that prefixSums[i] <= flatSlot
+        int lo = 0, hi = order.size() - 1;
+        while (lo < hi) {
+            int mid = (lo + hi + 1) >>> 1;
+            if (prefixSums[mid] <= flatSlot) lo = mid; else hi = mid - 1;
+        }
+        return new SlotRef(order.get(lo), flatSlot - prefixSums[lo]);
+    }
+
     /** Maps a flat slot index (in insertOrder layout) to the specific handler + local slot. */
     private SlotRef resolveSlotInsert(int flatSlot) {
-        if (flatSlot < 0) return null;
-        int remaining = flatSlot;
-        for (IItemHandler h : insertOrder) {
-            int slots = h.getSlots();
-            if (remaining < slots) return new SlotRef(h, remaining);
-            remaining -= slots;
-        }
-        return null;
+        return resolveSlot(flatSlot, insertOrder, insertPrefixSums);
     }
 
     /** Maps a flat slot index (in extractOrder layout) to the specific handler + local slot. */
     private SlotRef resolveSlotExtract(int flatSlot) {
-        if (flatSlot < 0) return null;
-        int remaining = flatSlot;
-        for (IItemHandler h : extractOrder) {
-            int slots = h.getSlots();
-            if (remaining < slots) return new SlotRef(h, remaining);
-            remaining -= slots;
-        }
-        return null;
+        return resolveSlot(flatSlot, extractOrder, extractPrefixSums);
     }
 
     // -------------------------------------------------------------------------
@@ -67,9 +93,8 @@ public class NiItemHandler implements IItemHandler {
 
     @Override
     public int getSlots() {
-        int total = 0;
-        for (IItemHandler h : insertOrder) total += h.getSlots();
-        return total;
+        // O(1): last entry of the prefix-sum array is the total
+        return insertPrefixSums[insertPrefixSums.length - 1];
     }
 
     @Override

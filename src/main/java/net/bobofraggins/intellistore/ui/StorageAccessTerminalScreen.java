@@ -77,7 +77,7 @@ public class StorageAccessTerminalScreen extends AbstractContainerScreen<Storage
 
         // Request network contents
         if (menu.hasNetwork()) {
-            PacketDistributor.sendToServer(new RequestSatContentsPacket(menu.getSatPos()));
+            PacketDistributor.sendToServer(new RequestSatContentsPacket(menu.getNiPos()));
         }
         SatContentsPacket.PENDING_STACKS = List.of();
         SatContentsPacket.PENDING_COUNTS = List.of();
@@ -144,7 +144,7 @@ public class StorageAccessTerminalScreen extends AbstractContainerScreen<Storage
                         : Math.min((int) totalCount, target.getMaxStackSize());
 
                 PacketDistributor.sendToServer(
-                        new SatExtractPacket(menu.getSatPos(), target.copyWithCount(1), amount));
+                        new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount));
                 return true;
             }
         }
