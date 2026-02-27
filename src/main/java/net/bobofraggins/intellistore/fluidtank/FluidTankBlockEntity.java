@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
- * Stores a single fluid type in quantities up to {@value #CAPACITY} mB (1024 buckets).
+ * Stores a single fluid type in quantities up to {@value #CAPACITY} mB (128 buckets).
  *
  * <p>The tank is unlocked (storedFluid is EMPTY) when fresh and locks to the first fluid
  * inserted. It stays locked at amount 0 after drain — use Whiteout Tape in the crafting grid
@@ -24,7 +24,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
  */
 public class FluidTankBlockEntity extends BlockEntity {
 
-    public static final long CAPACITY = 1_024_000L; // 1024 buckets
+    public static final long CAPACITY = 128_000L; // 128 buckets
 
     /** Type key — always has amount=1. EMPTY means unlocked. */
     private FluidStack storedFluid = FluidStack.EMPTY;
