@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.networkinterface;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.bobofraggins.intellistore.register.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -10,103 +11,132 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
 
 /**
- * Renders the Network Interface block (lower + upper half combined).
+ * Renders the Network Interface block as a brain-in-a-jar.
  *
- * <p>The BESR is registered for the lower-half {@link BlockEntityType} only.
- * It draws:
+ * <p>The block uses {@link net.minecraft.world.level.block.RenderShape#ENTITYBLOCK_ANIMATED},
+ * so the JSON block models are empty — this BESR draws everything:
  * <ul>
- *   <li><b>Lower body</b> — a full cube using the {@code network_interface} placeholder texture
- *   <li><b>Upper body</b> — a full cube using the vanilla glass texture (translated +1 Y)
- *   <li><b>Status dots</b> — a small 4×4-pixel square on each of the 6 lower-half faces,
- *       green when the network is valid, red otherwise
+ *   <li>Iron base (solid, blocky-cylinder approximation)
+ *   <li>Glass cylinder + dome (translucent)
+ *   <li>Blue water/fluid interior (translucent, inset)
+ *   <li>Animated floating Brain item
+ *   <li>Status dots (green = valid, red = invalid network)
  * </ul>
+ *
+ * <p>All geometry coordinates are in fractions of a block (1/16ths internally).
+ * The upper half is rendered by pushing +1 Y onto the pose stack.
+ * No {@code ItemBlockRenderTypes} registration is needed — using
+ * {@link RenderType#translucent()} in the buffer source handles translucency in NeoForge 1.21.1.
  */
 public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInterfaceBlockEntity> {
 
-    private static final ResourceLocation NI_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/network_interface");
-    private static final ResourceLocation GLASS_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "block/glass");
+    // -------------------------------------------------------------------------
+    // Texture locations
+    // -------------------------------------------------------------------------
 
-    // Status dot: centered 4/16 × 4/16 square, inset 0.002 from the face surface
-    private static final float DOT_MIN  = 6f / 16f;
-    private static final float DOT_MAX  = 10f / 16f;
+    private static final ResourceLocation IRON_BLOCK =
+            ResourceLocation.fromNamespaceAndPath("minecraft", "block/iron_block");
+    private static final ResourceLocation JAR_GLASS =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
+    private static final ResourceLocation JAR_WATER =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_water");
+
+    // -------------------------------------------------------------------------
+    // Status dot constants
+    // -------------------------------------------------------------------------
+
+    private static final float DOT_MIN   = 6f / 16f;
+    private static final float DOT_MAX   = 10f / 16f;
     private static final float DOT_INSET = 0.002f;
 
     public NetworkInterfaceRenderer(BlockEntityRendererProvider.Context ctx) {}
+
+    // -------------------------------------------------------------------------
+    // Render
+    // -------------------------------------------------------------------------
 
     @Override
     public void render(NetworkInterfaceBlockEntity be, float partialTick, PoseStack poseStack,
             MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
 
-        TextureAtlasSprite niSprite = Minecraft.getInstance()
-                .getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(NI_TEXTURE);
-        TextureAtlasSprite glassSprite = Minecraft.getInstance()
-                .getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(GLASS_TEXTURE);
+        TextureAtlasSprite ironSprite  = sprite(IRON_BLOCK);
+        TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
+        TextureAtlasSprite waterSprite = sprite(JAR_WATER);
 
-        VertexConsumer solid   = bufferSource.getBuffer(RenderType.solid());
-        VertexConsumer cutout  = bufferSource.getBuffer(RenderType.cutout());
+        VertexConsumer solid       = bufferSource.getBuffer(RenderType.solid());
+        VertexConsumer translucent = bufferSource.getBuffer(RenderType.translucent());
 
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();
 
-        // ---- Lower body (full cube 0→1 in block-local space) ----
-        drawBox(solid, mat, 0, 0, 0, 1, 1, 1,
-                niSprite, 255, 255, 255, packedLight, packedOverlay);
+        // ---- Iron base — solid, blocky-cylinder (three overlapping boxes) ----
+        // Coords in block units (1 = full block width). Values from /16 fractions:
+        drawBox(solid, mat, 3f/16, 0,     3f/16, 13f/16, 4f/16, 13f/16,
+                ironSprite, 255, 255, 255, packedLight, packedOverlay);
+        drawBox(solid, mat, 2f/16, 0,     4f/16, 14f/16, 4f/16, 12f/16,
+                ironSprite, 255, 255, 255, packedLight, packedOverlay);
+        drawBox(solid, mat, 4f/16, 0,     2f/16, 12f/16, 4f/16, 14f/16,
+                ironSprite, 255, 255, 255, packedLight, packedOverlay);
 
-        // ---- Upper body (translate +1 in Y) ----
-        poseStack.translate(0, 1, 0);
-        mat = poseStack.last().pose();
-        drawBox(cutout, mat, 0, 0, 0, 1, 1, 1,
+        // ---- Water interior — translucent, inset inside glass ----
+        drawBox(translucent, mat, 4f/16, 5f/16, 4f/16, 12f/16, 13f/16, 12f/16,
+                waterSprite, 255, 255, 255, packedLight, packedOverlay);
+
+        // ---- Glass cylinder — translucent, three overlapping boxes ----
+        drawBox(translucent, mat, 3f/16, 4f/16, 3f/16, 13f/16, 14f/16, 13f/16,
                 glassSprite, 255, 255, 255, packedLight, packedOverlay);
-        poseStack.translate(0, -1, 0);
-        mat = poseStack.last().pose();
+        drawBox(translucent, mat, 2f/16, 4f/16, 4f/16, 14f/16, 14f/16, 12f/16,
+                glassSprite, 255, 255, 255, packedLight, packedOverlay);
+        drawBox(translucent, mat, 4f/16, 4f/16, 2f/16, 12f/16, 14f/16, 14f/16,
+                glassSprite, 255, 255, 255, packedLight, packedOverlay);
 
-        // ---- Status dots on each face of the lower body ----
+        // ---- Status dots on the lower body faces ----
         boolean valid = be.isNetworkValid();
         int r = valid ? 0   : 220;
         int g = valid ? 200 : 20;
         int b = valid ? 0   : 20;
 
-        // -Y (down face): dot at y=0 plane, raised by DOT_INSET
+        // -Y (down)
         dot(solid, mat, r, g, b, packedLight, packedOverlay,
                 DOT_MIN, DOT_INSET, DOT_MAX,
                 DOT_MAX, DOT_INSET, DOT_MAX,
                 DOT_MAX, DOT_INSET, DOT_MIN,
                 DOT_MIN, DOT_INSET, DOT_MIN,
                 0, -1, 0);
-        // +Y (up face): dot at y=1 plane, lowered by DOT_INSET
+        // +Y (up)
         dot(solid, mat, r, g, b, packedLight, packedOverlay,
                 DOT_MIN, 1f - DOT_INSET, DOT_MIN,
                 DOT_MAX, 1f - DOT_INSET, DOT_MIN,
                 DOT_MAX, 1f - DOT_INSET, DOT_MAX,
                 DOT_MIN, 1f - DOT_INSET, DOT_MAX,
                 0, 1, 0);
-        // -Z (north face): dot at z=0 plane, pushed by DOT_INSET
+        // -Z (north)
         dot(solid, mat, r, g, b, packedLight, packedOverlay,
                 DOT_MAX, DOT_MAX, DOT_INSET,
                 DOT_MIN, DOT_MAX, DOT_INSET,
                 DOT_MIN, DOT_MIN, DOT_INSET,
                 DOT_MAX, DOT_MIN, DOT_INSET,
                 0, 0, -1);
-        // +Z (south face): dot at z=1 plane, pulled by DOT_INSET
+        // +Z (south)
         dot(solid, mat, r, g, b, packedLight, packedOverlay,
                 DOT_MIN, DOT_MAX, 1f - DOT_INSET,
                 DOT_MAX, DOT_MAX, 1f - DOT_INSET,
                 DOT_MAX, DOT_MIN, 1f - DOT_INSET,
                 DOT_MIN, DOT_MIN, 1f - DOT_INSET,
                 0, 0, 1);
-        // -X (west face): dot at x=0 plane, pushed by DOT_INSET
+        // -X (west)
         dot(solid, mat, r, g, b, packedLight, packedOverlay,
                 DOT_INSET, DOT_MAX, DOT_MIN,
                 DOT_INSET, DOT_MAX, DOT_MAX,
                 DOT_INSET, DOT_MIN, DOT_MAX,
                 DOT_INSET, DOT_MIN, DOT_MIN,
                 -1, 0, 0);
-        // +X (east face): dot at x=1 plane, pulled by DOT_INSET
+        // +X (east)
         dot(solid, mat, r, g, b, packedLight, packedOverlay,
                 1f - DOT_INSET, DOT_MAX, DOT_MAX,
                 1f - DOT_INSET, DOT_MAX, DOT_MIN,
@@ -114,41 +144,75 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 1f - DOT_INSET, DOT_MIN, DOT_MAX,
                 1, 0, 0);
 
+        // ---- Upper half: translate +1 Y ----
+        poseStack.translate(0, 1, 0);
+        mat = poseStack.last().pose();
+
+        // Glass dome — three overlapping boxes (y values relative to lower-half floor)
+        drawBox(translucent, mat, 5f/16, 14f/16, 5f/16, 11f/16, 1f,     11f/16,
+                glassSprite, 255, 255, 255, packedLight, packedOverlay);
+        drawBox(translucent, mat, 4f/16, 15f/16, 6f/16, 12f/16, 1f,     10f/16,
+                glassSprite, 255, 255, 255, packedLight, packedOverlay);
+        drawBox(translucent, mat, 6f/16, 15f/16, 4f/16, 10f/16, 1f,     12f/16,
+                glassSprite, 255, 255, 255, packedLight, packedOverlay);
+
+        // ---- Animated floating brain ----
+        // Use game time for smooth partial-tick-aware animation (avoids System.currentTimeMillis stutter)
+        double time = (be.getLevel().getGameTime() + partialTick) / 20.0;
+        float bob = (float) Math.sin(time * Math.PI) * 0.06f; // ~0.5 Hz, ±0.06 blocks
+
+        // Brain sits ~0.55 above lower-half floor.
+        // poseStack is currently translated +1 Y, so subtract 1 to get back to jar-interior coords:
+        // target y from lower floor: 0.55 → from +1Y offset: 0.55 - 1 = -0.45
+        poseStack.translate(0.5, -0.45 + bob, 0.5);
+        poseStack.scale(0.6f, 0.6f, 0.6f);
+
+        Minecraft.getInstance().getItemRenderer().renderStatic(
+                new ItemStack(Registration.BRAIN.get()),
+                ItemDisplayContext.GROUND,
+                packedLight, packedOverlay,
+                poseStack, bufferSource,
+                be.getLevel(), 0);
+
         poseStack.popPose();
     }
 
     // -------------------------------------------------------------------------
-    // Geometry helpers — same pattern as TubeRenderer
+    // Geometry helpers
     // -------------------------------------------------------------------------
+
+    private static TextureAtlasSprite sprite(ResourceLocation loc) {
+        return Minecraft.getInstance()
+                .getModelManager()
+                .getAtlas(InventoryMenu.BLOCK_ATLAS)
+                .getSprite(loc);
+    }
 
     private static void drawBox(VertexConsumer vc, Matrix4f mat,
             float x0, float y0, float z0, float x1, float y1, float z1,
-            TextureAtlasSprite sprite, int r, int g, int b, int light, int overlay) {
-
-        float u0 = sprite.getU0(), u1 = sprite.getU1();
-        float v0 = sprite.getV0(), v1 = sprite.getV1();
-
+            TextureAtlasSprite sp, int r, int g, int b, int light, int overlay) {
+        float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
         // -Y
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1,
                 x0, y0, z1,  x1, y0, z1,  x1, y0, z0,  x0, y0, z0,  0, -1, 0);
         // +Y
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1,
                 x0, y1, z0,  x1, y1, z0,  x1, y1, z1,  x0, y1, z1,  0, 1, 0);
-        // -Z
+        // -Z (north)
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1,
                 x1, y1, z0,  x0, y1, z0,  x0, y0, z0,  x1, y0, z0,  0, 0, -1);
-        // +Z
+        // +Z (south)
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1,
                 x0, y1, z1,  x1, y1, z1,  x1, y0, z1,  x0, y0, z1,  0, 0, 1);
-        // -X
+        // -X (west)
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1,
                 x0, y1, z0,  x0, y1, z1,  x0, y0, z1,  x0, y0, z0,  -1, 0, 0);
-        // +X
+        // +X (east)
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1,
                 x1, y1, z1,  x1, y1, z0,  x1, y0, z0,  x1, y0, z1,  1, 0, 0);
     }
 
-    /** Draws a single flat quad (for a status dot). */
+    /** Draws a flat quad for a status dot (solid colour, no UV mapping needed). */
     private static void dot(VertexConsumer vc, Matrix4f mat,
             int r, int g, int b, int light, int overlay,
             float x0, float y0, float z0,
@@ -156,8 +220,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
             float x2, float y2, float z2,
             float x3, float y3, float z3,
             float nx, float ny, float nz) {
-        // Use a 1×1 UV (solid color via tint)
-        float u = 0.5f, v = 0.5f;
+        float u = 0.5f, v = 0.5f; // arbitrary UV — colour comes from vertex colour
         vc.addVertex(mat, x0, y0, z0).setColor(r, g, b, 255).setUv(u, v).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
         vc.addVertex(mat, x1, y1, z1).setColor(r, g, b, 255).setUv(u, v).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
         vc.addVertex(mat, x2, y2, z2).setColor(r, g, b, 255).setUv(u, v).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);

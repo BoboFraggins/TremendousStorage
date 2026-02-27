@@ -254,7 +254,8 @@ public final class Registration {
                     .strength(5f, 1000f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)
-                    .noOcclusion()));
+                    .noOcclusion()
+                    .lightLevel(state -> 8)));
 
     public static final DeferredHolder<Item, BlockItem> NETWORK_INTERFACE_ITEM =
             ITEMS.registerSimpleBlockItem("network_interface", NETWORK_INTERFACE);
