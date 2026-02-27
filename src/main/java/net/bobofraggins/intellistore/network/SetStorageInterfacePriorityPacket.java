@@ -23,9 +23,12 @@ public record SetStorageInterfacePriorityPacket(BlockPos pos, int faceIndex, int
 
     public static final StreamCodec<FriendlyByteBuf, SetStorageInterfacePriorityPacket> STREAM_CODEC =
             StreamCodec.composite(
-                    BlockPos.STREAM_CODEC, SetStorageInterfacePriorityPacket::pos,
-                    ByteBufCodecs.INT, SetStorageInterfacePriorityPacket::faceIndex,
-                    ByteBufCodecs.INT, SetStorageInterfacePriorityPacket::priority,
+                    BlockPos.STREAM_CODEC,
+                    SetStorageInterfacePriorityPacket::pos,
+                    ByteBufCodecs.INT,
+                    SetStorageInterfacePriorityPacket::faceIndex,
+                    ByteBufCodecs.INT,
+                    SetStorageInterfacePriorityPacket::priority,
                     SetStorageInterfacePriorityPacket::new);
 
     @Override

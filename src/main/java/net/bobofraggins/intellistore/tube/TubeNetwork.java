@@ -45,13 +45,12 @@ public final class TubeNetwork {
      * @param color  only same-color tubes are traversed
      * @return composite handler for the entire network; never null
      */
-    public static NetworkItemHandler buildNetworkView(
-            ServerLevel level, BlockPos start, DyeColor color) {
+    public static NetworkItemHandler buildNetworkView(ServerLevel level, BlockPos start, DyeColor color) {
 
-        Set<BlockPos> visitedTubes    = new HashSet<>();
-        Deque<BlockPos> queue         = new ArrayDeque<>();
+        Set<BlockPos> visitedTubes = new HashSet<>();
+        Deque<BlockPos> queue = new ArrayDeque<>();
         Set<BlockPos> collectedStorage = new HashSet<>();
-        List<HandlerEntry> entries    = new ArrayList<>();
+        List<HandlerEntry> entries = new ArrayList<>();
 
         queue.add(start);
 
@@ -62,8 +61,7 @@ public final class TubeNetwork {
             BlockState state = level.getBlockState(pos);
             if (!(state.getBlock() instanceof TubeBlock tb) || tb.getColor() != color) continue;
 
-            TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe
-                    ? tbe : null;
+            TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe ? tbe : null;
 
             for (Direction dir : Direction.values()) {
                 // Only follow active connections (tube arm extends toward this face)
@@ -72,16 +70,15 @@ public final class TubeNetwork {
                 BlockPos neighborPos = pos.relative(dir);
                 BlockState neighborState = level.getBlockState(neighborPos);
 
-                if (neighborState.getBlock() instanceof TubeBlock neighborTube
-                        && neighborTube.getColor() == color) {
+                if (neighborState.getBlock() instanceof TubeBlock neighborTube && neighborTube.getColor() == color) {
                     // Same-color tube: extend BFS
                     if (!visitedTubes.contains(neighborPos)) {
                         queue.add(neighborPos);
                     }
                 } else if (collectedStorage.add(neighborPos)) {
                     // Non-tube neighbor not yet collected: query its IItemHandler capability
-                    IItemHandler handler = level.getCapability(
-                            Capabilities.ItemHandler.BLOCK, neighborPos, dir.getOpposite());
+                    IItemHandler handler =
+                            level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, dir.getOpposite());
                     if (handler != null) {
                         Priority priority = resolvePriority(level, neighborPos, tubeBE, dir.ordinal());
                         entries.add(new HandlerEntry(handler, priority));
@@ -111,16 +108,15 @@ public final class TubeNetwork {
      * </ol>
      */
     private static Priority resolvePriority(
-            ServerLevel level, BlockPos neighborPos,
-            TubeBlockEntity tubeBE, int faceIndex) {
+            ServerLevel level, BlockPos neighborPos, TubeBlockEntity tubeBE, int faceIndex) {
 
         if (tubeBE != null && tubeBE.hasAttachment(faceIndex)) {
             return tubeBE.getAttachmentPriority(faceIndex);
         }
 
         BlockEntity neighborBE = level.getBlockEntity(neighborPos);
-        if (neighborBE instanceof FilingCabinetBlockEntity fc)        return fc.getPriority();
-        if (neighborBE instanceof JunkDrawerBlockEntity jd)           return jd.getPriority();
+        if (neighborBE instanceof FilingCabinetBlockEntity fc) return fc.getPriority();
+        if (neighborBE instanceof JunkDrawerBlockEntity jd) return jd.getPriority();
         if (neighborBE instanceof BulkStorageContainerBlockEntity bs) return bs.getPriority();
 
         return Priority.NORMAL;

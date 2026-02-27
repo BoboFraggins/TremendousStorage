@@ -2,7 +2,6 @@ package net.bobofraggins.intellistore.healingsalve;
 
 import com.mojang.serialization.MapCodec;
 import net.bobofraggins.intellistore.register.Registration;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.AbstractCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
 

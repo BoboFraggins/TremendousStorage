@@ -22,14 +22,13 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  */
 public record NetworkContentsPacket(List<String> entries) implements CustomPacketPayload {
 
-    public static final Type<NetworkContentsPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "network_contents"));
+    public static final Type<NetworkContentsPacket> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "network_contents"));
 
-    public static final StreamCodec<FriendlyByteBuf, NetworkContentsPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
-                    NetworkContentsPacket::entries,
-                    NetworkContentsPacket::new);
+    public static final StreamCodec<FriendlyByteBuf, NetworkContentsPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
+            NetworkContentsPacket::entries,
+            NetworkContentsPacket::new);
 
     @Override
     public Type<NetworkContentsPacket> type() {

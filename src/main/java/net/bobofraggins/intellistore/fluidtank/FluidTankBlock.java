@@ -4,7 +4,6 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -91,13 +90,20 @@ public class FluidTankBlock extends BaseEntityBlock {
      * </ul>
      */
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
-            BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hit) {
         if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
 
         // --- Bottle handling (250 mB water only) ---
         if (stack.is(Items.GLASS_BOTTLE)) {
-            if (!(level.getBlockEntity(pos) instanceof FluidTankBlockEntity be)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            if (!(level.getBlockEntity(pos) instanceof FluidTankBlockEntity be))
+                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
             long drained = be.extract(BOTTLE_MB, true).getAmount();
             if (drained >= BOTTLE_MB) {
                 be.extract(BOTTLE_MB, false);
@@ -111,12 +117,14 @@ public class FluidTankBlock extends BaseEntityBlock {
         if (stack.is(Items.POTION)) {
             PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
             if (contents != null && contents.is(Potions.WATER)) {
-                if (!(level.getBlockEntity(pos) instanceof FluidTankBlockEntity be)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                if (!(level.getBlockEntity(pos) instanceof FluidTankBlockEntity be))
+                    return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
                 FluidStack water = new FluidStack(Fluids.WATER, BOTTLE_MB);
                 long inserted = be.insert(water, BOTTLE_MB, true);
                 if (inserted >= BOTTLE_MB) {
                     be.insert(water, BOTTLE_MB, false);
-                    player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, new ItemStack(Items.GLASS_BOTTLE)));
+                    player.setItemInHand(
+                            hand, ItemUtils.createFilledResult(stack, player, new ItemStack(Items.GLASS_BOTTLE)));
                     return ItemInteractionResult.SUCCESS;
                 }
             }

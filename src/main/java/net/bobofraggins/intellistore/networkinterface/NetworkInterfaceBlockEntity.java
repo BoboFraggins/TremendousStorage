@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.networkinterface;
 
 import net.bobofraggins.intellistore.register.Registration;
+import net.bobofraggins.intellistore.ui.NetworkInterfaceMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -17,7 +18,6 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
-import net.bobofraggins.intellistore.ui.NetworkInterfaceMenu;
 
 /**
  * Block entity for the lower half of a Network Interface block.
@@ -32,9 +32,9 @@ import net.bobofraggins.intellistore.ui.NetworkInterfaceMenu;
 public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProvider {
 
     /** Lazily built; {@code null} = stale. */
-    private NetworkScanResult cachedScan    = null;
+    private NetworkScanResult cachedScan = null;
     /** Lazily built alongside {@link #cachedScan}; {@code null} = stale. */
-    private NiItemHandler      cachedHandler = null;
+    private NiItemHandler cachedHandler = null;
 
     public NetworkInterfaceBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.NETWORK_INTERFACE_BE_TYPE.get(), pos, state);
@@ -84,7 +84,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
 
     @Override
     public void setChanged() {
-        cachedScan    = null; // invalidate before capability notification fires
+        cachedScan = null; // invalidate before capability notification fires
         cachedHandler = null;
         super.setChanged();
         if (level != null) {

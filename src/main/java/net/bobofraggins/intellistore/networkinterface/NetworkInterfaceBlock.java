@@ -36,8 +36,7 @@ import net.minecraft.world.phys.BlockHitResult;
  */
 public class NetworkInterfaceBlock extends BaseEntityBlock {
 
-    public static final MapCodec<NetworkInterfaceBlock> CODEC =
-            simpleCodec(NetworkInterfaceBlock::new);
+    public static final MapCodec<NetworkInterfaceBlock> CODEC = simpleCodec(NetworkInterfaceBlock::new);
 
     @Override
     public MapCodec<NetworkInterfaceBlock> codec() {
@@ -46,8 +45,8 @@ public class NetworkInterfaceBlock extends BaseEntityBlock {
 
     public NetworkInterfaceBlock(Properties props) {
         super(props);
-        registerDefaultState(stateDefinition.any()
-                .setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER));
+        registerDefaultState(
+                stateDefinition.any().setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.LOWER));
     }
 
     // -------------------------------------------------------------------------
@@ -75,11 +74,10 @@ public class NetworkInterfaceBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void setPlacedBy(Level level, BlockPos pos, BlockState state,
-            LivingEntity placer, ItemStack stack) {
-        if (!level.isClientSide
-                && state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
-            level.setBlockAndUpdate(pos.above(),
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+        if (!level.isClientSide && state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
+            level.setBlockAndUpdate(
+                    pos.above(),
                     defaultBlockState().setValue(BlockStateProperties.DOUBLE_BLOCK_HALF, DoubleBlockHalf.UPPER));
         }
     }
@@ -98,8 +96,7 @@ public class NetworkInterfaceBlock extends BaseEntityBlock {
                 if (lowerState.getBlock() == this
                         && lowerState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
                     // Drop the item at lower pos, then remove lower (which removes upper too)
-                    Block.popResource(level, lowerPos,
-                            new ItemStack(Registration.NETWORK_INTERFACE_ITEM.get()));
+                    Block.popResource(level, lowerPos, new ItemStack(Registration.NETWORK_INTERFACE_ITEM.get()));
                     level.setBlock(lowerPos, Blocks.AIR.defaultBlockState(), 35);
                     return state;
                 }
@@ -109,8 +106,7 @@ public class NetworkInterfaceBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos,
-            BlockState newState, boolean movedByPiston) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (newState.getBlock() == this) {
             // Block replaced by the same block type — just do normal cleanup
             super.onRemove(state, level, pos, newState, movedByPiston);
@@ -154,13 +150,13 @@ public class NetworkInterfaceBlock extends BaseEntityBlock {
     // -------------------------------------------------------------------------
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
-            Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         // Delegate to the lower half's block entity
-        BlockPos lowerPos = state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
-                ? pos : pos.below();
+        BlockPos lowerPos =
+                state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER ? pos : pos.below();
 
         if (level.getBlockEntity(lowerPos) instanceof MenuProvider mp) {
             player.openMenu(mp, buf -> buf.writeBlockPos(lowerPos));

@@ -1,6 +1,5 @@
 package net.bobofraggins.intellistore.networkinterface;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,7 +43,7 @@ public class NiItemHandler implements IItemHandler {
         Collections.reverse(rev);
         this.extractOrder = List.copyOf(rev);
 
-        this.insertPrefixSums  = buildPrefixSums(this.insertOrder);
+        this.insertPrefixSums = buildPrefixSums(this.insertOrder);
         this.extractPrefixSums = buildPrefixSums(this.extractOrder);
     }
 
@@ -72,7 +71,8 @@ public class NiItemHandler implements IItemHandler {
         int lo = 0, hi = order.size() - 1;
         while (lo < hi) {
             int mid = (lo + hi + 1) >>> 1;
-            if (prefixSums[mid] <= flatSlot) lo = mid; else hi = mid - 1;
+            if (prefixSums[mid] <= flatSlot) lo = mid;
+            else hi = mid - 1;
         }
         return new SlotRef(order.get(lo), flatSlot - prefixSums[lo]);
     }

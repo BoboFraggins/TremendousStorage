@@ -60,15 +60,13 @@ public final class StorageAccessTerminalBFS {
                 BlockPos adj = pos.relative(dir);
                 BlockState adjSt = level.getBlockState(adj);
 
-                if (adjSt.getBlock() instanceof TubeBlock adjTube
-                        && adjTube.getColor() == color) {
+                if (adjSt.getBlock() instanceof TubeBlock adjTube && adjTube.getColor() == color) {
                     // Continue BFS through same-color tubes
                     if (!visited.contains(adj)) {
                         queue.add(adj);
                     }
                 } else if (adjSt.getBlock() instanceof NetworkInterfaceBlock
-                        && adjSt.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF)
-                                == DoubleBlockHalf.LOWER) {
+                        && adjSt.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
                     // Found a Network Interface lower half
                     return adj;
                 }

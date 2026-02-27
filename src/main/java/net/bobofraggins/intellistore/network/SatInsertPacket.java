@@ -1,7 +1,7 @@
 package net.bobofraggins.intellistore.network;
 
-import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.IntelliStore;
+import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -21,18 +21,17 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * much as possible into the network via the NI item handler. Any remainder stays
  * in the inventory slot. Sends back an updated {@link SatContentsPacket} after.
  */
-public record SatInsertPacket(BlockPos niPos, int playerSlot)
-        implements CustomPacketPayload {
+public record SatInsertPacket(BlockPos niPos, int playerSlot) implements CustomPacketPayload {
 
-    public static final Type<SatInsertPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "sat_insert"));
+    public static final Type<SatInsertPacket> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "sat_insert"));
 
-    public static final StreamCodec<FriendlyByteBuf, SatInsertPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    BlockPos.STREAM_CODEC, SatInsertPacket::niPos,
-                    StreamCodec.of(FriendlyByteBuf::writeVarInt, FriendlyByteBuf::readVarInt),
-                    SatInsertPacket::playerSlot,
-                    SatInsertPacket::new);
+    public static final StreamCodec<FriendlyByteBuf, SatInsertPacket> STREAM_CODEC = StreamCodec.composite(
+            BlockPos.STREAM_CODEC,
+            SatInsertPacket::niPos,
+            StreamCodec.of(FriendlyByteBuf::writeVarInt, FriendlyByteBuf::readVarInt),
+            SatInsertPacket::playerSlot,
+            SatInsertPacket::new);
 
     @Override
     public Type<SatInsertPacket> type() {
@@ -67,8 +66,7 @@ public record SatInsertPacket(BlockPos niPos, int playerSlot)
             // Refresh client's item list
             IItemHandler refreshedHandler = ni.getItemHandler();
             if (refreshedHandler != null) {
-                PacketDistributor.sendToPlayer(player,
-                        RequestSatContentsPacket.buildContentsPacket(refreshedHandler));
+                PacketDistributor.sendToPlayer(player, RequestSatContentsPacket.buildContentsPacket(refreshedHandler));
             }
         });
     }

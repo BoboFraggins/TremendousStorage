@@ -37,8 +37,7 @@ public class IntelliStoreJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration reg) {
         reg.addRecipeCatalyst(
-                Registration.STORAGE_ACCESS_TERMINAL_ITEM.get().getDefaultInstance(),
-                RecipeTypes.CRAFTING);
+                Registration.STORAGE_ACCESS_TERMINAL_ITEM.get().getDefaultInstance(), RecipeTypes.CRAFTING);
     }
 
     /**
@@ -58,9 +57,9 @@ public class IntelliStoreJeiPlugin implements IModPlugin {
                 StorageAccessTerminalMenu.class,
                 Registration.STORAGE_ACCESS_TERMINAL_MENU.get(),
                 RecipeTypes.CRAFTING,
-                1,   // recipe slots start (slot 1 = first craft input)
-                9,   // recipe slot count  (slots 1-9, 3×3 grid)
-                10,  // inventory slots start
+                1, // recipe slots start (slot 1 = first craft input)
+                9, // recipe slot count  (slots 1-9, 3×3 grid)
+                10, // inventory slots start
                 36); // inventory slot count (27 main + 9 hotbar)
     }
 }

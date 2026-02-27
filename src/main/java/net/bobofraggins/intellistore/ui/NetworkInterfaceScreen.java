@@ -23,12 +23,13 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInterfaceMenu> {
 
-    private static final int BG_WIDTH  = 176;
+    private static final int BG_WIDTH = 176;
     private static final int BG_HEIGHT = 220;
 
     /** Number of list rows visible at once. */
     private static final int VISIBLE_ROWS = 12;
-    private static final int ROW_HEIGHT   = 12;
+
+    private static final int ROW_HEIGHT = 12;
     private static final int LIST_Y_START = 30;
 
     private List<String> entries = List.of();
@@ -36,7 +37,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
 
     public NetworkInterfaceScreen(NetworkInterfaceMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth  = BG_WIDTH;
+        this.imageWidth = BG_WIDTH;
         this.imageHeight = BG_HEIGHT;
     }
 
@@ -101,22 +102,20 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         // Validity indicator line below title
         boolean valid = menu.isNetworkValid();
         Component statusText = Component.translatable(
-                valid ? "screen.intellistore.network_interface.valid"
-                      : "screen.intellistore.network_interface.invalid");
+                valid
+                        ? "screen.intellistore.network_interface.valid"
+                        : "screen.intellistore.network_interface.invalid");
         int statusColor = valid ? 0x55FF55 : 0xFF5555;
-        graphics.drawString(font, statusText,
-                leftPos + (BG_WIDTH - font.width(statusText)) / 2,
-                topPos + 18,
-                statusColor, false);
+        graphics.drawString(
+                font, statusText, leftPos + (BG_WIDTH - font.width(statusText)) / 2, topPos + 18, statusColor, false);
 
         // List area separator
-        graphics.fill(leftPos + 4, topPos + LIST_Y_START - 2,
-                leftPos + BG_WIDTH - 4, topPos + LIST_Y_START - 1, 0x80FFFFFF);
+        graphics.fill(
+                leftPos + 4, topPos + LIST_Y_START - 2, leftPos + BG_WIDTH - 4, topPos + LIST_Y_START - 1, 0x80FFFFFF);
 
         // Draw list rows
         int listAreaBottom = topPos + LIST_Y_START + VISIBLE_ROWS * ROW_HEIGHT;
-        graphics.enableScissor(leftPos + 4, topPos + LIST_Y_START,
-                leftPos + BG_WIDTH - 4, listAreaBottom);
+        graphics.enableScissor(leftPos + 4, topPos + LIST_Y_START, leftPos + BG_WIDTH - 4, listAreaBottom);
 
         for (int i = 0; i < VISIBLE_ROWS; i++) {
             int idx = i + scrollOffset;
@@ -132,8 +131,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
             }
 
             int rowY = topPos + LIST_Y_START + i * ROW_HEIGHT;
-            graphics.drawString(font, displayStr,
-                    leftPos + 6, rowY, 0xE0E0E0, false);
+            graphics.drawString(font, displayStr, leftPos + 6, rowY, 0xE0E0E0, false);
         }
 
         graphics.disableScissor();
@@ -141,10 +139,13 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         // Empty state
         if (entries.isEmpty()) {
             String emptyMsg = "No blocks connected";
-            graphics.drawString(font, emptyMsg,
+            graphics.drawString(
+                    font,
+                    emptyMsg,
                     leftPos + (BG_WIDTH - font.width(emptyMsg)) / 2,
                     topPos + LIST_Y_START + 4,
-                    0x808080, false);
+                    0x808080,
+                    false);
         }
 
         // Scroll bar (if needed)
@@ -155,15 +156,13 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
             graphics.fill(barX, barY, barX + 4, barY + barH, 0x40FFFFFF);
 
             int thumbH = Math.max(8, barH * VISIBLE_ROWS / entries.size());
-            int thumbY = barY + (barH - thumbH) * scrollOffset
-                    / Math.max(1, entries.size() - VISIBLE_ROWS);
+            int thumbY = barY + (barH - thumbH) * scrollOffset / Math.max(1, entries.size() - VISIBLE_ROWS);
             graphics.fill(barX, thumbY, barX + 4, thumbY + thumbH, 0xC0FFFFFF);
         }
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title,
-                (BG_WIDTH - font.width(title)) / 2, 6, 0xFFFFFF, false);
+        graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 6, 0xFFFFFF, false);
     }
 }

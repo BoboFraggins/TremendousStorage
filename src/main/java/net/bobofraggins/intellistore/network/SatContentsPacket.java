@@ -20,24 +20,29 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * <p>The client handler stores the lists in {@link #PENDING_STACKS} and {@link #PENDING_COUNTS};
  * {@link net.bobofraggins.intellistore.ui.StorageAccessTerminalScreen} polls these each tick.
  */
-public record SatContentsPacket(List<ItemStack> stacks, List<Long> counts)
-        implements CustomPacketPayload {
+public record SatContentsPacket(List<ItemStack> stacks, List<Long> counts) implements CustomPacketPayload {
 
-    public static final Type<SatContentsPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "sat_contents"));
+    public static final Type<SatContentsPacket> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "sat_contents"));
 
-    private static final StreamCodec<RegistryFriendlyByteBuf, List<Long>> LONG_LIST_CODEC =
-            StreamCodec.of(
-                    (buf, list) -> { buf.writeVarInt(list.size()); for (long v : list) buf.writeVarLong(v); },
-                    buf -> { int size = buf.readVarInt(); List<Long> out = new ArrayList<>(size); for (int i = 0; i < size; i++) out.add(buf.readVarLong()); return out; });
+    private static final StreamCodec<RegistryFriendlyByteBuf, List<Long>> LONG_LIST_CODEC = StreamCodec.of(
+            (buf, list) -> {
+                buf.writeVarInt(list.size());
+                for (long v : list) buf.writeVarLong(v);
+            },
+            buf -> {
+                int size = buf.readVarInt();
+                List<Long> out = new ArrayList<>(size);
+                for (int i = 0; i < size; i++) out.add(buf.readVarLong());
+                return out;
+            });
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SatContentsPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()),
-                    SatContentsPacket::stacks,
-                    LONG_LIST_CODEC,
-                    SatContentsPacket::counts,
-                    SatContentsPacket::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, SatContentsPacket> STREAM_CODEC = StreamCodec.composite(
+            ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()),
+            SatContentsPacket::stacks,
+            LONG_LIST_CODEC,
+            SatContentsPacket::counts,
+            SatContentsPacket::new);
 
     @Override
     public Type<SatContentsPacket> type() {

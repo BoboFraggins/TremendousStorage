@@ -24,13 +24,11 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  */
 public record RequestNetworkContentsPacket(BlockPos pos) implements CustomPacketPayload {
 
-    public static final Type<RequestNetworkContentsPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "request_network_contents"));
+    public static final Type<RequestNetworkContentsPacket> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "request_network_contents"));
 
-    public static final StreamCodec<FriendlyByteBuf, RequestNetworkContentsPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    BlockPos.STREAM_CODEC, RequestNetworkContentsPacket::pos,
-                    RequestNetworkContentsPacket::new);
+    public static final StreamCodec<FriendlyByteBuf, RequestNetworkContentsPacket> STREAM_CODEC = StreamCodec.composite(
+            BlockPos.STREAM_CODEC, RequestNetworkContentsPacket::pos, RequestNetworkContentsPacket::new);
 
     @Override
     public Type<RequestNetworkContentsPacket> type() {

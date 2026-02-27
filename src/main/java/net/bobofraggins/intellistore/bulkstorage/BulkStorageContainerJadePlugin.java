@@ -26,18 +26,15 @@ public class BulkStorageContainerJadePlugin implements IWailaPlugin {
 
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(
-                ContainerDataProvider.INSTANCE, BulkStorageContainerBlockEntity.class);
+        registration.registerBlockDataProvider(ContainerDataProvider.INSTANCE, BulkStorageContainerBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        registration.registerBlockComponent(
-                ContainerDataProvider.INSTANCE, BulkStorageContainerBlock.class);
+        registration.registerBlockComponent(ContainerDataProvider.INSTANCE, BulkStorageContainerBlock.class);
     }
 
-    enum ContainerDataProvider
-            implements IBlockComponentProvider, snownee.jade.api.IServerDataProvider<BlockAccessor> {
+    enum ContainerDataProvider implements IBlockComponentProvider, snownee.jade.api.IServerDataProvider<BlockAccessor> {
         INSTANCE;
 
         private static final String KEY_TOTAL = "Total";

@@ -54,8 +54,7 @@ public class FilingCabinetScreen extends AbstractContainerScreen<FilingCabinetMe
                 .build());
 
         // Priority buttons — 5 in a row, centred
-        int totalW = Priority.VALUES.length * PRIORITY_BUTTON_W
-                + (Priority.VALUES.length - 1) * PRIORITY_BUTTON_GAP;
+        int totalW = Priority.VALUES.length * PRIORITY_BUTTON_W + (Priority.VALUES.length - 1) * PRIORITY_BUTTON_GAP;
         int startX = leftPos + (BG_WIDTH - totalW) / 2;
         int btnY = topPos + PRIORITY_Y_OFFSET;
 
@@ -65,15 +64,20 @@ public class FilingCabinetScreen extends AbstractContainerScreen<FilingCabinetMe
             addRenderableWidget(Button.builder(Component.translatable(p.translationKey()), btn -> {
                         PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), ordinal));
                     })
-                    .bounds(startX + i * (PRIORITY_BUTTON_W + PRIORITY_BUTTON_GAP), btnY, PRIORITY_BUTTON_W, PRIORITY_BUTTON_H)
+                    .bounds(
+                            startX + i * (PRIORITY_BUTTON_W + PRIORITY_BUTTON_GAP),
+                            btnY,
+                            PRIORITY_BUTTON_W,
+                            PRIORITY_BUTTON_H)
                     .build());
         }
     }
 
     private Component toggleLabel() {
         return Component.translatable(
-                menu.isOpen() ? "screen.intellistore.filing_cabinet.toggle_open"
-                              : "screen.intellistore.filing_cabinet.toggle_closed");
+                menu.isOpen()
+                        ? "screen.intellistore.filing_cabinet.toggle_open"
+                        : "screen.intellistore.filing_cabinet.toggle_closed");
     }
 
     private void rebuildToggle(Button btn) {
@@ -118,7 +122,11 @@ public class FilingCabinetScreen extends AbstractContainerScreen<FilingCabinetMe
         graphics.drawString(
                 font,
                 Component.translatable("screen.intellistore.filing_cabinet.open_label"),
-                leftPos + (BG_WIDTH - font.width(Component.translatable("screen.intellistore.filing_cabinet.open_label"))) / 2,
+                leftPos
+                        + (BG_WIDTH
+                                        - font.width(Component.translatable(
+                                                "screen.intellistore.filing_cabinet.open_label")))
+                                / 2,
                 topPos + TOGGLE_Y_OFFSET - 10,
                 0xFFFFFF,
                 false);

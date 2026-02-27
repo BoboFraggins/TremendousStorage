@@ -51,11 +51,9 @@ public class TubeBlock extends BaseEntityBlock {
     // Codec
     // -------------------------------------------------------------------------
 
-    public static final MapCodec<TubeBlock> CODEC = RecordCodecBuilder.mapCodec(
-            instance -> instance.group(
-                            DyeColor.CODEC.fieldOf("color").forGetter(TubeBlock::getColor),
-                            propertiesCodec())
-                    .apply(instance, TubeBlock::new));
+    public static final MapCodec<TubeBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+                    DyeColor.CODEC.fieldOf("color").forGetter(TubeBlock::getColor), propertiesCodec())
+            .apply(instance, TubeBlock::new));
 
     @Override
     public MapCodec<TubeBlock> codec() {
@@ -74,9 +72,7 @@ public class TubeBlock extends BaseEntityBlock {
     public static final BooleanProperty DOWN = BooleanProperty.create("down");
 
     /** Indexed by {@link Direction#ordinal()} — same order as {@code Direction.values()}. */
-    public static final BooleanProperty[] DIR_PROPS = {
-        DOWN, UP, NORTH, SOUTH, WEST, EAST
-    };
+    public static final BooleanProperty[] DIR_PROPS = {DOWN, UP, NORTH, SOUTH, WEST, EAST};
 
     // -------------------------------------------------------------------------
     // VoxelShapes — 64-entry array indexed by 6-bit connection mask
@@ -87,12 +83,12 @@ public class TubeBlock extends BaseEntityBlock {
 
     /** Arm from core to each face, one per Direction ordinal. */
     private static final VoxelShape[] ARM_SHAPES = {
-        Block.box(6, 0, 6, 10, 6, 10),   // DOWN  (ordinal 0)
-        Block.box(6, 10, 6, 10, 16, 10),  // UP    (ordinal 1)
-        Block.box(6, 6, 0, 10, 10, 6),    // NORTH (ordinal 2)
-        Block.box(6, 6, 10, 10, 10, 16),  // SOUTH (ordinal 3)
-        Block.box(0, 6, 6, 6, 10, 10),    // WEST  (ordinal 4)
-        Block.box(10, 6, 6, 16, 10, 10),  // EAST  (ordinal 5)
+        Block.box(6, 0, 6, 10, 6, 10), // DOWN  (ordinal 0)
+        Block.box(6, 10, 6, 10, 16, 10), // UP    (ordinal 1)
+        Block.box(6, 6, 0, 10, 10, 6), // NORTH (ordinal 2)
+        Block.box(6, 6, 10, 10, 10, 16), // SOUTH (ordinal 3)
+        Block.box(0, 6, 6, 6, 10, 10), // WEST  (ordinal 4)
+        Block.box(10, 6, 6, 16, 10, 10), // EAST  (ordinal 5)
     };
 
     /** 64 pre-computed shapes, one per connection bitmask. */
@@ -120,10 +116,14 @@ public class TubeBlock extends BaseEntityBlock {
     }
 
     private BlockState buildDefaultState() {
-        return stateDefinition.any()
-                .setValue(NORTH, false).setValue(SOUTH, false)
-                .setValue(EAST, false).setValue(WEST, false)
-                .setValue(UP, false).setValue(DOWN, false);
+        return stateDefinition
+                .any()
+                .setValue(NORTH, false)
+                .setValue(SOUTH, false)
+                .setValue(EAST, false)
+                .setValue(WEST, false)
+                .setValue(UP, false)
+                .setValue(DOWN, false);
     }
 
     private VoxelShape[] buildShapes() {
@@ -176,8 +176,13 @@ public class TubeBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos,
-            Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
+    public void neighborChanged(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Block neighborBlock,
+            BlockPos neighborPos,
+            boolean movedByPiston) {
         if (!level.isClientSide()) {
             BlockState updated = computeState(state, level, pos);
             if (!updated.equals(state)) {
@@ -193,10 +198,15 @@ public class TubeBlock extends BaseEntityBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState,
-            LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        return state.setValue(DIR_PROPS[direction.ordinal()],
-                canConnectToState(neighborState, level, neighborPos, direction));
+    public BlockState updateShape(
+            BlockState state,
+            Direction direction,
+            BlockState neighborState,
+            LevelAccessor level,
+            BlockPos pos,
+            BlockPos neighborPos) {
+        return state.setValue(
+                DIR_PROPS[direction.ordinal()], canConnectToState(neighborState, level, neighborPos, direction));
     }
 
     private BlockState computeState(BlockState current, LevelReader level, BlockPos pos) {
@@ -204,8 +214,7 @@ public class TubeBlock extends BaseEntityBlock {
         for (Direction dir : Direction.values()) {
             BlockPos neighborPos = pos.relative(dir);
             BlockState neighborState = level.getBlockState(neighborPos);
-            s = s.setValue(DIR_PROPS[dir.ordinal()],
-                    canConnectToState(neighborState, level, neighborPos, dir));
+            s = s.setValue(DIR_PROPS[dir.ordinal()], canConnectToState(neighborState, level, neighborPos, dir));
         }
         return s;
     }
@@ -214,8 +223,8 @@ public class TubeBlock extends BaseEntityBlock {
      * Returns true if this tube should connect to the block at {@code neighborPos}.
      * Connects to same-color tubes, or to any block that exposes an IItemHandler capability.
      */
-    private boolean canConnectToState(BlockState neighborState, LevelReader level,
-            BlockPos neighborPos, Direction fromDir) {
+    private boolean canConnectToState(
+            BlockState neighborState, LevelReader level, BlockPos neighborPos, Direction fromDir) {
         if (neighborState.getBlock() instanceof TubeBlock tb) {
             return tb.getColor() == this.color;
         }
@@ -223,8 +232,7 @@ public class TubeBlock extends BaseEntityBlock {
         if (level instanceof Level worldLevel) {
             var be = worldLevel.getBlockEntity(neighborPos);
             if (be != null) {
-                var cap = worldLevel.getCapability(
-                        Capabilities.ItemHandler.BLOCK, neighborPos, fromDir.getOpposite());
+                var cap = worldLevel.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, fromDir.getOpposite());
                 return cap != null;
             }
         }
@@ -258,9 +266,16 @@ public class TubeBlock extends BaseEntityBlock {
      * (if not already present) and consume one item from the stack.
      */
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
-            BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (!(stack.getItem() instanceof StorageInterfaceItem)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hit) {
+        if (!(stack.getItem() instanceof StorageInterfaceItem))
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
         if (!(level.getBlockEntity(pos) instanceof TubeBlockEntity be)) return ItemInteractionResult.FAIL;
 
@@ -277,20 +292,18 @@ public class TubeBlock extends BaseEntityBlock {
      * Does nothing on faces without an attachment (installation now requires the item).
      */
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
-            Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (!(level.getBlockEntity(pos) instanceof TubeBlockEntity be)) return InteractionResult.FAIL;
 
         int faceIndex = hit.getDirection().ordinal();
         if (!be.hasAttachment(faceIndex)) return InteractionResult.PASS;
 
-        player.openMenu(
-                new StorageInterfaceMenu.Provider(be, pos, faceIndex),
-                buf -> {
-                    buf.writeBlockPos(pos);
-                    buf.writeByte(faceIndex);
-                });
+        player.openMenu(new StorageInterfaceMenu.Provider(be, pos, faceIndex), buf -> {
+            buf.writeBlockPos(pos);
+            buf.writeByte(faceIndex);
+        });
         return InteractionResult.SUCCESS;
     }
 
@@ -321,14 +334,13 @@ public class TubeBlock extends BaseEntityBlock {
      * in addition to the tube block itself (handled by the loot table).
      */
     @Override
-    public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state,
-            @Nullable BlockEntity be, ItemStack tool) {
+    public void playerDestroy(
+            Level level, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity be, ItemStack tool) {
         super.playerDestroy(level, player, pos, state, be, tool);
         if (be instanceof TubeBlockEntity tube) {
             for (int i = 0; i < 6; i++) {
                 if (tube.hasAttachment(i)) {
-                    Block.popResource(level, pos,
-                            new ItemStack(Registration.STORAGE_INTERFACE.get()));
+                    Block.popResource(level, pos, new ItemStack(Registration.STORAGE_INTERFACE.get()));
                 }
             }
         }
@@ -341,12 +353,12 @@ public class TubeBlock extends BaseEntityBlock {
     private static AABB attachmentAABB(int i) {
         final double L = 4.0 / 16, H = 12.0 / 16, T = 2.0 / 16;
         return switch (i) {
-            case 0 -> new AABB(L, 0,   L, H, T,   H); // DOWN
-            case 1 -> new AABB(L, 1-T, L, H, 1,   H); // UP
-            case 2 -> new AABB(L, L,   0, H, H,   T); // NORTH
-            case 3 -> new AABB(L, L, 1-T, H, H,   1); // SOUTH
-            case 4 -> new AABB(0, L,   L, T, H,   H); // WEST
-            default-> new AABB(1-T, L, L, 1, H,   H); // EAST
+            case 0 -> new AABB(L, 0, L, H, T, H); // DOWN
+            case 1 -> new AABB(L, 1 - T, L, H, 1, H); // UP
+            case 2 -> new AABB(L, L, 0, H, H, T); // NORTH
+            case 3 -> new AABB(L, L, 1 - T, H, H, 1); // SOUTH
+            case 4 -> new AABB(0, L, L, T, H, H); // WEST
+            default -> new AABB(1 - T, L, L, 1, H, H); // EAST
         };
     }
 }

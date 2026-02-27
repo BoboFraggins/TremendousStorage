@@ -55,11 +55,11 @@ public final class NetworkInterfaceBFS {
      */
     public static NetworkScanResult scan(ServerLevel level, BlockPos niPos) {
 
-        Set<BlockPos> visitedTubes     = new HashSet<>();
+        Set<BlockPos> visitedTubes = new HashSet<>();
         Set<BlockPos> collectedStorage = new HashSet<>();
         List<HandlerEntry> handlerEntries = new ArrayList<>();
-        Map<String, Integer> tubeCounts  = new HashMap<>();   // color name → count
-        List<String> storageKeys         = new ArrayList<>(); // ordered by discovery
+        Map<String, Integer> tubeCounts = new HashMap<>(); // color name → count
+        List<String> storageKeys = new ArrayList<>(); // ordered by discovery
         int otherNiCount = 0;
 
         // Examine each face of the NI for adjacent tubes
@@ -84,8 +84,7 @@ public final class NetworkInterfaceBFS {
                 // Count this tube for the UI list
                 tubeCounts.merge(color.getName(), 1, Integer::sum);
 
-                TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe
-                        ? tbe : null;
+                TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe ? tbe : null;
 
                 for (Direction dir : Direction.values()) {
                     if (!state.getValue(TubeBlock.DIR_PROPS[dir.ordinal()])) continue;
@@ -93,21 +92,18 @@ public final class NetworkInterfaceBFS {
                     BlockPos adjPos = pos.relative(dir);
                     BlockState adjState = level.getBlockState(adjPos);
 
-                    if (adjState.getBlock() instanceof TubeBlock adjTube
-                            && adjTube.getColor() == color) {
+                    if (adjState.getBlock() instanceof TubeBlock adjTube && adjTube.getColor() == color) {
                         // Continue BFS through same-color tubes
                         if (!visitedTubes.contains(adjPos)) {
                             queue.add(adjPos);
                         }
                     } else if (collectedStorage.add(adjPos)) {
                         // First time we see this non-tube block
-                        processNeighbor(level, adjPos, adjState, niPos,
-                                dir, tubeBE, handlerEntries, storageKeys);
+                        processNeighbor(level, adjPos, adjState, niPos, dir, tubeBE, handlerEntries, storageKeys);
 
                         // Check if it's another NI lower half
                         if (adjState.getBlock() instanceof NetworkInterfaceBlock
-                                && adjState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF)
-                                        == DoubleBlockHalf.LOWER
+                                && adjState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
                                 && !adjPos.equals(niPos)) {
                             otherNiCount++;
                         }
@@ -144,15 +140,11 @@ public final class NetworkInterfaceBFS {
         List<String> sortedColors = new ArrayList<>(tubeCounts.keySet());
         Collections.sort(sortedColors);
         for (String colorName : sortedColors) {
-            blockList.add(new AttachedEntry("block.intellistore." + colorName + "_tube",
-                    tubeCounts.get(colorName)));
+            blockList.add(new AttachedEntry("block.intellistore." + colorName + "_tube", tubeCounts.get(colorName)));
         }
 
         return new NetworkScanResult(
-                List.copyOf(insertOrder),
-                List.copyOf(extractOrder),
-                List.copyOf(blockList),
-                otherNiCount == 0);
+                List.copyOf(insertOrder), List.copyOf(extractOrder), List.copyOf(blockList), otherNiCount == 0);
     }
 
     // -------------------------------------------------------------------------
@@ -160,16 +152,20 @@ public final class NetworkInterfaceBFS {
     // -------------------------------------------------------------------------
 
     private static void processNeighbor(
-            ServerLevel level, BlockPos adjPos, BlockState adjState,
-            BlockPos niPos, Direction tubeDir, TubeBlockEntity tubeBE,
-            List<HandlerEntry> handlerEntries, List<String> storageKeys) {
+            ServerLevel level,
+            BlockPos adjPos,
+            BlockState adjState,
+            BlockPos niPos,
+            Direction tubeDir,
+            TubeBlockEntity tubeBE,
+            List<HandlerEntry> handlerEntries,
+            List<String> storageKeys) {
 
         // Fetch block entity once and reuse for both priority resolution and UI key lookup
         BlockEntity neighborBE = adjPos.equals(niPos) ? null : level.getBlockEntity(adjPos);
 
         // Resolve IItemHandler capability
-        IItemHandler handler = level.getCapability(
-                Capabilities.ItemHandler.BLOCK, adjPos, tubeDir.getOpposite());
+        IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, adjPos, tubeDir.getOpposite());
         if (handler != null) {
             Priority priority = resolvePriority(tubeBE, tubeDir.ordinal(), neighborBE);
             handlerEntries.add(new HandlerEntry(handler, priority));
@@ -182,22 +178,21 @@ public final class NetworkInterfaceBFS {
 
     /** Returns the translation key for the UI list, or {@code null} if the block should be hidden. */
     private static String blockListKey(BlockEntity be) {
-        if (be instanceof FilingCabinetBlockEntity)        return "block.intellistore.filing_cabinet";
-        if (be instanceof JunkDrawerBlockEntity)           return "block.intellistore.junk_drawer";
+        if (be instanceof FilingCabinetBlockEntity) return "block.intellistore.filing_cabinet";
+        if (be instanceof JunkDrawerBlockEntity) return "block.intellistore.junk_drawer";
         if (be instanceof BulkStorageContainerBlockEntity) return "block.intellistore.bulk_storage_container";
-        if (be instanceof FluidTankBlockEntity)            return "block.intellistore.fluid_tank";
+        if (be instanceof FluidTankBlockEntity) return "block.intellistore.fluid_tank";
         return null;
     }
 
-    private static Priority resolvePriority(
-            TubeBlockEntity tubeBE, int faceIndex, BlockEntity neighborBE) {
+    private static Priority resolvePriority(TubeBlockEntity tubeBE, int faceIndex, BlockEntity neighborBE) {
 
         if (tubeBE != null && tubeBE.hasAttachment(faceIndex)) {
             return tubeBE.getAttachmentPriority(faceIndex);
         }
 
-        if (neighborBE instanceof FilingCabinetBlockEntity fc)        return fc.getPriority();
-        if (neighborBE instanceof JunkDrawerBlockEntity jd)           return jd.getPriority();
+        if (neighborBE instanceof FilingCabinetBlockEntity fc) return fc.getPriority();
+        if (neighborBE instanceof JunkDrawerBlockEntity jd) return jd.getPriority();
         if (neighborBE instanceof BulkStorageContainerBlockEntity bs) return bs.getPriority();
         return Priority.NORMAL;
     }

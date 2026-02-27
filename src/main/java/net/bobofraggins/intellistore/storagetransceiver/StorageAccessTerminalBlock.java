@@ -28,18 +28,16 @@ public class StorageAccessTerminalBlock extends Block {
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
-            Player player, BlockHitResult hit) {
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         BlockPos niPos = StorageAccessTerminalBFS.findNI((ServerLevel) level, pos);
-        player.openMenu(
-                new StorageAccessTerminalMenu.Provider(pos, niPos),
-                buf -> {
-                    buf.writeBlockPos(pos);
-                    buf.writeBoolean(niPos != null);
-                    if (niPos != null) buf.writeBlockPos(niPos);
-                });
+        player.openMenu(new StorageAccessTerminalMenu.Provider(pos, niPos), buf -> {
+            buf.writeBlockPos(pos);
+            buf.writeBoolean(niPos != null);
+            if (niPos != null) buf.writeBlockPos(niPos);
+        });
         return InteractionResult.SUCCESS;
     }
 

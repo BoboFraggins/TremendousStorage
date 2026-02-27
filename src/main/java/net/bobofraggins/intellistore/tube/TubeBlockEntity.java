@@ -97,7 +97,7 @@ public class TubeBlockEntity extends BlockEntity {
 
     @Override
     public void setChanged() {
-        networkCache = null;  // clear cache before capability invalidation fires
+        networkCache = null; // clear cache before capability invalidation fires
         super.setChanged();
         if (level != null) {
             level.invalidateCapabilities(worldPosition);
@@ -135,9 +135,7 @@ public class TubeBlockEntity extends BlockEntity {
         }
         byte[] prios = tag.getByteArray("AttachmentPriorities");
         for (int i = 0; i < 6; i++) {
-            attachmentPriority[i] = (i < prios.length)
-                    ? Priority.fromOrdinal(prios[i] & 0xFF)
-                    : Priority.NORMAL;
+            attachmentPriority[i] = (i < prios.length) ? Priority.fromOrdinal(prios[i] & 0xFF) : Priority.NORMAL;
         }
     }
 

@@ -27,11 +27,12 @@ public final class ZombieBrainDropHandler {
         Level level = event.getEntity().level();
         if (level.random.nextInt(8) != 0) return;
         BlockPos pos = event.getEntity().blockPosition();
-        event.getDrops().add(new ItemEntity(
-                level,
-                pos.getX() + 0.5,
-                pos.getY() + 0.5,
-                pos.getZ() + 0.5,
-                new ItemStack(Registration.ZOMBIE_BRAIN.get())));
+        event.getDrops()
+                .add(new ItemEntity(
+                        level,
+                        pos.getX() + 0.5,
+                        pos.getY() + 0.5,
+                        pos.getZ() + 0.5,
+                        new ItemStack(Registration.ZOMBIE_BRAIN.get())));
     }
 }

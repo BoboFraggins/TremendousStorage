@@ -28,13 +28,11 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  */
 public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPayload {
 
-    public static final Type<RequestSatContentsPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "request_sat_contents"));
+    public static final Type<RequestSatContentsPacket> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "request_sat_contents"));
 
-    public static final StreamCodec<FriendlyByteBuf, RequestSatContentsPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    BlockPos.STREAM_CODEC, RequestSatContentsPacket::niPos,
-                    RequestSatContentsPacket::new);
+    public static final StreamCodec<FriendlyByteBuf, RequestSatContentsPacket> STREAM_CODEC = StreamCodec.composite(
+            BlockPos.STREAM_CODEC, RequestSatContentsPacket::niPos, RequestSatContentsPacket::new);
 
     @Override
     public Type<RequestSatContentsPacket> type() {
@@ -47,15 +45,13 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
 
             BlockEntity be = player.level().getBlockEntity(packet.niPos());
             if (!(be instanceof NetworkInterfaceBlockEntity ni)) {
-                PacketDistributor.sendToPlayer(player,
-                        new SatContentsPacket(List.of(), List.of()));
+                PacketDistributor.sendToPlayer(player, new SatContentsPacket(List.of(), List.of()));
                 return;
             }
 
             IItemHandler handler = ni.getItemHandler();
             if (handler == null) {
-                PacketDistributor.sendToPlayer(player,
-                        new SatContentsPacket(List.of(), List.of()));
+                PacketDistributor.sendToPlayer(player, new SatContentsPacket(List.of(), List.of()));
                 return;
             }
 
@@ -84,7 +80,9 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
         }
 
         @Override
-        public int hashCode() { return hash; }
+        public int hashCode() {
+            return hash;
+        }
 
         @Override
         public boolean equals(Object o) {
@@ -114,8 +112,7 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
         }
 
         // Sort: highest count first, then display name ascending
-        entries.sort(Comparator.comparingLong(Entry::count).reversed()
-                .thenComparing(Entry::name));
+        entries.sort(Comparator.comparingLong(Entry::count).reversed().thenComparing(Entry::name));
 
         List<ItemStack> stacks = new ArrayList<>(entries.size());
         List<Long> counts = new ArrayList<>(entries.size());

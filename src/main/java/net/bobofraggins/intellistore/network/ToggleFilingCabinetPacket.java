@@ -20,10 +20,8 @@ public record ToggleFilingCabinetPacket(BlockPos pos) implements CustomPacketPay
     public static final Type<ToggleFilingCabinetPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "toggle_filing_cabinet"));
 
-    public static final StreamCodec<FriendlyByteBuf, ToggleFilingCabinetPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    BlockPos.STREAM_CODEC, ToggleFilingCabinetPacket::pos,
-                    ToggleFilingCabinetPacket::new);
+    public static final StreamCodec<FriendlyByteBuf, ToggleFilingCabinetPacket> STREAM_CODEC = StreamCodec.composite(
+            BlockPos.STREAM_CODEC, ToggleFilingCabinetPacket::pos, ToggleFilingCabinetPacket::new);
 
     @Override
     public Type<ToggleFilingCabinetPacket> type() {

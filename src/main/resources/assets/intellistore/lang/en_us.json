@@ -83,5 +83,19 @@
   "block.intellistore.brown_tube": "Brown Tube",
   "block.intellistore.green_tube": "Green Tube",
   "block.intellistore.red_tube": "Red Tube",
-  "block.intellistore.black_tube": "Black Tube"
+  "block.intellistore.black_tube": "Black Tube",
+
+  "block.intellistore.wireless_hub": "Wireless Hub",
+  "screen.intellistore.wireless_hub": "Wireless Hub",
+  "screen.intellistore.wireless_hub.unlinked": "Unlinked",
+  "screen.intellistore.wireless_hub.linked": "Linked",
+
+  "item.intellistore.wireless_sat": "Wireless Storage Access Terminal",
+  "item.intellistore.wireless_sat.unlinked": "Not linked to any network",
+  "item.intellistore.wireless_sat.linked": "Linked to NI at %1$d, %2$d, %3$d",
+  "item.intellistore.wireless_sat.not_linked": "Wireless SAT is not linked to a network",
+  "item.intellistore.wireless_sat.invalid_network": "Network is unavailable",
+
+  "key.intellistore.open_wireless_sat": "Open Wireless Storage Access Terminal",
+  "key.categories.intellistore": "IntelliStore"
 }

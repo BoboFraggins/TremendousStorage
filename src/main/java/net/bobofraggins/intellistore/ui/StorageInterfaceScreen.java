@@ -37,19 +37,22 @@ public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInter
     }
 
     private void buildPriorityButtons() {
-        int totalW = Priority.VALUES.length * PRIORITY_BUTTON_W
-                + (Priority.VALUES.length - 1) * PRIORITY_BUTTON_GAP;
+        int totalW = Priority.VALUES.length * PRIORITY_BUTTON_W + (Priority.VALUES.length - 1) * PRIORITY_BUTTON_GAP;
         int startX = leftPos + (BG_WIDTH - totalW) / 2;
         int btnY = topPos + PRIORITY_Y_OFFSET;
 
         for (int i = 0; i < Priority.VALUES.length; i++) {
             final int ordinal = i;
             Priority p = Priority.VALUES[i];
-            addRenderableWidget(Button.builder(Component.translatable(p.translationKey()), btn ->
-                            PacketDistributor.sendToServer(new SetStorageInterfacePriorityPacket(
-                                    menu.getPos(), menu.getFaceIndex(), ordinal)))
-                    .bounds(startX + i * (PRIORITY_BUTTON_W + PRIORITY_BUTTON_GAP), btnY,
-                            PRIORITY_BUTTON_W, PRIORITY_BUTTON_H)
+            addRenderableWidget(Button.builder(
+                            Component.translatable(p.translationKey()),
+                            btn -> PacketDistributor.sendToServer(
+                                    new SetStorageInterfacePriorityPacket(menu.getPos(), menu.getFaceIndex(), ordinal)))
+                    .bounds(
+                            startX + i * (PRIORITY_BUTTON_W + PRIORITY_BUTTON_GAP),
+                            btnY,
+                            PRIORITY_BUTTON_W,
+                            PRIORITY_BUTTON_H)
                     .build());
         }
     }

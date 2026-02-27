@@ -57,12 +57,20 @@ repositories {
         name = "JEI Maven"
         url = "https://maven.blamejared.com"
     }
+    maven {
+        name = "Curios Maven"
+        url = "https://maven.theillusivec4.top"
+        content {
+            includeGroup "top.theillusivec4.curios"
+        }
+    }
 }
 
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
     compileOnly "maven.modrinth:jade:15.9.2+neoforge"
     compileOnly "mezz.jei:jei-1.21.1-neoforge-api:19.27.0.340"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:9.2.2+1.21.1:api"
 }
 
 tasks.withType(ProcessResources).configureEach {

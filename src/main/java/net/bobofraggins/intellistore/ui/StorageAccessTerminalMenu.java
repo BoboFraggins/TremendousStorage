@@ -1,5 +1,6 @@
 package net.bobofraggins.intellistore.ui;
 
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.register.Registration;
@@ -26,8 +27,6 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.items.IItemHandler;
 
-import java.util.Optional;
-
 /**
  * Menu for the Storage Access Terminal.
  *
@@ -44,13 +43,13 @@ import java.util.Optional;
  */
 public class StorageAccessTerminalMenu extends AbstractContainerMenu {
 
-    private static final int RESULT_SLOT    = 0;
-    private static final int CRAFT_START    = 1;
-    private static final int CRAFT_END      = 10;
-    private static final int INV_START      = 10;
-    private static final int INV_END        = 37;
-    private static final int HOTBAR_START   = 37;
-    private static final int HOTBAR_END     = 46;
+    private static final int RESULT_SLOT = 0;
+    private static final int CRAFT_START = 1;
+    private static final int CRAFT_END = 10;
+    private static final int INV_START = 10;
+    private static final int INV_END = 37;
+    private static final int HOTBAR_START = 37;
+    private static final int HOTBAR_END = 46;
 
     private final CraftingContainer craftSlots;
     private final ResultContainer resultSlots = new ResultContainer();
@@ -58,7 +57,9 @@ public class StorageAccessTerminalMenu extends AbstractContainerMenu {
     private final Player player;
 
     private final BlockPos satPos;
-    @Nullable private final BlockPos niPos;
+
+    @Nullable
+    private final BlockPos niPos;
 
     // -------------------------------------------------------------------------
     // Server-side constructor (called by Provider)
@@ -73,8 +74,8 @@ public class StorageAccessTerminalMenu extends AbstractContainerMenu {
         this.access = ContainerLevelAccess.create(inv.player.level(), satPos);
 
         // Layout constants (image-relative, matching StorageAccessTerminalScreen)
-        final int craftY  = 130; // top of crafting grid area
-        final int invY    = 168; // top of player inventory
+        final int craftY = 130; // top of crafting grid area
+        final int invY = 168; // top of player inventory
         final int hotbarY = invY + 3 * 18 + 4; // top of hotbar
 
         // Slot 0: craft result
@@ -112,12 +113,18 @@ public class StorageAccessTerminalMenu extends AbstractContainerMenu {
     // Accessors
     // -------------------------------------------------------------------------
 
-    public BlockPos getSatPos() { return satPos; }
+    public BlockPos getSatPos() {
+        return satPos;
+    }
 
     @Nullable
-    public BlockPos getNiPos() { return niPos; }
+    public BlockPos getNiPos() {
+        return niPos;
+    }
 
-    public boolean hasNetwork() { return niPos != null; }
+    public boolean hasNetwork() {
+        return niPos != null;
+    }
 
     // -------------------------------------------------------------------------
     // Crafting
@@ -125,20 +132,21 @@ public class StorageAccessTerminalMenu extends AbstractContainerMenu {
 
     @Override
     public void slotsChanged(net.minecraft.world.Container inventory) {
-        access.execute((level, pos) ->
-                slotChangedCraftingGrid(this, level, player, craftSlots, resultSlots));
+        access.execute((level, pos) -> slotChangedCraftingGrid(this, level, player, craftSlots, resultSlots));
     }
 
     private static void slotChangedCraftingGrid(
-            AbstractContainerMenu menu, Level level, Player player,
-            CraftingContainer craftSlots, ResultContainer resultSlots) {
+            AbstractContainerMenu menu,
+            Level level,
+            Player player,
+            CraftingContainer craftSlots,
+            ResultContainer resultSlots) {
         if (level.isClientSide) return;
         CraftingInput input = craftSlots.asCraftInput();
         ServerPlayer serverPlayer = (ServerPlayer) player;
         ItemStack result = ItemStack.EMPTY;
-        Optional<RecipeHolder<CraftingRecipe>> optional = level.getServer()
-                .getRecipeManager()
-                .getRecipeFor(RecipeType.CRAFTING, input, level);
+        Optional<RecipeHolder<CraftingRecipe>> optional =
+                level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
         if (optional.isPresent()) {
             RecipeHolder<CraftingRecipe> holder = optional.get();
             if (resultSlots.setRecipeUsed(level, serverPlayer, holder)) {
@@ -204,11 +212,9 @@ public class StorageAccessTerminalMenu extends AbstractContainerMenu {
             // Shift-click player slot: try crafting grid first, then other inventory rows
             if (!moveItemStackTo(stack, CRAFT_START, CRAFT_END, false)) {
                 if (index < INV_END) {
-                    if (!moveItemStackTo(stack, HOTBAR_START, HOTBAR_END, false))
-                        return ItemStack.EMPTY;
+                    if (!moveItemStackTo(stack, HOTBAR_START, HOTBAR_END, false)) return ItemStack.EMPTY;
                 } else {
-                    if (!moveItemStackTo(stack, INV_START, INV_END, false))
-                        return ItemStack.EMPTY;
+                    if (!moveItemStackTo(stack, INV_START, INV_END, false)) return ItemStack.EMPTY;
                 }
             }
         } else if (index >= CRAFT_START && index < CRAFT_END) {

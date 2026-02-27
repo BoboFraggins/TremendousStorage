@@ -26,11 +26,12 @@ public record SetPriorityPacket(BlockPos pos, int priority) implements CustomPac
     public static final Type<SetPriorityPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "set_priority"));
 
-    public static final StreamCodec<FriendlyByteBuf, SetPriorityPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    BlockPos.STREAM_CODEC, SetPriorityPacket::pos,
-                    ByteBufCodecs.INT, SetPriorityPacket::priority,
-                    SetPriorityPacket::new);
+    public static final StreamCodec<FriendlyByteBuf, SetPriorityPacket> STREAM_CODEC = StreamCodec.composite(
+            BlockPos.STREAM_CODEC,
+            SetPriorityPacket::pos,
+            ByteBufCodecs.INT,
+            SetPriorityPacket::priority,
+            SetPriorityPacket::new);
 
     @Override
     public Type<SetPriorityPacket> type() {

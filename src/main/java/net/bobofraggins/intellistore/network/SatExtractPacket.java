@@ -1,13 +1,12 @@
 package net.bobofraggins.intellistore.network;
 
-import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.IntelliStore;
+import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -24,21 +23,22 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * from the network via the NI's item handler, and places them in the player's inventory.
  * Sends back an updated {@link SatContentsPacket} after the operation.
  */
-public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount)
-        implements CustomPacketPayload {
+public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount) implements CustomPacketPayload {
 
-    public static final Type<SatExtractPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "sat_extract"));
+    public static final Type<SatExtractPacket> TYPE =
+            new Type<>(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "sat_extract"));
 
     private static final StreamCodec<RegistryFriendlyByteBuf, Integer> VAR_INT_CODEC =
             StreamCodec.of((buf, v) -> buf.writeVarInt(v), RegistryFriendlyByteBuf::readVarInt);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SatExtractPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    BlockPos.STREAM_CODEC.cast(), SatExtractPacket::niPos,
-                    ItemStack.OPTIONAL_STREAM_CODEC, SatExtractPacket::target,
-                    VAR_INT_CODEC, SatExtractPacket::amount,
-                    SatExtractPacket::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, SatExtractPacket> STREAM_CODEC = StreamCodec.composite(
+            BlockPos.STREAM_CODEC.cast(),
+            SatExtractPacket::niPos,
+            ItemStack.OPTIONAL_STREAM_CODEC,
+            SatExtractPacket::target,
+            VAR_INT_CODEC,
+            SatExtractPacket::amount,
+            SatExtractPacket::new);
 
     @Override
     public Type<SatExtractPacket> type() {
@@ -74,8 +74,7 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount)
             // Refresh client's item list
             IItemHandler refreshedHandler = ni.getItemHandler();
             if (refreshedHandler != null) {
-                PacketDistributor.sendToPlayer(player,
-                        RequestSatContentsPacket.buildContentsPacket(refreshedHandler));
+                PacketDistributor.sendToPlayer(player, RequestSatContentsPacket.buildContentsPacket(refreshedHandler));
             }
         });
     }

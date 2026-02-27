@@ -15,10 +15,7 @@ public final class NetworkEvents {
     @SubscribeEvent
     static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar("1");
-        registrar.playToServer(
-                SetPriorityPacket.TYPE,
-                SetPriorityPacket.STREAM_CODEC,
-                SetPriorityPacket::handle);
+        registrar.playToServer(SetPriorityPacket.TYPE, SetPriorityPacket.STREAM_CODEC, SetPriorityPacket::handle);
         registrar.playToServer(
                 ToggleFilingCabinetPacket.TYPE,
                 ToggleFilingCabinetPacket.STREAM_CODEC,
@@ -32,24 +29,13 @@ public final class NetworkEvents {
                 RequestNetworkContentsPacket.STREAM_CODEC,
                 RequestNetworkContentsPacket::handle);
         registrar.playToClient(
-                NetworkContentsPacket.TYPE,
-                NetworkContentsPacket.STREAM_CODEC,
-                NetworkContentsPacket::handle);
+                NetworkContentsPacket.TYPE, NetworkContentsPacket.STREAM_CODEC, NetworkContentsPacket::handle);
         registrar.playToServer(
-                RequestSatContentsPacket.TYPE,
-                RequestSatContentsPacket.STREAM_CODEC,
-                RequestSatContentsPacket::handle);
-        registrar.playToClient(
-                SatContentsPacket.TYPE,
-                SatContentsPacket.STREAM_CODEC,
-                SatContentsPacket::handle);
+                RequestSatContentsPacket.TYPE, RequestSatContentsPacket.STREAM_CODEC, RequestSatContentsPacket::handle);
+        registrar.playToClient(SatContentsPacket.TYPE, SatContentsPacket.STREAM_CODEC, SatContentsPacket::handle);
+        registrar.playToServer(SatExtractPacket.TYPE, SatExtractPacket.STREAM_CODEC, SatExtractPacket::handle);
+        registrar.playToServer(SatInsertPacket.TYPE, SatInsertPacket.STREAM_CODEC, SatInsertPacket::handle);
         registrar.playToServer(
-                SatExtractPacket.TYPE,
-                SatExtractPacket.STREAM_CODEC,
-                SatExtractPacket::handle);
-        registrar.playToServer(
-                SatInsertPacket.TYPE,
-                SatInsertPacket.STREAM_CODEC,
-                SatInsertPacket::handle);
+                OpenWirelessSatPacket.TYPE, OpenWirelessSatPacket.STREAM_CODEC, OpenWirelessSatPacket::handle);
     }
 }

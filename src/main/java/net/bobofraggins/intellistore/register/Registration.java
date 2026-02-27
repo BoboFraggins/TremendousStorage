@@ -41,26 +41,31 @@ import net.bobofraggins.intellistore.ui.StorageAccessTerminalMenu;
 import net.bobofraggins.intellistore.ui.StorageInterfaceMenu;
 import net.bobofraggins.intellistore.whiteout.FolderTapeRecipe;
 import net.bobofraggins.intellistore.whiteout.WhiteoutTapeItem;
+import net.bobofraggins.intellistore.wirelesssat.WirelessHubBlock;
+import net.bobofraggins.intellistore.wirelesssat.WirelessHubBlockEntity;
+import net.bobofraggins.intellistore.wirelesssat.WirelessHubMenu;
+import net.bobofraggins.intellistore.wirelesssat.WirelessSatItem;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.BucketItem;
-import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.Items;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredBlock;
@@ -117,6 +122,16 @@ public final class Registration {
                     .networkSynchronized(FluidTankContents.STREAM_CODEC)
                     .build());
 
+    /**
+     * Data component storing the linked Network Interface {@link BlockPos} in a Wireless SAT item.
+     * Encoded as three varints (x, y, z) over the network.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<BlockPos>> WIRELESS_NI_POS =
+            DATA_COMPONENTS.register("wireless_ni_pos", () -> DataComponentType.<BlockPos>builder()
+                    .persistent(BlockPos.CODEC)
+                    .networkSynchronized(BlockPos.STREAM_CODEC)
+                    .build());
+
     // -------------------------------------------------------------------------
     // Blocks + block entities
     // -------------------------------------------------------------------------
@@ -162,9 +177,8 @@ public final class Registration {
             ITEMS.registerSimpleBlockItem("bulk_storage_container", BULK_STORAGE_CONTAINER);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BulkStorageContainerBlockEntity>>
-            BULK_STORAGE_CONTAINER_BE_TYPE = BLOCK_ENTITY_TYPES.register(
-                    "bulk_storage_container",
-                    () -> BlockEntityType.Builder.of(
+            BULK_STORAGE_CONTAINER_BE_TYPE =
+                    BLOCK_ENTITY_TYPES.register("bulk_storage_container", () -> BlockEntityType.Builder.of(
                                     BulkStorageContainerBlockEntity::new, BULK_STORAGE_CONTAINER.get())
                             .build(null));
 
@@ -187,12 +201,10 @@ public final class Registration {
     // Healing Salve fluid type + fluids + fluid block + cauldron + items
     // -------------------------------------------------------------------------
 
-    public static final DeferredHolder<FluidType, FluidType> HEALING_SALVE_TYPE =
-            FLUID_TYPE_REGISTER.register("healing_salve", () ->
-                    new FluidType(FluidType.Properties.create()
-                            .density(2000)
-                            .viscosity(6000)
-                            .temperature(320)));
+    public static final DeferredHolder<FluidType, FluidType> HEALING_SALVE_TYPE = FLUID_TYPE_REGISTER.register(
+            "healing_salve",
+            () -> new FluidType(
+                    FluidType.Properties.create().density(2000).viscosity(6000).temperature(320)));
 
     public static final DeferredHolder<net.minecraft.world.level.material.Fluid, HealingSalveFluid.Source>
             HEALING_SALVE_SOURCE = FLUID_REGISTER.register("healing_salve", HealingSalveFluid.Source::new);
@@ -216,25 +228,22 @@ public final class Registration {
     public static final DeferredHolder<Item, ZombieBrainItem> ZOMBIE_BRAIN =
             ITEMS.register("zombie_brain", ZombieBrainItem::new);
 
-    public static final DeferredHolder<Item, BrainItem> BRAIN =
-            ITEMS.register("brain", BrainItem::new);
+    public static final DeferredHolder<Item, BrainItem> BRAIN = ITEMS.register("brain", BrainItem::new);
 
-    public static final DeferredHolder<Item, BucketItem> HEALING_SALVE_BUCKET =
-            ITEMS.register("healing_salve_bucket",
-                    () -> new BucketItem(HEALING_SALVE_SOURCE.get(),
-                            new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
+    public static final DeferredHolder<Item, BucketItem> HEALING_SALVE_BUCKET = ITEMS.register(
+            "healing_salve_bucket",
+            () -> new BucketItem(
+                    HEALING_SALVE_SOURCE.get(),
+                    new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
 
     /** Shared properties object for the Healing Salve Source + Flowing fluids. */
-    public static final BaseFlowingFluid.Properties HEALING_SALVE_FLUID_PROPS =
-            new BaseFlowingFluid.Properties(
-                    HEALING_SALVE_TYPE,
-                    () -> HEALING_SALVE_SOURCE.get(),
-                    () -> HEALING_SALVE_FLOWING.get())
-                    .bucket(() -> HEALING_SALVE_BUCKET.get())
-                    .block(() -> HEALING_SALVE_BLOCK.get())
-                    .slopeFindDistance(2)
-                    .levelDecreasePerBlock(1)
-                    .tickRate(30);
+    public static final BaseFlowingFluid.Properties HEALING_SALVE_FLUID_PROPS = new BaseFlowingFluid.Properties(
+                    HEALING_SALVE_TYPE, () -> HEALING_SALVE_SOURCE.get(), () -> HEALING_SALVE_FLOWING.get())
+            .bucket(() -> HEALING_SALVE_BUCKET.get())
+            .block(() -> HEALING_SALVE_BLOCK.get())
+            .slopeFindDistance(2)
+            .levelDecreasePerBlock(1)
+            .tickRate(30);
 
     public static final DeferredBlock<HealingSalveCauldronBlock> HEALING_SALVE_CAULDRON = BLOCKS.register(
             "healing_salve_cauldron",
@@ -263,9 +272,8 @@ public final class Registration {
             ITEMS.registerSimpleBlockItem("network_interface", NETWORK_INTERFACE);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<NetworkInterfaceBlockEntity>>
-            NETWORK_INTERFACE_BE_TYPE = BLOCK_ENTITY_TYPES.register(
-                    "network_interface",
-                    () -> BlockEntityType.Builder.of(
+            NETWORK_INTERFACE_BE_TYPE =
+                    BLOCK_ENTITY_TYPES.register("network_interface", () -> BlockEntityType.Builder.of(
                                     NetworkInterfaceBlockEntity::new, NETWORK_INTERFACE.get())
                             .build(null));
 
@@ -273,15 +281,43 @@ public final class Registration {
     // Storage Access Terminal block
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<StorageAccessTerminalBlock> STORAGE_ACCESS_TERMINAL =
-            BLOCKS.register("storage_access_terminal",
-                    () -> new StorageAccessTerminalBlock(BlockBehaviour.Properties.of()
-                            .strength(2.5f, 1000f)
-                            .requiresCorrectToolForDrops()
-                            .sound(SoundType.WOOD)));
+    public static final DeferredBlock<StorageAccessTerminalBlock> STORAGE_ACCESS_TERMINAL = BLOCKS.register(
+            "storage_access_terminal",
+            () -> new StorageAccessTerminalBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f, 1000f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.WOOD)));
 
     public static final DeferredHolder<Item, BlockItem> STORAGE_ACCESS_TERMINAL_ITEM =
             ITEMS.registerSimpleBlockItem("storage_access_terminal", STORAGE_ACCESS_TERMINAL);
+
+    // -------------------------------------------------------------------------
+    // Wireless Hub block + block entity
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<WirelessHubBlock> WIRELESS_HUB = BLOCKS.register(
+            "wireless_hub",
+            () -> new WirelessHubBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f, 1000f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)
+                    .noOcclusion()
+                    .lightLevel(state -> 14)));
+
+    public static final DeferredHolder<Item, BlockItem> WIRELESS_HUB_ITEM =
+            ITEMS.registerSimpleBlockItem("wireless_hub", WIRELESS_HUB);
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WirelessHubBlockEntity>>
+            WIRELESS_HUB_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "wireless_hub", () -> BlockEntityType.Builder.of(WirelessHubBlockEntity::new, WIRELESS_HUB.get())
+                            .build(null));
+
+    // -------------------------------------------------------------------------
+    // Wireless SAT item
+    // -------------------------------------------------------------------------
+
+    public static final DeferredHolder<Item, WirelessSatItem> WIRELESS_SAT =
+            ITEMS.register("wireless_sat", WirelessSatItem::new);
 
     // -------------------------------------------------------------------------
     // Tubes (16 colored variants + shared block entity type)
@@ -293,12 +329,15 @@ public final class Registration {
     static {
         for (DyeColor color : DyeColor.values()) {
             String name = color.getName() + "_tube";
-            DeferredBlock<TubeBlock> block = BLOCKS.register(name,
-                    () -> new TubeBlock(color, BlockBehaviour.Properties.of()
-                            .strength(1.5f, 6.0f)
-                            .requiresCorrectToolForDrops()
-                            .sound(SoundType.METAL)
-                            .noOcclusion()));
+            DeferredBlock<TubeBlock> block = BLOCKS.register(
+                    name,
+                    () -> new TubeBlock(
+                            color,
+                            BlockBehaviour.Properties.of()
+                                    .strength(1.5f, 6.0f)
+                                    .requiresCorrectToolForDrops()
+                                    .sound(SoundType.METAL)
+                                    .noOcclusion()));
             TUBES.put(color, block);
             TUBE_ITEMS.put(color, ITEMS.registerSimpleBlockItem(name, block));
         }
@@ -306,9 +345,8 @@ public final class Registration {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TubeBlockEntity>> TUBE_BE_TYPE =
             BLOCK_ENTITY_TYPES.register("tube", () -> {
-                TubeBlock[] blocks = TUBES.values().stream()
-                        .map(DeferredBlock::get)
-                        .toArray(TubeBlock[]::new);
+                TubeBlock[] blocks =
+                        TUBES.values().stream().map(DeferredBlock::get).toArray(TubeBlock[]::new);
                 return BlockEntityType.Builder.of(TubeBlockEntity::new, blocks).build(null);
             });
 
@@ -317,24 +355,23 @@ public final class Registration {
     // -------------------------------------------------------------------------
 
     public static final DeferredHolder<MenuType<?>, MenuType<FilingCabinetMenu>> FILING_CABINET_MENU =
-            MENU_TYPES.register("filing_cabinet",
-                    () -> IMenuTypeExtension.create(FilingCabinetMenu::new));
+            MENU_TYPES.register("filing_cabinet", () -> IMenuTypeExtension.create(FilingCabinetMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<PriorityMenu>> PRIORITY_MENU =
-            MENU_TYPES.register("priority",
-                    () -> IMenuTypeExtension.create(PriorityMenu::new));
+            MENU_TYPES.register("priority", () -> IMenuTypeExtension.create(PriorityMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<StorageInterfaceMenu>> STORAGE_INTERFACE_MENU =
-            MENU_TYPES.register("storage_interface",
-                    () -> IMenuTypeExtension.create(StorageInterfaceMenu::new));
+            MENU_TYPES.register("storage_interface", () -> IMenuTypeExtension.create(StorageInterfaceMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<NetworkInterfaceMenu>> NETWORK_INTERFACE_MENU =
-            MENU_TYPES.register("network_interface",
-                    () -> IMenuTypeExtension.create(NetworkInterfaceMenu::new));
+            MENU_TYPES.register("network_interface", () -> IMenuTypeExtension.create(NetworkInterfaceMenu::new));
 
-    public static final DeferredHolder<MenuType<?>, MenuType<StorageAccessTerminalMenu>>
-            STORAGE_ACCESS_TERMINAL_MENU = MENU_TYPES.register("storage_access_terminal",
-                    () -> IMenuTypeExtension.create(StorageAccessTerminalMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<StorageAccessTerminalMenu>> STORAGE_ACCESS_TERMINAL_MENU =
+            MENU_TYPES.register(
+                    "storage_access_terminal", () -> IMenuTypeExtension.create(StorageAccessTerminalMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<WirelessHubMenu>> WIRELESS_HUB_MENU =
+            MENU_TYPES.register("wireless_hub", () -> IMenuTypeExtension.create(WirelessHubMenu::new));
 
     // -------------------------------------------------------------------------
     // Items — storage interface
@@ -446,6 +483,8 @@ public final class Registration {
                         output.accept(FLUID_TANK_ITEM.get());
                         output.accept(NETWORK_INTERFACE_ITEM.get());
                         output.accept(STORAGE_ACCESS_TERMINAL_ITEM.get());
+                        output.accept(WIRELESS_HUB_ITEM.get());
+                        output.accept(WIRELESS_SAT.get());
                         output.accept(STORAGE_INTERFACE.get());
                         output.accept(ZOMBIE_BRAIN.get());
                         output.accept(BRAIN.get());
@@ -498,8 +537,6 @@ public final class Registration {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                NETWORK_INTERFACE_BE_TYPE.get(),
-                (be, side) -> be.getItemHandler());
+                Capabilities.ItemHandler.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getItemHandler());
     }
 }

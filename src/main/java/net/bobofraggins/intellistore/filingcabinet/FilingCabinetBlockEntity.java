@@ -23,8 +23,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /** Stores up to {@value #SLOT_COUNT} Manila Folder stacks and tracks the open/close state. */
-public class FilingCabinetBlockEntity extends BlockEntity
-        implements net.minecraft.world.Container, MenuProvider {
+public class FilingCabinetBlockEntity extends BlockEntity implements net.minecraft.world.Container, MenuProvider {
 
     public static final int SLOT_COUNT = 8;
 

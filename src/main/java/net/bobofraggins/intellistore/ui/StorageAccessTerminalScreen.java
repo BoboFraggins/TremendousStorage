@@ -4,7 +4,6 @@ import java.util.List;
 import net.bobofraggins.intellistore.network.RequestSatContentsPacket;
 import net.bobofraggins.intellistore.network.SatContentsPacket;
 import net.bobofraggins.intellistore.network.SatExtractPacket;
-import net.bobofraggins.intellistore.network.SatInsertPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -37,24 +36,24 @@ public class StorageAccessTerminalScreen extends AbstractContainerScreen<Storage
     // Layout constants
     // -------------------------------------------------------------------------
 
-    private static final int BG_WIDTH      = 176;
-    private static final int BG_HEIGHT     = 256;
+    private static final int BG_WIDTH = 176;
+    private static final int BG_HEIGHT = 256;
 
-    private static final int LIST_Y        = 16;
-    private static final int LIST_HEIGHT   = 112; // 7 rows × 16 px
-    private static final int ROW_HEIGHT    = 16;
-    private static final int VISIBLE_ROWS  = 7;
+    private static final int LIST_Y = 16;
+    private static final int LIST_HEIGHT = 112; // 7 rows × 16 px
+    private static final int ROW_HEIGHT = 16;
+    private static final int VISIBLE_ROWS = 7;
 
-    private static final int CRAFT_Y       = 130;
-    private static final int INV_Y         = 168;
-    private static final int HOTBAR_Y      = INV_Y + 3 * 18 + 4;
+    private static final int CRAFT_Y = 130;
+    private static final int INV_Y = 168;
+    private static final int HOTBAR_Y = INV_Y + 3 * 18 + 4;
 
     // -------------------------------------------------------------------------
     // State
     // -------------------------------------------------------------------------
 
     private List<ItemStack> networkStacks = List.of();
-    private List<Long>      networkCounts = List.of();
+    private List<Long> networkCounts = List.of();
     private int scrollOffset = 0;
 
     // -------------------------------------------------------------------------
@@ -63,7 +62,7 @@ public class StorageAccessTerminalScreen extends AbstractContainerScreen<Storage
 
     public StorageAccessTerminalScreen(StorageAccessTerminalMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth  = BG_WIDTH;
+        this.imageWidth = BG_WIDTH;
         this.imageHeight = BG_HEIGHT;
     }
 
@@ -121,8 +120,10 @@ public class StorageAccessTerminalScreen extends AbstractContainerScreen<Storage
     }
 
     private boolean isInListArea(double mx, double my) {
-        return mx >= leftPos + 4 && mx < leftPos + BG_WIDTH - 12
-                && my >= topPos + LIST_Y && my < topPos + LIST_Y + LIST_HEIGHT;
+        return mx >= leftPos + 4
+                && mx < leftPos + BG_WIDTH - 12
+                && my >= topPos + LIST_Y
+                && my < topPos + LIST_Y + LIST_HEIGHT;
     }
 
     // -------------------------------------------------------------------------
@@ -143,8 +144,7 @@ public class StorageAccessTerminalScreen extends AbstractContainerScreen<Storage
                         ? (int) Math.min(totalCount, target.getMaxStackSize())
                         : Math.min((int) totalCount, target.getMaxStackSize());
 
-                PacketDistributor.sendToServer(
-                        new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount));
+                PacketDistributor.sendToServer(new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount));
                 return true;
             }
         }
@@ -183,9 +183,8 @@ public class StorageAccessTerminalScreen extends AbstractContainerScreen<Storage
                 : "screen.intellistore.storage_access_terminal.disconnected";
         Component statusText = Component.translatable(statusKey);
         int statusColor = connected ? 0x55FF55 : 0xFF9955;
-        graphics.drawString(font, statusText,
-                leftPos + (BG_WIDTH - font.width(statusText)) / 2,
-                topPos + 9, statusColor, false);
+        graphics.drawString(
+                font, statusText, leftPos + (BG_WIDTH - font.width(statusText)) / 2, topPos + 9, statusColor, false);
 
         // Separator below status
         graphics.fill(leftPos + 4, topPos + LIST_Y - 2, leftPos + BG_WIDTH - 4, topPos + LIST_Y - 1, 0x80FFFFFF);
@@ -221,14 +220,12 @@ public class StorageAccessTerminalScreen extends AbstractContainerScreen<Storage
 
         if (networkStacks.isEmpty() && connected) {
             String empty = "Network is empty";
-            graphics.drawString(font, empty,
-                    leftPos + (BG_WIDTH - font.width(empty)) / 2,
-                    topPos + LIST_Y + 4, 0x808080, false);
+            graphics.drawString(
+                    font, empty, leftPos + (BG_WIDTH - font.width(empty)) / 2, topPos + LIST_Y + 4, 0x808080, false);
         } else if (!connected) {
             String noNet = "No network connected";
-            graphics.drawString(font, noNet,
-                    leftPos + (BG_WIDTH - font.width(noNet)) / 2,
-                    topPos + LIST_Y + 4, 0x808080, false);
+            graphics.drawString(
+                    font, noNet, leftPos + (BG_WIDTH - font.width(noNet)) / 2, topPos + LIST_Y + 4, 0x808080, false);
         }
 
         // Scroll bar
@@ -238,8 +235,7 @@ public class StorageAccessTerminalScreen extends AbstractContainerScreen<Storage
             int barH = LIST_HEIGHT;
             graphics.fill(barX, barY, barX + 4, barY + barH, 0x40FFFFFF);
             int thumbH = Math.max(8, barH * VISIBLE_ROWS / networkStacks.size());
-            int thumbY = barY + (barH - thumbH) * scrollOffset
-                    / Math.max(1, networkStacks.size() - VISIBLE_ROWS);
+            int thumbY = barY + (barH - thumbH) * scrollOffset / Math.max(1, networkStacks.size() - VISIBLE_ROWS);
             graphics.fill(barX, thumbY, barX + 4, thumbY + thumbH, 0xC0FFFFFF);
         }
 
@@ -281,8 +277,7 @@ public class StorageAccessTerminalScreen extends AbstractContainerScreen<Storage
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title,
-                (BG_WIDTH - font.width(title)) / 2, 1, 0xFFFFFF, false);
+        graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 1, 0xFFFFFF, false);
     }
 
     // -------------------------------------------------------------------------
@@ -291,7 +286,7 @@ public class StorageAccessTerminalScreen extends AbstractContainerScreen<Storage
 
     private static String abbreviateCount(long count) {
         if (count >= 1_000_000) return String.format("%.1fM", count / 1_000_000.0);
-        if (count >= 1_000)     return String.format("%.1fk", count / 1_000.0);
+        if (count >= 1_000) return String.format("%.1fk", count / 1_000.0);
         return String.valueOf(count);
     }
 }
