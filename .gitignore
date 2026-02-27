@@ -25,6 +25,7 @@ run-data
 repo
 
 # project-local
+BRAIN_IN_JAR.md
 CLAUDE.md
 PROJECT.md
 .claude/

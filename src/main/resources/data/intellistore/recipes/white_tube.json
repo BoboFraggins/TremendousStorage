@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IiI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_bars" },
+    "i": { "item": "minecraft:iron_ingot" }
+  },
+  "result": {
+    "id": "intellistore:white_tube",
+    "count": 8
+  }
+}

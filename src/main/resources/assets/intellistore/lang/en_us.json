@@ -44,5 +44,23 @@
   "screen.intellistore.priority_label": "Priority:",
   "screen.intellistore.filing_cabinet.open_label": "Drawer:",
   "screen.intellistore.filing_cabinet.toggle_open": "Open",
-  "screen.intellistore.filing_cabinet.toggle_closed": "Closed"
+  "screen.intellistore.filing_cabinet.toggle_closed": "Closed",
+  "screen.intellistore.storage_interface": "Storage Interface",
+
+  "block.intellistore.white_tube": "White Tube",
+  "block.intellistore.orange_tube": "Orange Tube",
+  "block.intellistore.magenta_tube": "Magenta Tube",
+  "block.intellistore.light_blue_tube": "Light Blue Tube",
+  "block.intellistore.yellow_tube": "Yellow Tube",
+  "block.intellistore.lime_tube": "Lime Tube",
+  "block.intellistore.pink_tube": "Pink Tube",
+  "block.intellistore.gray_tube": "Gray Tube",
+  "block.intellistore.light_gray_tube": "Light Gray Tube",
+  "block.intellistore.cyan_tube": "Cyan Tube",
+  "block.intellistore.purple_tube": "Purple Tube",
+  "block.intellistore.blue_tube": "Blue Tube",
+  "block.intellistore.brown_tube": "Brown Tube",
+  "block.intellistore.green_tube": "Green Tube",
+  "block.intellistore.red_tube": "Red Tube",
+  "block.intellistore.black_tube": "Black Tube"
 }

@@ -22,14 +22,18 @@ import net.bobofraggins.intellistore.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.intellistore.manillafolder.FolderStorageRecipe;
 import net.bobofraggins.intellistore.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.manillafolder.ManillaFolderItem;
+import net.bobofraggins.intellistore.tube.TubeBlock;
+import net.bobofraggins.intellistore.tube.TubeBlockEntity;
 import net.bobofraggins.intellistore.ui.FilingCabinetMenu;
 import net.bobofraggins.intellistore.ui.PriorityMenu;
+import net.bobofraggins.intellistore.ui.StorageInterfaceMenu;
 import net.bobofraggins.intellistore.whiteout.FolderTapeRecipe;
 import net.bobofraggins.intellistore.whiteout.WhiteoutTapeItem;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.DyeColor;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -155,6 +159,35 @@ public final class Registration {
                             .build(null));
 
     // -------------------------------------------------------------------------
+    // Tubes (16 colored variants + shared block entity type)
+    // -------------------------------------------------------------------------
+
+    public static final Map<DyeColor, DeferredBlock<TubeBlock>> TUBES = new EnumMap<>(DyeColor.class);
+    public static final Map<DyeColor, DeferredHolder<Item, BlockItem>> TUBE_ITEMS = new EnumMap<>(DyeColor.class);
+
+    static {
+        for (DyeColor color : DyeColor.values()) {
+            String name = color.getName() + "_tube";
+            DeferredBlock<TubeBlock> block = BLOCKS.register(name,
+                    () -> new TubeBlock(color, BlockBehaviour.Properties.of()
+                            .strength(1.5f, 6.0f)
+                            .requiresCorrectToolForDrops()
+                            .sound(SoundType.METAL)
+                            .noOcclusion()));
+            TUBES.put(color, block);
+            TUBE_ITEMS.put(color, ITEMS.registerSimpleBlockItem(name, block));
+        }
+    }
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TubeBlockEntity>> TUBE_BE_TYPE =
+            BLOCK_ENTITY_TYPES.register("tube", () -> {
+                TubeBlock[] blocks = TUBES.values().stream()
+                        .map(DeferredBlock::get)
+                        .toArray(TubeBlock[]::new);
+                return BlockEntityType.Builder.of(TubeBlockEntity::new, blocks).build(null);
+            });
+
+    // -------------------------------------------------------------------------
     // Menu types
     // -------------------------------------------------------------------------
 
@@ -165,6 +198,10 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<PriorityMenu>> PRIORITY_MENU =
             MENU_TYPES.register("priority",
                     () -> IMenuTypeExtension.create(PriorityMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<StorageInterfaceMenu>> STORAGE_INTERFACE_MENU =
+            MENU_TYPES.register("storage_interface",
+                    () -> IMenuTypeExtension.create(StorageInterfaceMenu::new));
 
     // -------------------------------------------------------------------------
     // Items — whiteout tape
@@ -267,6 +304,9 @@ public final class Registration {
                         output.accept(JUNK_DRAWER_ITEM.get());
                         output.accept(BULK_STORAGE_CONTAINER_ITEM.get());
                         output.accept(FLUID_TANK_ITEM.get());
+                        for (DyeColor color : DyeColor.values()) {
+                            output.accept(TUBE_ITEMS.get(color).get());
+                        }
                         for (FolderTier tier : FolderTier.values()) {
                             output.accept(MANILA_FOLDERS.get(tier).get());
                         }
@@ -302,5 +342,7 @@ public final class Registration {
                 (be, side) -> new BulkStorageContainerItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK, FLUID_TANK_BE_TYPE.get(), (be, side) -> new FluidTankFluidHandler(be));
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
     }
 }

@@ -23,5 +23,9 @@ public final class NetworkEvents {
                 ToggleFilingCabinetPacket.TYPE,
                 ToggleFilingCabinetPacket.STREAM_CODEC,
                 ToggleFilingCabinetPacket::handle);
+        registrar.playToServer(
+                SetStorageInterfacePriorityPacket.TYPE,
+                SetStorageInterfacePriorityPacket.STREAM_CODEC,
+                SetStorageInterfacePriorityPacket::handle);
     }
 }

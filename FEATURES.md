@@ -111,3 +111,35 @@ Counts are abbreviated: exact below 1000, `Xk` from 1,000, `XM` from 1,000,000.
 All standard shaped/shapeless recipes (filing cabinet, folder tiers, junk drawer, whiteout tape,
 fluid tank, bulk storage container) appear in JEI automatically. The custom crafting-grid recipes (folder storage, extract,
 merge, tape) are intentionally not shown.
+
+---
+
+## Tubes
+
+### Tube (16 colors)
+- A 1/4-block × 1/4-block pipe that visually and logically connects to adjacent blocks
+- Connects to: same-color tubes, and any block exposing an `IItemHandler` capability
+- Different-colored tubes do **not** connect to each other
+- Six blockstate boolean properties (`north`, `south`, `east`, `west`, `up`, `down`) drive collision shape and rendering
+- Pre-computed 64-entry `VoxelShape` array for efficient collision at all connection states
+- All visual geometry drawn by a custom `BlockEntityRenderer` (BESR): core cube, arms toward connected faces, and attachment plates
+- Color tint applied at render time from `DyeColor.getTextureDiffuseColor()` — single shared white texture
+- Recipe: iron bars – iron ingot – iron bars (horizontal row) → **8 white tubes**
+- Dye recipe: any dye + any tube (shapeless) → **8 colored tubes** of that color
+- Pickaxe-minable
+
+### Storage Interface (tube attachment)
+- Up to 6 attachments per tube (one per face), stored in the tube block entity
+- **Right-click an empty tube face** → installs a Storage Interface on that face (visible as an 8×8×2-pixel plate)
+- **Right-click an occupied face** → opens the Storage Interface priority screen
+- Priority: 5 levels (Lowest → Highest); default **Normal**; attachment priority overrides the connected storage block's own priority
+- Priority saved to NBT per-face and survives break/replace
+
+### Tube Network
+- All storage blocks reachable through same-color connected tubes form a **unified virtual inventory**
+- Any block querying an `IItemHandler` capability on a tube receives a composite view of the entire network
+- **Insertion** routes to the highest-priority storage first (AE2/RS style — the network decides, not the caller)
+- **Priority source** (highest precedence first): Storage Interface attachment priority → storage block's own priority → Normal
+- Storage blocks connected via multiple paths are deduplicated (counted once per network)
+- Network view is built lazily on first capability access via BFS flood-fill and cached per tube; cache invalidates automatically when any neighbor changes
+- Cascade prevention: cache-clear propagation stops immediately if a tube's cache is already stale

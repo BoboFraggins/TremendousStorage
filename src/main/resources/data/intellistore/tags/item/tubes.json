@@ -1,10 +1,6 @@
 {
   "replace": false,
   "values": [
-    "intellistore:filing_cabinet",
-    "intellistore:junk_drawer",
-    "intellistore:bulk_storage_container",
-    "intellistore:fluid_tank",
     "intellistore:white_tube",
     "intellistore:orange_tube",
     "intellistore:magenta_tube",

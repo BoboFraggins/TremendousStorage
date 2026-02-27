@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "minecraft:light_gray_dye" },
+    { "tag": "intellistore:tubes" }
+  ],
+  "result": {
+    "id": "intellistore:light_gray_tube",
+    "count": 8
+  }
+}
