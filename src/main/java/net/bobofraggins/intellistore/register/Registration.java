@@ -209,7 +209,8 @@ public final class Registration {
                             .noLootTable()
                             .liquid()
                             .replaceable()
-                            .pushReaction(PushReaction.DESTROY)));
+                            .pushReaction(PushReaction.DESTROY)
+                            .lightLevel(state -> 8)));
 
     public static final DeferredHolder<Item, ZombieBrainItem> ZOMBIE_BRAIN =
             ITEMS.register("zombie_brain", ZombieBrainItem::new);
