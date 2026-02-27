@@ -9,10 +9,12 @@ NeoForge 1.21.1 · Minecraft 1.21.1
 ### Filing Cabinet
 - Holds up to **8 Manila Folders** in internal slots
 - Right-click with a folder in hand → inserts into the first empty slot
-- Right-click with empty hand → toggles open/closed (animated drawer)
+- Right-click with empty hand → opens the Filing Cabinet screen (toggle open/close + priority)
 - Sneak + right-click with empty hand (while open) → extracts the topmost folder
 - Drops itself with full folder inventory intact when broken
 - Exposes an `IItemHandler` capability (8 slots, one per folder) for hopper/pipe automation
+- **Priority**: 5 levels (Lowest → Highest); default **High**; set via the right-click screen
+- Priority is saved to NBT and survives break/replace
 - Recipe: iron bars ring around a chest (`III/ICI/III`)
 - Pickaxe-minable
 
@@ -22,8 +24,22 @@ NeoForge 1.21.1 · Minecraft 1.21.1
 - No locking — any qualifying item may be freely added or removed at any time
 - No player UI — automation only (hoppers, pipes, AE2 storage bus via `IItemHandler`)
 - All slots exposed via `IItemHandler`; slot count is dynamic (grows/shrinks with contents)
+- **Priority**: 5 levels (Lowest → Highest); default **Normal**; set via right-click screen
+- Priority is saved to NBT and survives break/replace
 - Drops itself with full contents intact when broken
 - Recipe: iron blocks on corners, iron bars on edges, chest in center (`BIB/ICI/BIB`)
+- Pickaxe-minable
+
+### Bulk Storage Container
+- Stores up to **32,768 total items** shared across any number of distinct item types
+- Accepts **only** items that Manila Folders accept: non-damageable items with default component data (plain stackable items) — the precise complement of the Junk Drawer
+- No locking — any qualifying item may be freely added or removed at any time
+- No player UI — automation only (hoppers, pipes via `IItemHandler`)
+- Slot count is dynamic (one slot per distinct stored type); each slot presents up to `maxStackSize` items for extraction
+- **Priority**: 5 levels (Lowest → Highest); default **Low**; set via right-click screen
+- Priority is saved to NBT and survives break/replace
+- Drops itself with full contents intact when broken
+- Recipe: iron bars on corners, iron blocks on edges, chest in center (`IBI/BCB/IBI`) — the Junk Drawer recipe with bars and blocks swapped
 - Pickaxe-minable
 
 ### Fluid Tank
@@ -86,11 +102,12 @@ Adds block tooltip overlays when looking at IntelliStore blocks:
 |-------|---------|
 | Filing Cabinet | Open / Closed state; item icon + "Xk of Yk ItemName" per occupied folder |
 | Junk Drawer | "Empty" or "X / Yk items" |
+| Bulk Storage Container | "Empty" or "Xk / Yk items" |
 | Fluid Tank | "Empty" or "Xk mB of Yk mB FluidName" |
 
 Counts are abbreviated: exact below 1000, `Xk` from 1,000, `XM` from 1,000,000.
 
 ### JEI — `compileOnly`, optional at runtime
 All standard shaped/shapeless recipes (filing cabinet, folder tiers, junk drawer, whiteout tape,
-fluid tank) appear in JEI automatically. The custom crafting-grid recipes (folder storage, extract,
+fluid tank, bulk storage container) appear in JEI automatically. The custom crafting-grid recipes (folder storage, extract,
 merge, tape) are intentionally not shown.

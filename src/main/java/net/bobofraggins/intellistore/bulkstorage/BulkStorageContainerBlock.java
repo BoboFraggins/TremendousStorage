@@ -1,4 +1,4 @@
-package net.bobofraggins.intellistore.junkdrawer;
+package net.bobofraggins.intellistore.bulkstorage;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
@@ -13,36 +13,36 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
- * The Junk Drawer block — stores up to 32,768 individual items, one per slot.
+ * The Bulk Storage Container block — stores up to {@value BulkStorageContainerBlockEntity#CAPACITY}
+ * items in a shared pool across any number of distinct item types.
  *
- * <p>Accepts only items that Manila Folders reject: damageable items (tools, armour, weapons)
- * and items with non-default component data (enchanted books, named items, potions, etc.).
+ * <p>Accepts only items that Manila Folders accept: non-damageable items with default component
+ * data (plain stackable items). This is the precise complement of the Junk Drawer.
  * There is no locking — any qualifying item may be freely added or removed at any time.
  *
  * <p>There is no player-facing UI. All item movement is via hoppers, pipes, or any mod that
  * reads the {@link net.neoforged.neoforge.items.IItemHandler} capability.
  */
-public class JunkDrawerBlock extends BaseEntityBlock {
+public class BulkStorageContainerBlock extends BaseEntityBlock {
 
-    public static final MapCodec<JunkDrawerBlock> CODEC = simpleCodec(JunkDrawerBlock::new);
+    public static final MapCodec<BulkStorageContainerBlock> CODEC = simpleCodec(BulkStorageContainerBlock::new);
 
     @Override
-    public MapCodec<JunkDrawerBlock> codec() {
+    public MapCodec<BulkStorageContainerBlock> codec() {
         return CODEC;
     }
 
-    public JunkDrawerBlock(Properties props) {
+    public BulkStorageContainerBlock(Properties props) {
         super(props);
     }
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new JunkDrawerBlockEntity(pos, state);
+        return new BulkStorageContainerBlockEntity(pos, state);
     }
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        // Use the standard JSON cube model.
         return RenderShape.MODEL;
     }
 

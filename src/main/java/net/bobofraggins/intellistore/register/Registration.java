@@ -3,6 +3,9 @@ package net.bobofraggins.intellistore.register;
 import java.util.EnumMap;
 import java.util.Map;
 import net.bobofraggins.intellistore.IntelliStore;
+import net.bobofraggins.intellistore.bulkstorage.BulkStorageContainerBlock;
+import net.bobofraggins.intellistore.bulkstorage.BulkStorageContainerBlockEntity;
+import net.bobofraggins.intellistore.bulkstorage.BulkStorageContainerItemHandler;
 import net.bobofraggins.intellistore.filingcabinet.FilingCabinetBlock;
 import net.bobofraggins.intellistore.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.filingcabinet.FilingCabinetItemHandler;
@@ -19,11 +22,15 @@ import net.bobofraggins.intellistore.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.intellistore.manillafolder.FolderStorageRecipe;
 import net.bobofraggins.intellistore.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.manillafolder.ManillaFolderItem;
+import net.bobofraggins.intellistore.ui.FilingCabinetMenu;
+import net.bobofraggins.intellistore.ui.PriorityMenu;
 import net.bobofraggins.intellistore.whiteout.FolderTapeRecipe;
 import net.bobofraggins.intellistore.whiteout.WhiteoutTapeItem;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.inventory.MenuType;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -61,6 +68,9 @@ public final class Registration {
 
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, IntelliStore.MODID);
+
+    public static final DeferredRegister<MenuType<?>> MENU_TYPES =
+            DeferredRegister.create(Registries.MENU, IntelliStore.MODID);
 
     // -------------------------------------------------------------------------
     // Data components
@@ -112,6 +122,23 @@ public final class Registration {
                     "junk_drawer", () -> BlockEntityType.Builder.of(JunkDrawerBlockEntity::new, JUNK_DRAWER.get())
                             .build(null));
 
+    public static final DeferredBlock<BulkStorageContainerBlock> BULK_STORAGE_CONTAINER = BLOCKS.register(
+            "bulk_storage_container",
+            () -> new BulkStorageContainerBlock(BlockBehaviour.Properties.of()
+                    .strength(5.0f, 1000.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)));
+
+    public static final DeferredHolder<Item, BlockItem> BULK_STORAGE_CONTAINER_ITEM =
+            ITEMS.registerSimpleBlockItem("bulk_storage_container", BULK_STORAGE_CONTAINER);
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BulkStorageContainerBlockEntity>>
+            BULK_STORAGE_CONTAINER_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "bulk_storage_container",
+                    () -> BlockEntityType.Builder.of(
+                                    BulkStorageContainerBlockEntity::new, BULK_STORAGE_CONTAINER.get())
+                            .build(null));
+
     public static final DeferredBlock<FluidTankBlock> FLUID_TANK = BLOCKS.register(
             "fluid_tank",
             () -> new FluidTankBlock(BlockBehaviour.Properties.of()
@@ -126,6 +153,18 @@ public final class Registration {
             BLOCK_ENTITY_TYPES.register(
                     "fluid_tank", () -> BlockEntityType.Builder.of(FluidTankBlockEntity::new, FLUID_TANK.get())
                             .build(null));
+
+    // -------------------------------------------------------------------------
+    // Menu types
+    // -------------------------------------------------------------------------
+
+    public static final DeferredHolder<MenuType<?>, MenuType<FilingCabinetMenu>> FILING_CABINET_MENU =
+            MENU_TYPES.register("filing_cabinet",
+                    () -> IMenuTypeExtension.create(FilingCabinetMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<PriorityMenu>> PRIORITY_MENU =
+            MENU_TYPES.register("priority",
+                    () -> IMenuTypeExtension.create(PriorityMenu::new));
 
     // -------------------------------------------------------------------------
     // Items — whiteout tape
@@ -226,6 +265,7 @@ public final class Registration {
                     .displayItems((params, output) -> {
                         output.accept(FILING_CABINET_ITEM.get());
                         output.accept(JUNK_DRAWER_ITEM.get());
+                        output.accept(BULK_STORAGE_CONTAINER_ITEM.get());
                         output.accept(FLUID_TANK_ITEM.get());
                         for (FolderTier tier : FolderTier.values()) {
                             output.accept(MANILA_FOLDERS.get(tier).get());
@@ -245,6 +285,7 @@ public final class Registration {
         DATA_COMPONENTS.register(modEventBus);
         RECIPE_SERIALIZERS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
+        MENU_TYPES.register(modEventBus);
         modEventBus.addListener(Registration::registerCapabilities);
     }
 
@@ -255,6 +296,10 @@ public final class Registration {
                 (be, side) -> new FilingCabinetItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, JUNK_DRAWER_BE_TYPE.get(), (be, side) -> new JunkDrawerItemHandler(be));
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                BULK_STORAGE_CONTAINER_BE_TYPE.get(),
+                (be, side) -> new BulkStorageContainerItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK, FLUID_TANK_BE_TYPE.get(), (be, side) -> new FluidTankFluidHandler(be));
     }

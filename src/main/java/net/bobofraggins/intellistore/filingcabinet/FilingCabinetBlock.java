@@ -162,7 +162,7 @@ public class FilingCabinetBlock extends BaseEntityBlock {
             return InteractionResult.SUCCESS;
         }
 
-        be.setOpen(!be.isOpen());
+        player.openMenu(be, buf -> buf.writeBlockPos(pos));
         return InteractionResult.SUCCESS;
     }
 

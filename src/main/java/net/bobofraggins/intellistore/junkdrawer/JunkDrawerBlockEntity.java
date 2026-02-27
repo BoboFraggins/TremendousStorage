@@ -2,15 +2,23 @@ package net.bobofraggins.intellistore.junkdrawer;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.bobofraggins.intellistore.priority.Priority;
 import net.bobofraggins.intellistore.register.Registration;
+import net.bobofraggins.intellistore.ui.PriorityMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,11 +38,12 @@ import net.minecraft.world.level.block.state.BlockState;
  *
  * <p>No player-facing UI — all interaction is via automation.
  */
-public class JunkDrawerBlockEntity extends BlockEntity {
+public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider {
 
     public static final int CAPACITY = 32_768;
 
     private final List<ItemStack> items = new ArrayList<>();
+    private Priority priority = Priority.NORMAL;
 
     public JunkDrawerBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.JUNK_DRAWER_BE_TYPE.get(), pos, state);
@@ -65,7 +74,6 @@ public class JunkDrawerBlockEntity extends BlockEntity {
         return items.size();
     }
 
-    @Override
     public boolean isEmpty() {
         return items.isEmpty();
     }
@@ -105,6 +113,47 @@ public class JunkDrawerBlockEntity extends BlockEntity {
     }
 
     // -------------------------------------------------------------------------
+    // Priority
+    // -------------------------------------------------------------------------
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority p) {
+        this.priority = p;
+        setChanged();
+    }
+
+    // -------------------------------------------------------------------------
+    // MenuProvider
+    // -------------------------------------------------------------------------
+
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable("block.intellistore.junk_drawer");
+    }
+
+    @Override
+    public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
+        ContainerData data = new ContainerData() {
+            @Override
+            public int get(int index) {
+                return index == 0 ? priority.ordinal() : 0;
+            }
+
+            @Override
+            public void set(int index, int value) {}
+
+            @Override
+            public int getCount() {
+                return 1;
+            }
+        };
+        return new PriorityMenu(id, inv, worldPosition, data);
+    }
+
+    // -------------------------------------------------------------------------
     // setChanged
     // -------------------------------------------------------------------------
 
@@ -131,6 +180,7 @@ public class JunkDrawerBlockEntity extends BlockEntity {
             list.add(stack.save(registries));
         }
         tag.put(TAG_ITEMS, list);
+        tag.putInt("Priority", priority.ordinal());
     }
 
     @Override
@@ -141,6 +191,7 @@ public class JunkDrawerBlockEntity extends BlockEntity {
         for (int i = 0; i < list.size(); i++) {
             ItemStack.parse(registries, list.getCompound(i)).ifPresent(items::add);
         }
+        priority = Priority.fromOrdinal(tag.getInt("Priority"));
     }
 
     // -------------------------------------------------------------------------

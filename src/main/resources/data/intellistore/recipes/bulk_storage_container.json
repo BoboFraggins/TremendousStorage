@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IBI",
+    "BCB",
+    "IBI"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_bars" },
+    "B": { "item": "minecraft:iron_block" },
+    "C": { "item": "minecraft:chest" }
+  },
+  "result": {
+    "id": "intellistore:bulk_storage_container",
+    "count": 1
+  }
+}

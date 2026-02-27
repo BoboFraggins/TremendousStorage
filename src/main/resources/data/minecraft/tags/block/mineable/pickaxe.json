@@ -3,6 +3,7 @@
   "values": [
     "intellistore:filing_cabinet",
     "intellistore:junk_drawer",
+    "intellistore:bulk_storage_container",
     "intellistore:fluid_tank"
   ]
 }

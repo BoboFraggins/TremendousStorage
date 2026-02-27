@@ -1,22 +1,30 @@
 package net.bobofraggins.intellistore.filingcabinet;
 
+import net.bobofraggins.intellistore.priority.Priority;
 import net.bobofraggins.intellistore.register.Registration;
+import net.bobofraggins.intellistore.ui.FilingCabinetMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /** Stores up to {@value #SLOT_COUNT} Manila Folder stacks and tracks the open/close state. */
-public class FilingCabinetBlockEntity extends BlockEntity implements net.minecraft.world.Container {
+public class FilingCabinetBlockEntity extends BlockEntity
+        implements net.minecraft.world.Container, MenuProvider {
 
     public static final int SLOT_COUNT = 8;
 
@@ -31,6 +39,7 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
 
     private final NonNullList<ItemStack> folders = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private boolean isOpen = false;
+    private Priority priority = Priority.HIGH;
 
     // Client-only animation state (not saved to NBT).
     public float drawerOffset = OFFSET_CLOSED;
@@ -139,6 +148,15 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
         setChanged();
     }
 
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority p) {
+        this.priority = p;
+        setChanged();
+    }
+
     /** Returns the index of the first empty slot, or -1 if all slots are full. */
     public int firstEmptySlot() {
         for (int i = 0; i < SLOT_COUNT; i++) {
@@ -165,6 +183,40 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
     }
 
     // -------------------------------------------------------------------------
+    // MenuProvider
+    // -------------------------------------------------------------------------
+
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable("block.intellistore.filing_cabinet");
+    }
+
+    @Override
+    public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
+        ContainerData data = new ContainerData() {
+            @Override
+            public int get(int index) {
+                return switch (index) {
+                    case 0 -> priority.ordinal();
+                    case 1 -> isOpen ? 1 : 0;
+                    default -> 0;
+                };
+            }
+
+            @Override
+            public void set(int index, int value) {
+                // Server-side data; changes come via packets
+            }
+
+            @Override
+            public int getCount() {
+                return 2;
+            }
+        };
+        return new FilingCabinetMenu(id, inv, worldPosition, data);
+    }
+
+    // -------------------------------------------------------------------------
     // NBT serialization
     // -------------------------------------------------------------------------
 
@@ -173,6 +225,7 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
         super.saveAdditional(tag, registries);
         ContainerHelper.saveAllItems(tag, folders, registries);
         tag.putBoolean("IsOpen", isOpen);
+        tag.putInt("Priority", priority.ordinal());
     }
 
     @Override
@@ -180,6 +233,7 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
         super.loadAdditional(tag, registries);
         ContainerHelper.loadAllItems(tag, folders, registries);
         isOpen = tag.getBoolean("IsOpen");
+        priority = Priority.fromOrdinal(tag.getInt("Priority"));
         // Snap animation to final position when loading (no lerp from wrong state).
         drawerOffset = prevDrawerOffset = isOpen ? OFFSET_OPEN : OFFSET_CLOSED;
     }
