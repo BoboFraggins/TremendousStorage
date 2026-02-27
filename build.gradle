@@ -53,12 +53,16 @@ configurations {
 
 repositories {
     maven { url "https://api.modrinth.com/maven" }
+    maven {
+        name = "JEI Maven"
+        url = "https://maven.blamejared.com"
+    }
 }
 
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
     compileOnly "maven.modrinth:jade:15.9.2+neoforge"
-    compileOnly "maven.modrinth:jei:19.27.0.340"
+    compileOnly "mezz.jei:jei-1.21.1-neoforge-api:19.27.0.340"
 }
 
 tasks.withType(ProcessResources).configureEach {
