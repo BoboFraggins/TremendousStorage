@@ -2,12 +2,17 @@ package net.bobofraggins.intellistore.tube;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import javax.annotation.Nullable;
+import net.bobofraggins.intellistore.register.Registration;
 import net.bobofraggins.intellistore.ui.StorageInterfaceMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -20,7 +25,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -247,11 +254,27 @@ public class TubeBlock extends BaseEntityBlock {
     // -------------------------------------------------------------------------
 
     /**
-     * Right-click with empty hand:
-     * <ul>
-     *   <li>If the clicked face has a Storage Interface attachment → open its priority screen.
-     *   <li>Otherwise → install a new Storage Interface on that face.
-     * </ul>
+     * Right-click with a Storage Interface item: install attachment on the clicked face
+     * (if not already present) and consume one item from the stack.
+     */
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level,
+            BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (!(stack.getItem() instanceof StorageInterfaceItem)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
+        if (!(level.getBlockEntity(pos) instanceof TubeBlockEntity be)) return ItemInteractionResult.FAIL;
+
+        int faceIndex = hit.getDirection().ordinal();
+        if (be.hasAttachment(faceIndex)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+
+        be.setAttachment(faceIndex, true);
+        if (!player.isCreative()) stack.shrink(1);
+        return ItemInteractionResult.SUCCESS;
+    }
+
+    /**
+     * Right-click with empty hand: open the priority screen for an installed attachment.
+     * Does nothing on faces without an attachment (installation now requires the item).
      */
     @Override
     protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos,
@@ -259,21 +282,71 @@ public class TubeBlock extends BaseEntityBlock {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (!(level.getBlockEntity(pos) instanceof TubeBlockEntity be)) return InteractionResult.FAIL;
 
-        Direction face = hit.getDirection();
-        int faceIndex = face.ordinal();
+        int faceIndex = hit.getDirection().ordinal();
+        if (!be.hasAttachment(faceIndex)) return InteractionResult.PASS;
 
-        if (be.hasAttachment(faceIndex)) {
-            // Open the storage interface priority screen
-            player.openMenu(
-                    new StorageInterfaceMenu.Provider(be, pos, faceIndex),
-                    buf -> {
-                        buf.writeBlockPos(pos);
-                        buf.writeByte(faceIndex);
-                    });
-        } else {
-            // Install a new storage interface attachment
-            be.setAttachment(faceIndex, true);
-        }
+        player.openMenu(
+                new StorageInterfaceMenu.Provider(be, pos, faceIndex),
+                buf -> {
+                    buf.writeBlockPos(pos);
+                    buf.writeByte(faceIndex);
+                });
         return InteractionResult.SUCCESS;
+    }
+
+    /**
+     * Left-click (punch): if the hit point lands inside an attachment plate's AABB,
+     * remove that attachment and drop one Storage Interface item.
+     */
+    @Override
+    public void attack(BlockState state, Level level, BlockPos pos, Player player) {
+        if (level.isClientSide()) return;
+        if (!(level.getBlockEntity(pos) instanceof TubeBlockEntity be)) return;
+
+        Vec3 hit = player.pick(player.blockInteractionRange(), 1.0f, false).getLocation();
+        Vec3 local = hit.subtract(pos.getX(), pos.getY(), pos.getZ());
+
+        for (int i = 0; i < 6; i++) {
+            if (!be.hasAttachment(i)) continue;
+            if (attachmentAABB(i).contains(local)) {
+                be.setAttachment(i, false);
+                Block.popResource(level, pos, new ItemStack(Registration.STORAGE_INTERFACE.get()));
+                return;
+            }
+        }
+    }
+
+    /**
+     * When the tube is broken, drop one Storage Interface item per installed attachment
+     * in addition to the tube block itself (handled by the loot table).
+     */
+    @Override
+    public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state,
+            @Nullable BlockEntity be, ItemStack tool) {
+        super.playerDestroy(level, player, pos, state, be, tool);
+        if (be instanceof TubeBlockEntity tube) {
+            for (int i = 0; i < 6; i++) {
+                if (tube.hasAttachment(i)) {
+                    Block.popResource(level, pos,
+                            new ItemStack(Registration.STORAGE_INTERFACE.get()));
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns the AABB (block-local [0..1] coords) for the attachment plate on face {@code i}.
+     * Matches the geometry drawn by {@link TubeRenderer}: P_MIN=4/16, P_MAX=12/16, P_THICK=2/16.
+     */
+    private static AABB attachmentAABB(int i) {
+        final double L = 4.0 / 16, H = 12.0 / 16, T = 2.0 / 16;
+        return switch (i) {
+            case 0 -> new AABB(L, 0,   L, H, T,   H); // DOWN
+            case 1 -> new AABB(L, 1-T, L, H, 1,   H); // UP
+            case 2 -> new AABB(L, L,   0, H, H,   T); // NORTH
+            case 3 -> new AABB(L, L, 1-T, H, H,   1); // SOUTH
+            case 4 -> new AABB(0, L,   L, T, H,   H); // WEST
+            default-> new AABB(1-T, L, L, 1, H,   H); // EAST
+        };
     }
 }

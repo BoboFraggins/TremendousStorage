@@ -45,6 +45,7 @@
   "screen.intellistore.filing_cabinet.open_label": "Drawer:",
   "screen.intellistore.filing_cabinet.toggle_open": "Open",
   "screen.intellistore.filing_cabinet.toggle_closed": "Closed",
+  "item.intellistore.storage_interface": "Storage Interface",
   "screen.intellistore.storage_interface": "Storage Interface",
 
   "block.intellistore.network_interface": "Network Interface",

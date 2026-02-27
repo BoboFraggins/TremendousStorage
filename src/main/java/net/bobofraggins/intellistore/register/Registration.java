@@ -31,6 +31,7 @@ import net.bobofraggins.intellistore.manillafolder.ManillaFolderItem;
 import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.storagetransceiver.StorageAccessTerminalBlock;
+import net.bobofraggins.intellistore.tube.StorageInterfaceItem;
 import net.bobofraggins.intellistore.tube.TubeBlock;
 import net.bobofraggins.intellistore.tube.TubeBlockEntity;
 import net.bobofraggins.intellistore.ui.FilingCabinetMenu;
@@ -336,6 +337,13 @@ public final class Registration {
                     () -> IMenuTypeExtension.create(StorageAccessTerminalMenu::new));
 
     // -------------------------------------------------------------------------
+    // Items — storage interface
+    // -------------------------------------------------------------------------
+
+    public static final DeferredHolder<Item, StorageInterfaceItem> STORAGE_INTERFACE =
+            ITEMS.register("storage_interface", StorageInterfaceItem::new);
+
+    // -------------------------------------------------------------------------
     // Items — whiteout tape
     // -------------------------------------------------------------------------
 
@@ -438,6 +446,7 @@ public final class Registration {
                         output.accept(FLUID_TANK_ITEM.get());
                         output.accept(NETWORK_INTERFACE_ITEM.get());
                         output.accept(STORAGE_ACCESS_TERMINAL_ITEM.get());
+                        output.accept(STORAGE_INTERFACE.get());
                         output.accept(ZOMBIE_BRAIN.get());
                         output.accept(BRAIN.get());
                         output.accept(HEALING_SALVE_BUCKET.get());
