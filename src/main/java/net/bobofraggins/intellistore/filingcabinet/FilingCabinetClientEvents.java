@@ -4,6 +4,7 @@ import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.register.Registration;
 import net.bobofraggins.intellistore.ui.FilingCabinetScreen;
 import net.bobofraggins.intellistore.ui.PriorityScreen;
+import net.bobofraggins.intellistore.ui.TankSettingsScreen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -30,5 +31,6 @@ public final class FilingCabinetClientEvents {
     public static void onRegisterScreens(RegisterMenuScreensEvent event) {
         event.register(Registration.FILING_CABINET_MENU.get(), FilingCabinetScreen::new);
         event.register(Registration.PRIORITY_MENU.get(), PriorityScreen::new);
+        event.register(Registration.TANK_SETTINGS_MENU.get(), TankSettingsScreen::new);
     }
 }

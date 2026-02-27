@@ -44,3 +44,17 @@ type="optional"
 versionRange="[9.0,)"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="mekanism"
+type="optional"
+versionRange="[10.7,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="ars_nouveau"
+type="optional"
+versionRange="[5,)"
+ordering="NONE"
+side="BOTH"

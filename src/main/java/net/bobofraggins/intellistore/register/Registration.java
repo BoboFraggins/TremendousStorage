@@ -3,6 +3,7 @@ package net.bobofraggins.intellistore.register;
 import java.util.EnumMap;
 import java.util.Map;
 import net.bobofraggins.intellistore.IntelliStore;
+import net.bobofraggins.intellistore.arsnouveau.SourceTankRegistration;
 import net.bobofraggins.intellistore.bulkstorage.BulkStorageContainerBlock;
 import net.bobofraggins.intellistore.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.bulkstorage.BulkStorageContainerItemHandler;
@@ -28,6 +29,7 @@ import net.bobofraggins.intellistore.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.intellistore.manillafolder.FolderStorageRecipe;
 import net.bobofraggins.intellistore.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.manillafolder.ManillaFolderItem;
+import net.bobofraggins.intellistore.mekanism.GasTankRegistration;
 import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.storagetransceiver.StorageAccessTerminalBlock;
@@ -39,6 +41,7 @@ import net.bobofraggins.intellistore.ui.NetworkInterfaceMenu;
 import net.bobofraggins.intellistore.ui.PriorityMenu;
 import net.bobofraggins.intellistore.ui.StorageAccessTerminalMenu;
 import net.bobofraggins.intellistore.ui.StorageInterfaceMenu;
+import net.bobofraggins.intellistore.ui.TankSettingsMenu;
 import net.bobofraggins.intellistore.whiteout.FolderTapeRecipe;
 import net.bobofraggins.intellistore.whiteout.WhiteoutTapeItem;
 import net.bobofraggins.intellistore.wirelesssat.WirelessHubBlock;
@@ -62,6 +65,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -373,6 +377,9 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<WirelessHubMenu>> WIRELESS_HUB_MENU =
             MENU_TYPES.register("wireless_hub", () -> IMenuTypeExtension.create(WirelessHubMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<TankSettingsMenu>> TANK_SETTINGS_MENU =
+            MENU_TYPES.register("tank_settings", () -> IMenuTypeExtension.create(TankSettingsMenu::new));
+
     // -------------------------------------------------------------------------
     // Items — storage interface
     // -------------------------------------------------------------------------
@@ -481,6 +488,12 @@ public final class Registration {
                         output.accept(JUNK_DRAWER_ITEM.get());
                         output.accept(BULK_STORAGE_CONTAINER_ITEM.get());
                         output.accept(FLUID_TANK_ITEM.get());
+                        if (ModList.get().isLoaded("mekanism")) {
+                            output.accept(GasTankRegistration.GAS_TANK_ITEM.get());
+                        }
+                        if (ModList.get().isLoaded("ars_nouveau")) {
+                            output.accept(SourceTankRegistration.SOURCE_TANK_ITEM.get());
+                        }
                         output.accept(NETWORK_INTERFACE_ITEM.get());
                         output.accept(STORAGE_ACCESS_TERMINAL_ITEM.get());
                         output.accept(WIRELESS_HUB_ITEM.get());
@@ -515,6 +528,12 @@ public final class Registration {
         FLUID_TYPE_REGISTER.register(modEventBus);
         modEventBus.addListener(Registration::registerCapabilities);
         modEventBus.addListener(Registration::onCommonSetup);
+        if (ModList.get().isLoaded("mekanism")) {
+            GasTankRegistration.register(modEventBus);
+        }
+        if (ModList.get().isLoaded("ars_nouveau")) {
+            SourceTankRegistration.register(modEventBus);
+        }
     }
 
     private static void onCommonSetup(FMLCommonSetupEvent event) {

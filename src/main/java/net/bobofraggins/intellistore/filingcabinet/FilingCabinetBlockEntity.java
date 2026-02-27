@@ -39,6 +39,7 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
     private final NonNullList<ItemStack> folders = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private boolean isOpen = false;
     private Priority priority = Priority.HIGH;
+    private boolean voidExcess = false;
 
     // Client-only animation state (not saved to NBT).
     public float drawerOffset = OFFSET_CLOSED;
@@ -156,6 +157,15 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
         setChanged();
     }
 
+    public boolean isVoidExcess() {
+        return voidExcess;
+    }
+
+    public void setVoidExcess(boolean voidExcess) {
+        this.voidExcess = voidExcess;
+        setChanged();
+    }
+
     /** Returns the index of the first empty slot, or -1 if all slots are full. */
     public int firstEmptySlot() {
         for (int i = 0; i < SLOT_COUNT; i++) {
@@ -198,6 +208,7 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
                 return switch (index) {
                     case 0 -> priority.ordinal();
                     case 1 -> isOpen ? 1 : 0;
+                    case 2 -> voidExcess ? 1 : 0;
                     default -> 0;
                 };
             }
@@ -209,7 +220,7 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
 
             @Override
             public int getCount() {
-                return 2;
+                return 3;
             }
         };
         return new FilingCabinetMenu(id, inv, worldPosition, data);
@@ -225,6 +236,7 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
         ContainerHelper.saveAllItems(tag, folders, registries);
         tag.putBoolean("IsOpen", isOpen);
         tag.putInt("Priority", priority.ordinal());
+        tag.putBoolean("VoidExcess", voidExcess);
     }
 
     @Override
@@ -233,6 +245,7 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
         ContainerHelper.loadAllItems(tag, folders, registries);
         isOpen = tag.getBoolean("IsOpen");
         priority = Priority.fromOrdinal(tag.getInt("Priority"));
+        voidExcess = tag.getBoolean("VoidExcess");
         // Snap animation to final position when loading (no lerp from wrong state).
         drawerOffset = prevDrawerOffset = isOpen ? OFFSET_OPEN : OFFSET_CLOSED;
     }

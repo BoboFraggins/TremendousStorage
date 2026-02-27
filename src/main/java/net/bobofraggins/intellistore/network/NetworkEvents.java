@@ -16,6 +16,7 @@ public final class NetworkEvents {
     static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar("1");
         registrar.playToServer(SetPriorityPacket.TYPE, SetPriorityPacket.STREAM_CODEC, SetPriorityPacket::handle);
+        registrar.playToServer(SetVoidExcessPacket.TYPE, SetVoidExcessPacket.STREAM_CODEC, SetVoidExcessPacket::handle);
         registrar.playToServer(
                 ToggleFilingCabinetPacket.TYPE,
                 ToggleFilingCabinetPacket.STREAM_CODEC,

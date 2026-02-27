@@ -5,6 +5,8 @@
   "block.intellistore.junk_drawer": "Junk Drawer",
   "block.intellistore.bulk_storage_container": "Bulk Storage Container",
   "block.intellistore.fluid_tank": "Fluid Tank",
+  "block.intellistore.gas_tank": "Gas Tank",
+  "block.intellistore.source_tank": "Source Tank",
 
   "item.intellistore.paper_manila_folder": "Manila Folder",
   "item.intellistore.copper_manila_folder": "Copper Folder",
@@ -47,6 +49,10 @@
   "screen.intellistore.filing_cabinet.toggle_closed": "Closed",
   "item.intellistore.storage_interface": "Storage Interface",
   "screen.intellistore.storage_interface": "Storage Interface",
+
+  "screen.intellistore.void_excess_label": "Void Excess:",
+  "screen.intellistore.void_excess_on": "Void Excess: ON",
+  "screen.intellistore.void_excess_off": "Void Excess: OFF",
 
   "block.intellistore.network_interface": "Network Interface",
   "block.intellistore.storage_access_terminal": "Storage Access Terminal",

@@ -1,6 +1,5 @@
-package net.bobofraggins.intellistore.fluidtank;
+package net.bobofraggins.intellistore.arsnouveau;
 
-import net.bobofraggins.intellistore.register.Registration;
 import net.bobofraggins.intellistore.ui.TankSettingsMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -16,47 +15,31 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
- * Stores a single fluid type in quantities up to {@value #CAPACITY} mB (128 buckets).
+ * Stores Ars Nouveau source in quantities up to {@value #CAPACITY}.
  *
- * <p>The tank is unlocked (storedFluid is EMPTY) when fresh and locks to the first fluid
- * inserted. It stays locked at amount 0 after drain — use Whiteout Tape in the crafting grid
- * to unlock it again.
- *
- * <p>All interaction is via the {@link FluidTankFluidHandler} IFluidHandler capability.
- * The stored fluid type ({@code storedFluid} with amount=1) is held as a type key; the
- * actual quantity is tracked separately as a {@code long} to support large capacities.
+ * <p>Source is a plain {@code int} — there is no "type"; the tank is always unlocked.
+ * All automation access is via the {@link SourceTankSourceCapHandler} {@code ISourceCap}
+ * capability, which Ars Nouveau's source network queries directly.
  */
-public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
+public class SourceTankBlockEntity extends BlockEntity implements MenuProvider {
 
-    public static final long CAPACITY = 128_000L; // 128 buckets
+    /** 100,000 source — 10× a vanilla Source Jar (10,000). */
+    public static final int CAPACITY = 100_000;
 
-    /** Type key — always has amount=1. EMPTY means unlocked. */
-    private FluidStack storedFluid = FluidStack.EMPTY;
-
-    private long amount = 0L;
+    private int amount = 0;
     private boolean voidExcess = false;
 
-    public FluidTankBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.FLUID_TANK_BE_TYPE.get(), pos, state);
+    public SourceTankBlockEntity(BlockPos pos, BlockState state) {
+        super(SourceTankRegistration.SOURCE_TANK_BE_TYPE.get(), pos, state);
     }
 
     // -------------------------------------------------------------------------
     // Accessors
     // -------------------------------------------------------------------------
 
-    public boolean isLocked() {
-        return !storedFluid.isEmpty();
-    }
-
-    /** Returns the stored fluid type (amount=1), or EMPTY if unlocked. */
-    public FluidStack getStoredFluid() {
-        return storedFluid;
-    }
-
-    public long getAmount() {
+    public int getAmount() {
         return amount;
     }
 
@@ -70,63 +53,43 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     // -------------------------------------------------------------------------
-    // Mutation
+    // Mutation — used by SourceTankSourceCapHandler
     // -------------------------------------------------------------------------
 
     /**
-     * Attempts to insert up to {@code requested} mB of the given fluid.
+     * Receives up to {@code requested} source into the tank.
      *
-     * @param fluid     the fluid type + components to insert (amount ignored for type check)
-     * @param requested how many mB to insert
+     * @param requested amount to receive
      * @param simulate  if true, don't modify state
-     * @return how many mB were actually inserted
+     * @return how much was actually received
      */
-    public long insert(FluidStack fluid, long requested, boolean simulate) {
-        if (fluid.isEmpty() || requested <= 0) return 0;
-
-        if (!storedFluid.isEmpty() && !FluidStack.isSameFluidSameComponents(storedFluid, fluid)) {
-            return 0; // locked to a different fluid
-        }
-
-        long space = CAPACITY - amount;
-        long toInsert = Math.min(requested, space);
-        if (toInsert <= 0) return 0;
-
+    public int receive(int requested, boolean simulate) {
+        if (requested <= 0) return 0;
+        int space = CAPACITY - amount;
+        int toReceive = Math.min(requested, space);
+        if (toReceive <= 0) return 0;
         if (!simulate) {
-            if (storedFluid.isEmpty()) {
-                storedFluid = fluid.copyWithAmount(1);
-            }
-            amount += toInsert;
+            amount += toReceive;
             setChanged();
         }
-        return toInsert;
+        return toReceive;
     }
 
     /**
-     * Extracts up to {@code requested} mB.
+     * Extracts up to {@code requested} source from the tank.
      *
-     * @param simulate if true, don't modify state
-     * @return the extracted FluidStack (may be smaller than requested), or EMPTY
+     * @param requested amount to extract
+     * @param simulate  if true, don't modify state
+     * @return how much was actually extracted
      */
-    public FluidStack extract(long requested, boolean simulate) {
-        if (storedFluid.isEmpty() || amount == 0 || requested <= 0) return FluidStack.EMPTY;
-
-        long toExtract = Math.min(requested, Math.min(Integer.MAX_VALUE, amount));
-        if (toExtract <= 0) return FluidStack.EMPTY;
-
-        FluidStack result = storedFluid.copyWithAmount((int) toExtract);
+    public int extract(int requested, boolean simulate) {
+        if (requested <= 0 || amount == 0) return 0;
+        int toExtract = Math.min(requested, amount);
         if (!simulate) {
             amount -= toExtract;
             setChanged();
         }
-        return result;
-    }
-
-    /** Clears the stored fluid type. Only valid when amount == 0. */
-    public void clearFluid() {
-        storedFluid = FluidStack.EMPTY;
-        amount = 0;
-        setChanged();
+        return toExtract;
     }
 
     // -------------------------------------------------------------------------
@@ -148,7 +111,7 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.intellistore.fluid_tank");
+        return Component.translatable("block.intellistore.source_tank");
     }
 
     @Override
@@ -174,33 +137,21 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
     // NBT
     // -------------------------------------------------------------------------
 
-    private static final String TAG_FLUID = "StoredFluid";
     private static final String TAG_AMOUNT = "Amount";
     private static final String TAG_VOID_EXCESS = "VoidExcess";
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        if (!storedFluid.isEmpty()) {
-            tag.put(TAG_FLUID, storedFluid.save(registries));
-        }
-        tag.putLong(TAG_AMOUNT, amount);
+        tag.putInt(TAG_AMOUNT, amount);
         tag.putBoolean(TAG_VOID_EXCESS, voidExcess);
     }
 
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+        amount = tag.getInt(TAG_AMOUNT);
         voidExcess = tag.getBoolean(TAG_VOID_EXCESS);
-        if (tag.contains(TAG_FLUID)) {
-            storedFluid = FluidStack.parseOptional(registries, tag.getCompound(TAG_FLUID));
-            if (!storedFluid.isEmpty()) {
-                storedFluid = storedFluid.copyWithAmount(1);
-            }
-        } else {
-            storedFluid = FluidStack.EMPTY;
-        }
-        amount = tag.getLong(TAG_AMOUNT);
     }
 
     // -------------------------------------------------------------------------

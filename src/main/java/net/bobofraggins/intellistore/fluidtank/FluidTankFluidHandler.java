@@ -57,6 +57,13 @@ public class FluidTankFluidHandler implements IFluidHandler {
     @Override
     public int fill(FluidStack resource, FluidAction action) {
         if (resource.isEmpty()) return 0;
+        if (be.isVoidExcess()) {
+            // Accept anything the tank can match; excess is silently voided
+            FluidStack stored = be.getStoredFluid();
+            if (!stored.isEmpty() && !FluidStack.isSameFluidSameComponents(stored, resource)) return 0;
+            be.insert(resource, resource.getAmount(), action.simulate());
+            return resource.getAmount();
+        }
         long inserted = be.insert(resource, resource.getAmount(), action.simulate());
         return (int) inserted;
     }

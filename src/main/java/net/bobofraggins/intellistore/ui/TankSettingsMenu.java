@@ -11,46 +11,37 @@ import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Menu for the Filing Cabinet priority/control screen.
+ * Minimal menu for the three tank settings screens (Fluid Tank, Gas Tank, Source Tank).
  *
- * <p>No item slots. Carries two server→client data values via {@link ContainerData}:
+ * <p>No item slots. Carries one server→client data value via {@link ContainerData}:
  * <ul>
- *   <li>slot 0: priority ordinal (0–4)
- *   <li>slot 1: isOpen (0 = closed, 1 = open)
+ *   <li>slot 0: voidExcess (0 = off, 1 = on)
  * </ul>
  */
-public class FilingCabinetMenu extends AbstractContainerMenu {
+public class TankSettingsMenu extends AbstractContainerMenu {
 
     private final BlockPos pos;
     private final ContainerData data;
 
-    /** Server-side constructor, called from the block entity's {@code createMenu}. */
-    public FilingCabinetMenu(int windowId, Inventory inv, BlockPos pos, ContainerData data) {
-        super(Registration.FILING_CABINET_MENU.get(), windowId);
+    /** Server-side constructor, called from the block's {@code useWithoutItem}. */
+    public TankSettingsMenu(int windowId, Inventory inv, BlockPos pos, ContainerData data) {
+        super(Registration.TANK_SETTINGS_MENU.get(), windowId);
         this.pos = pos;
         this.data = data;
         addDataSlots(data);
     }
 
     /** Client-side constructor, called via the {@link net.minecraft.world.inventory.MenuType} factory. */
-    public FilingCabinetMenu(int windowId, Inventory inv, FriendlyByteBuf buf) {
-        this(windowId, inv, buf.readBlockPos(), new SimpleContainerData(3));
+    public TankSettingsMenu(int windowId, Inventory inv, FriendlyByteBuf buf) {
+        this(windowId, inv, buf.readBlockPos(), new SimpleContainerData(1));
     }
 
     public BlockPos getPos() {
         return pos;
     }
 
-    public int getPriority() {
-        return data.get(0);
-    }
-
-    public boolean isOpen() {
-        return data.get(1) == 1;
-    }
-
     public boolean isVoidExcess() {
-        return data.get(2) == 1;
+        return data.get(0) == 1;
     }
 
     @Override

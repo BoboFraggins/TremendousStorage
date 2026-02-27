@@ -15,6 +15,7 @@ NeoForge 1.21.1 · Minecraft 1.21.1
 - Exposes an `IItemHandler` capability (8 slots, one per folder) for hopper/pipe automation
 - **Priority**: 5 levels (Lowest → Highest); default **High**; set via the right-click screen
 - Priority is saved to NBT and survives break/replace
+- **Void Excess**: toggle in the right-click screen; when ON, the cabinet always accepts item inserts even when full, silently discarding overflow; saved to NBT; default OFF
 - Recipe: iron bars ring around a chest (`III/ICI/III`)
 - Pickaxe-minable
 
@@ -44,13 +45,24 @@ NeoForge 1.21.1 · Minecraft 1.21.1
 
 ### Fluid Tank
 - Stores up to **1,024,000 mB** (1024 buckets) of a single fluid type
-- No player UI — automation only (pumps, pipes via `IFluidHandler`)
 - Locks to first fluid inserted; stays locked at 0 mB after drain
 - Use Whiteout Tape (crafting grid or right-click) to clear the lock when empty
 - Front face shows a **12×12 transparent window**; when filled, the fluid's texture is rendered inside it
 - Window faces the direction the player is looking when placed (`FACING` blockstate)
+- Right-click with empty hand → opens Tank Settings screen
+- **Void Excess**: toggle in the settings screen; when ON, the tank always accepts fluid inserts even when full, silently discarding overflow; saved to NBT; default OFF
+- Exposes `IFluidHandler` capability for pump/pipe automation
 - Drops itself with stored fluid data intact when broken
 - Recipe: glass on top, junk drawer in middle, bucket on bottom (vertical shaped)
+- Pickaxe-minable
+
+### Wireless Hub
+- A linking station that pairs an unlinked Wireless SAT item with a reachable Network Interface
+- Right-click → opens a 2-slot UI: left slot accepts an unlinked Wireless SAT; right slot is output-only
+- Performs a BFS scan through the connected tube network to find the nearest reachable Network Interface
+- If a valid NI is found, writes its position into the Wireless SAT item and moves it to the output slot automatically
+- Drops itself (with inventory contents) intact when broken
+- Recipe: Iron Ingot (top) / Paper Manila Folder (middle) / Ender Pearl (bottom) — vertical shaped
 - Pickaxe-minable
 
 ---
@@ -91,26 +103,21 @@ Single-item-type bulk storage carried as an item.
 - Creative players do not consume durability on right-click
 - Recipe: paper ring around a slime ball and white dye
 
----
+### Storage Interface
+- A consumable attachment item placed on tube faces to connect storage blocks to the tube network
+- Right-click an **empty tube face with a Storage Interface item in hand** → installs it on that face as an 8×8×2-pixel plate; consumes 1 item (not consumed in Creative)
+- Right-click an **installed plate with empty hand** → opens the Storage Interface priority screen
+- **Left-click (punch)** an installed plate → removes the plate and drops 1 Storage Interface item
+- **Breaking the tube** → drops 1 Storage Interface item per installed face (in addition to the tube item)
+- **Priority**: 5 levels (Lowest → Highest); default **Normal**; attachment priority overrides the connected storage block's own priority; saved to NBT per-face and survives break/replace
+- Recipe: 4× (cross of Iron Ingots with a Redstone Comparator in the center)
 
-## Optional Dependencies
-
-### Jade (WAILA) — `compileOnly`, optional at runtime
-Adds block tooltip overlays when looking at IntelliStore blocks:
-
-| Block | Tooltip |
-|-------|---------|
-| Filing Cabinet | Open / Closed state; item icon + "Xk of Yk ItemName" per occupied folder |
-| Junk Drawer | "Empty" or "X / Yk items" |
-| Bulk Storage Container | "Empty" or "Xk / Yk items" |
-| Fluid Tank | "Empty" or "Xk mB of Yk mB FluidName" |
-
-Counts are abbreviated: exact below 1000, `Xk` from 1,000, `XM` from 1,000,000.
-
-### JEI — `compileOnly`, optional at runtime
-All standard shaped/shapeless recipes (filing cabinet, folder tiers, junk drawer, whiteout tape,
-fluid tank, bulk storage container) appear in JEI automatically. The custom crafting-grid recipes (folder storage, extract,
-merge, tape) are intentionally not shown.
+### Wireless SAT
+- A portable Storage Access Terminal carried as an item (stack size 1)
+- Tooltip shows the linked Network Interface coordinates, or "Unlinked" if not yet configured
+- Right-click (while linked and in range) → opens the full SAT UI: scrollable network item list, 3×3 crafting grid, player inventory
+- Linked NI position stored as a data component — survives break/unload/reload
+- Recipe (shapeless): Ender Pearl + Storage Access Terminal item → 1× Wireless SAT (unlinked)
 
 ---
 
@@ -127,13 +134,6 @@ merge, tape) are intentionally not shown.
 - Recipe: iron bars – iron ingot – iron bars (horizontal row) → **8 white tubes**
 - Dye recipe: any dye + any tube (shapeless) → **8 colored tubes** of that color
 - Pickaxe-minable
-
-### Storage Interface (tube attachment)
-- Up to 6 attachments per tube (one per face), stored in the tube block entity
-- **Right-click an empty tube face** → installs a Storage Interface on that face (visible as an 8×8×2-pixel plate)
-- **Right-click an occupied face** → opens the Storage Interface priority screen
-- Priority: 5 levels (Lowest → Highest); default **Normal**; attachment priority overrides the connected storage block's own priority
-- Priority saved to NBT per-face and survives break/replace
 
 ### Network Interface
 - A two-block-tall block (lower + upper half) that acts as the coordinator for a storage network
@@ -185,3 +185,52 @@ merge, tape) are intentionally not shown.
 - Storage blocks connected via multiple paths are deduplicated (counted once per network)
 - Network view is built lazily on first capability access via BFS flood-fill and cached per tube; cache invalidates automatically when any neighbor changes
 - Cascade prevention: cache-clear propagation stops immediately if a tube's cache is already stale
+
+---
+
+## Optional Dependencies
+
+### Jade (WAILA) — compileOnly, optional at runtime
+Adds block tooltip overlays when looking at IntelliStore blocks:
+
+| Block | Tooltip |
+|-------|---------|
+| Filing Cabinet | Open / Closed state; item icon + "Xk of Yk ItemName" per occupied folder |
+| Junk Drawer | "Empty" or "X / Yk items" |
+| Bulk Storage Container | "Empty" or "Xk / Yk items" |
+| Fluid Tank | "Empty" or "Xk mB of Yk mB FluidName" |
+
+Counts are abbreviated: exact below 1000, `Xk` from 1,000, `XM` from 1,000,000.
+
+### JEI — compileOnly, optional at runtime
+- All standard shaped/shapeless recipes (filing cabinet, folder tiers, junk drawer, whiteout tape, fluid tank, bulk storage container, storage interface, wireless hub, wireless sat) appear in JEI automatically
+- The custom crafting-grid recipes (folder insert/extract/merge, tape unlock) are intentionally not shown
+- The Storage Access Terminal appears as a crafting station catalyst alongside crafting tables
+- JEI's "+" button on any crafting recipe auto-fills the SAT's 3×3 crafting grid
+
+### Mekanism — compileOnly, optional at runtime
+Adds the **Gas Tank** block:
+- Stores up to **128,000 mB** of a single Mekanism chemical type (gas, slurry, infuse type, pigment)
+- Locks to the first chemical inserted; stays locked at 0 mB after drain
+- Right-click with a Mekanism portable gas tank or any `IChemicalHandler` item → fills or drains the block
+- Right-click with empty hand → opens Tank Settings screen
+- **Void Excess**: when ON, silently discards chemical overflow; saved to NBT; default OFF
+- Exposes `IChemicalHandler` block capability: compatible with Mekanism pressure tubes and Pipez gas pipes
+- Drops itself with stored chemical data intact when broken
+- Recipe (requires Mekanism): Glass (top) / Junk Drawer (middle) / Mekanism Basic Gas Tank (bottom) — vertical shaped
+- Pickaxe-minable
+
+### Ars Nouveau — compileOnly, optional at runtime
+Adds the **Source Tank** block:
+- Stores up to **100,000 source** — 10× the capacity of a vanilla Ars Nouveau Source Jar (10,000)
+- Source is a plain integer — no type locking; the tank is always open to any source
+- Right-click with empty hand → opens Tank Settings screen
+- **Void Excess**: when ON, silently discards source overflow; saved to NBT; default OFF
+- Exposes `ISourceCap` block capability: compatible with Ars Nouveau source relays, arcane pedestals, obelisks, and any other source-network block
+- Drops itself with stored amount intact when broken
+- Recipe (requires Ars Nouveau): Glass (top) / Junk Drawer (middle) / Ars Nouveau Source Jar (bottom) — vertical shaped
+- Pickaxe-minable
+
+### Curios — compileOnly, optional at runtime
+- The Wireless SAT item is recognised in Curios accessory slots
+- The SAT screen remains open while the Wireless SAT is equipped in any Curios slot (in addition to main inventory and off-hand)

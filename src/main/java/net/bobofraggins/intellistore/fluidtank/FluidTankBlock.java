@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -137,5 +138,15 @@ public class FluidTankBlock extends BaseEntityBlock {
 
         boolean success = FluidUtil.interactWithFluidHandler(player, hand, handler);
         return success ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+    /** Right-click with empty hand → open tank settings screen. */
+    @Override
+    protected InteractionResult useWithoutItem(
+            BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
+        if (!(level.getBlockEntity(pos) instanceof FluidTankBlockEntity be)) return InteractionResult.FAIL;
+        player.openMenu(be, buf -> buf.writeBlockPos(pos));
+        return InteractionResult.SUCCESS;
     }
 }

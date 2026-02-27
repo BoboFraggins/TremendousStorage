@@ -1,10 +1,11 @@
-package net.bobofraggins.intellistore.fluidtank;
+package net.bobofraggins.intellistore.mekanism;
 
-import net.bobofraggins.intellistore.register.Registration;
+import mekanism.api.chemical.ChemicalStack;
 import net.bobofraggins.intellistore.ui.TankSettingsMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -16,31 +17,28 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
- * Stores a single fluid type in quantities up to {@value #CAPACITY} mB (128 buckets).
+ * Stores a single Mekanism chemical type in quantities up to {@value #CAPACITY} mB.
  *
- * <p>The tank is unlocked (storedFluid is EMPTY) when fresh and locks to the first fluid
- * inserted. It stays locked at amount 0 after drain — use Whiteout Tape in the crafting grid
- * to unlock it again.
+ * <p>The tank is unlocked ({@code storedChemical} is EMPTY) when fresh and locks to the first
+ * chemical inserted. It stays locked at amount 0 after a full drain.
  *
- * <p>All interaction is via the {@link FluidTankFluidHandler} IFluidHandler capability.
- * The stored fluid type ({@code storedFluid} with amount=1) is held as a type key; the
- * actual quantity is tracked separately as a {@code long} to support large capacities.
+ * <p>All interaction is via the {@link GasTankChemicalHandler} IChemicalHandler capability,
+ * exposed to Mekanism pressure tubes and Pipez gas pipes.
  */
-public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
+public class GasTankBlockEntity extends BlockEntity implements MenuProvider {
 
-    public static final long CAPACITY = 128_000L; // 128 buckets
+    public static final long CAPACITY = 128_000L;
 
     /** Type key — always has amount=1. EMPTY means unlocked. */
-    private FluidStack storedFluid = FluidStack.EMPTY;
+    private ChemicalStack storedChemical = ChemicalStack.EMPTY;
 
     private long amount = 0L;
     private boolean voidExcess = false;
 
-    public FluidTankBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.FLUID_TANK_BE_TYPE.get(), pos, state);
+    public GasTankBlockEntity(BlockPos pos, BlockState state) {
+        super(GasTankRegistration.GAS_TANK_BE_TYPE.get(), pos, state);
     }
 
     // -------------------------------------------------------------------------
@@ -48,12 +46,12 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
     // -------------------------------------------------------------------------
 
     public boolean isLocked() {
-        return !storedFluid.isEmpty();
+        return !storedChemical.isEmpty();
     }
 
-    /** Returns the stored fluid type (amount=1), or EMPTY if unlocked. */
-    public FluidStack getStoredFluid() {
-        return storedFluid;
+    /** Returns the stored chemical type (amount=1), or EMPTY if unlocked. */
+    public ChemicalStack getStoredChemical() {
+        return storedChemical;
     }
 
     public long getAmount() {
@@ -74,18 +72,18 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
     // -------------------------------------------------------------------------
 
     /**
-     * Attempts to insert up to {@code requested} mB of the given fluid.
+     * Attempts to insert up to {@code requested} mB of the given chemical.
      *
-     * @param fluid     the fluid type + components to insert (amount ignored for type check)
+     * @param chemical  the chemical type to insert (amount ignored for type check)
      * @param requested how many mB to insert
      * @param simulate  if true, don't modify state
      * @return how many mB were actually inserted
      */
-    public long insert(FluidStack fluid, long requested, boolean simulate) {
-        if (fluid.isEmpty() || requested <= 0) return 0;
+    public long insert(ChemicalStack chemical, long requested, boolean simulate) {
+        if (chemical.isEmpty() || requested <= 0) return 0;
 
-        if (!storedFluid.isEmpty() && !FluidStack.isSameFluidSameComponents(storedFluid, fluid)) {
-            return 0; // locked to a different fluid
+        if (!storedChemical.isEmpty() && !storedChemical.getChemical().equals(chemical.getChemical())) {
+            return 0; // locked to a different chemical
         }
 
         long space = CAPACITY - amount;
@@ -93,8 +91,8 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
         if (toInsert <= 0) return 0;
 
         if (!simulate) {
-            if (storedFluid.isEmpty()) {
-                storedFluid = fluid.copyWithAmount(1);
+            if (storedChemical.isEmpty()) {
+                storedChemical = chemical.copyWithAmount(1);
             }
             amount += toInsert;
             setChanged();
@@ -106,27 +104,20 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
      * Extracts up to {@code requested} mB.
      *
      * @param simulate if true, don't modify state
-     * @return the extracted FluidStack (may be smaller than requested), or EMPTY
+     * @return the extracted ChemicalStack (may be smaller than requested), or EMPTY
      */
-    public FluidStack extract(long requested, boolean simulate) {
-        if (storedFluid.isEmpty() || amount == 0 || requested <= 0) return FluidStack.EMPTY;
+    public ChemicalStack extract(long requested, boolean simulate) {
+        if (storedChemical.isEmpty() || amount == 0 || requested <= 0) return ChemicalStack.EMPTY;
 
-        long toExtract = Math.min(requested, Math.min(Integer.MAX_VALUE, amount));
-        if (toExtract <= 0) return FluidStack.EMPTY;
+        long toExtract = Math.min(requested, amount);
+        if (toExtract <= 0) return ChemicalStack.EMPTY;
 
-        FluidStack result = storedFluid.copyWithAmount((int) toExtract);
+        ChemicalStack result = storedChemical.copyWithAmount(toExtract);
         if (!simulate) {
             amount -= toExtract;
             setChanged();
         }
         return result;
-    }
-
-    /** Clears the stored fluid type. Only valid when amount == 0. */
-    public void clearFluid() {
-        storedFluid = FluidStack.EMPTY;
-        amount = 0;
-        setChanged();
     }
 
     // -------------------------------------------------------------------------
@@ -148,7 +139,7 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.intellistore.fluid_tank");
+        return Component.translatable("block.intellistore.gas_tank");
     }
 
     @Override
@@ -174,15 +165,15 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
     // NBT
     // -------------------------------------------------------------------------
 
-    private static final String TAG_FLUID = "StoredFluid";
+    private static final String TAG_CHEMICAL = "StoredChemical";
     private static final String TAG_AMOUNT = "Amount";
     private static final String TAG_VOID_EXCESS = "VoidExcess";
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
-        if (!storedFluid.isEmpty()) {
-            tag.put(TAG_FLUID, storedFluid.save(registries));
+        if (!storedChemical.isEmpty()) {
+            tag.put(TAG_CHEMICAL, storedChemical.saveOptional(registries));
         }
         tag.putLong(TAG_AMOUNT, amount);
         tag.putBoolean(TAG_VOID_EXCESS, voidExcess);
@@ -192,13 +183,18 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         voidExcess = tag.getBoolean(TAG_VOID_EXCESS);
-        if (tag.contains(TAG_FLUID)) {
-            storedFluid = FluidStack.parseOptional(registries, tag.getCompound(TAG_FLUID));
-            if (!storedFluid.isEmpty()) {
-                storedFluid = storedFluid.copyWithAmount(1);
+        if (tag.contains(TAG_CHEMICAL, Tag.TAG_COMPOUND)) {
+            storedChemical = ChemicalStack.OPTIONAL_CODEC
+                    .parse(
+                            registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE),
+                            tag.get(TAG_CHEMICAL))
+                    .result()
+                    .orElse(ChemicalStack.EMPTY);
+            if (!storedChemical.isEmpty()) {
+                storedChemical = storedChemical.copyWithAmount(1);
             }
         } else {
-            storedFluid = FluidStack.EMPTY;
+            storedChemical = ChemicalStack.EMPTY;
         }
         amount = tag.getLong(TAG_AMOUNT);
     }

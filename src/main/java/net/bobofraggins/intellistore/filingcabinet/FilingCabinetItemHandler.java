@@ -114,6 +114,7 @@ public class FilingCabinetItemHandler implements IItemHandler {
             be.setFolder(slot, ManillaFolderItem.setContents(folder.copyWithCount(1), result.updated()));
         }
 
+        if (be.isVoidExcess()) return ItemStack.EMPTY;
         return remainder == 0 ? ItemStack.EMPTY : stack.copyWithCount(remainder);
     }
 

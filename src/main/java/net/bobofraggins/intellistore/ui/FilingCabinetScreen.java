@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.ui;
 
 import net.bobofraggins.intellistore.network.SetPriorityPacket;
+import net.bobofraggins.intellistore.network.SetVoidExcessPacket;
 import net.bobofraggins.intellistore.network.ToggleFilingCabinetPacket;
 import net.bobofraggins.intellistore.priority.Priority;
 import net.minecraft.client.gui.GuiGraphics;
@@ -19,11 +20,12 @@ public class FilingCabinetScreen extends AbstractContainerScreen<FilingCabinetMe
 
     // Background panel dimensions
     private static final int BG_WIDTH = 176;
-    private static final int BG_HEIGHT = 96;
+    private static final int BG_HEIGHT = 116;
 
     // Widget layout constants
     private static final int TOGGLE_Y_OFFSET = 20;
     private static final int PRIORITY_Y_OFFSET = 54;
+    private static final int VOID_Y_OFFSET = 88;
     private static final int PRIORITY_BUTTON_W = 28;
     private static final int PRIORITY_BUTTON_H = 20;
     private static final int PRIORITY_BUTTON_GAP = 2;
@@ -71,6 +73,17 @@ public class FilingCabinetScreen extends AbstractContainerScreen<FilingCabinetMe
                             PRIORITY_BUTTON_H)
                     .build());
         }
+
+        // Void excess toggle button — centred below priority row
+        int voidX = leftPos + (BG_WIDTH - 120) / 2;
+        int voidY = topPos + VOID_Y_OFFSET;
+        addRenderableWidget(Button.builder(voidExcessLabel(), btn -> {
+                    boolean newValue = !menu.isVoidExcess();
+                    PacketDistributor.sendToServer(new SetVoidExcessPacket(menu.getPos(), newValue));
+                    btn.setMessage(voidExcessLabel(!menu.isVoidExcess()));
+                })
+                .bounds(voidX, voidY, 120, 20)
+                .build());
     }
 
     private Component toggleLabel() {
@@ -84,6 +97,15 @@ public class FilingCabinetScreen extends AbstractContainerScreen<FilingCabinetMe
         btn.setMessage(toggleLabel());
     }
 
+    private Component voidExcessLabel() {
+        return voidExcessLabel(menu.isVoidExcess());
+    }
+
+    private Component voidExcessLabel(boolean value) {
+        return Component.translatable(
+                value ? "screen.intellistore.void_excess_on" : "screen.intellistore.void_excess_off");
+    }
+
     @Override
     protected void containerTick() {
         super.containerTick();
@@ -94,6 +116,11 @@ public class FilingCabinetScreen extends AbstractContainerScreen<FilingCabinetMe
         }
         // Highlight the currently selected priority button
         updatePriorityHighlights();
+        // Keep void excess button label in sync (widget index 6: toggle + 5 priority buttons)
+        int voidIdx = 1 + Priority.VALUES.length;
+        if (voidIdx < renderables.size() && renderables.get(voidIdx) instanceof Button voidBtn) {
+            voidBtn.setMessage(voidExcessLabel());
+        }
     }
 
     private void updatePriorityHighlights() {
@@ -135,6 +162,13 @@ public class FilingCabinetScreen extends AbstractContainerScreen<FilingCabinetMe
                 Component.translatable("screen.intellistore.priority_label"),
                 leftPos + (BG_WIDTH - font.width(Component.translatable("screen.intellistore.priority_label"))) / 2,
                 topPos + PRIORITY_Y_OFFSET - 10,
+                0xFFFFFF,
+                false);
+        graphics.drawString(
+                font,
+                Component.translatable("screen.intellistore.void_excess_label"),
+                leftPos + (BG_WIDTH - font.width(Component.translatable("screen.intellistore.void_excess_label"))) / 2,
+                topPos + VOID_Y_OFFSET - 10,
                 0xFFFFFF,
                 false);
     }
