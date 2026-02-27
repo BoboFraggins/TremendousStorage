@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.ui;
 
 import javax.annotation.Nullable;
+import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.register.Registration;
 import net.bobofraggins.intellistore.storagetransceiver.StorageAccessTerminalBlock;
 import net.minecraft.core.BlockPos;
@@ -23,6 +24,7 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.Optional;
 
@@ -177,9 +179,27 @@ public class StorageAccessTerminalMenu extends AbstractContainerMenu {
         copy = stack.copy();
 
         if (index == RESULT_SLOT) {
+            // Snapshot the craft grid before ingredients are consumed by onTake
+            ItemStack[] gridSnapshot = new ItemStack[9];
+            for (int i = 0; i < 9; i++) {
+                gridSnapshot[i] = craftSlots.getItem(i).copy();
+            }
+
             // Shift-click result: move to inventory
             if (!moveItemStackTo(stack, INV_START, HOTBAR_END, true)) return ItemStack.EMPTY;
             slot.onQuickCraft(stack, copy);
+
+            if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
+            else slot.setChanged();
+
+            if (stack.getCount() == copy.getCount()) return ItemStack.EMPTY;
+            slot.onTake(player, stack);
+            player.drop(stack, false);
+
+            // Refill depleted craft slots from the network
+            refillCraftGridFromNetwork(player, gridSnapshot);
+
+            return copy;
         } else if (index >= INV_START && index < HOTBAR_END) {
             // Shift-click player slot: try crafting grid first, then other inventory rows
             if (!moveItemStackTo(stack, CRAFT_START, CRAFT_END, false)) {
@@ -207,6 +227,83 @@ public class StorageAccessTerminalMenu extends AbstractContainerMenu {
     @Override
     public boolean canTakeItemForPickAll(ItemStack stack, Slot slot) {
         return slot.container != resultSlots && super.canTakeItemForPickAll(stack, slot);
+    }
+
+    // -------------------------------------------------------------------------
+    // Network auto-refill
+    // -------------------------------------------------------------------------
+
+    /**
+     * After a craft result is taken, refill any depleted craft grid slot from the network.
+     *
+     * <p>For each of the 9 grid slots: if the slot is now empty but the pre-craft snapshot
+     * had an item there, pull one stack of that item type from the network and place it.
+     * Triggers {@link #slotsChanged} so the result slot updates immediately.
+     *
+     * @param player       the crafting player (used to get the server level)
+     * @param gridSnapshot copies of each craft slot taken just before {@code onTake} ran
+     */
+    private void refillCraftGridFromNetwork(Player player, ItemStack[] gridSnapshot) {
+        if (!hasNetwork() || player.level().isClientSide()) return;
+        if (!(player.level().getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
+        IItemHandler handler = ni.getItemHandler();
+        if (handler == null) return;
+
+        boolean anyRefilled = false;
+        for (int i = 0; i < 9; i++) {
+            ItemStack snap = gridSnapshot[i];
+            if (snap.isEmpty()) continue; // slot was empty before craft, nothing to refill
+
+            ItemStack current = craftSlots.getItem(i);
+
+            if (current.isEmpty()) {
+                // Normal case: ingredient was fully consumed — pull a fresh stack from network
+                anyRefilled |= extractFromNetworkIntoSlot(handler, snap, i);
+            } else if (snap.hasCraftingRemainingItem()) {
+                // Container item case (e.g. lava bucket → empty bucket):
+                // onTake placed the remainder (empty bucket) back in the slot.
+                // If that remainder matches what's there now, swap it for a full one.
+                ItemStack remainder = snap.getCraftingRemainingItem();
+                if (!remainder.isEmpty() && ItemStack.isSameItemSameComponents(current, remainder)) {
+                    // Try to extract the full item (e.g. lava bucket) from the network
+                    ItemStack needed = snap.copyWithCount(1);
+                    ItemStack extracted = tryExtractFromNetwork(handler, needed);
+                    if (!extracted.isEmpty()) {
+                        // Return the remainder (empty bucket) to the network
+                        handler.insertItem(0, current.copyWithCount(1), false);
+                        craftSlots.setItem(i, extracted);
+                        anyRefilled = true;
+                    }
+                }
+            }
+        }
+
+        if (anyRefilled) {
+            slotsChanged(craftSlots);
+        }
+    }
+
+    /** Extracts one stack of {@code template} from the network and places it in craft slot {@code gridIndex}. */
+    private boolean extractFromNetworkIntoSlot(IItemHandler handler, ItemStack template, int gridIndex) {
+        ItemStack extracted = tryExtractFromNetwork(handler, template.copyWithCount(1));
+        if (!extracted.isEmpty()) {
+            craftSlots.setItem(gridIndex, extracted);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Finds the first network slot containing an item matching {@code template} and extracts
+     * up to one full stack from it. Returns the extracted stack, or {@link ItemStack#EMPTY}.
+     */
+    private static ItemStack tryExtractFromNetwork(IItemHandler handler, ItemStack template) {
+        for (int slot = 0; slot < handler.getSlots(); slot++) {
+            if (!ItemStack.isSameItemSameComponents(handler.getStackInSlot(slot), template)) continue;
+            ItemStack extracted = handler.extractItem(slot, template.getMaxStackSize(), false);
+            if (!extracted.isEmpty()) return extracted;
+        }
+        return ItemStack.EMPTY;
     }
 
     // -------------------------------------------------------------------------
