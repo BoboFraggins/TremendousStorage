@@ -161,6 +161,22 @@ merge, tape) are intentionally not shown.
 - Crafted by right-clicking a **Healing Salve Cauldron** with a **Zombie Brain**
 - Both the Zombie Brain and the Healing Salve are consumed; the Brain pops out as an item entity
 
+### Storage Access Terminal
+- A single-block UI entry point for the tube storage network
+- Right-click → opens a 176×256 screen with three sections stacked vertically:
+  - **Top (scrollable item list)**: shows every item in the connected network, aggregated by type, sorted by count (desc) then name (asc); each row shows item icon, name, and abbreviated total count (e.g. `1.2k`, `3.5M`)
+  - **Middle**: standard 3×3 crafting grid + result slot (craft from items pulled from the network list)
+  - **Bottom**: player inventory (3×9) + hotbar
+- **Click** a network row → extracts one stack (up to max stack size) into the player's inventory
+- **Shift-click** a network row → extracts the full available count (up to max stack size) at once
+- **Shift-click** a player inventory slot → inserts that slot's entire stack into the network
+- Connects to the nearest Network Interface reachable by BFS through the tube network (any color)
+- Shows "Network: Connected" (green) / "Network: Not Connected" (orange) status line
+- No block entity — the NI lookup happens once at menu-open time and is passed to the client via the packet buffer
+- Breaking drops 1 Storage Access Terminal item
+- Recipe: vanilla Crafting Table surrounded by 8 Paper Manila Folders (`FFF/FCF/FFF`)
+- Pickaxe-minable
+
 ### Tube Network
 - All storage blocks reachable through same-color connected tubes form a **unified virtual inventory**
 - Any block querying an `IItemHandler` capability on a tube receives a composite view of the entire network

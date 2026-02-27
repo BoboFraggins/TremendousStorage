@@ -22,6 +22,7 @@
     "intellistore:red_tube",
     "intellistore:black_tube",
     "intellistore:network_interface",
-    "intellistore:healing_salve_cauldron"
+    "intellistore:healing_salve_cauldron",
+    "intellistore:storage_access_terminal"
   ]
 }

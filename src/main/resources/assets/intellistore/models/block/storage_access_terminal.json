@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "intellistore:block/storage_access_terminal"
+  }
+}

@@ -48,6 +48,12 @@
   "screen.intellistore.storage_interface": "Storage Interface",
 
   "block.intellistore.network_interface": "Network Interface",
+  "block.intellistore.storage_access_terminal": "Storage Access Terminal",
+
+  "screen.intellistore.storage_access_terminal": "Storage Access Terminal",
+  "screen.intellistore.storage_access_terminal.connected": "Network: Connected",
+  "screen.intellistore.storage_access_terminal.disconnected": "Network: Not Connected",
+
   "block.intellistore.healing_salve": "Healing Salve",
   "block.intellistore.healing_salve_cauldron": "Healing Salve Cauldron",
 

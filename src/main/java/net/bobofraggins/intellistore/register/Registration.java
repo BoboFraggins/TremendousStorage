@@ -30,11 +30,13 @@ import net.bobofraggins.intellistore.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.manillafolder.ManillaFolderItem;
 import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.intellistore.storagetransceiver.StorageAccessTerminalBlock;
 import net.bobofraggins.intellistore.tube.TubeBlock;
 import net.bobofraggins.intellistore.tube.TubeBlockEntity;
 import net.bobofraggins.intellistore.ui.FilingCabinetMenu;
 import net.bobofraggins.intellistore.ui.NetworkInterfaceMenu;
 import net.bobofraggins.intellistore.ui.PriorityMenu;
+import net.bobofraggins.intellistore.ui.StorageAccessTerminalMenu;
 import net.bobofraggins.intellistore.ui.StorageInterfaceMenu;
 import net.bobofraggins.intellistore.whiteout.FolderTapeRecipe;
 import net.bobofraggins.intellistore.whiteout.WhiteoutTapeItem;
@@ -265,6 +267,20 @@ public final class Registration {
                             .build(null));
 
     // -------------------------------------------------------------------------
+    // Storage Access Terminal block
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<StorageAccessTerminalBlock> STORAGE_ACCESS_TERMINAL =
+            BLOCKS.register("storage_access_terminal",
+                    () -> new StorageAccessTerminalBlock(BlockBehaviour.Properties.of()
+                            .strength(2.5f, 1000f)
+                            .requiresCorrectToolForDrops()
+                            .sound(SoundType.WOOD)));
+
+    public static final DeferredHolder<Item, BlockItem> STORAGE_ACCESS_TERMINAL_ITEM =
+            ITEMS.registerSimpleBlockItem("storage_access_terminal", STORAGE_ACCESS_TERMINAL);
+
+    // -------------------------------------------------------------------------
     // Tubes (16 colored variants + shared block entity type)
     // -------------------------------------------------------------------------
 
@@ -312,6 +328,10 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<NetworkInterfaceMenu>> NETWORK_INTERFACE_MENU =
             MENU_TYPES.register("network_interface",
                     () -> IMenuTypeExtension.create(NetworkInterfaceMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<StorageAccessTerminalMenu>>
+            STORAGE_ACCESS_TERMINAL_MENU = MENU_TYPES.register("storage_access_terminal",
+                    () -> IMenuTypeExtension.create(StorageAccessTerminalMenu::new));
 
     // -------------------------------------------------------------------------
     // Items — whiteout tape
@@ -415,6 +435,7 @@ public final class Registration {
                         output.accept(BULK_STORAGE_CONTAINER_ITEM.get());
                         output.accept(FLUID_TANK_ITEM.get());
                         output.accept(NETWORK_INTERFACE_ITEM.get());
+                        output.accept(STORAGE_ACCESS_TERMINAL_ITEM.get());
                         output.accept(ZOMBIE_BRAIN.get());
                         output.accept(BRAIN.get());
                         output.accept(HEALING_SALVE_BUCKET.get());

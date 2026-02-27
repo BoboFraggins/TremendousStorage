@@ -35,5 +35,21 @@ public final class NetworkEvents {
                 NetworkContentsPacket.TYPE,
                 NetworkContentsPacket.STREAM_CODEC,
                 NetworkContentsPacket::handle);
+        registrar.playToServer(
+                RequestSatContentsPacket.TYPE,
+                RequestSatContentsPacket.STREAM_CODEC,
+                RequestSatContentsPacket::handle);
+        registrar.playToClient(
+                SatContentsPacket.TYPE,
+                SatContentsPacket.STREAM_CODEC,
+                SatContentsPacket::handle);
+        registrar.playToServer(
+                SatExtractPacket.TYPE,
+                SatExtractPacket.STREAM_CODEC,
+                SatExtractPacket::handle);
+        registrar.playToServer(
+                SatInsertPacket.TYPE,
+                SatInsertPacket.STREAM_CODEC,
+                SatInsertPacket::handle);
     }
 }

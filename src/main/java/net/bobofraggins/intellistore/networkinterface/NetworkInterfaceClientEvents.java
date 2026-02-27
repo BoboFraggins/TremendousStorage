@@ -3,6 +3,7 @@ package net.bobofraggins.intellistore.networkinterface;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.register.Registration;
 import net.bobofraggins.intellistore.ui.NetworkInterfaceScreen;
+import net.bobofraggins.intellistore.ui.StorageAccessTerminalScreen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -24,5 +25,6 @@ public final class NetworkInterfaceClientEvents {
     @SubscribeEvent
     public static void onRegisterScreens(RegisterMenuScreensEvent event) {
         event.register(Registration.NETWORK_INTERFACE_MENU.get(), NetworkInterfaceScreen::new);
+        event.register(Registration.STORAGE_ACCESS_TERMINAL_MENU.get(), StorageAccessTerminalScreen::new);
     }
 }
