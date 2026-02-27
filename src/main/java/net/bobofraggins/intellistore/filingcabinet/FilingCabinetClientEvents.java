@@ -2,7 +2,9 @@ package net.bobofraggins.intellistore.filingcabinet;
 
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.register.Registration;
+import net.bobofraggins.intellistore.ui.ExportInterfaceScreen;
 import net.bobofraggins.intellistore.ui.FilingCabinetScreen;
+import net.bobofraggins.intellistore.ui.ImportInterfaceScreen;
 import net.bobofraggins.intellistore.ui.PriorityScreen;
 import net.bobofraggins.intellistore.ui.TankSettingsScreen;
 import net.neoforged.api.distmarker.Dist;
@@ -32,5 +34,7 @@ public final class FilingCabinetClientEvents {
         event.register(Registration.FILING_CABINET_MENU.get(), FilingCabinetScreen::new);
         event.register(Registration.PRIORITY_MENU.get(), PriorityScreen::new);
         event.register(Registration.TANK_SETTINGS_MENU.get(), TankSettingsScreen::new);
+        event.register(Registration.IMPORT_INTERFACE_MENU.get(), ImportInterfaceScreen::new);
+        event.register(Registration.EXPORT_INTERFACE_MENU.get(), ExportInterfaceScreen::new);
     }
 }

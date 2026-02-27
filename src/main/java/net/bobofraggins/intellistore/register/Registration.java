@@ -33,10 +33,15 @@ import net.bobofraggins.intellistore.mekanism.GasTankRegistration;
 import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.storagetransceiver.StorageAccessTerminalBlock;
+import net.bobofraggins.intellistore.tube.ExportInterfaceItem;
+import net.bobofraggins.intellistore.tube.ImportInterfaceItem;
+import net.bobofraggins.intellistore.tube.InterfaceFilterContents;
 import net.bobofraggins.intellistore.tube.StorageInterfaceItem;
 import net.bobofraggins.intellistore.tube.TubeBlock;
 import net.bobofraggins.intellistore.tube.TubeBlockEntity;
+import net.bobofraggins.intellistore.ui.ExportInterfaceMenu;
 import net.bobofraggins.intellistore.ui.FilingCabinetMenu;
+import net.bobofraggins.intellistore.ui.ImportInterfaceMenu;
 import net.bobofraggins.intellistore.ui.NetworkInterfaceMenu;
 import net.bobofraggins.intellistore.ui.PriorityMenu;
 import net.bobofraggins.intellistore.ui.StorageAccessTerminalMenu;
@@ -135,6 +140,29 @@ public final class Registration {
                     .persistent(BlockPos.CODEC)
                     .networkSynchronized(BlockPos.STREAM_CODEC)
                     .build());
+
+    /**
+     * Data component storing the filter configuration on Import Interface and Export Interface items.
+     * Carried on the item so filter state persists through break and re-attach cycles.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<InterfaceFilterContents>>
+            INTERFACE_FILTER = DATA_COMPONENTS.register("interface_filter",
+                    () -> DataComponentType.<InterfaceFilterContents>builder()
+                            .persistent(InterfaceFilterContents.CODEC)
+                            .networkSynchronized(InterfaceFilterContents.STREAM_CODEC)
+                            .build());
+
+    /**
+     * Data component storing the priority ordinal (0–4) on a Storage Interface item.
+     * Persists the priority through punch-off and re-attach cycles; defaults to NORMAL (ordinal 2)
+     * when absent.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>>
+            STORAGE_INTERFACE_PRIORITY = DATA_COMPONENTS.register("storage_interface_priority",
+                    () -> DataComponentType.<Integer>builder()
+                            .persistent(com.mojang.serialization.Codec.INT)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.INT)
+                            .build());
 
     // -------------------------------------------------------------------------
     // Blocks + block entities
@@ -380,12 +408,24 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<TankSettingsMenu>> TANK_SETTINGS_MENU =
             MENU_TYPES.register("tank_settings", () -> IMenuTypeExtension.create(TankSettingsMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<ImportInterfaceMenu>> IMPORT_INTERFACE_MENU =
+            MENU_TYPES.register("import_interface", () -> IMenuTypeExtension.create(ImportInterfaceMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<ExportInterfaceMenu>> EXPORT_INTERFACE_MENU =
+            MENU_TYPES.register("export_interface", () -> IMenuTypeExtension.create(ExportInterfaceMenu::new));
+
     // -------------------------------------------------------------------------
-    // Items — storage interface
+    // Items — storage interface / import interface / export interface
     // -------------------------------------------------------------------------
 
     public static final DeferredHolder<Item, StorageInterfaceItem> STORAGE_INTERFACE =
             ITEMS.register("storage_interface", StorageInterfaceItem::new);
+
+    public static final DeferredHolder<Item, ImportInterfaceItem> IMPORT_INTERFACE =
+            ITEMS.register("import_interface", ImportInterfaceItem::new);
+
+    public static final DeferredHolder<Item, ExportInterfaceItem> EXPORT_INTERFACE =
+            ITEMS.register("export_interface", ExportInterfaceItem::new);
 
     // -------------------------------------------------------------------------
     // Items — whiteout tape
@@ -499,6 +539,8 @@ public final class Registration {
                         output.accept(WIRELESS_HUB_ITEM.get());
                         output.accept(WIRELESS_SAT.get());
                         output.accept(STORAGE_INTERFACE.get());
+                        output.accept(IMPORT_INTERFACE.get());
+                        output.accept(EXPORT_INTERFACE.get());
                         output.accept(ZOMBIE_BRAIN.get());
                         output.accept(BRAIN.get());
                         output.accept(HEALING_SALVE_BUCKET.get());

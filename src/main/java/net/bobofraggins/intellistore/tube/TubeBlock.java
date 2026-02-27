@@ -4,6 +4,8 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.register.Registration;
+import net.bobofraggins.intellistore.ui.ExportInterfaceMenu;
+import net.bobofraggins.intellistore.ui.ImportInterfaceMenu;
 import net.bobofraggins.intellistore.ui.StorageInterfaceMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,6 +24,8 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
@@ -262,8 +266,8 @@ public class TubeBlock extends BaseEntityBlock {
     // -------------------------------------------------------------------------
 
     /**
-     * Right-click with a Storage Interface item: install attachment on the clicked face
-     * (if not already present) and consume one item from the stack.
+     * Right-click with a Storage Interface, Import Interface, or Export Interface item:
+     * install attachment on the clicked face (if not already present) and consume one item.
      */
     @Override
     protected ItemInteractionResult useItemOn(
@@ -274,21 +278,41 @@ public class TubeBlock extends BaseEntityBlock {
             Player player,
             InteractionHand hand,
             BlockHitResult hit) {
-        if (!(stack.getItem() instanceof StorageInterfaceItem))
+        AttachmentType newType;
+        if (stack.getItem() instanceof StorageInterfaceItem) {
+            newType = AttachmentType.STORAGE_INTERFACE;
+        } else if (stack.getItem() instanceof ImportInterfaceItem) {
+            newType = AttachmentType.IMPORT_INTERFACE;
+        } else if (stack.getItem() instanceof ExportInterfaceItem) {
+            newType = AttachmentType.EXPORT_INTERFACE;
+        } else {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+
         if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
         if (!(level.getBlockEntity(pos) instanceof TubeBlockEntity be)) return ItemInteractionResult.FAIL;
 
         int faceIndex = hit.getDirection().ordinal();
         if (be.hasAttachment(faceIndex)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 
-        be.setAttachment(faceIndex, true);
+        // Restore state from the item's data components before setting the type
+        if (newType == AttachmentType.STORAGE_INTERFACE) {
+            int pOrdinal = stack.getOrDefault(Registration.STORAGE_INTERFACE_PRIORITY.get(),
+                    net.bobofraggins.intellistore.priority.Priority.NORMAL.ordinal());
+            be.setAttachmentPriority(faceIndex, net.bobofraggins.intellistore.priority.Priority.fromOrdinal(pOrdinal));
+        } else if (newType == AttachmentType.IMPORT_INTERFACE || newType == AttachmentType.EXPORT_INTERFACE) {
+            InterfaceFilterContents contents = stack.getOrDefault(
+                    Registration.INTERFACE_FILTER.get(), InterfaceFilterContents.EMPTY);
+            be.loadFilterFromContents(faceIndex, contents);
+        }
+
+        be.setAttachmentType(faceIndex, newType);
         if (!player.isCreative()) stack.shrink(1);
         return ItemInteractionResult.SUCCESS;
     }
 
     /**
-     * Right-click with empty hand: open the priority screen for an installed attachment.
+     * Right-click with empty hand: open the appropriate screen for the installed attachment type.
      * Does nothing on faces without an attachment (installation now requires the item).
      */
     @Override
@@ -298,18 +322,27 @@ public class TubeBlock extends BaseEntityBlock {
         if (!(level.getBlockEntity(pos) instanceof TubeBlockEntity be)) return InteractionResult.FAIL;
 
         int faceIndex = hit.getDirection().ordinal();
-        if (!be.hasAttachment(faceIndex)) return InteractionResult.PASS;
+        AttachmentType type = be.getAttachmentType(faceIndex);
 
-        player.openMenu(new StorageInterfaceMenu.Provider(be, pos, faceIndex), buf -> {
-            buf.writeBlockPos(pos);
-            buf.writeByte(faceIndex);
-        });
+        switch (type) {
+            case STORAGE_INTERFACE -> player.openMenu(
+                    new StorageInterfaceMenu.Provider(be, pos, faceIndex),
+                    buf -> { buf.writeBlockPos(pos); buf.writeByte(faceIndex); });
+            case IMPORT_INTERFACE -> player.openMenu(
+                    new ImportInterfaceMenu.Provider(be, pos, faceIndex),
+                    buf -> { buf.writeBlockPos(pos); buf.writeByte(faceIndex); });
+            case EXPORT_INTERFACE -> player.openMenu(
+                    new ExportInterfaceMenu.Provider(be, pos, faceIndex),
+                    buf -> { buf.writeBlockPos(pos); buf.writeByte(faceIndex); });
+            default -> { return InteractionResult.PASS; }
+        }
         return InteractionResult.SUCCESS;
     }
 
     /**
      * Left-click (punch): if the hit point lands inside an attachment plate's AABB,
-     * remove that attachment and drop one Storage Interface item.
+     * remove that attachment and drop the appropriate interface item.
+     * For Import/Export Interfaces, the current filter state is stored on the dropped item.
      */
     @Override
     public void attack(BlockState state, Level level, BlockPos pos, Player player) {
@@ -320,18 +353,20 @@ public class TubeBlock extends BaseEntityBlock {
         Vec3 local = hit.subtract(pos.getX(), pos.getY(), pos.getZ());
 
         for (int i = 0; i < 6; i++) {
-            if (!be.hasAttachment(i)) continue;
-            if (attachmentAABB(i).contains(local)) {
-                be.setAttachment(i, false);
-                Block.popResource(level, pos, new ItemStack(Registration.STORAGE_INTERFACE.get()));
-                return;
-            }
+            AttachmentType type = be.getAttachmentType(i);
+            if (type == AttachmentType.NONE) continue;
+            if (!attachmentAABB(i).contains(local)) continue;
+
+            ItemStack drop = makeInterfaceDrop(be, i, type);
+            be.setAttachmentType(i, AttachmentType.NONE);
+            Block.popResource(level, pos, drop);
+            return;
         }
     }
 
     /**
-     * When the tube is broken, drop one Storage Interface item per installed attachment
-     * in addition to the tube block itself (handled by the loot table).
+     * When the tube is broken, drop the appropriate interface item per installed attachment,
+     * with filter data stored on Import/Export Interface items.
      */
     @Override
     public void playerDestroy(
@@ -339,12 +374,62 @@ public class TubeBlock extends BaseEntityBlock {
         super.playerDestroy(level, player, pos, state, be, tool);
         if (be instanceof TubeBlockEntity tube) {
             for (int i = 0; i < 6; i++) {
-                if (tube.hasAttachment(i)) {
-                    Block.popResource(level, pos, new ItemStack(Registration.STORAGE_INTERFACE.get()));
+                AttachmentType type = tube.getAttachmentType(i);
+                if (type != AttachmentType.NONE) {
+                    Block.popResource(level, pos, makeInterfaceDrop(tube, i, type));
                 }
             }
         }
     }
+
+    /**
+     * Creates the dropped item for the interface on face {@code faceIndex}.
+     * Import/Export Interfaces have their filter data stored as a data component.
+     */
+    private static ItemStack makeInterfaceDrop(TubeBlockEntity be, int faceIndex, AttachmentType type) {
+        return switch (type) {
+            case STORAGE_INTERFACE -> {
+                ItemStack stack = new ItemStack(Registration.STORAGE_INTERFACE.get());
+                int pOrdinal = be.getAttachmentPriority(faceIndex).ordinal();
+                if (pOrdinal != net.bobofraggins.intellistore.priority.Priority.NORMAL.ordinal()) {
+                    stack.set(Registration.STORAGE_INTERFACE_PRIORITY.get(), pOrdinal);
+                }
+                yield stack;
+            }
+            case IMPORT_INTERFACE -> {
+                ItemStack stack = new ItemStack(Registration.IMPORT_INTERFACE.get());
+                InterfaceFilterContents contents = be.saveFilterToContents(faceIndex);
+                if (!contents.isEmpty()) {
+                    stack.set(Registration.INTERFACE_FILTER.get(), contents);
+                }
+                yield stack;
+            }
+            case EXPORT_INTERFACE -> {
+                ItemStack stack = new ItemStack(Registration.EXPORT_INTERFACE.get());
+                InterfaceFilterContents contents = be.saveFilterToContents(faceIndex);
+                if (!contents.isEmpty()) {
+                    stack.set(Registration.INTERFACE_FILTER.get(), contents);
+                }
+                yield stack;
+            }
+            case NONE -> ItemStack.EMPTY;
+        };
+    }
+
+    // -------------------------------------------------------------------------
+    // Ticker
+    // -------------------------------------------------------------------------
+
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
+            Level level, BlockState state, BlockEntityType<T> type) {
+        if (level.isClientSide()) return null;
+        return createTickerHelper(type, Registration.TUBE_BE_TYPE.get(), TubeBlockEntity::serverTick);
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
 
     /**
      * Returns the AABB (block-local [0..1] coords) for the attachment plate on face {@code i}.

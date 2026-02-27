@@ -38,5 +38,13 @@ public final class NetworkEvents {
         registrar.playToServer(SatInsertPacket.TYPE, SatInsertPacket.STREAM_CODEC, SatInsertPacket::handle);
         registrar.playToServer(
                 OpenWirelessSatPacket.TYPE, OpenWirelessSatPacket.STREAM_CODEC, OpenWirelessSatPacket::handle);
+        registrar.playToServer(
+                SetImportExportFilterPacket.TYPE,
+                SetImportExportFilterPacket.STREAM_CODEC,
+                SetImportExportFilterPacket::handle);
+        registrar.playToClient(
+                SyncInterfaceFilterPacket.TYPE,
+                SyncInterfaceFilterPacket.STREAM_CODEC,
+                SyncInterfaceFilterPacket::handle);
     }
 }

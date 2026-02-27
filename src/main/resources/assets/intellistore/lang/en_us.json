@@ -50,6 +50,14 @@
   "item.intellistore.storage_interface": "Storage Interface",
   "screen.intellistore.storage_interface": "Storage Interface",
 
+  "item.intellistore.import_interface": "Import Interface",
+  "item.intellistore.export_interface": "Export Interface",
+  "screen.intellistore.import_interface": "Import Interface",
+  "screen.intellistore.export_interface": "Export Interface",
+  "screen.intellistore.filter_label": "Filter:",
+  "screen.intellistore.filter_accept": "Mode: Accept",
+  "screen.intellistore.filter_reject": "Mode: Reject",
+
   "screen.intellistore.void_excess_label": "Void Excess:",
   "screen.intellistore.void_excess_on": "Void Excess: ON",
   "screen.intellistore.void_excess_off": "Void Excess: OFF",

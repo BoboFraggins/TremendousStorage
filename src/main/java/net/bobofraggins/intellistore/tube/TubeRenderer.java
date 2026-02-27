@@ -80,11 +80,17 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
             }
         }
 
-        // Attachment plates
+        // Attachment plates — color varies by attachment type
         for (int i = 0; i < 6; i++) {
-            if (be.hasAttachment(i)) {
-                drawAttachmentPlate(vc, mat, Direction.values()[i], sprite, r, g, b, packedLight, packedOverlay);
+            AttachmentType aType = be.getAttachmentType(i);
+            if (aType == AttachmentType.NONE) continue;
+            int pr, pg, pb;
+            switch (aType) {
+                case IMPORT_INTERFACE -> { pr = 0x33; pg = 0x99; pb = 0xFF; } // blue
+                case EXPORT_INTERFACE -> { pr = 0xFF; pg = 0x33; pb = 0x33; } // red
+                default              -> { pr = r;    pg = g;    pb = b;    } // tube color (Storage Interface)
             }
+            drawAttachmentPlate(vc, mat, Direction.values()[i], sprite, pr, pg, pb, packedLight, packedOverlay);
         }
 
         poseStack.popPose();

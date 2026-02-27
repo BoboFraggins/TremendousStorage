@@ -109,8 +109,34 @@ Single-item-type bulk storage carried as an item.
 - Right-click an **installed plate with empty hand** → opens the Storage Interface priority screen
 - **Left-click (punch)** an installed plate → removes the plate and drops 1 Storage Interface item
 - **Breaking the tube** → drops 1 Storage Interface item per installed face (in addition to the tube item)
-- **Priority**: 5 levels (Lowest → Highest); default **Normal**; attachment priority overrides the connected storage block's own priority; saved to NBT per-face and survives break/replace
+- **Priority**: 5 levels (Lowest → Highest); default **Normal**; attachment priority overrides the connected storage block's own priority; priority is stored as a data component on the item and survives break/re-attach
 - Recipe: 4× (cross of Iron Ingots with a Redstone Comparator in the center)
+
+### Import Interface
+- A consumable attachment item that, when installed on a tube face, automatically pulls items from the adjacent external inventory into the tube network
+- Rendered as a **blue** 8×8×2-pixel plate on the tube face
+- Right-click an **empty tube face with an Import Interface item in hand** → installs it; consumes 1 item (not consumed in Creative)
+- Right-click an **installed plate with empty hand** → opens the filter screen
+- **Left-click (punch)** an installed plate → removes the plate and drops 1 Import Interface item with filter data stored on it
+- **Breaking the tube** → drops 1 Import Interface item per installed face with filter data intact
+- **Transfer rate**: up to 64 items per operation, every 20 ticks (1 second); one slot scanned per cycle
+- **Filter**: 9 ghost-item slots; click a slot with an item in hand to set it, click with empty hand to clear it; items can also be dragged from JEI without consuming them
+- **Mode toggle**: Accept (transfers only items matching the filter) or Reject (transfers all items except those matching the filter); empty Accept filter = transfer all; empty Reject filter = transfer nothing
+- Filter state and mode are stored as a data component on the item and survive break/re-attach
+- Recipe: 4× (cross of Iron Ingots with Blue Dye in the center)
+
+### Export Interface
+- A consumable attachment item that, when installed on a tube face, automatically pulls items from the tube network and pushes them into the adjacent external inventory
+- Rendered as a **red** 8×8×2-pixel plate on the tube face
+- Right-click an **empty tube face with an Export Interface item in hand** → installs it; consumes 1 item (not consumed in Creative)
+- Right-click an **installed plate with empty hand** → opens the filter screen
+- **Left-click (punch)** an installed plate → removes the plate and drops 1 Export Interface item with filter data stored on it
+- **Breaking the tube** → drops 1 Export Interface item per installed face with filter data intact
+- **Transfer rate**: up to 64 items per operation, every 20 ticks (1 second); one slot scanned per cycle
+- **Priority respected**: export pulls from the highest-priority storage in the network first
+- **Filter**: identical to Import Interface — 9 ghost-item slots with Accept/Reject mode toggle; JEI drag supported
+- Filter state and mode are stored as a data component on the item and survive break/re-attach
+- Recipe: 4× (cross of Iron Ingots with Red Dye in the center)
 
 ### Wireless SAT
 - A portable Storage Access Terminal carried as an item (stack size 1)
