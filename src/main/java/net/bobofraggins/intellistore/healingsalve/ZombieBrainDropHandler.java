@@ -12,7 +12,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 
 /**
- * Adds a 20% chance for any Zombie subtype to drop a Zombie Brain on death.
+ * Adds a 1-in-8 chance for any Zombie subtype to drop a Zombie Brain on death.
  *
  * <p>Zombie covers ZombieVillager, Husk, Drowned, and all other Zombie subclasses.
  */
@@ -25,7 +25,7 @@ public final class ZombieBrainDropHandler {
     static void onLivingDrops(LivingDropsEvent event) {
         if (!(event.getEntity() instanceof Zombie)) return;
         Level level = event.getEntity().level();
-        if (level.random.nextFloat() >= 0.20f) return;
+        if (level.random.nextInt(8) != 0) return;
         BlockPos pos = event.getEntity().blockPosition();
         event.getDrops().add(new ItemEntity(
                 level,

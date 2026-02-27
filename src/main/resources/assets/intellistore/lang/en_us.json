@@ -59,7 +59,9 @@
   "block.intellistore.healing_salve_cauldron": "Healing Salve Cauldron",
 
   "item.intellistore.zombie_brain": "Zombie Brain",
+  "item.intellistore.zombie_brain.tooltip": "Brrraaaiinnnsss...",
   "item.intellistore.brain": "Brain",
+  "item.intellistore.brain.tooltip": "Good as new!",
   "item.intellistore.healing_salve_bucket": "Healing Salve Bucket",
 
   "screen.intellistore.network_interface": "Network Interface",
