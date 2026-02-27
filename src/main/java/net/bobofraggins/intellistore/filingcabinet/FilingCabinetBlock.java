@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.bobofraggins.intellistore.tube.NetworkConnector;
 
 /**
  * The Filing Cabinet block. Holds up to 8 Manila Folders.
@@ -37,7 +38,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * <p>Breaking the block drops the cabinet item with its folder inventory intact (saved via the
  * loot table's {@code copy_components} function). No folders are spilled into the world.
  */
-public class FilingCabinetBlock extends BaseEntityBlock {
+public class FilingCabinetBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<FilingCabinetBlock> CODEC = simpleCodec(FilingCabinetBlock::new);
 

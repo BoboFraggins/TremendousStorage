@@ -12,6 +12,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.bobofraggins.intellistore.tube.NetworkConnector;
 
 /**
  * The Storage Access Terminal block.
@@ -23,7 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * <p>This block has no Block Entity — the Network Interface lookup is performed
  * at menu-open time and the NI position is passed through to the menu.
  */
-public class StorageAccessTerminalBlock extends Block {
+public class StorageAccessTerminalBlock extends Block implements NetworkConnector {
 
     public StorageAccessTerminalBlock(Properties props) {
         super(props);

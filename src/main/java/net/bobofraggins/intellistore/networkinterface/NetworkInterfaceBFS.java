@@ -17,13 +17,13 @@ import net.bobofraggins.intellistore.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.priority.Priority;
 import net.bobofraggins.intellistore.storagetransceiver.StorageAccessTerminalBlock;
 import net.bobofraggins.intellistore.tube.AttachmentType;
+import net.bobofraggins.intellistore.tube.NetworkConnector;
 import net.bobofraggins.intellistore.tube.TubeBlock;
 import net.bobofraggins.intellistore.tube.TubeBlockEntity;
 import net.bobofraggins.intellistore.wirelesssat.WirelessHubBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -36,9 +36,13 @@ import net.neoforged.neoforge.items.IItemHandler;
  *
  * <p>A Network Interface connects to <em>all</em> tube colors. For each directly-adjacent
  * {@link TubeBlock}, this scanner starts a same-color BFS and collects every storage block
- * reachable from those tubes. Results are deduped by position, and returned as a
- * {@link NetworkScanResult} with handlers sorted for both insertion (highest-priority first)
- * and extraction (lowest-priority first).
+ * reachable from those tubes. {@link NetworkConnector} blocks (Filing Cabinet, Junk Drawer,
+ * Bulk Storage Container, SAT, Wireless Hub, Stirling Engine) act as color-agnostic bridges:
+ * when encountered, the BFS continues through their adjacent tubes of any color, allowing
+ * different-colored tube runs to form a single unified network.
+ *
+ * <p>Results are deduped by position, and returned as a {@link NetworkScanResult} with handlers
+ * sorted for both insertion (highest-priority first) and extraction (lowest-priority first).
  *
  * <p>The network is considered valid when this NI is the <em>only</em> Network Interface
  * reachable on the combined tube network.
@@ -67,6 +71,8 @@ public final class NetworkInterfaceBFS {
 
         Set<BlockPos> visitedTubes = new HashSet<>();
         Set<BlockPos> collectedStorage = new HashSet<>();
+        // Connector blocks whose outgoing tube faces have already been enqueued
+        Set<BlockPos> visitedConnectors = new HashSet<>();
         List<HandlerEntry> handlerEntries = new ArrayList<>();
         Map<String, Integer> tubeCounts = new HashMap<>(); // color name → count
         List<String> storageKeys = new ArrayList<>(); // ordered by discovery
@@ -74,68 +80,81 @@ public final class NetworkInterfaceBFS {
         // Power accounting
         int rfPerTick = NetworkInterfaceBlockEntity.NI_COST; // base NI cost
 
-        // Examine each face of the NI for adjacent tubes
+        // Single shared queue for the whole scan; tubes of any color may be enqueued
+        // (the NI itself is a color-agnostic entry point, and connectors bridge colors)
+        Deque<BlockPos> queue = new ArrayDeque<>();
+
+        // Seed with every tube adjacent to the NI (any color)
         for (Direction niDir : Direction.values()) {
             BlockPos neighborPos = niPos.relative(niDir);
-            BlockState neighborState = level.getBlockState(neighborPos);
+            if (level.getBlockState(neighborPos).getBlock() instanceof TubeBlock) {
+                queue.add(neighborPos);
+            }
+        }
 
-            if (!(neighborState.getBlock() instanceof TubeBlock rootTube)) continue;
+        while (!queue.isEmpty()) {
+            BlockPos pos = queue.poll();
+            if (!visitedTubes.add(pos)) continue;
 
-            // BFS all same-color tubes reachable from this starting tube
-            DyeColor color = rootTube.getColor();
-            Deque<BlockPos> queue = new ArrayDeque<>();
-            queue.add(neighborPos);
+            BlockState state = level.getBlockState(pos);
+            if (!(state.getBlock() instanceof TubeBlock tb)) continue;
 
-            while (!queue.isEmpty()) {
-                BlockPos pos = queue.poll();
-                if (!visitedTubes.add(pos)) continue;
+            // Count this tube for the UI list
+            tubeCounts.merge(tb.getColor().getName(), 1, Integer::sum);
 
-                BlockState state = level.getBlockState(pos);
-                if (!(state.getBlock() instanceof TubeBlock tb) || tb.getColor() != color) continue;
+            TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe ? tbe : null;
 
-                // Count this tube for the UI list
-                tubeCounts.merge(color.getName(), 1, Integer::sum);
-
-                TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe ? tbe : null;
-
-                // Count tube attachment power cost
-                if (tubeBE != null) {
-                    for (int i = 0; i < 6; i++) {
-                        if (tubeBE.getAttachmentType(i) != AttachmentType.NONE) {
-                            rfPerTick += ATTACHMENT_COST;
-                        }
+            // Count tube attachment power cost
+            if (tubeBE != null) {
+                for (int i = 0; i < 6; i++) {
+                    if (tubeBE.getAttachmentType(i) != AttachmentType.NONE) {
+                        rfPerTick += ATTACHMENT_COST;
                     }
                 }
+            }
 
-                for (Direction dir : Direction.values()) {
-                    if (!state.getValue(TubeBlock.DIR_PROPS[dir.ordinal()])) continue;
+            for (Direction dir : Direction.values()) {
+                if (!state.getValue(TubeBlock.DIR_PROPS[dir.ordinal()])) continue;
 
-                    BlockPos adjPos = pos.relative(dir);
-                    BlockState adjState = level.getBlockState(adjPos);
+                BlockPos adjPos = pos.relative(dir);
+                BlockState adjState = level.getBlockState(adjPos);
 
-                    if (adjState.getBlock() instanceof TubeBlock adjTube && adjTube.getColor() == color) {
-                        // Continue BFS through same-color tubes
-                        if (!visitedTubes.contains(adjPos)) {
-                            queue.add(adjPos);
+                if (adjState.getBlock() instanceof TubeBlock adjTube
+                        && adjTube.getColor() == tb.getColor()) {
+                    // Continue BFS through same-color tubes
+                    if (!visitedTubes.contains(adjPos)) {
+                        queue.add(adjPos);
+                    }
+                } else if (collectedStorage.add(adjPos)) {
+                    // First time we see this non-tube block
+                    processNeighbor(level, adjPos, adjState, niPos, dir, tubeBE, handlerEntries, storageKeys);
+
+                    // Check if it's another NI lower half
+                    if (adjState.getBlock() instanceof NetworkInterfaceBlock
+                            && adjState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
+                            && !adjPos.equals(niPos)) {
+                        otherNiCount++;
+                    }
+
+                    // Count SAT and Wireless Hub power cost
+                    if (adjState.getBlock() instanceof StorageAccessTerminalBlock) {
+                        rfPerTick += SAT_COST;
+                    } else {
+                        BlockEntity adjBE = adjPos.equals(niPos) ? null : level.getBlockEntity(adjPos);
+                        if (adjBE instanceof WirelessHubBlockEntity) {
+                            rfPerTick += HUB_COST;
                         }
-                    } else if (collectedStorage.add(adjPos)) {
-                        // First time we see this non-tube block
-                        processNeighbor(level, adjPos, adjState, niPos, dir, tubeBE, handlerEntries, storageKeys);
+                    }
 
-                        // Check if it's another NI lower half
-                        if (adjState.getBlock() instanceof NetworkInterfaceBlock
-                                && adjState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
-                                && !adjPos.equals(niPos)) {
-                            otherNiCount++;
-                        }
-
-                        // Count SAT and Wireless Hub power cost
-                        if (adjState.getBlock() instanceof StorageAccessTerminalBlock) {
-                            rfPerTick += SAT_COST;
-                        } else {
-                            BlockEntity adjBE = adjPos.equals(niPos) ? null : level.getBlockEntity(adjPos);
-                            if (adjBE instanceof WirelessHubBlockEntity) {
-                                rfPerTick += HUB_COST;
+                    // If this neighbor is a NetworkConnector, bridge through it into
+                    // adjacent tubes of any color
+                    if (adjState.getBlock() instanceof NetworkConnector
+                            && visitedConnectors.add(adjPos)) {
+                        for (Direction connDir : Direction.values()) {
+                            BlockPos beyondPos = adjPos.relative(connDir);
+                            if (!visitedTubes.contains(beyondPos)
+                                    && level.getBlockState(beyondPos).getBlock() instanceof TubeBlock) {
+                                queue.add(beyondPos);
                             }
                         }
                     }

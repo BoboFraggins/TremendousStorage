@@ -28,9 +28,11 @@ import net.neoforged.neoforge.items.IItemHandler;
  * Utility class that builds a {@link NetworkItemHandler} for a tube network.
  *
  * <p>A tube network is the connected component of all {@link TubeBlock} positions reachable
- * from a starting position through same-color tube connections. Storage blocks adjacent to any
- * tube in the network contribute their {@link IItemHandler} capability to the unified network
- * view, sorted by priority (highest first).
+ * from a starting position through same-color tube connections. {@link NetworkConnector} blocks
+ * (Filing Cabinet, Junk Drawer, Bulk Storage Container, SAT, Wireless Hub, Stirling Engine)
+ * act as color-agnostic bridges: their {@code IItemHandler} is collected as a storage endpoint
+ * and the BFS continues through all of their adjacent tubes (any color), allowing different-
+ * colored tube runs to share a single network.
  *
  * <p>This class is stateless. Call {@link #buildNetworkView} on demand; cache the result in
  * the calling {@link TubeBlockEntity} and invalidate when the topology changes.
@@ -46,7 +48,8 @@ public final class TubeNetwork {
      *
      * @param level  the server-side level
      * @param start  position of the tube initiating the query
-     * @param color  only same-color tubes are traversed
+     * @param color  color of the starting tube (same-color tubes are traversed directly;
+     *               different-color tubes may be reached via {@link NetworkConnector} bridges)
      * @return composite handler for the entire network; never null
      */
     public static NetworkItemHandler buildNetworkView(ServerLevel level, BlockPos start, DyeColor color) {
@@ -54,6 +57,8 @@ public final class TubeNetwork {
         Set<BlockPos> visitedTubes = new HashSet<>();
         Deque<BlockPos> queue = new ArrayDeque<>();
         Set<BlockPos> collectedStorage = new HashSet<>();
+        // Connector blocks that have already been traversed (to prevent looping back)
+        Set<BlockPos> visitedConnectors = new HashSet<>();
         List<HandlerEntry> entries = new ArrayList<>();
         NetworkInterfaceBlockEntity foundNi = null;
 
@@ -64,7 +69,9 @@ public final class TubeNetwork {
             if (!visitedTubes.add(pos)) continue;
 
             BlockState state = level.getBlockState(pos);
-            if (!(state.getBlock() instanceof TubeBlock tb) || tb.getColor() != color) continue;
+            if (!(state.getBlock() instanceof TubeBlock tb)) continue;
+            // Accept any tube color — we may arrive here via a connector bridge
+            DyeColor tubeColor = tb.getColor();
 
             TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe ? tbe : null;
 
@@ -75,25 +82,40 @@ public final class TubeNetwork {
                 BlockPos neighborPos = pos.relative(dir);
                 BlockState neighborState = level.getBlockState(neighborPos);
 
-                if (neighborState.getBlock() instanceof TubeBlock neighborTube && neighborTube.getColor() == color) {
-                    // Same-color tube: extend BFS
+                if (neighborState.getBlock() instanceof TubeBlock neighborTube
+                        && neighborTube.getColor() == tubeColor) {
+                    // Same-color tube: extend BFS directly
                     if (!visitedTubes.contains(neighborPos)) {
                         queue.add(neighborPos);
                     }
                 } else if (collectedStorage.add(neighborPos)) {
-                    // Non-tube neighbor not yet collected: query its IItemHandler capability
+                    // Non-tube neighbor seen for the first time: collect its IItemHandler
                     IItemHandler handler =
                             level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, dir.getOpposite());
                     if (handler != null) {
                         Priority priority = resolvePriority(level, neighborPos, tubeBE, dir.ordinal());
                         entries.add(new HandlerEntry(handler, priority));
                     }
+
                     // Track the connected NI for energy routing
                     if (foundNi == null
                             && neighborState.getBlock() instanceof NetworkInterfaceBlock
                             && neighborState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
                             && level.getBlockEntity(neighborPos) instanceof NetworkInterfaceBlockEntity ni) {
                         foundNi = ni;
+                    }
+
+                    // If this neighbor is a NetworkConnector, continue the BFS through it
+                    // into any adjacent tubes (any color) that we haven't visited yet.
+                    if (neighborState.getBlock() instanceof NetworkConnector
+                            && visitedConnectors.add(neighborPos)) {
+                        for (Direction connDir : Direction.values()) {
+                            BlockPos beyondPos = neighborPos.relative(connDir);
+                            if (!visitedTubes.contains(beyondPos)
+                                    && level.getBlockState(beyondPos).getBlock() instanceof TubeBlock) {
+                                queue.add(beyondPos);
+                            }
+                        }
                     }
                 }
             }

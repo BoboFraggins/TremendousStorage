@@ -224,13 +224,30 @@ Single-item-type bulk storage carried as an item.
 - Pickaxe-minable
 
 ### Tube Network
-- All storage blocks reachable through same-color connected tubes form a **unified virtual inventory**
+- All storage blocks reachable through the tube network form a **unified virtual inventory**
 - Any block querying an `IItemHandler` capability on a tube receives a composite view of the entire network
 - **Insertion** routes to the highest-priority storage first (AE2/RS style — the network decides, not the caller)
 - **Priority source** (highest precedence first): Storage Interface attachment priority → storage block's own priority → Normal
 - Storage blocks connected via multiple paths are deduplicated (counted once per network)
 - Network view is built lazily on first capability access via BFS flood-fill and cached per tube; cache invalidates automatically when any neighbor changes
 - Cascade prevention: cache-clear propagation stops immediately if a tube's cache is already stale
+
+### Network Connectivity
+The following IntelliStore blocks act as **color-agnostic network connectors**: Filing Cabinet, Junk Drawer, Bulk Storage Container, Storage Access Terminal, Wireless Hub, and Stirling Engine.
+
+When the BFS encounters one of these blocks as a tube neighbor it:
+1. Collects the block's `IItemHandler` as a storage endpoint (same as always)
+2. **Continues the flood-fill** through all of that block's adjacent tubes — regardless of tube color
+
+This allows different-colored tube runs connected through a shared connector block to form a single unified network:
+
+```
+[red tube] — [Filing Cabinet] — [blue tube] — [NI]
+```
+
+- Tube color is a topological property of the tube itself; different colors never connect *directly* to each other
+- Color separation is reserved for future auto-crafting routing; it does **not** create isolated networks
+- There is one singular network per Network Interface; all connected storage is always in the same pool
 
 ### Tube Network — Power
 The network draws RF from the Network Interface's internal buffer each tick. Total cost is the sum of all connected components:

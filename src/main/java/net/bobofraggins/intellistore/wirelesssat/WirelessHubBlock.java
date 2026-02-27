@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.bobofraggins.intellistore.tube.NetworkConnector;
 
 /**
  * The Wireless Hub block.
@@ -23,7 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * records it into the item as a data component, then moves the item to the right slot
  * for retrieval. Only works when the network is valid.
  */
-public class WirelessHubBlock extends BaseEntityBlock {
+public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<WirelessHubBlock> CODEC = simpleCodec(WirelessHubBlock::new);
 

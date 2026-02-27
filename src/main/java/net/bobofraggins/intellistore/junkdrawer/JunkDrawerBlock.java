@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.bobofraggins.intellistore.tube.NetworkConnector;
 
 /**
  * The Junk Drawer block — stores up to 32,768 individual items, one per slot.
@@ -22,7 +23,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * <p>There is no player-facing UI. All item movement is via hoppers, pipes, or any mod that
  * reads the {@link net.neoforged.neoforge.items.IItemHandler} capability.
  */
-public class JunkDrawerBlock extends BaseEntityBlock {
+public class JunkDrawerBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<JunkDrawerBlock> CODEC = simpleCodec(JunkDrawerBlock::new);
 

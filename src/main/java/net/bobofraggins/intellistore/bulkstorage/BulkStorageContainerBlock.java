@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import net.bobofraggins.intellistore.tube.NetworkConnector;
 
 /**
  * The Bulk Storage Container block — stores up to {@value BulkStorageContainerBlockEntity#CAPACITY}
@@ -23,7 +24,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * <p>There is no player-facing UI. All item movement is via hoppers, pipes, or any mod that
  * reads the {@link net.neoforged.neoforge.items.IItemHandler} capability.
  */
-public class BulkStorageContainerBlock extends BaseEntityBlock {
+public class BulkStorageContainerBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<BulkStorageContainerBlock> CODEC = simpleCodec(BulkStorageContainerBlock::new);
 

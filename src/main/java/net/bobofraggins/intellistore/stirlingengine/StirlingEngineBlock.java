@@ -9,9 +9,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.bobofraggins.intellistore.tube.NetworkConnector;
 
 /** A heat-powered energy generator that converts heat from blocks below into RF. */
-public class StirlingEngineBlock extends BaseEntityBlock {
+public class StirlingEngineBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<StirlingEngineBlock> CODEC = simpleCodec(StirlingEngineBlock::new);
 
