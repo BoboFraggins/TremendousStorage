@@ -1,0 +1,207 @@
+package net.bobofraggins.intellistore.networkinterface;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import net.bobofraggins.intellistore.bulkstorage.BulkStorageContainerBlockEntity;
+import net.bobofraggins.intellistore.filingcabinet.FilingCabinetBlockEntity;
+import net.bobofraggins.intellistore.fluidtank.FluidTankBlockEntity;
+import net.bobofraggins.intellistore.junkdrawer.JunkDrawerBlockEntity;
+import net.bobofraggins.intellistore.priority.Priority;
+import net.bobofraggins.intellistore.tube.TubeBlock;
+import net.bobofraggins.intellistore.tube.TubeBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
+
+/**
+ * BFS utility that scans a Network Interface's entire connected tube network.
+ *
+ * <p>A Network Interface connects to <em>all</em> tube colors. For each directly-adjacent
+ * {@link TubeBlock}, this scanner starts a same-color BFS and collects every storage block
+ * reachable from those tubes. Results are deduped by position, and returned as a
+ * {@link NetworkScanResult} with handlers sorted for both insertion (highest-priority first)
+ * and extraction (lowest-priority first).
+ *
+ * <p>The network is considered valid when this NI is the <em>only</em> Network Interface
+ * reachable on the combined tube network.
+ */
+public final class NetworkInterfaceBFS {
+
+    private NetworkInterfaceBFS() {}
+
+    private record HandlerEntry(IItemHandler handler, Priority priority) {}
+
+    /**
+     * Scans the full network reachable from the Network Interface at {@code niPos}.
+     *
+     * @param level  server-side level
+     * @param niPos  position of the Network Interface lower-half block entity
+     * @return scan result (never null)
+     */
+    public static NetworkScanResult scan(ServerLevel level, BlockPos niPos) {
+
+        Set<BlockPos> visitedTubes     = new HashSet<>();
+        Set<BlockPos> collectedStorage = new HashSet<>();
+        List<HandlerEntry> handlerEntries = new ArrayList<>();
+        Map<String, Integer> tubeCounts  = new HashMap<>();   // color name → count
+        List<String> storageKeys         = new ArrayList<>(); // ordered by discovery
+        int otherNiCount = 0;
+
+        // Examine each face of the NI for adjacent tubes
+        for (Direction niDir : Direction.values()) {
+            BlockPos neighborPos = niPos.relative(niDir);
+            BlockState neighborState = level.getBlockState(neighborPos);
+
+            if (!(neighborState.getBlock() instanceof TubeBlock rootTube)) continue;
+
+            // BFS all same-color tubes reachable from this starting tube
+            DyeColor color = rootTube.getColor();
+            Deque<BlockPos> queue = new ArrayDeque<>();
+            queue.add(neighborPos);
+
+            while (!queue.isEmpty()) {
+                BlockPos pos = queue.poll();
+                if (!visitedTubes.add(pos)) continue;
+
+                BlockState state = level.getBlockState(pos);
+                if (!(state.getBlock() instanceof TubeBlock tb) || tb.getColor() != color) continue;
+
+                // Count this tube for the UI list
+                tubeCounts.merge(color.getName(), 1, Integer::sum);
+
+                TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe
+                        ? tbe : null;
+
+                for (Direction dir : Direction.values()) {
+                    if (!state.getValue(TubeBlock.DIR_PROPS[dir.ordinal()])) continue;
+
+                    BlockPos adjPos = pos.relative(dir);
+                    BlockState adjState = level.getBlockState(adjPos);
+
+                    if (adjState.getBlock() instanceof TubeBlock adjTube
+                            && adjTube.getColor() == color) {
+                        // Continue BFS through same-color tubes
+                        if (!visitedTubes.contains(adjPos)) {
+                            queue.add(adjPos);
+                        }
+                    } else if (collectedStorage.add(adjPos)) {
+                        // First time we see this non-tube block
+                        processNeighbor(level, adjPos, adjState, niPos,
+                                dir, tubeBE, handlerEntries, storageKeys);
+
+                        // Check if it's another NI lower half
+                        if (adjState.getBlock() instanceof NetworkInterfaceBlock
+                                && adjState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF)
+                                        == DoubleBlockHalf.LOWER
+                                && !adjPos.equals(niPos)) {
+                            otherNiCount++;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Sort handlers by priority
+        handlerEntries.sort(Comparator.comparingInt(e -> -e.priority().ordinal())); // highest first
+
+        List<IItemHandler> insertOrder = new ArrayList<>(handlerEntries.size());
+        for (HandlerEntry e : handlerEntries) insertOrder.add(e.handler());
+
+        List<IItemHandler> extractOrder = new ArrayList<>(insertOrder);
+        Collections.reverse(extractOrder); // lowest priority first
+
+        // Build UI block list: storage blocks first, then tubes
+        List<AttachedEntry> blockList = new ArrayList<>();
+        // Aggregate duplicate storage keys
+        Map<String, Integer> storageCounts = new HashMap<>();
+        for (String key : storageKeys) storageCounts.merge(key, 1, Integer::sum);
+        // Defined display order for storage types
+        List<String> storageOrder = List.of(
+                "block.intellistore.filing_cabinet",
+                "block.intellistore.junk_drawer",
+                "block.intellistore.bulk_storage_container",
+                "block.intellistore.fluid_tank");
+        for (String key : storageOrder) {
+            int count = storageCounts.getOrDefault(key, 0);
+            if (count > 0) blockList.add(new AttachedEntry(key, count));
+        }
+        // Tube entries (sorted by color name for determinism)
+        List<String> sortedColors = new ArrayList<>(tubeCounts.keySet());
+        Collections.sort(sortedColors);
+        for (String colorName : sortedColors) {
+            blockList.add(new AttachedEntry("block.intellistore." + colorName + "_tube",
+                    tubeCounts.get(colorName)));
+        }
+
+        return new NetworkScanResult(
+                List.copyOf(insertOrder),
+                List.copyOf(extractOrder),
+                List.copyOf(blockList),
+                otherNiCount == 0);
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private static void processNeighbor(
+            ServerLevel level, BlockPos adjPos, BlockState adjState,
+            BlockPos niPos, Direction tubeDir, TubeBlockEntity tubeBE,
+            List<HandlerEntry> handlerEntries, List<String> storageKeys) {
+
+        // Resolve IItemHandler capability
+        IItemHandler handler = level.getCapability(
+                Capabilities.ItemHandler.BLOCK, adjPos, tubeDir.getOpposite());
+        if (handler != null) {
+            Priority priority = resolvePriority(level, adjPos, tubeBE, tubeDir.ordinal());
+            handlerEntries.add(new HandlerEntry(handler, priority));
+        }
+
+        // Record block type for UI list
+        String key = blockListKey(level, adjPos, adjState, niPos);
+        if (key != null) storageKeys.add(key);
+    }
+
+    /** Returns the translation key for the UI list, or {@code null} if the block should be hidden. */
+    private static String blockListKey(ServerLevel level, BlockPos pos, BlockState state,
+            BlockPos niPos) {
+        if (pos.equals(niPos)) return null; // don't list ourselves
+
+        BlockEntity be = level.getBlockEntity(pos);
+        if (be instanceof FilingCabinetBlockEntity)        return "block.intellistore.filing_cabinet";
+        if (be instanceof JunkDrawerBlockEntity)           return "block.intellistore.junk_drawer";
+        if (be instanceof BulkStorageContainerBlockEntity) return "block.intellistore.bulk_storage_container";
+        if (be instanceof FluidTankBlockEntity)            return "block.intellistore.fluid_tank";
+        return null; // skip foreign blocks
+    }
+
+    private static Priority resolvePriority(
+            ServerLevel level, BlockPos neighborPos,
+            TubeBlockEntity tubeBE, int faceIndex) {
+
+        if (tubeBE != null && tubeBE.hasAttachment(faceIndex)) {
+            return tubeBE.getAttachmentPriority(faceIndex);
+        }
+
+        BlockEntity neighborBE = level.getBlockEntity(neighborPos);
+        if (neighborBE instanceof FilingCabinetBlockEntity fc)        return fc.getPriority();
+        if (neighborBE instanceof JunkDrawerBlockEntity jd)           return jd.getPriority();
+        if (neighborBE instanceof BulkStorageContainerBlockEntity bs) return bs.getPriority();
+        return Priority.NORMAL;
+    }
+}

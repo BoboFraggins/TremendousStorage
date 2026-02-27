@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "half=lower": { "model": "intellistore:block/network_interface_lower" },
+    "half=upper": { "model": "intellistore:block/network_interface_upper" }
+  }
+}

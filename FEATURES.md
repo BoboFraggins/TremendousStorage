@@ -135,6 +135,32 @@ merge, tape) are intentionally not shown.
 - Priority: 5 levels (Lowest → Highest); default **Normal**; attachment priority overrides the connected storage block's own priority
 - Priority saved to NBT per-face and survives break/replace
 
+### Network Interface
+- A two-block-tall block (lower + upper half) that acts as the coordinator for a storage network
+- **Lower half**: gray block body with a 1/4×1/4 status dot on each face; **upper half**: glass
+- Status dot is **green** when the network is valid (exactly one NI connected), **red** otherwise
+- Connects to all tube colors; BFS scans the entire reachable tube network on first access
+- Exposes an `IItemHandler` capability over the whole network: inserts to highest-priority storage first, extracts from lowest-priority storage first
+- Lazy-cached network scan; cache invalidates automatically when any neighbor changes
+- Right-click → opens the **Network Interface screen**: shows validity status and a scrollable list of all attached blocks (e.g. "Filing Cabinet (2)", "Black Tubes (13)")
+- Breaking either half removes both halves and drops one Network Interface item
+- Recipe: Glass (top) / Brain (center) / Healing Salve Bucket (bottom) — vertical shaped
+- Pickaxe-minable
+
+### Network Interface — Prerequisite Items & Fluid
+
+#### Zombie Brain
+- 20% drop from all Zombie-type mobs (Zombie, Husk, Drowned, Zombie Villager, etc.)
+
+#### Healing Salve (fluid)
+- Lava-like flowing fluid — does **not** form infinite source blocks; slow flow speed
+- Created by right-clicking a **water-filled cauldron** with a **Glistering Melon Slice** (melon consumed, cauldron becomes Healing Salve Cauldron)
+- Pick up with an empty bucket to get a **Healing Salve Bucket**
+
+#### Brain
+- Crafted by right-clicking a **Healing Salve Cauldron** with a **Zombie Brain**
+- Both the Zombie Brain and the Healing Salve are consumed; the Brain pops out as an item entity
+
 ### Tube Network
 - All storage blocks reachable through same-color connected tubes form a **unified virtual inventory**
 - Any block querying an `IItemHandler` capability on a tube receives a composite view of the entire network

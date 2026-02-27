@@ -47,6 +47,18 @@
   "screen.intellistore.filing_cabinet.toggle_closed": "Closed",
   "screen.intellistore.storage_interface": "Storage Interface",
 
+  "block.intellistore.network_interface": "Network Interface",
+  "block.intellistore.healing_salve": "Healing Salve",
+  "block.intellistore.healing_salve_cauldron": "Healing Salve Cauldron",
+
+  "item.intellistore.zombie_brain": "Zombie Brain",
+  "item.intellistore.brain": "Brain",
+  "item.intellistore.healing_salve_bucket": "Healing Salve Bucket",
+
+  "screen.intellistore.network_interface": "Network Interface",
+  "screen.intellistore.network_interface.valid": "Network: Valid",
+  "screen.intellistore.network_interface.invalid": "Network: Invalid",
+
   "block.intellistore.white_tube": "White Tube",
   "block.intellistore.orange_tube": "Orange Tube",
   "block.intellistore.magenta_tube": "Magenta Tube",

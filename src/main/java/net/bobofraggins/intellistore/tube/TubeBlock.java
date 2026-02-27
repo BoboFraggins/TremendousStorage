@@ -67,7 +67,7 @@ public class TubeBlock extends BaseEntityBlock {
     public static final BooleanProperty DOWN = BooleanProperty.create("down");
 
     /** Indexed by {@link Direction#ordinal()} — same order as {@code Direction.values()}. */
-    private static final BooleanProperty[] DIR_PROPS = {
+    public static final BooleanProperty[] DIR_PROPS = {
         DOWN, UP, NORTH, SOUTH, WEST, EAST
     };
 

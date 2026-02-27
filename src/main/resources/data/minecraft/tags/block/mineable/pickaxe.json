@@ -20,6 +20,8 @@
     "intellistore:brown_tube",
     "intellistore:green_tube",
     "intellistore:red_tube",
-    "intellistore:black_tube"
+    "intellistore:black_tube",
+    "intellistore:network_interface",
+    "intellistore:healing_salve_cauldron"
   ]
 }

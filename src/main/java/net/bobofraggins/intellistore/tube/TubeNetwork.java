@@ -17,7 +17,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -35,15 +34,6 @@ import net.neoforged.neoforge.items.IItemHandler;
 public final class TubeNetwork {
 
     private TubeNetwork() {}
-
-    /**
-     * Mirrors {@code TubeBlock.DIR_PROPS}, indexed by {@link Direction#ordinal()}.
-     * DOWN=0, UP=1, NORTH=2, SOUTH=3, WEST=4, EAST=5.
-     */
-    private static final BooleanProperty[] DIR_PROPS = {
-        TubeBlock.DOWN, TubeBlock.UP, TubeBlock.NORTH,
-        TubeBlock.SOUTH, TubeBlock.WEST, TubeBlock.EAST
-    };
 
     /**
      * Flood-fills the tube network starting at {@code start} and returns a
@@ -77,7 +67,7 @@ public final class TubeNetwork {
 
             for (Direction dir : Direction.values()) {
                 // Only follow active connections (tube arm extends toward this face)
-                if (!state.getValue(DIR_PROPS[dir.ordinal()])) continue;
+                if (!state.getValue(TubeBlock.DIR_PROPS[dir.ordinal()])) continue;
 
                 BlockPos neighborPos = pos.relative(dir);
                 BlockState neighborState = level.getBlockState(neighborPos);

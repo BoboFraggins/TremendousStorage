@@ -13,6 +13,12 @@ import net.bobofraggins.intellistore.fluidtank.FluidTankBlock;
 import net.bobofraggins.intellistore.fluidtank.FluidTankBlockEntity;
 import net.bobofraggins.intellistore.fluidtank.FluidTankContents;
 import net.bobofraggins.intellistore.fluidtank.FluidTankFluidHandler;
+import net.bobofraggins.intellistore.healingsalve.BrainItem;
+import net.bobofraggins.intellistore.healingsalve.HealingSalveBlock;
+import net.bobofraggins.intellistore.healingsalve.HealingSalveCauldronBlock;
+import net.bobofraggins.intellistore.healingsalve.HealingSalveFluid;
+import net.bobofraggins.intellistore.healingsalve.HealingSalveInteractions;
+import net.bobofraggins.intellistore.healingsalve.ZombieBrainItem;
 import net.bobofraggins.intellistore.junkdrawer.JunkDrawerBlock;
 import net.bobofraggins.intellistore.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.junkdrawer.JunkDrawerItemHandler;
@@ -22,9 +28,12 @@ import net.bobofraggins.intellistore.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.intellistore.manillafolder.FolderStorageRecipe;
 import net.bobofraggins.intellistore.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.manillafolder.ManillaFolderItem;
+import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlock;
+import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.tube.TubeBlock;
 import net.bobofraggins.intellistore.tube.TubeBlockEntity;
 import net.bobofraggins.intellistore.ui.FilingCabinetMenu;
+import net.bobofraggins.intellistore.ui.NetworkInterfaceMenu;
 import net.bobofraggins.intellistore.ui.PriorityMenu;
 import net.bobofraggins.intellistore.ui.StorageInterfaceMenu;
 import net.bobofraggins.intellistore.whiteout.FolderTapeRecipe;
@@ -33,7 +42,10 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Items;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -42,12 +54,16 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 public final class Registration {
 
@@ -75,6 +91,12 @@ public final class Registration {
 
     public static final DeferredRegister<MenuType<?>> MENU_TYPES =
             DeferredRegister.create(Registries.MENU, IntelliStore.MODID);
+
+    public static final DeferredRegister<net.minecraft.world.level.material.Fluid> FLUID_REGISTER =
+            DeferredRegister.create(Registries.FLUID, IntelliStore.MODID);
+
+    public static final DeferredRegister<FluidType> FLUID_TYPE_REGISTER =
+            DeferredRegister.create(NeoForgeRegistries.Keys.FLUID_TYPES, IntelliStore.MODID);
 
     // -------------------------------------------------------------------------
     // Data components
@@ -159,6 +181,90 @@ public final class Registration {
                             .build(null));
 
     // -------------------------------------------------------------------------
+    // Healing Salve fluid type + fluids + fluid block + cauldron + items
+    // -------------------------------------------------------------------------
+
+    public static final DeferredHolder<FluidType, FluidType> HEALING_SALVE_TYPE =
+            FLUID_TYPE_REGISTER.register("healing_salve", () ->
+                    new FluidType(FluidType.Properties.create()
+                            .density(2000)
+                            .viscosity(6000)
+                            .temperature(320)));
+
+    public static final DeferredHolder<net.minecraft.world.level.material.Fluid, HealingSalveFluid.Source>
+            HEALING_SALVE_SOURCE = FLUID_REGISTER.register("healing_salve", HealingSalveFluid.Source::new);
+
+    public static final DeferredHolder<net.minecraft.world.level.material.Fluid, HealingSalveFluid.Flowing>
+            HEALING_SALVE_FLOWING = FLUID_REGISTER.register("healing_salve_flowing", HealingSalveFluid.Flowing::new);
+
+    public static final DeferredBlock<HealingSalveBlock> HEALING_SALVE_BLOCK = BLOCKS.register(
+            "healing_salve",
+            () -> new HealingSalveBlock(
+                    HEALING_SALVE_SOURCE.get(),
+                    BlockBehaviour.Properties.of()
+                            .noCollission()
+                            .strength(100f)
+                            .noLootTable()
+                            .liquid()
+                            .replaceable()
+                            .pushReaction(PushReaction.DESTROY)));
+
+    public static final DeferredHolder<Item, ZombieBrainItem> ZOMBIE_BRAIN =
+            ITEMS.register("zombie_brain", ZombieBrainItem::new);
+
+    public static final DeferredHolder<Item, BrainItem> BRAIN =
+            ITEMS.register("brain", BrainItem::new);
+
+    public static final DeferredHolder<Item, BucketItem> HEALING_SALVE_BUCKET =
+            ITEMS.register("healing_salve_bucket",
+                    () -> new BucketItem(HEALING_SALVE_SOURCE.get(),
+                            new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    /** Shared properties object for the Healing Salve Source + Flowing fluids. */
+    public static final BaseFlowingFluid.Properties HEALING_SALVE_FLUID_PROPS =
+            new BaseFlowingFluid.Properties(
+                    HEALING_SALVE_TYPE,
+                    () -> HEALING_SALVE_SOURCE.get(),
+                    () -> HEALING_SALVE_FLOWING.get())
+                    .bucket(() -> HEALING_SALVE_BUCKET.get())
+                    .block(() -> HEALING_SALVE_BLOCK.get())
+                    .slopeFindDistance(2)
+                    .levelDecreasePerBlock(1)
+                    .tickRate(30);
+
+    public static final DeferredBlock<HealingSalveCauldronBlock> HEALING_SALVE_CAULDRON = BLOCKS.register(
+            "healing_salve_cauldron",
+            () -> new HealingSalveCauldronBlock(BlockBehaviour.Properties.of()
+                    .strength(2f)
+                    .sound(SoundType.METAL)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<Item, BlockItem> HEALING_SALVE_CAULDRON_ITEM =
+            ITEMS.registerSimpleBlockItem("healing_salve_cauldron", HEALING_SALVE_CAULDRON);
+
+    // -------------------------------------------------------------------------
+    // Network Interface block + block entity
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<NetworkInterfaceBlock> NETWORK_INTERFACE = BLOCKS.register(
+            "network_interface",
+            () -> new NetworkInterfaceBlock(BlockBehaviour.Properties.of()
+                    .strength(5f, 1000f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<Item, BlockItem> NETWORK_INTERFACE_ITEM =
+            ITEMS.registerSimpleBlockItem("network_interface", NETWORK_INTERFACE);
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<NetworkInterfaceBlockEntity>>
+            NETWORK_INTERFACE_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "network_interface",
+                    () -> BlockEntityType.Builder.of(
+                                    NetworkInterfaceBlockEntity::new, NETWORK_INTERFACE.get())
+                            .build(null));
+
+    // -------------------------------------------------------------------------
     // Tubes (16 colored variants + shared block entity type)
     // -------------------------------------------------------------------------
 
@@ -202,6 +308,10 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<StorageInterfaceMenu>> STORAGE_INTERFACE_MENU =
             MENU_TYPES.register("storage_interface",
                     () -> IMenuTypeExtension.create(StorageInterfaceMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<NetworkInterfaceMenu>> NETWORK_INTERFACE_MENU =
+            MENU_TYPES.register("network_interface",
+                    () -> IMenuTypeExtension.create(NetworkInterfaceMenu::new));
 
     // -------------------------------------------------------------------------
     // Items — whiteout tape
@@ -304,6 +414,10 @@ public final class Registration {
                         output.accept(JUNK_DRAWER_ITEM.get());
                         output.accept(BULK_STORAGE_CONTAINER_ITEM.get());
                         output.accept(FLUID_TANK_ITEM.get());
+                        output.accept(NETWORK_INTERFACE_ITEM.get());
+                        output.accept(ZOMBIE_BRAIN.get());
+                        output.accept(BRAIN.get());
+                        output.accept(HEALING_SALVE_BUCKET.get());
                         for (DyeColor color : DyeColor.values()) {
                             output.accept(TUBE_ITEMS.get(color).get());
                         }
@@ -326,7 +440,14 @@ public final class Registration {
         RECIPE_SERIALIZERS.register(modEventBus);
         CREATIVE_MODE_TABS.register(modEventBus);
         MENU_TYPES.register(modEventBus);
+        FLUID_REGISTER.register(modEventBus);
+        FLUID_TYPE_REGISTER.register(modEventBus);
         modEventBus.addListener(Registration::registerCapabilities);
+        modEventBus.addListener(Registration::onCommonSetup);
+    }
+
+    private static void onCommonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(HealingSalveInteractions::register);
     }
 
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
@@ -344,5 +465,9 @@ public final class Registration {
                 Capabilities.FluidHandler.BLOCK, FLUID_TANK_BE_TYPE.get(), (be, side) -> new FluidTankFluidHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                NETWORK_INTERFACE_BE_TYPE.get(),
+                (be, side) -> be.getItemHandler());
     }
 }

@@ -27,5 +27,13 @@ public final class NetworkEvents {
                 SetStorageInterfacePriorityPacket.TYPE,
                 SetStorageInterfacePriorityPacket.STREAM_CODEC,
                 SetStorageInterfacePriorityPacket::handle);
+        registrar.playToServer(
+                RequestNetworkContentsPacket.TYPE,
+                RequestNetworkContentsPacket.STREAM_CODEC,
+                RequestNetworkContentsPacket::handle);
+        registrar.playToClient(
+                NetworkContentsPacket.TYPE,
+                NetworkContentsPacket.STREAM_CODEC,
+                NetworkContentsPacket::handle);
     }
 }

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "G",
+    "B",
+    "S"
+  ],
+  "key": {
+    "G": { "item": "minecraft:glass" },
+    "B": { "item": "intellistore:brain" },
+    "S": { "item": "intellistore:healing_salve_bucket" }
+  },
+  "result": {
+    "id": "intellistore:network_interface",
+    "count": 1
+  }
+}
