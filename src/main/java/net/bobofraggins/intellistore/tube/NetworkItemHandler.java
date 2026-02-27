@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.tube;
 
 import java.util.List;
 import javax.annotation.Nullable;
+import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -16,13 +17,31 @@ import net.neoforged.neoforge.items.IItemHandler;
  *
  * <p>Slot counts in the underlying handlers are dynamic (JunkDrawer, BulkStorageContainer
  * grow/shrink as items are added), so slot resolution is recalculated on each call.
+ *
+ * <p>Also holds a reference to the connected {@link NetworkInterfaceBlockEntity} so that
+ * {@link TubeEnergyHandler} can route incoming energy to the correct NI buffer.
  */
 public class NetworkItemHandler implements IItemHandler {
 
     private final List<IItemHandler> handlers;
 
+    /** The NI that manages this network, or {@code null} if not found. */
+    @Nullable
+    private final NetworkInterfaceBlockEntity networkInterface;
+
     public NetworkItemHandler(List<IItemHandler> handlers) {
+        this(handlers, null);
+    }
+
+    public NetworkItemHandler(List<IItemHandler> handlers, @Nullable NetworkInterfaceBlockEntity networkInterface) {
         this.handlers = List.copyOf(handlers);
+        this.networkInterface = networkInterface;
+    }
+
+    /** Returns the Network Interface managing this network, or {@code null}. */
+    @Nullable
+    public NetworkInterfaceBlockEntity getNetworkInterface() {
+        return networkInterface;
     }
 
     // -------------------------------------------------------------------------

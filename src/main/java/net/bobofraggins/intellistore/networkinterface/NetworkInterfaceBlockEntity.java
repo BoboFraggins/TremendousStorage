@@ -28,13 +28,34 @@ import net.neoforged.neoforge.items.IItemHandler;
  *
  * <p>Exposes an {@link IItemHandler} capability via {@link NiItemHandler}: insertion uses
  * the highest-priority storage first; extraction drains the lowest-priority storage first.
+ *
+ * <p><b>Power system:</b> The Network Interface stores RF energy and drains it each server
+ * tick proportional to network demand (NI itself, connected SATs, Wireless Hubs, and tube
+ * attachments). When the energy buffer runs out the network becomes inactive and most
+ * functionality stops working. Energy can be supplied by:
+ * <ul>
+ *   <li>The Stirling Generator block (pushes energy into adjacent IEnergyStorage)
+ *   <li>Any energy pipe (Pipez, Mekanism cables, etc.) adjacent to the NI or any tube in
+ *       the network — tubes expose the NI's energy buffer as a shared capability
+ * </ul>
  */
 public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProvider {
+
+    // ---- Power constants ----
+    public static final int MAX_ENERGY = 100_000;
+    /** RF/t consumed by this NI itself. */
+    public static final int NI_COST = 5;
 
     /** Lazily built; {@code null} = stale. */
     private NetworkScanResult cachedScan = null;
     /** Lazily built alongside {@link #cachedScan}; {@code null} = stale. */
     private NiItemHandler cachedHandler = null;
+
+    private int energyStored = 0;
+    /** Whether the network had enough power last tick. Synced to clients. */
+    private boolean powered = false;
+    /** Total RF/t consumed by the network, computed during scan. Synced to clients. */
+    private int totalConsumption = 0;
 
     public NetworkInterfaceBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.NETWORK_INTERFACE_BE_TYPE.get(), pos, state);
@@ -79,6 +100,86 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     }
 
     // -------------------------------------------------------------------------
+    // Power system
+    // -------------------------------------------------------------------------
+
+    /** Returns how much energy is stored in the NI's buffer. */
+    public int getEnergyStored() {
+        return energyStored;
+    }
+
+    /** Returns the max energy capacity. */
+    public int getMaxEnergy() {
+        return MAX_ENERGY;
+    }
+
+    /**
+     * Returns true if the network is currently powered (had enough energy last tick).
+     * Returns true when not enough data is available (graceful before first tick).
+     */
+    public boolean isPowered() {
+        return powered;
+    }
+
+    /** Total RF/t consumed by all network components. */
+    public int getTotalConsumption() {
+        return totalConsumption;
+    }
+
+    /**
+     * Called each server tick by {@link NetworkInterfaceBlock#getTicker()}.
+     * Drains energy for all active network components. If insufficient energy is present,
+     * sets {@code powered = false} (the network becomes inactive).
+     */
+    public void serverTick() {
+        if (level == null || level.isClientSide()) return;
+
+        NetworkScanResult scan = getScan();
+        if (scan == null || !scan.isValid()) {
+            // No valid network — still count base NI cost but mark unpowered
+            int cost = NI_COST;
+            boolean wasPowered = powered;
+            powered = energyStored >= cost;
+            if (powered) energyStored -= cost;
+            totalConsumption = cost;
+            if (powered != wasPowered) setChanged();
+            return;
+        }
+
+        int cost = scan.totalRfPerTick();
+        boolean wasPowered = powered;
+        boolean nowPowered = energyStored >= cost;
+        if (nowPowered) {
+            energyStored -= cost;
+        }
+        powered = nowPowered;
+        totalConsumption = cost;
+
+        if (powered != wasPowered) {
+            setChanged();
+        }
+    }
+
+    /**
+     * Receives energy into the NI's buffer. Called by external energy sources
+     * (Stirling Engine push, Pipez pipe injection, Mekanism cable injection, etc.).
+     * Returns the amount actually accepted.
+     */
+    public int receiveEnergy(int maxReceive, boolean simulate) {
+        int space = MAX_ENERGY - energyStored;
+        int accepted = Math.min(maxReceive, space);
+        if (!simulate && accepted > 0) {
+            energyStored += accepted;
+            // Don't call setChanged here to avoid scan invalidation on every energy tick
+            super.setChanged();
+            if (level != null) {
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
+        }
+        return accepted;
+    }
+
+    // -------------------------------------------------------------------------
     // setChanged
     // -------------------------------------------------------------------------
 
@@ -107,7 +208,10 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         ContainerData data = new ContainerData() {
             @Override
             public int get(int index) {
-                return index == 0 ? (isNetworkValid() ? 1 : 0) : 0;
+                return switch (index) {
+                    case 0 -> (isNetworkValid() ? 1 : 0);
+                    default -> 0;
+                };
             }
 
             @Override
@@ -122,17 +226,21 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     }
 
     // -------------------------------------------------------------------------
-    // NBT (no persistent fields — scan is transient)
+    // NBT
     // -------------------------------------------------------------------------
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
+        tag.putInt("EnergyStored", energyStored);
+        tag.putBoolean("Powered", powered);
     }
 
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+        energyStored = tag.getInt("EnergyStored");
+        powered = tag.getBoolean("Powered");
     }
 
     // -------------------------------------------------------------------------

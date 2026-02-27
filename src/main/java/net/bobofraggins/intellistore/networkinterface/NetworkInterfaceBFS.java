@@ -15,8 +15,11 @@ import net.bobofraggins.intellistore.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.fluidtank.FluidTankBlockEntity;
 import net.bobofraggins.intellistore.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.priority.Priority;
+import net.bobofraggins.intellistore.storagetransceiver.StorageAccessTerminalBlock;
+import net.bobofraggins.intellistore.tube.AttachmentType;
 import net.bobofraggins.intellistore.tube.TubeBlock;
 import net.bobofraggins.intellistore.tube.TubeBlockEntity;
+import net.bobofraggins.intellistore.wirelesssat.WirelessHubBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -46,6 +49,13 @@ public final class NetworkInterfaceBFS {
 
     private record HandlerEntry(IItemHandler handler, Priority priority) {}
 
+    /** RF/t cost per attached SAT. */
+    private static final int SAT_COST = 5;
+    /** RF/t cost per Wireless Hub. */
+    private static final int HUB_COST = 25;
+    /** RF/t cost per tube attachment (any type). */
+    private static final int ATTACHMENT_COST = 1;
+
     /**
      * Scans the full network reachable from the Network Interface at {@code niPos}.
      *
@@ -61,6 +71,8 @@ public final class NetworkInterfaceBFS {
         Map<String, Integer> tubeCounts = new HashMap<>(); // color name → count
         List<String> storageKeys = new ArrayList<>(); // ordered by discovery
         int otherNiCount = 0;
+        // Power accounting
+        int rfPerTick = NetworkInterfaceBlockEntity.NI_COST; // base NI cost
 
         // Examine each face of the NI for adjacent tubes
         for (Direction niDir : Direction.values()) {
@@ -86,6 +98,15 @@ public final class NetworkInterfaceBFS {
 
                 TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe ? tbe : null;
 
+                // Count tube attachment power cost
+                if (tubeBE != null) {
+                    for (int i = 0; i < 6; i++) {
+                        if (tubeBE.getAttachmentType(i) != AttachmentType.NONE) {
+                            rfPerTick += ATTACHMENT_COST;
+                        }
+                    }
+                }
+
                 for (Direction dir : Direction.values()) {
                     if (!state.getValue(TubeBlock.DIR_PROPS[dir.ordinal()])) continue;
 
@@ -106,6 +127,16 @@ public final class NetworkInterfaceBFS {
                                 && adjState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
                                 && !adjPos.equals(niPos)) {
                             otherNiCount++;
+                        }
+
+                        // Count SAT and Wireless Hub power cost
+                        if (adjState.getBlock() instanceof StorageAccessTerminalBlock) {
+                            rfPerTick += SAT_COST;
+                        } else {
+                            BlockEntity adjBE = adjPos.equals(niPos) ? null : level.getBlockEntity(adjPos);
+                            if (adjBE instanceof WirelessHubBlockEntity) {
+                                rfPerTick += HUB_COST;
+                            }
                         }
                     }
                 }
@@ -144,7 +175,11 @@ public final class NetworkInterfaceBFS {
         }
 
         return new NetworkScanResult(
-                List.copyOf(insertOrder), List.copyOf(extractOrder), List.copyOf(blockList), otherNiCount == 0);
+                List.copyOf(insertOrder),
+                List.copyOf(extractOrder),
+                List.copyOf(blockList),
+                otherNiCount == 0,
+                rfPerTick);
     }
 
     // -------------------------------------------------------------------------

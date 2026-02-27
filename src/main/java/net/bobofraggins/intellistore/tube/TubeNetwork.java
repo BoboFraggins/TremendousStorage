@@ -10,6 +10,8 @@ import java.util.Set;
 import net.bobofraggins.intellistore.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.junkdrawer.JunkDrawerBlockEntity;
+import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlock;
+import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.priority.Priority;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -17,6 +19,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -51,6 +55,7 @@ public final class TubeNetwork {
         Deque<BlockPos> queue = new ArrayDeque<>();
         Set<BlockPos> collectedStorage = new HashSet<>();
         List<HandlerEntry> entries = new ArrayList<>();
+        NetworkInterfaceBlockEntity foundNi = null;
 
         queue.add(start);
 
@@ -83,6 +88,13 @@ public final class TubeNetwork {
                         Priority priority = resolvePriority(level, neighborPos, tubeBE, dir.ordinal());
                         entries.add(new HandlerEntry(handler, priority));
                     }
+                    // Track the connected NI for energy routing
+                    if (foundNi == null
+                            && neighborState.getBlock() instanceof NetworkInterfaceBlock
+                            && neighborState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
+                            && level.getBlockEntity(neighborPos) instanceof NetworkInterfaceBlockEntity ni) {
+                        foundNi = ni;
+                    }
                 }
             }
         }
@@ -94,7 +106,7 @@ public final class TubeNetwork {
         for (HandlerEntry e : entries) {
             handlers.add(e.handler());
         }
-        return new NetworkItemHandler(handlers);
+        return new NetworkItemHandler(handlers, foundNi);
     }
 
     /**

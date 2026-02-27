@@ -32,6 +32,10 @@ import net.bobofraggins.intellistore.manillafolder.ManillaFolderItem;
 import net.bobofraggins.intellistore.mekanism.GasTankRegistration;
 import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.intellistore.networkinterface.NiEnergyHandler;
+import net.bobofraggins.intellistore.stirlingengine.StirlingEngineBlock;
+import net.bobofraggins.intellistore.stirlingengine.StirlingEngineBlockEntity;
+import net.bobofraggins.intellistore.stirlingengine.StirlingEngineEnergyHandler;
 import net.bobofraggins.intellistore.storagetransceiver.StorageAccessTerminalBlock;
 import net.bobofraggins.intellistore.tube.ExportInterfaceItem;
 import net.bobofraggins.intellistore.tube.ImportInterfaceItem;
@@ -39,6 +43,7 @@ import net.bobofraggins.intellistore.tube.InterfaceFilterContents;
 import net.bobofraggins.intellistore.tube.StorageInterfaceItem;
 import net.bobofraggins.intellistore.tube.TubeBlock;
 import net.bobofraggins.intellistore.tube.TubeBlockEntity;
+import net.bobofraggins.intellistore.tube.TubeEnergyHandler;
 import net.bobofraggins.intellistore.ui.ExportInterfaceMenu;
 import net.bobofraggins.intellistore.ui.FilingCabinetMenu;
 import net.bobofraggins.intellistore.ui.ImportInterfaceMenu;
@@ -352,6 +357,27 @@ public final class Registration {
             ITEMS.register("wireless_sat", WirelessSatItem::new);
 
     // -------------------------------------------------------------------------
+    // Stirling Engine block + block entity
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<StirlingEngineBlock> STIRLING_ENGINE = BLOCKS.register(
+            "stirling_engine",
+            () -> new StirlingEngineBlock(BlockBehaviour.Properties.of()
+                    .strength(2.5f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<Item, BlockItem> STIRLING_ENGINE_ITEM =
+            ITEMS.registerSimpleBlockItem("stirling_engine", STIRLING_ENGINE);
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StirlingEngineBlockEntity>>
+            STIRLING_ENGINE_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "stirling_engine",
+                    () -> BlockEntityType.Builder.of(StirlingEngineBlockEntity::new, STIRLING_ENGINE.get())
+                            .build(null));
+
+    // -------------------------------------------------------------------------
     // Tubes (16 colored variants + shared block entity type)
     // -------------------------------------------------------------------------
 
@@ -538,6 +564,7 @@ public final class Registration {
                         output.accept(STORAGE_ACCESS_TERMINAL_ITEM.get());
                         output.accept(WIRELESS_HUB_ITEM.get());
                         output.accept(WIRELESS_SAT.get());
+                        output.accept(STIRLING_ENGINE_ITEM.get());
                         output.accept(STORAGE_INTERFACE.get());
                         output.accept(IMPORT_INTERFACE.get());
                         output.accept(EXPORT_INTERFACE.get());
@@ -599,5 +626,18 @@ public final class Registration {
                 Capabilities.ItemHandler.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getItemHandler());
+        // Energy capabilities
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK,
+                NETWORK_INTERFACE_BE_TYPE.get(),
+                (be, side) -> new NiEnergyHandler(be));
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK,
+                TUBE_BE_TYPE.get(),
+                (be, side) -> new TubeEnergyHandler(be));
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK,
+                STIRLING_ENGINE_BE_TYPE.get(),
+                (be, side) -> new StirlingEngineEnergyHandler(be));
     }
 }

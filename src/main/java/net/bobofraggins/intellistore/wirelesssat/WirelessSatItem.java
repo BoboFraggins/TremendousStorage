@@ -79,6 +79,11 @@ public class WirelessSatItem extends Item {
             player.displayClientMessage(Component.translatable("item.intellistore.wireless_sat.invalid_network"), true);
             return;
         }
+        if (!ni.isPowered()) {
+            player.displayClientMessage(
+                    Component.translatable("screen.intellistore.not_enough_power"), true);
+            return;
+        }
 
         // Use the NI position as both satPos and niPos — the client-side constructor reads
         // satPos first, then optionally niPos. WirelessSatMenu.stillValid ignores satPos.

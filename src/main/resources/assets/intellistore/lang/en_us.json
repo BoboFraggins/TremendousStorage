@@ -111,5 +111,15 @@
   "item.intellistore.wireless_sat.invalid_network": "Network is unavailable",
 
   "key.intellistore.open_wireless_sat": "Open Wireless Storage Access Terminal",
-  "key.categories.intellistore": "IntelliStore"
+  "key.categories.intellistore": "IntelliStore",
+
+  "block.intellistore.stirling_engine": "Stirling Engine",
+
+  "jade.intellistore.stirling_engine.hint": "Place Above Heat Source",
+  "jade.intellistore.stirling_engine.stored": "%1$s / %2$s FE",
+
+  "jade.intellistore.network_interface.consumption": "%1$s RF/t",
+  "jade.intellistore.not_enough_power": "Not Enough Power",
+
+  "screen.intellistore.not_enough_power": "Not Enough Power"
 }

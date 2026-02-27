@@ -94,6 +94,11 @@ public class TubeBlockEntity extends BlockEntity {
             NetworkItemHandler network = be.getNetworkView();
             if (network == null) continue;
 
+            // Skip import/export when the network lacks power
+            net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity ni =
+                    network.getNetworkInterface();
+            if (ni != null && !ni.isPowered()) continue;
+
             if (type == AttachmentType.IMPORT_INTERFACE) {
                 doImport(neighbor, network, be.filterSlots[i], be.filterMode[i]);
             } else {

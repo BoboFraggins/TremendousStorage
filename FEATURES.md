@@ -56,6 +56,21 @@ NeoForge 1.21.1 · Minecraft 1.21.1
 - Recipe: glass on top, junk drawer in middle, bucket on bottom (vertical shaped)
 - Pickaxe-minable
 
+### Stirling Engine
+- A heat-powered RF generator that converts heat from blocks placed below it into Redstone Flux
+- **Heat sources and output rates**:
+  - Lava: **50 FE/t**
+  - Magma Block: **25 FE/t**
+  - Lit Campfire or Lit Soul Campfire: **15 FE/t**
+  - Any other block (or air): 0 FE/t
+- **Internal buffer**: 100,000 FE
+- Pushes up to 100 FE/t to each adjacent block exposing an `IEnergyStorage` capability (including tubes)
+- Exposes `IEnergyStorage` capability for extraction by external conduits/cables
+- Client-animated spinning copper flywheel when the engine is actively generating
+- Jade tooltip: "Place Above Heat Source" when idle; stored / max FE when generating
+- Recipe: iron nuggets in the four cardinal faces, stick in center, water bucket bottom-left, lava bucket bottom-right
+- Pickaxe-minable
+
 ### Wireless Hub
 - A linking station that pairs an unlinked Wireless SAT item with a reachable Network Interface
 - Right-click → opens a 2-slot UI: left slot accepts an unlinked Wireless SAT; right slot is output-only
@@ -172,6 +187,11 @@ Single-item-type bulk storage carried as an item.
 - Breaking either half removes both halves and drops one Network Interface item
 - Recipe: Glass (top) / Brain (center) / Healing Salve Bucket (bottom) — vertical shaped
 - Pickaxe-minable
+- **Power**: requires RF to operate; base cost **5 RF/t** plus per-component costs (see Tube Network — Power)
+- Accepts RF via `IEnergyStorage` capability (internal buffer: 100,000 FE); compatible with Stirling Engine, Pipez power pipes, Mekanism cables, Powah conduits, etc.
+- Any tube in the connected network also exposes `IEnergyStorage`, so power can be injected through any tube face
+- When underpowered the network becomes **inactive**: SAT and Wireless SAT cannot be opened, tube Import/Export attachments stop transferring, and the status dot turns red
+- Jade tooltip: total RF/t consumed by the network; "Not Enough Power" in red when inactive
 
 ### Network Interface — Prerequisite Items & Fluid
 
@@ -212,6 +232,19 @@ Single-item-type bulk storage carried as an item.
 - Network view is built lazily on first capability access via BFS flood-fill and cached per tube; cache invalidates automatically when any neighbor changes
 - Cascade prevention: cache-clear propagation stops immediately if a tube's cache is already stale
 
+### Tube Network — Power
+The network draws RF from the Network Interface's internal buffer each tick. Total cost is the sum of all connected components:
+
+| Component | Cost |
+|-----------|------|
+| Network Interface (base) | 5 RF/t |
+| Storage Access Terminal | 5 RF/t each |
+| Wireless Hub | 25 RF/t each |
+| Each tube attachment (Storage / Import / Export Interface installed on a tube face) | 1 RF/t each |
+
+- When the buffer runs dry the network becomes **inactive** (see Network Interface — Power above)
+- Jade shows "Not Enough Power" in red on any tube with an attachment, on the SAT, and on the NI itself when inactive
+
 ---
 
 ## Optional Dependencies
@@ -225,6 +258,10 @@ Adds block tooltip overlays when looking at IntelliStore blocks:
 | Junk Drawer | "Empty" or "X / Yk items" |
 | Bulk Storage Container | "Empty" or "Xk / Yk items" |
 | Fluid Tank | "Empty" or "Xk mB of Yk mB FluidName" |
+| Stirling Engine | "Place Above Heat Source" when idle; "X / Y FE" when generating |
+| Network Interface | Total RF/t consumed; "Not Enough Power" in red when inactive |
+| Storage Access Terminal | "Not Enough Power" in red when network is inactive |
+| Tube (with attachment) | "Not Enough Power" in red when network is inactive |
 
 Counts are abbreviated: exact below 1000, `Xk` from 1,000, `XM` from 1,000,000.
 

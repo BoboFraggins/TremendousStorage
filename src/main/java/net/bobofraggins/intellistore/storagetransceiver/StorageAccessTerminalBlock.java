@@ -1,8 +1,10 @@
 package net.bobofraggins.intellistore.storagetransceiver;
 
+import net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.register.Registration;
 import net.bobofraggins.intellistore.ui.StorageAccessTerminalMenu;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -33,6 +35,15 @@ public class StorageAccessTerminalBlock extends Block {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         BlockPos niPos = StorageAccessTerminalBFS.findNI((ServerLevel) level, pos);
+
+        // Power check: if NI is found but network is not powered, show message and do not open
+        if (niPos != null && level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni
+                && !ni.isPowered()) {
+            player.displayClientMessage(
+                    Component.translatable("screen.intellistore.not_enough_power"), true);
+            return InteractionResult.SUCCESS;
+        }
+
         player.openMenu(new StorageAccessTerminalMenu.Provider(pos, niPos), buf -> {
             buf.writeBlockPos(pos);
             buf.writeBoolean(niPos != null);
