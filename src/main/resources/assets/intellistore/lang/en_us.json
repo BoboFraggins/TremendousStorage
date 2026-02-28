@@ -20,6 +20,16 @@
   "item.intellistore.manila_folder.contents": "%1$s %2$s",
   "item.intellistore.manila_folder.capacity": "Capacity: %1$s",
 
+  "item.intellistore.paper_ender_folder": "Ender Folder",
+  "item.intellistore.copper_ender_folder": "Copper Ender Folder",
+  "item.intellistore.iron_ender_folder": "Iron Ender Folder",
+  "item.intellistore.gold_ender_folder": "Gold Ender Folder",
+  "item.intellistore.diamond_ender_folder": "Diamond Ender Folder",
+  "item.intellistore.emerald_ender_folder": "Emerald Ender Folder",
+  "item.intellistore.netherite_ender_folder": "Netherite Ender Folder",
+
+  "item.intellistore.ender_folder.linked": "Link: ...%1$s",
+
   "item.intellistore.whiteout_tape": "Whiteout Tape",
 
   "itemGroup.intellistore": "IntelliStore",
@@ -64,11 +74,11 @@
   "screen.intellistore.void_excess_off": "Void Excess: OFF",
 
   "block.intellistore.network_interface": "Network Interface",
-  "block.intellistore.storage_access_terminal": "Storage Access Terminal",
+  "block.intellistore.access_terminal": "Access Terminal",
 
-  "screen.intellistore.storage_access_terminal": "Storage Access Terminal",
-  "screen.intellistore.storage_access_terminal.connected": "Network: Connected",
-  "screen.intellistore.storage_access_terminal.disconnected": "Network: Not Connected",
+  "screen.intellistore.access_terminal": "Access Terminal",
+  "screen.intellistore.access_terminal.connected": "Network: Connected",
+  "screen.intellistore.access_terminal.disconnected": "Network: Not Connected",
 
   "block.intellistore.healing_salve": "Healing Salve",
   "block.intellistore.healing_salve_cauldron": "Healing Salve Cauldron",
@@ -105,13 +115,13 @@
   "screen.intellistore.wireless_hub.unlinked": "Unlinked",
   "screen.intellistore.wireless_hub.linked": "Linked",
 
-  "item.intellistore.wireless_sat": "Wireless Storage Access Terminal",
-  "item.intellistore.wireless_sat.unlinked": "Not linked to any network",
-  "item.intellistore.wireless_sat.linked": "Linked to NI at %1$d, %2$d, %3$d",
-  "item.intellistore.wireless_sat.not_linked": "Wireless SAT is not linked to a network",
-  "item.intellistore.wireless_sat.invalid_network": "Network is unavailable",
+  "item.intellistore.personal_access_terminal": "Personal Access Terminal",
+  "item.intellistore.personal_access_terminal.unlinked": "Not linked to any network",
+  "item.intellistore.personal_access_terminal.linked": "Linked to NI at %1$d, %2$d, %3$d",
+  "item.intellistore.personal_access_terminal.not_linked": "Personal Access Terminal is not linked to a network",
+  "item.intellistore.personal_access_terminal.invalid_network": "Network is unavailable",
 
-  "key.intellistore.open_wireless_sat": "Open Wireless Storage Access Terminal",
+  "key.intellistore.open_personal_access_terminal": "Open Personal Access Terminal",
   "key.categories.intellistore": "IntelliStore",
 
   "block.intellistore.stirling_engine": "Stirling Engine",
@@ -127,5 +137,7 @@
   "action.intellistore.deposit_complete": "Deposited items into network",
 
   "item.intellistore.personal_filing_cabinet": "Personal Filing Cabinet",
-  "screen.intellistore.personal_filing_cabinet": "Personal Filing Cabinet"
+  "screen.intellistore.personal_filing_cabinet": "Personal Filing Cabinet",
+
+  "key.intellistore.open_personal_filing_cabinet": "Open Personal Filing Cabinet"
 }

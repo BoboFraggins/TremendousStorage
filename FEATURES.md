@@ -108,6 +108,25 @@ Single-item-type bulk storage carried as an item.
 | Two same-type folders | Merged folder (combined count, capped at capacity; remainder returned) |
 | Tape + locked-empty folder | Unlocked folder (tape loses 1 durability) |
 
+### Ender Folder (7 tiers)
+A linked pair of Manila Folder variants whose contents are shared globally across all items that carry the same link ID.
+
+| Tier      | Capacity      |
+|-----------|---------------|
+| Paper     | 4,096         |
+| Copper    | 16,384        |
+| Iron      | 65,536        |
+| Gold      | 131,072       |
+| Diamond   | 524,288       |
+| Emerald   | 1,048,576     |
+| Netherite | 4,294,967,296 |
+
+- **Crafting recipe**: 2 same-tier Manila Folders + 1 Eye of Ender → 2 **linked** Ender Folders; both share the same 64-bit random link ID
+- Ender Folders can be placed in Filing Cabinets or Personal Filing Cabinets and behave identically to regular Manila Folders, except any insert or extract is also applied to all other linked Ender Folders in all loaded inventories simultaneously
+- The authoritative state is stored server-side in `EnderFolderStorage` (`SavedData`); the item's `FOLDER_CONTENTS` component is always kept in sync for client display
+- Tooltip shows the last 4 hex digits of the link ID so players can visually confirm which items are paired
+- Sharing propagates immediately: on every write, all loaded player inventories (including inside Personal Filing Cabinets), and all loaded Filing Cabinet block entities, are updated in the same tick
+
 ### Whiteout Tape
 - 32 durability (32 uses); does not leave a broken item — consumed entirely on last use
 - **Crafting grid**: tape + locked-empty Manila Folder → unlocked folder (tape damaged by 1)

@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "intellistore:wireless_sat"
+    "intellistore:personal_access_terminal",
+    "intellistore:personal_filing_cabinet"
   ]
 }

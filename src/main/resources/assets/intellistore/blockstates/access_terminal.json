@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "intellistore:block/access_terminal" }
+  }
+}
