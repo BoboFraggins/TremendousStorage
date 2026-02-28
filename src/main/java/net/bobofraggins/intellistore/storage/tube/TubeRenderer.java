@@ -87,11 +87,31 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
             if (aType == AttachmentType.NONE) continue;
             int pr, pg, pb;
             switch (aType) {
-                case IMPORT_INTERFACE  -> { pr = 0x33; pg = 0x99; pb = 0xFF; } // blue
-                case EXPORT_INTERFACE  -> { pr = 0xFF; pg = 0x33; pb = 0x33; } // red
-                case PLACER_INTERFACE  -> { pr = 0x33; pg = 0xFF; pb = 0x33; } // green
-                case BREAKER_INTERFACE -> { pr = 0xFF; pg = 0xFF; pb = 0x00; } // yellow
-                default                -> { pr = r;    pg = g;    pb = b;    } // tube color (Storage Interface)
+                case IMPORT_INTERFACE -> {
+                    pr = 0x33;
+                    pg = 0x99;
+                    pb = 0xFF;
+                } // blue
+                case EXPORT_INTERFACE -> {
+                    pr = 0xFF;
+                    pg = 0x33;
+                    pb = 0x33;
+                } // red
+                case PLACER_INTERFACE -> {
+                    pr = 0x33;
+                    pg = 0xFF;
+                    pb = 0x33;
+                } // green
+                case BREAKER_INTERFACE -> {
+                    pr = 0xFF;
+                    pg = 0xFF;
+                    pb = 0x00;
+                } // yellow
+                default -> {
+                    pr = r;
+                    pg = g;
+                    pb = b;
+                } // tube color (Storage Interface)
             }
             drawAttachmentPlate(vc, mat, Direction.values()[i], sprite, pr, pg, pb, packedLight, packedOverlay);
         }

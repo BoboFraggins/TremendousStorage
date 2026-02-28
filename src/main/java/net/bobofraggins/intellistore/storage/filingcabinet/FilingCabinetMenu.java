@@ -44,13 +44,17 @@ public class FilingCabinetMenu extends AbstractFilingCabinetMenu {
                 if (index == 1) return priorityHolder[0];
                 return 0;
             }
+
             @Override
             public void set(int index, int value) {
                 if (index == 0) voidExcessHolder[0] = (value != 0);
                 else if (index == 1) priorityHolder[0] = value;
             }
+
             @Override
-            public int getCount() { return 2; }
+            public int getCount() {
+                return 2;
+            }
         };
 
         addAllSlots(be, playerInv, 118, 176);
@@ -68,15 +72,23 @@ public class FilingCabinetMenu extends AbstractFilingCabinetMenu {
         addDataSlots(data);
     }
 
-    public BlockPos getPos() { return pos; }
+    public BlockPos getPos() {
+        return pos;
+    }
 
     @Override
-    public boolean isVoidExcess() { return data.get(0) != 0; }
+    public boolean isVoidExcess() {
+        return data.get(0) != 0;
+    }
 
     @Override
-    public void setVoidExcess(boolean on) { data.set(0, on ? 1 : 0); }
+    public void setVoidExcess(boolean on) {
+        data.set(0, on ? 1 : 0);
+    }
 
-    public int getPriority() { return data.get(1); }
+    public int getPriority() {
+        return data.get(1);
+    }
 
     @Override
     public boolean stillValid(Player player) {

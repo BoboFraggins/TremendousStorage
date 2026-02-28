@@ -3,14 +3,25 @@ package net.bobofraggins.intellistore.shared.register;
 import java.util.EnumMap;
 import java.util.Map;
 import net.bobofraggins.intellistore.IntelliStore;
-import net.bobofraggins.intellistore.shared.config.IntelliStoreConfig;
 import net.bobofraggins.intellistore.external.arsnouveau.SourceTankRegistration;
+import net.bobofraggins.intellistore.external.mekanism.GasTankRegistration;
+import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlock;
+import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
+import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineEnergyHandler;
+import net.bobofraggins.intellistore.shared.config.IntelliStoreConfig;
+import net.bobofraggins.intellistore.shared.ui.PriorityMenu;
+import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
+import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
+import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlock;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerItemHandler;
+import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderItem;
+import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderRecipe;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlock;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetItemHandler;
+import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetMenu;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlock;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankContents;
@@ -24,51 +35,40 @@ import net.bobofraggins.intellistore.storage.items.ZombieBrainItem;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlock;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerItemHandler;
-import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderItem;
-import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderExtractRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderStorageRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
-import net.bobofraggins.intellistore.external.mekanism.GasTankRegistration;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceMenu;
 import net.bobofraggins.intellistore.storage.networkinterface.NiEnergyHandler;
-import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlock;
-import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
-import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineEnergyHandler;
-import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
+import net.bobofraggins.intellistore.storage.personalaccessterminal.PersonalAccessTerminalItem;
 import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetContents;
 import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetEvents;
 import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetItem;
-import net.bobofraggins.intellistore.storage.tubeattachments.BreakerInterfaceItem;
-import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceItem;
-import net.bobofraggins.intellistore.storage.tubeattachments.ImportInterfaceItem;
-import net.bobofraggins.intellistore.storage.tubeattachments.InterfaceFilterContents;
-import net.bobofraggins.intellistore.storage.tubeattachments.PlacerInterfaceItem;
-import net.bobofraggins.intellistore.storage.tubeattachments.StorageInterfaceItem;
+import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetMenu;
 import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.bobofraggins.intellistore.storage.tube.TubeBlockEntity;
 import net.bobofraggins.intellistore.storage.tube.TubeEnergyHandler;
+import net.bobofraggins.intellistore.storage.tubeattachments.BreakerInterfaceItem;
 import net.bobofraggins.intellistore.storage.tubeattachments.BreakerInterfaceMenu;
-import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetMenu;
+import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceItem;
 import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceMenu;
-import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetMenu;
+import net.bobofraggins.intellistore.storage.tubeattachments.ImportInterfaceItem;
 import net.bobofraggins.intellistore.storage.tubeattachments.ImportInterfaceMenu;
-import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceMenu;
+import net.bobofraggins.intellistore.storage.tubeattachments.InterfaceFilterContents;
+import net.bobofraggins.intellistore.storage.tubeattachments.PlacerInterfaceItem;
 import net.bobofraggins.intellistore.storage.tubeattachments.PlacerInterfaceMenu;
-import net.bobofraggins.intellistore.shared.ui.PriorityMenu;
-import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
+import net.bobofraggins.intellistore.storage.tubeattachments.StorageInterfaceItem;
 import net.bobofraggins.intellistore.storage.tubeattachments.StorageInterfaceMenu;
-import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
 import net.bobofraggins.intellistore.storage.whiteout.FolderTapeRecipe;
 import net.bobofraggins.intellistore.storage.whiteout.WhiteoutTapeItem;
 import net.bobofraggins.intellistore.storage.wirelesshub.WirelessHubBlock;
 import net.bobofraggins.intellistore.storage.wirelesshub.WirelessHubBlockEntity;
 import net.bobofraggins.intellistore.storage.wirelesshub.WirelessHubMenu;
-import net.bobofraggins.intellistore.storage.personalaccessterminal.PersonalAccessTerminalItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -86,11 +86,11 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -163,8 +163,8 @@ public final class Registration {
      * Carried on the item so filter state persists through break and re-attach cycles.
      */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<InterfaceFilterContents>>
-            INTERFACE_FILTER = DATA_COMPONENTS.register("interface_filter",
-                    () -> DataComponentType.<InterfaceFilterContents>builder()
+            INTERFACE_FILTER = DATA_COMPONENTS.register(
+                    "interface_filter", () -> DataComponentType.<InterfaceFilterContents>builder()
                             .persistent(InterfaceFilterContents.CODEC)
                             .networkSynchronized(InterfaceFilterContents.STREAM_CODEC)
                             .build());
@@ -174,29 +174,27 @@ public final class Registration {
      * Persists the priority through punch-off and re-attach cycles; defaults to NORMAL (ordinal 2)
      * when absent.
      */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>>
-            STORAGE_INTERFACE_PRIORITY = DATA_COMPONENTS.register("storage_interface_priority",
-                    () -> DataComponentType.<Integer>builder()
-                            .persistent(com.mojang.serialization.Codec.INT)
-                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.INT)
-                            .build());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> STORAGE_INTERFACE_PRIORITY =
+            DATA_COMPONENTS.register("storage_interface_priority", () -> DataComponentType.<Integer>builder()
+                    .persistent(com.mojang.serialization.Codec.INT)
+                    .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.INT)
+                    .build());
 
     /**
      * Data component storing the 64-bit shared link ID on an Ender Folder item.
      */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>>
-            ENDER_LINK_ID = DATA_COMPONENTS.register("ender_link_id",
-                    () -> DataComponentType.<Long>builder()
-                            .persistent(com.mojang.serialization.Codec.LONG)
-                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG)
-                            .build());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> ENDER_LINK_ID =
+            DATA_COMPONENTS.register("ender_link_id", () -> DataComponentType.<Long>builder()
+                    .persistent(com.mojang.serialization.Codec.LONG)
+                    .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG)
+                    .build());
 
     /**
      * Data component storing the folder contents and void-excess flag on a Personal Filing Cabinet item.
      */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<PersonalFilingCabinetContents>>
-            PFC_CONTENTS = DATA_COMPONENTS.register("pfc_contents",
-                    () -> DataComponentType.<PersonalFilingCabinetContents>builder()
+            PFC_CONTENTS = DATA_COMPONENTS.register(
+                    "pfc_contents", () -> DataComponentType.<PersonalFilingCabinetContents>builder()
                             .persistent(PersonalFilingCabinetContents.CODEC)
                             .networkSynchronized(PersonalFilingCabinetContents.STREAM_CODEC)
                             .build());
@@ -404,10 +402,9 @@ public final class Registration {
             ITEMS.registerSimpleBlockItem("stirling_engine", STIRLING_ENGINE);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StirlingEngineBlockEntity>>
-            STIRLING_ENGINE_BE_TYPE = BLOCK_ENTITY_TYPES.register(
-                    "stirling_engine",
-                    () -> BlockEntityType.Builder.of(StirlingEngineBlockEntity::new, STIRLING_ENGINE.get())
-                            .build(null));
+            STIRLING_ENGINE_BE_TYPE = BLOCK_ENTITY_TYPES.register("stirling_engine", () -> BlockEntityType.Builder.of(
+                    StirlingEngineBlockEntity::new, STIRLING_ENGINE.get())
+            .build(null));
 
     // -------------------------------------------------------------------------
     // Tubes (16 colored variants + shared block entity type)
@@ -457,8 +454,7 @@ public final class Registration {
             MENU_TYPES.register("network_interface", () -> IMenuTypeExtension.create(NetworkInterfaceMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<AccessTerminalMenu>> STORAGE_ACCESS_TERMINAL_MENU =
-            MENU_TYPES.register(
-                    "storage_access_terminal", () -> IMenuTypeExtension.create(AccessTerminalMenu::new));
+            MENU_TYPES.register("storage_access_terminal", () -> IMenuTypeExtension.create(AccessTerminalMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<WirelessHubMenu>> WIRELESS_HUB_MENU =
             MENU_TYPES.register("wireless_hub", () -> IMenuTypeExtension.create(WirelessHubMenu::new));
@@ -479,7 +475,8 @@ public final class Registration {
             MENU_TYPES.register("breaker_interface", () -> IMenuTypeExtension.create(BreakerInterfaceMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<PersonalFilingCabinetMenu>> PERSONAL_FILING_CABINET_MENU =
-            MENU_TYPES.register("personal_filing_cabinet", () -> IMenuTypeExtension.create(PersonalFilingCabinetMenu::new));
+            MENU_TYPES.register(
+                    "personal_filing_cabinet", () -> IMenuTypeExtension.create(PersonalFilingCabinetMenu::new));
 
     // -------------------------------------------------------------------------
     // Items — storage interface / import interface / export interface
@@ -608,8 +605,8 @@ public final class Registration {
                 }
             });
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderFolderRecipe>>
-            ENDER_FOLDER_RECIPE = RECIPE_SERIALIZERS.register("ender_folder", () -> new RecipeSerializer<>() {
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderFolderRecipe>> ENDER_FOLDER_RECIPE =
+            RECIPE_SERIALIZERS.register("ender_folder", () -> new RecipeSerializer<>() {
                 @Override
                 public com.mojang.serialization.MapCodec<EnderFolderRecipe> codec() {
                     return EnderFolderRecipe.CODEC;
@@ -727,9 +724,7 @@ public final class Registration {
                 NETWORK_INTERFACE_BE_TYPE.get(),
                 (be, side) -> new NiEnergyHandler(be));
         event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK,
-                TUBE_BE_TYPE.get(),
-                (be, side) -> new TubeEnergyHandler(be));
+                Capabilities.EnergyStorage.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> new TubeEnergyHandler(be));
         if (IntelliStoreConfig.STIRLING_ENGINE_ENABLED.get()) {
             event.registerBlockEntity(
                     Capabilities.EnergyStorage.BLOCK,

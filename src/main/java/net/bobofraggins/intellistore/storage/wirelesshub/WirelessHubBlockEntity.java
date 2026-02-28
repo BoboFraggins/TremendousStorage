@@ -1,9 +1,9 @@
 package net.bobofraggins.intellistore.storage.wirelesshub;
 
-import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
-import net.bobofraggins.intellistore.storage.personalaccessterminal.PersonalAccessTerminalItem;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBFS;
+import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.intellistore.storage.personalaccessterminal.PersonalAccessTerminalItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;

@@ -3,9 +3,9 @@ package net.bobofraggins.intellistore.storage.enderfolder;
 import com.mojang.serialization.MapCodec;
 import java.security.SecureRandom;
 import java.util.List;
+import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
-import net.bobofraggins.intellistore.shared.register.Registration;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -44,7 +44,7 @@ public class EnderFolderRecipe extends CustomRecipe {
      * <p>This is safe because crafting calls {@code assemble} then {@code getRemainingItems}
      * on the same thread without interleaving.
      */
-    private static final ThreadLocal<long[]> PENDING_LINK = ThreadLocal.withInitial(() -> new long[]{-1L});
+    private static final ThreadLocal<long[]> PENDING_LINK = ThreadLocal.withInitial(() -> new long[] {-1L});
 
     public EnderFolderRecipe(CraftingBookCategory category) {
         super(category);

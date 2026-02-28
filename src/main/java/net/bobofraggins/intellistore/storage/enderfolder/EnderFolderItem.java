@@ -1,10 +1,10 @@
 package net.bobofraggins.intellistore.storage.enderfolder;
 
 import java.util.List;
+import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
-import net.bobofraggins.intellistore.shared.register.Registration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
@@ -127,10 +127,14 @@ public class EnderFolderItem extends ManillaFolderItem {
         // Also check PFC items inside the player's inventory
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             ItemStack pfcStack = player.getInventory().getItem(i);
-            if (!(pfcStack.getItem() instanceof net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetItem)) continue;
+            if (!(pfcStack.getItem()
+                    instanceof net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetItem))
+                continue;
             net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetContents contents =
-                    pfcStack.getOrDefault(Registration.PFC_CONTENTS.get(),
-                            net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetContents.EMPTY);
+                    pfcStack.getOrDefault(
+                            Registration.PFC_CONTENTS.get(),
+                            net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetContents
+                                    .EMPTY);
             java.util.List<ItemStack> folders = new java.util.ArrayList<>(contents.folders());
             boolean changed = false;
             for (int fi = 0; fi < folders.size(); fi++) {
@@ -142,7 +146,8 @@ public class EnderFolderItem extends ManillaFolderItem {
                 }
             }
             if (changed) {
-                pfcStack.set(Registration.PFC_CONTENTS.get(),
+                pfcStack.set(
+                        Registration.PFC_CONTENTS.get(),
                         new net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetContents(
                                 java.util.List.copyOf(folders), contents.voidExcess()));
             }
@@ -164,7 +169,8 @@ public class EnderFolderItem extends ManillaFolderItem {
         long linkId = getLinkId(stack);
         if (linkId != -1L) {
             // Show a short hex suffix so players can visually confirm linking
-            lines.add(Component.translatable("item.intellistore.ender_folder.linked",
+            lines.add(Component.translatable(
+                    "item.intellistore.ender_folder.linked",
                     String.format("%016X", linkId).substring(12)));
         }
     }

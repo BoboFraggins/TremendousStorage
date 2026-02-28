@@ -15,9 +15,9 @@ import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.bobofraggins.intellistore.shared.network.SetImportExportFilterPacket;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
 import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceScreen;
 import net.bobofraggins.intellistore.storage.tubeattachments.ImportInterfaceScreen;
-import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -52,14 +52,19 @@ public class IntelliStoreJeiPlugin implements IModPlugin {
                 AccessTerminalMenu.class,
                 Registration.STORAGE_ACCESS_TERMINAL_MENU.get(),
                 RecipeTypes.CRAFTING,
-                1, 9, 10, 36);
+                1,
+                9,
+                10,
+                36);
     }
 
     @Override
     public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
-        jeiRuntime.getIngredientManager().removeIngredientsAtRuntime(
-                VanillaTypes.ITEM_STACK,
-                List.of(Registration.CREATIVE_TAB_ICON.get().getDefaultInstance()));
+        jeiRuntime
+                .getIngredientManager()
+                .removeIngredientsAtRuntime(
+                        VanillaTypes.ITEM_STACK,
+                        List.of(Registration.CREATIVE_TAB_ICON.get().getDefaultInstance()));
     }
 
     /**
@@ -80,7 +85,8 @@ public class IntelliStoreJeiPlugin implements IModPlugin {
      * Handles JEI ingredient drags into Import/Export Interface filter slot grids.
      * Works for both {@link ImportInterfaceScreen} and {@link ExportInterfaceScreen}.
      */
-    private static final class InterfaceGhostHandler<S extends net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>>
+    private static final class InterfaceGhostHandler<
+                    S extends net.minecraft.client.gui.screens.inventory.AbstractContainerScreen<?>>
             implements IGhostIngredientHandler<S> {
 
         @Override

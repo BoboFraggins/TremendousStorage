@@ -29,6 +29,7 @@ public class ImportInterfaceMenu extends AbstractContainerMenu {
 
     /** Ghost filter slots displayed client-side (not real Slot objects). */
     private final ItemStack[] filterSlots = new ItemStack[9];
+
     private boolean rejectMode;
 
     /** Server-side constructor. */
@@ -46,10 +47,17 @@ public class ImportInterfaceMenu extends AbstractContainerMenu {
         this(windowId, inv, buf.readBlockPos(), buf.readByte() & 0xFF, new SimpleContainerData(1));
     }
 
-    public BlockPos getPos() { return pos; }
-    public int getFaceIndex() { return faceIndex; }
+    public BlockPos getPos() {
+        return pos;
+    }
 
-    public boolean isRejectMode() { return data.get(0) != 0; }
+    public int getFaceIndex() {
+        return faceIndex;
+    }
+
+    public boolean isRejectMode() {
+        return data.get(0) != 0;
+    }
 
     public ItemStack getFilterSlot(int slot) {
         return (slot >= 0 && slot < 9) ? filterSlots[slot] : ItemStack.EMPTY;
@@ -61,16 +69,21 @@ public class ImportInterfaceMenu extends AbstractContainerMenu {
 
     public void applySync(java.util.List<ItemStack> slots, boolean reject) {
         for (int i = 0; i < 9 && i < slots.size(); i++) {
-            filterSlots[i] = slots.get(i) == null ? ItemStack.EMPTY : slots.get(i).copyWithCount(1);
+            filterSlots[i] =
+                    slots.get(i) == null ? ItemStack.EMPTY : slots.get(i).copyWithCount(1);
         }
         rejectMode = reject;
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index) { return ItemStack.EMPTY; }
+    public ItemStack quickMoveStack(Player player, int index) {
+        return ItemStack.EMPTY;
+    }
 
     @Override
-    public boolean stillValid(Player player) { return true; }
+    public boolean stillValid(Player player) {
+        return true;
+    }
 
     // -------------------------------------------------------------------------
     // MenuProvider helper
@@ -97,9 +110,18 @@ public class ImportInterfaceMenu extends AbstractContainerMenu {
         public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
             final int fi = faceIndex;
             ContainerData data = new ContainerData() {
-                @Override public int get(int index) { return index == 0 ? (be.getFilterMode(fi) ? 1 : 0) : 0; }
-                @Override public void set(int index, int value) {}
-                @Override public int getCount() { return 1; }
+                @Override
+                public int get(int index) {
+                    return index == 0 ? (be.getFilterMode(fi) ? 1 : 0) : 0;
+                }
+
+                @Override
+                public void set(int index, int value) {}
+
+                @Override
+                public int getCount() {
+                    return 1;
+                }
             };
             ImportInterfaceMenu menu = new ImportInterfaceMenu(id, inv, pos, faceIndex, data);
             // Pre-populate filter slots from BE for initial open

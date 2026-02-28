@@ -29,10 +29,15 @@ public record PersonalFilingCabinetContents(List<ItemStack> folders, boolean voi
         EMPTY = new PersonalFilingCabinetContents(List.copyOf(emptyFolders), true);
     }
 
-    public static final Codec<PersonalFilingCabinetContents> CODEC = RecordCodecBuilder.create(
-            instance -> instance.group(
-                    ItemStack.OPTIONAL_CODEC.listOf().fieldOf("folders").forGetter(PersonalFilingCabinetContents::folders),
-                    Codec.BOOL.optionalFieldOf("void_excess", true).forGetter(PersonalFilingCabinetContents::voidExcess))
+    public static final Codec<PersonalFilingCabinetContents> CODEC =
+            RecordCodecBuilder.create(instance -> instance.group(
+                            ItemStack.OPTIONAL_CODEC
+                                    .listOf()
+                                    .fieldOf("folders")
+                                    .forGetter(PersonalFilingCabinetContents::folders),
+                            Codec.BOOL
+                                    .optionalFieldOf("void_excess", true)
+                                    .forGetter(PersonalFilingCabinetContents::voidExcess))
                     .apply(instance, PersonalFilingCabinetContents::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, PersonalFilingCabinetContents> STREAM_CODEC =

@@ -2,9 +2,8 @@ package net.bobofraggins.intellistore.storage.accessterminal;
 
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
+import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;

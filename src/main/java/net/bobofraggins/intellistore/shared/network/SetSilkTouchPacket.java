@@ -14,21 +14,19 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 /**
  * Server-bound packet: set the Silk Touch flag on a Breaker Interface attachment.
  */
-public record SetSilkTouchPacket(BlockPos pos, int faceIndex, boolean silkTouch)
-        implements CustomPacketPayload {
+public record SetSilkTouchPacket(BlockPos pos, int faceIndex, boolean silkTouch) implements CustomPacketPayload {
 
     public static final Type<SetSilkTouchPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "set_silk_touch"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SetSilkTouchPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    BlockPos.STREAM_CODEC.cast(),
-                    SetSilkTouchPacket::pos,
-                    ByteBufCodecs.INT,
-                    SetSilkTouchPacket::faceIndex,
-                    ByteBufCodecs.BOOL,
-                    SetSilkTouchPacket::silkTouch,
-                    SetSilkTouchPacket::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, SetSilkTouchPacket> STREAM_CODEC = StreamCodec.composite(
+            BlockPos.STREAM_CODEC.cast(),
+            SetSilkTouchPacket::pos,
+            ByteBufCodecs.INT,
+            SetSilkTouchPacket::faceIndex,
+            ByteBufCodecs.BOOL,
+            SetSilkTouchPacket::silkTouch,
+            SetSilkTouchPacket::new);
 
     @Override
     public Type<SetSilkTouchPacket> type() {

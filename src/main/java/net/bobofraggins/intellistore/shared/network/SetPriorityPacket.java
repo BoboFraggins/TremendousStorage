@@ -1,10 +1,10 @@
 package net.bobofraggins.intellistore.shared.network;
 
 import net.bobofraggins.intellistore.IntelliStore;
+import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
-import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

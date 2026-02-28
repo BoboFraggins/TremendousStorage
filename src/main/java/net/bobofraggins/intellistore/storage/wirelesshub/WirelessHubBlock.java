@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.storage.wirelesshub;
 
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
+import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -14,7 +15,6 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 
 /**
  * The Wireless Hub block.

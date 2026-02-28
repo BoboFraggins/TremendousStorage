@@ -22,8 +22,7 @@ import snownee.jade.api.config.IPluginConfig;
 @WailaPlugin
 public class AccessTerminalJadePlugin implements IWailaPlugin {
 
-    static final ResourceLocation SAT_PROVIDER =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "sat_power");
+    static final ResourceLocation SAT_PROVIDER = ResourceLocation.fromNamespaceAndPath("intellistore", "sat_power");
 
     @Override
     public void register(IWailaCommonRegistration registration) {
@@ -43,8 +42,7 @@ public class AccessTerminalJadePlugin implements IWailaPlugin {
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
             if (!(accessor.getLevel() instanceof ServerLevel serverLevel)) return;
-            net.minecraft.core.BlockPos niPos =
-                    AccessTerminalBFS.findNI(serverLevel, accessor.getPosition());
+            net.minecraft.core.BlockPos niPos = AccessTerminalBFS.findNI(serverLevel, accessor.getPosition());
             if (niPos == null) {
                 data.putBoolean(KEY_POWERED, false);
                 return;

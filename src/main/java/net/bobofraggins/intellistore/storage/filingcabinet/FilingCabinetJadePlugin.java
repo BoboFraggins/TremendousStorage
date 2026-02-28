@@ -1,8 +1,8 @@
 package net.bobofraggins.intellistore.storage.filingcabinet;
 
+import net.bobofraggins.intellistore.shared.util.CountFormat;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
-import net.bobofraggins.intellistore.shared.util.CountFormat;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;

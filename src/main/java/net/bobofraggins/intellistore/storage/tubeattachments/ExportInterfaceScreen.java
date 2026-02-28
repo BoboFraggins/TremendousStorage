@@ -18,11 +18,11 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfaceMenu> {
 
-    private static final int BG_WIDTH  = 176;
+    private static final int BG_WIDTH = 176;
     private static final int BG_HEIGHT = 116;
 
-    private static final int GRID_X    = (BG_WIDTH - 3 * 18) / 2;
-    private static final int GRID_Y    = 30;
+    private static final int GRID_X = (BG_WIDTH - 3 * 18) / 2;
+    private static final int GRID_Y = 30;
     private static final int SLOT_SIZE = 18;
     private static final int MODE_BTN_Y = 88;
     private static final int MODE_BTN_W = 120;
@@ -32,7 +32,7 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
 
     public ExportInterfaceScreen(ExportInterfaceMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth  = BG_WIDTH;
+        this.imageWidth = BG_WIDTH;
         this.imageHeight = BG_HEIGHT;
     }
 
@@ -43,9 +43,8 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
         int btnY = topPos + MODE_BTN_Y;
         modeButton = addRenderableWidget(Button.builder(
                         modeLabel(),
-                        btn -> PacketDistributor.sendToServer(
-                                new SetImportExportFilterPacket(
-                                        menu.getPos(), menu.getFaceIndex(), -1, ItemStack.EMPTY)))
+                        btn -> PacketDistributor.sendToServer(new SetImportExportFilterPacket(
+                                menu.getPos(), menu.getFaceIndex(), -1, ItemStack.EMPTY)))
                 .bounds(btnX, btnY, MODE_BTN_W, MODE_BTN_H)
                 .build());
     }
@@ -74,13 +73,13 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
         graphics.fill(leftPos, topPos, leftPos + BG_WIDTH, topPos + BG_HEIGHT, 0xC0101010);
 
         Component filterLabel = Component.translatable("screen.intellistore.filter_label");
-        graphics.drawString(font, filterLabel, leftPos + (BG_WIDTH - font.width(filterLabel)) / 2,
-                topPos + 20, 0xAAAAAA, false);
+        graphics.drawString(
+                font, filterLabel, leftPos + (BG_WIDTH - font.width(filterLabel)) / 2, topPos + 20, 0xAAAAAA, false);
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
                 int sx = leftPos + GRID_X + col * SLOT_SIZE;
-                int sy = topPos  + GRID_Y + row * SLOT_SIZE;
+                int sy = topPos + GRID_Y + row * SLOT_SIZE;
                 int slotIndex = row * 3 + col;
 
                 graphics.fill(sx, sy, sx + SLOT_SIZE, sy + SLOT_SIZE, 0xFF303030);
@@ -104,9 +103,8 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
                 int sx = leftPos + GRID_X + col * SLOT_SIZE + 1;
-                int sy = topPos  + GRID_Y + row * SLOT_SIZE + 1;
-                if (mouseX >= sx && mouseX < sx + SLOT_SIZE - 2
-                        && mouseY >= sy && mouseY < sy + SLOT_SIZE - 2) {
+                int sy = topPos + GRID_Y + row * SLOT_SIZE + 1;
+                if (mouseX >= sx && mouseX < sx + SLOT_SIZE - 2 && mouseY >= sy && mouseY < sy + SLOT_SIZE - 2) {
                     int slotIndex = row * 3 + col;
                     handleGhostSlotClick(slotIndex);
                     return true;
@@ -120,13 +118,13 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
         ItemStack carried = minecraft.player.containerMenu.getCarried();
         if (carried.isEmpty()) {
             menu.setFilterSlot(slotIndex, ItemStack.EMPTY);
-            PacketDistributor.sendToServer(new SetImportExportFilterPacket(
-                    menu.getPos(), menu.getFaceIndex(), slotIndex, ItemStack.EMPTY));
+            PacketDistributor.sendToServer(
+                    new SetImportExportFilterPacket(menu.getPos(), menu.getFaceIndex(), slotIndex, ItemStack.EMPTY));
         } else {
             ItemStack ghost = carried.copyWithCount(1);
             menu.setFilterSlot(slotIndex, ghost);
-            PacketDistributor.sendToServer(new SetImportExportFilterPacket(
-                    menu.getPos(), menu.getFaceIndex(), slotIndex, ghost));
+            PacketDistributor.sendToServer(
+                    new SetImportExportFilterPacket(menu.getPos(), menu.getFaceIndex(), slotIndex, ghost));
         }
     }
 

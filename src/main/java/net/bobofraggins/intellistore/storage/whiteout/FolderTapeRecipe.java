@@ -1,10 +1,10 @@
 package net.bobofraggins.intellistore.storage.whiteout;
 
 import com.mojang.serialization.MapCodec;
+import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankContents;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
-import net.bobofraggins.intellistore.shared.register.Registration;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;

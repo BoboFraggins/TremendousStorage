@@ -57,8 +57,9 @@ public class FilingCabinetScreen extends AbstractFilingCabinetScreen<FilingCabin
         for (int i = 0; i < Priority.VALUES.length; i++) {
             final int ordinal = i;
             Priority p = Priority.VALUES[i];
-            addRenderableWidget(Button.builder(Component.translatable(p.translationKey()), btn ->
-                            PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), ordinal)))
+            addRenderableWidget(Button.builder(
+                            Component.translatable(p.translationKey()),
+                            btn -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), ordinal)))
                     .bounds(startX + i * (PRIORITY_BTN_W + PRIORITY_BTN_GAP), pY, PRIORITY_BTN_W, PRIORITY_BTN_H)
                     .build());
         }
@@ -86,8 +87,12 @@ public class FilingCabinetScreen extends AbstractFilingCabinetScreen<FilingCabin
         super.renderBg(graphics, partialTick, mouseX, mouseY);
 
         Component priorityLabel = Component.translatable("screen.intellistore.priority_label");
-        graphics.drawString(font, priorityLabel,
+        graphics.drawString(
+                font,
+                priorityLabel,
                 leftPos + (BG_WIDTH - font.width(priorityLabel)) / 2,
-                topPos + PRIORITY_LABEL_Y, 0xAAAAAA, false);
+                topPos + PRIORITY_LABEL_Y,
+                0xAAAAAA,
+                false);
     }
 }

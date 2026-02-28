@@ -43,23 +43,39 @@ public class BreakerInterfaceMenu extends AbstractContainerMenu {
         this(windowId, inv, buf.readBlockPos(), buf.readByte() & 0xFF, new SimpleContainerData(1));
     }
 
-    public BlockPos getPos() { return pos; }
-    public int getFaceIndex() { return faceIndex; }
+    public BlockPos getPos() {
+        return pos;
+    }
 
-    public boolean isSilkTouch() { return data.get(0) != 0; }
+    public int getFaceIndex() {
+        return faceIndex;
+    }
 
-    public ItemStack getFilterSlot() { return filterSlot; }
-    public void setFilterSlot(ItemStack stack) { filterSlot = stack; }
+    public boolean isSilkTouch() {
+        return data.get(0) != 0;
+    }
+
+    public ItemStack getFilterSlot() {
+        return filterSlot;
+    }
+
+    public void setFilterSlot(ItemStack stack) {
+        filterSlot = stack;
+    }
 
     public void applySync(ItemStack slot) {
         filterSlot = slot == null ? ItemStack.EMPTY : slot.copyWithCount(1);
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index) { return ItemStack.EMPTY; }
+    public ItemStack quickMoveStack(Player player, int index) {
+        return ItemStack.EMPTY;
+    }
 
     @Override
-    public boolean stillValid(Player player) { return true; }
+    public boolean stillValid(Player player) {
+        return true;
+    }
 
     // -------------------------------------------------------------------------
     // MenuProvider helper
@@ -86,9 +102,18 @@ public class BreakerInterfaceMenu extends AbstractContainerMenu {
         public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
             final int fi = faceIndex;
             ContainerData data = new ContainerData() {
-                @Override public int get(int index) { return index == 0 ? (be.getSilkTouch(fi) ? 1 : 0) : 0; }
-                @Override public void set(int index, int value) {}
-                @Override public int getCount() { return 1; }
+                @Override
+                public int get(int index) {
+                    return index == 0 ? (be.getSilkTouch(fi) ? 1 : 0) : 0;
+                }
+
+                @Override
+                public void set(int index, int value) {}
+
+                @Override
+                public int getCount() {
+                    return 1;
+                }
             };
             BreakerInterfaceMenu menu = new BreakerInterfaceMenu(id, inv, pos, faceIndex, data);
             ItemStack slot = be.getFilterSlot(faceIndex, 0);

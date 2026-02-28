@@ -3,7 +3,6 @@ package net.bobofraggins.intellistore.storage.personalfilingcabinet;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetScreen;
 import net.minecraft.client.KeyMapping;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;

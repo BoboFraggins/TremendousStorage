@@ -2,10 +2,10 @@ package net.bobofraggins.intellistore.storage.personalfilingcabinet;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
-import net.bobofraggins.intellistore.shared.register.Registration;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;

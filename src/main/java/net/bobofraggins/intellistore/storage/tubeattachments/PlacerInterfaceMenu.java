@@ -38,21 +38,35 @@ public class PlacerInterfaceMenu extends AbstractContainerMenu {
         this(windowId, inv, buf.readBlockPos(), buf.readByte() & 0xFF);
     }
 
-    public BlockPos getPos() { return pos; }
-    public int getFaceIndex() { return faceIndex; }
+    public BlockPos getPos() {
+        return pos;
+    }
 
-    public ItemStack getFilterSlot() { return filterSlot; }
-    public void setFilterSlot(ItemStack stack) { filterSlot = stack; }
+    public int getFaceIndex() {
+        return faceIndex;
+    }
+
+    public ItemStack getFilterSlot() {
+        return filterSlot;
+    }
+
+    public void setFilterSlot(ItemStack stack) {
+        filterSlot = stack;
+    }
 
     public void applySync(ItemStack slot) {
         filterSlot = slot == null ? ItemStack.EMPTY : slot.copyWithCount(1);
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index) { return ItemStack.EMPTY; }
+    public ItemStack quickMoveStack(Player player, int index) {
+        return ItemStack.EMPTY;
+    }
 
     @Override
-    public boolean stillValid(Player player) { return true; }
+    public boolean stillValid(Player player) {
+        return true;
+    }
 
     // -------------------------------------------------------------------------
     // MenuProvider helper

@@ -41,10 +41,17 @@ public class ExportInterfaceMenu extends AbstractContainerMenu {
         this(windowId, inv, buf.readBlockPos(), buf.readByte() & 0xFF, new SimpleContainerData(1));
     }
 
-    public BlockPos getPos() { return pos; }
-    public int getFaceIndex() { return faceIndex; }
+    public BlockPos getPos() {
+        return pos;
+    }
 
-    public boolean isRejectMode() { return data.get(0) != 0; }
+    public int getFaceIndex() {
+        return faceIndex;
+    }
+
+    public boolean isRejectMode() {
+        return data.get(0) != 0;
+    }
 
     public ItemStack getFilterSlot(int slot) {
         return (slot >= 0 && slot < 9) ? filterSlots[slot] : ItemStack.EMPTY;
@@ -56,16 +63,21 @@ public class ExportInterfaceMenu extends AbstractContainerMenu {
 
     public void applySync(java.util.List<ItemStack> slots, boolean reject) {
         for (int i = 0; i < 9 && i < slots.size(); i++) {
-            filterSlots[i] = slots.get(i) == null ? ItemStack.EMPTY : slots.get(i).copyWithCount(1);
+            filterSlots[i] =
+                    slots.get(i) == null ? ItemStack.EMPTY : slots.get(i).copyWithCount(1);
         }
         rejectMode = reject;
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int index) { return ItemStack.EMPTY; }
+    public ItemStack quickMoveStack(Player player, int index) {
+        return ItemStack.EMPTY;
+    }
 
     @Override
-    public boolean stillValid(Player player) { return true; }
+    public boolean stillValid(Player player) {
+        return true;
+    }
 
     public static final class Provider implements MenuProvider {
 
@@ -88,9 +100,18 @@ public class ExportInterfaceMenu extends AbstractContainerMenu {
         public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
             final int fi = faceIndex;
             ContainerData data = new ContainerData() {
-                @Override public int get(int index) { return index == 0 ? (be.getFilterMode(fi) ? 1 : 0) : 0; }
-                @Override public void set(int index, int value) {}
-                @Override public int getCount() { return 1; }
+                @Override
+                public int get(int index) {
+                    return index == 0 ? (be.getFilterMode(fi) ? 1 : 0) : 0;
+                }
+
+                @Override
+                public void set(int index, int value) {}
+
+                @Override
+                public int getCount() {
+                    return 1;
+                }
             };
             ExportInterfaceMenu menu = new ExportInterfaceMenu(id, inv, pos, faceIndex, data);
             for (int s = 0; s < 9; s++) {

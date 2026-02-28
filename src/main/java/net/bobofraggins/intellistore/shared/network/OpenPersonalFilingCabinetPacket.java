@@ -30,9 +30,12 @@ public record OpenPersonalFilingCabinetPacket(int slotType, int slotIndex, Strin
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenPersonalFilingCabinetPacket> STREAM_CODEC =
             StreamCodec.composite(
-                    ByteBufCodecs.INT, OpenPersonalFilingCabinetPacket::slotType,
-                    ByteBufCodecs.INT, OpenPersonalFilingCabinetPacket::slotIndex,
-                    ByteBufCodecs.STRING_UTF8, OpenPersonalFilingCabinetPacket::slotId,
+                    ByteBufCodecs.INT,
+                    OpenPersonalFilingCabinetPacket::slotType,
+                    ByteBufCodecs.INT,
+                    OpenPersonalFilingCabinetPacket::slotIndex,
+                    ByteBufCodecs.STRING_UTF8,
+                    OpenPersonalFilingCabinetPacket::slotId,
                     OpenPersonalFilingCabinetPacket::new);
 
     @Override

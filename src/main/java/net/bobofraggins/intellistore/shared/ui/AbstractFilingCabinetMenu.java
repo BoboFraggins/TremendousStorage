@@ -46,8 +46,11 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
                 public boolean mayPlace(ItemStack stack) {
                     return stack.getItem() instanceof ManillaFolderItem;
                 }
+
                 @Override
-                public int getMaxStackSize() { return 1; }
+                public int getMaxStackSize() {
+                    return 1;
+                }
             });
         }
 
@@ -63,6 +66,7 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
     }
 
     public abstract boolean isVoidExcess();
+
     public abstract void setVoidExcess(boolean on);
 
     @Override

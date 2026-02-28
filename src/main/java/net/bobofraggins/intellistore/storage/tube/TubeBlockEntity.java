@@ -99,8 +99,8 @@ public class TubeBlockEntity extends BlockEntity {
 
                 Direction dir = Direction.values()[i];
                 BlockPos neighborPos = pos.relative(dir);
-                IItemHandler neighbor = level.getCapability(
-                        Capabilities.ItemHandler.BLOCK, neighborPos, dir.getOpposite());
+                IItemHandler neighbor =
+                        level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, dir.getOpposite());
                 if (neighbor == null) continue;
 
                 NetworkItemHandler network = be.getNetworkView();
@@ -143,8 +143,8 @@ public class TubeBlockEntity extends BlockEntity {
      * Pulls items from the external {@code source} inventory into the {@code network}.
      * Scans source slots in order; transfers the first passing stack, up to TRANSFER_AMOUNT.
      */
-    private static void doImport(IItemHandler source, NetworkItemHandler network,
-            ItemStack[] filter, boolean rejectMode) {
+    private static void doImport(
+            IItemHandler source, NetworkItemHandler network, ItemStack[] filter, boolean rejectMode) {
         int slots = source.getSlots();
         for (int s = 0; s < slots; s++) {
             ItemStack inSlot = source.getStackInSlot(s);
@@ -170,8 +170,8 @@ public class TubeBlockEntity extends BlockEntity {
      * Pulls items from the {@code network} and pushes them into the external {@code dest} inventory.
      * Scans network slots in order; transfers the first passing stack, up to TRANSFER_AMOUNT.
      */
-    private static void doExport(NetworkItemHandler network, IItemHandler dest,
-            ItemStack[] filter, boolean rejectMode) {
+    private static void doExport(
+            NetworkItemHandler network, IItemHandler dest, ItemStack[] filter, boolean rejectMode) {
         int slots = network.getSlots();
         for (int s = 0; s < slots; s++) {
             ItemStack inSlot = network.getStackInSlot(s);
@@ -233,8 +233,10 @@ public class TubeBlockEntity extends BlockEntity {
             // Execute extract and place
             network.extractItem(s, 1, false);
             level.setBlockAndUpdate(targetPos, toPlace);
-            level.levelEvent(net.minecraft.world.level.block.LevelEvent.PARTICLES_DESTROY_BLOCK,
-                    targetPos, Block.getId(toPlace));
+            level.levelEvent(
+                    net.minecraft.world.level.block.LevelEvent.PARTICLES_DESTROY_BLOCK,
+                    targetPos,
+                    Block.getId(toPlace));
             return;
         }
     }
@@ -243,8 +245,8 @@ public class TubeBlockEntity extends BlockEntity {
      * Breaker: if the block at the target position matches the filter (or no filter),
      * break it and insert the drops into the network.
      */
-    private static void doBreaker(Level level, BlockPos targetPos, NetworkItemHandler network,
-            ItemStack filterItem, boolean useSilkTouch) {
+    private static void doBreaker(
+            Level level, BlockPos targetPos, NetworkItemHandler network, ItemStack filterItem, boolean useSilkTouch) {
         BlockState targetState = level.getBlockState(targetPos);
         if (targetState.isAir()) return;
 
@@ -265,11 +267,16 @@ public class TubeBlockEntity extends BlockEntity {
             net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> silkHolder =
                     enchantReg.getHolderOrThrow(Enchantments.SILK_TOUCH);
             silkTool.enchant(silkHolder, 1);
-            drops = Block.getDrops(targetState, (ServerLevel) level, targetPos, level.getBlockEntity(targetPos),
-                    null, silkTool);
+            drops = Block.getDrops(
+                    targetState, (ServerLevel) level, targetPos, level.getBlockEntity(targetPos), null, silkTool);
         } else {
-            drops = Block.getDrops(targetState, (ServerLevel) level, targetPos, level.getBlockEntity(targetPos),
-                    null, ItemStack.EMPTY);
+            drops = Block.getDrops(
+                    targetState,
+                    (ServerLevel) level,
+                    targetPos,
+                    level.getBlockEntity(targetPos),
+                    null,
+                    ItemStack.EMPTY);
         }
 
         // Try to insert all drops into the network (simulate first)
@@ -277,7 +284,10 @@ public class TubeBlockEntity extends BlockEntity {
         for (ItemStack drop : drops) {
             if (drop.isEmpty()) continue;
             ItemStack remainder = tryInsertAll(network, drop.copy(), true);
-            if (!remainder.isEmpty()) { allFit = false; break; }
+            if (!remainder.isEmpty()) {
+                allFit = false;
+                break;
+            }
         }
         if (!allFit) return;
 
@@ -297,12 +307,18 @@ public class TubeBlockEntity extends BlockEntity {
     static boolean passesFilter(ItemStack candidate, ItemStack[] filter, boolean rejectMode) {
         boolean anyFilter = false;
         for (ItemStack f : filter) {
-            if (!f.isEmpty()) { anyFilter = true; break; }
+            if (!f.isEmpty()) {
+                anyFilter = true;
+                break;
+            }
         }
         if (!anyFilter) return !rejectMode;
         boolean inList = false;
         for (ItemStack f : filter) {
-            if (!f.isEmpty() && ItemStack.isSameItem(f, candidate)) { inList = true; break; }
+            if (!f.isEmpty() && ItemStack.isSameItem(f, candidate)) {
+                inList = true;
+                break;
+            }
         }
         return rejectMode ? !inList : inList;
     }
@@ -437,9 +453,8 @@ public class TubeBlockEntity extends BlockEntity {
         filterMode[faceIndex] = contents.rejectMode();
         java.util.List<ItemStack> src = contents.slots();
         for (int s = 0; s < 9; s++) {
-            filterSlots[faceIndex][s] = (s < src.size() && !src.get(s).isEmpty())
-                    ? src.get(s).copyWithCount(1)
-                    : ItemStack.EMPTY;
+            filterSlots[faceIndex][s] =
+                    (s < src.size() && !src.get(s).isEmpty()) ? src.get(s).copyWithCount(1) : ItemStack.EMPTY;
         }
         // No setChanged() here; caller is expected to call setAttachmentType which calls setChanged
     }
@@ -452,8 +467,8 @@ public class TubeBlockEntity extends BlockEntity {
         if (faceIndex < 0 || faceIndex >= 6) return InterfaceFilterContents.EMPTY;
         java.util.List<ItemStack> list = new java.util.ArrayList<>(9);
         for (int s = 0; s < 9; s++) {
-            list.add(filterSlots[faceIndex][s].isEmpty() ? ItemStack.EMPTY
-                    : filterSlots[faceIndex][s].copyWithCount(1));
+            list.add(
+                    filterSlots[faceIndex][s].isEmpty() ? ItemStack.EMPTY : filterSlots[faceIndex][s].copyWithCount(1));
         }
         return new InterfaceFilterContents(list, filterMode[faceIndex]);
     }
@@ -528,26 +543,21 @@ public class TubeBlockEntity extends BlockEntity {
         if (tag.contains("AttachmentTypes")) {
             byte[] types = tag.getByteArray("AttachmentTypes");
             for (int i = 0; i < 6; i++) {
-                attachmentType[i] = (i < types.length)
-                        ? AttachmentType.fromOrdinal(types[i] & 0xFF)
-                        : AttachmentType.NONE;
+                attachmentType[i] =
+                        (i < types.length) ? AttachmentType.fromOrdinal(types[i] & 0xFF) : AttachmentType.NONE;
             }
         } else if (tag.contains("Attachments")) {
             // Legacy migration: old boolean bitmask
             int mask = tag.getByte("Attachments") & 0xFF;
             for (int i = 0; i < 6; i++) {
-                attachmentType[i] = (mask & (1 << i)) != 0
-                        ? AttachmentType.STORAGE_INTERFACE
-                        : AttachmentType.NONE;
+                attachmentType[i] = (mask & (1 << i)) != 0 ? AttachmentType.STORAGE_INTERFACE : AttachmentType.NONE;
             }
         }
 
         // Priorities
         byte[] prios = tag.getByteArray("AttachmentPriorities");
         for (int i = 0; i < 6; i++) {
-            attachmentPriority[i] = (i < prios.length)
-                    ? Priority.fromOrdinal(prios[i] & 0xFF)
-                    : Priority.NORMAL;
+            attachmentPriority[i] = (i < prios.length) ? Priority.fromOrdinal(prios[i] & 0xFF) : Priority.NORMAL;
         }
 
         // Filter modes
@@ -569,9 +579,8 @@ public class TubeBlockEntity extends BlockEntity {
                 ListTag innerList = outerList.getList(i);
                 for (int s = 0; s < 9 && s < innerList.size(); s++) {
                     CompoundTag slotTag = innerList.getCompound(s);
-                    filterSlots[i][s] = slotTag.isEmpty()
-                            ? ItemStack.EMPTY
-                            : ItemStack.parseOptional(registries, slotTag);
+                    filterSlots[i][s] =
+                            slotTag.isEmpty() ? ItemStack.EMPTY : ItemStack.parseOptional(registries, slotTag);
                 }
             }
         }

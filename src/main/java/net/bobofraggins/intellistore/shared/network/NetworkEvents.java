@@ -33,7 +33,9 @@ public final class NetworkEvents {
         registrar.playToServer(SatExtractPacket.TYPE, SatExtractPacket.STREAM_CODEC, SatExtractPacket::handle);
         registrar.playToServer(SatInsertPacket.TYPE, SatInsertPacket.STREAM_CODEC, SatInsertPacket::handle);
         registrar.playToServer(
-                OpenPersonalAccessTerminalPacket.TYPE, OpenPersonalAccessTerminalPacket.STREAM_CODEC, OpenPersonalAccessTerminalPacket::handle);
+                OpenPersonalAccessTerminalPacket.TYPE,
+                OpenPersonalAccessTerminalPacket.STREAM_CODEC,
+                OpenPersonalAccessTerminalPacket::handle);
         registrar.playToServer(
                 SetImportExportFilterPacket.TYPE,
                 SetImportExportFilterPacket.STREAM_CODEC,
@@ -42,14 +44,9 @@ public final class NetworkEvents {
                 SyncInterfaceFilterPacket.TYPE,
                 SyncInterfaceFilterPacket.STREAM_CODEC,
                 SyncInterfaceFilterPacket::handle);
+        registrar.playToServer(SetSilkTouchPacket.TYPE, SetSilkTouchPacket.STREAM_CODEC, SetSilkTouchPacket::handle);
         registrar.playToServer(
-                SetSilkTouchPacket.TYPE,
-                SetSilkTouchPacket.STREAM_CODEC,
-                SetSilkTouchPacket::handle);
-        registrar.playToServer(
-                SetPfcVoidExcessPacket.TYPE,
-                SetPfcVoidExcessPacket.STREAM_CODEC,
-                SetPfcVoidExcessPacket::handle);
+                SetPfcVoidExcessPacket.TYPE, SetPfcVoidExcessPacket.STREAM_CODEC, SetPfcVoidExcessPacket::handle);
         registrar.playToServer(
                 OpenPersonalFilingCabinetPacket.TYPE,
                 OpenPersonalFilingCabinetPacket.STREAM_CODEC,

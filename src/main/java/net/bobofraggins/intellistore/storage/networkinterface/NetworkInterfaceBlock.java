@@ -154,14 +154,11 @@ public class NetworkInterfaceBlock extends BaseEntityBlock {
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {
         // Only the lower half has a block entity; only tick on the server
-        if (level.isClientSide()
-                || state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) != DoubleBlockHalf.LOWER) {
+        if (level.isClientSide() || state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) != DoubleBlockHalf.LOWER) {
             return null;
         }
         return createTickerHelper(
-                type,
-                Registration.NETWORK_INTERFACE_BE_TYPE.get(),
-                (lvl, pos, st, be) -> be.serverTick());
+                type, Registration.NETWORK_INTERFACE_BE_TYPE.get(), (lvl, pos, st, be) -> be.serverTick());
     }
 
     // -------------------------------------------------------------------------
@@ -191,8 +188,7 @@ public class NetworkInterfaceBlock extends BaseEntityBlock {
                 player.getInventory().setItem(slot, remainder);
             }
             player.getInventory().setChanged();
-            player.displayClientMessage(
-                    Component.translatable("action.intellistore.deposit_complete"), true);
+            player.displayClientMessage(Component.translatable("action.intellistore.deposit_complete"), true);
             return InteractionResult.SUCCESS;
         }
 

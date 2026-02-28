@@ -23,7 +23,9 @@ public record OpenPersonalAccessTerminalPacket(BlockPos niPos) implements Custom
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenPersonalAccessTerminalPacket> STREAM_CODEC =
             StreamCodec.composite(
-                    BlockPos.STREAM_CODEC.cast(), OpenPersonalAccessTerminalPacket::niPos, OpenPersonalAccessTerminalPacket::new);
+                    BlockPos.STREAM_CODEC.cast(),
+                    OpenPersonalAccessTerminalPacket::niPos,
+                    OpenPersonalAccessTerminalPacket::new);
 
     @Override
     public Type<OpenPersonalAccessTerminalPacket> type() {

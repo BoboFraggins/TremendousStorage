@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.storage.junkdrawer;
 
 import com.mojang.serialization.MapCodec;
+import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -11,7 +12,6 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 
 /**
  * The Junk Drawer block — stores up to 32,768 individual items, one per slot.

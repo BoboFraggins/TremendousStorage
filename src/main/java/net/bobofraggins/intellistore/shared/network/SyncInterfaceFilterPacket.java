@@ -61,12 +61,16 @@ public record SyncInterfaceFilterPacket(BlockPos pos, int faceIndex, List<ItemSt
             } else if (current instanceof PlacerInterfaceScreen s
                     && s.getMenu().getPos().equals(packet.pos())
                     && s.getMenu().getFaceIndex() == packet.faceIndex()) {
-                ItemStack slot0 = packet.filterSlots().isEmpty() ? ItemStack.EMPTY : packet.filterSlots().get(0);
+                ItemStack slot0 = packet.filterSlots().isEmpty()
+                        ? ItemStack.EMPTY
+                        : packet.filterSlots().get(0);
                 s.applySync(slot0);
             } else if (current instanceof BreakerInterfaceScreen s
                     && s.getMenu().getPos().equals(packet.pos())
                     && s.getMenu().getFaceIndex() == packet.faceIndex()) {
-                ItemStack slot0 = packet.filterSlots().isEmpty() ? ItemStack.EMPTY : packet.filterSlots().get(0);
+                ItemStack slot0 = packet.filterSlots().isEmpty()
+                        ? ItemStack.EMPTY
+                        : packet.filterSlots().get(0);
                 s.applySync(slot0);
             }
         });

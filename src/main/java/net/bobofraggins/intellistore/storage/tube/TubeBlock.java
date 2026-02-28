@@ -6,15 +6,15 @@ import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.tubeattachments.AttachmentType;
 import net.bobofraggins.intellistore.storage.tubeattachments.BreakerInterfaceItem;
+import net.bobofraggins.intellistore.storage.tubeattachments.BreakerInterfaceMenu;
 import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceItem;
+import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceMenu;
 import net.bobofraggins.intellistore.storage.tubeattachments.ImportInterfaceItem;
+import net.bobofraggins.intellistore.storage.tubeattachments.ImportInterfaceMenu;
 import net.bobofraggins.intellistore.storage.tubeattachments.InterfaceFilterContents;
 import net.bobofraggins.intellistore.storage.tubeattachments.PlacerInterfaceItem;
-import net.bobofraggins.intellistore.storage.tubeattachments.StorageInterfaceItem;
-import net.bobofraggins.intellistore.storage.tubeattachments.BreakerInterfaceMenu;
-import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceMenu;
-import net.bobofraggins.intellistore.storage.tubeattachments.ImportInterfaceMenu;
 import net.bobofraggins.intellistore.storage.tubeattachments.PlacerInterfaceMenu;
+import net.bobofraggins.intellistore.storage.tubeattachments.StorageInterfaceItem;
 import net.bobofraggins.intellistore.storage.tubeattachments.StorageInterfaceMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -310,17 +310,19 @@ public class TubeBlock extends BaseEntityBlock {
 
         // Restore state from the item's data components before setting the type
         if (newType == AttachmentType.STORAGE_INTERFACE) {
-            int pOrdinal = stack.getOrDefault(Registration.STORAGE_INTERFACE_PRIORITY.get(),
+            int pOrdinal = stack.getOrDefault(
+                    Registration.STORAGE_INTERFACE_PRIORITY.get(),
                     net.bobofraggins.intellistore.shared.priority.Priority.NORMAL.ordinal());
-            be.setAttachmentPriority(faceIndex, net.bobofraggins.intellistore.shared.priority.Priority.fromOrdinal(pOrdinal));
+            be.setAttachmentPriority(
+                    faceIndex, net.bobofraggins.intellistore.shared.priority.Priority.fromOrdinal(pOrdinal));
         } else if (newType == AttachmentType.IMPORT_INTERFACE || newType == AttachmentType.EXPORT_INTERFACE) {
-            InterfaceFilterContents contents = stack.getOrDefault(
-                    Registration.INTERFACE_FILTER.get(), InterfaceFilterContents.EMPTY);
+            InterfaceFilterContents contents =
+                    stack.getOrDefault(Registration.INTERFACE_FILTER.get(), InterfaceFilterContents.EMPTY);
             be.loadFilterFromContents(faceIndex, contents);
         } else if (newType == AttachmentType.PLACER_INTERFACE || newType == AttachmentType.BREAKER_INTERFACE) {
             // Restore single filter slot and (for Breaker) silk touch from INTERFACE_FILTER component
-            InterfaceFilterContents contents = stack.getOrDefault(
-                    Registration.INTERFACE_FILTER.get(), InterfaceFilterContents.EMPTY);
+            InterfaceFilterContents contents =
+                    stack.getOrDefault(Registration.INTERFACE_FILTER.get(), InterfaceFilterContents.EMPTY);
             if (!contents.isEmpty()) {
                 java.util.List<ItemStack> slots = contents.slots();
                 if (!slots.isEmpty() && !slots.get(0).isEmpty()) {
@@ -351,22 +353,29 @@ public class TubeBlock extends BaseEntityBlock {
         AttachmentType type = be.getAttachmentType(faceIndex);
 
         switch (type) {
-            case STORAGE_INTERFACE -> player.openMenu(
-                    new StorageInterfaceMenu.Provider(be, pos, faceIndex),
-                    buf -> { buf.writeBlockPos(pos); buf.writeByte(faceIndex); });
-            case IMPORT_INTERFACE -> player.openMenu(
-                    new ImportInterfaceMenu.Provider(be, pos, faceIndex),
-                    buf -> { buf.writeBlockPos(pos); buf.writeByte(faceIndex); });
-            case EXPORT_INTERFACE -> player.openMenu(
-                    new ExportInterfaceMenu.Provider(be, pos, faceIndex),
-                    buf -> { buf.writeBlockPos(pos); buf.writeByte(faceIndex); });
-            case PLACER_INTERFACE -> player.openMenu(
-                    new PlacerInterfaceMenu.Provider(be, pos, faceIndex),
-                    buf -> { buf.writeBlockPos(pos); buf.writeByte(faceIndex); });
-            case BREAKER_INTERFACE -> player.openMenu(
-                    new BreakerInterfaceMenu.Provider(be, pos, faceIndex),
-                    buf -> { buf.writeBlockPos(pos); buf.writeByte(faceIndex); });
-            default -> { return InteractionResult.PASS; }
+            case STORAGE_INTERFACE -> player.openMenu(new StorageInterfaceMenu.Provider(be, pos, faceIndex), buf -> {
+                buf.writeBlockPos(pos);
+                buf.writeByte(faceIndex);
+            });
+            case IMPORT_INTERFACE -> player.openMenu(new ImportInterfaceMenu.Provider(be, pos, faceIndex), buf -> {
+                buf.writeBlockPos(pos);
+                buf.writeByte(faceIndex);
+            });
+            case EXPORT_INTERFACE -> player.openMenu(new ExportInterfaceMenu.Provider(be, pos, faceIndex), buf -> {
+                buf.writeBlockPos(pos);
+                buf.writeByte(faceIndex);
+            });
+            case PLACER_INTERFACE -> player.openMenu(new PlacerInterfaceMenu.Provider(be, pos, faceIndex), buf -> {
+                buf.writeBlockPos(pos);
+                buf.writeByte(faceIndex);
+            });
+            case BREAKER_INTERFACE -> player.openMenu(new BreakerInterfaceMenu.Provider(be, pos, faceIndex), buf -> {
+                buf.writeBlockPos(pos);
+                buf.writeByte(faceIndex);
+            });
+            default -> {
+                return InteractionResult.PASS;
+            }
         }
         return InteractionResult.SUCCESS;
     }

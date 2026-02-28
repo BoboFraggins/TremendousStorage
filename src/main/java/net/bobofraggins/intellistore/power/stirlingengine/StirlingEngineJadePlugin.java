@@ -65,9 +65,11 @@ public class StirlingEngineJadePlugin implements IWailaPlugin {
             if (!heated) {
                 tooltip.add(Component.translatable("jade.intellistore.stirling_engine.hint"));
             } else {
-                tooltip.add(Component.translatable("jade.intellistore.stirling_engine.stored",
+                tooltip.add(Component.translatable(
+                        "jade.intellistore.stirling_engine.stored",
                         net.bobofraggins.intellistore.shared.util.CountFormat.format(stored),
-                        net.bobofraggins.intellistore.shared.util.CountFormat.format(StirlingEngineBlockEntity.MAX_ENERGY)));
+                        net.bobofraggins.intellistore.shared.util.CountFormat.format(
+                                StirlingEngineBlockEntity.MAX_ENERGY)));
             }
         }
     }

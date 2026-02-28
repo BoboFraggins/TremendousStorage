@@ -36,8 +36,13 @@ import net.minecraft.world.item.ItemStack;
 public class PersonalFilingCabinetMenu extends AbstractFilingCabinetMenu {
 
     private final int pfcSlot;
-    @Nullable private final String curiosSlotId;
-    @Nullable private final Object curiosHandler; // top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler
+
+    @Nullable
+    private final String curiosSlotId;
+
+    @Nullable
+    private final Object curiosHandler; // top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler
+
     private final SimpleContainer container;
     private final ContainerData data;
 
@@ -47,8 +52,12 @@ public class PersonalFilingCabinetMenu extends AbstractFilingCabinetMenu {
     }
 
     /** Server-side constructor supporting both inventory and Curios slots. */
-    public PersonalFilingCabinetMenu(int syncId, Inventory playerInv, int pfcSlot,
-            @Nullable String curiosSlotId, @Nullable Object curiosHandler) {
+    public PersonalFilingCabinetMenu(
+            int syncId,
+            Inventory playerInv,
+            int pfcSlot,
+            @Nullable String curiosSlotId,
+            @Nullable Object curiosHandler) {
         super(Registration.PERSONAL_FILING_CABINET_MENU.get(), syncId);
         this.pfcSlot = pfcSlot;
         this.curiosSlotId = curiosSlotId;
@@ -66,11 +75,19 @@ public class PersonalFilingCabinetMenu extends AbstractFilingCabinetMenu {
         boolean[] voidExcessHolder = {contents.voidExcess()};
         this.data = new SimpleContainerData(1) {
             @Override
-            public int get(int index) { return voidExcessHolder[0] ? 1 : 0; }
+            public int get(int index) {
+                return voidExcessHolder[0] ? 1 : 0;
+            }
+
             @Override
-            public void set(int index, int value) { voidExcessHolder[0] = (value != 0); }
+            public void set(int index, int value) {
+                voidExcessHolder[0] = (value != 0);
+            }
+
             @Override
-            public int getCount() { return 1; }
+            public int getCount() {
+                return 1;
+            }
         };
 
         addAllSlots(container, playerInv, 86, 144);
@@ -82,16 +99,24 @@ public class PersonalFilingCabinetMenu extends AbstractFilingCabinetMenu {
         this(syncId, playerInv, buf.readInt());
     }
 
-    public int getPfcSlot() { return pfcSlot; }
+    public int getPfcSlot() {
+        return pfcSlot;
+    }
 
     @Override
-    public boolean isVoidExcess() { return data.get(0) != 0; }
+    public boolean isVoidExcess() {
+        return data.get(0) != 0;
+    }
 
     @Override
-    public void setVoidExcess(boolean on) { data.set(0, on ? 1 : 0); }
+    public void setVoidExcess(boolean on) {
+        data.set(0, on ? 1 : 0);
+    }
 
     @Override
-    public boolean stillValid(Player player) { return true; }
+    public boolean stillValid(Player player) {
+        return true;
+    }
 
     @Override
     public void removed(Player player) {
@@ -107,7 +132,8 @@ public class PersonalFilingCabinetMenu extends AbstractFilingCabinetMenu {
             try {
                 var handler = (top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler) curiosHandler;
                 return handler.getStacks().getStackInSlot(pfcSlot);
-            } catch (NoClassDefFoundError | Exception ignored) {}
+            } catch (NoClassDefFoundError | Exception ignored) {
+            }
         }
         return player.getInventory().getItem(pfcSlot);
     }
@@ -129,7 +155,8 @@ public class PersonalFilingCabinetMenu extends AbstractFilingCabinetMenu {
                     pfcStack.set(Registration.PFC_CONTENTS.get(), contents);
                     handler.getStacks().setStackInSlot(pfcSlot, pfcStack);
                 }
-            } catch (NoClassDefFoundError | Exception ignored) {}
+            } catch (NoClassDefFoundError | Exception ignored) {
+            }
             return;
         }
 
@@ -145,8 +172,12 @@ public class PersonalFilingCabinetMenu extends AbstractFilingCabinetMenu {
 
     public static class Provider implements MenuProvider {
         private final int pfcSlot;
-        @Nullable private final String curiosSlotId;
-        @Nullable private final Object curiosHandler;
+
+        @Nullable
+        private final String curiosSlotId;
+
+        @Nullable
+        private final Object curiosHandler;
 
         public Provider(int pfcSlot, @Nullable String curiosSlotId, @Nullable Object curiosHandler) {
             this.pfcSlot = pfcSlot;

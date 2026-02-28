@@ -2,7 +2,6 @@ package net.bobofraggins.intellistore.storage.tubeattachments;
 
 import java.util.List;
 import net.bobofraggins.intellistore.shared.network.SetImportExportFilterPacket;
-import net.bobofraggins.intellistore.shared.network.SyncInterfaceFilterPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -24,11 +23,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfaceMenu> {
 
-    private static final int BG_WIDTH  = 176;
+    private static final int BG_WIDTH = 176;
     private static final int BG_HEIGHT = 116;
 
     /** Top-left of the 3×3 ghost grid (relative to leftPos/topPos). */
-    private static final int GRID_X = (BG_WIDTH - 3 * 18) / 2;  // 29
+    private static final int GRID_X = (BG_WIDTH - 3 * 18) / 2; // 29
+
     private static final int GRID_Y = 30;
 
     private static final int SLOT_SIZE = 18;
@@ -40,7 +40,7 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
 
     public ImportInterfaceScreen(ImportInterfaceMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth  = BG_WIDTH;
+        this.imageWidth = BG_WIDTH;
         this.imageHeight = BG_HEIGHT;
     }
 
@@ -49,13 +49,10 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
         super.init();
         int btnX = leftPos + (BG_WIDTH - MODE_BTN_W) / 2;
         int btnY = topPos + MODE_BTN_Y;
-        modeButton = addRenderableWidget(Button.builder(
-                        modeLabel(),
-                        btn -> {
-                            PacketDistributor.sendToServer(
-                                    new SetImportExportFilterPacket(
-                                            menu.getPos(), menu.getFaceIndex(), -1, ItemStack.EMPTY));
-                        })
+        modeButton = addRenderableWidget(Button.builder(modeLabel(), btn -> {
+                    PacketDistributor.sendToServer(
+                            new SetImportExportFilterPacket(menu.getPos(), menu.getFaceIndex(), -1, ItemStack.EMPTY));
+                })
                 .bounds(btnX, btnY, MODE_BTN_W, MODE_BTN_H)
                 .build());
     }
@@ -89,14 +86,14 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
 
         // "Filter:" label
         Component filterLabel = Component.translatable("screen.intellistore.filter_label");
-        graphics.drawString(font, filterLabel, leftPos + (BG_WIDTH - font.width(filterLabel)) / 2,
-                topPos + 20, 0xAAAAAA, false);
+        graphics.drawString(
+                font, filterLabel, leftPos + (BG_WIDTH - font.width(filterLabel)) / 2, topPos + 20, 0xAAAAAA, false);
 
         // Draw ghost slot backgrounds and item icons
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
                 int sx = leftPos + GRID_X + col * SLOT_SIZE;
-                int sy = topPos  + GRID_Y + row * SLOT_SIZE;
+                int sy = topPos + GRID_Y + row * SLOT_SIZE;
                 int slotIndex = row * 3 + col;
 
                 // Dark recessed slot background
@@ -127,9 +124,8 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
                 int sx = leftPos + GRID_X + col * SLOT_SIZE + 1;
-                int sy = topPos  + GRID_Y + row * SLOT_SIZE + 1;
-                if (mouseX >= sx && mouseX < sx + SLOT_SIZE - 2
-                        && mouseY >= sy && mouseY < sy + SLOT_SIZE - 2) {
+                int sy = topPos + GRID_Y + row * SLOT_SIZE + 1;
+                if (mouseX >= sx && mouseX < sx + SLOT_SIZE - 2 && mouseY >= sy && mouseY < sy + SLOT_SIZE - 2) {
                     int slotIndex = row * 3 + col;
                     handleGhostSlotClick(slotIndex);
                     return true;
@@ -144,14 +140,14 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
         if (carried.isEmpty()) {
             // Clear this slot
             menu.setFilterSlot(slotIndex, ItemStack.EMPTY);
-            PacketDistributor.sendToServer(new SetImportExportFilterPacket(
-                    menu.getPos(), menu.getFaceIndex(), slotIndex, ItemStack.EMPTY));
+            PacketDistributor.sendToServer(
+                    new SetImportExportFilterPacket(menu.getPos(), menu.getFaceIndex(), slotIndex, ItemStack.EMPTY));
         } else {
             // Set this slot to the carried item type (count 1, ghost)
             ItemStack ghost = carried.copyWithCount(1);
             menu.setFilterSlot(slotIndex, ghost);
-            PacketDistributor.sendToServer(new SetImportExportFilterPacket(
-                    menu.getPos(), menu.getFaceIndex(), slotIndex, ghost));
+            PacketDistributor.sendToServer(
+                    new SetImportExportFilterPacket(menu.getPos(), menu.getFaceIndex(), slotIndex, ghost));
         }
     }
 

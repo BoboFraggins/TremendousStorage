@@ -23,8 +23,7 @@ import snownee.jade.api.config.IPluginConfig;
 @WailaPlugin
 public class TubeJadePlugin implements IWailaPlugin {
 
-    static final ResourceLocation TUBE_PROVIDER =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "tube_power");
+    static final ResourceLocation TUBE_PROVIDER = ResourceLocation.fromNamespaceAndPath("intellistore", "tube_power");
 
     @Override
     public void register(IWailaCommonRegistration registration) {

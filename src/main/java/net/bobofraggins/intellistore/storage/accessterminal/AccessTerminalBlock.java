@@ -1,8 +1,8 @@
 package net.bobofraggins.intellistore.storage.accessterminal;
 
-import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
+import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
@@ -12,7 +12,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 
 /**
  * The Storage Access Terminal block.
@@ -38,10 +37,8 @@ public class AccessTerminalBlock extends Block implements NetworkConnector {
         BlockPos niPos = AccessTerminalBFS.findNI((ServerLevel) level, pos);
 
         // Power check: if NI is found but network is not powered, show message and do not open
-        if (niPos != null && level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni
-                && !ni.isPowered()) {
-            player.displayClientMessage(
-                    Component.translatable("screen.intellistore.not_enough_power"), true);
+        if (niPos != null && level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni && !ni.isPowered()) {
+            player.displayClientMessage(Component.translatable("screen.intellistore.not_enough_power"), true);
             return InteractionResult.SUCCESS;
         }
 

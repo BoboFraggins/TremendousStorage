@@ -65,8 +65,8 @@ public class NetworkInterfaceJadePlugin implements IWailaPlugin {
             boolean powered = data.getBoolean(KEY_POWERED);
 
             // Always show total consumption
-            tooltip.add(Component.translatable("jade.intellistore.network_interface.consumption",
-                    CountFormat.format(consumption)));
+            tooltip.add(Component.translatable(
+                    "jade.intellistore.network_interface.consumption", CountFormat.format(consumption)));
 
             if (!powered) {
                 tooltip.add(Component.translatable("jade.intellistore.not_enough_power")

@@ -10,16 +10,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.bobofraggins.intellistore.shared.priority.Priority;
+import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
-import net.bobofraggins.intellistore.shared.priority.Priority;
-import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
-import net.bobofraggins.intellistore.storage.tubeattachments.AttachmentType;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.bobofraggins.intellistore.storage.tube.TubeBlockEntity;
+import net.bobofraggins.intellistore.storage.tubeattachments.AttachmentType;
 import net.bobofraggins.intellistore.storage.wirelesshub.WirelessHubBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -119,8 +119,7 @@ public final class NetworkInterfaceBFS {
                 BlockPos adjPos = pos.relative(dir);
                 BlockState adjState = level.getBlockState(adjPos);
 
-                if (adjState.getBlock() instanceof TubeBlock adjTube
-                        && adjTube.getColor() == tb.getColor()) {
+                if (adjState.getBlock() instanceof TubeBlock adjTube && adjTube.getColor() == tb.getColor()) {
                     // Continue BFS through same-color tubes
                     if (!visitedTubes.contains(adjPos)) {
                         queue.add(adjPos);
@@ -148,8 +147,7 @@ public final class NetworkInterfaceBFS {
 
                     // If this neighbor is a NetworkConnector, bridge through it into
                     // adjacent tubes of any color
-                    if (adjState.getBlock() instanceof NetworkConnector
-                            && visitedConnectors.add(adjPos)) {
+                    if (adjState.getBlock() instanceof NetworkConnector && visitedConnectors.add(adjPos)) {
                         for (Direction connDir : Direction.values()) {
                             BlockPos beyondPos = adjPos.relative(connDir);
                             if (!visitedTubes.contains(beyondPos)

@@ -18,8 +18,8 @@ public class IntelliStoreConfig {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
         builder.comment("Power features").push("power");
-        STIRLING_ENGINE_ENABLED = builder
-                .comment("Enable the Stirling Engine block (heat-to-RF generator). Default: true.")
+        STIRLING_ENGINE_ENABLED = builder.comment(
+                        "Enable the Stirling Engine block (heat-to-RF generator). Default: true.")
                 .define("stirlingEngineEnabled", true);
         builder.pop();
 

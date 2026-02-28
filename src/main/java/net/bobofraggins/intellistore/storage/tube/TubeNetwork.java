@@ -7,12 +7,12 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
-import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -107,8 +107,7 @@ public final class TubeNetwork {
 
                     // If this neighbor is a NetworkConnector, continue the BFS through it
                     // into any adjacent tubes (any color) that we haven't visited yet.
-                    if (neighborState.getBlock() instanceof NetworkConnector
-                            && visitedConnectors.add(neighborPos)) {
+                    if (neighborState.getBlock() instanceof NetworkConnector && visitedConnectors.add(neighborPos)) {
                         for (Direction connDir : Direction.values()) {
                             BlockPos beyondPos = neighborPos.relative(connDir);
                             if (!visitedTubes.contains(beyondPos)

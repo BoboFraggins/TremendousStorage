@@ -1,7 +1,7 @@
 package net.bobofraggins.intellistore.storage.filingcabinet;
 
 import com.mojang.serialization.MapCodec;
-import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -16,7 +16,6 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 
 /**
  * The Filing Cabinet block. Holds up to 8 Manila Folders.

@@ -70,8 +70,7 @@ public final class AccessTerminalBFS {
                         && adjSt.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
                     // Found a Network Interface lower half
                     return adj;
-                } else if (adjSt.getBlock() instanceof NetworkConnector
-                        && visitedConnectors.add(adj)) {
+                } else if (adjSt.getBlock() instanceof NetworkConnector && visitedConnectors.add(adj)) {
                     // Bridge through this connector into its adjacent tubes (any color)
                     for (Direction connDir : Direction.values()) {
                         BlockPos beyond = adj.relative(connDir);

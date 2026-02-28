@@ -3,13 +3,11 @@ package net.bobofraggins.intellistore.storage.enderfolder;
 import java.util.HashMap;
 import java.util.Map;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
-import net.bobofraggins.intellistore.shared.register.Registration;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
@@ -34,8 +32,7 @@ public class EnderFolderStorage extends SavedData {
     public static EnderFolderStorage get(MinecraftServer server) {
         DimensionDataStorage storage = server.overworld().getDataStorage();
         return storage.computeIfAbsent(
-                new SavedData.Factory<>(EnderFolderStorage::new, EnderFolderStorage::load, null),
-                SAVE_KEY);
+                new SavedData.Factory<>(EnderFolderStorage::new, EnderFolderStorage::load, null), SAVE_KEY);
     }
 
     // -------------------------------------------------------------------------

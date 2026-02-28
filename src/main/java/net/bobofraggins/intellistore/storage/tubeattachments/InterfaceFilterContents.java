@@ -22,8 +22,7 @@ public record InterfaceFilterContents(List<ItemStack> slots, boolean rejectMode)
 
     public static final int SLOT_COUNT = 9;
 
-    public static final InterfaceFilterContents EMPTY =
-            new InterfaceFilterContents(emptySlots(), false);
+    public static final InterfaceFilterContents EMPTY = new InterfaceFilterContents(emptySlots(), false);
 
     private static List<ItemStack> emptySlots() {
         List<ItemStack> list = new ArrayList<>(SLOT_COUNT);
@@ -40,15 +39,13 @@ public record InterfaceFilterContents(List<ItemStack> slots, boolean rejectMode)
         return true;
     }
 
-    public static final Codec<InterfaceFilterContents> CODEC = RecordCodecBuilder.create(
-            instance -> instance.group(
-                            ItemStack.OPTIONAL_CODEC
-                                    .listOf(SLOT_COUNT, SLOT_COUNT)
-                                    .fieldOf("slots")
-                                    .forGetter(InterfaceFilterContents::slots),
-                            Codec.BOOL.optionalFieldOf("reject_mode", false)
-                                    .forGetter(InterfaceFilterContents::rejectMode))
-                    .apply(instance, InterfaceFilterContents::new));
+    public static final Codec<InterfaceFilterContents> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    ItemStack.OPTIONAL_CODEC
+                            .listOf(SLOT_COUNT, SLOT_COUNT)
+                            .fieldOf("slots")
+                            .forGetter(InterfaceFilterContents::slots),
+                    Codec.BOOL.optionalFieldOf("reject_mode", false).forGetter(InterfaceFilterContents::rejectMode))
+            .apply(instance, InterfaceFilterContents::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, InterfaceFilterContents> STREAM_CODEC =
             StreamCodec.composite(

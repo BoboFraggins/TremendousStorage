@@ -2,8 +2,8 @@ package net.bobofraggins.intellistore.storage.personalaccessterminal;
 
 import java.util.List;
 import javax.annotation.Nullable;
-import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -80,8 +80,7 @@ public class PersonalAccessTerminalItem extends Item {
             return;
         }
         if (!ni.isPowered()) {
-            player.displayClientMessage(
-                    Component.translatable("screen.intellistore.not_enough_power"), true);
+            player.displayClientMessage(Component.translatable("screen.intellistore.not_enough_power"), true);
             return;
         }
 
