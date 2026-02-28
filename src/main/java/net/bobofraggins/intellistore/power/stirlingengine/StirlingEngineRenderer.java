@@ -55,47 +55,15 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
         // From [2,EPS,2] to [14,6,14] in 1/16 coords; EPS avoids Z-fighting with ground block.
         drawBox(solid, mat, 2f / 16, EPS, 2f / 16, 14f / 16, 6f / 16, 14f / 16, ironSprite, packedLight, packedOverlay);
 
-        // ---- Cylinder core: [2,6,2] to [14,14,14] ----
-        drawBox(
-                solid,
-                mat,
-                2f / 16,
-                6f / 16,
-                2f / 16,
-                14f / 16,
-                14f / 16,
-                14f / 16,
-                metalSprite,
-                packedLight,
-                packedOverlay);
+        // ---- Cylinder: narrow upright column, 6px wide, 10px tall, centered ----
+        // Core: [5,6,5] to [11,16,11]
+        drawBox(solid, mat, 5f / 16, 6f / 16, 5f / 16, 11f / 16, 1f, 11f / 16, metalSprite, packedLight, packedOverlay);
 
-        // ---- Cylinder rounded illusion: two cross-pieces ----
-        // [1,6,4] to [15,14,12]
-        drawBox(
-                solid,
-                mat,
-                1f / 16,
-                6f / 16,
-                4f / 16,
-                15f / 16,
-                14f / 16,
-                12f / 16,
-                metalSprite,
-                packedLight,
-                packedOverlay);
-        // [4,6,1] to [12,14,15]
-        drawBox(
-                solid,
-                mat,
-                4f / 16,
-                6f / 16,
-                1f / 16,
-                12f / 16,
-                14f / 16,
-                15f / 16,
-                metalSprite,
-                packedLight,
-                packedOverlay);
+        // Rounded-cylinder illusion: two cross-pieces
+        // [4,6,6] to [12,16,10]
+        drawBox(solid, mat, 4f / 16, 6f / 16, 6f / 16, 12f / 16, 1f, 10f / 16, metalSprite, packedLight, packedOverlay);
+        // [6,6,4] to [10,16,12]
+        drawBox(solid, mat, 6f / 16, 6f / 16, 4f / 16, 10f / 16, 1f, 12f / 16, metalSprite, packedLight, packedOverlay);
 
         poseStack.popPose();
 
@@ -103,8 +71,8 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
         if (be.isHeated()) {
             poseStack.pushPose();
 
-            // Position flywheel at the top centre of the cylinder
-            poseStack.translate(0.5, 14.5f / 16f, 0.5);
+            // Position flywheel at the top centre of the cylinder (y=1.0, top of block)
+            poseStack.translate(0.5, 1f - EPS, 0.5);
 
             float animTick = be.animationTicks + partialTick * 1.5f;
             float rotation = (animTick * 10f) % 360f;
