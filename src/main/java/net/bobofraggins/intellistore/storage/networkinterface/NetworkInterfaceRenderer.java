@@ -80,12 +80,12 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         Matrix4f mat = poseStack.last().pose();
 
         // ---- Iron base — solid, blocky-cylinder (three overlapping boxes) ----
-        // Coords in block units (1 = full block width). Values from /16 fractions:
+        // y starts at 1/16 (1px above floor) to avoid Z-fighting with the ground block.
         drawBox(
                 solid,
                 mat,
                 3f / 16,
-                0,
+                1f / 16,
                 3f / 16,
                 13f / 16,
                 4f / 16,
@@ -100,7 +100,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 solid,
                 mat,
                 2f / 16,
-                0,
+                1f / 16,
                 4f / 16,
                 14f / 16,
                 4f / 16,
@@ -115,7 +115,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 solid,
                 mat,
                 4f / 16,
-                0,
+                1f / 16,
                 2f / 16,
                 12f / 16,
                 4f / 16,
@@ -128,6 +128,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 packedOverlay);
 
         // ---- Water interior — translucent, inset inside glass ----
+        // Lower half: from top of base to top of lower block
         drawBox(
                 translucent,
                 mat,
@@ -135,7 +136,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 5f / 16,
                 4f / 16,
                 12f / 16,
-                13f / 16,
+                1f,
                 12f / 16,
                 waterSprite,
                 255,
@@ -145,6 +146,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 packedOverlay);
 
         // ---- Glass cylinder — translucent, three overlapping boxes ----
+        // Extends from top of iron base (4/16) to top of lower block (1.0) so there is no gap.
         drawBox(
                 translucent,
                 mat,
@@ -152,7 +154,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 4f / 16,
                 3f / 16,
                 13f / 16,
-                14f / 16,
+                1f,
                 13f / 16,
                 glassSprite,
                 255,
@@ -167,7 +169,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 4f / 16,
                 4f / 16,
                 14f / 16,
-                14f / 16,
+                1f,
                 12f / 16,
                 glassSprite,
                 255,
@@ -182,7 +184,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 4f / 16,
                 2f / 16,
                 12f / 16,
-                14f / 16,
+                1f,
                 14f / 16,
                 glassSprite,
                 255,
@@ -346,7 +348,71 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         poseStack.translate(0, 1, 0);
         mat = poseStack.last().pose();
 
-        // Glass dome — three overlapping boxes (y values relative to lower-half floor)
+        // Water interior continuation — upper block, inset inside glass, up to dome base
+        drawBox(
+                translucent,
+                mat,
+                4f / 16,
+                0f,
+                4f / 16,
+                12f / 16,
+                14f / 16,
+                12f / 16,
+                waterSprite,
+                255,
+                255,
+                255,
+                packedLight,
+                packedOverlay);
+
+        // Glass cylinder continuation — fills upper block from y=0 to y=14/16 where dome begins
+        drawBox(
+                translucent,
+                mat,
+                3f / 16,
+                0f,
+                3f / 16,
+                13f / 16,
+                14f / 16,
+                13f / 16,
+                glassSprite,
+                255,
+                255,
+                255,
+                packedLight,
+                packedOverlay);
+        drawBox(
+                translucent,
+                mat,
+                2f / 16,
+                0f,
+                4f / 16,
+                14f / 16,
+                14f / 16,
+                12f / 16,
+                glassSprite,
+                255,
+                255,
+                255,
+                packedLight,
+                packedOverlay);
+        drawBox(
+                translucent,
+                mat,
+                4f / 16,
+                0f,
+                2f / 16,
+                12f / 16,
+                14f / 16,
+                14f / 16,
+                glassSprite,
+                255,
+                255,
+                255,
+                packedLight,
+                packedOverlay);
+
+        // Glass dome — three overlapping boxes tapering to top
         drawBox(
                 translucent,
                 mat,
