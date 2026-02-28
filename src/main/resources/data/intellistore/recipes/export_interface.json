@@ -6,11 +6,16 @@
     " I "
   ],
   "key": {
-    "I": { "item": "minecraft:iron_ingot" },
-    "R": { "item": "minecraft:red_dye" }
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "R": {
+      "item": "minecraft:red_dye"
+    }
   },
   "result": {
     "id": "intellistore:export_interface",
     "count": 4
-  }
+  },
+  "category": "misc"
 }

@@ -6,12 +6,19 @@
     "BIB"
   ],
   "key": {
-    "B": { "item": "minecraft:iron_block" },
-    "I": { "item": "minecraft:iron_bars" },
-    "C": { "item": "minecraft:chest" }
+    "B": {
+      "item": "minecraft:iron_block"
+    },
+    "I": {
+      "item": "minecraft:iron_bars"
+    },
+    "C": {
+      "item": "minecraft:chest"
+    }
   },
   "result": {
     "id": "intellistore:junk_drawer",
     "count": 1
-  }
+  },
+  "category": "misc"
 }

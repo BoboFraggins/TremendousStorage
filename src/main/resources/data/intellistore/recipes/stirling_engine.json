@@ -6,10 +6,22 @@
     "WIL"
   ],
   "key": {
-    "I": { "item": "minecraft:iron_nugget" },
-    "S": { "item": "minecraft:stick" },
-    "W": { "item": "minecraft:water_bucket" },
-    "L": { "item": "minecraft:lava_bucket" }
+    "I": {
+      "item": "minecraft:iron_nugget"
+    },
+    "S": {
+      "item": "minecraft:stick"
+    },
+    "W": {
+      "item": "minecraft:water_bucket"
+    },
+    "L": {
+      "item": "minecraft:lava_bucket"
+    }
   },
-  "result": { "id": "intellistore:stirling_engine", "count": 1 }
+  "result": {
+    "id": "intellistore:stirling_engine",
+    "count": 1
+  },
+  "category": "misc"
 }

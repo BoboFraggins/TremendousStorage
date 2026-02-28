@@ -12,12 +12,19 @@
     " P "
   ],
   "key": {
-    "G": { "item": "minecraft:glass" },
-    "J": { "item": "intellistore:junk_drawer" },
-    "P": { "item": "mekanism:basic_gas_tank" }
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "J": {
+      "item": "intellistore:junk_drawer"
+    },
+    "P": {
+      "item": "mekanism:basic_gas_tank"
+    }
   },
   "result": {
     "id": "intellistore:gas_tank",
     "count": 1
-  }
+  },
+  "category": "misc"
 }

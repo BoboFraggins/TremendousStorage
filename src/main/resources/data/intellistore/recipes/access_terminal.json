@@ -6,11 +6,16 @@
     "FFF"
   ],
   "key": {
-    "F": { "item": "intellistore:paper_manila_folder" },
-    "C": { "item": "minecraft:crafting_table" }
+    "F": {
+      "item": "intellistore:paper_manila_folder"
+    },
+    "C": {
+      "item": "minecraft:crafting_table"
+    }
   },
   "result": {
     "id": "intellistore:access_terminal",
     "count": 1
-  }
+  },
+  "category": "misc"
 }

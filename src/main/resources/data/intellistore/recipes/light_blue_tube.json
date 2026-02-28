@@ -1,9 +1,19 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    { "item": "minecraft:light_blue_dye" },
-    { "tag": "intellistore:tubes" }
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "TTT",
+    "TDT",
+    "TTT"
   ],
+  "key": {
+    "T": {
+      "tag": "intellistore:tubes"
+    },
+    "D": {
+      "item": "minecraft:light_blue_dye"
+    }
+  },
   "result": {
     "id": "intellistore:light_blue_tube",
     "count": 8

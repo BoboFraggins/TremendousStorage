@@ -1,9 +1,19 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    { "item": "minecraft:green_dye" },
-    { "tag": "intellistore:tubes" }
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "TTT",
+    "TDT",
+    "TTT"
   ],
+  "key": {
+    "T": {
+      "tag": "intellistore:tubes"
+    },
+    "D": {
+      "item": "minecraft:green_dye"
+    }
+  },
   "result": {
     "id": "intellistore:green_tube",
     "count": 8

@@ -631,7 +631,7 @@ public final class Registration {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> INTELLISTORE_TAB =
             CREATIVE_MODE_TABS.register("intellistore", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.intellistore"))
-                    .icon(() -> CREATIVE_TAB_ICON.get().getDefaultInstance())
+                    .icon(() -> FILING_CABINET_ITEM.get().getDefaultInstance())
                     .displayItems((params, output) -> {
                         output.accept(FILING_CABINET_ITEM.get());
                         output.accept(JUNK_DRAWER_ITEM.get());
