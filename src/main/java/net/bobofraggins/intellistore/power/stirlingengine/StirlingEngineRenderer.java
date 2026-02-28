@@ -29,6 +29,9 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
     private static final ResourceLocation CAMPFIRE_LOG =
             ResourceLocation.fromNamespaceAndPath("minecraft", "block/campfire_log");
 
+    /** Small offset to prevent Z-fighting with adjacent block faces. */
+    private static final float EPS = 1e-4f;
+
     public StirlingEngineRenderer(BlockEntityRendererProvider.Context ctx) {}
 
     @Override
@@ -49,8 +52,8 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
         Matrix4f mat = poseStack.last().pose();
 
         // ---- Base: 3/4 x 3/4 footprint, 6px tall ----
-        // From [2,0,2] to [14,6,14] in 1/16 coords
-        drawBox(solid, mat, 2f / 16, 0f, 2f / 16, 14f / 16, 6f / 16, 14f / 16, ironSprite, packedLight, packedOverlay);
+        // From [2,EPS,2] to [14,6,14] in 1/16 coords; EPS avoids Z-fighting with ground block.
+        drawBox(solid, mat, 2f / 16, EPS, 2f / 16, 14f / 16, 6f / 16, 14f / 16, ironSprite, packedLight, packedOverlay);
 
         // ---- Cylinder core: [2,6,2] to [14,14,14] ----
         drawBox(
