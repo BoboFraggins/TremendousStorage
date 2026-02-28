@@ -1,6 +1,12 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube",
   "textures": {
-    "all": "intellistore:block/filing_cabinet_side"
+    "north":  "intellistore:block/junk_drawer_front",
+    "south":  "intellistore:block/filing_cabinet_side",
+    "east":   "intellistore:block/filing_cabinet_side",
+    "west":   "intellistore:block/filing_cabinet_side",
+    "up":     "intellistore:block/filing_cabinet_side",
+    "down":   "intellistore:block/filing_cabinet_side",
+    "particle": "intellistore:block/filing_cabinet_side"
   }
 }
