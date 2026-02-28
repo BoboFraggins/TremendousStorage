@@ -47,12 +47,15 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_water");
 
     // -------------------------------------------------------------------------
-    // Status dot constants
+    // Constants
     // -------------------------------------------------------------------------
+
+    /** Small offset to prevent Z-fighting with adjacent block faces. */
+    private static final float EPS = 1e-4f;
 
     private static final float DOT_MIN = 6f / 16f;
     private static final float DOT_MAX = 10f / 16f;
-    private static final float DOT_INSET = 0.002f;
+    private static final float DOT_INSET = EPS;
 
     public NetworkInterfaceRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -80,12 +83,12 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         Matrix4f mat = poseStack.last().pose();
 
         // ---- Iron base — solid, blocky-cylinder (three overlapping boxes) ----
-        // y starts at 1/16 (1px above floor) to avoid Z-fighting with the ground block.
+        // y starts at EPS above floor to avoid Z-fighting with the ground block.
         drawBox(
                 solid,
                 mat,
                 3f / 16,
-                1f / 16,
+                EPS,
                 3f / 16,
                 13f / 16,
                 4f / 16,
@@ -100,7 +103,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 solid,
                 mat,
                 2f / 16,
-                1f / 16,
+                EPS,
                 4f / 16,
                 14f / 16,
                 4f / 16,
@@ -115,7 +118,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 solid,
                 mat,
                 4f / 16,
-                1f / 16,
+                EPS,
                 2f / 16,
                 12f / 16,
                 4f / 16,
