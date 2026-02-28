@@ -2,7 +2,7 @@ package net.bobofraggins.intellistore.storage.tube;
 
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.shared.ui.StorageInterfaceScreen;
+import net.bobofraggins.intellistore.storage.tubeattachments.StorageInterfaceScreen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;

@@ -2,7 +2,7 @@ package net.bobofraggins.intellistore.storage.accessterminal;
 
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.shared.ui.AccessTerminalMenu;
+import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;

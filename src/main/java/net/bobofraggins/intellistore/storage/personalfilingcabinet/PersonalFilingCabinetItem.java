@@ -2,7 +2,7 @@ package net.bobofraggins.intellistore.storage.personalfilingcabinet;
 
 import net.bobofraggins.intellistore.shared.network.OpenPersonalFilingCabinetPacket;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.shared.ui.PersonalFilingCabinetMenu;
+import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetMenu;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;

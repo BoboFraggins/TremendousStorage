@@ -1,7 +1,7 @@
 package net.bobofraggins.intellistore.storage.networkinterface;
 
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.shared.ui.NetworkInterfaceMenu;
+import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;

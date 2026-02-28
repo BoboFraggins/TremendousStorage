@@ -2,8 +2,8 @@ package net.bobofraggins.intellistore.storage.networkinterface;
 
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.shared.ui.NetworkInterfaceScreen;
-import net.bobofraggins.intellistore.shared.ui.AccessTerminalScreen;
+import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceScreen;
+import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalScreen;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;

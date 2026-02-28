@@ -16,7 +16,7 @@ import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
-import net.bobofraggins.intellistore.storage.tube.AttachmentType;
+import net.bobofraggins.intellistore.storage.tubeattachments.AttachmentType;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.bobofraggins.intellistore.storage.tube.TubeBlockEntity;

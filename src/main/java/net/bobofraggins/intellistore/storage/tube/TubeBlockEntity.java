@@ -3,6 +3,8 @@ package net.bobofraggins.intellistore.storage.tube;
 import java.util.List;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.storage.tubeattachments.AttachmentType;
+import net.bobofraggins.intellistore.storage.tubeattachments.InterfaceFilterContents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;

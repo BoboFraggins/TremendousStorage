@@ -2,11 +2,11 @@ package net.bobofraggins.intellistore.storage.filingcabinet;
 
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.shared.ui.BreakerInterfaceScreen;
-import net.bobofraggins.intellistore.shared.ui.ExportInterfaceScreen;
-import net.bobofraggins.intellistore.shared.ui.FilingCabinetScreen;
-import net.bobofraggins.intellistore.shared.ui.ImportInterfaceScreen;
-import net.bobofraggins.intellistore.shared.ui.PlacerInterfaceScreen;
+import net.bobofraggins.intellistore.storage.tubeattachments.BreakerInterfaceScreen;
+import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceScreen;
+import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetScreen;
+import net.bobofraggins.intellistore.storage.tubeattachments.ImportInterfaceScreen;
+import net.bobofraggins.intellistore.storage.tubeattachments.PlacerInterfaceScreen;
 import net.bobofraggins.intellistore.shared.ui.PriorityScreen;
 import net.bobofraggins.intellistore.shared.ui.TankSettingsScreen;
 import net.neoforged.api.distmarker.Dist;

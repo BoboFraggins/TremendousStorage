@@ -2,7 +2,7 @@ package net.bobofraggins.intellistore.storage.filingcabinet;
 
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.shared.ui.FilingCabinetMenu;
+import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
