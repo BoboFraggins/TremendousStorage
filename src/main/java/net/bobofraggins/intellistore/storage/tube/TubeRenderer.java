@@ -30,14 +30,17 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     public static final ResourceLocation TUBE_TEXTURE =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/tube");
 
+    /** Small offset to prevent Z-fighting with adjacent block faces. */
+    private static final float EPS = 1e-4f;
+
     // Block-unit coordinate constants (in [0..1] space)
     private static final float C_MIN = 6f / 16f; // Core start
     private static final float C_MAX = 10f / 16f; // Core end
     private static final float A_MIN = C_MIN; // Arm cross-section min (same as core)
     private static final float A_MAX = C_MAX; // Arm cross-section max
-    // Arms stop 1px short of the block face to avoid Z-fighting with the neighbour's face
-    private static final float A_FACE_LO = 1f / 16f;
-    private static final float A_FACE_HI = 15f / 16f;
+    // Arms stop just short of the block face to avoid Z-fighting with the neighbour's face
+    private static final float A_FACE_LO = EPS;
+    private static final float A_FACE_HI = 1f - EPS;
 
     // Attachment plate is 8/16 wide, 2/16 thick
     private static final float P_MIN = 4f / 16f;
@@ -212,7 +215,7 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
             int b,
             int light,
             int overlay) {
-        float inset = 0.001f;
+        float inset = EPS;
         float x0, y0, z0, x1, y1, z1;
         switch (dir) {
             case DOWN -> {
