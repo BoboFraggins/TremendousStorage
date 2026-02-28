@@ -8,9 +8,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
@@ -22,11 +26,35 @@ import net.minecraft.world.phys.BlockHitResult;
  *
  * <p>This block has no Block Entity — the Network Interface lookup is performed
  * at menu-open time and the NI position is passed through to the menu.
+ *
+ * <p>The {@code active} blockstate is {@code true} when a powered NI is reachable,
+ * switching the screen texture to the glowing "on" variant. It is updated each time
+ * the block is interacted with.
  */
 public class AccessTerminalBlock extends Block implements NetworkConnector {
 
+    public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
+
     public AccessTerminalBlock(Properties props) {
         super(props);
+        registerDefaultState(stateDefinition
+                .any()
+                .setValue(BlockStateProperties.HORIZONTAL_FACING, net.minecraft.core.Direction.NORTH)
+                .setValue(ACTIVE, false));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(BlockStateProperties.HORIZONTAL_FACING, ACTIVE);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+        return defaultBlockState()
+                .setValue(
+                        BlockStateProperties.HORIZONTAL_FACING,
+                        ctx.getHorizontalDirection().getOpposite())
+                .setValue(ACTIVE, false);
     }
 
     @Override
@@ -36,8 +64,18 @@ public class AccessTerminalBlock extends Block implements NetworkConnector {
 
         BlockPos niPos = AccessTerminalBFS.findNI((ServerLevel) level, pos);
 
+        boolean powered = niPos != null
+                && level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni
+                && ni.isPowered();
+
+        // Update active state to reflect current network status
+        boolean currentlyActive = state.getValue(ACTIVE);
+        if (powered != currentlyActive) {
+            level.setBlock(pos, state.setValue(ACTIVE, powered), 3);
+        }
+
         // Power check: if NI is found but network is not powered, show message and do not open
-        if (niPos != null && level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni && !ni.isPowered()) {
+        if (niPos != null && !powered) {
             player.displayClientMessage(Component.translatable("screen.intellistore.not_enough_power"), true);
             return InteractionResult.SUCCESS;
         }
