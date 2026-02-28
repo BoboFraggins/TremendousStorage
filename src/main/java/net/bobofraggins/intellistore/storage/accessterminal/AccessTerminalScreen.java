@@ -7,6 +7,7 @@ import net.bobofraggins.intellistore.shared.network.SatExtractPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -37,6 +38,10 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     // -------------------------------------------------------------------------
 
     private static final int BG_WIDTH = 176;
+
+    // Vanilla generic chest texture — 176 wide, top 17px = title bar, bottom 96px = player inv
+    private static final ResourceLocation BG_TEXTURE =
+            ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
 
     private static final int LIST_Y = 16;
     private static final int LIST_HEIGHT = 112; // 7 rows × 16 px
@@ -177,14 +182,33 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        // Overall background
-        graphics.fill(leftPos, topPos, leftPos + BG_WIDTH, topPos + BG_HEIGHT, 0xC0101010);
+        // Background: blit the vanilla generic-chest texture.
+        // It is 176×222 px: top 17px = title row, bottom 96px = player inv section.
+        // We blit the title row at the top, then a plain fill for the list area,
+        // then the bottom player-inv slice aligned to our INV_Y.
+        int x = leftPos, y = topPos;
+
+        // Title bar (top 17 rows of the texture)
+        graphics.blit(BG_TEXTURE, x, y, 0, 0, BG_WIDTH, 17);
+
+        // Middle fill (between title bar and player inventory)
+        int midTop = y + 17;
+        int midBottom = y + INV_Y - 7; // 7px above player-inv matches vanilla chest spacing
+        if (midBottom > midTop) {
+            graphics.fill(midTop > y + 17 ? x : x, midTop, x + BG_WIDTH, midBottom, 0xFFC6C6C6);
+            // Border lines to match vanilla panel look
+            graphics.fill(x, midTop, x + 1, midBottom, 0xFF555555); // left
+            graphics.fill(x + BG_WIDTH - 1, midTop, x + BG_WIDTH, midBottom, 0xFFFFFFFF); // right
+        }
+
+        // Player inventory section (bottom 96px of the texture, starting at src y=126)
+        graphics.blit(BG_TEXTURE, x, y + INV_Y - 7, 0, 126, BG_WIDTH, 96);
 
         // Network status line
         boolean connected = menu.hasNetwork();
         String statusKey = connected
-                ? "screen.intellistore.storage_access_terminal.connected"
-                : "screen.intellistore.storage_access_terminal.disconnected";
+                ? "screen.intellistore.access_terminal.connected"
+                : "screen.intellistore.access_terminal.disconnected";
         Component statusText = Component.translatable(statusKey);
         int statusColor = connected ? 0x55FF55 : 0xFF9955;
         graphics.drawString(
@@ -223,11 +247,11 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         graphics.disableScissor();
 
         if (networkStacks.isEmpty() && connected) {
-            String empty = "Network is empty";
+            Component empty = Component.translatable("screen.intellistore.access_terminal.empty");
             graphics.drawString(
                     font, empty, leftPos + (BG_WIDTH - font.width(empty)) / 2, topPos + LIST_Y + 4, 0x808080, false);
         } else if (!connected) {
-            String noNet = "No network connected";
+            Component noNet = Component.translatable("screen.intellistore.access_terminal.disconnected");
             graphics.drawString(
                     font, noNet, leftPos + (BG_WIDTH - font.width(noNet)) / 2, topPos + LIST_Y + 4, 0x808080, false);
         }
@@ -246,37 +270,21 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         // Separator above crafting
         graphics.fill(leftPos + 4, topPos + CRAFT_Y - 2, leftPos + BG_WIDTH - 4, topPos + CRAFT_Y - 1, 0x80FFFFFF);
 
-        // Crafting slot backgrounds (18×18 each)
+        // Crafting slot backgrounds — vanilla inset style (dark border + slightly darker fill)
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
-                int sx = leftPos + 30 + col * 18 - 1;
-                int sy = topPos + CRAFT_Y + row * 18 - 1;
-                graphics.fill(sx, sy, sx + 18, sy + 18, 0x40FFFFFF);
+                int sx = leftPos + 30 + col * 18;
+                int sy = topPos + CRAFT_Y + row * 18;
+                graphics.fill(sx - 1, sy - 1, sx + 17, sy + 17, 0xFF373737); // dark border
+                graphics.fill(sx, sy, sx + 16, sy + 16, 0xFF8B8B8B); // slot interior
             }
         }
         // Result slot background
-        graphics.fill(leftPos + 123, topPos + CRAFT_Y + 8, leftPos + 141, topPos + CRAFT_Y + 26, 0x40FFFFFF);
+        graphics.fill(leftPos + 123, topPos + CRAFT_Y + 8, leftPos + 139, topPos + CRAFT_Y + 24, 0xFF373737);
+        graphics.fill(leftPos + 124, topPos + CRAFT_Y + 9, leftPos + 140, topPos + CRAFT_Y + 25, 0xFF8B8B8B);
 
         // Arrow between grid and result
-        graphics.fill(leftPos + 97, topPos + CRAFT_Y + 14, leftPos + 121, topPos + CRAFT_Y + 19, 0x80AAAAAA);
-
-        // Separator above player inventory
-        graphics.fill(leftPos + 4, topPos + INV_Y - 2, leftPos + BG_WIDTH - 4, topPos + INV_Y - 1, 0x80FFFFFF);
-
-        // Player inventory slot backgrounds
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 9; col++) {
-                int sx = leftPos + 8 + col * 18 - 1;
-                int sy = topPos + INV_Y + row * 18 - 1;
-                graphics.fill(sx, sy, sx + 18, sy + 18, 0x40FFFFFF);
-            }
-        }
-        // Hotbar slot backgrounds
-        for (int col = 0; col < 9; col++) {
-            int sx = leftPos + 8 + col * 18 - 1;
-            int sy = topPos + HOTBAR_Y - 1;
-            graphics.fill(sx, sy, sx + 18, sy + 18, 0x50FFFFFF); // slightly brighter for hotbar
-        }
+        graphics.fill(leftPos + 97, topPos + CRAFT_Y + 13, leftPos + 121, topPos + CRAFT_Y + 20, 0xFF888888);
     }
 
     @Override

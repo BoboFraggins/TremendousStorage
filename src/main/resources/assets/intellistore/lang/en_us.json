@@ -79,6 +79,7 @@
   "screen.intellistore.access_terminal": "Access Terminal",
   "screen.intellistore.access_terminal.connected": "Network: Connected",
   "screen.intellistore.access_terminal.disconnected": "Network: Not Connected",
+  "screen.intellistore.access_terminal.empty": "Network is empty",
 
   "block.intellistore.healing_salve": "Healing Salve",
   "block.intellistore.healing_salve_cauldron": "Healing Salve Cauldron",
