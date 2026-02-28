@@ -46,5 +46,9 @@ public final class NetworkEvents {
                 SyncInterfaceFilterPacket.TYPE,
                 SyncInterfaceFilterPacket.STREAM_CODEC,
                 SyncInterfaceFilterPacket::handle);
+        registrar.playToServer(
+                SetSilkTouchPacket.TYPE,
+                SetSilkTouchPacket.STREAM_CODEC,
+                SetSilkTouchPacket::handle);
     }
 }

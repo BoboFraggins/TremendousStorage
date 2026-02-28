@@ -37,17 +37,21 @@ import net.bobofraggins.intellistore.stirlingengine.StirlingEngineBlock;
 import net.bobofraggins.intellistore.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.intellistore.stirlingengine.StirlingEngineEnergyHandler;
 import net.bobofraggins.intellistore.storagetransceiver.StorageAccessTerminalBlock;
+import net.bobofraggins.intellistore.tube.BreakerInterfaceItem;
 import net.bobofraggins.intellistore.tube.ExportInterfaceItem;
 import net.bobofraggins.intellistore.tube.ImportInterfaceItem;
 import net.bobofraggins.intellistore.tube.InterfaceFilterContents;
+import net.bobofraggins.intellistore.tube.PlacerInterfaceItem;
 import net.bobofraggins.intellistore.tube.StorageInterfaceItem;
 import net.bobofraggins.intellistore.tube.TubeBlock;
 import net.bobofraggins.intellistore.tube.TubeBlockEntity;
 import net.bobofraggins.intellistore.tube.TubeEnergyHandler;
+import net.bobofraggins.intellistore.ui.BreakerInterfaceMenu;
 import net.bobofraggins.intellistore.ui.ExportInterfaceMenu;
 import net.bobofraggins.intellistore.ui.FilingCabinetMenu;
 import net.bobofraggins.intellistore.ui.ImportInterfaceMenu;
 import net.bobofraggins.intellistore.ui.NetworkInterfaceMenu;
+import net.bobofraggins.intellistore.ui.PlacerInterfaceMenu;
 import net.bobofraggins.intellistore.ui.PriorityMenu;
 import net.bobofraggins.intellistore.ui.StorageAccessTerminalMenu;
 import net.bobofraggins.intellistore.ui.StorageInterfaceMenu;
@@ -440,6 +444,12 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<ExportInterfaceMenu>> EXPORT_INTERFACE_MENU =
             MENU_TYPES.register("export_interface", () -> IMenuTypeExtension.create(ExportInterfaceMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<PlacerInterfaceMenu>> PLACER_INTERFACE_MENU =
+            MENU_TYPES.register("placer_interface", () -> IMenuTypeExtension.create(PlacerInterfaceMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<BreakerInterfaceMenu>> BREAKER_INTERFACE_MENU =
+            MENU_TYPES.register("breaker_interface", () -> IMenuTypeExtension.create(BreakerInterfaceMenu::new));
+
     // -------------------------------------------------------------------------
     // Items — storage interface / import interface / export interface
     // -------------------------------------------------------------------------
@@ -452,6 +462,12 @@ public final class Registration {
 
     public static final DeferredHolder<Item, ExportInterfaceItem> EXPORT_INTERFACE =
             ITEMS.register("export_interface", ExportInterfaceItem::new);
+
+    public static final DeferredHolder<Item, PlacerInterfaceItem> PLACER_INTERFACE =
+            ITEMS.register("placer_interface", PlacerInterfaceItem::new);
+
+    public static final DeferredHolder<Item, BreakerInterfaceItem> BREAKER_INTERFACE =
+            ITEMS.register("breaker_interface", BreakerInterfaceItem::new);
 
     // -------------------------------------------------------------------------
     // Items — whiteout tape
@@ -568,6 +584,8 @@ public final class Registration {
                         output.accept(STORAGE_INTERFACE.get());
                         output.accept(IMPORT_INTERFACE.get());
                         output.accept(EXPORT_INTERFACE.get());
+                        output.accept(PLACER_INTERFACE.get());
+                        output.accept(BREAKER_INTERFACE.get());
                         output.accept(ZOMBIE_BRAIN.get());
                         output.accept(BRAIN.get());
                         output.accept(HEALING_SALVE_BUCKET.get());

@@ -153,6 +153,31 @@ Single-item-type bulk storage carried as an item.
 - Filter state and mode are stored as a data component on the item and survive break/re-attach
 - Recipe: 4× (cross of Iron Ingots with Red Dye in the center)
 
+### Placer Interface
+- A consumable attachment item that, when installed on a tube face, automatically places blocks from the network into the world
+- Rendered as a **green** 8×8×2-pixel plate on the tube face
+- Right-click an **empty tube face with a Placer Interface item in hand** → installs it; consumes 1 item (not consumed in Creative)
+- Right-click an **installed plate with empty hand** → opens the filter screen
+- **Left-click (punch)** an installed plate → removes the plate and drops 1 Placer Interface item with filter data stored on it
+- **Breaking the tube** → drops 1 Placer Interface item per installed face with filter data intact
+- **Filter**: single ghost-item slot; must be a block item (something that can be placed in the world)
+- Every **5 ticks**: if the block directly in front of the plate is air, extracts 1 matching item from the network and places it as a block
+- If no filter is set, the Placer does nothing
+- No recipes yet
+
+### Breaker Interface
+- A consumable attachment item that, when installed on a tube face, automatically breaks blocks in front of it and inserts the drops into the network
+- Rendered as a **yellow** 8×8×2-pixel plate on the tube face
+- Right-click an **empty tube face with a Breaker Interface item in hand** → installs it; consumes 1 item (not consumed in Creative)
+- Right-click an **installed plate with empty hand** → opens the filter screen
+- **Left-click (punch)** an installed plate → removes the plate and drops 1 Breaker Interface item with filter data stored on it
+- **Breaking the tube** → drops 1 Breaker Interface item per installed face with filter data intact
+- **Filter**: single ghost-item slot; if set, only breaks blocks whose default drop matches the filter; if empty, breaks any block
+- **Silk Touch toggle**: button in the filter screen; when ON, drops are collected as if mined with Silk Touch; default OFF
+- Every **5 ticks**: if the block directly in front matches the filter, breaks it and inserts all drops into the network (only proceeds if all drops fit)
+- Filter and Silk Touch state are stored as a data component on the item and survive break/re-attach
+- No recipes yet
+
 ### Wireless SAT
 - A portable Storage Access Terminal carried as an item (stack size 1)
 - Tooltip shows the linked Network Interface coordinates, or "Unlinked" if not yet configured
@@ -257,7 +282,7 @@ The network draws RF from the Network Interface's internal buffer each tick. Tot
 | Network Interface (base) | 5 RF/t |
 | Storage Access Terminal | 5 RF/t each |
 | Wireless Hub | 25 RF/t each |
-| Each tube attachment (Storage / Import / Export Interface installed on a tube face) | 1 RF/t each |
+| Each tube attachment (Storage / Import / Export / Placer / Breaker Interface installed on a tube face) | 1 RF/t each |
 
 - When the buffer runs dry the network becomes **inactive** (see Network Interface — Power above)
 - Jade shows "Not Enough Power" in red on any tube with an attachment, on the SAT, and on the NI itself when inactive

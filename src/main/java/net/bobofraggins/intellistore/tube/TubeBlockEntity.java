@@ -1,5 +1,6 @@
 package net.bobofraggins.intellistore.tube;
 
+import java.util.List;
 import net.bobofraggins.intellistore.priority.Priority;
 import net.bobofraggins.intellistore.register.Registration;
 import net.minecraft.core.BlockPos;
@@ -12,9 +13,12 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -35,6 +39,7 @@ public class TubeBlockEntity extends BlockEntity {
 
     private static final int TRANSFER_AMOUNT = 64;
     private static final int TRANSFER_INTERVAL = 20;
+    private static final int PLACER_BREAKER_INTERVAL = 5;
 
     /** The type of attachment on each face (indexed by Direction ordinal). */
     private final AttachmentType[] attachmentType = new AttachmentType[] {
@@ -54,8 +59,11 @@ public class TubeBlockEntity extends BlockEntity {
     /** Ghost-item filter slots for each Import/Export Interface (9 slots per face). */
     private final ItemStack[][] filterSlots = new ItemStack[6][9];
 
-    /** Per-face tick counter for throttling Import/Export operations. */
+    /** Per-face tick counter for throttling Import/Export/Placer/Breaker operations. */
     private final int[] tickCounter = new int[6];
+
+    /** Silk Touch flag for each Breaker Interface face (false = no silk touch). */
+    private final boolean[] silkTouch = new boolean[6];
 
     /**
      * Cached network view; {@code null} means stale and will be rebuilt on next access.
@@ -80,29 +88,51 @@ public class TubeBlockEntity extends BlockEntity {
     public static void serverTick(Level level, BlockPos pos, BlockState state, TubeBlockEntity be) {
         for (int i = 0; i < 6; i++) {
             AttachmentType type = be.attachmentType[i];
-            if (type != AttachmentType.IMPORT_INTERFACE && type != AttachmentType.EXPORT_INTERFACE) continue;
+            if (type == AttachmentType.NONE || type == AttachmentType.STORAGE_INTERFACE) continue;
 
             be.tickCounter[i]++;
-            if (be.tickCounter[i] % TRANSFER_INTERVAL != 0) continue;
 
-            Direction dir = Direction.values()[i];
-            BlockPos neighborPos = pos.relative(dir);
-            IItemHandler neighbor = level.getCapability(
-                    Capabilities.ItemHandler.BLOCK, neighborPos, dir.getOpposite());
-            if (neighbor == null) continue;
+            if (type == AttachmentType.IMPORT_INTERFACE || type == AttachmentType.EXPORT_INTERFACE) {
+                if (be.tickCounter[i] % TRANSFER_INTERVAL != 0) continue;
 
-            NetworkItemHandler network = be.getNetworkView();
-            if (network == null) continue;
+                Direction dir = Direction.values()[i];
+                BlockPos neighborPos = pos.relative(dir);
+                IItemHandler neighbor = level.getCapability(
+                        Capabilities.ItemHandler.BLOCK, neighborPos, dir.getOpposite());
+                if (neighbor == null) continue;
 
-            // Skip import/export when the network lacks power
-            net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity ni =
-                    network.getNetworkInterface();
-            if (ni != null && !ni.isPowered()) continue;
+                NetworkItemHandler network = be.getNetworkView();
+                if (network == null) continue;
 
-            if (type == AttachmentType.IMPORT_INTERFACE) {
-                doImport(neighbor, network, be.filterSlots[i], be.filterMode[i]);
-            } else {
-                doExport(network, neighbor, be.filterSlots[i], be.filterMode[i]);
+                // Skip import/export when the network lacks power
+                net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity ni =
+                        network.getNetworkInterface();
+                if (ni != null && !ni.isPowered()) continue;
+
+                if (type == AttachmentType.IMPORT_INTERFACE) {
+                    doImport(neighbor, network, be.filterSlots[i], be.filterMode[i]);
+                } else {
+                    doExport(network, neighbor, be.filterSlots[i], be.filterMode[i]);
+                }
+
+            } else if (type == AttachmentType.PLACER_INTERFACE || type == AttachmentType.BREAKER_INTERFACE) {
+                if (be.tickCounter[i] % PLACER_BREAKER_INTERVAL != 0) continue;
+
+                NetworkItemHandler network = be.getNetworkView();
+                if (network == null) continue;
+
+                net.bobofraggins.intellistore.networkinterface.NetworkInterfaceBlockEntity ni =
+                        network.getNetworkInterface();
+                if (ni != null && !ni.isPowered()) continue;
+
+                Direction dir = Direction.values()[i];
+                BlockPos targetPos = pos.relative(dir);
+
+                if (type == AttachmentType.PLACER_INTERFACE) {
+                    doPlacer(level, targetPos, network, be.filterSlots[i][0]);
+                } else {
+                    doBreaker(level, targetPos, network, be.filterSlots[i][0], be.silkTouch[i]);
+                }
             }
         }
     }
@@ -175,6 +205,88 @@ public class TubeBlockEntity extends BlockEntity {
     }
 
     /**
+     * Placer: if the target position is air and the network contains the filter item,
+     * extract one and place it as a block in the world.
+     */
+    private static void doPlacer(Level level, BlockPos targetPos, NetworkItemHandler network, ItemStack filterItem) {
+        if (filterItem.isEmpty()) return;
+        if (!(filterItem.getItem() instanceof BlockItem blockItem)) return;
+        if (!level.getBlockState(targetPos).isAir()) return;
+
+        // Find and extract one matching item from the network
+        int slots = network.getSlots();
+        for (int s = 0; s < slots; s++) {
+            ItemStack inSlot = network.getStackInSlot(s);
+            if (inSlot.isEmpty()) continue;
+            if (!ItemStack.isSameItem(inSlot, filterItem)) continue;
+
+            // Simulate extract
+            ItemStack extracted = network.extractItem(s, 1, true);
+            if (extracted.isEmpty()) continue;
+
+            // Place the block
+            BlockState toPlace = blockItem.getBlock().defaultBlockState();
+            if (!toPlace.canSurvive(level, targetPos)) continue;
+
+            // Execute extract and place
+            network.extractItem(s, 1, false);
+            level.setBlockAndUpdate(targetPos, toPlace);
+            level.levelEvent(net.minecraft.world.level.block.LevelEvent.PARTICLES_DESTROY_BLOCK,
+                    targetPos, Block.getId(toPlace));
+            return;
+        }
+    }
+
+    /**
+     * Breaker: if the block at the target position matches the filter (or no filter),
+     * break it and insert the drops into the network.
+     */
+    private static void doBreaker(Level level, BlockPos targetPos, NetworkItemHandler network,
+            ItemStack filterItem, boolean useSilkTouch) {
+        BlockState targetState = level.getBlockState(targetPos);
+        if (targetState.isAir()) return;
+
+        // Filter check: if a filter is set, only break matching blocks
+        if (!filterItem.isEmpty()) {
+            // Compare the block's default item drop with the filter item
+            ItemStack blockAsItem = new ItemStack(targetState.getBlock());
+            if (!ItemStack.isSameItem(blockAsItem, filterItem)) return;
+        }
+
+        // Collect drops
+        List<ItemStack> drops;
+        if (useSilkTouch) {
+            // Build a silk-touch tool for loot table purposes
+            ItemStack silkTool = new ItemStack(net.minecraft.world.item.Items.DIAMOND_PICKAXE);
+            net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> enchantReg =
+                    level.registryAccess().registryOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT);
+            net.minecraft.core.Holder<net.minecraft.world.item.enchantment.Enchantment> silkHolder =
+                    enchantReg.getHolderOrThrow(Enchantments.SILK_TOUCH);
+            silkTool.enchant(silkHolder, 1);
+            drops = Block.getDrops(targetState, (ServerLevel) level, targetPos, level.getBlockEntity(targetPos),
+                    null, silkTool);
+        } else {
+            drops = Block.getDrops(targetState, (ServerLevel) level, targetPos, level.getBlockEntity(targetPos),
+                    null, ItemStack.EMPTY);
+        }
+
+        // Try to insert all drops into the network (simulate first)
+        boolean allFit = true;
+        for (ItemStack drop : drops) {
+            if (drop.isEmpty()) continue;
+            ItemStack remainder = tryInsertAll(network, drop.copy(), true);
+            if (!remainder.isEmpty()) { allFit = false; break; }
+        }
+        if (!allFit) return;
+
+        // Execute: destroy block and insert drops
+        level.destroyBlock(targetPos, false);
+        for (ItemStack drop : drops) {
+            if (!drop.isEmpty()) tryInsertAll(network, drop, false);
+        }
+    }
+
+    /**
      * Returns true if {@code candidate} should be transferred given the filter.
      *
      * <p>Empty Accept filter → accept all. Empty Reject filter → reject all.
@@ -242,6 +354,7 @@ public class TubeBlockEntity extends BlockEntity {
         if (type == AttachmentType.NONE) {
             attachmentPriority[faceIndex] = Priority.NORMAL;
             filterMode[faceIndex] = false;
+            silkTouch[faceIndex] = false;
             for (int s = 0; s < 9; s++) filterSlots[faceIndex][s] = ItemStack.EMPTY;
         }
         setChanged();
@@ -295,6 +408,21 @@ public class TubeBlockEntity extends BlockEntity {
     public void setFilterSlot(int faceIndex, int slot, ItemStack stack) {
         if (faceIndex < 0 || faceIndex >= 6 || slot < 0 || slot >= 9) return;
         filterSlots[faceIndex][slot] = stack.isEmpty() ? ItemStack.EMPTY : stack.copyWithCount(1);
+        setChanged();
+    }
+
+    // -------------------------------------------------------------------------
+    // Accessors — silk touch
+    // -------------------------------------------------------------------------
+
+    public boolean getSilkTouch(int faceIndex) {
+        if (faceIndex < 0 || faceIndex >= 6) return false;
+        return silkTouch[faceIndex];
+    }
+
+    public void setSilkTouch(int faceIndex, boolean value) {
+        if (faceIndex < 0 || faceIndex >= 6) return;
+        silkTouch[faceIndex] = value;
         setChanged();
     }
 
@@ -367,6 +495,13 @@ public class TubeBlockEntity extends BlockEntity {
         }
         tag.putByte("FilterMode", (byte) modeMask);
 
+        // Silk touch flags packed into one byte (bit i = silkTouch[i])
+        int silkMask = 0;
+        for (int i = 0; i < 6; i++) {
+            if (silkTouch[i]) silkMask |= (1 << i);
+        }
+        tag.putByte("SilkTouch", (byte) silkMask);
+
         // Filter slots: outer ListTag of 6 inner ListTags, each with 9 CompoundTags
         ListTag outerList = new ListTag();
         for (int i = 0; i < 6; i++) {
@@ -417,6 +552,12 @@ public class TubeBlockEntity extends BlockEntity {
         int modeMask = tag.getByte("FilterMode") & 0xFF;
         for (int i = 0; i < 6; i++) {
             filterMode[i] = (modeMask & (1 << i)) != 0;
+        }
+
+        // Silk touch flags
+        int silkMask = tag.getByte("SilkTouch") & 0xFF;
+        for (int i = 0; i < 6; i++) {
+            silkTouch[i] = (silkMask & (1 << i)) != 0;
         }
 
         // Filter slots

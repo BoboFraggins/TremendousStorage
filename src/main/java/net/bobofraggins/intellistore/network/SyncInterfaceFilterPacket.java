@@ -3,8 +3,10 @@ package net.bobofraggins.intellistore.network;
 import java.util.ArrayList;
 import java.util.List;
 import net.bobofraggins.intellistore.IntelliStore;
-import net.bobofraggins.intellistore.ui.ImportInterfaceScreen;
+import net.bobofraggins.intellistore.ui.BreakerInterfaceScreen;
 import net.bobofraggins.intellistore.ui.ExportInterfaceScreen;
+import net.bobofraggins.intellistore.ui.ImportInterfaceScreen;
+import net.bobofraggins.intellistore.ui.PlacerInterfaceScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
@@ -56,6 +58,16 @@ public record SyncInterfaceFilterPacket(BlockPos pos, int faceIndex, List<ItemSt
                     && s.getMenu().getPos().equals(packet.pos())
                     && s.getMenu().getFaceIndex() == packet.faceIndex()) {
                 s.applySync(packet.filterSlots(), packet.rejectMode());
+            } else if (current instanceof PlacerInterfaceScreen s
+                    && s.getMenu().getPos().equals(packet.pos())
+                    && s.getMenu().getFaceIndex() == packet.faceIndex()) {
+                ItemStack slot0 = packet.filterSlots().isEmpty() ? ItemStack.EMPTY : packet.filterSlots().get(0);
+                s.applySync(slot0);
+            } else if (current instanceof BreakerInterfaceScreen s
+                    && s.getMenu().getPos().equals(packet.pos())
+                    && s.getMenu().getFaceIndex() == packet.faceIndex()) {
+                ItemStack slot0 = packet.filterSlots().isEmpty() ? ItemStack.EMPTY : packet.filterSlots().get(0);
+                s.applySync(slot0);
             }
         });
     }

@@ -4,8 +4,10 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.register.Registration;
+import net.bobofraggins.intellistore.ui.BreakerInterfaceMenu;
 import net.bobofraggins.intellistore.ui.ExportInterfaceMenu;
 import net.bobofraggins.intellistore.ui.ImportInterfaceMenu;
+import net.bobofraggins.intellistore.ui.PlacerInterfaceMenu;
 import net.bobofraggins.intellistore.ui.StorageInterfaceMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -285,6 +287,10 @@ public class TubeBlock extends BaseEntityBlock {
             newType = AttachmentType.IMPORT_INTERFACE;
         } else if (stack.getItem() instanceof ExportInterfaceItem) {
             newType = AttachmentType.EXPORT_INTERFACE;
+        } else if (stack.getItem() instanceof PlacerInterfaceItem) {
+            newType = AttachmentType.PLACER_INTERFACE;
+        } else if (stack.getItem() instanceof BreakerInterfaceItem) {
+            newType = AttachmentType.BREAKER_INTERFACE;
         } else {
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
@@ -304,6 +310,19 @@ public class TubeBlock extends BaseEntityBlock {
             InterfaceFilterContents contents = stack.getOrDefault(
                     Registration.INTERFACE_FILTER.get(), InterfaceFilterContents.EMPTY);
             be.loadFilterFromContents(faceIndex, contents);
+        } else if (newType == AttachmentType.PLACER_INTERFACE || newType == AttachmentType.BREAKER_INTERFACE) {
+            // Restore single filter slot and (for Breaker) silk touch from INTERFACE_FILTER component
+            InterfaceFilterContents contents = stack.getOrDefault(
+                    Registration.INTERFACE_FILTER.get(), InterfaceFilterContents.EMPTY);
+            if (!contents.isEmpty()) {
+                java.util.List<ItemStack> slots = contents.slots();
+                if (!slots.isEmpty() && !slots.get(0).isEmpty()) {
+                    be.setFilterSlot(faceIndex, 0, slots.get(0));
+                }
+                if (newType == AttachmentType.BREAKER_INTERFACE) {
+                    be.setSilkTouch(faceIndex, contents.rejectMode()); // rejectMode repurposed as silkTouch
+                }
+            }
         }
 
         be.setAttachmentType(faceIndex, newType);
@@ -333,6 +352,12 @@ public class TubeBlock extends BaseEntityBlock {
                     buf -> { buf.writeBlockPos(pos); buf.writeByte(faceIndex); });
             case EXPORT_INTERFACE -> player.openMenu(
                     new ExportInterfaceMenu.Provider(be, pos, faceIndex),
+                    buf -> { buf.writeBlockPos(pos); buf.writeByte(faceIndex); });
+            case PLACER_INTERFACE -> player.openMenu(
+                    new PlacerInterfaceMenu.Provider(be, pos, faceIndex),
+                    buf -> { buf.writeBlockPos(pos); buf.writeByte(faceIndex); });
+            case BREAKER_INTERFACE -> player.openMenu(
+                    new BreakerInterfaceMenu.Provider(be, pos, faceIndex),
                     buf -> { buf.writeBlockPos(pos); buf.writeByte(faceIndex); });
             default -> { return InteractionResult.PASS; }
         }
@@ -408,6 +433,33 @@ public class TubeBlock extends BaseEntityBlock {
                 ItemStack stack = new ItemStack(Registration.EXPORT_INTERFACE.get());
                 InterfaceFilterContents contents = be.saveFilterToContents(faceIndex);
                 if (!contents.isEmpty()) {
+                    stack.set(Registration.INTERFACE_FILTER.get(), contents);
+                }
+                yield stack;
+            }
+            case PLACER_INTERFACE -> {
+                ItemStack stack = new ItemStack(Registration.PLACER_INTERFACE.get());
+                ItemStack filterItem = be.getFilterSlot(faceIndex, 0);
+                if (!filterItem.isEmpty()) {
+                    // Store filter slot 0 in the INTERFACE_FILTER component (rejectMode=false unused)
+                    java.util.List<ItemStack> slots = new java.util.ArrayList<>(9);
+                    slots.add(filterItem.copyWithCount(1));
+                    for (int s = 1; s < 9; s++) slots.add(ItemStack.EMPTY);
+                    InterfaceFilterContents contents = new InterfaceFilterContents(slots, false);
+                    stack.set(Registration.INTERFACE_FILTER.get(), contents);
+                }
+                yield stack;
+            }
+            case BREAKER_INTERFACE -> {
+                ItemStack stack = new ItemStack(Registration.BREAKER_INTERFACE.get());
+                ItemStack filterItem = be.getFilterSlot(faceIndex, 0);
+                boolean silkTouch = be.getSilkTouch(faceIndex);
+                if (!filterItem.isEmpty() || silkTouch) {
+                    // Store filter slot 0; rejectMode repurposed as silkTouch
+                    java.util.List<ItemStack> slots = new java.util.ArrayList<>(9);
+                    slots.add(filterItem.isEmpty() ? ItemStack.EMPTY : filterItem.copyWithCount(1));
+                    for (int s = 1; s < 9; s++) slots.add(ItemStack.EMPTY);
+                    InterfaceFilterContents contents = new InterfaceFilterContents(slots, silkTouch);
                     stack.set(Registration.INTERFACE_FILTER.get(), contents);
                 }
                 yield stack;
