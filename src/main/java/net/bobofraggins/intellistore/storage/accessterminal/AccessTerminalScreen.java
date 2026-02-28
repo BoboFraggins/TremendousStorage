@@ -37,16 +37,20 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     // -------------------------------------------------------------------------
 
     private static final int BG_WIDTH = 176;
-    private static final int BG_HEIGHT = 256;
 
     private static final int LIST_Y = 16;
     private static final int LIST_HEIGHT = 112; // 7 rows × 16 px
     private static final int ROW_HEIGHT = 16;
     private static final int VISIBLE_ROWS = 7;
 
-    private static final int CRAFT_Y = 130;
-    private static final int INV_Y = 168;
-    private static final int HOTBAR_Y = INV_Y + 3 * 18 + 4;
+    // CRAFT_Y: separator + 2px padding below list area
+    private static final int CRAFT_Y = LIST_Y + LIST_HEIGHT + 4; // 132
+    // INV_Y: 3 craft rows × 18px + 4px gap below craft area
+    private static final int INV_Y = CRAFT_Y + 3 * 18 + 4; // 190
+    // HOTBAR_Y: 3 inv rows × 18px + 4px gap
+    private static final int HOTBAR_Y = INV_Y + 3 * 18 + 4; // 248
+
+    private static final int BG_HEIGHT = HOTBAR_Y + 18 + 4; // 270
 
     // -------------------------------------------------------------------------
     // State

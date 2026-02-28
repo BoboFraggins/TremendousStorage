@@ -72,10 +72,10 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         this.craftSlots = new TransientCraftingContainer(this, 3, 3);
         this.access = ContainerLevelAccess.create(inv.player.level(), satPos);
 
-        // Layout constants (image-relative, matching AccessTerminalScreen)
-        final int craftY = 130; // top of crafting grid area
-        final int invY = 168; // top of player inventory
-        final int hotbarY = invY + 3 * 18 + 4; // top of hotbar
+        // Layout constants (image-relative, must match AccessTerminalScreen)
+        final int craftY = 132; // LIST_Y(16) + LIST_HEIGHT(112) + 4
+        final int invY = 190; // craftY(132) + 3*18 + 4
+        final int hotbarY = 248; // invY(190) + 3*18 + 4
 
         // Slot 0: craft result
         addSlot(new ResultSlot(inv.player, craftSlots, resultSlots, 0, 124, craftY + 9));

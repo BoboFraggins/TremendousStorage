@@ -216,6 +216,10 @@ public final class NetworkInterfaceBFS {
         // Fetch block entity once and reuse for both priority resolution and UI key lookup
         BlockEntity neighborBE = adjPos.equals(niPos) ? null : level.getBlockEntity(adjPos);
 
+        // Never query the capability of a Network Interface — doing so would trigger its own
+        // scan, causing infinite recursion. NIs are connectors/bridges only, not storage.
+        if (neighborBE instanceof NetworkInterfaceBlockEntity) return;
+
         // Resolve IItemHandler capability
         IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, adjPos, tubeDir.getOpposite());
         if (handler != null) {

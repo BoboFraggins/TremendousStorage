@@ -1,5 +1,8 @@
 {
   "variants": {
-    "": { "model": "intellistore:block/bulk_storage_container" }
+    "facing=north": { "model": "intellistore:block/bulk_storage_container" },
+    "facing=south": { "model": "intellistore:block/bulk_storage_container", "y": 180 },
+    "facing=west":  { "model": "intellistore:block/bulk_storage_container", "y": 270 },
+    "facing=east":  { "model": "intellistore:block/bulk_storage_container", "y": 90 }
   }
 }

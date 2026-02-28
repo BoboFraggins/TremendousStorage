@@ -1,5 +1,8 @@
 {
   "variants": {
-    "": { "model": "intellistore:block/junk_drawer" }
+    "facing=north": { "model": "intellistore:block/junk_drawer" },
+    "facing=south": { "model": "intellistore:block/junk_drawer", "y": 180 },
+    "facing=west":  { "model": "intellistore:block/junk_drawer", "y": 270 },
+    "facing=east":  { "model": "intellistore:block/junk_drawer", "y": 90 }
   }
 }

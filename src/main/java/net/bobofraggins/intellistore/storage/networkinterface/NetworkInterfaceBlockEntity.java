@@ -49,6 +49,8 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     private NetworkScanResult cachedScan = null;
     /** Lazily built alongside {@link #cachedScan}; {@code null} = stale. */
     private NiItemHandler cachedHandler = null;
+    /** Re-entrancy guard: true while a BFS scan is in progress. */
+    private boolean scanning = false;
 
     private int energyStored = 0;
     /** Whether the network had enough power last tick. Synced to clients. */
@@ -70,8 +72,14 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
      */
     public NetworkScanResult getScan() {
         if (level == null || level.isClientSide()) return null;
+        if (scanning) return null; // re-entrancy guard: BFS triggered a capability query back into us
         if (cachedScan == null) {
-            cachedScan = NetworkInterfaceBFS.scan((ServerLevel) level, worldPosition);
+            scanning = true;
+            try {
+                cachedScan = NetworkInterfaceBFS.scan((ServerLevel) level, worldPosition);
+            } finally {
+                scanning = false;
+            }
         }
         return cachedScan;
     }

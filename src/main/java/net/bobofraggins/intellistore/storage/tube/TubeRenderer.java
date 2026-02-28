@@ -35,6 +35,9 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     private static final float C_MAX = 10f / 16f; // Core end
     private static final float A_MIN = C_MIN; // Arm cross-section min (same as core)
     private static final float A_MAX = C_MAX; // Arm cross-section max
+    // Arms stop 1px short of the block face to avoid Z-fighting with the neighbour's face
+    private static final float A_FACE_LO = 1f / 16f;
+    private static final float A_FACE_HI = 15f / 16f;
 
     // Attachment plate is 8/16 wide, 2/16 thick
     private static final float P_MIN = 4f / 16f;
@@ -145,7 +148,7 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
         switch (dir) {
             case DOWN -> {
                 x0 = A_MIN;
-                y0 = 0;
+                y0 = A_FACE_LO;
                 z0 = A_MIN;
                 x1 = A_MAX;
                 y1 = C_MIN;
@@ -156,13 +159,13 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                 y0 = C_MAX;
                 z0 = A_MIN;
                 x1 = A_MAX;
-                y1 = 1;
+                y1 = A_FACE_HI;
                 z1 = A_MAX;
             }
             case NORTH -> {
                 x0 = A_MIN;
                 y0 = A_MIN;
-                z0 = 0;
+                z0 = A_FACE_LO;
                 x1 = A_MAX;
                 y1 = A_MAX;
                 z1 = C_MIN;
@@ -173,10 +176,10 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                 z0 = C_MAX;
                 x1 = A_MAX;
                 y1 = A_MAX;
-                z1 = 1;
+                z1 = A_FACE_HI;
             }
             case WEST -> {
-                x0 = 0;
+                x0 = A_FACE_LO;
                 y0 = A_MIN;
                 z0 = A_MIN;
                 x1 = C_MIN;
@@ -187,7 +190,7 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                 x0 = C_MAX;
                 y0 = A_MIN;
                 z0 = A_MIN;
-                x1 = 1;
+                x1 = A_FACE_HI;
                 y1 = A_MAX;
                 z1 = A_MAX;
             } // EAST

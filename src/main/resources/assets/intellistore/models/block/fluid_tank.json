@@ -1,7 +1,6 @@
 {
-  "parent": "block/block",
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "intellistore:block/fluid_tank"
-  },
-  "elements": []
+  }
 }

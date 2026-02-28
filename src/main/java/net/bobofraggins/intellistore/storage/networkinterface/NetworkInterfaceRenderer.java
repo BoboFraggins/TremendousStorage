@@ -396,7 +396,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         // ---- Animated floating brain ----
         // Use game time for smooth partial-tick-aware animation (avoids System.currentTimeMillis stutter)
         double time = (be.getLevel().getGameTime() + partialTick) / 20.0;
-        float bob = (float) Math.sin(time * Math.PI) * 0.06f; // ~0.5 Hz, ±0.06 blocks
+        float bob = (float) Math.sin(time * Math.PI * 0.5) * 0.06f; // ~0.25 Hz, ±0.06 blocks
 
         // Brain sits ~0.55 above lower-half floor.
         // poseStack is currently translated +1 Y, so subtract 1 to get back to jar-interior coords:
