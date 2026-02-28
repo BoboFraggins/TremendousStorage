@@ -50,5 +50,9 @@ public final class NetworkEvents {
                 SetSilkTouchPacket.TYPE,
                 SetSilkTouchPacket.STREAM_CODEC,
                 SetSilkTouchPacket::handle);
+        registrar.playToServer(
+                SetPfcVoidExcessPacket.TYPE,
+                SetPfcVoidExcessPacket.STREAM_CODEC,
+                SetPfcVoidExcessPacket::handle);
     }
 }

@@ -37,6 +37,9 @@ import net.bobofraggins.intellistore.stirlingengine.StirlingEngineBlock;
 import net.bobofraggins.intellistore.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.intellistore.stirlingengine.StirlingEngineEnergyHandler;
 import net.bobofraggins.intellistore.storagetransceiver.StorageAccessTerminalBlock;
+import net.bobofraggins.intellistore.personalfilingcabinet.PersonalFilingCabinetContents;
+import net.bobofraggins.intellistore.personalfilingcabinet.PersonalFilingCabinetEvents;
+import net.bobofraggins.intellistore.personalfilingcabinet.PersonalFilingCabinetItem;
 import net.bobofraggins.intellistore.tube.BreakerInterfaceItem;
 import net.bobofraggins.intellistore.tube.ExportInterfaceItem;
 import net.bobofraggins.intellistore.tube.ImportInterfaceItem;
@@ -47,6 +50,7 @@ import net.bobofraggins.intellistore.tube.TubeBlock;
 import net.bobofraggins.intellistore.tube.TubeBlockEntity;
 import net.bobofraggins.intellistore.tube.TubeEnergyHandler;
 import net.bobofraggins.intellistore.ui.BreakerInterfaceMenu;
+import net.bobofraggins.intellistore.ui.PersonalFilingCabinetMenu;
 import net.bobofraggins.intellistore.ui.ExportInterfaceMenu;
 import net.bobofraggins.intellistore.ui.FilingCabinetMenu;
 import net.bobofraggins.intellistore.ui.ImportInterfaceMenu;
@@ -79,6 +83,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -171,6 +176,16 @@ public final class Registration {
                     () -> DataComponentType.<Integer>builder()
                             .persistent(com.mojang.serialization.Codec.INT)
                             .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.INT)
+                            .build());
+
+    /**
+     * Data component storing the folder contents and void-excess flag on a Personal Filing Cabinet item.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<PersonalFilingCabinetContents>>
+            PFC_CONTENTS = DATA_COMPONENTS.register("pfc_contents",
+                    () -> DataComponentType.<PersonalFilingCabinetContents>builder()
+                            .persistent(PersonalFilingCabinetContents.CODEC)
+                            .networkSynchronized(PersonalFilingCabinetContents.STREAM_CODEC)
                             .build());
 
     // -------------------------------------------------------------------------
@@ -450,6 +465,9 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<BreakerInterfaceMenu>> BREAKER_INTERFACE_MENU =
             MENU_TYPES.register("breaker_interface", () -> IMenuTypeExtension.create(BreakerInterfaceMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<PersonalFilingCabinetMenu>> PERSONAL_FILING_CABINET_MENU =
+            MENU_TYPES.register("personal_filing_cabinet", () -> IMenuTypeExtension.create(PersonalFilingCabinetMenu::new));
+
     // -------------------------------------------------------------------------
     // Items — storage interface / import interface / export interface
     // -------------------------------------------------------------------------
@@ -468,6 +486,9 @@ public final class Registration {
 
     public static final DeferredHolder<Item, BreakerInterfaceItem> BREAKER_INTERFACE =
             ITEMS.register("breaker_interface", BreakerInterfaceItem::new);
+
+    public static final DeferredHolder<Item, PersonalFilingCabinetItem> PERSONAL_FILING_CABINET =
+            ITEMS.register("personal_filing_cabinet", PersonalFilingCabinetItem::new);
 
     // -------------------------------------------------------------------------
     // Items — whiteout tape
@@ -595,6 +616,7 @@ public final class Registration {
                         for (FolderTier tier : FolderTier.values()) {
                             output.accept(MANILA_FOLDERS.get(tier).get());
                         }
+                        output.accept(PERSONAL_FILING_CABINET.get());
                         output.accept(WHITEOUT_TAPE.get());
                     })
                     .build());
@@ -615,6 +637,7 @@ public final class Registration {
         FLUID_TYPE_REGISTER.register(modEventBus);
         modEventBus.addListener(Registration::registerCapabilities);
         modEventBus.addListener(Registration::onCommonSetup);
+        NeoForge.EVENT_BUS.register(PersonalFilingCabinetEvents.class);
         if (ModList.get().isLoaded("mekanism")) {
             GasTankRegistration.register(modEventBus);
         }

@@ -3,6 +3,7 @@ package net.bobofraggins.intellistore.filingcabinet;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.register.Registration;
 import net.bobofraggins.intellistore.ui.BreakerInterfaceScreen;
+import net.bobofraggins.intellistore.ui.PersonalFilingCabinetScreen;
 import net.bobofraggins.intellistore.ui.ExportInterfaceScreen;
 import net.bobofraggins.intellistore.ui.FilingCabinetScreen;
 import net.bobofraggins.intellistore.ui.ImportInterfaceScreen;
@@ -40,5 +41,6 @@ public final class FilingCabinetClientEvents {
         event.register(Registration.EXPORT_INTERFACE_MENU.get(), ExportInterfaceScreen::new);
         event.register(Registration.PLACER_INTERFACE_MENU.get(), PlacerInterfaceScreen::new);
         event.register(Registration.BREAKER_INTERFACE_MENU.get(), BreakerInterfaceScreen::new);
+        event.register(Registration.PERSONAL_FILING_CABINET_MENU.get(), PersonalFilingCabinetScreen::new);
     }
 }

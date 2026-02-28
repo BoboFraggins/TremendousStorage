@@ -3,6 +3,7 @@ package net.bobofraggins.intellistore.networkinterface;
 import com.mojang.serialization.MapCodec;
 import net.bobofraggins.intellistore.register.Registration;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,6 +23,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.BlockHitResult;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 /**
  * A two-block-tall Network Interface block.
@@ -173,6 +176,25 @@ public class NetworkInterfaceBlock extends BaseEntityBlock {
         // Delegate to the lower half's block entity
         BlockPos lowerPos =
                 state.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER ? pos : pos.below();
+
+        if (player.isShiftKeyDown()) {
+            // Sneak + right-click: deposit all player inventory items into the network
+            if (!(level.getBlockEntity(lowerPos) instanceof NetworkInterfaceBlockEntity ni)) {
+                return InteractionResult.FAIL;
+            }
+            IItemHandler network = ni.getItemHandler();
+            if (network == null) return InteractionResult.FAIL;
+            for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+                ItemStack held = player.getInventory().getItem(slot);
+                if (held.isEmpty()) continue;
+                ItemStack remainder = ItemHandlerHelper.insertItem(network, held, false);
+                player.getInventory().setItem(slot, remainder);
+            }
+            player.getInventory().setChanged();
+            player.displayClientMessage(
+                    Component.translatable("action.intellistore.deposit_complete"), true);
+            return InteractionResult.SUCCESS;
+        }
 
         if (level.getBlockEntity(lowerPos) instanceof MenuProvider mp) {
             player.openMenu(mp, buf -> buf.writeBlockPos(lowerPos));

@@ -127,5 +127,10 @@
   "jade.intellistore.network_interface.consumption": "%1$s FE/t",
   "jade.intellistore.not_enough_power": "Not Enough Power",
 
-  "screen.intellistore.not_enough_power": "Not Enough Power"
+  "screen.intellistore.not_enough_power": "Not Enough Power",
+
+  "action.intellistore.deposit_complete": "Deposited items into network",
+
+  "item.intellistore.personal_filing_cabinet": "Personal Filing Cabinet",
+  "screen.intellistore.personal_filing_cabinet": "Personal Filing Cabinet"
 }

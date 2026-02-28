@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "FFF",
+    "FCF",
+    "FFF"
+  ],
+  "key": {
+    "F": { "item": "intellistore:paper_manila_folder" },
+    "C": { "item": "minecraft:chest" }
+  },
+  "result": {
+    "id": "intellistore:personal_filing_cabinet",
+    "count": 1
+  }
+}

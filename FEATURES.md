@@ -185,6 +185,19 @@ Single-item-type bulk storage carried as an item.
 - Linked NI position stored as a data component — survives break/unload/reload
 - Recipe (shapeless): Ender Pearl + Storage Access Terminal item → 1× Wireless SAT (unlinked)
 
+### Personal Filing Cabinet
+- A portable item (stack size 1) that holds up to **8 Manila Folders** of any tier
+- Right-click in air → opens the Personal Filing Cabinet screen: 8 folder slots (2×4 grid) + player inventory
+- Drag any locked Manila Folder into a slot; the folder stays inside the item as a data component
+- **Auto-pickup**: when the player walks over a dropped item that matches a locked folder's item type, it is automatically routed into that folder instead of the regular inventory
+- Only **locked** folders (already containing an item type) participate in auto-pickup; unlocked folders are skipped
+- **Void Excess: ON** (default) — if the folder is full, overflow from pickup is silently discarded; the pickup event is denied so nothing goes to the regular inventory
+- **Void Excess: OFF** — only actually-inserted items are consumed; surplus stays on the ground and is picked up normally by the inventory
+- Toggle button in the screen switches Void Excess ON/OFF (persisted on the item)
+- Multiple PFC items in inventory: all are checked in slot order; the first matching folder wins
+- All folder contents and Void Excess state are stored as a data component on the PFC item — survive break/pick-up and log-out/log-in
+- Recipe: Chest surrounded by 8 Paper Manila Folders (`FFF/FCF/FFF`)
+
 ---
 
 ## Tubes
@@ -209,6 +222,7 @@ Single-item-type bulk storage carried as an item.
 - Exposes an `IItemHandler` capability over the whole network: inserts to highest-priority storage first, extracts from lowest-priority storage first
 - Lazy-cached network scan; cache invalidates automatically when any neighbor changes
 - Right-click → opens the **Network Interface screen**: shows validity status and a scrollable list of all attached blocks (e.g. "Filing Cabinet (2)", "Black Tubes (13)")
+- **Sneak + right-click** → deposit all items from the player's inventory into the network (items are routed per the normal priority system; anything that doesn't fit stays in the inventory)
 - Breaking either half removes both halves and drops one Network Interface item
 - Recipe: Glass (top) / Brain (center) / Healing Salve Bucket (bottom) — vertical shaped
 - Pickaxe-minable
