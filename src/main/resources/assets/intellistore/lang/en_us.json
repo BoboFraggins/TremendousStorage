@@ -124,7 +124,7 @@
   "jade.intellistore.stirling_engine.hint": "Place Above Heat Source",
   "jade.intellistore.stirling_engine.stored": "%1$s / %2$s FE",
 
-  "jade.intellistore.network_interface.consumption": "%1$s RF/t",
+  "jade.intellistore.network_interface.consumption": "%1$s FE/t",
   "jade.intellistore.not_enough_power": "Not Enough Power",
 
   "screen.intellistore.not_enough_power": "Not Enough Power"

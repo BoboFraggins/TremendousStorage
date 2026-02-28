@@ -53,11 +53,11 @@ public final class NetworkInterfaceBFS {
 
     private record HandlerEntry(IItemHandler handler, Priority priority) {}
 
-    /** RF/t cost per attached SAT. */
+    /** FE/t cost per attached SAT. */
     private static final int SAT_COST = 5;
-    /** RF/t cost per Wireless Hub. */
+    /** FE/t cost per Wireless Hub. */
     private static final int HUB_COST = 25;
-    /** RF/t cost per tube attachment (any type). */
+    /** FE/t cost per tube attachment (any type). */
     private static final int ATTACHMENT_COST = 1;
 
     /**
@@ -78,7 +78,7 @@ public final class NetworkInterfaceBFS {
         List<String> storageKeys = new ArrayList<>(); // ordered by discovery
         int otherNiCount = 0;
         // Power accounting
-        int rfPerTick = NetworkInterfaceBlockEntity.NI_COST; // base NI cost
+        int fePerTick = NetworkInterfaceBlockEntity.NI_COST; // base NI cost
 
         // Single shared queue for the whole scan; tubes of any color may be enqueued
         // (the NI itself is a color-agnostic entry point, and connectors bridge colors)
@@ -108,7 +108,7 @@ public final class NetworkInterfaceBFS {
             if (tubeBE != null) {
                 for (int i = 0; i < 6; i++) {
                     if (tubeBE.getAttachmentType(i) != AttachmentType.NONE) {
-                        rfPerTick += ATTACHMENT_COST;
+                        fePerTick += ATTACHMENT_COST;
                     }
                 }
             }
@@ -138,11 +138,11 @@ public final class NetworkInterfaceBFS {
 
                     // Count SAT and Wireless Hub power cost
                     if (adjState.getBlock() instanceof StorageAccessTerminalBlock) {
-                        rfPerTick += SAT_COST;
+                        fePerTick += SAT_COST;
                     } else {
                         BlockEntity adjBE = adjPos.equals(niPos) ? null : level.getBlockEntity(adjPos);
                         if (adjBE instanceof WirelessHubBlockEntity) {
-                            rfPerTick += HUB_COST;
+                            fePerTick += HUB_COST;
                         }
                     }
 
@@ -198,7 +198,7 @@ public final class NetworkInterfaceBFS {
                 List.copyOf(extractOrder),
                 List.copyOf(blockList),
                 otherNiCount == 0,
-                rfPerTick);
+                fePerTick);
     }
 
     // -------------------------------------------------------------------------

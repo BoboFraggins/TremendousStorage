@@ -18,7 +18,7 @@ import snownee.jade.api.config.IPluginConfig;
  *
  * <p>Appends:
  * <ul>
- *   <li>Total RF/t consumed by the network
+ *   <li>Total FE/t consumed by the network
  *   <li>"Not Enough Power" when the network is unpowered
  * </ul>
  */

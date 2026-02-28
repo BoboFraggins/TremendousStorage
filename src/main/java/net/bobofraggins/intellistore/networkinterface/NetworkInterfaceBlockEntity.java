@@ -29,7 +29,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  * <p>Exposes an {@link IItemHandler} capability via {@link NiItemHandler}: insertion uses
  * the highest-priority storage first; extraction drains the lowest-priority storage first.
  *
- * <p><b>Power system:</b> The Network Interface stores RF energy and drains it each server
+ * <p><b>Power system:</b> The Network Interface stores FE energy and drains it each server
  * tick proportional to network demand (NI itself, connected SATs, Wireless Hubs, and tube
  * attachments). When the energy buffer runs out the network becomes inactive and most
  * functionality stops working. Energy can be supplied by:
@@ -43,7 +43,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
 
     // ---- Power constants ----
     public static final int MAX_ENERGY = 100_000;
-    /** RF/t consumed by this NI itself. */
+    /** FE/t consumed by this NI itself. */
     public static final int NI_COST = 5;
 
     /** Lazily built; {@code null} = stale. */
@@ -54,7 +54,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     private int energyStored = 0;
     /** Whether the network had enough power last tick. Synced to clients. */
     private boolean powered = false;
-    /** Total RF/t consumed by the network, computed during scan. Synced to clients. */
+    /** Total FE/t consumed by the network, computed during scan. Synced to clients. */
     private int totalConsumption = 0;
 
     public NetworkInterfaceBlockEntity(BlockPos pos, BlockState state) {
@@ -121,7 +121,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         return powered;
     }
 
-    /** Total RF/t consumed by all network components. */
+    /** Total FE/t consumed by all network components. */
     public int getTotalConsumption() {
         return totalConsumption;
     }
@@ -146,7 +146,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
             return;
         }
 
-        int cost = scan.totalRfPerTick();
+        int cost = scan.totalFePerTick();
         boolean wasPowered = powered;
         boolean nowPowered = energyStored >= cost;
         if (nowPowered) {

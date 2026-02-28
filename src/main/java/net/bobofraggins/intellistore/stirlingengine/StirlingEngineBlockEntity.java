@@ -18,7 +18,7 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 /**
  * Block entity for the Stirling Engine generator.
  *
- * <p>Checks the block directly below each tick and generates RF based on the heat source:
+ * <p>Checks the block directly below each tick and generates FE based on the heat source:
  * <ul>
  *   <li>Lava block → 50 FE/t
  *   <li>Magma block → 25 FE/t

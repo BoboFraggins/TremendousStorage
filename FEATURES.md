@@ -212,11 +212,11 @@ Single-item-type bulk storage carried as an item.
 - Breaking either half removes both halves and drops one Network Interface item
 - Recipe: Glass (top) / Brain (center) / Healing Salve Bucket (bottom) — vertical shaped
 - Pickaxe-minable
-- **Power**: requires RF to operate; base cost **5 RF/t** plus per-component costs (see Tube Network — Power)
-- Accepts RF via `IEnergyStorage` capability (internal buffer: 100,000 FE); compatible with Stirling Engine, Pipez power pipes, Mekanism cables, Powah conduits, etc.
+- **Power**: requires FE to operate; base cost **5 FE/t** plus per-component costs (see Tube Network — Power)
+- Accepts FE via `IEnergyStorage` capability (internal buffer: 100,000 FE); compatible with Stirling Engine, Pipez power pipes, Mekanism cables, Powah conduits, etc.
 - Any tube in the connected network also exposes `IEnergyStorage`, so power can be injected through any tube face
 - When underpowered the network becomes **inactive**: SAT and Wireless SAT cannot be opened, tube Import/Export attachments stop transferring, and the status dot turns red
-- Jade tooltip: total RF/t consumed by the network; "Not Enough Power" in red when inactive
+- Jade tooltip: total FE/t consumed by the network; "Not Enough Power" in red when inactive
 
 ### Network Interface — Prerequisite Items & Fluid
 
@@ -275,14 +275,14 @@ This allows different-colored tube runs connected through a shared connector blo
 - There is one singular network per Network Interface; all connected storage is always in the same pool
 
 ### Tube Network — Power
-The network draws RF from the Network Interface's internal buffer each tick. Total cost is the sum of all connected components:
+The network draws FE from the Network Interface's internal buffer each tick. Total cost is the sum of all connected components:
 
 | Component | Cost |
 |-----------|------|
-| Network Interface (base) | 5 RF/t |
-| Storage Access Terminal | 5 RF/t each |
-| Wireless Hub | 25 RF/t each |
-| Each tube attachment (Storage / Import / Export / Placer / Breaker Interface installed on a tube face) | 1 RF/t each |
+| Network Interface (base) | 5 FE/t |
+| Storage Access Terminal | 5 FE/t each |
+| Wireless Hub | 25 FE/t each |
+| Each tube attachment (Storage / Import / Export / Placer / Breaker Interface installed on a tube face) | 1 FE/t each |
 
 - When the buffer runs dry the network becomes **inactive** (see Network Interface — Power above)
 - Jade shows "Not Enough Power" in red on any tube with an attachment, on the SAT, and on the NI itself when inactive
@@ -301,7 +301,7 @@ Adds block tooltip overlays when looking at IntelliStore blocks:
 | Bulk Storage Container | "Empty" or "Xk / Yk items" |
 | Fluid Tank | "Empty" or "Xk mB of Yk mB FluidName" |
 | Stirling Engine | "Place Above Heat Source" when idle; "X / Y FE" when generating |
-| Network Interface | Total RF/t consumed; "Not Enough Power" in red when inactive |
+| Network Interface | Total FE/t consumed; "Not Enough Power" in red when inactive |
 | Storage Access Terminal | "Not Enough Power" in red when network is inactive |
 | Tube (with attachment) | "Not Enough Power" in red when network is inactive |
 
