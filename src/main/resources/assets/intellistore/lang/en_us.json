@@ -1,6 +1,6 @@
 {
   "block.intellistore.filing_cabinet": "Filing Cabinet",
-  "block.intellistore.filing_cabinet.full": "The filing cabinet is full.",
+  "screen.intellistore.filing_cabinet": "Filing Cabinet",
 
   "block.intellistore.junk_drawer": "Junk Drawer",
   "block.intellistore.bulk_storage_container": "Bulk Storage Container",
@@ -24,8 +24,6 @@
 
   "itemGroup.intellistore": "IntelliStore",
 
-  "jade.intellistore.filing_cabinet.open": "Open",
-  "jade.intellistore.filing_cabinet.closed": "Closed",
   "jade.intellistore.filing_cabinet.slot": "%2$s of %3$s %1$s",
 
   "jade.intellistore.junk_drawer.empty": "Empty",
@@ -44,9 +42,6 @@
   "priority.intellistore.highest": "Highest",
 
   "screen.intellistore.priority_label": "Priority:",
-  "screen.intellistore.filing_cabinet.open_label": "Drawer:",
-  "screen.intellistore.filing_cabinet.toggle_open": "Open",
-  "screen.intellistore.filing_cabinet.toggle_closed": "Closed",
   "item.intellistore.storage_interface": "Storage Interface",
   "screen.intellistore.storage_interface": "Storage Interface",
 

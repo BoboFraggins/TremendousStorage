@@ -16,60 +16,21 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-/** Stores up to {@value #SLOT_COUNT} Manila Folder stacks and tracks the open/close state. */
+/** Stores up to {@value #SLOT_COUNT} Manila Folder stacks. */
 public class FilingCabinetBlockEntity extends BlockEntity implements net.minecraft.world.Container, MenuProvider {
 
     public static final int SLOT_COUNT = 8;
 
-    /** Speed at which the drawer opens/closes, in block units per tick. */
-    public static final float OFFSET_SPEED = 0.1f;
-
-    /** Fully-open drawer offset (Z, in model-space units, negative = pulled out). */
-    public static final float OFFSET_OPEN = -0.75f;
-
-    /** Fully-closed drawer offset. */
-    public static final float OFFSET_CLOSED = 0.05f;
-
     private final NonNullList<ItemStack> folders = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
-    private boolean isOpen = false;
     private Priority priority = Priority.HIGH;
     private boolean voidExcess = false;
 
-    // Client-only animation state (not saved to NBT).
-    public float drawerOffset = OFFSET_CLOSED;
-    public float prevDrawerOffset = OFFSET_CLOSED;
-
     public FilingCabinetBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.FILING_CABINET_BE_TYPE.get(), pos, state);
-    }
-
-    // -------------------------------------------------------------------------
-    // Tick
-    // -------------------------------------------------------------------------
-
-    /**
-     * Server-side tick — no-op; all interaction state is synced via {@link #getUpdatePacket()}.
-     */
-    public static void serverTick(Level level, BlockPos pos, BlockState state, FilingCabinetBlockEntity be) {
-        // intentionally empty
-    }
-
-    /**
-     * Client-side tick: smoothly animates the drawer toward its target offset.
-     */
-    public static void clientTick(Level level, BlockPos pos, BlockState state, FilingCabinetBlockEntity be) {
-        be.prevDrawerOffset = be.drawerOffset;
-        if (be.isOpen) {
-            be.drawerOffset = Math.max(OFFSET_OPEN, be.drawerOffset - OFFSET_SPEED);
-        } else {
-            be.drawerOffset = Math.min(OFFSET_CLOSED, be.drawerOffset + OFFSET_SPEED);
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -80,9 +41,7 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
     public void setChanged() {
         super.setChanged();
         if (level != null) {
-            // Invalidate cached capability references (hoppers, pipes, etc.)
             level.invalidateCapabilities(worldPosition);
-            // Push the update packet to watching clients so the renderer stays in sync.
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
@@ -139,15 +98,6 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
     // Custom accessors
     // -------------------------------------------------------------------------
 
-    public boolean isOpen() {
-        return isOpen;
-    }
-
-    public void setOpen(boolean open) {
-        this.isOpen = open;
-        setChanged();
-    }
-
     public Priority getPriority() {
         return priority;
     }
@@ -164,22 +114,6 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
     public void setVoidExcess(boolean voidExcess) {
         this.voidExcess = voidExcess;
         setChanged();
-    }
-
-    /** Returns the index of the first empty slot, or -1 if all slots are full. */
-    public int firstEmptySlot() {
-        for (int i = 0; i < SLOT_COUNT; i++) {
-            if (folders.get(i).isEmpty()) return i;
-        }
-        return -1;
-    }
-
-    /** Returns the highest-index occupied slot, or -1 if the cabinet is empty. */
-    public int lastOccupiedSlot() {
-        for (int i = SLOT_COUNT - 1; i >= 0; i--) {
-            if (!folders.get(i).isEmpty()) return i;
-        }
-        return -1;
     }
 
     public ItemStack getFolder(int slot) {
@@ -202,28 +136,7 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
 
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
-        ContainerData data = new ContainerData() {
-            @Override
-            public int get(int index) {
-                return switch (index) {
-                    case 0 -> priority.ordinal();
-                    case 1 -> isOpen ? 1 : 0;
-                    case 2 -> voidExcess ? 1 : 0;
-                    default -> 0;
-                };
-            }
-
-            @Override
-            public void set(int index, int value) {
-                // Server-side data; changes come via packets
-            }
-
-            @Override
-            public int getCount() {
-                return 3;
-            }
-        };
-        return new FilingCabinetMenu(id, inv, worldPosition, data);
+        return new FilingCabinetMenu(id, inv, worldPosition, this);
     }
 
     // -------------------------------------------------------------------------
@@ -234,7 +147,6 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         ContainerHelper.saveAllItems(tag, folders, registries);
-        tag.putBoolean("IsOpen", isOpen);
         tag.putInt("Priority", priority.ordinal());
         tag.putBoolean("VoidExcess", voidExcess);
     }
@@ -243,11 +155,8 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         ContainerHelper.loadAllItems(tag, folders, registries);
-        isOpen = tag.getBoolean("IsOpen");
         priority = Priority.fromOrdinal(tag.getInt("Priority"));
         voidExcess = tag.getBoolean("VoidExcess");
-        // Snap animation to final position when loading (no lerp from wrong state).
-        drawerOffset = prevDrawerOffset = isOpen ? OFFSET_OPEN : OFFSET_CLOSED;
     }
 
     // -------------------------------------------------------------------------

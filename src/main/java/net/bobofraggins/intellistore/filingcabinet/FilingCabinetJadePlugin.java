@@ -23,7 +23,6 @@ import snownee.jade.api.config.IPluginConfig;
  *
  * <p>Shows:
  * <ul>
- *   <li>Open / Closed state
  *   <li>How many of the 8 slots are occupied
  *   <li>An item icon + count for each folder that contains items
  * </ul>
@@ -55,7 +54,6 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
     enum FolderDataProvider implements IBlockComponentProvider, snownee.jade.api.IServerDataProvider<BlockAccessor> {
         INSTANCE;
 
-        private static final String KEY_OPEN = "IsOpen";
         private static final String KEY_ITEMS = "Items";
 
         // -- Server side: copy the BE's NBT into the Jade data tag --
@@ -63,7 +61,6 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
             if (!(accessor.getBlockEntity() instanceof FilingCabinetBlockEntity be)) return;
-            data.putBoolean(KEY_OPEN, be.isOpen());
 
             // Summarise each slot: store the stored-item type and total count from FolderContents
             ListTag list = new ListTag();
@@ -99,10 +96,6 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             CompoundTag data = accessor.getServerData();
-
-            boolean open = data.getBoolean(KEY_OPEN);
-            tooltip.add(Component.translatable(
-                    open ? "jade.intellistore.filing_cabinet.open" : "jade.intellistore.filing_cabinet.closed"));
 
             ListTag items = data.getList(KEY_ITEMS, Tag.TAG_COMPOUND);
             if (items.isEmpty()) return;

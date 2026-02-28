@@ -2,7 +2,6 @@ package net.bobofraggins.intellistore.ui;
 
 import net.bobofraggins.intellistore.network.SetPriorityPacket;
 import net.bobofraggins.intellistore.network.SetVoidExcessPacket;
-import net.bobofraggins.intellistore.network.ToggleFilingCabinetPacket;
 import net.bobofraggins.intellistore.priority.Priority;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -12,23 +11,34 @@ import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
- * Screen for the Filing Cabinet. Shows an open/close toggle and a 5-button priority row.
+ * Screen for the Filing Cabinet block.
  *
- * <p>Background panel: 176 × 96 pixels (standard chest width, shorter height).
+ * <p>Layout (176 × 212 px):
+ * <ul>
+ *   <li>Title centred at y=6
+ *   <li>"Void Excess: ON/OFF" toggle button (120×14) centred at y=18
+ *   <li>2 rows × 4 columns of folder slots starting at x=29, y=44 (18×18 each)
+ *   <li>Priority label and 5 priority buttons at y=86/96
+ *   <li>Player inventory 3×9 starting at y=118
+ *   <li>Player hotbar at y=176
+ * </ul>
  */
 public class FilingCabinetScreen extends AbstractContainerScreen<FilingCabinetMenu> {
 
-    // Background panel dimensions
     private static final int BG_WIDTH = 176;
-    private static final int BG_HEIGHT = 116;
+    private static final int BG_HEIGHT = 204;
 
-    // Widget layout constants
-    private static final int TOGGLE_Y_OFFSET = 20;
-    private static final int PRIORITY_Y_OFFSET = 54;
-    private static final int VOID_Y_OFFSET = 88;
-    private static final int PRIORITY_BUTTON_W = 28;
-    private static final int PRIORITY_BUTTON_H = 20;
-    private static final int PRIORITY_BUTTON_GAP = 2;
+    private static final int BTN_W = 120;
+    private static final int BTN_H = 14;
+    private static final int BTN_Y = 18;
+
+    private static final int PRIORITY_LABEL_Y = 86;
+    private static final int PRIORITY_Y = 96;
+    private static final int PRIORITY_BTN_W = 28;
+    private static final int PRIORITY_BTN_H = 14;
+    private static final int PRIORITY_BTN_GAP = 2;
+
+    private Button voidExcessButton;
 
     public FilingCabinetScreen(FilingCabinetMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -39,93 +49,51 @@ public class FilingCabinetScreen extends AbstractContainerScreen<FilingCabinetMe
     @Override
     protected void init() {
         super.init();
-        buildWidgets();
-    }
 
-    private void buildWidgets() {
-        // Toggle button — centred, below the title
-        int toggleX = leftPos + (BG_WIDTH - 80) / 2;
-        int toggleY = topPos + TOGGLE_Y_OFFSET;
-        addRenderableWidget(Button.builder(toggleLabel(), btn -> {
-                    PacketDistributor.sendToServer(new ToggleFilingCabinetPacket(menu.getPos()));
-                    // Rebuild buttons immediately so the label reflects the new state
-                    // (ContainerData will sync on next tick)
-                    rebuildToggle(btn);
-                })
-                .bounds(toggleX, toggleY, 80, 20)
+        // Void excess toggle
+        int btnX = leftPos + (BG_WIDTH - BTN_W) / 2;
+        int btnY = topPos + BTN_Y;
+        voidExcessButton = addRenderableWidget(Button.builder(
+                        voidExcessLabel(),
+                        btn -> {
+                            boolean newValue = !menu.isVoidExcess();
+                            menu.setVoidExcess(newValue);
+                            PacketDistributor.sendToServer(new SetVoidExcessPacket(menu.getPos(), newValue));
+                        })
+                .bounds(btnX, btnY, BTN_W, BTN_H)
                 .build());
 
         // Priority buttons — 5 in a row, centred
-        int totalW = Priority.VALUES.length * PRIORITY_BUTTON_W + (Priority.VALUES.length - 1) * PRIORITY_BUTTON_GAP;
+        int totalW = Priority.VALUES.length * PRIORITY_BTN_W + (Priority.VALUES.length - 1) * PRIORITY_BTN_GAP;
         int startX = leftPos + (BG_WIDTH - totalW) / 2;
-        int btnY = topPos + PRIORITY_Y_OFFSET;
+        int pY = topPos + PRIORITY_Y;
 
         for (int i = 0; i < Priority.VALUES.length; i++) {
             final int ordinal = i;
             Priority p = Priority.VALUES[i];
-            addRenderableWidget(Button.builder(Component.translatable(p.translationKey()), btn -> {
-                        PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), ordinal));
-                    })
-                    .bounds(
-                            startX + i * (PRIORITY_BUTTON_W + PRIORITY_BUTTON_GAP),
-                            btnY,
-                            PRIORITY_BUTTON_W,
-                            PRIORITY_BUTTON_H)
+            addRenderableWidget(Button.builder(Component.translatable(p.translationKey()), btn ->
+                            PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), ordinal)))
+                    .bounds(startX + i * (PRIORITY_BTN_W + PRIORITY_BTN_GAP), pY, PRIORITY_BTN_W, PRIORITY_BTN_H)
                     .build());
         }
-
-        // Void excess toggle button — centred below priority row
-        int voidX = leftPos + (BG_WIDTH - 120) / 2;
-        int voidY = topPos + VOID_Y_OFFSET;
-        addRenderableWidget(Button.builder(voidExcessLabel(), btn -> {
-                    boolean newValue = !menu.isVoidExcess();
-                    PacketDistributor.sendToServer(new SetVoidExcessPacket(menu.getPos(), newValue));
-                    btn.setMessage(voidExcessLabel(!menu.isVoidExcess()));
-                })
-                .bounds(voidX, voidY, 120, 20)
-                .build());
-    }
-
-    private Component toggleLabel() {
-        return Component.translatable(
-                menu.isOpen()
-                        ? "screen.intellistore.filing_cabinet.toggle_open"
-                        : "screen.intellistore.filing_cabinet.toggle_closed");
-    }
-
-    private void rebuildToggle(Button btn) {
-        btn.setMessage(toggleLabel());
     }
 
     private Component voidExcessLabel() {
-        return voidExcessLabel(menu.isVoidExcess());
-    }
-
-    private Component voidExcessLabel(boolean value) {
-        return Component.translatable(
-                value ? "screen.intellistore.void_excess_on" : "screen.intellistore.void_excess_off");
+        return menu.isVoidExcess()
+                ? Component.translatable("screen.intellistore.void_excess_on")
+                : Component.translatable("screen.intellistore.void_excess_off");
     }
 
     @Override
     protected void containerTick() {
         super.containerTick();
-        // Keep toggle label in sync as ContainerData updates arrive
-        // The first widget is the toggle button
-        if (!renderables.isEmpty() && renderables.get(0) instanceof Button toggleBtn) {
-            toggleBtn.setMessage(toggleLabel());
-        }
-        // Highlight the currently selected priority button
+        if (voidExcessButton != null) voidExcessButton.setMessage(voidExcessLabel());
         updatePriorityHighlights();
-        // Keep void excess button label in sync (widget index 6: toggle + 5 priority buttons)
-        int voidIdx = 1 + Priority.VALUES.length;
-        if (voidIdx < renderables.size() && renderables.get(voidIdx) instanceof Button voidBtn) {
-            voidBtn.setMessage(voidExcessLabel());
-        }
     }
 
     private void updatePriorityHighlights() {
         int selected = menu.getPriority();
-        // Priority buttons are widgets 1..5
+        // Priority buttons are widgets 1..5 (voidExcess is widget 0)
         for (int i = 0; i < Priority.VALUES.length; i++) {
             int widgetIdx = 1 + i;
             if (widgetIdx < renderables.size() && renderables.get(widgetIdx) instanceof Button btn) {
@@ -143,39 +111,28 @@ public class FilingCabinetScreen extends AbstractContainerScreen<FilingCabinetMe
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        // Draw a plain dark panel as background
+        // Dark background
         graphics.fill(leftPos, topPos, leftPos + BG_WIDTH, topPos + BG_HEIGHT, 0xC0101010);
-        // Section labels
-        graphics.drawString(
-                font,
-                Component.translatable("screen.intellistore.filing_cabinet.open_label"),
-                leftPos
-                        + (BG_WIDTH
-                                        - font.width(Component.translatable(
-                                                "screen.intellistore.filing_cabinet.open_label")))
-                                / 2,
-                topPos + TOGGLE_Y_OFFSET - 10,
-                0xFFFFFF,
-                false);
-        graphics.drawString(
-                font,
-                Component.translatable("screen.intellistore.priority_label"),
-                leftPos + (BG_WIDTH - font.width(Component.translatable("screen.intellistore.priority_label"))) / 2,
-                topPos + PRIORITY_Y_OFFSET - 10,
-                0xFFFFFF,
-                false);
-        graphics.drawString(
-                font,
-                Component.translatable("screen.intellistore.void_excess_label"),
-                leftPos + (BG_WIDTH - font.width(Component.translatable("screen.intellistore.void_excess_label"))) / 2,
-                topPos + VOID_Y_OFFSET - 10,
-                0xFFFFFF,
-                false);
+
+        // Slot backgrounds for the 8 folder slots (2 rows × 4 cols, matching menu at x=29, y=44)
+        for (int i = 0; i < FilingCabinetMenu.FOLDER_SLOTS; i++) {
+            int col = i % 4;
+            int row = i / 4;
+            int sx = leftPos + 29 + col * 18;
+            int sy = topPos + 44 + row * 18;
+            graphics.fill(sx, sy, sx + 18, sy + 18, 0xFF303030);
+            graphics.fill(sx + 1, sy + 1, sx + 17, sy + 17, 0xFF1A1A1A);
+        }
+
+        // Priority label
+        Component priorityLabel = Component.translatable("screen.intellistore.priority_label");
+        graphics.drawString(font, priorityLabel,
+                leftPos + (BG_WIDTH - font.width(priorityLabel)) / 2,
+                topPos + PRIORITY_LABEL_Y, 0xAAAAAA, false);
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        // Draw title centred
         graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 6, 0xFFFFFF, false);
     }
 }

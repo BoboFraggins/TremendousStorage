@@ -8,14 +8,13 @@ NeoForge 1.21.1 · Minecraft 1.21.1
 
 ### Filing Cabinet
 - Holds up to **8 Manila Folders** in internal slots
-- Right-click with a folder in hand → inserts into the first empty slot
-- Right-click with empty hand → opens the Filing Cabinet screen (toggle open/close + priority)
-- Sneak + right-click with empty hand (while open) → extracts the topmost folder
+- Right-click → opens the Filing Cabinet inventory screen: 8 folder slots (2×4 grid) + player inventory
+- Drag any Manila Folder into a slot; remove folders by shift-clicking them back to your inventory
 - Drops itself with full folder inventory intact when broken
 - Exposes an `IItemHandler` capability (8 slots, one per folder) for hopper/pipe automation
-- **Priority**: 5 levels (Lowest → Highest); default **High**; set via the right-click screen
+- **Priority**: 5 levels (Lowest → Highest); default **High**; set via the inventory screen
 - Priority is saved to NBT and survives break/replace
-- **Void Excess**: toggle in the right-click screen; when ON, the cabinet always accepts item inserts even when full, silently discarding overflow; saved to NBT; default OFF
+- **Void Excess**: toggle button in the inventory screen; when ON, the cabinet always accepts item inserts even when full, silently discarding overflow; saved to NBT; default OFF
 - Recipe: iron bars ring around a chest (`III/ICI/III`)
 - Pickaxe-minable
 
@@ -310,7 +309,7 @@ Adds block tooltip overlays when looking at IntelliStore blocks:
 
 | Block | Tooltip |
 |-------|---------|
-| Filing Cabinet | Open / Closed state; item icon + "Xk of Yk ItemName" per occupied folder |
+| Filing Cabinet | Item icon + "Xk of Yk ItemName" per occupied folder |
 | Junk Drawer | "Empty" or "X / Yk items" |
 | Bulk Storage Container | "Empty" or "Xk / Yk items" |
 | Fluid Tank | "Empty" or "Xk mB of Yk mB FluidName" |
