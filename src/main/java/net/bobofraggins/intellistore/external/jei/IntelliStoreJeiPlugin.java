@@ -6,11 +6,13 @@ import java.util.Optional;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
+import mezz.jei.api.runtime.IJeiRuntime;
 import net.bobofraggins.intellistore.shared.network.SetImportExportFilterPacket;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceScreen;
@@ -51,6 +53,13 @@ public class IntelliStoreJeiPlugin implements IModPlugin {
                 Registration.STORAGE_ACCESS_TERMINAL_MENU.get(),
                 RecipeTypes.CRAFTING,
                 1, 9, 10, 36);
+    }
+
+    @Override
+    public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
+        jeiRuntime.getIngredientManager().removeIngredientsAtRuntime(
+                VanillaTypes.ITEM_STACK,
+                List.of(Registration.CREATIVE_TAB_ICON.get().getDefaultInstance()));
     }
 
     /**

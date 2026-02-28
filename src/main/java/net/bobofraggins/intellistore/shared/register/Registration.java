@@ -627,10 +627,14 @@ public final class Registration {
     // Creative tab
     // -------------------------------------------------------------------------
 
+    /** Invisible item whose sole purpose is to provide the creative tab icon texture. */
+    public static final DeferredHolder<Item, Item> CREATIVE_TAB_ICON =
+            ITEMS.register("creative_tab", () -> new Item(new Item.Properties()));
+
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> INTELLISTORE_TAB =
             CREATIVE_MODE_TABS.register("intellistore", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.intellistore"))
-                    .icon(() -> MANILA_FOLDERS.get(FolderTier.IRON).get().getDefaultInstance())
+                    .icon(() -> CREATIVE_TAB_ICON.get().getDefaultInstance())
                     .displayItems((params, output) -> {
                         output.accept(FILING_CABINET_ITEM.get());
                         output.accept(JUNK_DRAWER_ITEM.get());
