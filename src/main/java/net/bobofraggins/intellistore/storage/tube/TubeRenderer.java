@@ -23,6 +23,13 @@ import org.joml.Matrix4f;
  *
  * <p>The JSON block model provides only the particle texture (for break effects). All
  * visible geometry is drawn here.
+ *
+ * <p>Face shading multipliers give each face a distinct tone so tubes read clearly:
+ * <ul>
+ *   <li>Up/Down faces — 90% brightness (darker top/bottom)
+ *   <li>East/West faces — 95% brightness (slightly dimmed sides)
+ *   <li>North/South faces — 100% brightness (pure dye color)
+ * </ul>
  */
 public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
 
@@ -46,6 +53,11 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     private static final float P_MIN = 4f / 16f;
     private static final float P_MAX = 12f / 16f;
     private static final float P_THICK = 2f / 16f;
+
+    // Per-face brightness multipliers
+    private static final float SHADE_TOP_BOTTOM = 0.90f;
+    private static final float SHADE_EAST_WEST = 0.95f;
+    private static final float SHADE_NORTH_SOUTH = 1.00f;
 
     public TubeRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -271,8 +283,9 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     }
 
     /**
-     * Draws all 6 faces of an axis-aligned box with the given sprite and color tint.
-     * UV coordinates span the full sprite extent.
+     * Draws all 6 faces of an axis-aligned box with per-face shading.
+     * Each face receives a flat brightness multiplier based on its orientation:
+     * Up/Down=90%, East/West=95%, North/South=100%.
      */
     private static void drawBox(
             VertexConsumer vc,
@@ -293,24 +306,37 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
         float u0 = sprite.getU0(), u1 = sprite.getU1();
         float v0 = sprite.getV0(), v1 = sprite.getV1();
 
-        // -Y (down)
+        int ry = shade(r, SHADE_TOP_BOTTOM), gy = shade(g, SHADE_TOP_BOTTOM), by = shade(b, SHADE_TOP_BOTTOM);
+        int rx = shade(r, SHADE_EAST_WEST), gx = shade(g, SHADE_EAST_WEST), bx = shade(b, SHADE_EAST_WEST);
+        // North/South: pure color (no change needed, use r/g/b directly)
+
+        // -Y (down) — top/bottom shade
         quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0, -1,
-                0);
-        // +Y (up)
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0, 1, 0);
-        // -Z (north)
+                vc, mat, ry, gy, by, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0,
+                -1, 0);
+        // +Y (up) — top/bottom shade
+        quad(
+                vc, mat, ry, gy, by, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0,
+                1, 0);
+        // -Z (north) — pure color
         quad(
                 vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0, 0,
                 -1);
-        // +Z (south)
+        // +Z (south) — pure color
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0, 0, 1);
-        // -X (west)
+        // -X (west) — east/west shade
         quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1, 0,
-                0);
-        // +X (east)
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1, 0, 0);
+                vc, mat, rx, gx, bx, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1,
+                0, 0);
+        // +X (east) — east/west shade
+        quad(
+                vc, mat, rx, gx, bx, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
+                0, 0);
+    }
+
+    /** Multiplies a channel value by a shade factor and clamps to [0, 255]. */
+    private static int shade(int channel, float factor) {
+        return Math.min(255, Math.max(0, Math.round(channel * factor)));
     }
 
     /** Emits a single CCW quad (4 vertices) with the given UV corners. */

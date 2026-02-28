@@ -351,12 +351,13 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         poseStack.translate(0, 1, 0);
         mat = poseStack.last().pose();
 
-        // Water interior continuation — upper block, inset inside glass, up to dome base
+        // Water interior continuation — upper block, inset inside glass, up to dome base.
+        // Start at -EPS to overlap the lower/upper block seam and prevent Z-fighting there.
         drawBox(
                 translucent,
                 mat,
                 4f / 16,
-                0f,
+                -EPS,
                 4f / 16,
                 12f / 16,
                 14f / 16,
@@ -368,12 +369,13 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 packedLight,
                 packedOverlay);
 
-        // Glass cylinder continuation — fills upper block from y=0 to y=14/16 where dome begins
+        // Glass cylinder continuation — fills upper block to y=14/16 where dome begins.
+        // Start at -EPS to overlap the lower/upper block seam and prevent Z-fighting there.
         drawBox(
                 translucent,
                 mat,
                 3f / 16,
-                0f,
+                -EPS,
                 3f / 16,
                 13f / 16,
                 14f / 16,
@@ -388,7 +390,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 translucent,
                 mat,
                 2f / 16,
-                0f,
+                -EPS,
                 4f / 16,
                 14f / 16,
                 14f / 16,
@@ -403,7 +405,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 translucent,
                 mat,
                 4f / 16,
-                0f,
+                -EPS,
                 2f / 16,
                 12f / 16,
                 14f / 16,

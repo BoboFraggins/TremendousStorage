@@ -12,6 +12,7 @@ import net.bobofraggins.intellistore.shared.config.IntelliStoreConfig;
 import net.bobofraggins.intellistore.shared.ui.PriorityMenu;
 import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
+import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlock;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
@@ -353,10 +354,17 @@ public final class Registration {
             () -> new AccessTerminalBlock(BlockBehaviour.Properties.of()
                     .strength(2.5f, 1000f)
                     .requiresCorrectToolForDrops()
-                    .sound(SoundType.WOOD)));
+                    .sound(SoundType.WOOD)
+                    .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> STORAGE_ACCESS_TERMINAL_ITEM =
             ITEMS.registerSimpleBlockItem("storage_access_terminal", STORAGE_ACCESS_TERMINAL);
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<AccessTerminalBlockEntity>>
+            STORAGE_ACCESS_TERMINAL_BE_TYPE =
+                    BLOCK_ENTITY_TYPES.register("storage_access_terminal", () -> BlockEntityType.Builder.of(
+                                    AccessTerminalBlockEntity::new, STORAGE_ACCESS_TERMINAL.get())
+                            .build(null));
 
     // -------------------------------------------------------------------------
     // Wireless Hub block + block entity

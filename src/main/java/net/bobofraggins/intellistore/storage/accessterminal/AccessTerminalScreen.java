@@ -191,18 +191,23 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         // Title bar (top 17 rows of the texture)
         graphics.blit(BG_TEXTURE, x, y, 0, 0, BG_WIDTH, 17);
 
-        // Middle fill (between title bar and player inventory)
+        // Player inventory section from the texture.
+        // In generic_54.png the slot backgrounds start at src y=143 (17px into the inv section).
+        // Blit so that src y=143 lands at screen y=topPos+INV_Y, i.e. dest y = topPos+INV_Y-17.
+        int invBgY = y + INV_Y - 17;
+
+        // Middle fill (between title bar and player inventory background)
         int midTop = y + 17;
-        int midBottom = y + INV_Y - 7; // 7px above player-inv matches vanilla chest spacing
+        int midBottom = invBgY;
         if (midBottom > midTop) {
-            graphics.fill(midTop > y + 17 ? x : x, midTop, x + BG_WIDTH, midBottom, 0xFFC6C6C6);
+            graphics.fill(x, midTop, x + BG_WIDTH, midBottom, 0xFFC6C6C6);
             // Border lines to match vanilla panel look
             graphics.fill(x, midTop, x + 1, midBottom, 0xFF555555); // left
             graphics.fill(x + BG_WIDTH - 1, midTop, x + BG_WIDTH, midBottom, 0xFFFFFFFF); // right
         }
 
-        // Player inventory section (bottom 96px of the texture, starting at src y=126)
-        graphics.blit(BG_TEXTURE, x, y + INV_Y - 7, 0, 126, BG_WIDTH, 96);
+        // Player inventory section (96px tall, src y=126 in generic_54.png)
+        graphics.blit(BG_TEXTURE, x, invBgY, 0, 126, BG_WIDTH, 96);
 
         // Network status line
         boolean connected = menu.hasNetwork();

@@ -1,5 +1,7 @@
 package net.bobofraggins.intellistore.storage.accessterminal;
 
+import com.mojang.serialization.MapCodec;
+import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
@@ -10,7 +12,11 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -24,16 +30,20 @@ import net.minecraft.world.phys.BlockHitResult;
  * (via the nearest Network Interface), a 3×3 crafting grid, and the player's
  * inventory. Items can be extracted from or inserted into the network.
  *
- * <p>This block has no Block Entity — the Network Interface lookup is performed
- * at menu-open time and the NI position is passed through to the menu.
- *
- * <p>The {@code active} blockstate is {@code true} when a powered NI is reachable,
- * switching the screen texture to the glowing "on" variant. It is updated each time
- * the block is interacted with.
+ * <p>The {@code active} blockstate is kept continuously in sync with the connected
+ * NI's power state via a server tick in {@link AccessTerminalBlockEntity} (every 20 t).
+ * It switches the screen texture to the glowing "on" variant.
  */
-public class AccessTerminalBlock extends Block implements NetworkConnector {
+public class AccessTerminalBlock extends BaseEntityBlock implements NetworkConnector {
+
+    public static final MapCodec<AccessTerminalBlock> CODEC = simpleCodec(AccessTerminalBlock::new);
 
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
+
+    @Override
+    public MapCodec<AccessTerminalBlock> codec() {
+        return CODEC;
+    }
 
     public AccessTerminalBlock(Properties props) {
         super(props);
@@ -44,7 +54,8 @@ public class AccessTerminalBlock extends Block implements NetworkConnector {
     }
 
     @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(
+            StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
         builder.add(BlockStateProperties.HORIZONTAL_FACING, ACTIVE);
     }
 
@@ -58,6 +69,23 @@ public class AccessTerminalBlock extends Block implements NetworkConnector {
     }
 
     @Override
+    public RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
+    }
+
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new AccessTerminalBlockEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
+            Level level, BlockState state, BlockEntityType<T> type) {
+        return level.isClientSide ? null : (lvl, pos, st, be) -> ((AccessTerminalBlockEntity) be).serverTick();
+    }
+
+    @Override
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
@@ -67,12 +95,6 @@ public class AccessTerminalBlock extends Block implements NetworkConnector {
         boolean powered = niPos != null
                 && level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni
                 && ni.isPowered();
-
-        // Update active state to reflect current network status
-        boolean currentlyActive = state.getValue(ACTIVE);
-        if (powered != currentlyActive) {
-            level.setBlock(pos, state.setValue(ACTIVE, powered), 3);
-        }
 
         // Power check: if NI is found but network is not powered, show message and do not open
         if (niPos != null && !powered) {

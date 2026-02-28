@@ -318,7 +318,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     public record Provider(BlockPos satPos, @Nullable BlockPos niPos) implements MenuProvider {
         @Override
         public Component getDisplayName() {
-            return Component.translatable("screen.intellistore.storage_access_terminal");
+            return Component.translatable("screen.intellistore.access_terminal");
         }
 
         @Override
