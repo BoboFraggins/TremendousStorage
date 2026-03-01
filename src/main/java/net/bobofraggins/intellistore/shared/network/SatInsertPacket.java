@@ -42,12 +42,19 @@ public record SatInsertPacket(BlockPos niPos, int playerSlot) implements CustomP
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
 
-            // Validate slot index
             int slot = packet.playerSlot();
-            if (slot < 0 || slot >= player.getInventory().getContainerSize()) return;
+            ItemStack inSlot;
 
-            ItemStack inSlot = player.getInventory().getItem(slot);
-            if (inSlot.isEmpty()) return;
+            if (slot == -1) {
+                // Cursor insert: take item from the player's open menu cursor
+                if (player.containerMenu == null) return;
+                inSlot = player.containerMenu.getCarried();
+                if (inSlot.isEmpty()) return;
+            } else {
+                if (slot >= player.getInventory().getContainerSize()) return;
+                inSlot = player.getInventory().getItem(slot);
+                if (inSlot.isEmpty()) return;
+            }
 
             BlockEntity be = player.level().getBlockEntity(packet.niPos());
             if (!(be instanceof NetworkInterfaceBlockEntity ni)) return;
@@ -55,13 +62,15 @@ public record SatInsertPacket(BlockPos niPos, int playerSlot) implements CustomP
             IItemHandler handler = ni.getItemHandler();
             if (handler == null) return;
 
-            // Insert the stack into the network; remainder stays in the slot
+            // Insert the stack into the network; remainder goes back to source
             ItemStack toInsert = inSlot.copy();
             ItemStack remainder = handler.insertItem(0, toInsert, false);
-            // insertItem slot=0 is ignored by NiItemHandler (it iterates all handlers)
-            // Set remaining amount back in player slot
-            player.getInventory().setItem(slot, remainder);
-            player.getInventory().setChanged();
+            if (slot == -1) {
+                player.containerMenu.setCarried(remainder);
+            } else {
+                player.getInventory().setItem(slot, remainder);
+                player.getInventory().setChanged();
+            }
 
             // Refresh client's item list
             IItemHandler refreshedHandler = ni.getItemHandler();

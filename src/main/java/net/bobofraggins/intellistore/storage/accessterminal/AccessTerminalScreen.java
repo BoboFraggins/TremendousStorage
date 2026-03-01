@@ -4,6 +4,7 @@ import java.util.List;
 import net.bobofraggins.intellistore.shared.network.RequestSatContentsPacket;
 import net.bobofraggins.intellistore.shared.network.SatContentsPacket;
 import net.bobofraggins.intellistore.shared.network.SatExtractPacket;
+import net.bobofraggins.intellistore.shared.network.SatInsertPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -17,12 +18,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
  *
  * <p>Layout (image-relative coordinates):
  * <ul>
- *   <li>y=0..17   title bar (from vanilla generic_54 texture)
- *   <li>y=17..129 scrollable network item list (7 rows × 16px)
- *   <li>y=133..187 3×3 crafting grid + result slot  (4px gap above and below)
- *   <li>y=191..257 player inventory (3 rows × 18px)
- *   <li>y=261..279 player hotbar (1 row × 18px)
- *   <li>full height: 283
+ *   <li>y=0..17    title bar (from vanilla generic_54 texture)
+ *   <li>y=18..90   network grid (4 rows × 9 columns of 18×18 slots, + 6px scrollbar at right)
+ *   <li>y=94..148  3×3 crafting grid + result slot  (4px gap above and below)
+ *   <li>y=148..202 player inventory (3 rows × 18px)
+ *   <li>y=206..224 player hotbar (1 row × 18px)
+ *   <li>full height: 228
  * </ul>
  */
 public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminalMenu> {
@@ -34,7 +35,6 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     private static final ResourceLocation BG_TEXTURE =
             ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
 
-    // Vanilla crafting table texture — used for the arrow sprite
     private static final ResourceLocation CRAFTING_TEXTURE =
             ResourceLocation.withDefaultNamespace("textures/gui/container/crafting_table.png");
 
@@ -44,41 +44,37 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
     private static final int BG_WIDTH = 176;
 
-    private static final int LIST_Y = 17; // immediately below title bar
-    private static final int ROW_HEIGHT = 16;
-    private static final int VISIBLE_ROWS = 7;
-    private static final int LIST_HEIGHT = VISIBLE_ROWS * ROW_HEIGHT; // 112
+    // Network grid — chest-style 9×4 slot area
+    private static final int COLS = 9;
+    private static final int VISIBLE_ROWS = 4;
+    private static final int SLOT_SIZE = 18;
+    private static final int GRID_X = 8; // vanilla left margin
+    private static final int GRID_Y = 18; // 1px below title bar
+    private static final int GRID_W = COLS * SLOT_SIZE; // 162
+    private static final int GRID_H = VISIBLE_ROWS * SLOT_SIZE; // 72
 
-    // Scrollbar: 6px wide, right-flush inside the panel border
+    // Scrollbar: flush against right border
     private static final int SCROLLBAR_W = 6;
     private static final int SCROLLBAR_X = BG_WIDTH - 1 - SCROLLBAR_W; // 169
 
-    // List content area (left of scrollbar)
-    private static final int LIST_CONTENT_X = 1; // 1px inside left border
-    private static final int LIST_CONTENT_W = SCROLLBAR_X - LIST_CONTENT_X - 1; // leaves 1px gap before bar
-
-    // Crafting section: 4px gap below the list
+    // Crafting section: 4px gap below the grid
     private static final int CRAFT_GAP = 4;
-    private static final int CRAFT_Y = LIST_Y + LIST_HEIGHT + CRAFT_GAP; // 133
+    private static final int CRAFT_Y = GRID_Y + GRID_H + CRAFT_GAP; // 94
     private static final int CRAFT_ROWS = 3;
 
-    // Crafting grid is centred horizontally: 3 slots × 18 = 54px.
-    // Arrow is 22px wide, 2px gap on each side. Result slot is 18px wide.
-    // Total: 54 + 2 + 22 + 2 + 18 = 98px. Centred in 176: (176-98)/2 = 39px left margin.
-    private static final int GRID_X = 30; // left edge of the 3×3 grid
-    private static final int ARROW_X = GRID_X + 3 * 18 + 2; // 86
+    // Crafting grid centred: 3×18=54 + 2 + 22 + 2 + 18 = 98px, (176-98)/2 = 39 left margin
+    private static final int CRAFT_GRID_X = 30;
+    private static final int ARROW_X = CRAFT_GRID_X + 3 * SLOT_SIZE + 2; // 86
     private static final int RESULT_X = ARROW_X + 22 + 2; // 110
+    private static final int RESULT_Y = CRAFT_Y + SLOT_SIZE; // vertically centred (row 1 of 3)
 
-    // Result slot is 18px wide; centre vertically in craft area (3 rows × 18 = 54px)
-    private static final int RESULT_Y = CRAFT_Y + 18; // vertically centred: row 1 of 3
+    // Player inventory: gap below crafting
+    private static final int INV_Y = CRAFT_Y + CRAFT_ROWS * SLOT_SIZE + CRAFT_GAP; // 148
+    private static final int HOTBAR_Y = INV_Y + 3 * SLOT_SIZE + CRAFT_GAP; // 206
 
-    // Player inventory: same gap below crafting as crafting has above player inv
-    private static final int INV_Y = CRAFT_Y + CRAFT_ROWS * 18 + CRAFT_GAP; // 191
-    private static final int HOTBAR_Y = INV_Y + 3 * 18 + CRAFT_GAP; // 249
+    private static final int BG_HEIGHT = HOTBAR_Y + SLOT_SIZE + CRAFT_GAP; // 228
 
-    private static final int BG_HEIGHT = HOTBAR_Y + 18 + CRAFT_GAP; // 271
-
-    // Crafting arrow source coords in crafting_table.png (256×256)
+    // Crafting arrow sprite in crafting_table.png
     private static final int ARROW_SRC_X = 82;
     private static final int ARROW_SRC_Y = 60;
     private static final int ARROW_W = 22;
@@ -90,7 +86,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
     private List<ItemStack> networkStacks = List.of();
     private List<Long> networkCounts = List.of();
-    private int scrollOffset = 0;
+    private int scrollOffset = 0; // in rows
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -140,7 +136,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (isInListArea(mouseX, mouseY)) {
+        if (isInGridArea(mouseX, mouseY)) {
             scrollOffset -= (int) Math.signum(scrollY);
             clampScroll();
             return true;
@@ -149,35 +145,63 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     }
 
     private void clampScroll() {
-        int maxScroll = Math.max(0, networkStacks.size() - VISIBLE_ROWS);
+        int totalRows = (networkStacks.size() + COLS - 1) / COLS;
+        int maxScroll = Math.max(0, totalRows - VISIBLE_ROWS);
         scrollOffset = Math.max(0, Math.min(scrollOffset, maxScroll));
     }
 
-    private boolean isInListArea(double mx, double my) {
-        return mx >= leftPos + LIST_CONTENT_X
-                && mx < leftPos + SCROLLBAR_X
-                && my >= topPos + LIST_Y
-                && my < topPos + LIST_Y + LIST_HEIGHT;
+    private boolean isInGridArea(double mx, double my) {
+        return mx >= leftPos + GRID_X
+                && mx < leftPos + GRID_X + GRID_W
+                && my >= topPos + GRID_Y
+                && my < topPos + GRID_Y + GRID_H;
     }
 
     // -------------------------------------------------------------------------
-    // Mouse click
+    // Mouse interaction
     // -------------------------------------------------------------------------
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (button == 0 && isInListArea(mouseX, mouseY)) {
-            int relY = (int) (mouseY - topPos - LIST_Y);
-            int rowIndex = relY / ROW_HEIGHT + scrollOffset;
-            if (rowIndex >= 0 && rowIndex < networkStacks.size() && menu.hasNetwork()) {
-                ItemStack target = networkStacks.get(rowIndex);
-                long totalCount = networkCounts.get(rowIndex);
-                int amount = (int) Math.min(totalCount, target.getMaxStackSize());
+        if (isInGridArea(mouseX, mouseY)) {
+            int col = (int) ((mouseX - leftPos - GRID_X) / SLOT_SIZE);
+            int row = (int) ((mouseY - topPos - GRID_Y) / SLOT_SIZE);
+            int idx = (row + scrollOffset) * COLS + col;
+
+            if (idx >= 0 && idx < networkStacks.size() && menu.hasNetwork()) {
+                ItemStack target = networkStacks.get(idx);
+                long totalCount = networkCounts.get(idx);
+
+                // Right-click: extract single item; left-click: extract full stack
+                int amount = (button == 1) ? 1 : (int) Math.min(totalCount, target.getMaxStackSize());
                 PacketDistributor.sendToServer(new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount));
                 return true;
             }
+            return true; // consume click even on empty cell
         }
+
+        // Left-click with a held item on the grid area: handled above.
+        // If the player releases a drag or clicks elsewhere, fall through.
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    /**
+     * When the player releases the mouse over the network grid while holding an item
+     * on the cursor, insert the held stack into the network.
+     */
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (button == 0 && isInGridArea(mouseX, mouseY) && menu.hasNetwork()) {
+            ItemStack carried = menu.getCarried();
+            if (!carried.isEmpty()) {
+                // Find the player inventory slot that contains this stack.
+                // The carried stack is in the cursor — we need to send it to the network.
+                // Use slot index -1 as a sentinel: the server will take it from the cursor.
+                PacketDistributor.sendToServer(new SatInsertPacket(menu.getNiPos(), -1));
+                return true;
+            }
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     // -------------------------------------------------------------------------
@@ -190,11 +214,13 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         super.render(graphics, mouseX, mouseY, partialTick);
         renderTooltip(graphics, mouseX, mouseY);
 
-        if (isInListArea(mouseX, mouseY)) {
-            int relY = (int) (mouseY - topPos - LIST_Y);
-            int rowIndex = relY / ROW_HEIGHT + scrollOffset;
-            if (rowIndex >= 0 && rowIndex < networkStacks.size()) {
-                graphics.renderTooltip(font, networkStacks.get(rowIndex), mouseX, mouseY);
+        // Tooltip for hovered network slot
+        if (isInGridArea(mouseX, mouseY)) {
+            int col = (int) ((mouseX - leftPos - GRID_X) / SLOT_SIZE);
+            int row = (int) ((mouseY - topPos - GRID_Y) / SLOT_SIZE);
+            int idx = (row + scrollOffset) * COLS + col;
+            if (idx >= 0 && idx < networkStacks.size()) {
+                graphics.renderTooltip(font, networkStacks.get(idx), mouseX, mouseY);
             }
         }
     }
@@ -203,98 +229,81 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         int x = leftPos, y = topPos;
 
-        // ── Title bar: top 17px of generic_54 texture ──
+        // Title bar (top 17px of generic_54)
         graphics.blit(BG_TEXTURE, x, y, 0, 0, BG_WIDTH, 17);
 
-        // ── Middle fill (list + craft area) ──
-        // The vanilla player-inv section from the texture starts at src y=126.
-        // It is 96px tall, containing 7px of header padding before the first slot row.
-        // We want slot outlines to land at topPos + INV_Y, so we blit at topPos + INV_Y - 7.
-        int invBgDest = y + INV_Y - 7;
-
-        // Fill the entire middle+inv area with the panel background color
+        // Gray fill for entire panel body
         graphics.fill(x, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFC6C6C6);
 
-        // Left and right border lines spanning the entire panel (below title bar)
-        graphics.fill(x, y + 17, x + 1, y + BG_HEIGHT, 0xFF555555); // left dark
-        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFFFFFFF); // right bright
+        // Left and right border lines
+        graphics.fill(x, y + 17, x + 1, y + BG_HEIGHT, 0xFF555555);
+        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFFFFFFF);
 
         // Bottom border
         graphics.fill(x, y + BG_HEIGHT - 1, x + BG_WIDTH, y + BG_HEIGHT, 0xFF555555);
 
-        // ── Player inventory section from vanilla texture ──
-        // Blit the slot outlines only (strip the grey background since we filled it above).
-        // generic_54.png: slots are at src x=7, y=140 for the first 3×9 rows (3×9×18 = 486px range).
-        // We just blit the full 96px section; it blends seamlessly over our grey fill.
-        graphics.blit(BG_TEXTURE, x, invBgDest, 0, 126, BG_WIDTH, 96);
+        // Player inventory slot outlines from vanilla texture.
+        // Src y=126 has 7px padding then slot rows; blit at INV_Y-7 so outlines land at INV_Y.
+        graphics.blit(BG_TEXTURE, x, y + INV_Y - 7, 0, 126, BG_WIDTH, 96);
 
-        // ── Network item list ──
-        drawNetworkList(graphics, x, y);
+        // Network grid
+        drawNetworkGrid(graphics, x, y);
 
-        // ── Scrollbar (always shown) ──
+        // Scrollbar
         drawScrollbar(graphics, x, y);
 
-        // ── Crafting section ──
+        // Crafting section
         drawCraftingSection(graphics, x, y);
     }
 
-    private void drawNetworkList(GuiGraphics graphics, int x, int y) {
-        int listX0 = x + LIST_CONTENT_X;
-        int listX1 = x + SCROLLBAR_X - 1;
-        int listY0 = y + LIST_Y;
-        int listY1 = listY0 + LIST_HEIGHT;
-
-        // Draw empty slot backgrounds for all VISIBLE_ROWS rows
-        for (int i = 0; i < VISIBLE_ROWS; i++) {
-            int rowY = listY0 + i * ROW_HEIGHT;
-            // Slot-style inset: 1px dark top+left, 1px bright bottom+right, gray interior
-            drawSlotBackground(graphics, listX0, rowY, LIST_CONTENT_W, ROW_HEIGHT);
+    private void drawNetworkGrid(GuiGraphics graphics, int x, int y) {
+        // Blit slot outlines from generic_54.png chest rows (src x=0, y=17, each row 18px tall)
+        // Blit 4 rows of 9 slots each, at GRID_X=8, GRID_Y=18
+        for (int row = 0; row < VISIBLE_ROWS; row++) {
+            // Each chest row in the texture: src y = 17 + row * 18, height 18, width = 9*18 = 162
+            graphics.blit(
+                    BG_TEXTURE, x + GRID_X, y + GRID_Y + row * SLOT_SIZE, 7, 17 + row * SLOT_SIZE, GRID_W, SLOT_SIZE);
         }
 
-        // Scissor to list content area
-        graphics.enableScissor(listX0, listY0, listX1, listY1);
+        // Overlay item icons and counts
+        int firstIdx = scrollOffset * COLS;
+        for (int row = 0; row < VISIBLE_ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                int idx = firstIdx + row * COLS + col;
+                if (idx >= networkStacks.size()) break;
 
-        for (int i = 0; i < VISIBLE_ROWS; i++) {
-            int idx = i + scrollOffset;
-            if (idx >= networkStacks.size()) break;
+                ItemStack stack = networkStacks.get(idx);
+                long count = networkCounts.get(idx);
+                int sx = x + GRID_X + col * SLOT_SIZE + 1;
+                int sy = y + GRID_Y + row * SLOT_SIZE + 1;
 
-            ItemStack stack = networkStacks.get(idx);
-            long count = networkCounts.get(idx);
-            int rowX = listX0 + 1;
-            int rowY = listY0 + i * ROW_HEIGHT;
+                graphics.renderItem(stack, sx, sy);
 
-            // Item icon (16×16, centred vertically in the row)
-            graphics.renderItem(stack, rowX, rowY);
-            graphics.renderItemDecorations(font, stack, rowX, rowY, null);
-
-            // Item name
-            String name = stack.getDisplayName().getString();
-            graphics.drawString(font, name, rowX + 18, rowY + 4, 0xE0E0E0, false);
-
-            // Count
-            String countStr = abbreviateCount(count);
-            int countX = x + SCROLLBAR_X - 2 - font.width(countStr);
-            graphics.drawString(font, countStr, countX, rowY + 4, 0xAAAAAA, false);
+                // Show count only if > 1
+                if (count > 1) {
+                    String countStr = abbreviateCount(count);
+                    graphics.renderItemDecorations(font, stack, sx, sy, countStr);
+                } else {
+                    graphics.renderItemDecorations(font, stack, sx, sy, null);
+                }
+            }
         }
-
-        graphics.disableScissor();
     }
 
     private void drawScrollbar(GuiGraphics graphics, int x, int y) {
         int barX = x + SCROLLBAR_X;
-        int barY = y + LIST_Y;
-        int barH = LIST_HEIGHT;
+        int barY = y + GRID_Y;
+        int barH = GRID_H;
 
         // Track
         graphics.fill(barX, barY, barX + SCROLLBAR_W, barY + barH, 0x40000000);
 
         // Thumb
-        int total = Math.max(networkStacks.size(), 1);
-        int thumbH = Math.max(8, barH * VISIBLE_ROWS / total);
-        int maxScroll = Math.max(1, total - VISIBLE_ROWS);
+        int totalRows = Math.max((networkStacks.size() + COLS - 1) / COLS, 1);
+        int thumbH = Math.max(8, barH * VISIBLE_ROWS / totalRows);
+        int maxScroll = Math.max(1, totalRows - VISIBLE_ROWS);
         int thumbY = barY + (barH - thumbH) * scrollOffset / maxScroll;
-        if (networkStacks.size() <= VISIBLE_ROWS) {
-            // All content fits — thumb fills the whole track
+        if (totalRows <= VISIBLE_ROWS) {
             thumbY = barY;
             thumbH = barH;
         }
@@ -302,45 +311,32 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     }
 
     private void drawCraftingSection(GuiGraphics graphics, int x, int y) {
-        // 3×3 crafting grid slots (vanilla inset style)
+        // 3×3 crafting grid
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
-                int sx = x + GRID_X + col * 18;
-                int sy = y + CRAFT_Y + row * 18;
-                drawSlotBackground(graphics, sx, sy, 16, 16);
+                drawSlotBackground(graphics, x + CRAFT_GRID_X + col * SLOT_SIZE, y + CRAFT_Y + row * SLOT_SIZE, 16, 16);
             }
         }
 
-        // Arrow from vanilla crafting_table.png
-        // Arrow is vertically centred in the craft area (54px tall): top of craft area + 18 + (18-15)/2
-        int arrowDestX = x + ARROW_X;
-        int arrowDestY = y + CRAFT_Y + 18 + (18 - ARROW_H) / 2; // vertically centred in middle row
-        graphics.blit(CRAFTING_TEXTURE, arrowDestX, arrowDestY, ARROW_SRC_X, ARROW_SRC_Y, ARROW_W, ARROW_H);
+        // Arrow
+        int arrowDestY = y + CRAFT_Y + SLOT_SIZE + (SLOT_SIZE - ARROW_H) / 2;
+        graphics.blit(CRAFTING_TEXTURE, x + ARROW_X, arrowDestY, ARROW_SRC_X, ARROW_SRC_Y, ARROW_W, ARROW_H);
 
-        // Result slot (18×18 inset)
+        // Result slot
         drawSlotBackground(graphics, x + RESULT_X, y + RESULT_Y, 16, 16);
     }
 
-    /**
-     * Draws a vanilla-style inset slot: 1px dark shadow on top+left edges,
-     * 1px bright highlight on bottom+right edges, gray interior fill.
-     */
     private static void drawSlotBackground(GuiGraphics graphics, int sx, int sy, int w, int h) {
-        // Dark edges (top, left)
         graphics.fill(sx, sy, sx + w, sy + 1, 0xFF373737); // top
         graphics.fill(sx, sy + 1, sx + 1, sy + h, 0xFF373737); // left
-        // Bright edges (bottom, right)
         graphics.fill(sx, sy + h, sx + w + 1, sy + h + 1, 0xFFFFFFFF); // bottom
         graphics.fill(sx + w, sy, sx + w + 1, sy + h, 0xFFFFFFFF); // right
-        // Interior
-        graphics.fill(sx + 1, sy + 1, sx + w, sy + h, 0xFF8B8B8B);
+        graphics.fill(sx + 1, sy + 1, sx + w, sy + h, 0xFF8B8B8B); // interior
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        // Title centred, black, shifted down to y=4
         graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 4, 0x404040, false);
-        // No network-status text, no "network is empty" text
     }
 
     // -------------------------------------------------------------------------

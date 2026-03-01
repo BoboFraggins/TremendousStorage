@@ -73,14 +73,14 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         this.access = ContainerLevelAccess.create(inv.player.level(), satPos);
 
         // Layout constants (image-relative, must match AccessTerminalScreen)
-        // LIST_Y=17, LIST_HEIGHT=112, CRAFT_GAP=4 → craftY = 17+112+4 = 133
-        // GRID_X=30, RESULT_X=110, RESULT_Y=craftY+18=151
-        // INV_Y = craftY + 3*18 + 4 = 191, HOTBAR_Y = INV_Y + 3*18 + 4 = 249
-        final int craftY = 133;
-        final int invY = 191;
-        final int hotbarY = 249;
+        // GRID_Y=18, GRID_H=72, CRAFT_GAP=4 → craftY = 18+72+4 = 94
+        // CRAFT_GRID_X=30, RESULT_X=110, RESULT_Y=craftY+18=112
+        // INV_Y = craftY + 3*18 + 4 = 148, HOTBAR_Y = INV_Y + 3*18 + 4 = 206
+        final int craftY = 94;
+        final int invY = 148;
+        final int hotbarY = 206;
 
-        // Slot 0: craft result — centred on result slot background (RESULT_X=110, RESULT_Y=151)
+        // Slot 0: craft result
         addSlot(new ResultSlot(inv.player, craftSlots, resultSlots, 0, 110, craftY + 18));
 
         // Slots 1-9: 3×3 crafting grid
@@ -211,13 +211,23 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
 
             return copy;
         } else if (index >= INV_START && index < HOTBAR_END) {
-            // Shift-click player slot: try crafting grid first, then other inventory rows
-            if (!moveItemStackTo(stack, CRAFT_START, CRAFT_END, false)) {
-                if (index < INV_END) {
-                    if (!moveItemStackTo(stack, HOTBAR_START, HOTBAR_END, false)) return ItemStack.EMPTY;
-                } else {
-                    if (!moveItemStackTo(stack, INV_START, INV_END, false)) return ItemStack.EMPTY;
+            // Shift-click player slot: try network first, then swap between inv/hotbar
+            if (hasNetwork() && !player.level().isClientSide()) {
+                if (player.level().getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni) {
+                    IItemHandler handler = ni.getItemHandler();
+                    if (handler != null) {
+                        ItemStack remainder = handler.insertItem(0, stack, false);
+                        slot.set(remainder);
+                        slotsChanged(craftSlots);
+                        return copy;
+                    }
                 }
+            }
+            // Fallback: swap between main inv and hotbar
+            if (index < INV_END) {
+                if (!moveItemStackTo(stack, HOTBAR_START, HOTBAR_END, false)) return ItemStack.EMPTY;
+            } else {
+                if (!moveItemStackTo(stack, INV_START, INV_END, false)) return ItemStack.EMPTY;
             }
         } else if (index >= CRAFT_START && index < CRAFT_END) {
             if (!moveItemStackTo(stack, INV_START, HOTBAR_END, false)) return ItemStack.EMPTY;
