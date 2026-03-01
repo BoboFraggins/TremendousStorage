@@ -26,8 +26,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -128,10 +126,8 @@ public final class NetworkInterfaceBFS {
                     // First time we see this non-tube block
                     processNeighbor(level, adjPos, adjState, niPos, dir, tubeBE, handlerEntries, storageKeys);
 
-                    // Check if it's another NI lower half
-                    if (adjState.getBlock() instanceof NetworkInterfaceBlock
-                            && adjState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
-                            && !adjPos.equals(niPos)) {
+                    // Check if it's another NI
+                    if (adjState.getBlock() instanceof NetworkInterfaceBlock && !adjPos.equals(niPos)) {
                         otherNiCount++;
                     }
 
@@ -166,9 +162,6 @@ public final class NetworkInterfaceBFS {
         List<IItemHandler> insertOrder = new ArrayList<>(handlerEntries.size());
         for (HandlerEntry e : handlerEntries) insertOrder.add(e.handler());
 
-        List<IItemHandler> extractOrder = new ArrayList<>(insertOrder);
-        Collections.reverse(extractOrder); // lowest priority first
-
         // Build UI block list: storage blocks first, then tubes
         List<AttachedEntry> blockList = new ArrayList<>();
         // Aggregate duplicate storage keys
@@ -191,12 +184,7 @@ public final class NetworkInterfaceBFS {
             blockList.add(new AttachedEntry("block.intellistore." + colorName + "_tube", tubeCounts.get(colorName)));
         }
 
-        return new NetworkScanResult(
-                List.copyOf(insertOrder),
-                List.copyOf(extractOrder),
-                List.copyOf(blockList),
-                otherNiCount == 0,
-                fePerTick);
+        return new NetworkScanResult(List.copyOf(insertOrder), List.copyOf(blockList), otherNiCount == 0, fePerTick);
     }
 
     // -------------------------------------------------------------------------

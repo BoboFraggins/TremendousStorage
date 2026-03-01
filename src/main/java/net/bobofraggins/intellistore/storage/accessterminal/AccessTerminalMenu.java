@@ -75,10 +75,10 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         // Layout constants (image-relative, must match AccessTerminalScreen)
         // GRID_Y=18, GRID_H=72, CRAFT_GAP=4 → craftY = 18+72+4 = 94
         // CRAFT_GRID_X=30, RESULT_X=110, RESULT_Y=craftY+18=112
-        // INV_Y = craftY + 3*18 + 4 = 148, HOTBAR_Y = INV_Y + 3*18 + 4 = 206
+        // INV_Y = craftY + 3*18 + 4 = 152, HOTBAR_Y = INV_Y + 3*18 + 4 = 210
         final int craftY = 94;
-        final int invY = 148;
-        final int hotbarY = 206;
+        final int invY = 152;
+        final int hotbarY = 210;
 
         // Slot 0: craft result
         addSlot(new ResultSlot(inv.player, craftSlots, resultSlots, 0, 110, craftY + 18));

@@ -12,18 +12,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 
 /**
  * BFS utility that searches outward from a Storage Access Terminal to find the
- * nearest connected Network Interface lower half.
+ * nearest connected Network Interface.
  *
  * <p>Scans all tube colors reachable from the SAT's adjacent faces. {@link NetworkConnector}
  * blocks (Filing Cabinet, Junk Drawer, Bulk Storage Container, SAT, Wireless Hub, Stirling
  * Engine) act as color-agnostic bridges: when the BFS encounters one, it continues through
- * all of its adjacent tubes of any color. Returns the {@link BlockPos} of the first NI lower
- * half found, or {@code null} if no NI is reachable.
+ * all of its adjacent tubes of any color. Returns the {@link BlockPos} of the first NI
+ * found, or {@code null} if no NI is reachable.
  */
 public final class AccessTerminalBFS {
 
@@ -31,7 +29,7 @@ public final class AccessTerminalBFS {
 
     /**
      * Scans the tube network reachable from {@code satPos} and returns the block
-     * position of the nearest Network Interface lower half, or {@code null} if none.
+     * position of the nearest Network Interface, or {@code null} if none.
      */
     @Nullable
     public static BlockPos findNI(ServerLevel level, BlockPos satPos) {
@@ -66,9 +64,8 @@ public final class AccessTerminalBFS {
                     if (!visitedTubes.contains(adj)) {
                         queue.add(adj);
                     }
-                } else if (adjSt.getBlock() instanceof NetworkInterfaceBlock
-                        && adjSt.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER) {
-                    // Found a Network Interface lower half
+                } else if (adjSt.getBlock() instanceof NetworkInterfaceBlock) {
+                    // Found a Network Interface
                     return adj;
                 } else if (adjSt.getBlock() instanceof NetworkConnector && visitedConnectors.add(adj)) {
                     // Bridge through this connector into its adjacent tubes (any color)

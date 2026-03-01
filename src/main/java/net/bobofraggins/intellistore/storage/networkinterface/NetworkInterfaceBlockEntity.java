@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
 
 /**
- * Block entity for the lower half of a Network Interface block.
+ * Block entity for the Network Interface block.
  *
  * <p>Holds a lazily-built {@link NetworkScanResult} that describes all storage blocks
  * reachable through the connected tube network (all colors). The cache is invalidated

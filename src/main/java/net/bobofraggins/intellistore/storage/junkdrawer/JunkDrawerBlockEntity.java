@@ -62,8 +62,7 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider {
      */
     public static boolean accepts(ItemStack stack) {
         if (stack.isEmpty()) return false;
-        return stack.isDamageableItem()
-                || !stack.getComponents().equals(stack.getItem().components());
+        return stack.isDamageableItem() || !stack.isComponentsPatchEmpty();
     }
 
     // -------------------------------------------------------------------------

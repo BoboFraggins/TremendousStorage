@@ -11,11 +11,17 @@ import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
+import mezz.jei.api.registration.IVanillaCategoryExtensionRegistration;
 import net.bobofraggins.intellistore.shared.network.SetImportExportFilterPacket;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
+import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderRecipe;
+import net.bobofraggins.intellistore.storage.manillafolder.FolderExtractRecipe;
+import net.bobofraggins.intellistore.storage.manillafolder.FolderMergeRecipe;
+import net.bobofraggins.intellistore.storage.manillafolder.FolderStorageRecipe;
 import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceScreen;
 import net.bobofraggins.intellistore.storage.tubeattachments.ImportInterfaceScreen;
+import net.bobofraggins.intellistore.storage.whiteout.FolderTapeRecipe;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -42,6 +48,18 @@ public class IntelliStoreJeiPlugin implements IModPlugin {
     public void registerRecipeCatalysts(IRecipeCatalystRegistration reg) {
         reg.addRecipeCatalyst(
                 Registration.STORAGE_ACCESS_TERMINAL_ITEM.get().getDefaultInstance(), RecipeTypes.CRAFTING);
+    }
+
+    @Override
+    public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration reg) {
+        reg.getCraftingCategory()
+                .addExtension(FolderStorageRecipe.class, new FolderRecipeExtensions.StorageExtension());
+        reg.getCraftingCategory()
+                .addExtension(FolderExtractRecipe.class, new FolderRecipeExtensions.ExtractExtension());
+        reg.getCraftingCategory().addExtension(FolderMergeRecipe.class, new FolderRecipeExtensions.MergeExtension());
+        reg.getCraftingCategory().addExtension(FolderTapeRecipe.class, new FolderRecipeExtensions.TapeExtension());
+        reg.getCraftingCategory()
+                .addExtension(EnderFolderRecipe.class, new FolderRecipeExtensions.EnderFolderExtension());
     }
 
     @Override

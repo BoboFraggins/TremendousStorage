@@ -44,7 +44,6 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.capabilities.Capabilities;
 
 /**
  * A pipe block that visually connects to adjacent same-color tubes and to any block exposing
@@ -203,8 +202,9 @@ public class TubeBlock extends BaseEntityBlock {
             }
             // Clear the network cache when any neighbor changes (storage block added/removed,
             // or priority changed via sendBlockUpdated flags=3 from adjacent storage BEs).
-            // Guard with hasNetworkCache() to prevent O(n²) cascade through large networks.
-            if (level.getBlockEntity(pos) instanceof TubeBlockEntity be && be.hasNetworkCache()) {
+            // Always propagate so the update reaches the Network Interface even through
+            // already-invalidated tubes.
+            if (level.getBlockEntity(pos) instanceof TubeBlockEntity be) {
                 be.setChanged();
             }
         }
@@ -233,25 +233,34 @@ public class TubeBlock extends BaseEntityBlock {
     }
 
     /**
-     * Returns true if this tube should connect to the block at {@code neighborPos}.
-     * Connects to same-color tubes, NetworkConnector blocks (SAT, Filing Cabinet, etc.),
-     * or to any block that exposes an IItemHandler capability.
+     * Returns true if this tube should visually connect (and extend an arm) toward
+     * {@code neighborPos} in direction {@code fromDir}.
+     *
+     * <p>Connects to:
+     * <ul>
+     *   <li>Same-color tubes (direct pipe connection)
+     *   <li>{@link NetworkConnector} blocks (mod storage/hub/SAT/NI blocks — always connectable)
+     *   <li>Any external block when this tube face has a tube attachment (Storage Interface,
+     *       Import Interface, Export Interface, etc.) installed on the facing side
+     * </ul>
+     *
+     * <p>Plain third-party blocks (vanilla chests, hoppers, etc.) are NOT connected unless
+     * a tube attachment is present on this face.
      */
     private boolean canConnectToState(
             BlockState neighborState, LevelReader level, BlockPos neighborPos, Direction fromDir) {
         if (neighborState.getBlock() instanceof TubeBlock tb) {
             return tb.getColor() == this.color;
         }
-        // NetworkConnector blocks are always connectable (SAT, Wireless Hub, etc.)
+        // NetworkConnector blocks (mod storage, SAT, Wireless Hub, NI, Stirling Engine, etc.)
         if (neighborState.getBlock() instanceof NetworkConnector) {
             return true;
         }
-        // Connect to any block with an IItemHandler (storage blocks, hoppers, etc.)
+        // External (non-mod) block: only connect if this tube face has an attachment installed
         if (level instanceof Level worldLevel) {
-            var be = worldLevel.getBlockEntity(neighborPos);
-            if (be != null) {
-                var cap = worldLevel.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, fromDir.getOpposite());
-                return cap != null;
+            BlockPos tubePos = neighborPos.relative(fromDir); // position of this tube
+            if (worldLevel.getBlockEntity(tubePos) instanceof TubeBlockEntity be) {
+                return be.hasAttachment(fromDir.getOpposite().ordinal());
             }
         }
         return false;

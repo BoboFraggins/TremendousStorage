@@ -19,8 +19,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -100,7 +98,6 @@ public final class TubeNetwork {
                     // Track the connected NI for energy routing
                     if (foundNi == null
                             && neighborState.getBlock() instanceof NetworkInterfaceBlock
-                            && neighborState.getValue(BlockStateProperties.DOUBLE_BLOCK_HALF) == DoubleBlockHalf.LOWER
                             && level.getBlockEntity(neighborPos) instanceof NetworkInterfaceBlockEntity ni) {
                         foundNi = ni;
                     }

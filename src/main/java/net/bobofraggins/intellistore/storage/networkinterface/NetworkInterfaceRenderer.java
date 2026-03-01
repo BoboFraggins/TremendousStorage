@@ -29,7 +29,6 @@ import org.joml.Matrix4f;
  * </ul>
  *
  * <p>All geometry coordinates are in fractions of a block (1/16ths internally).
- * The upper half is rendered by pushing +1 Y onto the pose stack.
  * No {@code ItemBlockRenderTypes} registration is needed — using
  * {@link RenderType#translucent()} in the buffer source handles translucency in NeoForge 1.21.1.
  */
@@ -78,7 +77,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();
 
-        // ---- Iron base — full footprint, 4/16 tall, solid ----
+        // ---- Iron base — full footprint, 2/16 tall (1/8 block), solid ----
         // EPS lift off floor and inset from block edges to avoid Z-fighting.
         drawBox(
                 solid,
@@ -87,7 +86,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 EPS,
                 EPS,
                 1f - EPS,
-                4f / 16,
+                2f / 16,
                 1f - EPS,
                 ironSprite,
                 255,
@@ -96,11 +95,10 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 packedLight,
                 packedOverlay);
 
-        // ---- Glass — full 2-block height, 1px inset, no bottom face ----
-        // Drawn in lower-block pose (y=0..2) so no seam at y=1.
+        // ---- Glass — single-block height, 1px inset, no bottom face ----
         float gx0 = 1f / 16, gx1 = 15f / 16;
         float gz0 = 1f / 16, gz1 = 15f / 16;
-        float gy0 = 4f / 16, gy1 = 2f;
+        float gy0 = 2f / 16, gy1 = 1f;
         drawBoxNoBottom(
                 translucent, mat, gx0, gy0, gz0, gx1, gy1, gz1, glassSprite, 255, 255, 255, packedLight, packedOverlay);
 
@@ -108,27 +106,41 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         // Goes all the way down to just above the base top.
         float wx0 = gx0 + 1f / 16 + EPS, wx1 = gx1 - 1f / 16 - EPS;
         float wz0 = gz0 + 1f / 16 + EPS, wz1 = gz1 - 1f / 16 - EPS;
-        float wy0 = 4f / 16 + EPS, wy1 = gy1 - 1f / 16 - EPS;
+        float wy0 = 2f / 16 + EPS, wy1 = gy1 - 1f / 16 - EPS;
         drawBox(translucent, mat, wx0, wy0, wz0, wx1, wy1, wz1, waterSprite, 255, 255, 255, packedLight, packedOverlay);
 
         // ---- Animated floating brain (item renderer) ----
         double time = (be.getLevel().getGameTime() + partialTick) / 20.0;
-        float bob = (float) Math.sin(time * Math.PI * 0.5) * 0.06f;
+        float bob = (float) Math.sin(time * Math.PI * 0.5) * 0.04f;
 
-        // Centre at x=0.5, z=0.5; vertically at the block seam (y=1.0 in lower-block pose).
-        poseStack.translate(0.5, 1.0 + bob, 0.5);
-        poseStack.scale(0.5f, 0.5f, 0.5f);
-        Minecraft.getInstance()
-                .getItemRenderer()
-                .renderStatic(
-                        new ItemStack(Registration.BRAIN.get()),
-                        ItemDisplayContext.FIXED,
-                        packedLight,
-                        packedOverlay,
-                        poseStack,
-                        bufferSource,
-                        be.getLevel(),
-                        0);
+        // Centre at x=0.5, z=0.5; float at 60% of block height.
+        // The brain item is a 2D flat sprite. Rendering it twice at 90° offsets creates a
+        // crossed-quad shape (like a ground item drop) that is always visible from any
+        // horizontal angle. The whole cross then slowly spins via rotY.
+        float rotY = (float) ((time * 40.0) % 360.0);
+        ItemStack brainStack = new ItemStack(Registration.BRAIN.get());
+        poseStack.translate(0.5, 0.60 + bob, 0.5);
+        // Apply the slow spin first, then tilt the sprite upright (facing outward)
+        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
+        // Tilt flat sprite 90° on X so it stands vertically and faces +Z
+        poseStack.mulPose(com.mojang.math.Axis.XP.rotationDegrees(90f));
+        // Render twice at 0° and 90° to form a cross visible from all horizontal angles
+        for (int i = 0; i < 2; i++) {
+            poseStack.pushPose();
+            poseStack.mulPose(com.mojang.math.Axis.ZP.rotationDegrees(i * 90f));
+            Minecraft.getInstance()
+                    .getItemRenderer()
+                    .renderStatic(
+                            brainStack,
+                            ItemDisplayContext.FIXED,
+                            packedLight,
+                            packedOverlay,
+                            poseStack,
+                            bufferSource,
+                            be.getLevel(),
+                            0);
+            poseStack.popPose();
+        }
 
         poseStack.popPose();
     }

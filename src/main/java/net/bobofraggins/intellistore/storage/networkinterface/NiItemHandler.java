@@ -1,7 +1,5 @@
 package net.bobofraggins.intellistore.storage.networkinterface;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import net.minecraft.world.item.ItemStack;
@@ -10,81 +8,44 @@ import net.neoforged.neoforge.items.IItemHandler;
 /**
  * The {@link IItemHandler} exposed by a Network Interface block entity.
  *
- * <p>Insertion fills the highest-priority storage first; extraction drains
- * the lowest-priority storage first. Both lists span the same physical handlers —
- * they are just in opposite orders.
+ * <p>Insertion fills the highest-priority storage first. Slot indices are consistent
+ * across {@link #getStackInSlot} and {@link #extractItem} — both use insert order —
+ * so callers can safely iterate slots and extract by the same index.
  *
- * <p>Slot numbering (for {@link #getStackInSlot}, {@link #getSlotLimit},
- * {@link #isItemValid}, and {@link #extractItem}) is based on
- * {@link #insertOrder} for read consistency; extraction internally resolves
- * the same flat slot index but walks handlers in {@link #extractOrder}.
- *
- * <p>Slot resolution uses a prefix-sum array built at construction time so that
- * {@link #getSlots()} and per-slot lookups are O(1) / O(log n) rather than
- * iterating all handlers on every call.
+ * <p>Slot counts are computed dynamically on every call because underlying handlers
+ * (e.g. Bulk Storage Container) report different slot counts as items are inserted or
+ * removed. Caching slot counts at construction time would cause newly-inserted items to
+ * be invisible until the next full network re-scan.
  */
 public class NiItemHandler implements IItemHandler {
 
     private final List<IItemHandler> insertOrder;
-    private final List<IItemHandler> extractOrder;
-
-    /**
-     * Prefix sums for insertOrder: {@code insertPrefixSums[i]} is the total slot count
-     * of handlers 0..i-1. Length is {@code insertOrder.size() + 1}; the last entry is
-     * the total slot count of the whole network.
-     */
-    private final int[] insertPrefixSums;
-    /** Same structure for extractOrder. */
-    private final int[] extractPrefixSums;
 
     public NiItemHandler(List<IItemHandler> insertOrder) {
         this.insertOrder = List.copyOf(insertOrder);
-        List<IItemHandler> rev = new ArrayList<>(insertOrder);
-        Collections.reverse(rev);
-        this.extractOrder = List.copyOf(rev);
-
-        this.insertPrefixSums = buildPrefixSums(this.insertOrder);
-        this.extractPrefixSums = buildPrefixSums(this.extractOrder);
-    }
-
-    private static int[] buildPrefixSums(List<IItemHandler> handlers) {
-        int[] sums = new int[handlers.size() + 1];
-        for (int i = 0; i < handlers.size(); i++) {
-            sums[i + 1] = sums[i] + handlers.get(i).getSlots();
-        }
-        return sums;
     }
 
     // -------------------------------------------------------------------------
-    // Slot resolution helpers
+    // Slot resolution
     // -------------------------------------------------------------------------
 
     private record SlotRef(IItemHandler handler, int localSlot) {}
 
     /**
-     * Maps a flat slot index to a specific handler + local slot using binary search
-     * on the prefix-sum array — O(log n) in the number of handlers.
+     * Maps a flat slot index to a handler + local slot by walking the handler list.
+     * Dynamic (not cached) so that handlers with variable slot counts are handled correctly.
      */
-    private SlotRef resolveSlot(int flatSlot, List<IItemHandler> order, int[] prefixSums) {
-        if (flatSlot < 0 || flatSlot >= prefixSums[prefixSums.length - 1]) return null;
-        // Binary search: find largest i such that prefixSums[i] <= flatSlot
-        int lo = 0, hi = order.size() - 1;
-        while (lo < hi) {
-            int mid = (lo + hi + 1) >>> 1;
-            if (prefixSums[mid] <= flatSlot) lo = mid;
-            else hi = mid - 1;
+    private static SlotRef resolveSlot(int flatSlot, List<IItemHandler> order) {
+        if (flatSlot < 0) return null;
+        int remaining = flatSlot;
+        for (IItemHandler h : order) {
+            int slots = h.getSlots();
+            if (remaining < slots) {
+                return new SlotRef(h, remaining);
+            }
+            remaining -= slots;
         }
-        return new SlotRef(order.get(lo), flatSlot - prefixSums[lo]);
-    }
-
-    /** Maps a flat slot index (in insertOrder layout) to the specific handler + local slot. */
-    private SlotRef resolveSlotInsert(int flatSlot) {
-        return resolveSlot(flatSlot, insertOrder, insertPrefixSums);
-    }
-
-    /** Maps a flat slot index (in extractOrder layout) to the specific handler + local slot. */
-    private SlotRef resolveSlotExtract(int flatSlot) {
-        return resolveSlot(flatSlot, extractOrder, extractPrefixSums);
+        return null;
     }
 
     // -------------------------------------------------------------------------
@@ -93,19 +54,22 @@ public class NiItemHandler implements IItemHandler {
 
     @Override
     public int getSlots() {
-        // O(1): last entry of the prefix-sum array is the total
-        return insertPrefixSums[insertPrefixSums.length - 1];
+        int total = 0;
+        for (IItemHandler h : insertOrder) {
+            total += h.getSlots();
+        }
+        return total;
     }
 
     @Override
     public int getSlotLimit(int slot) {
-        SlotRef ref = resolveSlotInsert(slot);
+        SlotRef ref = resolveSlot(slot, insertOrder);
         return ref == null ? 0 : ref.handler().getSlotLimit(ref.localSlot());
     }
 
     @Override
     public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-        SlotRef ref = resolveSlotInsert(slot);
+        SlotRef ref = resolveSlot(slot, insertOrder);
         return ref != null && ref.handler().isItemValid(ref.localSlot(), stack);
     }
 
@@ -116,7 +80,7 @@ public class NiItemHandler implements IItemHandler {
     @Override
     @Nonnull
     public ItemStack getStackInSlot(int slot) {
-        SlotRef ref = resolveSlotInsert(slot);
+        SlotRef ref = resolveSlot(slot, insertOrder);
         return ref == null ? ItemStack.EMPTY : ref.handler().getStackInSlot(ref.localSlot());
     }
 
@@ -150,13 +114,18 @@ public class NiItemHandler implements IItemHandler {
     }
 
     // -------------------------------------------------------------------------
-    // IItemHandler — extract (lowest-priority first via extractOrder)
+    // IItemHandler — extract
     // -------------------------------------------------------------------------
 
+    /**
+     * Extracts from the slot at the given index in insert order (same mapping as
+     * {@link #getStackInSlot}), so callers that iterate slots via getStackInSlot can
+     * extract from the same slot using the same index.
+     */
     @Override
     @Nonnull
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        SlotRef ref = resolveSlotExtract(slot);
+        SlotRef ref = resolveSlot(slot, insertOrder);
         return ref == null ? ItemStack.EMPTY : ref.handler().extractItem(ref.localSlot(), amount, simulate);
     }
 }
