@@ -24,11 +24,13 @@ import org.joml.Matrix4f;
  * <p>The JSON block model provides only the particle texture (for break effects). All
  * visible geometry is drawn here.
  *
- * <p>Face shading multipliers give each face a distinct tone so tubes read clearly:
+ * <p>Face shading mirrors vanilla's {@code ClientLevel.getShade()} multipliers so the
+ * tubes read as 3-dimensional objects:
  * <ul>
- *   <li>Up/Down faces — 90% brightness (darker top/bottom)
- *   <li>East/West faces — 95% brightness (slightly dimmed sides)
- *   <li>North/South faces — 100% brightness (pure dye color)
+ *   <li>Up   — 100% (brightest)
+ *   <li>Down — 50%
+ *   <li>North/South — 80%
+ *   <li>East/West   — 60%
  * </ul>
  */
 public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
@@ -54,10 +56,11 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     private static final float P_MAX = 12f / 16f;
     private static final float P_THICK = 2f / 16f;
 
-    // Per-face brightness multipliers
-    private static final float SHADE_TOP_BOTTOM = 0.90f;
-    private static final float SHADE_EAST_WEST = 0.95f;
-    private static final float SHADE_NORTH_SOUTH = 1.00f;
+    // Per-face brightness multipliers — mirror vanilla ClientLevel.getShade() values
+    private static final float SHADE_UP         = 1.00f;
+    private static final float SHADE_DOWN        = 0.50f;
+    private static final float SHADE_NORTH_SOUTH = 0.80f;
+    private static final float SHADE_EAST_WEST   = 0.60f;
 
     public TubeRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -306,32 +309,35 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
         float u0 = sprite.getU0(), u1 = sprite.getU1();
         float v0 = sprite.getV0(), v1 = sprite.getV1();
 
-        int ry = shade(r, SHADE_TOP_BOTTOM), gy = shade(g, SHADE_TOP_BOTTOM), by = shade(b, SHADE_TOP_BOTTOM);
-        int rx = shade(r, SHADE_EAST_WEST), gx = shade(g, SHADE_EAST_WEST), bx = shade(b, SHADE_EAST_WEST);
-        // North/South: pure color (no change needed, use r/g/b directly)
+        int rUp = shade(r, SHADE_UP),         gUp = shade(g, SHADE_UP),         bUp = shade(b, SHADE_UP);
+        int rDn = shade(r, SHADE_DOWN),       gDn = shade(g, SHADE_DOWN),       bDn = shade(b, SHADE_DOWN);
+        int rNS = shade(r, SHADE_NORTH_SOUTH), gNS = shade(g, SHADE_NORTH_SOUTH), bNS = shade(b, SHADE_NORTH_SOUTH);
+        int rEW = shade(r, SHADE_EAST_WEST),  gEW = shade(g, SHADE_EAST_WEST),  bEW = shade(b, SHADE_EAST_WEST);
 
-        // -Y (down) — top/bottom shade
+        // -Y (down)
         quad(
-                vc, mat, ry, gy, by, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0,
-                -1, 0);
-        // +Y (up) — top/bottom shade
+                vc, mat, rDn, gDn, bDn, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0,
+                0, -1, 0);
+        // +Y (up)
         quad(
-                vc, mat, ry, gy, by, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0,
-                1, 0);
-        // -Z (north) — pure color
+                vc, mat, rUp, gUp, bUp, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1,
+                0, 1, 0);
+        // -Z (north)
         quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0, 0,
-                -1);
-        // +Z (south) — pure color
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0, 0, 1);
-        // -X (west) — east/west shade
+                vc, mat, rNS, gNS, bNS, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0,
+                0, 0, -1);
+        // +Z (south)
         quad(
-                vc, mat, rx, gx, bx, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1,
-                0, 0);
-        // +X (east) — east/west shade
+                vc, mat, rNS, gNS, bNS, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1,
+                0, 0, 1);
+        // -X (west)
         quad(
-                vc, mat, rx, gx, bx, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
-                0, 0);
+                vc, mat, rEW, gEW, bEW, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0,
+                -1, 0, 0);
+        // +X (east)
+        quad(
+                vc, mat, rEW, gEW, bEW, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1,
+                1, 0, 0);
     }
 
     /** Multiplies a channel value by a shade factor and clamps to [0, 255]. */

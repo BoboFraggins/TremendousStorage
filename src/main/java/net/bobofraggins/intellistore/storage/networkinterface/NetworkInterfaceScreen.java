@@ -6,6 +6,7 @@ import net.bobofraggins.intellistore.shared.network.RequestNetworkContentsPacket
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -22,6 +23,9 @@ import net.neoforged.neoforge.network.PacketDistributor;
  * the response populates {@link NetworkContentsPacket#PENDING} which is polled each tick.
  */
 public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInterfaceMenu> {
+
+    private static final ResourceLocation BG_TEXTURE =
+            ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
 
     private static final int BG_WIDTH = 176;
     private static final int BG_HEIGHT = 220;
@@ -96,42 +100,47 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        // Dark background panel
-        graphics.fill(leftPos, topPos, leftPos + BG_WIDTH, topPos + BG_HEIGHT, 0xC0101010);
+        int x = leftPos, y = topPos;
 
-        // Validity indicator line below title
+        // Title bar (top 17px of generic_54)
+        graphics.blit(BG_TEXTURE, x, y, 0, 0, BG_WIDTH, 17);
+
+        // Gray fill for the rest of the panel
+        graphics.fill(x, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFC6C6C6);
+
+        // Left and right border lines
+        graphics.fill(x,               y + 17, x + 1,           y + BG_HEIGHT, 0xFF555555);
+        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH,    y + BG_HEIGHT, 0xFFFFFFFF);
+
+        // Bottom border
+        graphics.fill(x, y + BG_HEIGHT - 1, x + BG_WIDTH, y + BG_HEIGHT, 0xFF555555);
+
+        // Validity indicator line below title bar
         boolean valid = menu.isNetworkValid();
         Component statusText = Component.translatable(
                 valid
                         ? "screen.intellistore.network_interface.valid"
                         : "screen.intellistore.network_interface.invalid");
-        int statusColor = valid ? 0x55FF55 : 0xFF5555;
+        int statusColor = valid ? 0x006600 : 0xAA0000;
         graphics.drawString(
-                font, statusText, leftPos + (BG_WIDTH - font.width(statusText)) / 2, topPos + 18, statusColor, false);
+                font, statusText, x + (BG_WIDTH - font.width(statusText)) / 2, y + 18, statusColor, false);
 
         // List area separator
-        graphics.fill(
-                leftPos + 4, topPos + LIST_Y_START - 2, leftPos + BG_WIDTH - 4, topPos + LIST_Y_START - 1, 0x80FFFFFF);
+        graphics.fill(x + 4, y + LIST_Y_START - 2, x + BG_WIDTH - 4, y + LIST_Y_START - 1, 0x80555555);
 
         // Draw list rows
-        int listAreaBottom = topPos + LIST_Y_START + VISIBLE_ROWS * ROW_HEIGHT;
-        graphics.enableScissor(leftPos + 4, topPos + LIST_Y_START, leftPos + BG_WIDTH - 4, listAreaBottom);
+        int listAreaBottom = y + LIST_Y_START + VISIBLE_ROWS * ROW_HEIGHT;
+        graphics.enableScissor(x + 4, y + LIST_Y_START, x + BG_WIDTH - 4, listAreaBottom);
 
         for (int i = 0; i < VISIBLE_ROWS; i++) {
             int idx = i + scrollOffset;
             if (idx >= entries.size()) break;
 
             String key = entries.get(idx);
-            // Translate if it looks like a translation key; otherwise display as-is
-            String displayStr;
-            if (key.contains(".")) {
-                displayStr = Component.translatable(key).getString();
-            } else {
-                displayStr = key;
-            }
+            String displayStr = key.contains(".") ? Component.translatable(key).getString() : key;
 
-            int rowY = topPos + LIST_Y_START + i * ROW_HEIGHT;
-            graphics.drawString(font, displayStr, leftPos + 6, rowY, 0xE0E0E0, false);
+            int rowY = y + LIST_Y_START + i * ROW_HEIGHT;
+            graphics.drawString(font, displayStr, x + 6, rowY, 0x404040, false);
         }
 
         graphics.disableScissor();
@@ -142,27 +151,28 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
             graphics.drawString(
                     font,
                     emptyMsg,
-                    leftPos + (BG_WIDTH - font.width(emptyMsg)) / 2,
-                    topPos + LIST_Y_START + 4,
+                    x + (BG_WIDTH - font.width(emptyMsg)) / 2,
+                    y + LIST_Y_START + 4,
                     0x808080,
                     false);
         }
 
-        // Scroll bar (if needed)
-        if (entries.size() > VISIBLE_ROWS) {
-            int barX = leftPos + BG_WIDTH - 8;
-            int barY = topPos + LIST_Y_START;
-            int barH = VISIBLE_ROWS * ROW_HEIGHT;
-            graphics.fill(barX, barY, barX + 4, barY + barH, 0x40FFFFFF);
+        // Scroll bar (always shown)
+        int barX = x + BG_WIDTH - 8;
+        int barY = y + LIST_Y_START;
+        int barH = VISIBLE_ROWS * ROW_HEIGHT;
+        graphics.fill(barX, barY, barX + 4, barY + barH, 0x40000000);
 
-            int thumbH = Math.max(8, barH * VISIBLE_ROWS / entries.size());
-            int thumbY = barY + (barH - thumbH) * scrollOffset / Math.max(1, entries.size() - VISIBLE_ROWS);
-            graphics.fill(barX, thumbY, barX + 4, thumbY + thumbH, 0xC0FFFFFF);
-        }
+        int total   = Math.max(entries.size(), 1);
+        int thumbH  = Math.max(8, barH * VISIBLE_ROWS / total);
+        int maxScroll = Math.max(1, total - VISIBLE_ROWS);
+        int thumbY  = barY + (barH - thumbH) * scrollOffset / maxScroll;
+        if (entries.size() <= VISIBLE_ROWS) { thumbY = barY; thumbH = barH; }
+        graphics.fill(barX, thumbY, barX + 4, thumbY + thumbH, 0xC0FFFFFF);
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 6, 0xFFFFFF, false);
+        graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 4, 0x404040, false);
     }
 }

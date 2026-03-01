@@ -234,12 +234,17 @@ public class TubeBlock extends BaseEntityBlock {
 
     /**
      * Returns true if this tube should connect to the block at {@code neighborPos}.
-     * Connects to same-color tubes, or to any block that exposes an IItemHandler capability.
+     * Connects to same-color tubes, NetworkConnector blocks (SAT, Filing Cabinet, etc.),
+     * or to any block that exposes an IItemHandler capability.
      */
     private boolean canConnectToState(
             BlockState neighborState, LevelReader level, BlockPos neighborPos, Direction fromDir) {
         if (neighborState.getBlock() instanceof TubeBlock tb) {
             return tb.getColor() == this.color;
+        }
+        // NetworkConnector blocks are always connectable (SAT, Wireless Hub, etc.)
+        if (neighborState.getBlock() instanceof NetworkConnector) {
+            return true;
         }
         // Connect to any block with an IItemHandler (storage blocks, hoppers, etc.)
         if (level instanceof Level worldLevel) {

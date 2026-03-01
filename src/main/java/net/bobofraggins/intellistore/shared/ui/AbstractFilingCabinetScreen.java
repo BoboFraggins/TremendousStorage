@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
 /**
@@ -17,6 +18,9 @@ import net.minecraft.world.entity.player.Inventory;
  */
 public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabinetMenu>
         extends AbstractContainerScreen<M> {
+
+    private static final ResourceLocation BG_TEXTURE =
+            ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
 
     protected static final int BG_WIDTH = 176;
     private static final int BTN_W = 120;
@@ -69,20 +73,41 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.fill(leftPos, topPos, leftPos + BG_WIDTH, topPos + imageHeight, 0xC0101010);
+        int x = leftPos, y = topPos;
 
+        // Title bar (top 17px of generic_54)
+        graphics.blit(BG_TEXTURE, x, y, 0, 0, BG_WIDTH, 17);
+
+        // Gray fill for the rest of the panel
+        graphics.fill(x, y + 17, x + BG_WIDTH, y + imageHeight, 0xFFC6C6C6);
+
+        // Left and right border lines
+        graphics.fill(x,               y + 17, x + 1,           y + imageHeight, 0xFF555555);
+        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH,    y + imageHeight, 0xFFFFFFFF);
+
+        // Bottom border
+        graphics.fill(x, y + imageHeight - 1, x + BG_WIDTH, y + imageHeight, 0xFF555555);
+
+        // Folder slots — vanilla inset style
         for (int i = 0; i < AbstractFilingCabinetMenu.FOLDER_SLOTS; i++) {
             int col = i % 4;
             int row = i / 4;
-            int sx = leftPos + 29 + col * 18;
-            int sy = topPos + 44 + row * 18;
-            graphics.fill(sx, sy, sx + 18, sy + 18, 0xFF303030);
-            graphics.fill(sx + 1, sy + 1, sx + 17, sy + 17, 0xFF1A1A1A);
+            int sx = x + 29 + col * 18;
+            int sy = y + 44 + row * 18;
+            drawSlotBackground(graphics, sx, sy, 16, 16);
         }
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 6, 0xFFFFFF, false);
+        graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 4, 0x404040, false);
+    }
+
+    private static void drawSlotBackground(GuiGraphics graphics, int sx, int sy, int w, int h) {
+        graphics.fill(sx,     sy,     sx + w, sy + 1, 0xFF373737); // top
+        graphics.fill(sx,     sy + 1, sx + 1, sy + h, 0xFF373737); // left
+        graphics.fill(sx,     sy + h, sx + w + 1, sy + h + 1, 0xFFFFFFFF); // bottom
+        graphics.fill(sx + w, sy,     sx + w + 1, sy + h,     0xFFFFFFFF); // right
+        graphics.fill(sx + 1, sy + 1, sx + w, sy + h, 0xFF8B8B8B); // interior
     }
 }
