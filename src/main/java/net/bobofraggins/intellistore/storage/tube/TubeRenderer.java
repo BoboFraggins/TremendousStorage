@@ -84,7 +84,7 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                 .getAtlas(InventoryMenu.BLOCK_ATLAS)
                 .getSprite(TUBE_TEXTURE);
 
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.cutout());
+        VertexConsumer vc = bufferSource.getBuffer(RenderType.solid());
         poseStack.pushPose();
 
         Matrix4f mat = poseStack.last().pose();
@@ -312,7 +312,7 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
 
         // -Y (down) — top/bottom shade
         quad(
-                vc, mat, ry, gy, by, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0,
+                vc, mat, ry, gy, by, light, overlay, u0, v0, u1, v1, x0, y0, z0, x1, y0, z0, x1, y0, z1, x0, y0, z1, 0,
                 -1, 0);
         // +Y (up) — top/bottom shade
         quad(

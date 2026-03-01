@@ -192,9 +192,9 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         graphics.blit(BG_TEXTURE, x, y, 0, 0, BG_WIDTH, 17);
 
         // Player inventory section from the texture.
-        // In generic_54.png the slot backgrounds start at src y=143 (17px into the inv section).
-        // Blit so that src y=143 lands at screen y=topPos+INV_Y, i.e. dest y = topPos+INV_Y-17.
-        int invBgY = y + INV_Y - 17;
+        // The src section starts at y=126 in generic_54.png; the slot outlines begin 7px in at
+        // src y=133. Blit at dest y = INV_Y-7 so the slot outlines land exactly at INV_Y.
+        int invBgY = y + INV_Y - 7;
 
         // Middle fill (between title bar and player inventory background)
         int midTop = y + 17;

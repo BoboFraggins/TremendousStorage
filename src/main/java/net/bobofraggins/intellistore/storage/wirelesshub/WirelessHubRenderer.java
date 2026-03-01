@@ -43,10 +43,13 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
     // Geometry constants — all in block units (0..1), matching the JSON model
     // -------------------------------------------------------------------------
 
+    /** Small offset to prevent Z-fighting with the ground block. */
+    private static final float EPS = 1e-4f;
+
     // Base slab: 8×2×8 px centred
     private static final float BASE_X0 = 4f / 16;
     private static final float BASE_X1 = 12f / 16;
-    private static final float BASE_Y0 = 0f;
+    private static final float BASE_Y0 = EPS; // raised off floor to prevent Z-fighting
     private static final float BASE_Y1 = 2f / 16;
     private static final float BASE_Z0 = 4f / 16;
     private static final float BASE_Z1 = 12f / 16;
@@ -266,7 +269,7 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
         float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
         // -Y (bottom)
         quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0, -1,
+                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y0, z0, x1, y0, z0, x1, y0, z1, x0, y0, z1, 0, -1,
                 0);
         // +Y (top)
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0, 1, 0);
