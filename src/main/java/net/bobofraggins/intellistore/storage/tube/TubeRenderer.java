@@ -312,7 +312,7 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
 
         // -Y (down) — top/bottom shade
         quad(
-                vc, mat, ry, gy, by, light, overlay, u0, v0, u1, v1, x0, y0, z0, x1, y0, z0, x1, y0, z1, x0, y0, z1, 0,
+                vc, mat, ry, gy, by, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0,
                 -1, 0);
         // +Y (up) — top/bottom shade
         quad(
@@ -367,15 +367,9 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
             float nx,
             float ny,
             float nz) {
-        vc.addVertex(mat, x0, y0, z0)
+        vc.addVertex(mat, x3, y3, z3)
                 .setColor(r, g, b, 255)
-                .setUv(u0, v0)
-                .setOverlay(overlay)
-                .setLight(light)
-                .setNormal(nx, ny, nz);
-        vc.addVertex(mat, x1, y1, z1)
-                .setColor(r, g, b, 255)
-                .setUv(u1, v0)
+                .setUv(u0, v1)
                 .setOverlay(overlay)
                 .setLight(light)
                 .setNormal(nx, ny, nz);
@@ -385,9 +379,15 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                 .setOverlay(overlay)
                 .setLight(light)
                 .setNormal(nx, ny, nz);
-        vc.addVertex(mat, x3, y3, z3)
+        vc.addVertex(mat, x1, y1, z1)
                 .setColor(r, g, b, 255)
-                .setUv(u0, v1)
+                .setUv(u1, v0)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x0, y0, z0)
+                .setColor(r, g, b, 255)
+                .setUv(u0, v0)
                 .setOverlay(overlay)
                 .setLight(light)
                 .setNormal(nx, ny, nz);
