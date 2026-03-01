@@ -109,8 +109,8 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         graphics.fill(x, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFC6C6C6);
 
         // Left and right border lines
-        graphics.fill(x,               y + 17, x + 1,           y + BG_HEIGHT, 0xFF555555);
-        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH,    y + BG_HEIGHT, 0xFFFFFFFF);
+        graphics.fill(x, y + 17, x + 1, y + BG_HEIGHT, 0xFF555555);
+        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFFFFFFF);
 
         // Bottom border
         graphics.fill(x, y + BG_HEIGHT - 1, x + BG_WIDTH, y + BG_HEIGHT, 0xFF555555);
@@ -122,8 +122,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
                         ? "screen.intellistore.network_interface.valid"
                         : "screen.intellistore.network_interface.invalid");
         int statusColor = valid ? 0x006600 : 0xAA0000;
-        graphics.drawString(
-                font, statusText, x + (BG_WIDTH - font.width(statusText)) / 2, y + 18, statusColor, false);
+        graphics.drawString(font, statusText, x + (BG_WIDTH - font.width(statusText)) / 2, y + 18, statusColor, false);
 
         // List area separator
         graphics.fill(x + 4, y + LIST_Y_START - 2, x + BG_WIDTH - 4, y + LIST_Y_START - 1, 0x80555555);
@@ -149,12 +148,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         if (entries.isEmpty()) {
             String emptyMsg = "No blocks connected";
             graphics.drawString(
-                    font,
-                    emptyMsg,
-                    x + (BG_WIDTH - font.width(emptyMsg)) / 2,
-                    y + LIST_Y_START + 4,
-                    0x808080,
-                    false);
+                    font, emptyMsg, x + (BG_WIDTH - font.width(emptyMsg)) / 2, y + LIST_Y_START + 4, 0x808080, false);
         }
 
         // Scroll bar (always shown)
@@ -163,11 +157,14 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         int barH = VISIBLE_ROWS * ROW_HEIGHT;
         graphics.fill(barX, barY, barX + 4, barY + barH, 0x40000000);
 
-        int total   = Math.max(entries.size(), 1);
-        int thumbH  = Math.max(8, barH * VISIBLE_ROWS / total);
+        int total = Math.max(entries.size(), 1);
+        int thumbH = Math.max(8, barH * VISIBLE_ROWS / total);
         int maxScroll = Math.max(1, total - VISIBLE_ROWS);
-        int thumbY  = barY + (barH - thumbH) * scrollOffset / maxScroll;
-        if (entries.size() <= VISIBLE_ROWS) { thumbY = barY; thumbH = barH; }
+        int thumbY = barY + (barH - thumbH) * scrollOffset / maxScroll;
+        if (entries.size() <= VISIBLE_ROWS) {
+            thumbY = barY;
+            thumbH = barH;
+        }
         graphics.fill(barX, thumbY, barX + 4, thumbY + thumbH, 0xC0FFFFFF);
     }
 

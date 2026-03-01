@@ -42,10 +42,10 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     // Layout constants  (all image-relative, i.e. relative to leftPos/topPos)
     // -------------------------------------------------------------------------
 
-    private static final int BG_WIDTH   = 176;
+    private static final int BG_WIDTH = 176;
 
-    private static final int LIST_Y      = 17;   // immediately below title bar
-    private static final int ROW_HEIGHT  = 16;
+    private static final int LIST_Y = 17; // immediately below title bar
+    private static final int ROW_HEIGHT = 16;
     private static final int VISIBLE_ROWS = 7;
     private static final int LIST_HEIGHT = VISIBLE_ROWS * ROW_HEIGHT; // 112
 
@@ -54,42 +54,42 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     private static final int SCROLLBAR_X = BG_WIDTH - 1 - SCROLLBAR_W; // 169
 
     // List content area (left of scrollbar)
-    private static final int LIST_CONTENT_X = 1;  // 1px inside left border
+    private static final int LIST_CONTENT_X = 1; // 1px inside left border
     private static final int LIST_CONTENT_W = SCROLLBAR_X - LIST_CONTENT_X - 1; // leaves 1px gap before bar
 
     // Crafting section: 4px gap below the list
-    private static final int CRAFT_GAP  = 4;
-    private static final int CRAFT_Y    = LIST_Y + LIST_HEIGHT + CRAFT_GAP; // 133
+    private static final int CRAFT_GAP = 4;
+    private static final int CRAFT_Y = LIST_Y + LIST_HEIGHT + CRAFT_GAP; // 133
     private static final int CRAFT_ROWS = 3;
 
     // Crafting grid is centred horizontally: 3 slots × 18 = 54px.
     // Arrow is 22px wide, 2px gap on each side. Result slot is 18px wide.
     // Total: 54 + 2 + 22 + 2 + 18 = 98px. Centred in 176: (176-98)/2 = 39px left margin.
-    private static final int GRID_X     = 30;   // left edge of the 3×3 grid
-    private static final int ARROW_X    = GRID_X + 3 * 18 + 2; // 86
-    private static final int RESULT_X   = ARROW_X + 22 + 2;    // 110
+    private static final int GRID_X = 30; // left edge of the 3×3 grid
+    private static final int ARROW_X = GRID_X + 3 * 18 + 2; // 86
+    private static final int RESULT_X = ARROW_X + 22 + 2; // 110
 
     // Result slot is 18px wide; centre vertically in craft area (3 rows × 18 = 54px)
-    private static final int RESULT_Y   = CRAFT_Y + 18; // vertically centred: row 1 of 3
+    private static final int RESULT_Y = CRAFT_Y + 18; // vertically centred: row 1 of 3
 
     // Player inventory: same gap below crafting as crafting has above player inv
-    private static final int INV_Y      = CRAFT_Y + CRAFT_ROWS * 18 + CRAFT_GAP; // 191
-    private static final int HOTBAR_Y   = INV_Y + 3 * 18 + CRAFT_GAP;            // 249
+    private static final int INV_Y = CRAFT_Y + CRAFT_ROWS * 18 + CRAFT_GAP; // 191
+    private static final int HOTBAR_Y = INV_Y + 3 * 18 + CRAFT_GAP; // 249
 
-    private static final int BG_HEIGHT  = HOTBAR_Y + 18 + CRAFT_GAP; // 271
+    private static final int BG_HEIGHT = HOTBAR_Y + 18 + CRAFT_GAP; // 271
 
     // Crafting arrow source coords in crafting_table.png (256×256)
     private static final int ARROW_SRC_X = 82;
     private static final int ARROW_SRC_Y = 60;
-    private static final int ARROW_W     = 22;
-    private static final int ARROW_H     = 15;
+    private static final int ARROW_W = 22;
+    private static final int ARROW_H = 15;
 
     // -------------------------------------------------------------------------
     // State
     // -------------------------------------------------------------------------
 
     private List<ItemStack> networkStacks = List.of();
-    private List<Long>      networkCounts = List.of();
+    private List<Long> networkCounts = List.of();
     private int scrollOffset = 0;
 
     // -------------------------------------------------------------------------
@@ -98,7 +98,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
     public AccessTerminalScreen(AccessTerminalMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth  = BG_WIDTH;
+        this.imageWidth = BG_WIDTH;
         this.imageHeight = BG_HEIGHT;
     }
 
@@ -167,11 +167,11 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0 && isInListArea(mouseX, mouseY)) {
-            int relY    = (int) (mouseY - topPos - LIST_Y);
+            int relY = (int) (mouseY - topPos - LIST_Y);
             int rowIndex = relY / ROW_HEIGHT + scrollOffset;
             if (rowIndex >= 0 && rowIndex < networkStacks.size() && menu.hasNetwork()) {
-                ItemStack target    = networkStacks.get(rowIndex);
-                long      totalCount = networkCounts.get(rowIndex);
+                ItemStack target = networkStacks.get(rowIndex);
+                long totalCount = networkCounts.get(rowIndex);
                 int amount = (int) Math.min(totalCount, target.getMaxStackSize());
                 PacketDistributor.sendToServer(new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount));
                 return true;
@@ -191,7 +191,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         renderTooltip(graphics, mouseX, mouseY);
 
         if (isInListArea(mouseX, mouseY)) {
-            int relY     = (int) (mouseY - topPos - LIST_Y);
+            int relY = (int) (mouseY - topPos - LIST_Y);
             int rowIndex = relY / ROW_HEIGHT + scrollOffset;
             if (rowIndex >= 0 && rowIndex < networkStacks.size()) {
                 graphics.renderTooltip(font, networkStacks.get(rowIndex), mouseX, mouseY);
@@ -216,8 +216,8 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         graphics.fill(x, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFC6C6C6);
 
         // Left and right border lines spanning the entire panel (below title bar)
-        graphics.fill(x,               y + 17, x + 1,           y + BG_HEIGHT, 0xFF555555); // left dark
-        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH,    y + BG_HEIGHT, 0xFFFFFFFF); // right bright
+        graphics.fill(x, y + 17, x + 1, y + BG_HEIGHT, 0xFF555555); // left dark
+        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFFFFFFF); // right bright
 
         // Bottom border
         graphics.fill(x, y + BG_HEIGHT - 1, x + BG_WIDTH, y + BG_HEIGHT, 0xFF555555);
@@ -255,11 +255,11 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         graphics.enableScissor(listX0, listY0, listX1, listY1);
 
         for (int i = 0; i < VISIBLE_ROWS; i++) {
-            int idx  = i + scrollOffset;
+            int idx = i + scrollOffset;
             if (idx >= networkStacks.size()) break;
 
             ItemStack stack = networkStacks.get(idx);
-            long      count = networkCounts.get(idx);
+            long count = networkCounts.get(idx);
             int rowX = listX0 + 1;
             int rowY = listY0 + i * ROW_HEIGHT;
 
@@ -268,12 +268,12 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
             graphics.renderItemDecorations(font, stack, rowX, rowY, null);
 
             // Item name
-            String name     = stack.getDisplayName().getString();
+            String name = stack.getDisplayName().getString();
             graphics.drawString(font, name, rowX + 18, rowY + 4, 0xE0E0E0, false);
 
             // Count
             String countStr = abbreviateCount(count);
-            int    countX   = x + SCROLLBAR_X - 2 - font.width(countStr);
+            int countX = x + SCROLLBAR_X - 2 - font.width(countStr);
             graphics.drawString(font, countStr, countX, rowY + 4, 0xAAAAAA, false);
         }
 
@@ -281,18 +281,18 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     }
 
     private void drawScrollbar(GuiGraphics graphics, int x, int y) {
-        int barX  = x + SCROLLBAR_X;
-        int barY  = y + LIST_Y;
-        int barH  = LIST_HEIGHT;
+        int barX = x + SCROLLBAR_X;
+        int barY = y + LIST_Y;
+        int barH = LIST_HEIGHT;
 
         // Track
         graphics.fill(barX, barY, barX + SCROLLBAR_W, barY + barH, 0x40000000);
 
         // Thumb
-        int total   = Math.max(networkStacks.size(), 1);
-        int thumbH  = Math.max(8, barH * VISIBLE_ROWS / total);
+        int total = Math.max(networkStacks.size(), 1);
+        int thumbH = Math.max(8, barH * VISIBLE_ROWS / total);
         int maxScroll = Math.max(1, total - VISIBLE_ROWS);
-        int thumbY  = barY + (barH - thumbH) * scrollOffset / maxScroll;
+        int thumbY = barY + (barH - thumbH) * scrollOffset / maxScroll;
         if (networkStacks.size() <= VISIBLE_ROWS) {
             // All content fits — thumb fills the whole track
             thumbY = barY;
@@ -327,11 +327,11 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
      */
     private static void drawSlotBackground(GuiGraphics graphics, int sx, int sy, int w, int h) {
         // Dark edges (top, left)
-        graphics.fill(sx,     sy,     sx + w, sy + 1, 0xFF373737); // top
-        graphics.fill(sx,     sy + 1, sx + 1, sy + h, 0xFF373737); // left
+        graphics.fill(sx, sy, sx + w, sy + 1, 0xFF373737); // top
+        graphics.fill(sx, sy + 1, sx + 1, sy + h, 0xFF373737); // left
         // Bright edges (bottom, right)
-        graphics.fill(sx,     sy + h, sx + w + 1, sy + h + 1, 0xFFFFFFFF); // bottom
-        graphics.fill(sx + w, sy,     sx + w + 1, sy + h,     0xFFFFFFFF); // right
+        graphics.fill(sx, sy + h, sx + w + 1, sy + h + 1, 0xFFFFFFFF); // bottom
+        graphics.fill(sx + w, sy, sx + w + 1, sy + h, 0xFFFFFFFF); // right
         // Interior
         graphics.fill(sx + 1, sy + 1, sx + w, sy + h, 0xFF8B8B8B);
     }
@@ -349,7 +349,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
     private static String abbreviateCount(long count) {
         if (count >= 1_000_000) return String.format("%.1fM", count / 1_000_000.0);
-        if (count >= 1_000)     return String.format("%.1fk", count / 1_000.0);
+        if (count >= 1_000) return String.format("%.1fk", count / 1_000.0);
         return String.valueOf(count);
     }
 }

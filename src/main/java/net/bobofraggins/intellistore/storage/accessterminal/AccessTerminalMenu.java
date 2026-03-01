@@ -76,8 +76,8 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         // LIST_Y=17, LIST_HEIGHT=112, CRAFT_GAP=4 → craftY = 17+112+4 = 133
         // GRID_X=30, RESULT_X=110, RESULT_Y=craftY+18=151
         // INV_Y = craftY + 3*18 + 4 = 191, HOTBAR_Y = INV_Y + 3*18 + 4 = 249
-        final int craftY  = 133;
-        final int invY    = 191;
+        final int craftY = 133;
+        final int invY = 191;
         final int hotbarY = 249;
 
         // Slot 0: craft result — centred on result slot background (RESULT_X=110, RESULT_Y=151)

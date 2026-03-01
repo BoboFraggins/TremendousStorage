@@ -82,8 +82,8 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         graphics.fill(x, y + 17, x + BG_WIDTH, y + imageHeight, 0xFFC6C6C6);
 
         // Left and right border lines
-        graphics.fill(x,               y + 17, x + 1,           y + imageHeight, 0xFF555555);
-        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH,    y + imageHeight, 0xFFFFFFFF);
+        graphics.fill(x, y + 17, x + 1, y + imageHeight, 0xFF555555);
+        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH, y + imageHeight, 0xFFFFFFFF);
 
         // Bottom border
         graphics.fill(x, y + imageHeight - 1, x + BG_WIDTH, y + imageHeight, 0xFF555555);
@@ -104,10 +104,10 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
     }
 
     private static void drawSlotBackground(GuiGraphics graphics, int sx, int sy, int w, int h) {
-        graphics.fill(sx,     sy,     sx + w, sy + 1, 0xFF373737); // top
-        graphics.fill(sx,     sy + 1, sx + 1, sy + h, 0xFF373737); // left
-        graphics.fill(sx,     sy + h, sx + w + 1, sy + h + 1, 0xFFFFFFFF); // bottom
-        graphics.fill(sx + w, sy,     sx + w + 1, sy + h,     0xFFFFFFFF); // right
+        graphics.fill(sx, sy, sx + w, sy + 1, 0xFF373737); // top
+        graphics.fill(sx, sy + 1, sx + 1, sy + h, 0xFF373737); // left
+        graphics.fill(sx, sy + h, sx + w + 1, sy + h + 1, 0xFFFFFFFF); // bottom
+        graphics.fill(sx + w, sy, sx + w + 1, sy + h, 0xFFFFFFFF); // right
         graphics.fill(sx + 1, sy + 1, sx + w, sy + h, 0xFF8B8B8B); // interior
     }
 }

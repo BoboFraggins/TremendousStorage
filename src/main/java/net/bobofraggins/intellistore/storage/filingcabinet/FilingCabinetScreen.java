@@ -29,12 +29,12 @@ public class FilingCabinetScreen extends AbstractFilingCabinetScreen<FilingCabin
     private static final int BG_HEIGHT = 204;
 
     private static final int PRIORITY_LABEL_Y = 86;
-    private static final int PRIORITY_ROW_Y   = 96;
-    private static final int BTN_W  = 20;
-    private static final int BTN_H  = 14;
-    private static final int LBL_W  = 56;
-    private static final int GAP    = 2;
-    private static final int ROW_W  = BTN_W + GAP + LBL_W + GAP + BTN_W;
+    private static final int PRIORITY_ROW_Y = 96;
+    private static final int BTN_W = 20;
+    private static final int BTN_H = 14;
+    private static final int LBL_W = 56;
+    private static final int GAP = 2;
+    private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W;
 
     public FilingCabinetScreen(FilingCabinetMenu menu, Inventory inv, Component title) {
         super(menu, inv, title, BG_HEIGHT);
@@ -80,7 +80,7 @@ public class FilingCabinetScreen extends AbstractFilingCabinetScreen<FilingCabin
         // Widgets: 0=voidExcess (from super), 1=▼, 2=▲
         if (renderables.size() >= 3) {
             if (renderables.get(1) instanceof Button down) down.active = (selected > 0);
-            if (renderables.get(2) instanceof Button up)   up.active   = (selected < Priority.VALUES.length - 1);
+            if (renderables.get(2) instanceof Button up) up.active = (selected < Priority.VALUES.length - 1);
         }
     }
 
@@ -90,20 +90,24 @@ public class FilingCabinetScreen extends AbstractFilingCabinetScreen<FilingCabin
 
         // "Priority:" label
         Component priorityLabel = Component.translatable("screen.intellistore.priority_label");
-        graphics.drawString(font, priorityLabel,
+        graphics.drawString(
+                font,
+                priorityLabel,
                 leftPos + (BG_WIDTH - font.width(priorityLabel)) / 2,
-                topPos + PRIORITY_LABEL_Y, 0x404040, false);
+                topPos + PRIORITY_LABEL_Y,
+                0x404040,
+                false);
 
         // Priority name display — inset box between the two arrow buttons
-        int rowX  = leftPos + (BG_WIDTH - ROW_W) / 2;
+        int rowX = leftPos + (BG_WIDTH - ROW_W) / 2;
         int lblX0 = rowX + BTN_W + GAP;
-        int lblY  = topPos + PRIORITY_ROW_Y;
+        int lblY = topPos + PRIORITY_ROW_Y;
 
-        graphics.fill(lblX0,         lblY,         lblX0 + LBL_W,     lblY + 1,         0xFF373737);
-        graphics.fill(lblX0,         lblY + 1,     lblX0 + 1,         lblY + BTN_H,     0xFF373737);
-        graphics.fill(lblX0,         lblY + BTN_H, lblX0 + LBL_W + 1, lblY + BTN_H + 1, 0xFFFFFFFF);
-        graphics.fill(lblX0 + LBL_W, lblY,         lblX0 + LBL_W + 1, lblY + BTN_H,     0xFFFFFFFF);
-        graphics.fill(lblX0 + 1,     lblY + 1,     lblX0 + LBL_W,     lblY + BTN_H,     0xFF8B8B8B);
+        graphics.fill(lblX0, lblY, lblX0 + LBL_W, lblY + 1, 0xFF373737);
+        graphics.fill(lblX0, lblY + 1, lblX0 + 1, lblY + BTN_H, 0xFF373737);
+        graphics.fill(lblX0, lblY + BTN_H, lblX0 + LBL_W + 1, lblY + BTN_H + 1, 0xFFFFFFFF);
+        graphics.fill(lblX0 + LBL_W, lblY, lblX0 + LBL_W + 1, lblY + BTN_H, 0xFFFFFFFF);
+        graphics.fill(lblX0 + 1, lblY + 1, lblX0 + LBL_W, lblY + BTN_H, 0xFF8B8B8B);
 
         Priority current = Priority.fromOrdinal(menu.getPriority());
         String name = Component.translatable(current.translationKey()).getString();

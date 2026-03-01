@@ -81,10 +81,20 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         // ---- Iron base — full footprint, 4/16 tall, solid ----
         // EPS lift off floor and inset from block edges to avoid Z-fighting.
         drawBox(
-                solid, mat,
-                EPS, EPS, EPS,
-                1f - EPS, 4f / 16, 1f - EPS,
-                ironSprite, 255, 255, 255, packedLight, packedOverlay);
+                solid,
+                mat,
+                EPS,
+                EPS,
+                EPS,
+                1f - EPS,
+                4f / 16,
+                1f - EPS,
+                ironSprite,
+                255,
+                255,
+                255,
+                packedLight,
+                packedOverlay);
 
         // ---- Glass — full 2-block height, 1px inset, no bottom face ----
         // Drawn in lower-block pose (y=0..2) so no seam at y=1.
@@ -92,21 +102,14 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         float gz0 = 1f / 16, gz1 = 15f / 16;
         float gy0 = 4f / 16, gy1 = 2f;
         drawBoxNoBottom(
-                translucent, mat,
-                gx0, gy0, gz0,
-                gx1, gy1, gz1,
-                glassSprite, 255, 255, 255, packedLight, packedOverlay);
+                translucent, mat, gx0, gy0, gz0, gx1, gy1, gz1, glassSprite, 255, 255, 255, packedLight, packedOverlay);
 
         // ---- Water — inset 1px + EPS inside the glass on all sides ----
         // Goes all the way down to just above the base top.
         float wx0 = gx0 + 1f / 16 + EPS, wx1 = gx1 - 1f / 16 - EPS;
         float wz0 = gz0 + 1f / 16 + EPS, wz1 = gz1 - 1f / 16 - EPS;
-        float wy0 = 4f / 16 + EPS,       wy1 = gy1 - 1f / 16 - EPS;
-        drawBox(
-                translucent, mat,
-                wx0, wy0, wz0,
-                wx1, wy1, wz1,
-                waterSprite, 255, 255, 255, packedLight, packedOverlay);
+        float wy0 = 4f / 16 + EPS, wy1 = gy1 - 1f / 16 - EPS;
+        drawBox(translucent, mat, wx0, wy0, wz0, wx1, wy1, wz1, waterSprite, 255, 255, 255, packedLight, packedOverlay);
 
         // ---- Animated floating brain (item renderer) ----
         double time = (be.getLevel().getGameTime() + partialTick) / 20.0;
@@ -197,11 +200,15 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         // +Y
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0, 1, 0);
         // -Z (north)
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0, 0, -1);
+        quad(
+                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0, 0,
+                -1);
         // +Z (south)
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0, 0, 1);
         // -X (west)
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1, 0, 0);
+        quad(
+                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1, 0,
+                0);
         // +X (east)
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1, 0, 0);
     }

@@ -57,10 +57,10 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     private static final float P_THICK = 2f / 16f;
 
     // Per-face brightness multipliers — mirror vanilla ClientLevel.getShade() values
-    private static final float SHADE_UP         = 1.00f;
-    private static final float SHADE_DOWN        = 0.50f;
+    private static final float SHADE_UP = 1.00f;
+    private static final float SHADE_DOWN = 0.50f;
     private static final float SHADE_NORTH_SOUTH = 0.80f;
-    private static final float SHADE_EAST_WEST   = 0.60f;
+    private static final float SHADE_EAST_WEST = 0.60f;
 
     public TubeRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -309,10 +309,10 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
         float u0 = sprite.getU0(), u1 = sprite.getU1();
         float v0 = sprite.getV0(), v1 = sprite.getV1();
 
-        int rUp = shade(r, SHADE_UP),         gUp = shade(g, SHADE_UP),         bUp = shade(b, SHADE_UP);
-        int rDn = shade(r, SHADE_DOWN),       gDn = shade(g, SHADE_DOWN),       bDn = shade(b, SHADE_DOWN);
+        int rUp = shade(r, SHADE_UP), gUp = shade(g, SHADE_UP), bUp = shade(b, SHADE_UP);
+        int rDn = shade(r, SHADE_DOWN), gDn = shade(g, SHADE_DOWN), bDn = shade(b, SHADE_DOWN);
         int rNS = shade(r, SHADE_NORTH_SOUTH), gNS = shade(g, SHADE_NORTH_SOUTH), bNS = shade(b, SHADE_NORTH_SOUTH);
-        int rEW = shade(r, SHADE_EAST_WEST),  gEW = shade(g, SHADE_EAST_WEST),  bEW = shade(b, SHADE_EAST_WEST);
+        int rEW = shade(r, SHADE_EAST_WEST), gEW = shade(g, SHADE_EAST_WEST), bEW = shade(b, SHADE_EAST_WEST);
 
         // -Y (down)
         quad(
