@@ -103,6 +103,19 @@ public class TubeBlock extends BaseEntityBlock {
         Block.box(10, 6, 6, 16, 10, 10), // EAST  (ordinal 5)
     };
 
+    /**
+     * Attachment plate hitboxes — 8×8 px wide, 2 px thick, flush with the block face.
+     * Matches the geometry rendered by {@link TubeRenderer}: P_MIN=4/16, P_MAX=12/16, P_THICK=2/16.
+     */
+    private static final VoxelShape[] PLATE_SHAPES = {
+        Block.box(4, 0, 4, 12, 2, 12), // DOWN  (ordinal 0)
+        Block.box(4, 14, 4, 12, 16, 12), // UP    (ordinal 1)
+        Block.box(4, 4, 0, 12, 12, 2), // NORTH (ordinal 2)
+        Block.box(4, 4, 14, 12, 12, 16), // SOUTH (ordinal 3)
+        Block.box(0, 4, 4, 2, 12, 12), // WEST  (ordinal 4)
+        Block.box(14, 4, 4, 16, 12, 12), // EAST  (ordinal 5)
+    };
+
     /** 64 pre-computed shapes, one per connection bitmask. */
     private final VoxelShape[] shapes;
 
@@ -167,7 +180,15 @@ public class TubeBlock extends BaseEntityBlock {
 
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return shapes[connectionMask(state)];
+        VoxelShape shape = shapes[connectionMask(state)];
+        if (level.getBlockEntity(pos) instanceof TubeBlockEntity be) {
+            for (int i = 0; i < 6; i++) {
+                if (be.getAttachmentType(i) != AttachmentType.NONE) {
+                    shape = Shapes.or(shape, PLATE_SHAPES[i]);
+                }
+            }
+        }
+        return shape;
     }
 
     private static int connectionMask(BlockState state) {
@@ -218,8 +239,7 @@ public class TubeBlock extends BaseEntityBlock {
             LevelAccessor level,
             BlockPos pos,
             BlockPos neighborPos) {
-        return state.setValue(
-                DIR_PROPS[direction.ordinal()], canConnectToState(neighborState, level, neighborPos, direction));
+        return state.setValue(DIR_PROPS[direction.ordinal()], canConnectToState(pos, neighborState, level, direction));
     }
 
     private BlockState computeState(BlockState current, LevelReader level, BlockPos pos) {
@@ -227,40 +247,42 @@ public class TubeBlock extends BaseEntityBlock {
         for (Direction dir : Direction.values()) {
             BlockPos neighborPos = pos.relative(dir);
             BlockState neighborState = level.getBlockState(neighborPos);
-            s = s.setValue(DIR_PROPS[dir.ordinal()], canConnectToState(neighborState, level, neighborPos, dir));
+            s = s.setValue(DIR_PROPS[dir.ordinal()], canConnectToState(pos, neighborState, level, dir));
         }
         return s;
     }
 
     /**
-     * Returns true if this tube should visually connect (and extend an arm) toward
-     * {@code neighborPos} in direction {@code fromDir}.
+     * Returns true if the tube at {@code tubePos} should visually connect (and extend an arm)
+     * in direction {@code dir} toward the block described by {@code neighborState}.
      *
      * <p>Connects to:
      * <ul>
      *   <li>Same-color tubes (direct pipe connection)
-     *   <li>{@link NetworkConnector} blocks (mod storage/hub/SAT/NI blocks — always connectable)
-     *   <li>Any external block when this tube face has a tube attachment (Storage Interface,
-     *       Import Interface, Export Interface, etc.) installed on the facing side
+     *   <li>{@link NetworkConnector} blocks (mod storage/hub/SAT/NI/Stirling blocks)
+     *   <li>Any external block when this tube face has an attachment installed on {@code dir}
      * </ul>
      *
      * <p>Plain third-party blocks (vanilla chests, hoppers, etc.) are NOT connected unless
-     * a tube attachment is present on this face.
+     * a tube attachment is present on that face.
      */
-    private boolean canConnectToState(
-            BlockState neighborState, LevelReader level, BlockPos neighborPos, Direction fromDir) {
+    private boolean canConnectToState(BlockPos tubePos, BlockState neighborState, LevelReader level, Direction dir) {
         if (neighborState.getBlock() instanceof TubeBlock tb) {
             return tb.getColor() == this.color;
         }
-        // NetworkConnector blocks (mod storage, SAT, Wireless Hub, NI, Stirling Engine, etc.)
+        // NetworkConnector blocks (mod storage, SAT, Wireless Hub, Stirling Engine, etc.)
         if (neighborState.getBlock() instanceof NetworkConnector) {
+            return true;
+        }
+        // NetworkInterface is a connector but doesn't implement the interface — check explicitly
+        if (neighborState.getBlock()
+                instanceof net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlock) {
             return true;
         }
         // External (non-mod) block: only connect if this tube face has an attachment installed
         if (level instanceof Level worldLevel) {
-            BlockPos tubePos = neighborPos.relative(fromDir); // position of this tube
             if (worldLevel.getBlockEntity(tubePos) instanceof TubeBlockEntity be) {
-                return be.hasAttachment(fromDir.getOpposite().ordinal());
+                return be.hasAttachment(dir.ordinal());
             }
         }
         return false;

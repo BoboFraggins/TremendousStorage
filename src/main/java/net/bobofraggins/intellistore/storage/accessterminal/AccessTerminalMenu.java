@@ -29,13 +29,15 @@ import net.neoforged.neoforge.items.IItemHandler;
 /**
  * Menu for the Storage Access Terminal.
  *
- * <p>Slot layout:
+ * <p>Slot indices:
  * <ul>
  *   <li>[0] craft result
  *   <li>[1..9] 3×3 crafting grid
  *   <li>[10..36] player main inventory (27 slots)
  *   <li>[37..45] player hotbar (9 slots)
  * </ul>
+ *
+ * <p>All pixel coordinates come from {@link AccessTerminalLayout}.
  *
  * <p>The network item list is NOT backed by real slots — it is rendered and interacted
  * with as a custom overlay in {@link AccessTerminalScreen}, using packets.
@@ -72,34 +74,43 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         this.craftSlots = new TransientCraftingContainer(this, 3, 3);
         this.access = ContainerLevelAccess.create(inv.player.level(), satPos);
 
-        // Layout constants (image-relative, must match AccessTerminalScreen)
-        // GRID_Y=18, GRID_H=72, CRAFT_GAP=4 → craftY = 18+72+4 = 94
-        // CRAFT_GRID_X=30, RESULT_X=110, RESULT_Y=craftY+18=112
-        // INV_Y = craftY + 3*18 + 4 = 152, HOTBAR_Y = INV_Y + 3*18 + 4 = 210
-        final int craftY = 94;
-        final int invY = 152;
-        final int hotbarY = 210;
+        // All coordinates come from AccessTerminalLayout — the single source of truth.
+        final int S = AccessTerminalLayout.SLOT_SIZE;
 
         // Slot 0: craft result
-        addSlot(new ResultSlot(inv.player, craftSlots, resultSlots, 0, 110, craftY + 18));
+        addSlot(new ResultSlot(
+                inv.player,
+                craftSlots,
+                resultSlots,
+                0,
+                AccessTerminalLayout.CRAFTING_RESULT_X,
+                AccessTerminalLayout.CRAFTING_RESULT_Y));
 
         // Slots 1-9: 3×3 crafting grid
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
-                addSlot(new Slot(craftSlots, col + row * 3, 30 + col * 18, craftY + row * 18));
+                addSlot(new Slot(
+                        craftSlots,
+                        col + row * 3,
+                        AccessTerminalLayout.CRAFTING_GRID_X + col * S,
+                        AccessTerminalLayout.CRAFTING_Y + row * S));
             }
         }
 
         // Slots 10-36: player main inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(inv, col + row * 9 + 9, 8 + col * 18, invY + row * 18));
+                addSlot(new Slot(
+                        inv,
+                        col + row * 9 + 9,
+                        AccessTerminalLayout.PLAYER_INV_X + col * S,
+                        AccessTerminalLayout.PLAYER_INV_Y + row * S));
             }
         }
 
         // Slots 37-45: player hotbar
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(inv, col, 8 + col * 18, hotbarY));
+            addSlot(new Slot(inv, col, AccessTerminalLayout.HOTBAR_X + col * S, AccessTerminalLayout.HOTBAR_Y));
         }
     }
 
