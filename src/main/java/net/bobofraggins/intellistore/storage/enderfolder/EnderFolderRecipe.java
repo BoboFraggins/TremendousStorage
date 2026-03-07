@@ -1,6 +1,5 @@
 package net.bobofraggins.intellistore.storage.enderfolder;
 
-import com.mojang.serialization.MapCodec;
 import java.security.SecureRandom;
 import java.util.List;
 import net.bobofraggins.intellistore.shared.register.Registration;
@@ -8,8 +7,6 @@ import net.bobofraggins.intellistore.storage.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -28,12 +25,6 @@ import net.minecraft.world.level.Level;
  * one of the folder inputs. The primary output from {@link #assemble} is the first Ender Folder.
  */
 public class EnderFolderRecipe extends CustomRecipe {
-
-    public static final MapCodec<EnderFolderRecipe> CODEC =
-            MapCodec.unit(new EnderFolderRecipe(CraftingBookCategory.MISC));
-
-    public static final StreamCodec<RegistryFriendlyByteBuf, EnderFolderRecipe> STREAM_CODEC =
-            StreamCodec.unit(new EnderFolderRecipe(CraftingBookCategory.MISC));
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 

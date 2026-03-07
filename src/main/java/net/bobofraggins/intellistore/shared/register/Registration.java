@@ -82,6 +82,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -527,8 +528,7 @@ public final class Registration {
             MANILA_FOLDERS.put(
                     tier,
                     ITEMS.register(
-                            tier.getId() + "_manila_folder",
-                            () -> new ManillaFolderItem(tier, new Item.Properties().stacksTo(1))));
+                            tier.getId() + "_manila_folder", () -> new ManillaFolderItem(tier, new Item.Properties())));
         }
     }
 
@@ -554,79 +554,24 @@ public final class Registration {
     // -------------------------------------------------------------------------
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderStorageRecipe>>
-            FOLDER_STORAGE_RECIPE = RECIPE_SERIALIZERS.register("folder_storage", () -> new RecipeSerializer<>() {
-        @Override
-        public com.mojang.serialization.MapCodec<FolderStorageRecipe> codec() {
-            return FolderStorageRecipe.CODEC;
-        }
-
-        @Override
-        public net.minecraft.network.codec.StreamCodec<
-                        net.minecraft.network.RegistryFriendlyByteBuf, FolderStorageRecipe>
-                streamCodec() {
-            return FolderStorageRecipe.STREAM_CODEC;
-        }
-    });
+            FOLDER_STORAGE_RECIPE = RECIPE_SERIALIZERS.register(
+                    "folder_storage", () -> new SimpleCraftingRecipeSerializer<>(FolderStorageRecipe::new));
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderExtractRecipe>>
-            FOLDER_EXTRACT_RECIPE = RECIPE_SERIALIZERS.register("folder_extract", () -> new RecipeSerializer<>() {
-        @Override
-        public com.mojang.serialization.MapCodec<FolderExtractRecipe> codec() {
-            return FolderExtractRecipe.CODEC;
-        }
-
-        @Override
-        public net.minecraft.network.codec.StreamCodec<
-                        net.minecraft.network.RegistryFriendlyByteBuf, FolderExtractRecipe>
-                streamCodec() {
-            return FolderExtractRecipe.STREAM_CODEC;
-        }
-    });
+            FOLDER_EXTRACT_RECIPE = RECIPE_SERIALIZERS.register(
+                    "folder_extract", () -> new SimpleCraftingRecipeSerializer<>(FolderExtractRecipe::new));
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderMergeRecipe>> FOLDER_MERGE_RECIPE =
-            RECIPE_SERIALIZERS.register("folder_merge", () -> new RecipeSerializer<>() {
-                @Override
-                public com.mojang.serialization.MapCodec<FolderMergeRecipe> codec() {
-                    return FolderMergeRecipe.CODEC;
-                }
-
-                @Override
-                public net.minecraft.network.codec.StreamCodec<
-                                net.minecraft.network.RegistryFriendlyByteBuf, FolderMergeRecipe>
-                        streamCodec() {
-                    return FolderMergeRecipe.STREAM_CODEC;
-                }
-            });
+            RECIPE_SERIALIZERS.register(
+                    "folder_merge", () -> new SimpleCraftingRecipeSerializer<>(FolderMergeRecipe::new));
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderTapeRecipe>> FOLDER_TAPE_RECIPE =
-            RECIPE_SERIALIZERS.register("folder_tape", () -> new RecipeSerializer<>() {
-                @Override
-                public com.mojang.serialization.MapCodec<FolderTapeRecipe> codec() {
-                    return FolderTapeRecipe.CODEC;
-                }
-
-                @Override
-                public net.minecraft.network.codec.StreamCodec<
-                                net.minecraft.network.RegistryFriendlyByteBuf, FolderTapeRecipe>
-                        streamCodec() {
-                    return FolderTapeRecipe.STREAM_CODEC;
-                }
-            });
+            RECIPE_SERIALIZERS.register(
+                    "folder_tape", () -> new SimpleCraftingRecipeSerializer<>(FolderTapeRecipe::new));
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderFolderRecipe>> ENDER_FOLDER_RECIPE =
-            RECIPE_SERIALIZERS.register("ender_folder", () -> new RecipeSerializer<>() {
-                @Override
-                public com.mojang.serialization.MapCodec<EnderFolderRecipe> codec() {
-                    return EnderFolderRecipe.CODEC;
-                }
-
-                @Override
-                public net.minecraft.network.codec.StreamCodec<
-                                net.minecraft.network.RegistryFriendlyByteBuf, EnderFolderRecipe>
-                        streamCodec() {
-                    return EnderFolderRecipe.STREAM_CODEC;
-                }
-            });
+            RECIPE_SERIALIZERS.register(
+                    "ender_folder", () -> new SimpleCraftingRecipeSerializer<>(EnderFolderRecipe::new));
 
     // -------------------------------------------------------------------------
     // Creative tab

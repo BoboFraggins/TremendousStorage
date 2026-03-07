@@ -1,9 +1,6 @@
 package net.bobofraggins.intellistore.storage.manillafolder;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -19,12 +16,6 @@ import net.minecraft.world.level.Level;
  * player should check capacities before merging.
  */
 public class FolderMergeRecipe extends CustomRecipe {
-
-    public static final MapCodec<FolderMergeRecipe> CODEC =
-            MapCodec.unit(new FolderMergeRecipe(CraftingBookCategory.MISC));
-
-    public static final StreamCodec<RegistryFriendlyByteBuf, FolderMergeRecipe> STREAM_CODEC =
-            StreamCodec.unit(new FolderMergeRecipe(CraftingBookCategory.MISC));
 
     public FolderMergeRecipe(CraftingBookCategory category) {
         super(category);

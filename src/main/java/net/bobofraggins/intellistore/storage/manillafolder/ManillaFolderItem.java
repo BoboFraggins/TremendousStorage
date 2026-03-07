@@ -48,6 +48,11 @@ public class ManillaFolderItem extends Item {
         return tier.getDefaultCapacity();
     }
 
+    @Override
+    public int getMaxStackSize(ItemStack stack) {
+        return getContents(stack).isEmpty() ? 64 : 1;
+    }
+
     // -------------------------------------------------------------------------
     // Tooltip
     // -------------------------------------------------------------------------

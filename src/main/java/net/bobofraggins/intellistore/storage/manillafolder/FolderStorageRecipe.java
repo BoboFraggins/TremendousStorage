@@ -1,9 +1,6 @@
 package net.bobofraggins.intellistore.storage.manillafolder;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -26,12 +23,6 @@ import net.minecraft.world.level.Level;
  * items (tools, weapons, armour) are rejected.
  */
 public class FolderStorageRecipe extends CustomRecipe {
-
-    public static final MapCodec<FolderStorageRecipe> CODEC =
-            MapCodec.unit(new FolderStorageRecipe(CraftingBookCategory.MISC));
-
-    public static final StreamCodec<RegistryFriendlyByteBuf, FolderStorageRecipe> STREAM_CODEC =
-            StreamCodec.unit(new FolderStorageRecipe(CraftingBookCategory.MISC));
 
     public FolderStorageRecipe(CraftingBookCategory category) {
         super(category);

@@ -1,14 +1,11 @@
 package net.bobofraggins.intellistore.storage.whiteout;
 
-import com.mojang.serialization.MapCodec;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankContents;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -26,12 +23,6 @@ import net.minecraft.world.level.Level;
  * locked (has a stored type) but has a count/amount of zero.
  */
 public class FolderTapeRecipe extends CustomRecipe {
-
-    public static final MapCodec<FolderTapeRecipe> CODEC =
-            MapCodec.unit(new FolderTapeRecipe(CraftingBookCategory.MISC));
-
-    public static final StreamCodec<RegistryFriendlyByteBuf, FolderTapeRecipe> STREAM_CODEC =
-            StreamCodec.unit(new FolderTapeRecipe(CraftingBookCategory.MISC));
 
     public FolderTapeRecipe(CraftingBookCategory category) {
         super(category);

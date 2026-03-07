@@ -1,10 +1,7 @@
 package net.bobofraggins.intellistore.storage.manillafolder;
 
-import com.mojang.serialization.MapCodec;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -43,12 +40,6 @@ import net.minecraft.world.level.Level;
  * </ul>
  */
 public class FolderExtractRecipe extends CustomRecipe {
-
-    public static final MapCodec<FolderExtractRecipe> CODEC =
-            MapCodec.unit(new FolderExtractRecipe(CraftingBookCategory.MISC));
-
-    public static final StreamCodec<RegistryFriendlyByteBuf, FolderExtractRecipe> STREAM_CODEC =
-            StreamCodec.unit(new FolderExtractRecipe(CraftingBookCategory.MISC));
 
     public FolderExtractRecipe(CraftingBookCategory category) {
         super(category);
