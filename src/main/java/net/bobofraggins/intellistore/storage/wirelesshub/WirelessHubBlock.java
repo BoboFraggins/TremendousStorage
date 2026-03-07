@@ -4,16 +4,21 @@ import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
@@ -27,6 +32,7 @@ import net.minecraft.world.phys.BlockHitResult;
 public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<WirelessHubBlock> CODEC = simpleCodec(WirelessHubBlock::new);
+    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     @Override
     public MapCodec<WirelessHubBlock> codec() {
@@ -35,6 +41,19 @@ public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnecto
 
     public WirelessHubBlock(Properties props) {
         super(props);
+        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.SOUTH));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(
+            StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
+        builder.add(FACING);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        return this.defaultBlockState()
+                .setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override

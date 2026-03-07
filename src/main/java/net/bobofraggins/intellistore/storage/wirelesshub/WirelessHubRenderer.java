@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.storage.wirelesshub;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import java.util.Random;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -9,6 +10,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -106,6 +108,23 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
 
         poseStack.pushPose();
+
+        // Rotate geometry to match the placed facing direction.
+        // Default geometry (SOUTH = 0°): rods separated along X, arc visible from +Z face.
+        Direction facing = be.getBlockState().getValue(WirelessHubBlock.FACING);
+        float yDeg =
+                switch (facing) {
+                    case WEST -> 90f;
+                    case NORTH -> 180f;
+                    case EAST -> 270f;
+                    default -> 0f; // SOUTH
+                };
+        if (yDeg != 0f) {
+            poseStack.translate(0.5f, 0f, 0.5f);
+            poseStack.mulPose(Axis.YP.rotationDegrees(yDeg));
+            poseStack.translate(-0.5f, 0f, -0.5f);
+        }
+
         Matrix4f mat = poseStack.last().pose();
 
         // ---- Iron base ----
@@ -170,60 +189,89 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
 
         VertexConsumer lightning = bufferSource.getBuffer(RenderType.lightning());
 
-        // Build array of (x, y) knot points from bottom to arcTopY
+        // Both endpoints sit at arcTopY so both rods rise together.
+        // Interior knots jitter in X and Y around that height.
         float[] knotX = new float[ARC_SEGMENTS + 1];
         float[] knotY = new float[ARC_SEGMENTS + 1];
 
         knotX[0] = ARC_LEFT_X;
-        knotY[0] = ARC_BOTTOM_Y;
-
-        for (int i = 1; i <= ARC_SEGMENTS; i++) {
+        knotY[0] = arcTopY;
+        for (int i = 1; i < ARC_SEGMENTS; i++) {
             float t = i / (float) ARC_SEGMENTS;
-            // X travels from left rod to right rod
-            float baseX = ARC_LEFT_X + (ARC_RIGHT_X - ARC_LEFT_X) * t;
-            // Random lateral zigzag
-            float jitter = (rand.nextFloat() - 0.5f) * 0.12f;
-            knotX[i] = baseX + jitter;
-            knotY[i] = ARC_BOTTOM_Y + (arcTopY - ARC_BOTTOM_Y) * t;
+            float xJitter = (rand.nextFloat() - 0.5f) * 0.12f;
+            float yJitter = (rand.nextFloat() - 0.5f) * 0.06f;
+            knotX[i] = ARC_LEFT_X + (ARC_RIGHT_X - ARC_LEFT_X) * t + xJitter;
+            knotY[i] = arcTopY + yJitter;
         }
+        knotX[ARC_SEGMENTS] = ARC_RIGHT_X;
+        knotY[ARC_SEGMENTS] = arcTopY;
 
-        // Emit as quad strip: each segment = a thin quad, drawn in Z-axis plane
+        // Emit each segment in two perpendicular planes (cross) so the arc is
+        // visible from any horizontal viewing angle, regardless of hub facing.
         for (int i = 0; i < ARC_SEGMENTS; i++) {
-            float x0 = knotX[i];
-            float y0 = knotY[i];
-            float x1 = knotX[i + 1];
-            float y1 = knotY[i + 1];
+            float xa = knotX[i], ya = knotY[i];
+            float xb = knotX[i + 1], yb = knotY[i + 1];
             float z = ARC_Z;
 
-            // Quad vertices: bottom-left, bottom-right, top-right, top-left
+            // Plane 1: width along X — face visible from north/south (±Z axis)
             lightning
-                    .addVertex(mat, x0 - ARC_HALF_W, y0, z)
+                    .addVertex(mat, xa - ARC_HALF_W, ya, z)
                     .setColor(ARC_R, ARC_G, ARC_B, ARC_A)
                     .setUv(0, 0)
                     .setOverlay(packedOverlay)
-                    .setLight(0xF000F0) // full brightness — arc glows
+                    .setLight(0xF000F0)
                     .setNormal(0, 0, 1);
             lightning
-                    .addVertex(mat, x0 + ARC_HALF_W, y0, z)
+                    .addVertex(mat, xa + ARC_HALF_W, ya, z)
                     .setColor(ARC_R, ARC_G, ARC_B, ARC_A)
                     .setUv(1, 0)
                     .setOverlay(packedOverlay)
                     .setLight(0xF000F0)
                     .setNormal(0, 0, 1);
             lightning
-                    .addVertex(mat, x1 + ARC_HALF_W, y1, z)
+                    .addVertex(mat, xb + ARC_HALF_W, yb, z)
                     .setColor(ARC_R, ARC_G, ARC_B, ARC_A)
                     .setUv(1, 1)
                     .setOverlay(packedOverlay)
                     .setLight(0xF000F0)
                     .setNormal(0, 0, 1);
             lightning
-                    .addVertex(mat, x1 - ARC_HALF_W, y1, z)
+                    .addVertex(mat, xb - ARC_HALF_W, yb, z)
                     .setColor(ARC_R, ARC_G, ARC_B, ARC_A)
                     .setUv(0, 1)
                     .setOverlay(packedOverlay)
                     .setLight(0xF000F0)
                     .setNormal(0, 0, 1);
+
+            // Plane 2: width along Z — face visible from east/west (±X axis)
+            lightning
+                    .addVertex(mat, xa, ya, z - ARC_HALF_W)
+                    .setColor(ARC_R, ARC_G, ARC_B, ARC_A)
+                    .setUv(0, 0)
+                    .setOverlay(packedOverlay)
+                    .setLight(0xF000F0)
+                    .setNormal(1, 0, 0);
+            lightning
+                    .addVertex(mat, xa, ya, z + ARC_HALF_W)
+                    .setColor(ARC_R, ARC_G, ARC_B, ARC_A)
+                    .setUv(1, 0)
+                    .setOverlay(packedOverlay)
+                    .setLight(0xF000F0)
+                    .setNormal(1, 0, 0);
+            lightning
+                    .addVertex(mat, xb, yb, z + ARC_HALF_W)
+                    .setColor(ARC_R, ARC_G, ARC_B, ARC_A)
+                    .setUv(1, 1)
+                    .setOverlay(packedOverlay)
+                    .setLight(0xF000F0)
+                    .setNormal(1, 0, 0);
+            lightning
+                    .addVertex(mat, xb, yb, z - ARC_HALF_W)
+                    .setColor(ARC_R, ARC_G, ARC_B, ARC_A)
+                    .setUv(0, 1)
+                    .setOverlay(packedOverlay)
+                    .setLight(0xF000F0)
+                    .setNormal(1, 0, 0);
         }
 
         poseStack.popPose();
