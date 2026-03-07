@@ -33,6 +33,9 @@ public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInter
     private static final int GAP = 2;
     private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W;
 
+    private Button downBtn;
+    private Button upBtn;
+
     public StorageInterfaceScreen(StorageInterfaceMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         this.imageWidth = BG_WIDTH;
@@ -46,7 +49,7 @@ public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInter
         int btnY = topPos + ROW_Y;
 
         // ▼ — decrease priority
-        addRenderableWidget(Button.builder(Component.literal("▼"), btn -> {
+        downBtn = addRenderableWidget(Button.builder(Component.literal("▼"), btn -> {
                     int next = Math.max(0, menu.getPriority() - 1);
                     PacketDistributor.sendToServer(
                             new SetStorageInterfacePriorityPacket(menu.getPos(), menu.getFaceIndex(), next));
@@ -55,7 +58,7 @@ public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInter
                 .build());
 
         // ▲ — increase priority
-        addRenderableWidget(Button.builder(Component.literal("▲"), btn -> {
+        upBtn = addRenderableWidget(Button.builder(Component.literal("▲"), btn -> {
                     int next = Math.min(Priority.VALUES.length - 1, menu.getPriority() + 1);
                     PacketDistributor.sendToServer(
                             new SetStorageInterfacePriorityPacket(menu.getPos(), menu.getFaceIndex(), next));
@@ -68,10 +71,8 @@ public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInter
     protected void containerTick() {
         super.containerTick();
         int selected = menu.getPriority();
-        if (renderables.size() >= 2) {
-            if (renderables.get(0) instanceof Button down) down.active = (selected > 0);
-            if (renderables.get(1) instanceof Button up) up.active = (selected < Priority.VALUES.length - 1);
-        }
+        if (downBtn != null) downBtn.active = (selected > 0);
+        if (upBtn != null) upBtn.active = (selected < Priority.VALUES.length - 1);
     }
 
     @Override

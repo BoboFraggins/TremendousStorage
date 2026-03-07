@@ -35,6 +35,9 @@ public class PriorityScreen extends AbstractContainerScreen<PriorityMenu> {
     // Total row width: BTN_W + GAP + LBL_W + GAP + BTN_W = 20+2+56+2+20 = 100
     private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W;
 
+    private Button downBtn;
+    private Button upBtn;
+
     public PriorityScreen(PriorityMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         this.imageWidth = BG_WIDTH;
@@ -48,7 +51,7 @@ public class PriorityScreen extends AbstractContainerScreen<PriorityMenu> {
         int btnY = topPos + ROW_Y;
 
         // ▼ — decrease priority (higher ordinal = higher priority, so decrease = ordinal - 1)
-        addRenderableWidget(Button.builder(Component.literal("▼"), btn -> {
+        downBtn = addRenderableWidget(Button.builder(Component.literal("▼"), btn -> {
                     int next = Math.max(0, menu.getPriority() - 1);
                     PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), next));
                 })
@@ -56,7 +59,7 @@ public class PriorityScreen extends AbstractContainerScreen<PriorityMenu> {
                 .build());
 
         // ▲ — increase priority
-        addRenderableWidget(Button.builder(Component.literal("▲"), btn -> {
+        upBtn = addRenderableWidget(Button.builder(Component.literal("▲"), btn -> {
                     int next = Math.min(Priority.VALUES.length - 1, menu.getPriority() + 1);
                     PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), next));
                 })
@@ -68,11 +71,8 @@ public class PriorityScreen extends AbstractContainerScreen<PriorityMenu> {
     protected void containerTick() {
         super.containerTick();
         int selected = menu.getPriority();
-        // Disable ▼ at minimum, ▲ at maximum (widgets 0 and 1)
-        if (renderables.size() >= 2) {
-            if (renderables.get(0) instanceof Button down) down.active = (selected > 0);
-            if (renderables.get(1) instanceof Button up) up.active = (selected < Priority.VALUES.length - 1);
-        }
+        if (downBtn != null) downBtn.active = (selected > 0);
+        if (upBtn != null) upBtn.active = (selected < Priority.VALUES.length - 1);
     }
 
     @Override

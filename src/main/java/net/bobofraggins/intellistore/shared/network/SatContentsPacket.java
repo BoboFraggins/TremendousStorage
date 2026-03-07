@@ -49,8 +49,8 @@ public record SatContentsPacket(List<ItemStack> stacks, List<Long> counts) imple
         return TYPE;
     }
 
-    /** Latest item stacks received from the server. Client-thread only. */
-    public static volatile List<ItemStack> PENDING_STACKS = List.of();
+    /** Latest item stacks received from the server. Client-thread only. Null until first packet arrives. */
+    public static volatile List<ItemStack> PENDING_STACKS = null;
 
     /** Parallel to {@link #PENDING_STACKS}: total count of each item type. */
     public static volatile List<Long> PENDING_COUNTS = List.of();

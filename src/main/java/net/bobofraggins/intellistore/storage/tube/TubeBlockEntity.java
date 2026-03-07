@@ -397,6 +397,12 @@ public class TubeBlockEntity extends BlockEntity {
             for (int s = 0; s < 9; s++) filterSlots[faceIndex][s] = ItemStack.EMPTY;
         }
         setChanged();
+        // Invalidate neighbors so their stale cached network views are discarded.
+        if (level != null) {
+            for (Direction dir : Direction.values()) {
+                level.invalidateCapabilities(worldPosition.relative(dir));
+            }
+        }
     }
 
     /** Convenience shim used by TubeBlock for Storage Interface installs/removals. */

@@ -35,7 +35,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     // State
     // -------------------------------------------------------------------------
 
-    private List<ItemStack> networkStacks = List.of();
+    private List<ItemStack> networkStacks = null; // null = awaiting first server response
     private List<Long> networkCounts = List.of();
     private int scrollOffset = 0; // in rows
 
@@ -59,9 +59,9 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         if (menu.hasNetwork()) {
             PacketDistributor.sendToServer(new RequestSatContentsPacket(menu.getNiPos()));
         }
-        SatContentsPacket.PENDING_STACKS = List.of();
+        SatContentsPacket.PENDING_STACKS = null;
         SatContentsPacket.PENDING_COUNTS = List.of();
-        networkStacks = List.of();
+        networkStacks = null;
         networkCounts = List.of();
         scrollOffset = 0;
     }
@@ -74,7 +74,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     protected void containerTick() {
         super.containerTick();
         List<ItemStack> pending = SatContentsPacket.PENDING_STACKS;
-        if (!pending.isEmpty() && pending != networkStacks) {
+        if (pending != null && pending != networkStacks) {
             networkStacks = pending;
             networkCounts = SatContentsPacket.PENDING_COUNTS;
             clampScroll();
