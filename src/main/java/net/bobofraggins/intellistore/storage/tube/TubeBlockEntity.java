@@ -83,6 +83,27 @@ public class TubeBlockEntity extends BlockEntity {
     }
 
     // -------------------------------------------------------------------------
+    // onLoad — fix stale connection state from old world data
+    // -------------------------------------------------------------------------
+
+    /**
+     * Called when this block entity is added to the world. Recomputes the tube's
+     * connection blockstate so that stale values from old world data are corrected
+     * without needing a manual block update.
+     */
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        if (level == null || level.isClientSide()) return;
+        BlockState current = getBlockState();
+        if (!(current.getBlock() instanceof TubeBlock tubeBlock)) return;
+        BlockState corrected = tubeBlock.computeState(current, level, worldPosition);
+        if (!corrected.equals(current)) {
+            level.setBlockAndUpdate(worldPosition, corrected);
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Server tick
     // -------------------------------------------------------------------------
 

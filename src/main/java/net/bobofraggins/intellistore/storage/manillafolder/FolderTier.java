@@ -8,7 +8,7 @@ public enum FolderTier {
     GOLD("gold", 131_072L),
     DIAMOND("diamond", 524_288L),
     EMERALD("emerald", 1_048_576L),
-    NETHERITE("netherite", 4_294_967_296L);
+    NETHERITE("netherite", 4_194_304L);
 
     private final String id;
     private final long defaultCapacity;

@@ -239,10 +239,10 @@ public class TubeBlock extends BaseEntityBlock {
             LevelAccessor level,
             BlockPos pos,
             BlockPos neighborPos) {
-        return state.setValue(DIR_PROPS[direction.ordinal()], canConnectToState(pos, neighborState, level, direction));
+        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
 
-    private BlockState computeState(BlockState current, LevelReader level, BlockPos pos) {
+    BlockState computeState(BlockState current, LevelReader level, BlockPos pos) {
         BlockState s = current;
         for (Direction dir : Direction.values()) {
             BlockPos neighborPos = pos.relative(dir);
@@ -372,6 +372,13 @@ public class TubeBlock extends BaseEntityBlock {
 
         be.setAttachmentType(faceIndex, newType);
         if (!player.isCreative()) stack.shrink(1);
+
+        // Re-evaluate connections — attaching to an external block face now enables connection
+        BlockState updated = computeState(state, level, pos);
+        if (!updated.equals(state)) {
+            level.setBlockAndUpdate(pos, updated);
+        }
+
         return ItemInteractionResult.SUCCESS;
     }
 
@@ -385,29 +392,31 @@ public class TubeBlock extends BaseEntityBlock {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (!(level.getBlockEntity(pos) instanceof TubeBlockEntity be)) return InteractionResult.FAIL;
 
-        int faceIndex = hit.getDirection().ordinal();
-        AttachmentType type = be.getAttachmentType(faceIndex);
+        Vec3 hitLocal = hit.getLocation().subtract(pos.getX(), pos.getY(), pos.getZ());
+        final int fi = attachmentIndexAt(be, hitLocal);
+        if (fi == -1) return InteractionResult.PASS;
+        AttachmentType type = be.getAttachmentType(fi);
 
         switch (type) {
-            case STORAGE_INTERFACE -> player.openMenu(new StorageInterfaceMenu.Provider(be, pos, faceIndex), buf -> {
+            case STORAGE_INTERFACE -> player.openMenu(new StorageInterfaceMenu.Provider(be, pos, fi), buf -> {
                 buf.writeBlockPos(pos);
-                buf.writeByte(faceIndex);
+                buf.writeByte(fi);
             });
-            case IMPORT_INTERFACE -> player.openMenu(new ImportInterfaceMenu.Provider(be, pos, faceIndex), buf -> {
+            case IMPORT_INTERFACE -> player.openMenu(new ImportInterfaceMenu.Provider(be, pos, fi), buf -> {
                 buf.writeBlockPos(pos);
-                buf.writeByte(faceIndex);
+                buf.writeByte(fi);
             });
-            case EXPORT_INTERFACE -> player.openMenu(new ExportInterfaceMenu.Provider(be, pos, faceIndex), buf -> {
+            case EXPORT_INTERFACE -> player.openMenu(new ExportInterfaceMenu.Provider(be, pos, fi), buf -> {
                 buf.writeBlockPos(pos);
-                buf.writeByte(faceIndex);
+                buf.writeByte(fi);
             });
-            case PLACER_INTERFACE -> player.openMenu(new PlacerInterfaceMenu.Provider(be, pos, faceIndex), buf -> {
+            case PLACER_INTERFACE -> player.openMenu(new PlacerInterfaceMenu.Provider(be, pos, fi), buf -> {
                 buf.writeBlockPos(pos);
-                buf.writeByte(faceIndex);
+                buf.writeByte(fi);
             });
-            case BREAKER_INTERFACE -> player.openMenu(new BreakerInterfaceMenu.Provider(be, pos, faceIndex), buf -> {
+            case BREAKER_INTERFACE -> player.openMenu(new BreakerInterfaceMenu.Provider(be, pos, fi), buf -> {
                 buf.writeBlockPos(pos);
-                buf.writeByte(faceIndex);
+                buf.writeByte(fi);
             });
             default -> {
                 return InteractionResult.PASS;
@@ -437,6 +446,12 @@ public class TubeBlock extends BaseEntityBlock {
             ItemStack drop = makeInterfaceDrop(be, i, type);
             be.setAttachmentType(i, AttachmentType.NONE);
             Block.popResource(level, pos, drop);
+
+            // Re-evaluate connections — removing the attachment may disconnect this face
+            BlockState updated = computeState(state, level, pos);
+            if (!updated.equals(state)) {
+                level.setBlockAndUpdate(pos, updated);
+            }
             return;
         }
     }
@@ -539,7 +554,7 @@ public class TubeBlock extends BaseEntityBlock {
      * Returns the AABB (block-local [0..1] coords) for the attachment plate on face {@code i}.
      * Matches the geometry drawn by {@link TubeRenderer}: P_MIN=4/16, P_MAX=12/16, P_THICK=2/16.
      */
-    private static AABB attachmentAABB(int i) {
+    public static AABB attachmentAABB(int i) {
         final double L = 4.0 / 16, H = 12.0 / 16, T = 2.0 / 16;
         return switch (i) {
             case 0 -> new AABB(L, 0, L, H, T, H); // DOWN
@@ -549,5 +564,18 @@ public class TubeBlock extends BaseEntityBlock {
             case 4 -> new AABB(0, L, L, T, H, H); // WEST
             default -> new AABB(1 - T, L, L, 1, H, H); // EAST
         };
+    }
+
+    /**
+     * Returns the attachment face index (0–5) whose plate contains the given block-local hit
+     * point, or -1 if no installed attachment is hit. AABBs are inflated by a small epsilon
+     * to handle hit points that land exactly on a face boundary.
+     */
+    static int attachmentIndexAt(TubeBlockEntity be, Vec3 hitLocal) {
+        for (int i = 0; i < 6; i++) {
+            if (be.getAttachmentType(i) == AttachmentType.NONE) continue;
+            if (attachmentAABB(i).inflate(1e-3).contains(hitLocal)) return i;
+        }
+        return -1;
     }
 }
