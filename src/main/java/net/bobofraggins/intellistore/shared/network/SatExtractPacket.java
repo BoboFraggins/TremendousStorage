@@ -23,13 +23,17 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * from the network via the NI's item handler, and places them in the player's inventory.
  * Sends back an updated {@link SatContentsPacket} after the operation.
  */
-public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount) implements CustomPacketPayload {
+public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount, boolean toCursor)
+        implements CustomPacketPayload {
 
     public static final Type<SatExtractPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "sat_extract"));
 
     private static final StreamCodec<RegistryFriendlyByteBuf, Integer> VAR_INT_CODEC =
             StreamCodec.of((buf, v) -> buf.writeVarInt(v), RegistryFriendlyByteBuf::readVarInt);
+
+    private static final StreamCodec<RegistryFriendlyByteBuf, Boolean> BOOL_CODEC =
+            StreamCodec.of((buf, b) -> buf.writeBoolean(b), buf -> buf.readBoolean());
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SatExtractPacket> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC.cast(),
@@ -38,6 +42,8 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount) imp
             SatExtractPacket::target,
             VAR_INT_CODEC,
             SatExtractPacket::amount,
+            BOOL_CODEC,
+            SatExtractPacket::toCursor,
             SatExtractPacket::new);
 
     @Override
@@ -56,19 +62,28 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount) imp
             if (handler == null) return;
 
             // Extract up to `amount` items matching target type+components
+            ItemStack result = ItemStack.EMPTY;
             int remaining = packet.amount();
             for (int s = 0; s < handler.getSlots() && remaining > 0; s++) {
                 ItemStack inSlot = handler.getStackInSlot(s);
-                if (inSlot.isEmpty()) continue;
-                if (!ItemStack.isSameItemSameComponents(inSlot, packet.target())) continue;
+                if (inSlot.isEmpty() || !ItemStack.isSameItemSameComponents(inSlot, packet.target())) continue;
 
                 int toExtract = Math.min(remaining, inSlot.getCount());
                 ItemStack extracted = handler.extractItem(s, toExtract, false);
                 if (extracted.isEmpty()) continue;
 
                 remaining -= extracted.getCount();
-                // Give extracted items to player (respects inventory rules)
-                ItemHandlerHelper.giveItemToPlayer(player, extracted);
+                if (result.isEmpty()) result = extracted;
+                else result.grow(extracted.getCount());
+            }
+
+            // Route to cursor or directly to inventory
+            if (!result.isEmpty()) {
+                if (packet.toCursor() && player.containerMenu.getCarried().isEmpty()) {
+                    player.containerMenu.setCarried(result);
+                } else {
+                    ItemHandlerHelper.giveItemToPlayer(player, result);
+                }
             }
 
             // Refresh client's item list

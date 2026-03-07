@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.storage.accessterminal;
 
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.bobofraggins.intellistore.shared.network.RequestSatContentsPacket;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -25,6 +26,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Menu for the Storage Access Terminal.
@@ -230,6 +232,11 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                         ItemStack remainder = handler.insertItem(0, stack, false);
                         slot.set(remainder);
                         slotsChanged(craftSlots);
+                        // Refresh the client's network grid
+                        IItemHandler refreshed = ni.getItemHandler();
+                        if (refreshed != null && player instanceof ServerPlayer sp) {
+                            PacketDistributor.sendToPlayer(sp, RequestSatContentsPacket.buildContentsPacket(refreshed));
+                        }
                         return copy;
                     }
                 }

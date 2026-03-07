@@ -96,6 +96,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     }
 
     private void clampScroll() {
+        if (networkStacks == null) return;
         int totalRows =
                 (networkStacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS;
         int maxScroll = Math.max(0, totalRows - AccessTerminalLayout.NETWORK_VISIBLE_ROWS);
@@ -116,39 +117,41 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (isInGridArea(mouseX, mouseY)) {
+            ItemStack carried = menu.getCarried();
+
+            if (!carried.isEmpty()) {
+                // Cursor has items — deposit into network on left-click
+                if (button == 0 && menu.hasNetwork()) {
+                    PacketDistributor.sendToServer(new SatInsertPacket(menu.getNiPos(), -1));
+                }
+                return true;
+            }
+
+            // Cursor empty — extract from network to cursor
             int col = (int) ((mouseX - leftPos - AccessTerminalLayout.NETWORK_X) / AccessTerminalLayout.SLOT_SIZE);
             int row = (int) ((mouseY - topPos - AccessTerminalLayout.NETWORK_Y) / AccessTerminalLayout.SLOT_SIZE);
             int idx = (row + scrollOffset) * AccessTerminalLayout.NETWORK_COLS + col;
 
-            if (idx >= 0 && idx < networkStacks.size() && menu.hasNetwork()) {
+            if (networkStacks != null && idx >= 0 && idx < networkStacks.size() && menu.hasNetwork()) {
                 ItemStack target = networkStacks.get(idx);
                 long totalCount = networkCounts.get(idx);
-
-                // Right-click: extract single item; left-click: extract full stack
-                int amount = (button == 1) ? 1 : (int) Math.min(totalCount, target.getMaxStackSize());
-                PacketDistributor.sendToServer(new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount));
-                return true;
+                int maxStack = target.getMaxStackSize();
+                if (hasShiftDown()) {
+                    // Shift-click: send full stack directly to inventory
+                    int amount = (int) Math.min(totalCount, maxStack);
+                    PacketDistributor.sendToServer(
+                            new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, false));
+                } else {
+                    // Right-click: 1 to cursor; left-click: full stack to cursor
+                    int amount = (button == 1) ? 1 : (int) Math.min(totalCount, maxStack);
+                    PacketDistributor.sendToServer(
+                            new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, true));
+                }
             }
             return true; // consume click even on empty cell
         }
 
         return super.mouseClicked(mouseX, mouseY, button);
-    }
-
-    /**
-     * When the player releases the mouse over the network grid while holding an item
-     * on the cursor, insert the held stack into the network.
-     */
-    @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (button == 0 && isInGridArea(mouseX, mouseY) && menu.hasNetwork()) {
-            ItemStack carried = menu.getCarried();
-            if (!carried.isEmpty()) {
-                PacketDistributor.sendToServer(new SatInsertPacket(menu.getNiPos(), -1));
-                return true;
-            }
-        }
-        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     // -------------------------------------------------------------------------
@@ -166,7 +169,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
             int col = (int) ((mouseX - leftPos - AccessTerminalLayout.NETWORK_X) / AccessTerminalLayout.SLOT_SIZE);
             int row = (int) ((mouseY - topPos - AccessTerminalLayout.NETWORK_Y) / AccessTerminalLayout.SLOT_SIZE);
             int idx = (row + scrollOffset) * AccessTerminalLayout.NETWORK_COLS + col;
-            if (idx >= 0 && idx < networkStacks.size()) {
+            if (networkStacks != null && idx >= 0 && idx < networkStacks.size()) {
                 graphics.renderTooltip(font, networkStacks.get(idx), mouseX, mouseY);
             }
         }
@@ -233,6 +236,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         }
 
         // Overlay item icons and counts
+        if (networkStacks == null) return;
         int firstIdx = scrollOffset * AccessTerminalLayout.NETWORK_COLS;
         for (int row = 0; row < AccessTerminalLayout.NETWORK_VISIBLE_ROWS; row++) {
             for (int col = 0; col < AccessTerminalLayout.NETWORK_COLS; col++) {
@@ -264,8 +268,12 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         graphics.fill(barX, barY, barX + AccessTerminalLayout.SCROLLBAR_W, barY + barH, 0x40000000);
 
         // Thumb
-        int totalRows = Math.max(
-                (networkStacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
+        int totalRows = networkStacks == null
+                ? 1
+                : Math.max(
+                        (networkStacks.size() + AccessTerminalLayout.NETWORK_COLS - 1)
+                                / AccessTerminalLayout.NETWORK_COLS,
+                        1);
         int thumbH = Math.max(8, barH * AccessTerminalLayout.NETWORK_VISIBLE_ROWS / totalRows);
         int maxScroll = Math.max(1, totalRows - AccessTerminalLayout.NETWORK_VISIBLE_ROWS);
         int thumbY = barY + (barH - thumbH) * scrollOffset / maxScroll;
