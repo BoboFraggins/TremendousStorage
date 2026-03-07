@@ -56,22 +56,19 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
     private static final float BASE_Z0 = 4f / 16;
     private static final float BASE_Z1 = 12f / 16;
 
-    // Left rod: x 5-6, z 8-9, y 2-14
-    private static final float LROD_X0 = 5f / 16;
-    private static final float LROD_X1 = 6f / 16;
-    private static final float ROD_Z0 = 8f / 16;
-    private static final float ROD_Z1 = 9f / 16;
+    // V-shape rods: both start at block-centre X at the base, fan outward toward the top.
     private static final float ROD_Y0 = 2f / 16;
     private static final float ROD_Y1 = 14f / 16;
+    private static final float ROD_BASE_X = 8f / 16; // shared X origin at base (block centre)
+    private static final float LROD_TOP_CX = 4.5f / 16; // left rod centre-X at top
+    private static final float RROD_TOP_CX = 11.5f / 16; // right rod centre-X at top
+    private static final float ROD_HALF_W = 0.5f / 16; // 1 px half-width
 
-    // Right rod: x 10-11, same z and y
-    private static final float RROD_X0 = 10f / 16;
-    private static final float RROD_X1 = 11f / 16;
-
-    // Arc anchor X positions (centre of each rod face that faces the other)
-    private static final float ARC_LEFT_X = 6f / 16; // right face of left rod
-    private static final float ARC_RIGHT_X = 10f / 16; // left face of right rod
     private static final float ARC_Z = 8.5f / 16; // midpoint of rod depth
+
+    // Arc inner-face X at full spread (top of V); lerped by progress during animation.
+    private static final float ARC_LEFT_X_TOP = LROD_TOP_CX + ROD_HALF_W; // = 5/16
+    private static final float ARC_RIGHT_X_TOP = RROD_TOP_CX - ROD_HALF_W; // = 11/16
 
     // Arc Y range
     private static final float ARC_BOTTOM_Y = ROD_Y0;
@@ -144,37 +141,29 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
                 packedLight,
                 packedOverlay);
 
-        // ---- Left rod ----
-        drawBox(
+        // ---- V-shape rods (diagonal cross-quads) ----
+        drawDiagonalRod(
                 solid,
                 mat,
-                LROD_X0,
+                ROD_BASE_X,
                 ROD_Y0,
-                ROD_Z0,
-                LROD_X1,
+                LROD_TOP_CX,
                 ROD_Y1,
-                ROD_Z1,
+                ARC_Z,
+                ROD_HALF_W,
                 iron,
-                255,
-                255,
-                255,
                 packedLight,
                 packedOverlay);
-
-        // ---- Right rod ----
-        drawBox(
+        drawDiagonalRod(
                 solid,
                 mat,
-                RROD_X0,
+                ROD_BASE_X,
                 ROD_Y0,
-                ROD_Z0,
-                RROD_X1,
+                RROD_TOP_CX,
                 ROD_Y1,
-                ROD_Z1,
+                ARC_Z,
+                ROD_HALF_W,
                 iron,
-                255,
-                255,
-                255,
                 packedLight,
                 packedOverlay);
 
@@ -189,21 +178,25 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
 
         VertexConsumer lightning = bufferSource.getBuffer(RenderType.lightning());
 
+        // Arc X anchors widen with progress — narrow at the base of the V, full-width at the top.
+        float arcLeftX = ROD_BASE_X + (ARC_LEFT_X_TOP - ROD_BASE_X) * progress;
+        float arcRightX = ROD_BASE_X + (ARC_RIGHT_X_TOP - ROD_BASE_X) * progress;
+
         // Both endpoints sit at arcTopY so both rods rise together.
         // Interior knots jitter in X and Y around that height.
         float[] knotX = new float[ARC_SEGMENTS + 1];
         float[] knotY = new float[ARC_SEGMENTS + 1];
 
-        knotX[0] = ARC_LEFT_X;
+        knotX[0] = arcLeftX;
         knotY[0] = arcTopY;
         for (int i = 1; i < ARC_SEGMENTS; i++) {
             float t = i / (float) ARC_SEGMENTS;
             float xJitter = (rand.nextFloat() - 0.5f) * 0.12f;
             float yJitter = (rand.nextFloat() - 0.5f) * 0.06f;
-            knotX[i] = ARC_LEFT_X + (ARC_RIGHT_X - ARC_LEFT_X) * t + xJitter;
+            knotX[i] = arcLeftX + (arcRightX - arcLeftX) * t + xJitter;
             knotY[i] = arcTopY + yJitter;
         }
-        knotX[ARC_SEGMENTS] = ARC_RIGHT_X;
+        knotX[ARC_SEGMENTS] = arcRightX;
         knotY[ARC_SEGMENTS] = arcTopY;
 
         // Emit each segment in two perpendicular planes (cross) so the arc is
@@ -297,6 +290,39 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
                 .getModelManager()
                 .getAtlas(InventoryMenu.BLOCK_ATLAS)
                 .getSprite(loc);
+    }
+
+    /**
+     * Draws a diagonal rod as two perpendicular cross-quad planes (front + back each), going from
+     * (x0, y0) at the base to (x1, y1) at the tip, centred on z.
+     */
+    private static void drawDiagonalRod(
+            VertexConsumer vc,
+            Matrix4f mat,
+            float x0,
+            float y0,
+            float x1,
+            float y1,
+            float z,
+            float hw,
+            TextureAtlasSprite sp,
+            int light,
+            int overlay) {
+        float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
+        // XY-plane — visible from ±Z
+        quad(
+                vc, mat, 255, 255, 255, light, overlay, u0, v0, u1, v1, x0 - hw, y0, z, x0 + hw, y0, z, x1 + hw, y1, z,
+                x1 - hw, y1, z, 0, 0, 1);
+        quad(
+                vc, mat, 255, 255, 255, light, overlay, u0, v0, u1, v1, x0 + hw, y0, z, x0 - hw, y0, z, x1 - hw, y1, z,
+                x1 + hw, y1, z, 0, 0, -1);
+        // ZY-plane — visible from ±X
+        quad(
+                vc, mat, 255, 255, 255, light, overlay, u0, v0, u1, v1, x0, y0, z + hw, x0, y0, z - hw, x1, y1, z - hw,
+                x1, y1, z + hw, 1, 0, 0);
+        quad(
+                vc, mat, 255, 255, 255, light, overlay, u0, v0, u1, v1, x0, y0, z - hw, x0, y0, z + hw, x1, y1, z + hw,
+                x1, y1, z - hw, -1, 0, 0);
     }
 
     private static void drawBox(
