@@ -131,42 +131,16 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
             if (aType == AttachmentType.NONE) continue;
             // Typed attachments: white vertex color (accent encoded in texture).
             // Storage: tube-color vertex color (texture has white pattern, tinted at render time).
-            TextureAtlasSprite faceSprite;
-            int pr, pg, pb;
-            switch (aType) {
-                case IMPORT_INTERFACE -> {
-                    faceSprite = importSprite;
-                    pr = 255;
-                    pg = 255;
-                    pb = 255;
-                }
-                case EXPORT_INTERFACE -> {
-                    faceSprite = exportSprite;
-                    pr = 255;
-                    pg = 255;
-                    pb = 255;
-                }
-                case PLACER_INTERFACE -> {
-                    faceSprite = placerSprite;
-                    pr = 255;
-                    pg = 255;
-                    pb = 255;
-                }
-                case BREAKER_INTERFACE -> {
-                    faceSprite = breakerSprite;
-                    pr = 255;
-                    pg = 255;
-                    pb = 255;
-                }
-                default -> {
-                    faceSprite = storageSprite;
-                    pr = r;
-                    pg = g;
-                    pb = b;
-                }
-            }
+            TextureAtlasSprite faceSprite =
+                    switch (aType) {
+                        case IMPORT_INTERFACE -> importSprite;
+                        case EXPORT_INTERFACE -> exportSprite;
+                        case PLACER_INTERFACE -> placerSprite;
+                        case BREAKER_INTERFACE -> breakerSprite;
+                        default -> storageSprite;
+                    };
             drawAttachmentPlate(
-                    vc, mat, Direction.values()[i], faceSprite, sprite, pr, pg, pb, packedLight, packedOverlay);
+                    vc, mat, Direction.values()[i], faceSprite, sprite, r, g, b, packedLight, packedOverlay);
         }
 
         poseStack.popPose();
