@@ -11,11 +11,11 @@
       "tag": "intellistore:tubes"
     },
     "D": {
-      "item": "minecraft:light_blue_dye"
+      "item": "minecraft:white_dye"
     }
   },
   "result": {
-    "id": "intellistore:light_blue_tube",
+    "id": "intellistore:white_tube",
     "count": 8
   }
 }

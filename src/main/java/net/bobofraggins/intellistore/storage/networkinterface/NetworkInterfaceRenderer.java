@@ -109,8 +109,8 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         float wx0 = gx0 + 1f / 16 + EPS, wx1 = gx1 - 1f / 16 - EPS;
         float wz0 = gz0 + 1f / 16 + EPS, wz1 = gz1 - 1f / 16 - EPS;
         float wy0 = 2f / 16 + EPS, wy1 = gy1 - 1f / 16 - EPS;
-        // Lime-green tint (#80C71F) to match Minecraft lime dye colour.
-        drawBox(translucent, mat, wx0, wy0, wz0, wx1, wy1, wz1, waterSprite, 128, 199, 31, packedLight, packedOverlay);
+        // Light-blue tint (#3AB3DA) to match Minecraft light-blue dye colour.
+        drawBox(translucent, mat, wx0, wy0, wz0, wx1, wy1, wz1, waterSprite, 58, 179, 218, packedLight, packedOverlay);
 
         // ---- Animated floating brain (item renderer — matches vanilla dropped items) ----
         // ItemModelGenerator automatically produces per-pixel edge faces from the
@@ -122,8 +122,8 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         float rotY = (float) ((time * 40.0) % 360.0);
         poseStack.translate(0.5, 0.41 + bob, 0.5);
         poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
-        // scale(1.125) × FIXED display scale(0.5) ≈ 0.56 effective world-units.
-        poseStack.scale(1.125f, 1.125f, 1.125f);
+        // scale(0.5625) × FIXED display scale(0.5) ≈ 0.28 effective world-units (half original).
+        poseStack.scale(0.5625f, 0.5625f, 0.5625f);
         poseStack.mulPose(Axis.XP.rotationDegrees(2f));
 
         // Render exactly as ItemEntityRenderer does: fetch the baked model, then

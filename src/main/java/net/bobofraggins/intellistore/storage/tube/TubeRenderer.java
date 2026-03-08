@@ -39,6 +39,20 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     public static final ResourceLocation TUBE_TEXTURE =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/tube");
 
+    // Core face textures — selected by perpendicular connection count/pattern
+    private static final ResourceLocation TUBE_FACE_0 =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/tube_face");
+    private static final ResourceLocation TUBE_FACE_1 =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/tube_face_1");
+    private static final ResourceLocation TUBE_FACE_2ADJ =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/tube_face_2adj");
+    private static final ResourceLocation TUBE_FACE_2OPP =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/tube_face_2opp");
+    private static final ResourceLocation TUBE_FACE_3 =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/tube_face_3");
+    private static final ResourceLocation TUBE_FACE_4 =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/tube_face_4");
+
     // Attachment face textures — steel border + accent-color random pattern
     private static final ResourceLocation ATTACH_IMPORT_TEXTURE =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/attachment_import");
@@ -104,6 +118,12 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
 
         var atlas = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS);
         TextureAtlasSprite sprite = atlas.getSprite(TUBE_TEXTURE);
+        TextureAtlasSprite tubeFace0 = atlas.getSprite(TUBE_FACE_0);
+        TextureAtlasSprite tubeFace1 = atlas.getSprite(TUBE_FACE_1);
+        TextureAtlasSprite tubeFace2adj = atlas.getSprite(TUBE_FACE_2ADJ);
+        TextureAtlasSprite tubeFace2opp = atlas.getSprite(TUBE_FACE_2OPP);
+        TextureAtlasSprite tubeFace3 = atlas.getSprite(TUBE_FACE_3);
+        TextureAtlasSprite tubeFace4 = atlas.getSprite(TUBE_FACE_4);
         TextureAtlasSprite importSprite = atlas.getSprite(ATTACH_IMPORT_TEXTURE);
         TextureAtlasSprite exportSprite = atlas.getSprite(ATTACH_EXPORT_TEXTURE);
         TextureAtlasSprite placerSprite = atlas.getSprite(ATTACH_PLACER_TEXTURE);
@@ -116,7 +136,22 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
         Matrix4f mat = poseStack.last().pose();
 
         // Core cube — only draw faces not covered by an arm
-        drawCore(vc, mat, state, sprite, r, g, b, packedLight, packedOverlay);
+        drawCore(
+                vc,
+                mat,
+                state,
+                sprite,
+                tubeFace0,
+                tubeFace1,
+                tubeFace2adj,
+                tubeFace2opp,
+                tubeFace3,
+                tubeFace4,
+                r,
+                g,
+                b,
+                packedLight,
+                packedOverlay);
 
         // Arms toward connected faces
         for (Direction dir : Direction.values()) {
@@ -166,6 +201,12 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
             Matrix4f mat,
             BlockState state,
             TextureAtlasSprite sprite,
+            TextureAtlasSprite face0,
+            TextureAtlasSprite face1,
+            TextureAtlasSprite face2adj,
+            TextureAtlasSprite face2opp,
+            TextureAtlasSprite face3,
+            TextureAtlasSprite face4,
             int r,
             int g,
             int b,
@@ -175,17 +216,11 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
         int rDn = shade(r, SHADE_DOWN), gDn = shade(g, SHADE_DOWN), bDn = shade(b, SHADE_DOWN);
         int rNS = shade(r, SHADE_NORTH_SOUTH), gNS = shade(g, SHADE_NORTH_SOUTH), bNS = shade(b, SHADE_NORTH_SOUTH);
         int rEW = shade(r, SHADE_EAST_WEST), gEW = shade(g, SHADE_EAST_WEST), bEW = shade(b, SHADE_EAST_WEST);
-        int trUp = shade(TRIM_R, SHADE_UP), tgUp = shade(TRIM_G, SHADE_UP), tbUp = shade(TRIM_B, SHADE_UP);
-        int trDn = shade(TRIM_R, SHADE_DOWN), tgDn = shade(TRIM_G, SHADE_DOWN), tbDn = shade(TRIM_B, SHADE_DOWN);
-        int trNS = shade(TRIM_R, SHADE_NORTH_SOUTH),
-                tgNS = shade(TRIM_G, SHADE_NORTH_SOUTH),
-                tbNS = shade(TRIM_B, SHADE_NORTH_SOUTH);
-        int trEW = shade(TRIM_R, SHADE_EAST_WEST),
-                tgEW = shade(TRIM_G, SHADE_EAST_WEST),
-                tbEW = shade(TRIM_B, SHADE_EAST_WEST);
+
+        TextureAtlasSprite[] faceSprites = {face0, face1, face2adj, face2opp, face3, face4};
 
         if (!state.getValue(TubeBlock.UP))
-            drawFramedFace(
+            drawCoreFace(
                     vc,
                     mat,
                     Direction.UP,
@@ -194,17 +229,15 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                     C_MAX,
                     C_MIN,
                     C_MAX,
+                    state,
+                    faceSprites,
                     rUp,
                     gUp,
                     bUp,
-                    trUp,
-                    tgUp,
-                    tbUp,
                     light,
-                    overlay,
-                    sprite);
+                    overlay);
         if (!state.getValue(TubeBlock.DOWN))
-            drawFramedFace(
+            drawCoreFace(
                     vc,
                     mat,
                     Direction.DOWN,
@@ -213,17 +246,15 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                     C_MAX,
                     C_MIN,
                     C_MAX,
+                    state,
+                    faceSprites,
                     rDn,
                     gDn,
                     bDn,
-                    trDn,
-                    tgDn,
-                    tbDn,
                     light,
-                    overlay,
-                    sprite);
+                    overlay);
         if (!state.getValue(TubeBlock.SOUTH))
-            drawFramedFace(
+            drawCoreFace(
                     vc,
                     mat,
                     Direction.SOUTH,
@@ -232,17 +263,15 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                     C_MAX,
                     C_MIN,
                     C_MAX,
+                    state,
+                    faceSprites,
                     rNS,
                     gNS,
                     bNS,
-                    trNS,
-                    tgNS,
-                    tbNS,
                     light,
-                    overlay,
-                    sprite);
+                    overlay);
         if (!state.getValue(TubeBlock.NORTH))
-            drawFramedFace(
+            drawCoreFace(
                     vc,
                     mat,
                     Direction.NORTH,
@@ -251,17 +280,15 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                     C_MAX,
                     C_MIN,
                     C_MAX,
+                    state,
+                    faceSprites,
                     rNS,
                     gNS,
                     bNS,
-                    trNS,
-                    tgNS,
-                    tbNS,
                     light,
-                    overlay,
-                    sprite);
+                    overlay);
         if (!state.getValue(TubeBlock.EAST))
-            drawFramedFace(
+            drawCoreFace(
                     vc,
                     mat,
                     Direction.EAST,
@@ -270,17 +297,15 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                     C_MAX,
                     C_MIN,
                     C_MAX,
+                    state,
+                    faceSprites,
                     rEW,
                     gEW,
                     bEW,
-                    trEW,
-                    tgEW,
-                    tbEW,
                     light,
-                    overlay,
-                    sprite);
+                    overlay);
         if (!state.getValue(TubeBlock.WEST))
-            drawFramedFace(
+            drawCoreFace(
                     vc,
                     mat,
                     Direction.WEST,
@@ -289,15 +314,285 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                     C_MAX,
                     C_MIN,
                     C_MAX,
+                    state,
+                    faceSprites,
                     rEW,
                     gEW,
                     bEW,
-                    trEW,
-                    tgEW,
-                    tbEW,
                     light,
-                    overlay,
-                    sprite);
+                    overlay);
+    }
+
+    /**
+     * Returns the 4 perpendicular directions of a face in clockwise order
+     * [top, right, bottom, left] as seen from outside (used for UV rotation).
+     *
+     * <p>These match the UV mappings of {@link #faceQuad}: for each face direction,
+     * texture-top aligns with the first entry, texture-right with the second, etc.
+     */
+    private static Direction[] facePerps(Direction face) {
+        return switch (face) {
+            case DOWN -> new Direction[] {Direction.SOUTH, Direction.EAST, Direction.NORTH, Direction.WEST};
+            case UP -> new Direction[] {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
+            case NORTH -> new Direction[] {Direction.UP, Direction.WEST, Direction.DOWN, Direction.EAST};
+            case SOUTH -> new Direction[] {Direction.UP, Direction.EAST, Direction.DOWN, Direction.WEST};
+            case WEST -> new Direction[] {Direction.UP, Direction.SOUTH, Direction.DOWN, Direction.NORTH};
+            case EAST -> new Direction[] {Direction.UP, Direction.NORTH, Direction.DOWN, Direction.SOUTH};
+        };
+    }
+
+    /**
+     * Selects the correct face texture and UV rotation for a core face based on which of
+     * the four perpendicular directions have connected arms.
+     *
+     * <p>Rotation r (0–3) means the texture is rotated r×90° CW on the surface, so that
+     * what was at texture-top appears at face-direction[r % 4].
+     *
+     * @param faceDir the direction of this core face
+     * @param state   the tube's block state
+     * @param sp      array [face0, face1, face2adj, face2opp, face3, face4]
+     * @return {spriteIndex, rotation} pair
+     */
+    private static int[] pickCoreFaceSprite(Direction faceDir, BlockState state, TextureAtlasSprite[] sp) {
+        Direction[] perps = facePerps(faceDir);
+        boolean c0 = state.getValue(dirProp(perps[0]));
+        boolean c1 = state.getValue(dirProp(perps[1]));
+        boolean c2 = state.getValue(dirProp(perps[2]));
+        boolean c3 = state.getValue(dirProp(perps[3]));
+        int count = (c0 ? 1 : 0) + (c1 ? 1 : 0) + (c2 ? 1 : 0) + (c3 ? 1 : 0);
+        return switch (count) {
+            case 4 -> new int[] {5, 0};
+            case 3 -> {
+                // find the one closed direction; it goes to texture-right (position 1)
+                if (!c0) yield new int[] {4, (0 - 1 + 4) % 4};
+                if (!c1) yield new int[] {4, (1 - 1 + 4) % 4};
+                if (!c2) yield new int[] {4, (2 - 1 + 4) % 4};
+                yield new int[] {4, (3 - 1 + 4) % 4};
+            }
+            case 2 -> {
+                // 2 opposite
+                if (c0 && c2) yield new int[] {3, 0};
+                if (c1 && c3) yield new int[] {3, 1};
+                // 2 adjacent: find pair (i, i+1); rotate so i+1 → top(0), i → left(3)
+                if (c0 && c1) yield new int[] {2, 1};
+                if (c1 && c2) yield new int[] {2, 2};
+                if (c2 && c3) yield new int[] {2, 3};
+                yield new int[] {2, 0}; // c3 && c0
+            }
+            case 1 -> {
+                // the single connected direction goes to texture-top; rotation = its index
+                if (c0) yield new int[] {1, 0};
+                if (c1) yield new int[] {1, 1};
+                if (c2) yield new int[] {1, 2};
+                yield new int[] {1, 3};
+            }
+            default -> new int[] {0, 0};
+        };
+    }
+
+    /**
+     * Draws one core face as a single flat quad using the texture selected by connection
+     * pattern. The sprite's pixel pattern (dark=walls, white=tube-color openings) is
+     * rendered with UV rotation so each opening aligns with the connected arm direction.
+     */
+    private static void drawCoreFace(
+            VertexConsumer vc,
+            Matrix4f mat,
+            Direction face,
+            float f,
+            float s0,
+            float s1,
+            float t0,
+            float t1,
+            BlockState state,
+            TextureAtlasSprite[] faceSprites,
+            int r,
+            int g,
+            int b,
+            int light,
+            int overlay) {
+        int[] pick = pickCoreFaceSprite(face, state, faceSprites);
+        TextureAtlasSprite sp = faceSprites[pick[0]];
+        int rot = pick[1];
+        float tu0 = sp.getU0(), tu1 = sp.getU1(), tv0 = sp.getV0(), tv1 = sp.getV1();
+
+        // 4 UV pairs for vertices [x0, x1, x2, x3] based on clockwise rotation
+        float u0v, u1v, u2v, u3v, v0v, v1v, v2v, v3v;
+        switch (rot & 3) {
+            case 1 -> { // 90° CW: texture-top → face-right
+                u0v = tu0;
+                v0v = tv1;
+                u1v = tu0;
+                v1v = tv0;
+                u2v = tu1;
+                v2v = tv0;
+                u3v = tu1;
+                v3v = tv1;
+            }
+            case 2 -> { // 180°: texture-top → face-bottom
+                u0v = tu1;
+                v0v = tv1;
+                u1v = tu0;
+                v1v = tv1;
+                u2v = tu0;
+                v2v = tv0;
+                u3v = tu1;
+                v3v = tv0;
+            }
+            case 3 -> { // 270° CW: texture-top → face-left
+                u0v = tu1;
+                v0v = tv0;
+                u1v = tu1;
+                v1v = tv1;
+                u2v = tu0;
+                v2v = tv1;
+                u3v = tu0;
+                v3v = tv0;
+            }
+            default -> { // 0°: texture-top → face-top
+                u0v = tu0;
+                v0v = tv0;
+                u1v = tu1;
+                v1v = tv0;
+                u2v = tu1;
+                v2v = tv1;
+                u3v = tu0;
+                v3v = tv1;
+            }
+        }
+
+        // World positions and normals for each face direction (matching faceQuad winding)
+        float x0, y0, z0, x1, y1, z1, x2, y2, z2, x3, y3, z3, nx, ny, nz;
+        switch (face) {
+            case UP -> {
+                x0 = s0;
+                y0 = f;
+                z0 = t0;
+                x1 = s1;
+                y1 = f;
+                z1 = t0;
+                x2 = s1;
+                y2 = f;
+                z2 = t1;
+                x3 = s0;
+                y3 = f;
+                z3 = t1;
+                nx = 0;
+                ny = 1;
+                nz = 0;
+            }
+            case DOWN -> {
+                x0 = s0;
+                y0 = f;
+                z0 = t1;
+                x1 = s1;
+                y1 = f;
+                z1 = t1;
+                x2 = s1;
+                y2 = f;
+                z2 = t0;
+                x3 = s0;
+                y3 = f;
+                z3 = t0;
+                nx = 0;
+                ny = -1;
+                nz = 0;
+            }
+            case SOUTH -> {
+                x0 = s0;
+                y0 = t1;
+                z0 = f;
+                x1 = s1;
+                y1 = t1;
+                z1 = f;
+                x2 = s1;
+                y2 = t0;
+                z2 = f;
+                x3 = s0;
+                y3 = t0;
+                z3 = f;
+                nx = 0;
+                ny = 0;
+                nz = 1;
+            }
+            case NORTH -> {
+                x0 = s1;
+                y0 = t1;
+                z0 = f;
+                x1 = s0;
+                y1 = t1;
+                z1 = f;
+                x2 = s0;
+                y2 = t0;
+                z2 = f;
+                x3 = s1;
+                y3 = t0;
+                z3 = f;
+                nx = 0;
+                ny = 0;
+                nz = -1;
+            }
+            case EAST -> {
+                x0 = f;
+                y0 = t1;
+                z0 = s1;
+                x1 = f;
+                y1 = t1;
+                z1 = s0;
+                x2 = f;
+                y2 = t0;
+                z2 = s0;
+                x3 = f;
+                y3 = t0;
+                z3 = s1;
+                nx = 1;
+                ny = 0;
+                nz = 0;
+            }
+            default -> { // WEST
+                x0 = f;
+                y0 = t1;
+                z0 = s0;
+                x1 = f;
+                y1 = t1;
+                z1 = s1;
+                x2 = f;
+                y2 = t0;
+                z2 = s1;
+                x3 = f;
+                y3 = t0;
+                z3 = s0;
+                nx = -1;
+                ny = 0;
+                nz = 0;
+            }
+        }
+
+        // Emit vertices in order x3, x2, x1, x0 (matching existing quad() winding)
+        vc.addVertex(mat, x3, y3, z3)
+                .setColor(r, g, b, 255)
+                .setUv(u3v, v3v)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x2, y2, z2)
+                .setColor(r, g, b, 255)
+                .setUv(u2v, v2v)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x1, y1, z1)
+                .setColor(r, g, b, 255)
+                .setUv(u1v, v1v)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x0, y0, z0)
+                .setColor(r, g, b, 255)
+                .setUv(u0v, v0v)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
     }
 
     /**

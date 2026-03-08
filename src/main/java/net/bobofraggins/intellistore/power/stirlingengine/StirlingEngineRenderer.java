@@ -2,7 +2,6 @@ package net.bobofraggins.intellistore.power.stirlingengine;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -14,11 +13,19 @@ import net.minecraft.world.inventory.InventoryMenu;
 import org.joml.Matrix4f;
 
 /**
- * Renders the Stirling Engine as a blocky base with a cylindrical top.
+ * Renders the Stirling Engine as an iron base + iron block top with a sliding copper piston.
  *
- * <p>When heated, a spinning flywheel disc rotates at the top.
- * The body uses an iron texture for the base and a metal/copper texture for the cylinder.
- * The flywheel spins on the Y axis.
+ * <p>The piston animates (bouncing up and down) only when a heat source is present below
+ * the engine (i.e. when {@link StirlingEngineBlockEntity#isHeated()} returns true).
+ * When idle the piston sits at its lowest position, 1 px proud of the iron block top.
+ *
+ * <p>Geometry (all in 1/16ths of a block):
+ * <ul>
+ *   <li>Iron base   — [2,EPS,2] → [14,6,14]  (12px wide, 6px tall)
+ *   <li>Iron top    — [4,6,4]   → [12,10,12]  (8px wide, 4px tall, centred)
+ *   <li>Copper piston — [5,?,5] → [11,?,11]  (6px wide, 6px tall, Y position animated)
+ *       piston top: 11/16 (rest) … 16/16 (extended)
+ * </ul>
  */
 public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngineBlockEntity> {
 
@@ -26,11 +33,27 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
             ResourceLocation.fromNamespaceAndPath("minecraft", "block/iron_block");
     private static final ResourceLocation COPPER_BLOCK =
             ResourceLocation.fromNamespaceAndPath("minecraft", "block/copper_block");
-    private static final ResourceLocation CAMPFIRE_LOG =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "block/campfire_log");
 
     /** Small offset to prevent Z-fighting with adjacent block faces. */
     private static final float EPS = 1e-4f;
+
+    /** Piston height in world units (6 px). */
+    private static final float PISTON_HEIGHT = 6f / 16f;
+
+    /** Y of the iron-top surface (10 px). */
+    private static final float IRON_TOP_Y = 10f / 16f;
+
+    /** Piston top at rest: 1 px proud of the iron block top. */
+    private static final float PISTON_TOP_MIN = IRON_TOP_Y + 1f / 16f;
+
+    /** Piston top at full extension: top of block. */
+    private static final float PISTON_TOP_MAX = 1f;
+
+    /** animationTicks units per second (1.5 per client tick × 20 ticks/s = 30). */
+    private static final float TICKS_PER_SECOND = 30f;
+
+    /** One full piston cycle = 2 seconds. */
+    private static final float CYCLE_TICKS = TICKS_PER_SECOND * 2f;
 
     public StirlingEngineRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -44,51 +67,56 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
             int packedOverlay) {
 
         TextureAtlasSprite ironSprite = sprite(IRON_BLOCK);
-        TextureAtlasSprite metalSprite = sprite(COPPER_BLOCK);
+        TextureAtlasSprite copperSprite = sprite(COPPER_BLOCK);
 
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
 
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();
 
-        // ---- Base: 3/4 x 3/4 footprint, 6px tall ----
-        // From [2,EPS,2] to [14,6,14] in 1/16 coords; EPS avoids Z-fighting with ground block.
+        // ---- Iron base: 12 px wide, 6 px tall ----
         drawBox(solid, mat, 2f / 16, EPS, 2f / 16, 14f / 16, 6f / 16, 14f / 16, ironSprite, packedLight, packedOverlay);
 
-        // ---- Cylinder: narrow upright column, 6px wide, 10px tall, centered ----
-        // Core: [5,6,5] to [11,16,11]
-        drawBox(solid, mat, 5f / 16, 6f / 16, 5f / 16, 11f / 16, 1f, 11f / 16, metalSprite, packedLight, packedOverlay);
+        // ---- Iron block top: 8 px wide, 4 px tall, centred ----
+        drawBox(
+                solid,
+                mat,
+                4f / 16,
+                6f / 16,
+                4f / 16,
+                12f / 16,
+                IRON_TOP_Y,
+                12f / 16,
+                ironSprite,
+                packedLight,
+                packedOverlay);
 
-        // Rounded-cylinder illusion: two cross-pieces
-        // [4,6,6] to [12,16,10]
-        drawBox(solid, mat, 4f / 16, 6f / 16, 6f / 16, 12f / 16, 1f, 10f / 16, metalSprite, packedLight, packedOverlay);
-        // [6,6,4] to [10,16,12]
-        drawBox(solid, mat, 6f / 16, 6f / 16, 4f / 16, 10f / 16, 1f, 12f / 16, metalSprite, packedLight, packedOverlay);
+        // ---- Copper piston: 6 px wide, slides up/down when heated ----
+        float pistonTop;
+        if (be.isHeated()) {
+            float time = be.animationTicks + partialTick * 1.5f;
+            // sin oscillates -1 … +1; map to 0 … 1 for piston travel.
+            float t = ((float) Math.sin(time * Math.PI / (CYCLE_TICKS / 2f)) + 1f) / 2f;
+            pistonTop = PISTON_TOP_MIN + t * (PISTON_TOP_MAX - PISTON_TOP_MIN);
+        } else {
+            pistonTop = PISTON_TOP_MIN;
+        }
+        float pistonBot = pistonTop - PISTON_HEIGHT;
+
+        drawBox(
+                solid,
+                mat,
+                5f / 16,
+                pistonBot,
+                5f / 16,
+                11f / 16,
+                pistonTop,
+                11f / 16,
+                copperSprite,
+                packedLight,
+                packedOverlay);
 
         poseStack.popPose();
-
-        // ---- Flywheel — only when heated ----
-        if (be.isHeated()) {
-            poseStack.pushPose();
-
-            // Position flywheel at the top centre of the cylinder (y=1.0, top of block)
-            poseStack.translate(0.5, 1f - EPS, 0.5);
-
-            float animTick = be.animationTicks + partialTick * 1.5f;
-            float rotation = (animTick * 10f) % 360f;
-            poseStack.mulPose(Axis.YP.rotationDegrees(rotation));
-
-            VertexConsumer fw = bufferSource.getBuffer(RenderType.solid());
-            Matrix4f fwMat = poseStack.last().pose();
-            TextureAtlasSprite fwSprite = sprite(CAMPFIRE_LOG);
-
-            // Horizontal disc: two perpendicular flat quads
-            float r = 5f / 16f, thick = 1f / 16f;
-            drawFlatQuadY(fw, fwMat, -r, thick / 2, -r, r, thick / 2, r, fwSprite, packedLight, packedOverlay);
-            drawFlatQuadY(fw, fwMat, -r, -thick / 2, -r, r, -thick / 2, r, fwSprite, packedLight, packedOverlay);
-
-            poseStack.popPose();
-        }
     }
 
     // -------------------------------------------------------------------------
@@ -134,25 +162,6 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
                 0);
         // +X
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1, 0, 0);
-    }
-
-    /** Draws a horizontal flat quad (top face only) for the flywheel. */
-    private static void drawFlatQuadY(
-            VertexConsumer vc,
-            Matrix4f mat,
-            float x0,
-            float y,
-            float z0,
-            float x1,
-            float dummy,
-            float z1,
-            TextureAtlasSprite sp,
-            int light,
-            int overlay) {
-        float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
-        int r = 180, g = 180, b = 180;
-        float ny = y > 0 ? 1 : -1;
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y, z0, x1, y, z0, x1, y, z1, x0, y, z1, 0, ny, 0);
     }
 
     private static void quad(
