@@ -39,6 +39,18 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     public static final ResourceLocation TUBE_TEXTURE =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/tube");
 
+    // Attachment face textures — steel border + accent-color random pattern
+    private static final ResourceLocation ATTACH_IMPORT_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/attachment_import");
+    private static final ResourceLocation ATTACH_EXPORT_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/attachment_export");
+    private static final ResourceLocation ATTACH_PLACER_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/attachment_placer");
+    private static final ResourceLocation ATTACH_BREAKER_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/attachment_breaker");
+    private static final ResourceLocation ATTACH_STORAGE_TEXTURE =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/attachment_storage");
+
     /** Small offset to prevent Z-fighting with adjacent block faces. */
     private static final float EPS = 1e-4f;
 
@@ -51,6 +63,9 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     private static final float A_FACE_LO = EPS;
     private static final float A_FACE_HI = 1f - EPS;
 
+    // One pixel in block-unit space (1/16)
+    private static final float PX = 1f / 16f;
+
     // Attachment plate is 8/16 wide, 2/16 thick
     private static final float P_MIN = 4f / 16f;
     private static final float P_MAX = 12f / 16f;
@@ -61,6 +76,11 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     private static final float SHADE_DOWN = 0.50f;
     private static final float SHADE_NORTH_SOUTH = 0.80f;
     private static final float SHADE_EAST_WEST = 0.60f;
+
+    // Dark steel trim color (#2A313A)
+    private static final int TRIM_R = 42;
+    private static final int TRIM_G = 49;
+    private static final int TRIM_B = 58;
 
     public TubeRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -82,18 +102,21 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
         int g = (texColor >> 8) & 0xFF;
         int b = texColor & 0xFF;
 
-        TextureAtlasSprite sprite = Minecraft.getInstance()
-                .getModelManager()
-                .getAtlas(InventoryMenu.BLOCK_ATLAS)
-                .getSprite(TUBE_TEXTURE);
+        var atlas = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS);
+        TextureAtlasSprite sprite = atlas.getSprite(TUBE_TEXTURE);
+        TextureAtlasSprite importSprite = atlas.getSprite(ATTACH_IMPORT_TEXTURE);
+        TextureAtlasSprite exportSprite = atlas.getSprite(ATTACH_EXPORT_TEXTURE);
+        TextureAtlasSprite placerSprite = atlas.getSprite(ATTACH_PLACER_TEXTURE);
+        TextureAtlasSprite breakerSprite = atlas.getSprite(ATTACH_BREAKER_TEXTURE);
+        TextureAtlasSprite storageSprite = atlas.getSprite(ATTACH_STORAGE_TEXTURE);
 
         VertexConsumer vc = bufferSource.getBuffer(RenderType.solid());
         poseStack.pushPose();
 
         Matrix4f mat = poseStack.last().pose();
 
-        // Core cube
-        drawBox(vc, mat, C_MIN, C_MIN, C_MIN, C_MAX, C_MAX, C_MAX, sprite, r, g, b, packedLight, packedOverlay);
+        // Core cube — only draw faces not covered by an arm
+        drawCore(vc, mat, state, sprite, r, g, b, packedLight, packedOverlay);
 
         // Arms toward connected faces
         for (Direction dir : Direction.values()) {
@@ -102,39 +125,48 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
             }
         }
 
-        // Attachment plates — color varies by attachment type
+        // Attachment plates — outward face uses type texture, sides use steel trim
         for (int i = 0; i < 6; i++) {
             AttachmentType aType = be.getAttachmentType(i);
             if (aType == AttachmentType.NONE) continue;
+            // Typed attachments: white vertex color (accent encoded in texture).
+            // Storage: tube-color vertex color (texture has white pattern, tinted at render time).
+            TextureAtlasSprite faceSprite;
             int pr, pg, pb;
             switch (aType) {
                 case IMPORT_INTERFACE -> {
-                    pr = 0x33;
-                    pg = 0x99;
-                    pb = 0xFF;
-                } // blue
+                    faceSprite = importSprite;
+                    pr = 255;
+                    pg = 255;
+                    pb = 255;
+                }
                 case EXPORT_INTERFACE -> {
-                    pr = 0xFF;
-                    pg = 0x33;
-                    pb = 0x33;
-                } // red
+                    faceSprite = exportSprite;
+                    pr = 255;
+                    pg = 255;
+                    pb = 255;
+                }
                 case PLACER_INTERFACE -> {
-                    pr = 0x33;
-                    pg = 0xFF;
-                    pb = 0x33;
-                } // green
+                    faceSprite = placerSprite;
+                    pr = 255;
+                    pg = 255;
+                    pb = 255;
+                }
                 case BREAKER_INTERFACE -> {
-                    pr = 0xFF;
-                    pg = 0xFF;
-                    pb = 0x00;
-                } // yellow
+                    faceSprite = breakerSprite;
+                    pr = 255;
+                    pg = 255;
+                    pb = 255;
+                }
                 default -> {
+                    faceSprite = storageSprite;
                     pr = r;
                     pg = g;
                     pb = b;
-                } // tube color (Storage Interface)
+                }
             }
-            drawAttachmentPlate(vc, mat, Direction.values()[i], sprite, pr, pg, pb, packedLight, packedOverlay);
+            drawAttachmentPlate(
+                    vc, mat, Direction.values()[i], faceSprite, sprite, pr, pg, pb, packedLight, packedOverlay);
         }
 
         poseStack.popPose();
@@ -151,7 +183,154 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
         };
     }
 
-    /** Draws a 4×4 arm from the core out to the given face. */
+    /**
+     * Draws the 4×4×4 core cube, skipping any face covered by a connected arm.
+     * Each exposed face is drawn as a framed 5-quad face (1px trim border + 2×2 center).
+     */
+    private static void drawCore(
+            VertexConsumer vc,
+            Matrix4f mat,
+            BlockState state,
+            TextureAtlasSprite sprite,
+            int r,
+            int g,
+            int b,
+            int light,
+            int overlay) {
+        int rUp = shade(r, SHADE_UP), gUp = shade(g, SHADE_UP), bUp = shade(b, SHADE_UP);
+        int rDn = shade(r, SHADE_DOWN), gDn = shade(g, SHADE_DOWN), bDn = shade(b, SHADE_DOWN);
+        int rNS = shade(r, SHADE_NORTH_SOUTH), gNS = shade(g, SHADE_NORTH_SOUTH), bNS = shade(b, SHADE_NORTH_SOUTH);
+        int rEW = shade(r, SHADE_EAST_WEST), gEW = shade(g, SHADE_EAST_WEST), bEW = shade(b, SHADE_EAST_WEST);
+        int trUp = shade(TRIM_R, SHADE_UP), tgUp = shade(TRIM_G, SHADE_UP), tbUp = shade(TRIM_B, SHADE_UP);
+        int trDn = shade(TRIM_R, SHADE_DOWN), tgDn = shade(TRIM_G, SHADE_DOWN), tbDn = shade(TRIM_B, SHADE_DOWN);
+        int trNS = shade(TRIM_R, SHADE_NORTH_SOUTH),
+                tgNS = shade(TRIM_G, SHADE_NORTH_SOUTH),
+                tbNS = shade(TRIM_B, SHADE_NORTH_SOUTH);
+        int trEW = shade(TRIM_R, SHADE_EAST_WEST),
+                tgEW = shade(TRIM_G, SHADE_EAST_WEST),
+                tbEW = shade(TRIM_B, SHADE_EAST_WEST);
+
+        if (!state.getValue(TubeBlock.UP))
+            drawFramedFace(
+                    vc,
+                    mat,
+                    Direction.UP,
+                    C_MAX,
+                    C_MIN,
+                    C_MAX,
+                    C_MIN,
+                    C_MAX,
+                    rUp,
+                    gUp,
+                    bUp,
+                    trUp,
+                    tgUp,
+                    tbUp,
+                    light,
+                    overlay,
+                    sprite);
+        if (!state.getValue(TubeBlock.DOWN))
+            drawFramedFace(
+                    vc,
+                    mat,
+                    Direction.DOWN,
+                    C_MIN,
+                    C_MIN,
+                    C_MAX,
+                    C_MIN,
+                    C_MAX,
+                    rDn,
+                    gDn,
+                    bDn,
+                    trDn,
+                    tgDn,
+                    tbDn,
+                    light,
+                    overlay,
+                    sprite);
+        if (!state.getValue(TubeBlock.SOUTH))
+            drawFramedFace(
+                    vc,
+                    mat,
+                    Direction.SOUTH,
+                    C_MAX,
+                    C_MIN,
+                    C_MAX,
+                    C_MIN,
+                    C_MAX,
+                    rNS,
+                    gNS,
+                    bNS,
+                    trNS,
+                    tgNS,
+                    tbNS,
+                    light,
+                    overlay,
+                    sprite);
+        if (!state.getValue(TubeBlock.NORTH))
+            drawFramedFace(
+                    vc,
+                    mat,
+                    Direction.NORTH,
+                    C_MIN,
+                    C_MIN,
+                    C_MAX,
+                    C_MIN,
+                    C_MAX,
+                    rNS,
+                    gNS,
+                    bNS,
+                    trNS,
+                    tgNS,
+                    tbNS,
+                    light,
+                    overlay,
+                    sprite);
+        if (!state.getValue(TubeBlock.EAST))
+            drawFramedFace(
+                    vc,
+                    mat,
+                    Direction.EAST,
+                    C_MAX,
+                    C_MIN,
+                    C_MAX,
+                    C_MIN,
+                    C_MAX,
+                    rEW,
+                    gEW,
+                    bEW,
+                    trEW,
+                    tgEW,
+                    tbEW,
+                    light,
+                    overlay,
+                    sprite);
+        if (!state.getValue(TubeBlock.WEST))
+            drawFramedFace(
+                    vc,
+                    mat,
+                    Direction.WEST,
+                    C_MIN,
+                    C_MIN,
+                    C_MAX,
+                    C_MIN,
+                    C_MAX,
+                    rEW,
+                    gEW,
+                    bEW,
+                    trEW,
+                    tgEW,
+                    tbEW,
+                    light,
+                    overlay,
+                    sprite);
+    }
+
+    /**
+     * Draws a trimmed 4×4 arm from the core to the given face.
+     * Each side face is split into three strips (1px trim / 2px body / 1px trim) along the
+     * cross-section axis. The end cap is drawn as a 5-quad framed face (border + center).
+     */
     private static void drawArm(
             VertexConsumer vc,
             Matrix4f mat,
@@ -162,69 +341,625 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
             int b,
             int light,
             int overlay) {
-        float x0, y0, z0, x1, y1, z1;
+        int rUp = shade(r, SHADE_UP), gUp = shade(g, SHADE_UP), bUp = shade(b, SHADE_UP);
+        int rDn = shade(r, SHADE_DOWN), gDn = shade(g, SHADE_DOWN), bDn = shade(b, SHADE_DOWN);
+        int rNS = shade(r, SHADE_NORTH_SOUTH), gNS = shade(g, SHADE_NORTH_SOUTH), bNS = shade(b, SHADE_NORTH_SOUTH);
+        int rEW = shade(r, SHADE_EAST_WEST), gEW = shade(g, SHADE_EAST_WEST), bEW = shade(b, SHADE_EAST_WEST);
+        int trUp = shade(TRIM_R, SHADE_UP), tgUp = shade(TRIM_G, SHADE_UP), tbUp = shade(TRIM_B, SHADE_UP);
+        int trDn = shade(TRIM_R, SHADE_DOWN), tgDn = shade(TRIM_G, SHADE_DOWN), tbDn = shade(TRIM_B, SHADE_DOWN);
+        int trNS = shade(TRIM_R, SHADE_NORTH_SOUTH),
+                tgNS = shade(TRIM_G, SHADE_NORTH_SOUTH),
+                tbNS = shade(TRIM_B, SHADE_NORTH_SOUTH);
+        int trEW = shade(TRIM_R, SHADE_EAST_WEST),
+                tgEW = shade(TRIM_G, SHADE_EAST_WEST),
+                tbEW = shade(TRIM_B, SHADE_EAST_WEST);
+
+        // For each arm direction: 4 trimmed side faces + 1 framed end cap.
+        // Face-coord convention per Direction: UP/DOWN → s=X,t=Z; NS → s=X,t=Y; EW → s=Z,t=Y.
+        // splitS=true splits the s-axis (cross-section); splitS=false splits the t-axis.
         switch (dir) {
             case DOWN -> {
-                x0 = A_MIN;
-                y0 = A_FACE_LO;
-                z0 = A_MIN;
-                x1 = A_MAX;
-                y1 = C_MIN;
-                z1 = A_MAX;
+                float yLo = A_FACE_LO, yHi = C_MIN;
+                // Arm along Y=t; cross-section on Z=s (EAST/WEST) or X=s (SOUTH/NORTH)
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.EAST,
+                        A_MAX,
+                        A_MIN,
+                        A_MAX,
+                        yLo,
+                        yHi,
+                        true,
+                        rEW,
+                        gEW,
+                        bEW,
+                        trEW,
+                        tgEW,
+                        tbEW,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.WEST,
+                        A_MIN,
+                        A_MIN,
+                        A_MAX,
+                        yLo,
+                        yHi,
+                        true,
+                        rEW,
+                        gEW,
+                        bEW,
+                        trEW,
+                        tgEW,
+                        tbEW,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.SOUTH,
+                        A_MAX,
+                        A_MIN,
+                        A_MAX,
+                        yLo,
+                        yHi,
+                        true,
+                        rNS,
+                        gNS,
+                        bNS,
+                        trNS,
+                        tgNS,
+                        tbNS,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.NORTH,
+                        A_MIN,
+                        A_MIN,
+                        A_MAX,
+                        yLo,
+                        yHi,
+                        true,
+                        rNS,
+                        gNS,
+                        bNS,
+                        trNS,
+                        tgNS,
+                        tbNS,
+                        light,
+                        overlay,
+                        sprite);
+                drawFramedFace(
+                        vc,
+                        mat,
+                        Direction.DOWN,
+                        A_FACE_LO,
+                        A_MIN,
+                        A_MAX,
+                        A_MIN,
+                        A_MAX,
+                        rDn,
+                        gDn,
+                        bDn,
+                        trDn,
+                        tgDn,
+                        tbDn,
+                        light,
+                        overlay,
+                        sprite);
             }
             case UP -> {
-                x0 = A_MIN;
-                y0 = C_MAX;
-                z0 = A_MIN;
-                x1 = A_MAX;
-                y1 = A_FACE_HI;
-                z1 = A_MAX;
+                float yLo = C_MAX, yHi = A_FACE_HI;
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.EAST,
+                        A_MAX,
+                        A_MIN,
+                        A_MAX,
+                        yLo,
+                        yHi,
+                        true,
+                        rEW,
+                        gEW,
+                        bEW,
+                        trEW,
+                        tgEW,
+                        tbEW,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.WEST,
+                        A_MIN,
+                        A_MIN,
+                        A_MAX,
+                        yLo,
+                        yHi,
+                        true,
+                        rEW,
+                        gEW,
+                        bEW,
+                        trEW,
+                        tgEW,
+                        tbEW,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.SOUTH,
+                        A_MAX,
+                        A_MIN,
+                        A_MAX,
+                        yLo,
+                        yHi,
+                        true,
+                        rNS,
+                        gNS,
+                        bNS,
+                        trNS,
+                        tgNS,
+                        tbNS,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.NORTH,
+                        A_MIN,
+                        A_MIN,
+                        A_MAX,
+                        yLo,
+                        yHi,
+                        true,
+                        rNS,
+                        gNS,
+                        bNS,
+                        trNS,
+                        tgNS,
+                        tbNS,
+                        light,
+                        overlay,
+                        sprite);
+                drawFramedFace(
+                        vc,
+                        mat,
+                        Direction.UP,
+                        A_FACE_HI,
+                        A_MIN,
+                        A_MAX,
+                        A_MIN,
+                        A_MAX,
+                        rUp,
+                        gUp,
+                        bUp,
+                        trUp,
+                        tgUp,
+                        tbUp,
+                        light,
+                        overlay,
+                        sprite);
             }
             case NORTH -> {
-                x0 = A_MIN;
-                y0 = A_MIN;
-                z0 = A_FACE_LO;
-                x1 = A_MAX;
-                y1 = A_MAX;
-                z1 = C_MIN;
+                float zLo = A_FACE_LO, zHi = C_MIN;
+                // UP/DOWN: arm along Z=t, cross on X=s → splitS=true
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.UP,
+                        A_MAX,
+                        A_MIN,
+                        A_MAX,
+                        zLo,
+                        zHi,
+                        true,
+                        rUp,
+                        gUp,
+                        bUp,
+                        trUp,
+                        tgUp,
+                        tbUp,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.DOWN,
+                        A_MIN,
+                        A_MIN,
+                        A_MAX,
+                        zLo,
+                        zHi,
+                        true,
+                        rDn,
+                        gDn,
+                        bDn,
+                        trDn,
+                        tgDn,
+                        tbDn,
+                        light,
+                        overlay,
+                        sprite);
+                // EAST/WEST: arm along Z=s, cross on Y=t → splitS=false
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.EAST,
+                        A_MAX,
+                        zLo,
+                        zHi,
+                        A_MIN,
+                        A_MAX,
+                        false,
+                        rEW,
+                        gEW,
+                        bEW,
+                        trEW,
+                        tgEW,
+                        tbEW,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.WEST,
+                        A_MIN,
+                        zLo,
+                        zHi,
+                        A_MIN,
+                        A_MAX,
+                        false,
+                        rEW,
+                        gEW,
+                        bEW,
+                        trEW,
+                        tgEW,
+                        tbEW,
+                        light,
+                        overlay,
+                        sprite);
+                drawFramedFace(
+                        vc,
+                        mat,
+                        Direction.NORTH,
+                        A_FACE_LO,
+                        A_MIN,
+                        A_MAX,
+                        A_MIN,
+                        A_MAX,
+                        rNS,
+                        gNS,
+                        bNS,
+                        trNS,
+                        tgNS,
+                        tbNS,
+                        light,
+                        overlay,
+                        sprite);
             }
             case SOUTH -> {
-                x0 = A_MIN;
-                y0 = A_MIN;
-                z0 = C_MAX;
-                x1 = A_MAX;
-                y1 = A_MAX;
-                z1 = A_FACE_HI;
+                float zLo = C_MAX, zHi = A_FACE_HI;
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.UP,
+                        A_MAX,
+                        A_MIN,
+                        A_MAX,
+                        zLo,
+                        zHi,
+                        true,
+                        rUp,
+                        gUp,
+                        bUp,
+                        trUp,
+                        tgUp,
+                        tbUp,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.DOWN,
+                        A_MIN,
+                        A_MIN,
+                        A_MAX,
+                        zLo,
+                        zHi,
+                        true,
+                        rDn,
+                        gDn,
+                        bDn,
+                        trDn,
+                        tgDn,
+                        tbDn,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.EAST,
+                        A_MAX,
+                        zLo,
+                        zHi,
+                        A_MIN,
+                        A_MAX,
+                        false,
+                        rEW,
+                        gEW,
+                        bEW,
+                        trEW,
+                        tgEW,
+                        tbEW,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.WEST,
+                        A_MIN,
+                        zLo,
+                        zHi,
+                        A_MIN,
+                        A_MAX,
+                        false,
+                        rEW,
+                        gEW,
+                        bEW,
+                        trEW,
+                        tgEW,
+                        tbEW,
+                        light,
+                        overlay,
+                        sprite);
+                drawFramedFace(
+                        vc,
+                        mat,
+                        Direction.SOUTH,
+                        A_FACE_HI,
+                        A_MIN,
+                        A_MAX,
+                        A_MIN,
+                        A_MAX,
+                        rNS,
+                        gNS,
+                        bNS,
+                        trNS,
+                        tgNS,
+                        tbNS,
+                        light,
+                        overlay,
+                        sprite);
             }
             case WEST -> {
-                x0 = A_FACE_LO;
-                y0 = A_MIN;
-                z0 = A_MIN;
-                x1 = C_MIN;
-                y1 = A_MAX;
-                z1 = A_MAX;
+                float xLo = A_FACE_LO, xHi = C_MIN;
+                // UP/DOWN: arm along X=s, cross on Z=t → splitS=false
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.UP,
+                        A_MAX,
+                        xLo,
+                        xHi,
+                        A_MIN,
+                        A_MAX,
+                        false,
+                        rUp,
+                        gUp,
+                        bUp,
+                        trUp,
+                        tgUp,
+                        tbUp,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.DOWN,
+                        A_MIN,
+                        xLo,
+                        xHi,
+                        A_MIN,
+                        A_MAX,
+                        false,
+                        rDn,
+                        gDn,
+                        bDn,
+                        trDn,
+                        tgDn,
+                        tbDn,
+                        light,
+                        overlay,
+                        sprite);
+                // SOUTH/NORTH: arm along X=s, cross on Y=t → splitS=false
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.SOUTH,
+                        A_MAX,
+                        xLo,
+                        xHi,
+                        A_MIN,
+                        A_MAX,
+                        false,
+                        rNS,
+                        gNS,
+                        bNS,
+                        trNS,
+                        tgNS,
+                        tbNS,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.NORTH,
+                        A_MIN,
+                        xLo,
+                        xHi,
+                        A_MIN,
+                        A_MAX,
+                        false,
+                        rNS,
+                        gNS,
+                        bNS,
+                        trNS,
+                        tgNS,
+                        tbNS,
+                        light,
+                        overlay,
+                        sprite);
+                drawFramedFace(
+                        vc,
+                        mat,
+                        Direction.WEST,
+                        A_FACE_LO,
+                        A_MIN,
+                        A_MAX,
+                        A_MIN,
+                        A_MAX,
+                        rEW,
+                        gEW,
+                        bEW,
+                        trEW,
+                        tgEW,
+                        tbEW,
+                        light,
+                        overlay,
+                        sprite);
             }
-            default -> {
-                x0 = C_MAX;
-                y0 = A_MIN;
-                z0 = A_MIN;
-                x1 = A_FACE_HI;
-                y1 = A_MAX;
-                z1 = A_MAX;
-            } // EAST
+            case EAST -> {
+                float xLo = C_MAX, xHi = A_FACE_HI;
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.UP,
+                        A_MAX,
+                        xLo,
+                        xHi,
+                        A_MIN,
+                        A_MAX,
+                        false,
+                        rUp,
+                        gUp,
+                        bUp,
+                        trUp,
+                        tgUp,
+                        tbUp,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.DOWN,
+                        A_MIN,
+                        xLo,
+                        xHi,
+                        A_MIN,
+                        A_MAX,
+                        false,
+                        rDn,
+                        gDn,
+                        bDn,
+                        trDn,
+                        tgDn,
+                        tbDn,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.SOUTH,
+                        A_MAX,
+                        xLo,
+                        xHi,
+                        A_MIN,
+                        A_MAX,
+                        false,
+                        rNS,
+                        gNS,
+                        bNS,
+                        trNS,
+                        tgNS,
+                        tbNS,
+                        light,
+                        overlay,
+                        sprite);
+                drawTrimmedStrip(
+                        vc,
+                        mat,
+                        Direction.NORTH,
+                        A_MIN,
+                        xLo,
+                        xHi,
+                        A_MIN,
+                        A_MAX,
+                        false,
+                        rNS,
+                        gNS,
+                        bNS,
+                        trNS,
+                        tgNS,
+                        tbNS,
+                        light,
+                        overlay,
+                        sprite);
+                drawFramedFace(
+                        vc,
+                        mat,
+                        Direction.EAST,
+                        A_FACE_HI,
+                        A_MIN,
+                        A_MAX,
+                        A_MIN,
+                        A_MAX,
+                        rEW,
+                        gEW,
+                        bEW,
+                        trEW,
+                        tgEW,
+                        tbEW,
+                        light,
+                        overlay,
+                        sprite);
+            }
         }
-        drawBox(vc, mat, x0, y0, z0, x1, y1, z1, sprite, r, g, b, light, overlay);
     }
 
     /**
      * Draws an 8×8×2 attachment plate flush with the outside face, slightly inset to avoid
-     * z-fighting with adjacent blocks.
+     * z-fighting with adjacent blocks. The outward face uses {@code faceSprite} tinted by
+     * {@code r,g,b}; the four side edges use {@code sideSprite} tinted dark steel. The inner
+     * face is omitted (not visible).
      */
     private static void drawAttachmentPlate(
             VertexConsumer vc,
             Matrix4f mat,
             Direction dir,
-            TextureAtlasSprite sprite,
+            TextureAtlasSprite faceSprite,
+            TextureAtlasSprite sideSprite,
             int r,
             int g,
             int b,
@@ -282,7 +1017,45 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                 z1 = P_MAX;
             } // EAST
         }
-        drawBox(vc, mat, x0, y0, z0, x1, y1, z1, sprite, r, g, b, light, overlay);
+        Direction inner = dir.getOpposite();
+        for (Direction face : Direction.values()) {
+            if (face == inner) continue;
+            boolean isOutward = (face == dir);
+            TextureAtlasSprite sp = isOutward ? faceSprite : sideSprite;
+            int cr = isOutward ? r : TRIM_R;
+            int cg = isOutward ? g : TRIM_G;
+            int cb = isOutward ? b : TRIM_B;
+            float shadeF =
+                    switch (face) {
+                        case UP -> SHADE_UP;
+                        case DOWN -> SHADE_DOWN;
+                        case NORTH, SOUTH -> SHADE_NORTH_SOUTH;
+                        default -> SHADE_EAST_WEST;
+                    };
+            int sr = shade(cr, shadeF);
+            int sg = shade(cg, shadeF);
+            int sb = shade(cb, shadeF);
+            switch (face) {
+                case DOWN -> quadFlat(
+                        vc, mat, sr, sg, sb, light, overlay, sp, 0, -1, 0, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0,
+                        z0);
+                case UP -> quadFlat(
+                        vc, mat, sr, sg, sb, light, overlay, sp, 0, 1, 0, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1,
+                        z1);
+                case NORTH -> quadFlat(
+                        vc, mat, sr, sg, sb, light, overlay, sp, 0, 0, -1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0,
+                        z0);
+                case SOUTH -> quadFlat(
+                        vc, mat, sr, sg, sb, light, overlay, sp, 0, 0, 1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0,
+                        z1);
+                case WEST -> quadFlat(
+                        vc, mat, sr, sg, sb, light, overlay, sp, -1, 0, 0, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0,
+                        z0);
+                default -> quadFlat(
+                        vc, mat, sr, sg, sb, light, overlay, sp, 1, 0, 0, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0,
+                        z1);
+            }
+        }
     }
 
     /**
@@ -338,6 +1111,164 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
         quad(
                 vc, mat, rEW, gEW, bEW, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1,
                 1, 0, 0);
+    }
+
+    /**
+     * Emits a single quad from 4 explicit corner positions, using the full sprite UV.
+     * Vertices are given in CCW order when viewed from the outside (same winding as {@link #quad}).
+     * Prefer this over {@link #quad} when computing sub-face geometry directly.
+     */
+    private static void quadFlat(
+            VertexConsumer vc,
+            Matrix4f mat,
+            int r,
+            int g,
+            int b,
+            int light,
+            int overlay,
+            TextureAtlasSprite sprite,
+            float nx,
+            float ny,
+            float nz,
+            float x0,
+            float y0,
+            float z0,
+            float x1,
+            float y1,
+            float z1,
+            float x2,
+            float y2,
+            float z2,
+            float x3,
+            float y3,
+            float z3) {
+        quad(
+                vc,
+                mat,
+                r,
+                g,
+                b,
+                light,
+                overlay,
+                sprite.getU0(),
+                sprite.getV0(),
+                sprite.getU1(),
+                sprite.getV1(),
+                x0,
+                y0,
+                z0,
+                x1,
+                y1,
+                z1,
+                x2,
+                y2,
+                z2,
+                x3,
+                y3,
+                z3,
+                nx,
+                ny,
+                nz);
+    }
+
+    /**
+     * Emits one rectangle on a face of a given Direction at fixed coordinate {@code f}.
+     * Coordinate systems: UP/DOWN → s=X,t=Z; NORTH/SOUTH → s=X,t=Y; EAST/WEST → s=Z,t=Y.
+     * Winding matches {@link #drawBox} (CCW when viewed from outside).
+     */
+    private static void faceQuad(
+            VertexConsumer vc,
+            Matrix4f mat,
+            int r,
+            int g,
+            int b,
+            int light,
+            int overlay,
+            TextureAtlasSprite sprite,
+            Direction face,
+            float f,
+            float s0,
+            float t0,
+            float s1,
+            float t1) {
+        switch (face) {
+            case UP -> quadFlat(
+                    vc, mat, r, g, b, light, overlay, sprite, 0, 1, 0, s0, f, t0, s1, f, t0, s1, f, t1, s0, f, t1);
+            case DOWN -> quadFlat(
+                    vc, mat, r, g, b, light, overlay, sprite, 0, -1, 0, s0, f, t1, s1, f, t1, s1, f, t0, s0, f, t0);
+            case SOUTH -> quadFlat(
+                    vc, mat, r, g, b, light, overlay, sprite, 0, 0, 1, s0, t1, f, s1, t1, f, s1, t0, f, s0, t0, f);
+            case NORTH -> quadFlat(
+                    vc, mat, r, g, b, light, overlay, sprite, 0, 0, -1, s1, t1, f, s0, t1, f, s0, t0, f, s1, t0, f);
+            case EAST -> quadFlat(
+                    vc, mat, r, g, b, light, overlay, sprite, 1, 0, 0, f, t1, s1, f, t1, s0, f, t0, s0, f, t0, s1);
+            case WEST -> quadFlat(
+                    vc, mat, r, g, b, light, overlay, sprite, -1, 0, 0, f, t1, s0, f, t1, s1, f, t0, s1, f, t0, s0);
+        }
+    }
+
+    /**
+     * Draws three quads on a face — trim / body / trim — splitting either the s-axis
+     * ({@code splitS=true}) or the t-axis ({@code splitS=false}) into 1px trim at each edge
+     * and 2px body in the middle.
+     */
+    private static void drawTrimmedStrip(
+            VertexConsumer vc,
+            Matrix4f mat,
+            Direction face,
+            float f,
+            float s0,
+            float s1,
+            float t0,
+            float t1,
+            boolean splitS,
+            int cr,
+            int cg,
+            int cb,
+            int trR,
+            int trG,
+            int trB,
+            int light,
+            int overlay,
+            TextureAtlasSprite sprite) {
+        if (splitS) {
+            faceQuad(vc, mat, trR, trG, trB, light, overlay, sprite, face, f, s0, t0, s0 + PX, t1);
+            faceQuad(vc, mat, cr, cg, cb, light, overlay, sprite, face, f, s0 + PX, t0, s1 - PX, t1);
+            faceQuad(vc, mat, trR, trG, trB, light, overlay, sprite, face, f, s1 - PX, t0, s1, t1);
+        } else {
+            faceQuad(vc, mat, trR, trG, trB, light, overlay, sprite, face, f, s0, t0, s1, t0 + PX);
+            faceQuad(vc, mat, cr, cg, cb, light, overlay, sprite, face, f, s0, t0 + PX, s1, t1 - PX);
+            faceQuad(vc, mat, trR, trG, trB, light, overlay, sprite, face, f, s0, t1 - PX, s1, t1);
+        }
+    }
+
+    /**
+     * Draws a 4×4 face as 5 quads: a 1px border frame (trim color) with a 2×2 center (tube color).
+     * Used for end caps and unconnected core faces.
+     */
+    private static void drawFramedFace(
+            VertexConsumer vc,
+            Matrix4f mat,
+            Direction face,
+            float f,
+            float s0,
+            float s1,
+            float t0,
+            float t1,
+            int cr,
+            int cg,
+            int cb,
+            int trR,
+            int trG,
+            int trB,
+            int light,
+            int overlay,
+            TextureAtlasSprite sprite) {
+        faceQuad(vc, mat, trR, trG, trB, light, overlay, sprite, face, f, s0, t0, s1, t0 + PX); // bottom
+        faceQuad(vc, mat, trR, trG, trB, light, overlay, sprite, face, f, s0, t1 - PX, s1, t1); // top
+        faceQuad(vc, mat, trR, trG, trB, light, overlay, sprite, face, f, s0, t0 + PX, s0 + PX, t1 - PX); // left
+        faceQuad(vc, mat, trR, trG, trB, light, overlay, sprite, face, f, s1 - PX, t0 + PX, s1, t1 - PX); // right
+        faceQuad(vc, mat, cr, cg, cb, light, overlay, sprite, face, f, s0 + PX, t0 + PX, s1 - PX, t1 - PX); // center
     }
 
     /** Multiplies a channel value by a shade factor and clamps to [0, 255]. */

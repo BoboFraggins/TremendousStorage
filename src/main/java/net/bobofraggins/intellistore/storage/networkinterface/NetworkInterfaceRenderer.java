@@ -2,14 +2,19 @@ package net.bobofraggins.intellistore.storage.networkinterface;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
+import net.bobofraggins.intellistore.shared.register.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
 
 /**
@@ -106,78 +111,35 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         float wy0 = 2f / 16 + EPS, wy1 = gy1 - 1f / 16 - EPS;
         drawBox(translucent, mat, wx0, wy0, wz0, wx1, wy1, wz1, waterSprite, 255, 255, 255, packedLight, packedOverlay);
 
-        // ---- Animated floating brain (vertical billboard quad) ----
+        // ---- Animated floating brain (item renderer — matches vanilla dropped items) ----
+        // ItemModelGenerator automatically produces per-pixel edge faces from the
+        // item/generated model, giving the sprite the same depth as a dropped item.
         double time = (be.getLevel().getGameTime() + partialTick) / 20.0;
         float bob = (float) Math.sin(time * Math.PI * 0.5) * 0.04f;
 
         // Centre at x=0.5, z=0.5; float at 60% of block height.
         float rotY = (float) ((time * 40.0) % 360.0);
-        poseStack.translate(0.5, 0.60 + bob, 0.5);
+        poseStack.translate(0.5, 0.41 + bob, 0.5);
         poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
-        poseStack.scale(0.75f, 0.75f, 0.75f);
+        // scale(1.125) × FIXED display scale(0.5) ≈ 0.56 effective world-units.
+        poseStack.scale(1.125f, 1.125f, 1.125f);
+        poseStack.mulPose(Axis.XP.rotationDegrees(2f));
 
-        // Render as a two-sided vertical quad in the X-Y plane so the brain is
-        // visible from all horizontal angles as it spins around the Y axis.
-        TextureAtlasSprite brainSprite = sprite(ResourceLocation.fromNamespaceAndPath("intellistore", "item/brain"));
-        VertexConsumer cutout = bufferSource.getBuffer(RenderType.cutout());
-        float bu0 = brainSprite.getU0(), bu1 = brainSprite.getU1();
-        float bv0 = brainSprite.getV0(), bv1 = brainSprite.getV1();
-        // Front face (+Z)
-        quad(
-                cutout,
-                mat,
-                255,
-                255,
-                255,
-                packedLight,
-                packedOverlay,
-                bu0,
-                bv0,
-                bu1,
-                bv1,
-                -0.5f,
-                0.5f,
-                0f,
-                0.5f,
-                0.5f,
-                0f,
-                0.5f,
-                -0.5f,
-                0f,
-                -0.5f,
-                -0.5f,
-                0f,
-                0f,
-                0f,
-                1f);
-        // Back face (-Z) — swap x so winding faces the other way and texture isn't mirrored
-        quad(
-                cutout,
-                mat,
-                255,
-                255,
-                255,
-                packedLight,
-                packedOverlay,
-                bu0,
-                bv0,
-                bu1,
-                bv1,
-                0.5f,
-                0.5f,
-                0f,
-                -0.5f,
-                0.5f,
-                0f,
-                -0.5f,
-                -0.5f,
-                0f,
-                0.5f,
-                -0.5f,
-                0f,
-                0f,
-                0f,
-                -1f);
+        // Render exactly as ItemEntityRenderer does: fetch the baked model, then
+        // call render() with FIXED context (rotation [0,0,0] — sprite stays vertical).
+        ItemStack brainStack = new ItemStack(Registration.BRAIN.get());
+        BakedModel model = Minecraft.getInstance().getItemRenderer().getModel(brainStack, be.getLevel(), null, 0);
+        Minecraft.getInstance()
+                .getItemRenderer()
+                .render(
+                        brainStack,
+                        ItemDisplayContext.FIXED,
+                        false,
+                        poseStack,
+                        bufferSource,
+                        packedLight,
+                        packedOverlay,
+                        model);
 
         poseStack.popPose();
     }
