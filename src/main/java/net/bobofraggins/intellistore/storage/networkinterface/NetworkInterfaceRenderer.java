@@ -109,7 +109,8 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         float wx0 = gx0 + 1f / 16 + EPS, wx1 = gx1 - 1f / 16 - EPS;
         float wz0 = gz0 + 1f / 16 + EPS, wz1 = gz1 - 1f / 16 - EPS;
         float wy0 = 2f / 16 + EPS, wy1 = gy1 - 1f / 16 - EPS;
-        drawBox(translucent, mat, wx0, wy0, wz0, wx1, wy1, wz1, waterSprite, 255, 255, 255, packedLight, packedOverlay);
+        // Lime-green tint (#80C71F) to match Minecraft lime dye colour.
+        drawBox(translucent, mat, wx0, wy0, wz0, wx1, wy1, wz1, waterSprite, 128, 199, 31, packedLight, packedOverlay);
 
         // ---- Animated floating brain (item renderer — matches vanilla dropped items) ----
         // ItemModelGenerator automatically produces per-pixel edge faces from the
