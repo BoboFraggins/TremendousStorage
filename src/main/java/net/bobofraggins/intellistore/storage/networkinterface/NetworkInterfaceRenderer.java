@@ -119,11 +119,10 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         float bob = (float) Math.sin(time * Math.PI * 0.5) * 0.04f;
 
         // Centre at x=0.5, z=0.5; float at 60% of block height.
-        float rotY = (float) ((time * 40.0) % 360.0);
-        poseStack.translate(0.5, 0.41 + bob, 0.5);
+        float rotY = (float) ((time * 20.0) % 360.0);
+        poseStack.translate(0.5, 0.5 + bob, 0.5);
         poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
-        // scale(0.5625) × FIXED display scale(0.5) ≈ 0.28 effective world-units (half original).
-        poseStack.scale(0.5625f, 0.5625f, 0.5625f);
+        poseStack.scale(0.62f, 0.62f, 0.62f);
         poseStack.mulPose(Axis.XP.rotationDegrees(2f));
 
         // Render exactly as ItemEntityRenderer does: fetch the baked model, then
