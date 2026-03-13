@@ -102,9 +102,10 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider 
         BlockPos niPos = AccessTerminalBFS.findNI((ServerLevel) level, worldPosition);
         if (niPos == null) return;
 
-        // Validate network
+        // Validate network — must exist, be valid, and be powered
         if (!(level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
         if (!ni.isNetworkValid()) return;
+        if (!ni.isPowered()) return;
 
         // Write the NI position into the item
         sat.set(Registration.WIRELESS_NI_POS.get(), niPos);
