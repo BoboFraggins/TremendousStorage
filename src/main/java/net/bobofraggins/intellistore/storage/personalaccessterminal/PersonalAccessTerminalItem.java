@@ -4,8 +4,10 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.intellistore.storage.wirelesshub.WirelessHubBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -68,16 +70,20 @@ public class PersonalAccessTerminalItem extends Item {
             return InteractionResultHolder.fail(stack);
         }
 
-        openSatUi((ServerPlayer) player, niPos);
+        BlockPos hubPos = stack.get(Registration.WIRELESS_HUB_POS.get());
+        openSatUi((ServerPlayer) player, niPos, hubPos);
         return InteractionResultHolder.success(stack);
     }
 
     /**
      * Opens the SAT UI for the given player, connecting to the network at {@code niPos}.
-     * Validates that the NI still exists and the network is valid before opening.
+     * Validates that the NI still exists, the network is valid, and — if {@code hubPos} is
+     * provided — that the originating Wireless Hub is still present on that network.
      */
-    public static void openSatUi(ServerPlayer player, BlockPos niPos) {
-        if (!(player.level().getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) {
+    public static void openSatUi(ServerPlayer player, BlockPos niPos, @Nullable BlockPos hubPos) {
+        ServerLevel level = player.serverLevel();
+
+        if (!(level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) {
             player.displayClientMessage(
                     Component.translatable("item.intellistore.personal_access_terminal.invalid_network"), true);
             return;
@@ -90,6 +96,14 @@ public class PersonalAccessTerminalItem extends Item {
         if (!ni.isPowered()) {
             player.displayClientMessage(Component.translatable("screen.intellistore.not_enough_power"), true);
             return;
+        }
+        if (hubPos != null) {
+            if (!(level.getBlockEntity(hubPos) instanceof WirelessHubBlockEntity hub)
+                    || !niPos.equals(hub.getOrFindNiPos(level))) {
+                player.displayClientMessage(
+                        Component.translatable("item.intellistore.personal_access_terminal.hub_disconnected"), true);
+                return;
+            }
         }
 
         // Use the NI position as both satPos and niPos — the client-side constructor reads

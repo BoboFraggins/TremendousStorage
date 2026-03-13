@@ -1,5 +1,6 @@
 package net.bobofraggins.intellistore.shared.network;
 
+import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.storage.personalaccessterminal.PersonalAccessTerminalItem;
 import net.minecraft.core.BlockPos;
@@ -16,16 +17,32 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * <p>Sent when the player presses the Wireless SAT keybind. The server validates that
  * the player actually has a linked Wireless SAT for this NI before opening the menu.
  */
-public record OpenPersonalAccessTerminalPacket(BlockPos niPos) implements CustomPacketPayload {
+public record OpenPersonalAccessTerminalPacket(BlockPos niPos, @Nullable BlockPos hubPos)
+        implements CustomPacketPayload {
 
     public static final Type<OpenPersonalAccessTerminalPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "open_wireless_sat"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenPersonalAccessTerminalPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    BlockPos.STREAM_CODEC.cast(),
-                    OpenPersonalAccessTerminalPacket::niPos,
-                    OpenPersonalAccessTerminalPacket::new);
+            new StreamCodec<>() {
+                @Override
+                public OpenPersonalAccessTerminalPacket decode(RegistryFriendlyByteBuf buf) {
+                    BlockPos niPos = BlockPos.STREAM_CODEC.decode(buf);
+                    BlockPos hubPos = buf.readBoolean() ? BlockPos.STREAM_CODEC.decode(buf) : null;
+                    return new OpenPersonalAccessTerminalPacket(niPos, hubPos);
+                }
+
+                @Override
+                public void encode(RegistryFriendlyByteBuf buf, OpenPersonalAccessTerminalPacket value) {
+                    BlockPos.STREAM_CODEC.encode(buf, value.niPos());
+                    if (value.hubPos() != null) {
+                        buf.writeBoolean(true);
+                        BlockPos.STREAM_CODEC.encode(buf, value.hubPos());
+                    } else {
+                        buf.writeBoolean(false);
+                    }
+                }
+            };
 
     @Override
     public Type<OpenPersonalAccessTerminalPacket> type() {
@@ -35,7 +52,7 @@ public record OpenPersonalAccessTerminalPacket(BlockPos niPos) implements Custom
     public static void handle(OpenPersonalAccessTerminalPacket packet, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
-            PersonalAccessTerminalItem.openSatUi(player, packet.niPos());
+            PersonalAccessTerminalItem.openSatUi(player, packet.niPos(), packet.hubPos());
         });
     }
 }

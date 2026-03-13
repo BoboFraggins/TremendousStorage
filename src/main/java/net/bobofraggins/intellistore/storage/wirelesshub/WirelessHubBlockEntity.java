@@ -112,8 +112,9 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         if (!ni.isNetworkValid()) return;
         if (!ni.isPowered()) return;
 
-        // Write the NI position into the item
+        // Write the NI position and this hub's position into the item
         sat.set(Registration.WIRELESS_NI_POS.get(), niPos);
+        sat.set(Registration.WIRELESS_HUB_POS.get(), worldPosition);
 
         // Move to output slot (slot 1)
         inventory.setStackInSlot(1, sat);

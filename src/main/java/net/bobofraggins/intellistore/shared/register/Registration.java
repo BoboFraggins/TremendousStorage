@@ -164,6 +164,16 @@ public final class Registration {
                     .build());
 
     /**
+     * Data component storing the Wireless Hub {@link BlockPos} that was used to link a Wireless SAT.
+     * Used at access-time to verify the hub is still present on the network.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<BlockPos>> WIRELESS_HUB_POS =
+            DATA_COMPONENTS.register("wireless_hub_pos", () -> DataComponentType.<BlockPos>builder()
+                    .persistent(BlockPos.CODEC)
+                    .networkSynchronized(BlockPos.STREAM_CODEC)
+                    .build());
+
+    /**
      * Data component storing the filter configuration on Import Interface and Export Interface items.
      * Carried on the item so filter state persists through break and re-attach cycles.
      */

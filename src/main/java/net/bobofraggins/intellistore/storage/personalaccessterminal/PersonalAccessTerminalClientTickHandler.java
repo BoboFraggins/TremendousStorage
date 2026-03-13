@@ -32,25 +32,25 @@ public final class PersonalAccessTerminalClientTickHandler {
 
         while (PersonalAccessTerminalClientEvents.OPEN_WIRELESS_SAT != null
                 && PersonalAccessTerminalClientEvents.OPEN_WIRELESS_SAT.consumeClick()) {
-            BlockPos niPos = findLinkedPersonalAccessTerminal(mc);
-            if (niPos != null) {
-                PacketDistributor.sendToServer(new OpenPersonalAccessTerminalPacket(niPos));
+            OpenPersonalAccessTerminalPacket packet = findLinkedPersonalAccessTerminal(mc);
+            if (packet != null) {
+                PacketDistributor.sendToServer(packet);
             }
         }
     }
 
     /**
      * Scans the player's main inventory, off-hand, and Curios slots for a linked Wireless SAT.
-     * Returns the NI position of the first one found, or {@code null} if none.
+     * Returns a ready-to-send packet for the first one found, or {@code null} if none.
      */
     @Nullable
-    private static BlockPos findLinkedPersonalAccessTerminal(Minecraft mc) {
+    private static OpenPersonalAccessTerminalPacket findLinkedPersonalAccessTerminal(Minecraft mc) {
         // Main inventory + off-hand
         for (ItemStack stack : mc.player.getInventory().items) {
-            BlockPos pos = getLinkedPos(stack);
-            if (pos != null) return pos;
+            OpenPersonalAccessTerminalPacket packet = buildPacket(stack);
+            if (packet != null) return packet;
         }
-        BlockPos offhand = getLinkedPos(mc.player.getOffhandItem());
+        OpenPersonalAccessTerminalPacket offhand = buildPacket(mc.player.getOffhandItem());
         if (offhand != null) return offhand;
 
         // Curios slots (soft dependency)
@@ -60,8 +60,8 @@ public final class PersonalAccessTerminalClientTickHandler {
                 for (var entry : curiosInv.getCurios().entrySet()) {
                     var handler = entry.getValue().getStacks();
                     for (int i = 0; i < handler.getSlots(); i++) {
-                        BlockPos pos = getLinkedPos(handler.getStackInSlot(i));
-                        if (pos != null) return pos;
+                        OpenPersonalAccessTerminalPacket packet = buildPacket(handler.getStackInSlot(i));
+                        if (packet != null) return packet;
                     }
                 }
             }
@@ -73,8 +73,11 @@ public final class PersonalAccessTerminalClientTickHandler {
     }
 
     @Nullable
-    private static BlockPos getLinkedPos(ItemStack stack) {
+    private static OpenPersonalAccessTerminalPacket buildPacket(ItemStack stack) {
         if (!(stack.getItem() instanceof PersonalAccessTerminalItem)) return null;
-        return stack.get(Registration.WIRELESS_NI_POS.get());
+        BlockPos niPos = stack.get(Registration.WIRELESS_NI_POS.get());
+        if (niPos == null) return null;
+        BlockPos hubPos = stack.get(Registration.WIRELESS_HUB_POS.get());
+        return new OpenPersonalAccessTerminalPacket(niPos, hubPos);
     }
 }

@@ -121,6 +121,7 @@
   "item.intellistore.personal_access_terminal.linked": "Linked to NI at %1$d, %2$d, %3$d",
   "item.intellistore.personal_access_terminal.not_linked": "Personal Access Terminal is not linked to a network",
   "item.intellistore.personal_access_terminal.invalid_network": "Network is unavailable",
+  "item.intellistore.personal_access_terminal.hub_disconnected": "Wireless Hub is no longer connected to this network",
 
   "key.intellistore.open_personal_access_terminal": "Open Personal Access Terminal",
   "key.categories.intellistore": "IntelliStore",
