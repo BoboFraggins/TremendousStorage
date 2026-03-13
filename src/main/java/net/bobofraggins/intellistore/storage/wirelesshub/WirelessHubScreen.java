@@ -46,9 +46,9 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
         drawSlotBg(graphics, x + 44, y + 35); // input  (slot centre x = 52)
         drawSlotBg(graphics, x + 114, y + 35); // output (slot centre x = 122)
 
-        // Arrow between slots (→): shaft + arrowhead
-        graphics.fill(x + 62, y + 42, x + 112, y + 46, 0xFF888888); // shaft
-        graphics.fill(x + 112, y + 40, x + 114, y + 48, 0xFF888888); // arrowhead
+        // Arrow between slots (→): 5px margins from each slot border, shaft + arrowhead
+        graphics.fill(x + 66, y + 42, x + 106, y + 46, 0xFF888888); // shaft
+        graphics.fill(x + 106, y + 40, x + 108, y + 48, 0xFF888888); // arrowhead
 
         // Separator above player inventory
         graphics.fill(x + 4, y + 81, x + BG_WIDTH - 4, y + 82, 0xFF555555);

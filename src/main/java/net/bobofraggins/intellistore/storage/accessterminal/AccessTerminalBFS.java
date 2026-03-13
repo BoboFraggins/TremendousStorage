@@ -11,70 +11,76 @@ import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * BFS utility that searches outward from a Storage Access Terminal to find the
- * nearest connected Network Interface.
+ * BFS utility that searches outward from a network device to find the nearest connected
+ * Network Interface.
  *
- * <p>Scans all tube colors reachable from the SAT's adjacent faces. {@link NetworkConnector}
- * blocks (Filing Cabinet, Junk Drawer, Bulk Storage Container, SAT, Wireless Hub, Stirling
- * Engine) act as color-agnostic bridges: when the BFS encounters one, it continues through
- * all of its adjacent tubes of any color. Returns the {@link BlockPos} of the first NI
- * found, or {@code null} if no NI is reachable.
+ * <p>Two node types are traversed:
+ * <ul>
+ *   <li>{@link TubeBlock} — directional: only follows faces where the tube has a connection.
+ *       Same-color tubes and {@link NetworkConnector} blocks reachable via a connected face
+ *       are added to the queue.
+ *   <li>{@link NetworkConnector} (Filing Cabinet, Junk Drawer, Bulk Storage, Access Terminal,
+ *       Wireless Hub, Stirling Engine) — omnidirectional: checks all six faces freely,
+ *       reaching adjacent tubes of any color or other connectors without requiring tube
+ *       attachments. Two connectors that are directly adjacent are therefore on the same
+ *       network.
+ * </ul>
+ *
+ * <p>Returns the {@link BlockPos} of the first {@link NetworkInterfaceBlock} reachable,
+ * or {@code null} if none.
  */
 public final class AccessTerminalBFS {
 
     private AccessTerminalBFS() {}
 
     /**
-     * Scans the tube network reachable from {@code satPos} and returns the block
-     * position of the nearest Network Interface, or {@code null} if none.
+     * Scans the network reachable from {@code startPos} and returns the position of the
+     * nearest Network Interface, or {@code null} if none is reachable.
      */
     @Nullable
-    public static BlockPos findNI(ServerLevel level, BlockPos satPos) {
-        Set<BlockPos> visitedTubes = new HashSet<>();
-        Set<BlockPos> visitedConnectors = new HashSet<>();
+    public static BlockPos findNI(ServerLevel level, BlockPos startPos) {
+        Set<BlockPos> visited = new HashSet<>();
         Deque<BlockPos> queue = new ArrayDeque<>();
 
-        // Seed the queue with every adjacent tube block (any color) and connector block
+        // Seed: directly adjacent NI, tubes, and connectors
         for (Direction dir : Direction.values()) {
-            BlockPos nb = satPos.relative(dir);
-            BlockState st = level.getBlockState(nb);
-            if (st.getBlock() instanceof TubeBlock) {
-                queue.add(nb);
+            BlockPos nb = startPos.relative(dir);
+            Block block = level.getBlockState(nb).getBlock();
+            if (block instanceof NetworkInterfaceBlock) return nb;
+            if (block instanceof TubeBlock || block instanceof NetworkConnector) {
+                if (visited.add(nb)) queue.add(nb);
             }
         }
 
         while (!queue.isEmpty()) {
             BlockPos pos = queue.poll();
-            if (!visitedTubes.add(pos)) continue;
-
             BlockState st = level.getBlockState(pos);
-            if (!(st.getBlock() instanceof TubeBlock tube)) continue;
 
-            for (Direction dir : Direction.values()) {
-                if (!st.getValue(TubeBlock.DIR_PROPS[dir.ordinal()])) continue;
-
-                BlockPos adj = pos.relative(dir);
-                BlockState adjSt = level.getBlockState(adj);
-
-                if (adjSt.getBlock() instanceof TubeBlock adjTube && adjTube.getColor() == tube.getColor()) {
-                    // Continue BFS through same-color tubes
-                    if (!visitedTubes.contains(adj)) {
-                        queue.add(adj);
+            if (st.getBlock() instanceof TubeBlock tube) {
+                // Tubes: only follow connected faces
+                for (Direction dir : Direction.values()) {
+                    if (!st.getValue(TubeBlock.DIR_PROPS[dir.ordinal()])) continue;
+                    BlockPos adj = pos.relative(dir);
+                    Block adjBlock = level.getBlockState(adj).getBlock();
+                    if (adjBlock instanceof NetworkInterfaceBlock) return adj;
+                    if (adjBlock instanceof TubeBlock adjTube && adjTube.getColor() == tube.getColor()) {
+                        if (visited.add(adj)) queue.add(adj);
+                    } else if (adjBlock instanceof NetworkConnector) {
+                        if (visited.add(adj)) queue.add(adj);
                     }
-                } else if (adjSt.getBlock() instanceof NetworkInterfaceBlock) {
-                    // Found a Network Interface
-                    return adj;
-                } else if (adjSt.getBlock() instanceof NetworkConnector && visitedConnectors.add(adj)) {
-                    // Bridge through this connector into its adjacent tubes (any color)
-                    for (Direction connDir : Direction.values()) {
-                        BlockPos beyond = adj.relative(connDir);
-                        if (!visitedTubes.contains(beyond)
-                                && level.getBlockState(beyond).getBlock() instanceof TubeBlock) {
-                            queue.add(beyond);
-                        }
+                }
+            } else if (st.getBlock() instanceof NetworkConnector) {
+                // Connectors: check all six faces freely
+                for (Direction dir : Direction.values()) {
+                    BlockPos adj = pos.relative(dir);
+                    Block adjBlock = level.getBlockState(adj).getBlock();
+                    if (adjBlock instanceof NetworkInterfaceBlock) return adj;
+                    if (adjBlock instanceof TubeBlock || adjBlock instanceof NetworkConnector) {
+                        if (visited.add(adj)) queue.add(adj);
                     }
                 }
             }
