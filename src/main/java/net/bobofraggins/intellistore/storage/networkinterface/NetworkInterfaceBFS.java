@@ -100,15 +100,18 @@ public final class NetworkInterfaceBFS {
                         fePerTick += HUB_COST;
                     }
                 }
-                // Bridge through the connector to adjacent tubes of any color
+                // Bridge through the connector cluster to adjacent tubes of any color
                 if (visitedConnectors.add(neighborPos)) {
-                    for (Direction connDir : Direction.values()) {
-                        BlockPos beyondPos = neighborPos.relative(connDir);
-                        if (!visitedTubes.contains(beyondPos)
-                                && level.getBlockState(beyondPos).getBlock() instanceof TubeBlock) {
-                            queue.add(beyondPos);
-                        }
-                    }
+                    fePerTick += bridgeConnectorCluster(
+                            level,
+                            neighborPos,
+                            niPos,
+                            visitedTubes,
+                            visitedConnectors,
+                            collectedStorage,
+                            handlerEntries,
+                            storageKeys,
+                            queue);
                 }
             }
         }
@@ -165,15 +168,18 @@ public final class NetworkInterfaceBFS {
                     }
 
                     // If this neighbor is a NetworkConnector, bridge through it into
-                    // adjacent tubes of any color
+                    // adjacent tubes and connectors of any color
                     if (adjState.getBlock() instanceof NetworkConnector && visitedConnectors.add(adjPos)) {
-                        for (Direction connDir : Direction.values()) {
-                            BlockPos beyondPos = adjPos.relative(connDir);
-                            if (!visitedTubes.contains(beyondPos)
-                                    && level.getBlockState(beyondPos).getBlock() instanceof TubeBlock) {
-                                queue.add(beyondPos);
-                            }
-                        }
+                        fePerTick += bridgeConnectorCluster(
+                                level,
+                                adjPos,
+                                niPos,
+                                visitedTubes,
+                                visitedConnectors,
+                                collectedStorage,
+                                handlerEntries,
+                                storageKeys,
+                                queue);
                     }
                 }
             }
@@ -213,6 +219,51 @@ public final class NetworkInterfaceBFS {
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    /**
+     * Flood-fills through all directly-adjacent {@link NetworkConnector} blocks reachable from
+     * {@code startConnector} without going through tubes. Enqueues any adjacent {@link TubeBlock}s
+     * into {@code tubeQueue} and processes each newly-discovered connector via
+     * {@link #processNeighbor}. Returns the additional FE/t cost for the discovered connectors.
+     *
+     * <p>{@code startConnector} must already be in {@code visitedConnectors} before calling.
+     */
+    private static int bridgeConnectorCluster(
+            ServerLevel level,
+            BlockPos startConnector,
+            BlockPos niPos,
+            Set<BlockPos> visitedTubes,
+            Set<BlockPos> visitedConnectors,
+            Set<BlockPos> collectedStorage,
+            List<HandlerEntry> handlerEntries,
+            List<String> storageKeys,
+            Deque<BlockPos> tubeQueue) {
+        int feCost = 0;
+        Deque<BlockPos> pending = new ArrayDeque<>();
+        pending.add(startConnector);
+        while (!pending.isEmpty()) {
+            BlockPos connPos = pending.poll();
+            for (Direction dir : Direction.values()) {
+                BlockPos adj = connPos.relative(dir);
+                BlockState adjState = level.getBlockState(adj);
+                if (!visitedTubes.contains(adj) && adjState.getBlock() instanceof TubeBlock) {
+                    tubeQueue.add(adj);
+                } else if (adjState.getBlock() instanceof NetworkConnector && collectedStorage.add(adj)) {
+                    processNeighbor(level, adj, adjState, niPos, dir, null, handlerEntries, storageKeys);
+                    if (adjState.getBlock() instanceof AccessTerminalBlock) {
+                        feCost += SAT_COST;
+                    } else {
+                        BlockEntity adjBE = level.getBlockEntity(adj);
+                        if (adjBE instanceof WirelessHubBlockEntity) feCost += HUB_COST;
+                    }
+                    if (visitedConnectors.add(adj)) {
+                        pending.add(adj);
+                    }
+                }
+            }
+        }
+        return feCost;
+    }
 
     private static void processNeighbor(
             ServerLevel level,
