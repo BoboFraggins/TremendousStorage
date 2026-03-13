@@ -20,7 +20,7 @@ public final class AccessTerminalLayout {
     public static final int NETWORK_W = NETWORK_COLS * SLOT_SIZE; // 162
     public static final int NETWORK_H = NETWORK_VISIBLE_ROWS * SLOT_SIZE; // 72
     public static final int SCROLLBAR_W = 6;
-    public static final int SCROLLBAR_X = BG_WIDTH - 1 - SCROLLBAR_W; // 169
+    public static final int SCROLLBAR_X = NETWORK_X + NETWORK_W; // 170
 
     // ── Crafting section ──────────────────────────────────────────────────────
 
