@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.shared.ui.PriorityControl;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -201,7 +200,7 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
                 return 1;
             }
         };
-        return new PriorityControl(id, inv, worldPosition, data);
+        return new BulkStorageContainerMenu(id, inv, worldPosition, data);
     }
 
     // -------------------------------------------------------------------------

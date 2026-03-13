@@ -17,6 +17,7 @@ import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlock;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerItemHandler;
+import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerMenu;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderRecipe;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlock;
@@ -36,6 +37,7 @@ import net.bobofraggins.intellistore.storage.items.ZombieBrainItem;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlock;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerItemHandler;
+import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerMenu;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderExtractRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderMergeRecipe;
@@ -455,6 +457,13 @@ public final class Registration {
 
     public static final DeferredHolder<MenuType<?>, MenuType<PriorityControl>> PRIORITY_MENU =
             MENU_TYPES.register("priority", () -> IMenuTypeExtension.create(PriorityControl::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<BulkStorageContainerMenu>> BULK_STORAGE_CONTAINER_MENU =
+            MENU_TYPES.register(
+                    "bulk_storage_container", () -> IMenuTypeExtension.create(BulkStorageContainerMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<JunkDrawerMenu>> JUNK_DRAWER_MENU =
+            MENU_TYPES.register("junk_drawer", () -> IMenuTypeExtension.create(JunkDrawerMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<StorageInterfaceMenu>> STORAGE_INTERFACE_MENU =
             MENU_TYPES.register("storage_interface", () -> IMenuTypeExtension.create(StorageInterfaceMenu::new));
