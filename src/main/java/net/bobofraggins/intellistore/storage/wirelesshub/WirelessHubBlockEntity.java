@@ -1,8 +1,10 @@
 package net.bobofraggins.intellistore.storage.wirelesshub;
 
+import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.intellistore.storage.networkinterface.NiCacheHolder;
 import net.bobofraggins.intellistore.storage.personalaccessterminal.PersonalAccessTerminalItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -31,11 +33,14 @@ import net.neoforged.neoforge.items.ItemStackHandler;
  *   <li>Slot 1 (right): output-only. Player retrieves the linked Wireless SAT from here.
  * </ul>
  */
-public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider {
+public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder {
 
     // -------------------------------------------------------------------------
     // Client-side animation state (not persisted)
     // -------------------------------------------------------------------------
+
+    @Nullable
+    private BlockPos cachedNiPos = null;
 
     /** Incremented each client tick; drives the arc animation. */
     private int tickCount = 0;
@@ -99,7 +104,7 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider 
         if (sat.isEmpty() || !(sat.getItem() instanceof PersonalAccessTerminalItem)) return;
 
         // Find the nearest NI reachable from this hub
-        BlockPos niPos = AccessTerminalBFS.findNI((ServerLevel) level, worldPosition);
+        BlockPos niPos = getOrFindNiPos((ServerLevel) level);
         if (niPos == null) return;
 
         // Validate network — must exist, be valid, and be powered
@@ -139,11 +144,27 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider 
     }
 
     // -------------------------------------------------------------------------
-    // setChanged — propagate cache invalidation through the tube network
+    // NiCacheHolder + setChanged
     // -------------------------------------------------------------------------
 
     @Override
+    public void invalidateNiCache() {
+        cachedNiPos = null;
+    }
+
+    @Override
+    @Nullable
+    public BlockPos getOrFindNiPos(ServerLevel level) {
+        if (cachedNiPos != null && !(level.getBlockEntity(cachedNiPos) instanceof NetworkInterfaceBlockEntity)) {
+            cachedNiPos = null;
+        }
+        if (cachedNiPos == null) cachedNiPos = AccessTerminalBFS.findNI(level, worldPosition);
+        return cachedNiPos;
+    }
+
+    @Override
     public void setChanged() {
+        invalidateNiCache();
         super.setChanged();
         if (level != null) {
             level.invalidateCapabilities(worldPosition);

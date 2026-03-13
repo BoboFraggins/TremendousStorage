@@ -1,6 +1,5 @@
 package net.bobofraggins.intellistore.storage.networkinterface;
 
-import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBFS;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.energy.IEnergyStorage;
@@ -27,7 +26,8 @@ public class ConnectorEnergyHandler implements IEnergyStorage {
 
     private NetworkInterfaceBlockEntity resolveNi() {
         if (!(be.getLevel() instanceof ServerLevel sl)) return null;
-        var niPos = AccessTerminalBFS.findNI(sl, be.getBlockPos());
+        if (!(be instanceof NiCacheHolder holder)) return null;
+        var niPos = holder.getOrFindNiPos(sl);
         if (niPos == null) return null;
         return sl.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni ? ni : null;
     }

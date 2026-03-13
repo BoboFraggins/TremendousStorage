@@ -1,7 +1,10 @@
 package net.bobofraggins.intellistore.storage.filingcabinet;
 
+import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBFS;
+import net.bobofraggins.intellistore.storage.networkinterface.NiCacheHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -10,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -20,13 +24,17 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /** Stores up to {@value #SLOT_COUNT} Manila Folder stacks. */
-public class FilingCabinetBlockEntity extends BlockEntity implements net.minecraft.world.Container, MenuProvider {
+public class FilingCabinetBlockEntity extends BlockEntity
+        implements net.minecraft.world.Container, MenuProvider, NiCacheHolder {
 
     public static final int SLOT_COUNT = 8;
 
     private final NonNullList<ItemStack> folders = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private Priority priority = Priority.HIGH;
     private boolean voidExcess = false;
+
+    @Nullable
+    private BlockPos cachedNiPos = null;
 
     public FilingCabinetBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.FILING_CABINET_BE_TYPE.get(), pos, state);
@@ -37,7 +45,26 @@ public class FilingCabinetBlockEntity extends BlockEntity implements net.minecra
     // -------------------------------------------------------------------------
 
     @Override
+    public void invalidateNiCache() {
+        cachedNiPos = null;
+    }
+
+    @Override
+    @Nullable
+    public BlockPos getOrFindNiPos(ServerLevel level) {
+        if (cachedNiPos != null
+                && !(level.getBlockEntity(cachedNiPos)
+                        instanceof
+                        net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity)) {
+            cachedNiPos = null;
+        }
+        if (cachedNiPos == null) cachedNiPos = AccessTerminalBFS.findNI(level, worldPosition);
+        return cachedNiPos;
+    }
+
+    @Override
     public void setChanged() {
+        invalidateNiCache();
         super.setChanged();
         if (level != null) {
             level.invalidateCapabilities(worldPosition);

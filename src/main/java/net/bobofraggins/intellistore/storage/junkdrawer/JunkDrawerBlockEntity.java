@@ -2,8 +2,12 @@ package net.bobofraggins.intellistore.storage.junkdrawer;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBFS;
+import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.intellistore.storage.networkinterface.NiCacheHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -13,6 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -37,12 +42,15 @@ import net.minecraft.world.level.block.state.BlockState;
  *
  * <p>No player-facing UI — all interaction is via automation.
  */
-public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider {
+public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder {
 
     public static final int CAPACITY = 32_768;
 
     private final List<ItemStack> items = new ArrayList<>();
     private Priority priority = Priority.NORMAL;
+
+    @Nullable
+    private BlockPos cachedNiPos = null;
 
     public JunkDrawerBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.JUNK_DRAWER_BE_TYPE.get(), pos, state);
@@ -152,11 +160,27 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     // -------------------------------------------------------------------------
-    // setChanged
+    // NiCacheHolder + setChanged
     // -------------------------------------------------------------------------
 
     @Override
+    public void invalidateNiCache() {
+        cachedNiPos = null;
+    }
+
+    @Override
+    @Nullable
+    public BlockPos getOrFindNiPos(ServerLevel level) {
+        if (cachedNiPos != null && !(level.getBlockEntity(cachedNiPos) instanceof NetworkInterfaceBlockEntity)) {
+            cachedNiPos = null;
+        }
+        if (cachedNiPos == null) cachedNiPos = AccessTerminalBFS.findNI(level, worldPosition);
+        return cachedNiPos;
+    }
+
+    @Override
     public void setChanged() {
+        invalidateNiCache();
         super.setChanged();
         if (level != null) {
             level.invalidateCapabilities(worldPosition);
