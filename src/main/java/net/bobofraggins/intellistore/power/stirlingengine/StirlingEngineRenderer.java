@@ -46,8 +46,8 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
     /** Piston top at rest: 1 px proud of the iron block top. */
     private static final float PISTON_TOP_MIN = IRON_TOP_Y + 1f / 16f;
 
-    /** Piston top at full extension: top of block. */
-    private static final float PISTON_TOP_MAX = 1f;
+    /** Piston top at full extension: 2 px short of block top, keeping bottom 2px hidden. */
+    private static final float PISTON_TOP_MAX = 14f / 16f;
 
     /** animationTicks units per second (1.5 per client tick × 20 ticks/s = 30). */
     private static final float TICKS_PER_SECOND = 30f;
