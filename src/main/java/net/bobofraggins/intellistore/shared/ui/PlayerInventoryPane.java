@@ -65,8 +65,8 @@ public class PlayerInventoryPane implements IDialogPane {
     }
 
     private static void drawSlotBg(GuiGraphics graphics, int sx, int sy) {
-        graphics.fill(sx, sy, sx + 16, sy + 1, DARK);        // top
-        graphics.fill(sx, sy + 1, sx + 1, sy + 16, DARK);    // left
+        graphics.fill(sx, sy, sx + 16, sy + 1, DARK); // top
+        graphics.fill(sx, sy + 1, sx + 1, sy + 16, DARK); // left
         graphics.fill(sx, sy + 16, sx + 17, sy + 17, LIGHT); // bottom
         graphics.fill(sx + 16, sy, sx + 17, sy + 16, LIGHT); // right
         graphics.fill(sx + 1, sy + 1, sx + 16, sy + 16, FILL); // interior
