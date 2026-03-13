@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.InventoryMenu;
 import org.joml.Matrix4f;
 
 /**
- * Renders the Stirling Engine as an iron base + iron block top with a sliding copper piston.
+ * Renders the Stirling Engine as a Lazurite base + Lazurite block top with a sliding piston.
  *
  * <p>The piston animates (bouncing up and down) only when a heat source is present below
  * the engine (i.e. when {@link StirlingEngineBlockEntity#isHeated()} returns true).
@@ -32,7 +32,7 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
     private static final ResourceLocation IRON_BLOCK =
             ResourceLocation.fromNamespaceAndPath("minecraft", "block/iron_block");
     private static final ResourceLocation COPPER_BLOCK =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "block/copper_block");
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/stirling_engine_piston");
 
     /** Small offset to prevent Z-fighting with adjacent block faces. */
     private static final float EPS = 1e-4f;
