@@ -66,6 +66,19 @@ public class BulkStorageContainerBlock extends BaseEntityBlock implements Networ
     }
 
     @Override
+    public void neighborChanged(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Block neighborBlock,
+            BlockPos neighborPos,
+            boolean movedByPiston) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof BulkStorageContainerBlockEntity be) {
+            be.setChanged();
+        }
+    }
+
+    @Override
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;

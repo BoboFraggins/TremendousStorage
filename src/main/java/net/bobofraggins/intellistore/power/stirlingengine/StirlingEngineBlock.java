@@ -5,6 +5,7 @@ import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -23,6 +24,19 @@ public class StirlingEngineBlock extends BaseEntityBlock implements NetworkConne
 
     public StirlingEngineBlock(Properties props) {
         super(props);
+    }
+
+    @Override
+    public void neighborChanged(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Block neighborBlock,
+            BlockPos neighborPos,
+            boolean movedByPiston) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof StirlingEngineBlockEntity be) {
+            be.setChanged();
+        }
     }
 
     @Override

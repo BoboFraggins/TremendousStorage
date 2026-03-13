@@ -66,6 +66,19 @@ public class JunkDrawerBlock extends BaseEntityBlock implements NetworkConnector
     }
 
     @Override
+    public void neighborChanged(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Block neighborBlock,
+            BlockPos neighborPos,
+            boolean movedByPiston) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof JunkDrawerBlockEntity be) {
+            be.setChanged();
+        }
+    }
+
+    @Override
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;

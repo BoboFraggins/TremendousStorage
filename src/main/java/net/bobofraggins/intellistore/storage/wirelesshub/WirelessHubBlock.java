@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -65,6 +66,19 @@ public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnecto
     public RenderShape getRenderShape(BlockState state) {
         // All geometry (base, rods, arc) is drawn by WirelessHubRenderer; JSON provides particle only.
         return RenderShape.ENTITYBLOCK_ANIMATED;
+    }
+
+    @Override
+    public void neighborChanged(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Block neighborBlock,
+            BlockPos neighborPos,
+            boolean movedByPiston) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof WirelessHubBlockEntity be) {
+            be.setChanged();
+        }
     }
 
     @Override

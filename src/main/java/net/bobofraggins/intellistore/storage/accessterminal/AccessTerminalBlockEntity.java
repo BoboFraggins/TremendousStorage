@@ -22,6 +22,14 @@ public class AccessTerminalBlockEntity extends BlockEntity {
         super(Registration.STORAGE_ACCESS_TERMINAL_BE_TYPE.get(), pos, state);
     }
 
+    @Override
+    public void setChanged() {
+        super.setChanged();
+        if (level != null) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
     /** Called each server tick by the block ticker. */
     public void serverTick() {
         if (++tickCounter < 20) return;

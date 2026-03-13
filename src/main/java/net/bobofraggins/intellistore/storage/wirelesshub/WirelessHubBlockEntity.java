@@ -139,6 +139,19 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider 
     }
 
     // -------------------------------------------------------------------------
+    // setChanged — propagate cache invalidation through the tube network
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void setChanged() {
+        super.setChanged();
+        if (level != null) {
+            level.invalidateCapabilities(worldPosition);
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // NBT persistence
     // -------------------------------------------------------------------------
 

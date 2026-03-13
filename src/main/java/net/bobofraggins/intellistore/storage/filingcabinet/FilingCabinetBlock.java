@@ -70,6 +70,23 @@ public class FilingCabinetBlock extends BaseEntityBlock implements NetworkConnec
     }
 
     // -------------------------------------------------------------------------
+    // Neighbour change — propagate cache invalidation through the tube network
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void neighborChanged(
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Block neighborBlock,
+            BlockPos neighborPos,
+            boolean movedByPiston) {
+        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FilingCabinetBlockEntity be) {
+            be.setChanged();
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Interaction — open UI on any right-click
     // -------------------------------------------------------------------------
 

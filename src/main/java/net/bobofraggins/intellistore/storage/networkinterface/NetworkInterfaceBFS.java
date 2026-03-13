@@ -82,11 +82,34 @@ public final class NetworkInterfaceBFS {
         // (the NI itself is a color-agnostic entry point, and connectors bridge colors)
         Deque<BlockPos> queue = new ArrayDeque<>();
 
-        // Seed with every tube adjacent to the NI (any color)
+        // Seed with every tube adjacent to the NI (any color), and also handle
+        // NetworkConnector blocks that are directly adjacent to the NI (no tube required).
         for (Direction niDir : Direction.values()) {
             BlockPos neighborPos = niPos.relative(niDir);
-            if (level.getBlockState(neighborPos).getBlock() instanceof TubeBlock) {
+            BlockState neighborState = level.getBlockState(neighborPos);
+            if (neighborState.getBlock() instanceof TubeBlock) {
                 queue.add(neighborPos);
+            } else if (neighborState.getBlock() instanceof NetworkConnector && collectedStorage.add(neighborPos)) {
+                processNeighbor(level, neighborPos, neighborState, niPos, niDir, null, handlerEntries, storageKeys);
+                // Count power cost for SAT/Wireless Hub directly adjacent to NI
+                if (neighborState.getBlock() instanceof AccessTerminalBlock) {
+                    fePerTick += SAT_COST;
+                } else {
+                    BlockEntity adjBE = level.getBlockEntity(neighborPos);
+                    if (adjBE instanceof WirelessHubBlockEntity) {
+                        fePerTick += HUB_COST;
+                    }
+                }
+                // Bridge through the connector to adjacent tubes of any color
+                if (visitedConnectors.add(neighborPos)) {
+                    for (Direction connDir : Direction.values()) {
+                        BlockPos beyondPos = neighborPos.relative(connDir);
+                        if (!visitedTubes.contains(beyondPos)
+                                && level.getBlockState(beyondPos).getBlock() instanceof TubeBlock) {
+                            queue.add(beyondPos);
+                        }
+                    }
+                }
             }
         }
 
