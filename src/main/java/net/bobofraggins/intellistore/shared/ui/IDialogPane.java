@@ -13,6 +13,9 @@ import net.minecraft.client.gui.GuiGraphics;
  */
 public interface IDialogPane {
 
+    /** Preferred width of this pane in pixels. Used by {@link Dialog} to auto-size itself. */
+    int preferredWidth();
+
     /** Preferred height of this pane in pixels. */
     int preferredHeight();
 

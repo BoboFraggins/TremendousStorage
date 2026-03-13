@@ -52,6 +52,11 @@ public class NetworkInventoryPane implements IDialogPane {
     // IDialogPane
     // -------------------------------------------------------------------------
 
+    @Override
+    public int preferredWidth() {
+        return AccessTerminalLayout.BG_WIDTH;
+    }
+
     /** Spans from {@code TITLE_H} to {@code CRAFTING_Y} (exclusive). */
     @Override
     public int preferredHeight() {

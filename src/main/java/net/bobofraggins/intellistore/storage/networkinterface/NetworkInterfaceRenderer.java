@@ -179,7 +179,13 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1, 0, 0);
     }
 
-    /** Draws all faces of a box except the bottom (-Y) face. */
+    /**
+     * Draws all faces of a box except the bottom (-Y) face, double-sided.
+     *
+     * <p>Each face is emitted twice — once with the outward-facing normal and once with the
+     * inward-facing normal (reversed vertex winding) — so translucent surfaces like glass are
+     * visible from both outside and inside the jar.
+     */
     private static void drawBoxNoBottom(
             VertexConsumer vc,
             Matrix4f mat,
@@ -196,20 +202,31 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
             int light,
             int overlay) {
         float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
-        // +Y
+        // +Y (top) — outer then inner
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0, 1, 0);
-        // -Z (north)
+        quad(
+                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0, 0, -1,
+                0);
+        // -Z (north) — outer then inner
         quad(
                 vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0, 0,
                 -1);
-        // +Z (south)
+        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0, 0, 0, 1);
+        // +Z (south) — outer then inner
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0, 0, 1);
-        // -X (west)
+        quad(
+                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1, 0, 0,
+                -1);
+        // -X (west) — outer then inner
         quad(
                 vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1, 0,
                 0);
-        // +X (east)
+        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0, 1, 0, 0);
+        // +X (east) — outer then inner
         quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1, 0, 0);
+        quad(
+                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y0, z1, x1, y0, z0, x1, y1, z0, x1, y1, z1, -1, 0,
+                0);
     }
 
     private static void quad(

@@ -23,6 +23,11 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
             ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
 
     protected static final int BG_WIDTH = 176;
+
+    /** Y position of the player inventory rows (relative to topPos). */
+    protected static final int PLAYER_INV_Y = 118;
+
+    private static final PlayerInventoryPane PLAYER_INV_PANE = new PlayerInventoryPane();
     private static final int BTN_W = 120;
     private static final int BTN_H = 14;
     private static final int BTN_Y = 18;
@@ -96,6 +101,12 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
             int sy = y + 44 + row * 18;
             drawSlotBackground(graphics, sx, sy, 16, 16);
         }
+
+        // Player inventory slot backgrounds
+        graphics.pose().pushPose();
+        graphics.pose().translate(x, y + PLAYER_INV_Y, 0);
+        PLAYER_INV_PANE.render(graphics, font, BG_WIDTH, 0, 0, 0);
+        graphics.pose().popPose();
     }
 
     @Override

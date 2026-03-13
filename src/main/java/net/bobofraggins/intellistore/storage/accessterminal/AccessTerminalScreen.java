@@ -4,6 +4,7 @@ import java.util.List;
 import net.bobofraggins.intellistore.shared.network.RequestSatContentsPacket;
 import net.bobofraggins.intellistore.shared.network.SatContentsPacket;
 import net.bobofraggins.intellistore.shared.ui.Dialog;
+import net.bobofraggins.intellistore.shared.ui.PlayerInventoryPane;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -40,8 +41,10 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
     public AccessTerminalScreen(AccessTerminalMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth = AccessTerminalLayout.BG_WIDTH;
-        this.imageHeight = AccessTerminalLayout.BG_HEIGHT;
+        networkPane = new NetworkInventoryPane(menu);
+        dialog = new Dialog(networkPane, new CraftingGridPane(), new PlayerInventoryPane());
+        this.imageWidth = dialog.totalWidth();
+        this.imageHeight = dialog.totalHeight();
     }
 
     // -------------------------------------------------------------------------
@@ -51,10 +54,6 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     @Override
     protected void init() {
         super.init();
-
-        networkPane = new NetworkInventoryPane(menu);
-        dialog = new Dialog(
-                AccessTerminalLayout.BG_WIDTH, networkPane, new CraftingGridPane(), new PlayerInventoryPane());
         dialog.init(leftPos, topPos);
 
         if (menu.hasNetwork()) {

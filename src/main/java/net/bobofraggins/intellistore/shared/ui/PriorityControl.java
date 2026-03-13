@@ -99,6 +99,11 @@ public class PriorityControl extends AbstractContainerMenu implements IDialogPan
     // -------------------------------------------------------------------------
 
     @Override
+    public int preferredWidth() {
+        return PANE_WIDTH;
+    }
+
+    @Override
     public int preferredHeight() {
         return PANE_HEIGHT;
     }

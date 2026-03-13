@@ -9,14 +9,23 @@ import net.minecraft.resources.ResourceLocation;
 /**
  * A dialog window that stacks {@link IDialogPane} instances vertically below a title bar.
  *
- * <p>The dialog owns its own background (vanilla title bar + gray fill + border lines) and routes
+ * <p>The dialog owns its own background (9-slice title bar + gray fill + border lines) and routes
  * mouse events to whichever pane contains the cursor.
+ *
+ * <p>Background is rendered using nine separate 1-pixel textures: four corners, four edges, and a
+ * center. Corner textures are blitted directly; the top edge tiles horizontally to fill any dialog
+ * width; body fill and single-pixel borders use {@code fill()} (equivalent to tiling a 1×1 solid
+ * pixel).
  *
  * <p>Usage:
  *
  * <pre>{@code
- * // Create once in Screen.init():
- * dialog = new Dialog(width, paneA, paneB, paneC);
+ * // Create in Screen constructor (so imageWidth/imageHeight are available):
+ * dialog = new Dialog(paneA, paneB, paneC);
+ * imageWidth  = dialog.totalWidth();
+ * imageHeight = dialog.totalHeight();
+ *
+ * // In Screen.init():
  * dialog.init(leftPos, topPos);
  *
  * // In renderBg():
@@ -28,15 +37,43 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class Dialog {
 
-    private static final ResourceLocation BG_TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
+    // ── 9-slice textures ─────────────────────────────────────────────────────
+    // Each texture contains only the actual border decoration pixels from generic_54.png —
+    // no interior gray fill is stored in the texture data.
+    // Corners: 5×5. Top/bottom edges: 1×5 (tile H). Left/right edges: 5×1 (tile V).
+    // The interior body fill is rendered via fill() using COLOR_BODY.
 
-    /** Height of the vanilla title bar strip. */
+    private static final ResourceLocation TEX_CORNER_TL =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/dialog_corner_tl.png");
+    private static final ResourceLocation TEX_CORNER_TR =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/dialog_corner_tr.png");
+    private static final ResourceLocation TEX_CORNER_BL =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/dialog_corner_bl.png");
+    private static final ResourceLocation TEX_CORNER_BR =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/dialog_corner_br.png");
+    private static final ResourceLocation TEX_EDGE_TOP =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/dialog_edge_top.png");
+    private static final ResourceLocation TEX_EDGE_BOTTOM =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/dialog_edge_bottom.png");
+    private static final ResourceLocation TEX_EDGE_LEFT =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/dialog_edge_left.png");
+    private static final ResourceLocation TEX_EDGE_RIGHT =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/dialog_edge_right.png");
+
+    /** Height of the title bar area; panes are positioned below this. */
     public static final int TITLE_H = 17;
 
+    /** Size of each corner square and the fixed dimension of each edge texture. */
+    private static final int CORNER = 5;
+
+    /**
+     * Padding added below the last pane so its content doesn't sit directly under the bottom
+     * corner border. Equal to {@link #CORNER} so the bottom frame is flush with the pane end.
+     */
+    private static final int BOTTOM_PADDING = CORNER;
+
+    // Body fill colour — matches the center.png 1×1 pixel.
     private static final int COLOR_BODY = 0xFFC6C6C6;
-    private static final int COLOR_BORDER_DARK = 0xFF555555;
-    private static final int COLOR_BORDER_LIGHT = 0xFFFFFFFF;
 
     private final int width;
     private final List<IDialogPane> panes;
@@ -51,16 +88,23 @@ public class Dialog {
 
     private int y;
 
-    public Dialog(int width, IDialogPane... panes) {
-        this.width = width;
+    /**
+     * Creates a dialog whose dimensions are derived from the panes.
+     * Width = {@code max(pane.preferredWidth())} over all panes.
+     * Height = {@link #TITLE_H} + sum of pane heights + {@link #BOTTOM_PADDING}.
+     */
+    public Dialog(IDialogPane... panes) {
         this.panes = List.of(panes);
         this.paneYOffsets = new int[panes.length];
-        int total = 0;
+        int totalH = 0;
+        int maxW = 0;
         for (int i = 0; i < panes.length; i++) {
-            paneYOffsets[i] = total;
-            total += panes[i].preferredHeight();
+            paneYOffsets[i] = totalH;
+            totalH += panes[i].preferredHeight();
+            maxW = Math.max(maxW, panes[i].preferredWidth());
         }
-        this.bodyHeight = total;
+        this.bodyHeight = totalH;
+        this.width = maxW;
     }
 
     /** Call from {@code Screen.init()} with the screen's {@code leftPos} and {@code topPos}. */
@@ -69,9 +113,14 @@ public class Dialog {
         this.y = screenY;
     }
 
-    /** Total height of the dialog: title bar plus the sum of all pane preferred heights. */
+    /** Total width of the dialog, equal to the widest pane's {@code preferredWidth()}. */
+    public int totalWidth() {
+        return width;
+    }
+
+    /** Total height: title bar + pane heights + bottom padding. */
     public int totalHeight() {
-        return TITLE_H + bodyHeight;
+        return TITLE_H + bodyHeight + BOTTOM_PADDING;
     }
 
     /** Absolute screen-space X of the pane at the given index. */
@@ -90,19 +139,33 @@ public class Dialog {
 
     public void render(GuiGraphics graphics, Font font, Component title, int mouseX, int mouseY, float partialTick) {
         int totalH = totalHeight();
+        int bodyTop = y + CORNER;
+        int bodyBot = y + totalH; // exclusive bottom of content area
+        int midW = width - 2 * CORNER; // width of middle strip (between corners)
+        int midH = totalH - 2 * CORNER; // height of middle strip (between corners)
 
-        // Title bar from vanilla container texture
-        graphics.blit(BG_TEXTURE, x, y, 0, 0, width, TITLE_H);
+        // ── Top corners + top edge ────────────────────────────────────────────
+        graphics.blit(TEX_CORNER_TL, x, y, 0, 0, CORNER, CORNER, CORNER, CORNER);
+        for (int px = 0; px < midW; px++) {
+            graphics.blit(TEX_EDGE_TOP, x + CORNER + px, y, 0, 0, 1, CORNER, 1, CORNER);
+        }
+        graphics.blit(TEX_CORNER_TR, x + width - CORNER, y, 0, 0, CORNER, CORNER, CORNER, CORNER);
 
-        // Gray body fill
-        graphics.fill(x, y + TITLE_H, x + width, y + totalH, COLOR_BODY);
+        // ── Side edges + center fill ──────────────────────────────────────────
+        for (int py = 0; py < midH; py++) {
+            graphics.blit(TEX_EDGE_LEFT, x, bodyTop + py, 0, 0, CORNER, 1, CORNER, 1);
+            graphics.blit(TEX_EDGE_RIGHT, x + width - CORNER, bodyTop + py, 0, 0, CORNER, 1, CORNER, 1);
+        }
+        graphics.fill(x + CORNER, bodyTop, x + width - CORNER, bodyBot - CORNER, COLOR_BODY);
 
-        // Borders: dark left + bottom, light right
-        graphics.fill(x, y + TITLE_H, x + 1, y + totalH, COLOR_BORDER_DARK);
-        graphics.fill(x + width - 1, y + TITLE_H, x + width, y + totalH, COLOR_BORDER_LIGHT);
-        graphics.fill(x, y + totalH - 1, x + width, y + totalH, COLOR_BORDER_DARK);
+        // ── Bottom edge + bottom corners ──────────────────────────────────────
+        graphics.blit(TEX_CORNER_BL, x, bodyBot - CORNER, 0, 0, CORNER, CORNER, CORNER, CORNER);
+        for (int px = 0; px < midW; px++) {
+            graphics.blit(TEX_EDGE_BOTTOM, x + CORNER + px, bodyBot - CORNER, 0, 0, 1, CORNER, 1, CORNER);
+        }
+        graphics.blit(TEX_CORNER_BR, x + width - CORNER, bodyBot - CORNER, 0, 0, CORNER, CORNER, CORNER, CORNER);
 
-        // Title centred in title bar
+        // ── Title centred in title bar ────────────────────────────────────────
         graphics.drawString(font, title, x + (width - font.width(title)) / 2, y + 5, 0x404040, false);
 
         // Render each pane translated to its local origin

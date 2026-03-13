@@ -12,20 +12,18 @@ import net.minecraft.world.entity.player.Inventory;
  */
 public class PriorityScreen extends AbstractContainerScreen<PriorityControl> {
 
-    private static final int BG_WIDTH = 176;
-
     private Dialog dialog;
 
     public PriorityScreen(PriorityControl menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth = BG_WIDTH;
-        this.imageHeight = Dialog.TITLE_H + menu.preferredHeight();
+        dialog = new Dialog(menu);
+        this.imageWidth = dialog.totalWidth();
+        this.imageHeight = dialog.totalHeight();
     }
 
     @Override
     protected void init() {
         super.init();
-        dialog = new Dialog(imageWidth, menu);
         dialog.init(leftPos, topPos);
     }
 
