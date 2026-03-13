@@ -51,5 +51,9 @@ public final class NetworkEvents {
                 OpenPersonalFilingCabinetPacket.TYPE,
                 OpenPersonalFilingCabinetPacket.STREAM_CODEC,
                 OpenPersonalFilingCabinetPacket::handle);
+        registrar.playToServer(
+                LocalStorageInteractPacket.TYPE,
+                LocalStorageInteractPacket.STREAM_CODEC,
+                LocalStorageInteractPacket::handle);
     }
 }

@@ -4,18 +4,38 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.util.CountFormat;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalLayout;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * Dialog pane that renders a read-only scrollable item grid backed by a local block inventory.
+ * Dialog pane that renders a scrollable item grid backed by a local block inventory.
  *
  * <p>Uses the same visual layout as the network inventory grid in the Access Terminal: 9 columns,
  * 4 visible rows, 18 px slots, and a 6 px scrollbar flush against the right edge of the grid.
+ *
+ * <p>Grid interactions (click to extract, click with carried item to insert) are routed to a
+ * {@link GridClickHandler} supplied by the hosting screen.
  */
 public class LocalInventoryPane implements IDialogPane {
+
+    /**
+     * Callback for grid click interactions.
+     *
+     * <ul>
+     *   <li>{@code idx == -1}: player clicked the grid while holding an item — insert from cursor.
+     *   <li>{@code idx >= 0}: player clicked an occupied grid slot — extract {@code amount} items;
+     *       {@code toCursor = true} places them on the cursor, {@code false} sends them directly
+     *       to the player's inventory (shift-click behaviour).
+     * </ul>
+     */
+    @FunctionalInterface
+    public interface GridClickHandler {
+        void onClick(int idx, int amount, boolean toCursor);
+    }
 
     private static final ResourceLocation BG_TEXTURE =
             ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
@@ -35,6 +55,9 @@ public class LocalInventoryPane implements IDialogPane {
     private List<Long> counts = List.of();
     private int scrollOffset = 0;
 
+    @Nullable
+    private GridClickHandler clickHandler;
+
     // -------------------------------------------------------------------------
     // Public API
     // -------------------------------------------------------------------------
@@ -43,6 +66,10 @@ public class LocalInventoryPane implements IDialogPane {
         this.stacks = stacks;
         this.counts = counts;
         clampScroll();
+    }
+
+    public void setClickHandler(GridClickHandler handler) {
+        this.clickHandler = handler;
     }
 
     /**
@@ -77,6 +104,36 @@ public class LocalInventoryPane implements IDialogPane {
             GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
         drawGrid(graphics, font);
         drawScrollbar(graphics);
+    }
+
+    @Override
+    public boolean mouseClicked(double localX, double localY, int button) {
+        if (!isInGrid(localX, localY) || clickHandler == null) return false;
+
+        var mc = Minecraft.getInstance();
+        if (mc.player == null) return false;
+        ItemStack carried = mc.player.containerMenu.getCarried();
+
+        if (!carried.isEmpty()) {
+            if (button == 0) clickHandler.onClick(-1, 0, false);
+            return true;
+        }
+
+        int col = (int) ((localX - GRID_X) / AccessTerminalLayout.SLOT_SIZE);
+        int row = (int) ((localY - GRID_Y) / AccessTerminalLayout.SLOT_SIZE);
+        int idx = (row + scrollOffset) * AccessTerminalLayout.NETWORK_COLS + col;
+
+        if (idx >= 0 && idx < stacks.size()) {
+            long count = counts.get(idx);
+            int maxStack = stacks.get(idx).getMaxStackSize();
+            if (Screen.hasShiftDown()) {
+                clickHandler.onClick(idx, (int) Math.min(count, maxStack), false);
+            } else {
+                int amount = (button == 1) ? 1 : (int) Math.min(count, maxStack);
+                clickHandler.onClick(idx, amount, true);
+            }
+        }
+        return true;
     }
 
     @Override

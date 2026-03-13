@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.storage.bulkstorage;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.bobofraggins.intellistore.shared.network.LocalStorageInteractPacket;
 import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.bobofraggins.intellistore.shared.ui.LocalInventoryPane;
 import net.bobofraggins.intellistore.shared.ui.PlayerInventoryPane;
@@ -13,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Screen for the Bulk Storage Container.
@@ -38,6 +40,8 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
     protected void init() {
         super.init();
         dialog.init(leftPos, topPos);
+        inventoryPane.setClickHandler((idx, amount, toCursor) -> PacketDistributor.sendToServer(
+                new LocalStorageInteractPacket(menu.getPos(), true, idx, amount, toCursor)));
     }
 
     @Override
