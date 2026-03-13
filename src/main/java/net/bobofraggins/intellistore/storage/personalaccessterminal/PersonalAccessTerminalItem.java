@@ -30,6 +30,11 @@ public class PersonalAccessTerminalItem extends Item {
         super(new Item.Properties().stacksTo(1));
     }
 
+    @Override
+    public String getDescriptionId() {
+        return "item.intellistore.personal_access_terminal";
+    }
+
     // -------------------------------------------------------------------------
     // Tooltip
     // -------------------------------------------------------------------------
@@ -39,9 +44,9 @@ public class PersonalAccessTerminalItem extends Item {
         BlockPos niPos = stack.get(Registration.WIRELESS_NI_POS.get());
         if (niPos != null) {
             lines.add(Component.translatable(
-                    "item.intellistore.wireless_sat.linked", niPos.getX(), niPos.getY(), niPos.getZ()));
+                    "item.intellistore.personal_access_terminal.linked", niPos.getX(), niPos.getY(), niPos.getZ()));
         } else {
-            lines.add(Component.translatable("item.intellistore.wireless_sat.unlinked"));
+            lines.add(Component.translatable("item.intellistore.personal_access_terminal.unlinked"));
         }
     }
 
@@ -58,7 +63,8 @@ public class PersonalAccessTerminalItem extends Item {
 
         BlockPos niPos = stack.get(Registration.WIRELESS_NI_POS.get());
         if (niPos == null) {
-            player.displayClientMessage(Component.translatable("item.intellistore.wireless_sat.not_linked"), true);
+            player.displayClientMessage(
+                    Component.translatable("item.intellistore.personal_access_terminal.not_linked"), true);
             return InteractionResultHolder.fail(stack);
         }
 
@@ -72,11 +78,13 @@ public class PersonalAccessTerminalItem extends Item {
      */
     public static void openSatUi(ServerPlayer player, BlockPos niPos) {
         if (!(player.level().getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) {
-            player.displayClientMessage(Component.translatable("item.intellistore.wireless_sat.invalid_network"), true);
+            player.displayClientMessage(
+                    Component.translatable("item.intellistore.personal_access_terminal.invalid_network"), true);
             return;
         }
         if (!ni.isNetworkValid()) {
-            player.displayClientMessage(Component.translatable("item.intellistore.wireless_sat.invalid_network"), true);
+            player.displayClientMessage(
+                    Component.translatable("item.intellistore.personal_access_terminal.invalid_network"), true);
             return;
         }
         if (!ni.isPowered()) {

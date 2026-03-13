@@ -43,10 +43,10 @@ public class WirelessHubMenu extends AbstractContainerMenu {
         this.hubInventory = hubInventory;
 
         // Slot 0: input — Wireless SAT only
-        addSlot(new SlotItemHandler(hubInventory, 0, 62, 35));
+        addSlot(new SlotItemHandler(hubInventory, 0, 44, 35));
 
         // Slot 1: output — read-only for player (item placed by block entity)
-        addSlot(new SlotItemHandler(hubInventory, 1, 98, 35) {
+        addSlot(new SlotItemHandler(hubInventory, 1, 114, 35) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false; // player cannot put items here

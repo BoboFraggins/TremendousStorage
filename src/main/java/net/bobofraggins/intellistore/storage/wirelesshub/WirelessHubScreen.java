@@ -42,12 +42,13 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
 
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
 
-        // Slot backgrounds (inset style: dark top-left border, light bottom-right, gray fill)
-        drawSlotBg(graphics, x + 62, y + 35); // input
-        drawSlotBg(graphics, x + 98, y + 35); // output
+        // Slot backgrounds — input (left) and output (right), spread apart with room for labels
+        drawSlotBg(graphics, x + 44, y + 35); // input  (slot centre x = 52)
+        drawSlotBg(graphics, x + 114, y + 35); // output (slot centre x = 122)
 
-        // Arrow between slots (→)
-        graphics.fill(x + 80, y + 43, x + 96, y + 47, 0xFF888888);
+        // Arrow between slots (→): shaft + arrowhead
+        graphics.fill(x + 62, y + 42, x + 112, y + 46, 0xFF888888); // shaft
+        graphics.fill(x + 112, y + 40, x + 114, y + 48, 0xFF888888); // arrowhead
 
         // Separator above player inventory
         graphics.fill(x + 4, y + 81, x + BG_WIDTH - 4, y + 82, 0xFF555555);
@@ -64,21 +65,11 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
             drawSlotBg(graphics, x + 8 + col * 18, y + 142);
         }
 
-        // "Unlinked" / "Linked" labels
-        graphics.drawString(
-                font,
-                Component.translatable("screen.intellistore.wireless_hub.unlinked"),
-                x + 62,
-                y + 55,
-                0x404040,
-                false);
-        graphics.drawString(
-                font,
-                Component.translatable("screen.intellistore.wireless_hub.linked"),
-                x + 98,
-                y + 55,
-                0x006600,
-                false);
+        // "Unlinked" / "Linked" labels — centred under their respective slots
+        Component unlinked = Component.translatable("screen.intellistore.wireless_hub.unlinked");
+        Component linked = Component.translatable("screen.intellistore.wireless_hub.linked");
+        graphics.drawString(font, unlinked, x + 52 - font.width(unlinked) / 2, y + 55, 0x404040, false);
+        graphics.drawString(font, linked, x + 122 - font.width(linked) / 2, y + 55, 0x006600, false);
     }
 
     /** Draws a standard 16×16 inset slot background at the given top-left pixel. */
