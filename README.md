@@ -46,6 +46,14 @@ IntelliStore is inspired by and derived in part from
 The core folder storage concept, crafting grid insert/extract behavior, and filing cabinet block
 interaction model all originate from that project. Thank you to bafomdad for the original work.
 
+The Lazurite Paxel implementation is derived from
+**[Mekanism](https://github.com/mekanism/Mekanism)** by
+[aidancbrady](https://github.com/aidancbrady) and contributors, which is licensed under the
+[MIT License](https://github.com/mekanism/Mekanism/blob/1.21.x/LICENSE).
+
+The `LazuritePaxelItem` class structure and `useOn` logic (combining axe strip/scrape/wax-off,
+shovel flatten/douse, and hoe till interactions) are modelled after `ItemMekanismPaxel`.
+
 ## License
 
 MIT License — Copyright (c) 2026 BoboFraggins. See [LICENSE](LICENSE) for details.
