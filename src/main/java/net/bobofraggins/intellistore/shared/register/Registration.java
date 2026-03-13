@@ -7,6 +7,7 @@ import net.bobofraggins.intellistore.external.arsnouveau.SourceTankRegistration;
 import net.bobofraggins.intellistore.external.mekanism.GasTankRegistration;
 import net.bobofraggins.intellistore.lazuritebars.LazuriteBarsBlock;
 import net.bobofraggins.intellistore.lazuriteore.LazuriteOreBlock;
+import net.bobofraggins.intellistore.lazuritetools.LazuriteTier;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlock;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineEnergyHandler;
@@ -80,12 +81,17 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.item.ShovelItem;
+import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.SoundType;
@@ -338,6 +344,41 @@ public final class Registration {
 
     public static final DeferredHolder<Item, BlockItem> LAZURITE_BLOCK_ITEM =
             ITEMS.registerSimpleBlockItem("lazurite_block", LAZURITE_BLOCK);
+
+    // -------------------------------------------------------------------------
+    // Lazurite tools
+    // -------------------------------------------------------------------------
+
+    public static final DeferredHolder<Item, PickaxeItem> LAZURITE_PICKAXE = ITEMS.register(
+            "lazurite_pickaxe",
+            () -> new PickaxeItem(
+                    LazuriteTier.INSTANCE,
+                    new Item.Properties()
+                            .attributes(PickaxeItem.createAttributes(LazuriteTier.INSTANCE, 1.0f, -2.8f))));
+
+    public static final DeferredHolder<Item, AxeItem> LAZURITE_AXE = ITEMS.register(
+            "lazurite_axe",
+            () -> new AxeItem(
+                    LazuriteTier.INSTANCE,
+                    new Item.Properties().attributes(AxeItem.createAttributes(LazuriteTier.INSTANCE, 4.0f, -3.3f))));
+
+    public static final DeferredHolder<Item, ShovelItem> LAZURITE_SHOVEL = ITEMS.register(
+            "lazurite_shovel",
+            () -> new ShovelItem(
+                    LazuriteTier.INSTANCE,
+                    new Item.Properties().attributes(ShovelItem.createAttributes(LazuriteTier.INSTANCE, 1.5f, -3.0f))));
+
+    public static final DeferredHolder<Item, SwordItem> LAZURITE_SWORD = ITEMS.register(
+            "lazurite_sword",
+            () -> new SwordItem(
+                    LazuriteTier.INSTANCE,
+                    new Item.Properties().attributes(SwordItem.createAttributes(LazuriteTier.INSTANCE, 3, -2.4f))));
+
+    public static final DeferredHolder<Item, HoeItem> LAZURITE_HOE = ITEMS.register(
+            "lazurite_hoe",
+            () -> new HoeItem(
+                    LazuriteTier.INSTANCE,
+                    new Item.Properties().attributes(HoeItem.createAttributes(LazuriteTier.INSTANCE, -2.0f, -1.0f))));
 
     // -------------------------------------------------------------------------
     // Healing Salve fluid type + fluids + fluid block + cauldron + items
@@ -673,6 +714,11 @@ public final class Registration {
                         output.accept(LAZURITE_NUGGET.get());
                         output.accept(LAZURITE_INGOT.get());
                         output.accept(LAZURITE_BLOCK_ITEM.get());
+                        output.accept(LAZURITE_PICKAXE.get());
+                        output.accept(LAZURITE_AXE.get());
+                        output.accept(LAZURITE_SHOVEL.get());
+                        output.accept(LAZURITE_SWORD.get());
+                        output.accept(LAZURITE_HOE.get());
                         output.accept(FILING_CABINET_ITEM.get());
                         output.accept(JUNK_DRAWER_ITEM.get());
                         output.accept(BULK_STORAGE_CONTAINER_ITEM.get());

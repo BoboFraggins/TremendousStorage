@@ -6,6 +6,11 @@
   "item.intellistore.lazurite_nugget": "Lazurite Nugget",
   "item.intellistore.lazurite_ingot": "Lazurite Ingot",
   "block.intellistore.lazurite_block": "Block of Lazurite",
+  "item.intellistore.lazurite_pickaxe": "Lazurite Pickaxe",
+  "item.intellistore.lazurite_axe": "Lazurite Axe",
+  "item.intellistore.lazurite_shovel": "Lazurite Shovel",
+  "item.intellistore.lazurite_sword": "Lazurite Sword",
+  "item.intellistore.lazurite_hoe": "Lazurite Hoe",
 
   "block.intellistore.filing_cabinet": "Filing Cabinet",
   "screen.intellistore.filing_cabinet": "Filing Cabinet",

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "II",
+    "IS",
+    " S"
+  ],
+  "key": {
+    "I": { "item": "intellistore:lazurite_ingot" },
+    "S": { "item": "minecraft:stick" }
+  },
+  "result": {
+    "id": "intellistore:lazurite_axe",
+    "count": 1
+  }
+}
