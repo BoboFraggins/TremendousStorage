@@ -5,6 +5,7 @@ import java.util.Map;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.external.arsnouveau.SourceTankRegistration;
 import net.bobofraggins.intellistore.external.mekanism.GasTankRegistration;
+import net.bobofraggins.intellistore.lazuritebars.LazuriteBarsBlock;
 import net.bobofraggins.intellistore.lazuriteore.LazuriteOreBlock;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlock;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
@@ -279,6 +280,21 @@ public final class Registration {
             BLOCK_ENTITY_TYPES.register(
                     "fluid_tank", () -> BlockEntityType.Builder.of(FluidTankBlockEntity::new, FLUID_TANK.get())
                             .build(null));
+
+    // -------------------------------------------------------------------------
+    // Lazurite bars
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<LazuriteBarsBlock> LAZURITE_BARS = BLOCKS.register(
+            "lazurite_bars",
+            () -> new LazuriteBarsBlock(BlockBehaviour.Properties.of()
+                    .strength(5.0f, 6.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<Item, BlockItem> LAZURITE_BARS_ITEM =
+            ITEMS.registerSimpleBlockItem("lazurite_bars", LAZURITE_BARS);
 
     // -------------------------------------------------------------------------
     // Lazurite ore + ingot
@@ -650,6 +666,7 @@ public final class Registration {
                     .title(Component.translatable("itemGroup.intellistore"))
                     .icon(() -> FILING_CABINET_ITEM.get().getDefaultInstance())
                     .displayItems((params, output) -> {
+                        output.accept(LAZURITE_BARS_ITEM.get());
                         output.accept(LAZURITE_ORE_ITEM.get());
                         output.accept(LAZURITE_DEEPSLATE_ORE_ITEM.get());
                         output.accept(RAW_LAZURITE.get());

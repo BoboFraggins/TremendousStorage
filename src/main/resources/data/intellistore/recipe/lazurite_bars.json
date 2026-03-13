@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    "III"
+  ],
+  "key": {
+    "I": { "item": "intellistore:lazurite_ingot" }
+  },
+  "result": { "id": "intellistore:lazurite_bars", "count": 16 },
+  "category": "misc"
+}

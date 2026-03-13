@@ -26,6 +26,7 @@
     "intellistore:access_terminal",
     "intellistore:lazurite_ore",
     "intellistore:lazurite_deepslate_ore",
-    "intellistore:lazurite_block"
+    "intellistore:lazurite_block",
+    "intellistore:lazurite_bars"
   ]
 }
