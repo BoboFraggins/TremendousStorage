@@ -26,9 +26,8 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * Stores up to {@value #CAPACITY} items in a shared pool across any number of distinct types.
  *
- * <p>The Bulk Storage Container is the complement of the Junk Drawer: it accepts <em>only</em>
- * items that Manila Folders accept — non-damageable items with default component data (plain
- * stackable items). Items with enchantments, custom names, or other non-default data are refused.
+ * <p>Accepts any item (including unstackable items, damageable items, and items with custom
+ * component data). The only limit is the total item count across all types.
  *
  * <p>Multiple distinct item types may be stored simultaneously. The total item count across
  * all types is bounded by {@value #CAPACITY}. There is no locking — any qualifying item may be
@@ -61,13 +60,10 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
     /**
      * Returns true if the stack qualifies for storage in the Bulk Storage Container.
      *
-     * <p>Accepts non-damageable items whose component data matches the item's defaults — the
-     * same items that Manila Folders accept, and the precise complement of what the Junk Drawer
-     * accepts.
+     * <p>Accepts any non-empty item regardless of damage, stack size, or component data.
      */
     public static boolean accepts(ItemStack stack) {
-        if (stack.isEmpty()) return false;
-        return !stack.isDamageableItem() && stack.isComponentsPatchEmpty();
+        return !stack.isEmpty();
     }
 
     // -------------------------------------------------------------------------
