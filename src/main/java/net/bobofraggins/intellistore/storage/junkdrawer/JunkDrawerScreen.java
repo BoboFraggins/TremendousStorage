@@ -29,7 +29,7 @@ public class JunkDrawerScreen extends AbstractContainerScreen<JunkDrawerMenu> {
         super(menu, inv, title);
         inventoryPane = new LocalInventoryPane();
         dialog = new Dialog(
-                inventoryPane, new PriorityPane(menu::getPriority, menu.getPos()), new PlayerInventoryPane());
+                new PriorityPane(menu::getPriority, menu.getPos()), inventoryPane, new PlayerInventoryPane());
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
     }
@@ -80,7 +80,7 @@ public class JunkDrawerScreen extends AbstractContainerScreen<JunkDrawerMenu> {
         super.render(graphics, mouseX, mouseY, partialTick);
         renderTooltip(graphics, mouseX, mouseY);
 
-        int paneAbsY = dialog.getPaneAbsY(0);
+        int paneAbsY = dialog.getPaneAbsY(1);
         ItemStack hovered = inventoryPane.getHoveredStack(mouseX - leftPos, mouseY - paneAbsY);
         if (hovered != null) {
             graphics.renderTooltip(font, hovered, mouseX, mouseY);
