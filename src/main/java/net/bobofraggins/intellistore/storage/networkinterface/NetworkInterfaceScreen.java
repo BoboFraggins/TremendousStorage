@@ -136,7 +136,17 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
             if (idx >= entries.size()) break;
 
             String key = entries.get(idx);
-            String displayStr = key.contains(".") ? Component.translatable(key).getString() : key;
+            // Strip optional " (N)" count suffix before translating, then re-append
+            String translatable = key;
+            String countSuffix = "";
+            int parenIdx = key.lastIndexOf(" (");
+            if (parenIdx > 0 && key.endsWith(")")) {
+                translatable = key.substring(0, parenIdx);
+                countSuffix = key.substring(parenIdx);
+            }
+            String displayStr = translatable.contains(".")
+                    ? Component.translatable(translatable).getString() + countSuffix
+                    : key;
 
             int rowY = y + LIST_Y_START + i * ROW_HEIGHT;
             graphics.drawString(font, displayStr, x + 6, rowY, 0x404040, false);
