@@ -1,4 +1,4 @@
-package net.bobofraggins.intellistore.lazuritebars;
+package net.bobofraggins.intellistore.lazurite;
 
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;

@@ -1,4 +1,4 @@
-package net.bobofraggins.intellistore.lazuriteore;
+package net.bobofraggins.intellistore.lazurite;
 
 import net.minecraft.util.valueproviders.UniformInt;
 import net.minecraft.world.level.block.DropExperienceBlock;

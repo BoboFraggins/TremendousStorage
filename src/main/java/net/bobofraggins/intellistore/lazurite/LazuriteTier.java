@@ -1,4 +1,4 @@
-package net.bobofraggins.intellistore.lazuritetools;
+package net.bobofraggins.intellistore.lazurite;
 
 import net.bobofraggins.intellistore.IntelliStore;
 import net.minecraft.resources.ResourceLocation;

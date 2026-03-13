@@ -1,4 +1,4 @@
-package net.bobofraggins.intellistore.lazuritetools;
+package net.bobofraggins.intellistore.lazurite;
 
 import java.util.Set;
 import net.bobofraggins.intellistore.IntelliStore;
