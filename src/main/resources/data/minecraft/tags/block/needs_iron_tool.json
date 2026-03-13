@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "intellistore:lazurite_ore",
+    "intellistore:lazurite_deepslate_ore",
+    "intellistore:lazurite_block"
+  ]
+}

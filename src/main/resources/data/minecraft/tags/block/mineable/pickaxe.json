@@ -23,6 +23,9 @@
     "intellistore:black_tube",
     "intellistore:network_interface",
     "intellistore:healing_salve_cauldron",
-    "intellistore:access_terminal"
+    "intellistore:access_terminal",
+    "intellistore:lazurite_ore",
+    "intellistore:lazurite_deepslate_ore",
+    "intellistore:lazurite_block"
   ]
 }

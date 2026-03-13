@@ -1,4 +1,11 @@
 {
+  "block.intellistore.lazurite_ore": "Lazurite Ore",
+  "block.intellistore.lazurite_deepslate_ore": "Deepslate Lazurite Ore",
+  "item.intellistore.raw_lazurite": "Raw Lazurite",
+  "item.intellistore.lazurite_nugget": "Lazurite Nugget",
+  "item.intellistore.lazurite_ingot": "Lazurite Ingot",
+  "block.intellistore.lazurite_block": "Block of Lazurite",
+
   "block.intellistore.filing_cabinet": "Filing Cabinet",
   "screen.intellistore.filing_cabinet": "Filing Cabinet",
 

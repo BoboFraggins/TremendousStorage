@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": { "item": "intellistore:lazurite_deepslate_ore" },
+  "result": { "id": "intellistore:lazurite_ingot" },
+  "experience": 0.7,
+  "cookingtime": 200,
+  "category": "misc"
+}

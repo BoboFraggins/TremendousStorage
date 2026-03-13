@@ -5,6 +5,7 @@ import java.util.Map;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.external.arsnouveau.SourceTankRegistration;
 import net.bobofraggins.intellistore.external.mekanism.GasTankRegistration;
+import net.bobofraggins.intellistore.lazuriteore.LazuriteOreBlock;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlock;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineEnergyHandler;
@@ -278,6 +279,49 @@ public final class Registration {
             BLOCK_ENTITY_TYPES.register(
                     "fluid_tank", () -> BlockEntityType.Builder.of(FluidTankBlockEntity::new, FLUID_TANK.get())
                             .build(null));
+
+    // -------------------------------------------------------------------------
+    // Lazurite ore + ingot
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<LazuriteOreBlock> LAZURITE_ORE = BLOCKS.register(
+            "lazurite_ore",
+            () -> new LazuriteOreBlock(BlockBehaviour.Properties.of()
+                    .strength(3.0f, 3.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.STONE)));
+
+    public static final DeferredHolder<Item, BlockItem> LAZURITE_ORE_ITEM =
+            ITEMS.registerSimpleBlockItem("lazurite_ore", LAZURITE_ORE);
+
+    public static final DeferredBlock<LazuriteOreBlock> LAZURITE_DEEPSLATE_ORE = BLOCKS.register(
+            "lazurite_deepslate_ore",
+            () -> new LazuriteOreBlock(BlockBehaviour.Properties.of()
+                    .strength(4.5f, 3.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.DEEPSLATE)));
+
+    public static final DeferredHolder<Item, BlockItem> LAZURITE_DEEPSLATE_ORE_ITEM =
+            ITEMS.registerSimpleBlockItem("lazurite_deepslate_ore", LAZURITE_DEEPSLATE_ORE);
+
+    public static final DeferredHolder<Item, Item> RAW_LAZURITE =
+            ITEMS.register("raw_lazurite", () -> new Item(new Item.Properties()));
+
+    public static final DeferredHolder<Item, Item> LAZURITE_INGOT =
+            ITEMS.register("lazurite_ingot", () -> new Item(new Item.Properties()));
+
+    public static final DeferredHolder<Item, Item> LAZURITE_NUGGET =
+            ITEMS.register("lazurite_nugget", () -> new Item(new Item.Properties()));
+
+    public static final DeferredBlock<net.minecraft.world.level.block.Block> LAZURITE_BLOCK = BLOCKS.register(
+            "lazurite_block",
+            () -> new net.minecraft.world.level.block.Block(BlockBehaviour.Properties.of()
+                    .strength(5.0f, 6.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)));
+
+    public static final DeferredHolder<Item, BlockItem> LAZURITE_BLOCK_ITEM =
+            ITEMS.registerSimpleBlockItem("lazurite_block", LAZURITE_BLOCK);
 
     // -------------------------------------------------------------------------
     // Healing Salve fluid type + fluids + fluid block + cauldron + items
@@ -606,6 +650,12 @@ public final class Registration {
                     .title(Component.translatable("itemGroup.intellistore"))
                     .icon(() -> FILING_CABINET_ITEM.get().getDefaultInstance())
                     .displayItems((params, output) -> {
+                        output.accept(LAZURITE_ORE_ITEM.get());
+                        output.accept(LAZURITE_DEEPSLATE_ORE_ITEM.get());
+                        output.accept(RAW_LAZURITE.get());
+                        output.accept(LAZURITE_NUGGET.get());
+                        output.accept(LAZURITE_INGOT.get());
+                        output.accept(LAZURITE_BLOCK_ITEM.get());
                         output.accept(FILING_CABINET_ITEM.get());
                         output.accept(JUNK_DRAWER_ITEM.get());
                         output.accept(BULK_STORAGE_CONTAINER_ITEM.get());
