@@ -7,6 +7,7 @@ import net.bobofraggins.intellistore.external.arsnouveau.SourceTankRegistration;
 import net.bobofraggins.intellistore.external.mekanism.GasTankRegistration;
 import net.bobofraggins.intellistore.lazuritebars.LazuriteBarsBlock;
 import net.bobofraggins.intellistore.lazuriteore.LazuriteOreBlock;
+import net.bobofraggins.intellistore.lazuritetools.LazuritePaxelItem;
 import net.bobofraggins.intellistore.lazuritetools.LazuriteTier;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlock;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
@@ -380,6 +381,9 @@ public final class Registration {
                     LazuriteTier.INSTANCE,
                     new Item.Properties().attributes(HoeItem.createAttributes(LazuriteTier.INSTANCE, -2.0f, -1.0f))));
 
+    public static final DeferredHolder<Item, LazuritePaxelItem> LAZURITE_PAXEL =
+            ITEMS.register("lazurite_paxel", () -> new LazuritePaxelItem(new Item.Properties()));
+
     // -------------------------------------------------------------------------
     // Healing Salve fluid type + fluids + fluid block + cauldron + items
     // -------------------------------------------------------------------------
@@ -719,6 +723,7 @@ public final class Registration {
                         output.accept(LAZURITE_SHOVEL.get());
                         output.accept(LAZURITE_SWORD.get());
                         output.accept(LAZURITE_HOE.get());
+                        output.accept(LAZURITE_PAXEL.get());
                         output.accept(FILING_CABINET_ITEM.get());
                         output.accept(JUNK_DRAWER_ITEM.get());
                         output.accept(BULK_STORAGE_CONTAINER_ITEM.get());

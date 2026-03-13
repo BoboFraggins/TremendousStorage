@@ -9,11 +9,12 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 
 public enum LazuriteTier implements Tier {
-    INSTANCE;
+    INSTANCE,
+    PAXEL;
 
     @Override
     public int getUses() {
-        return 1024;
+        return this == PAXEL ? 2048 : 1024;
     }
 
     @Override
