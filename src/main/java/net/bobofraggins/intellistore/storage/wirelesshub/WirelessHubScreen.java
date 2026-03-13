@@ -44,7 +44,7 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
 
         // Slot backgrounds — input (left) and output (right), spread apart with room for labels
         drawSlotBg(graphics, x + 44, y + 35); // input  (slot centre x = 52)
-        drawSlotBg(graphics, x + 114, y + 35); // output (slot centre x = 122)
+        drawSlotBg(graphics, x + 120, y + 35); // output (slot centre x = 128)
 
         // Arrow between slots (→): 5px margins from each slot border, shaft + arrowhead
         graphics.fill(x + 66, y + 42, x + 106, y + 46, 0xFF888888); // shaft
@@ -69,7 +69,7 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
         Component unlinked = Component.translatable("screen.intellistore.wireless_hub.unlinked");
         Component linked = Component.translatable("screen.intellistore.wireless_hub.linked");
         graphics.drawString(font, unlinked, x + 52 - font.width(unlinked) / 2, y + 55, 0x404040, false);
-        graphics.drawString(font, linked, x + 122 - font.width(linked) / 2, y + 55, 0x006600, false);
+        graphics.drawString(font, linked, x + 128 - font.width(linked) / 2, y + 55, 0x006600, false);
     }
 
     /** Draws a standard 16×16 inset slot background at the given top-left pixel. */
