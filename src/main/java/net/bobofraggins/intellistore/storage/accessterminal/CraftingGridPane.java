@@ -20,8 +20,8 @@ public class CraftingGridPane implements IDialogPane {
     /** Pane-local Y of the result slot (= CRAFTING_RESULT_Y - CRAFTING_Y). */
     private static final int RESULT_LOCAL_Y = AccessTerminalLayout.CRAFTING_RESULT_Y - AccessTerminalLayout.CRAFTING_Y;
 
-    /** Pane-local Y of the arrow, centred on the crafting rows, nudged up 1px. */
-    private static final int ARROW_LOCAL_Y = (AccessTerminalLayout.CRAFTING_H - AccessTerminalLayout.ARROW_H) / 2 - 1;
+    /** Pane-local Y of the arrow, centred on the crafting rows, nudged up 3px. */
+    private static final int ARROW_LOCAL_Y = (AccessTerminalLayout.CRAFTING_H - AccessTerminalLayout.ARROW_H) / 2 - 3;
 
     // Result slot background blitted from crafting_table.png (256×256).
     // Vanilla places this 26×26 region 5 px to the left/above the slot container position.

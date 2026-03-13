@@ -70,7 +70,7 @@ public class Dialog {
      * Padding added below the last pane so its content doesn't sit directly under the bottom
      * corner border. Equal to {@link #CORNER} so the bottom frame is flush with the pane end.
      */
-    private static final int BOTTOM_PADDING = CORNER;
+    public static final int BOTTOM_PADDING = CORNER;
 
     // Body fill colour — matches the center.png 1×1 pixel.
     private static final int COLOR_BODY = 0xFFC6C6C6;
@@ -87,6 +87,30 @@ public class Dialog {
     private int x;
 
     private int y;
+
+    /**
+     * Returns a no-op pane with the given fixed dimensions and no rendered content.
+     *
+     * <p>Useful for screens that manage their own content rendering but still want Dialog to
+     * draw the background frame at the correct size.
+     */
+    public static IDialogPane blankPane(int width, int height) {
+        return new IDialogPane() {
+            @Override
+            public int preferredWidth() {
+                return width;
+            }
+
+            @Override
+            public int preferredHeight() {
+                return height;
+            }
+
+            @Override
+            public void render(
+                    GuiGraphics graphics, Font font, int w, int localMouseX, int localMouseY, float partialTick) {}
+        };
+    }
 
     /**
      * Creates a dialog whose dimensions are derived from the panes.

@@ -1,9 +1,9 @@
 package net.bobofraggins.intellistore.storage.wirelesshub;
 
+import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
 /**
@@ -18,36 +18,29 @@ import net.minecraft.world.entity.player.Inventory;
  */
 public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> {
 
-    private static final ResourceLocation BG_TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
-
     private static final int BG_WIDTH = 176;
     private static final int BG_HEIGHT = 166;
 
+    private final Dialog dialog;
+
     public WirelessHubScreen(WirelessHubMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth = BG_WIDTH;
-        this.imageHeight = BG_HEIGHT;
+        dialog = new Dialog(Dialog.blankPane(BG_WIDTH, BG_HEIGHT - Dialog.TITLE_H - Dialog.BOTTOM_PADDING));
+        this.imageWidth = dialog.totalWidth();
+        this.imageHeight = dialog.totalHeight();
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        dialog.init(leftPos, topPos);
     }
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         int x = leftPos, y = topPos;
 
-        // Title bar (top 17px of generic_54)
-        graphics.blit(BG_TEXTURE, x, y, 0, 0, BG_WIDTH, 17);
-
-        // Gray fill for the rest of the panel
-        graphics.fill(x, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFC6C6C6);
-
-        // Left, right, and bottom border lines
-        graphics.fill(x, y + 17, x + 1, y + BG_HEIGHT, 0xFF555555);
-        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFFFFFFF);
-        graphics.fill(x, y + BG_HEIGHT - 1, x + BG_WIDTH, y + BG_HEIGHT, 0xFF555555);
-
-        // Title
-        Component title = Component.translatable("screen.intellistore.wireless_hub");
-        graphics.drawString(font, title, x + (BG_WIDTH - font.width(title)) / 2, y + 6, 0x404040, false);
+        dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
 
         // Slot backgrounds (inset style: dark top-left border, light bottom-right, gray fill)
         drawSlotBg(graphics, x + 62, y + 35); // input
@@ -102,7 +95,7 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        // Labels drawn in renderBg to avoid default white background label; suppress default here
+        // Title is drawn by Dialog.
     }
 
     @Override

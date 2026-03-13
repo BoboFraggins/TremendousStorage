@@ -38,7 +38,7 @@ public final class AccessTerminalLayout {
     public static final int ARROW_H = 22;
     // Horizontally centred between grid right edge (84) and result slot left (120)
     public static final int ARROW_X =
-            (CRAFTING_GRID_X + CRAFTING_ROWS * SLOT_SIZE + CRAFTING_RESULT_X - ARROW_W) / 2; // 86
+            (CRAFTING_GRID_X + CRAFTING_ROWS * SLOT_SIZE + CRAFTING_RESULT_X - ARROW_W + 4) / 2; // 86
 
     // ── Player inventory ──────────────────────────────────────────────────────
 

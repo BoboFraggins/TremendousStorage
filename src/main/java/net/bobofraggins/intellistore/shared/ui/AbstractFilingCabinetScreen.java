@@ -4,7 +4,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 
 /**
@@ -19,9 +18,6 @@ import net.minecraft.world.entity.player.Inventory;
 public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabinetMenu>
         extends AbstractContainerScreen<M> {
 
-    private static final ResourceLocation BG_TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
-
     protected static final int BG_WIDTH = 176;
 
     /** Y position of the player inventory rows (relative to topPos). */
@@ -32,12 +28,14 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
     private static final int BTN_H = 14;
     private static final int BTN_Y = 18;
 
+    private Dialog dialog;
     private Button voidExcessButton;
 
     protected AbstractFilingCabinetScreen(M menu, Inventory inv, Component title, int bgHeight) {
         super(menu, inv, title);
-        this.imageWidth = BG_WIDTH;
-        this.imageHeight = bgHeight;
+        dialog = new Dialog(Dialog.blankPane(BG_WIDTH, bgHeight - Dialog.TITLE_H - Dialog.BOTTOM_PADDING));
+        this.imageWidth = dialog.totalWidth();
+        this.imageHeight = dialog.totalHeight();
     }
 
     /**
@@ -50,6 +48,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
     @Override
     protected void init() {
         super.init();
+        dialog.init(leftPos, topPos);
         int btnX = leftPos + (BG_WIDTH - BTN_W) / 2;
         int btnY = topPos + BTN_Y;
         voidExcessButton = addRenderableWidget(Button.builder(voidExcessLabel(), voidExcessAction())
@@ -80,18 +79,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         int x = leftPos, y = topPos;
 
-        // Title bar (top 17px of generic_54)
-        graphics.blit(BG_TEXTURE, x, y, 0, 0, BG_WIDTH, 17);
-
-        // Gray fill for the rest of the panel
-        graphics.fill(x, y + 17, x + BG_WIDTH, y + imageHeight, 0xFFC6C6C6);
-
-        // Left and right border lines
-        graphics.fill(x, y + 17, x + 1, y + imageHeight, 0xFF555555);
-        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH, y + imageHeight, 0xFFFFFFFF);
-
-        // Bottom border
-        graphics.fill(x, y + imageHeight - 1, x + BG_WIDTH, y + imageHeight, 0xFF555555);
+        dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
 
         // Folder slots — vanilla inset style
         for (int i = 0; i < AbstractFilingCabinetMenu.FOLDER_SLOTS; i++) {
@@ -111,7 +99,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 4, 0x404040, false);
+        // Title is drawn by Dialog.
     }
 
     private static void drawSlotBackground(GuiGraphics graphics, int sx, int sy, int w, int h) {
