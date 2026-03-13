@@ -9,7 +9,7 @@ import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlock;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineEnergyHandler;
 import net.bobofraggins.intellistore.shared.config.IntelliStoreConfig;
-import net.bobofraggins.intellistore.shared.ui.PriorityMenu;
+import net.bobofraggins.intellistore.shared.ui.PriorityControl;
 import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlockEntity;
@@ -453,8 +453,8 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<FilingCabinetMenu>> FILING_CABINET_MENU =
             MENU_TYPES.register("filing_cabinet", () -> IMenuTypeExtension.create(FilingCabinetMenu::new));
 
-    public static final DeferredHolder<MenuType<?>, MenuType<PriorityMenu>> PRIORITY_MENU =
-            MENU_TYPES.register("priority", () -> IMenuTypeExtension.create(PriorityMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<PriorityControl>> PRIORITY_MENU =
+            MENU_TYPES.register("priority", () -> IMenuTypeExtension.create(PriorityControl::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<StorageInterfaceMenu>> STORAGE_INTERFACE_MENU =
             MENU_TYPES.register("storage_interface", () -> IMenuTypeExtension.create(StorageInterfaceMenu::new));

@@ -44,9 +44,6 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
             ResourceLocation.fromNamespaceAndPath("minecraft", "block/iron_block");
     private static final ResourceLocation JAR_GLASS =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
-    private static final ResourceLocation JAR_WATER =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_water");
-
     // -------------------------------------------------------------------------
     // Constants
     // -------------------------------------------------------------------------
@@ -71,7 +68,6 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
 
         TextureAtlasSprite ironSprite = sprite(IRON_BLOCK);
         TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
-        TextureAtlasSprite waterSprite = sprite(JAR_WATER);
 
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
         VertexConsumer translucent = bufferSource.getBuffer(RenderType.translucent());
@@ -104,26 +100,18 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         drawBoxNoBottom(
                 translucent, mat, gx0, gy0, gz0, gx1, gy1, gz1, glassSprite, 255, 255, 255, packedLight, packedOverlay);
 
-        // ---- Water — inset 1px + EPS inside the glass on all sides ----
-        // Goes all the way down to just above the base top.
-        float wx0 = gx0 + 1f / 16 + EPS, wx1 = gx1 - 1f / 16 - EPS;
-        float wz0 = gz0 + 1f / 16 + EPS, wz1 = gz1 - 1f / 16 - EPS;
-        float wy0 = 2f / 16 + EPS, wy1 = gy1 - 1f / 16 - EPS;
-        // Light-blue tint (#3AB3DA) to match Minecraft light-blue dye colour.
-        drawBox(translucent, mat, wx0, wy0, wz0, wx1, wy1, wz1, waterSprite, 58, 179, 218, packedLight, packedOverlay);
-
         // ---- Animated floating brain (item renderer — matches vanilla dropped items) ----
         // ItemModelGenerator automatically produces per-pixel edge faces from the
         // item/generated model, giving the sprite the same depth as a dropped item.
         double time = (be.getLevel().getGameTime() + partialTick) / 20.0;
         float bob = (float) Math.sin(time * Math.PI * 0.5) * 0.04f;
 
-        // Centre at x=0.5, z=0.5; float at 60% of block height.
+        // Centre at x=0.5, z=0.5; float at 50% of block height.
         float rotY = (float) ((time * 20.0) % 360.0);
         poseStack.translate(0.5, 0.5 + bob, 0.5);
         poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
-        poseStack.scale(0.62f, 0.62f, 0.62f);
-        poseStack.mulPose(Axis.XP.rotationDegrees(2f));
+        poseStack.scale(0.6f, 0.6f, 0.6f);
+        poseStack.mulPose(Axis.XP.rotationDegrees(3f));
 
         // Render exactly as ItemEntityRenderer does: fetch the baked model, then
         // call render() with FIXED context (rotation [0,0,0] — sprite stays vertical).
