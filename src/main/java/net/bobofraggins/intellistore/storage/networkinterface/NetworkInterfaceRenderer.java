@@ -23,7 +23,7 @@ import org.joml.Matrix4f;
  * <p>The block uses {@link net.minecraft.world.level.block.RenderShape#ENTITYBLOCK_ANIMATED},
  * so the JSON block models are empty — this BESR draws everything:
  * <ul>
- *   <li>Iron base (solid, blocky-cylinder approximation)
+ *   <li>Lazurite base (solid, blocky-cylinder approximation)
  *   <li>Glass cylinder + dome (translucent)
  *   <li>Blue water/fluid interior (translucent, inset)
  *   <li>Animated floating Brain item
@@ -40,8 +40,8 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
     // Texture locations
     // -------------------------------------------------------------------------
 
-    private static final ResourceLocation IRON_BLOCK =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "block/iron_block");
+    private static final ResourceLocation LAZURITE_BLOCK =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/lazurite_block");
     private static final ResourceLocation JAR_GLASS =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
     // -------------------------------------------------------------------------
@@ -66,7 +66,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
             int packedLight,
             int packedOverlay) {
 
-        TextureAtlasSprite ironSprite = sprite(IRON_BLOCK);
+        TextureAtlasSprite ironSprite = sprite(LAZURITE_BLOCK);
         TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
 
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
