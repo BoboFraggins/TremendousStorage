@@ -13,6 +13,7 @@ import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlock;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineEnergyHandler;
 import net.bobofraggins.intellistore.shared.config.IntelliStoreConfig;
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.shared.ui.PriorityControl;
 import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
@@ -47,6 +48,7 @@ import net.bobofraggins.intellistore.storage.manillafolder.FolderExtractRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderStorageRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderTier;
+import net.bobofraggins.intellistore.storage.manillafolder.FolderUpgradeRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
@@ -57,6 +59,8 @@ import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilin
 import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetEvents;
 import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetItem;
 import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetMenu;
+import net.bobofraggins.intellistore.storage.storageupgrade.StorageBlockUpgradeRecipe;
+import net.bobofraggins.intellistore.storage.storageupgrade.StorageUpgradeItem;
 import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.bobofraggins.intellistore.storage.tube.TubeBlockEntity;
 import net.bobofraggins.intellistore.storage.tube.TubeEnergyHandler;
@@ -271,6 +275,43 @@ public final class Registration {
                     BLOCK_ENTITY_TYPES.register("bulk_storage_container", () -> BlockEntityType.Builder.of(
                                     BulkStorageContainerBlockEntity::new, BULK_STORAGE_CONTAINER.get())
                             .build(null));
+
+    // -------------------------------------------------------------------------
+    // Storage upgrade items
+    // -------------------------------------------------------------------------
+
+    public static final DeferredHolder<Item, StorageUpgradeItem> PAPER_TO_COPPER_STORAGE_UPGRADE = ITEMS.register(
+            "paper_to_copper_storage_upgrade",
+            () -> new StorageUpgradeItem(StorageTier.PAPER, StorageTier.COPPER, new Item.Properties()));
+
+    public static final DeferredHolder<Item, StorageUpgradeItem> COPPER_TO_IRON_STORAGE_UPGRADE = ITEMS.register(
+            "copper_to_iron_storage_upgrade",
+            () -> new StorageUpgradeItem(StorageTier.COPPER, StorageTier.IRON, new Item.Properties()));
+
+    public static final DeferredHolder<Item, StorageUpgradeItem> IRON_TO_GOLD_STORAGE_UPGRADE = ITEMS.register(
+            "iron_to_gold_storage_upgrade",
+            () -> new StorageUpgradeItem(StorageTier.IRON, StorageTier.GOLD, new Item.Properties()));
+
+    public static final DeferredHolder<Item, StorageUpgradeItem> GOLD_TO_DIAMOND_STORAGE_UPGRADE = ITEMS.register(
+            "gold_to_diamond_storage_upgrade",
+            () -> new StorageUpgradeItem(StorageTier.GOLD, StorageTier.DIAMOND, new Item.Properties()));
+
+    public static final DeferredHolder<Item, StorageUpgradeItem> DIAMOND_TO_EMERALD_STORAGE_UPGRADE = ITEMS.register(
+            "diamond_to_emerald_storage_upgrade",
+            () -> new StorageUpgradeItem(StorageTier.DIAMOND, StorageTier.EMERALD, new Item.Properties()));
+
+    public static final DeferredHolder<Item, StorageUpgradeItem> EMERALD_TO_NETHERITE_STORAGE_UPGRADE = ITEMS.register(
+            "emerald_to_netherite_storage_upgrade",
+            () -> new StorageUpgradeItem(StorageTier.EMERALD, StorageTier.NETHERITE, new Item.Properties()));
+
+    public static final DeferredHolder<Item, StorageUpgradeItem>[] STORAGE_UPGRADES = new DeferredHolder[] {
+        PAPER_TO_COPPER_STORAGE_UPGRADE,
+        COPPER_TO_IRON_STORAGE_UPGRADE,
+        IRON_TO_GOLD_STORAGE_UPGRADE,
+        GOLD_TO_DIAMOND_STORAGE_UPGRADE,
+        DIAMOND_TO_EMERALD_STORAGE_UPGRADE,
+        EMERALD_TO_NETHERITE_STORAGE_UPGRADE
+    };
 
     public static final DeferredBlock<FluidTankBlock> FLUID_TANK = BLOCKS.register(
             "fluid_tank",
@@ -697,6 +738,15 @@ public final class Registration {
             RECIPE_SERIALIZERS.register(
                     "ender_folder", () -> new SimpleCraftingRecipeSerializer<>(EnderFolderRecipe::new));
 
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderUpgradeRecipe>>
+            FOLDER_UPGRADE_RECIPE = RECIPE_SERIALIZERS.register(
+                    "folder_upgrade", () -> new SimpleCraftingRecipeSerializer<>(FolderUpgradeRecipe::new));
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StorageBlockUpgradeRecipe>>
+            STORAGE_BLOCK_UPGRADE_RECIPE = RECIPE_SERIALIZERS.register(
+                    "storage_block_upgrade",
+                    () -> new SimpleCraftingRecipeSerializer<>(StorageBlockUpgradeRecipe::new));
+
     // -------------------------------------------------------------------------
     // Creative tab
     // -------------------------------------------------------------------------
@@ -726,6 +776,9 @@ public final class Registration {
                         output.accept(FILING_CABINET_ITEM.get());
                         output.accept(JUNK_DRAWER_ITEM.get());
                         output.accept(BULK_STORAGE_CONTAINER_ITEM.get());
+                        for (DeferredHolder<Item, StorageUpgradeItem> upgrade : STORAGE_UPGRADES) {
+                            output.accept(upgrade.get());
+                        }
                         output.accept(FLUID_TANK_ITEM.get());
                         if (ModList.get().isLoaded("mekanism")) {
                             output.accept(GasTankRegistration.GAS_TANK_ITEM.get());

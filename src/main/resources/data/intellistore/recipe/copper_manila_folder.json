@@ -1,24 +1,3 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    " B ",
-    "IFI",
-    " I "
-  ],
-  "key": {
-    "B": {
-      "item": "minecraft:copper_block"
-    },
-    "I": {
-      "item": "minecraft:copper_ingot"
-    },
-    "F": {
-      "item": "intellistore:paper_manila_folder"
-    }
-  },
-  "result": {
-    "id": "intellistore:copper_manila_folder",
-    "count": 1
-  },
-  "category": "misc"
+  "type": "intellistore:folder_upgrade"
 }

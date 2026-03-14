@@ -44,7 +44,7 @@ public class BulkStorageContainerJadePlugin implements IWailaPlugin {
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
             if (!(accessor.getBlockEntity() instanceof BulkStorageContainerBlockEntity be)) return;
             data.putLong(KEY_TOTAL, be.totalCount());
-            data.putLong(KEY_CAPACITY, BulkStorageContainerBlockEntity.CAPACITY);
+            data.putLong(KEY_CAPACITY, be.getCapacity());
         }
 
         @Override

@@ -58,7 +58,7 @@ public class JunkDrawerItemHandler implements IItemHandler {
         if (!JunkDrawerBlockEntity.accepts(stack)) return stack;
 
         int toInsert = stack.getCount();
-        int canInsert = Math.min(toInsert, JunkDrawerBlockEntity.CAPACITY - be.size());
+        int canInsert = Math.min(toInsert, (int) Math.min(Integer.MAX_VALUE, be.getCapacity()) - be.size());
         if (canInsert <= 0) return stack;
 
         if (!simulate) {

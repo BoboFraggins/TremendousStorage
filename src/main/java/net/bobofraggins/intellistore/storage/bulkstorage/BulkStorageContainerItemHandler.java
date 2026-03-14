@@ -38,7 +38,7 @@ public class BulkStorageContainerItemHandler implements IItemHandler {
 
     @Override
     public int getSlotLimit(int slot) {
-        return (int) Math.min(Integer.MAX_VALUE, BulkStorageContainerBlockEntity.CAPACITY);
+        return (int) Math.min(Integer.MAX_VALUE, be.getCapacity());
     }
 
     @Override

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "intellistore:item/emerald_to_netherite_storage_upgrade"
+  }
+}

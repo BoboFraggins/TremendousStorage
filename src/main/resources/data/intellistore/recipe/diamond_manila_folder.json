@@ -1,24 +1,3 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    " B ",
-    "IFI",
-    " I "
-  ],
-  "key": {
-    "B": {
-      "item": "minecraft:diamond_block"
-    },
-    "I": {
-      "item": "minecraft:diamond"
-    },
-    "F": {
-      "item": "intellistore:gold_manila_folder"
-    }
-  },
-  "result": {
-    "id": "intellistore:diamond_manila_folder",
-    "count": 1
-  },
-  "category": "misc"
+  "type": "intellistore:folder_upgrade"
 }

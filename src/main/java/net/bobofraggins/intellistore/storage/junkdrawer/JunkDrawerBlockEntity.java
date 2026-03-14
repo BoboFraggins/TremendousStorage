@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NiCacheHolder;
@@ -44,10 +45,13 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder {
 
-    public static final int CAPACITY = 32_768;
-
     private final List<ItemStack> items = new ArrayList<>();
     private Priority priority = Priority.NORMAL;
+    private StorageTier tier = StorageTier.PAPER;
+
+    public long getCapacity() {
+        return tier.getCapacity();
+    }
 
     @Nullable
     private BlockPos cachedNiPos = null;
@@ -85,7 +89,16 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
     }
 
     public boolean isFull() {
-        return items.size() >= CAPACITY;
+        return items.size() >= getCapacity();
+    }
+
+    public StorageTier getTier() {
+        return tier;
+    }
+
+    public void setTier(StorageTier tier) {
+        this.tier = tier;
+        setChanged();
     }
 
     /** Returns the item at {@code index} (count == 1), or {@link ItemStack#EMPTY}. */
@@ -203,6 +216,7 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
         }
         tag.put(TAG_ITEMS, list);
         tag.putInt("Priority", priority.ordinal());
+        tag.putString("Tier", tier.getId());
     }
 
     @Override
@@ -214,6 +228,7 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
             ItemStack.parse(registries, list.getCompound(i)).ifPresent(items::add);
         }
         priority = Priority.fromOrdinal(tag.getInt("Priority"));
+        tier = StorageTier.fromId(tag.getString("Tier"));
     }
 
     // -------------------------------------------------------------------------

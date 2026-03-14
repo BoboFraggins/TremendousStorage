@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "DDD",
+    "DUD",
+    "DDD"
+  ],
+  "key": {
+    "D": { "item": "minecraft:diamond" },
+    "U": { "item": "intellistore:iron_to_gold_storage_upgrade" }
+  },
+  "result": {
+    "id": "intellistore:gold_to_diamond_storage_upgrade",
+    "count": 1
+  },
+  "category": "misc"
+}

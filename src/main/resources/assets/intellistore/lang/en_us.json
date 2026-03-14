@@ -18,6 +18,13 @@
 
   "block.intellistore.junk_drawer": "Junk Drawer",
   "block.intellistore.bulk_storage_container": "Bulk Storage Container",
+
+  "item.intellistore.paper_to_copper_storage_upgrade": "Paper to Copper Storage Upgrade",
+  "item.intellistore.copper_to_iron_storage_upgrade": "Copper to Iron Storage Upgrade",
+  "item.intellistore.iron_to_gold_storage_upgrade": "Iron to Gold Storage Upgrade",
+  "item.intellistore.gold_to_diamond_storage_upgrade": "Gold to Diamond Storage Upgrade",
+  "item.intellistore.diamond_to_emerald_storage_upgrade": "Diamond to Emerald Storage Upgrade",
+  "item.intellistore.emerald_to_netherite_storage_upgrade": "Emerald to Netherite Storage Upgrade",
   "block.intellistore.fluid_tank": "Fluid Tank",
   "block.intellistore.gas_tank": "Gas Tank",
   "block.intellistore.source_tank": "Source Tank",

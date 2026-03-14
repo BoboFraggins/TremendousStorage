@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NiCacheHolder;
@@ -28,30 +29,28 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Stores up to {@value #CAPACITY} items in a shared pool across any number of distinct types.
+ * Stores items in a shared pool across any number of distinct types.
  *
  * <p>Accepts any item (including unstackable items, damageable items, and items with custom
- * component data). The only limit is the total item count across all types.
+ * component data). The only limit is the total item count across all types, which is determined by
+ * the block's {@link StorageTier} (starts at Paper = 4,096; upgradeable to Netherite = 4,194,304).
  *
- * <p>Multiple distinct item types may be stored simultaneously. The total item count across
- * all types is bounded by {@value #CAPACITY}. There is no locking — any qualifying item may be
- * freely added or removed at any time.
- *
- * <p>Internally, items are stored as a list of {@code (type, count)} entries. Each type
- * occupies exactly one entry; the count may be up to the remaining pool capacity. Items of the
- * same type are merged into a single entry. When a type's count reaches zero its entry is removed.
+ * <p>Tier is persisted in NBT and retained when the block is broken and replaced.
  *
  * <p>No player-facing UI — all interaction is via the {@link BulkStorageContainerItemHandler}
  * {@code IItemHandler} capability.
  */
 public class BulkStorageContainerBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder {
 
-    public static final long CAPACITY = 32_768L;
-
     // Each entry: type key (count==1) + stored count
     private final List<ItemStack> types = new ArrayList<>();
     private final List<Long> counts = new ArrayList<>();
     private Priority priority = Priority.LOW;
+    private StorageTier tier = StorageTier.PAPER;
+
+    public long getCapacity() {
+        return tier.getCapacity();
+    }
 
     @Nullable
     private BlockPos cachedNiPos = null;
@@ -89,7 +88,16 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
     }
 
     public boolean isFull() {
-        return totalCount() >= CAPACITY;
+        return totalCount() >= getCapacity();
+    }
+
+    public StorageTier getTier() {
+        return tier;
+    }
+
+    public void setTier(StorageTier tier) {
+        this.tier = tier;
+        setChanged();
     }
 
     /** Number of distinct item types currently stored. */
@@ -121,7 +129,7 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
     public long insert(ItemStack type, long amount, boolean simulate) {
         if (amount <= 0 || !accepts(type)) return amount;
 
-        long space = CAPACITY - totalCount();
+        long space = getCapacity() - totalCount();
         if (space <= 0) return amount;
 
         long toInsert = Math.min(amount, space);
@@ -272,6 +280,7 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
         }
         tag.put(TAG_TYPES, list);
         tag.putInt("Priority", priority.ordinal());
+        tag.putString("Tier", tier.getId());
     }
 
     @Override
@@ -288,6 +297,7 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
             });
         }
         priority = Priority.fromOrdinal(tag.getInt("Priority"));
+        tier = StorageTier.fromId(tag.getString("Tier"));
     }
 
     // -------------------------------------------------------------------------

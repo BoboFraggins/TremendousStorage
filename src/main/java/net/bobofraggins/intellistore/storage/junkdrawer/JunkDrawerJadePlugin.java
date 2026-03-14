@@ -44,7 +44,7 @@ public class JunkDrawerJadePlugin implements IWailaPlugin {
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
             if (!(accessor.getBlockEntity() instanceof JunkDrawerBlockEntity be)) return;
             data.putInt(KEY_TOTAL, be.size());
-            data.putInt(KEY_CAPACITY, JunkDrawerBlockEntity.CAPACITY);
+            data.putLong(KEY_CAPACITY, be.getCapacity());
         }
 
         @Override
@@ -65,7 +65,7 @@ public class JunkDrawerJadePlugin implements IWailaPlugin {
             tooltip.add(Component.translatable(
                     "jade.intellistore.junk_drawer.total",
                     CountFormat.format(total),
-                    CountFormat.format(data.getInt(KEY_CAPACITY))));
+                    CountFormat.format(data.getLong(KEY_CAPACITY))));
         }
     }
 }
