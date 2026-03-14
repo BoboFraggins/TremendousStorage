@@ -1,5 +1,7 @@
 package net.bobofraggins.intellistore.shared.ui;
 
+import net.bobofraggins.intellistore.shared.input.QuickStackClientEvents;
+import net.bobofraggins.intellistore.shared.network.QuickStackFilingCabinetPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -7,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Shared screen base for
@@ -70,6 +73,16 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
     protected void containerTick() {
         super.containerTick();
         if (voidExcessButton != null) voidExcessButton.setMessage(voidExcessLabel());
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (QuickStackClientEvents.QUICK_STACK != null
+                && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)) {
+            PacketDistributor.sendToServer(new QuickStackFilingCabinetPacket());
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override

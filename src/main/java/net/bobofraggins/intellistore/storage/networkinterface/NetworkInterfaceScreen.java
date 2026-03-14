@@ -1,7 +1,9 @@
 package net.bobofraggins.intellistore.storage.networkinterface;
 
 import java.util.List;
+import net.bobofraggins.intellistore.shared.input.QuickStackClientEvents;
 import net.bobofraggins.intellistore.shared.network.NetworkContentsPacket;
+import net.bobofraggins.intellistore.shared.network.QuickStackPacket;
 import net.bobofraggins.intellistore.shared.network.RequestNetworkContentsPacket;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -74,6 +76,17 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
     // -------------------------------------------------------------------------
     // Scroll
     // -------------------------------------------------------------------------
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (QuickStackClientEvents.QUICK_STACK != null
+                && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)
+                && menu.isNetworkValid()) {
+            PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), true));
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
