@@ -56,6 +56,13 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         addRenderableWidget(Button.builder(Component.literal("\u2261"), btn -> configDrawer.toggle())
                 .bounds(leftPos + 3, topPos + 2, 20, 13)
                 .build());
+
+        // "+" quick stack button above the player inventory, right-aligned
+        addRenderableWidget(Button.builder(
+                        Component.literal("+"),
+                        btn -> PacketDistributor.sendToServer(new QuickStackFilingCabinetPacket()))
+                .bounds(leftPos + BG_WIDTH - 22, topPos + playerInvY - 14, 20, 13)
+                .build());
     }
 
     @Override

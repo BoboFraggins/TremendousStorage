@@ -53,6 +53,13 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
         addRenderableWidget(Button.builder(Component.literal("\u2261"), btn -> configDrawer.toggle())
                 .bounds(leftPos + 3, topPos + 2, 20, 13)
                 .build());
+
+        // "+" quick stack button above the player inventory, right-aligned
+        addRenderableWidget(Button.builder(
+                        Component.literal("+"),
+                        btn -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false)))
+                .bounds(leftPos + dialog.totalWidth() - 22, dialog.getPaneAbsY(1) - 14, 20, 13)
+                .build());
     }
 
     @Override
