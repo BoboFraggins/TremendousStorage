@@ -48,7 +48,6 @@ import net.bobofraggins.intellistore.storage.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderStorageRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
-import net.bobofraggins.intellistore.storage.networkinterface.ConnectorEnergyHandler;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceMenu;
@@ -816,28 +815,6 @@ public final class Registration {
                 (be, side) -> new NiEnergyHandler(be));
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> new TubeEnergyHandler(be));
-        // NetworkConnector blocks act as energy conduits: any power source adjacent to one
-        // (Stirling Engine, external energy pipe, etc.) can inject into the NI buffer.
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK,
-                FILING_CABINET_BE_TYPE.get(),
-                (be, side) -> new ConnectorEnergyHandler(be));
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK,
-                JUNK_DRAWER_BE_TYPE.get(),
-                (be, side) -> new ConnectorEnergyHandler(be));
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK,
-                BULK_STORAGE_CONTAINER_BE_TYPE.get(),
-                (be, side) -> new ConnectorEnergyHandler(be));
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK,
-                WIRELESS_HUB_BE_TYPE.get(),
-                (be, side) -> new ConnectorEnergyHandler(be));
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK,
-                STORAGE_ACCESS_TERMINAL_BE_TYPE.get(),
-                (be, side) -> new ConnectorEnergyHandler(be));
         if (IntelliStoreConfig.STIRLING_ENGINE_ENABLED.get()) {
             event.registerBlockEntity(
                     Capabilities.EnergyStorage.BLOCK,
