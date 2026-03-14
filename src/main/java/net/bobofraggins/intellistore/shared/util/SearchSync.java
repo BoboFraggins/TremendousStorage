@@ -1,9 +1,13 @@
 package net.bobofraggins.intellistore.shared.util;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 
 /**
  * Singleton bridge between the optional JEI search bar and IntelliStore's inventory panes.
@@ -39,7 +43,9 @@ public final class SearchSync {
      *
      * <ul>
      *   <li>Empty filter → always matches.
-     *   <li>{@code @prefix} → matches when the item's mod namespace contains {@code prefix}.
+     *   <li>{@code @text} → matches when the item's mod namespace contains {@code text}.
+     *   <li>{@code #text} → matches when any tooltip line (after the name) contains {@code text}.
+     *   <li>{@code $text} → matches when any of the item's tags contains {@code text}.
      *   <li>Otherwise → matches when the item's display name contains {@code filter} (both
      *       already lowercased).
      * </ul>
@@ -47,12 +53,27 @@ public final class SearchSync {
     public static boolean matches(ItemStack stack, String filter) {
         if (filter.isEmpty()) return true;
         if (filter.startsWith("@")) {
-            String modQuery = filter.substring(1);
+            String query = filter.substring(1);
             String ns = BuiltInRegistries.ITEM
                     .getKey(stack.getItem())
                     .getNamespace()
                     .toLowerCase(Locale.ROOT);
-            return ns.contains(modQuery);
+            return ns.contains(query);
+        }
+        if (filter.startsWith("#")) {
+            String query = filter.substring(1);
+            List<Component> lines = stack.getTooltipLines(Item.TooltipContext.EMPTY, null, TooltipFlag.Default.NORMAL);
+            // Skip index 0 (item name); check remaining tooltip lines.
+            for (int i = 1; i < lines.size(); i++) {
+                if (lines.get(i).getString().toLowerCase(Locale.ROOT).contains(query)) return true;
+            }
+            return false;
+        }
+        if (filter.startsWith("$")) {
+            String query = filter.substring(1);
+            return stack.getTags()
+                    .anyMatch(tag ->
+                            tag.location().toString().toLowerCase(Locale.ROOT).contains(query));
         }
         return stack.getHoverName().getString().toLowerCase(Locale.ROOT).contains(filter);
     }
