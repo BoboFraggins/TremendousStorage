@@ -1,5 +1,7 @@
 package net.bobofraggins.intellistore.shared.ui;
 
+import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderItem;
+import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
@@ -132,11 +134,32 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
             return copy;
 
         } else {
-            // Player inventory / hotbar → folder slots (only ManillaFolderItem)
+            // Player inventory / hotbar
             ItemStack stack = slot.getItem();
             ItemStack copy = stack.copy();
-            if (!(stack.getItem() instanceof ManillaFolderItem)) return ItemStack.EMPTY;
-            if (!moveItemStackTo(stack, 0, FOLDER_SLOTS, false)) return ItemStack.EMPTY;
+
+            if (stack.getItem() instanceof ManillaFolderItem) {
+                // Folder item: move into a folder slot
+                if (!moveItemStackTo(stack, 0, FOLDER_SLOTS, false)) return ItemStack.EMPTY;
+            } else {
+                // Non-folder item: insert into locked matching folders
+                for (int fi = 0; fi < FOLDER_SLOTS && !stack.isEmpty(); fi++) {
+                    Slot folderSlot = slots.get(fi);
+                    ItemStack folderItem = folderSlot.getItem();
+                    if (folderItem.isEmpty()
+                            || !(folderItem.getItem() instanceof ManillaFolderItem folderType)
+                            || folderItem.getItem() instanceof EnderFolderItem) continue;
+                    FolderContents contents = ManillaFolderItem.getContents(folderItem);
+                    if (contents.isEmpty() || !contents.accepts(stack)) continue;
+                    FolderContents.InsertResult result = contents.insert(stack.getCount(), folderType.getCapacity());
+                    int inserted = (int) (stack.getCount() - result.remainder());
+                    if (inserted <= 0) continue;
+                    folderSlot.set(ManillaFolderItem.setContents(folderItem.copy(), result.updated()));
+                    stack.shrink(inserted);
+                }
+                if (stack.getCount() == copy.getCount()) return ItemStack.EMPTY;
+            }
+
             if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
             else slot.setChanged();
             if (stack.getCount() == copy.getCount()) return ItemStack.EMPTY;
