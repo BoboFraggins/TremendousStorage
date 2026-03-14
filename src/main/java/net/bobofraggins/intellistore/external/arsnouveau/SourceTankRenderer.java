@@ -2,14 +2,18 @@ package net.bobofraggins.intellistore.external.arsnouveau;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.level.Level;
 import org.joml.Matrix4f;
 
 /**
@@ -24,6 +28,8 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/fluid_tank");
     private static final ResourceLocation JAR_GLASS =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
+    private static final ResourceLocation LAZURITE_BLOCK =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/lazurite_block");
 
     // Geometry constants — identical to FluidTankRenderer
     private static final float RIM_H = 2f / 16f;
@@ -50,6 +56,10 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
 
     private static final float MIN_FILL_FRAC = 0.05f;
 
+    private static final float STUB_D = 2f / 16f;
+    private static final float STUB_MIN = 6f / 16f;
+    private static final float STUB_MAX = 10f / 16f;
+
     // Ars Nouveau source colour: teal-blue glow
     private static final int SOURCE_R = 60;
     private static final int SOURCE_G = 180;
@@ -69,6 +79,7 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
 
         TextureAtlasSprite bodySprite = sprite(TANK_BODY);
         TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
+        TextureAtlasSprite lazuriteSprite = sprite(LAZURITE_BLOCK);
 
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
         VertexConsumer translucent = bufferSource.getBuffer(RenderType.translucent());
@@ -76,7 +87,7 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();
 
-        // Metal rims
+        // Lazurite rims
         drawCylinder(
                 solid,
                 mat,
@@ -86,7 +97,7 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
                 RIM_H,
                 BODY_B0,
                 BODY_B1,
-                bodySprite,
+                lazuriteSprite,
                 255,
                 255,
                 255,
@@ -102,7 +113,7 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
                 1f,
                 BODY_B0,
                 BODY_B1,
-                bodySprite,
+                lazuriteSprite,
                 255,
                 255,
                 255,
@@ -125,7 +136,7 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
                     fillTop,
                     FLUID_B0,
                     FLUID_B1,
-                    glassSprite,
+                    bodySprite,
                     SOURCE_R,
                     SOURCE_G,
                     SOURCE_B,
@@ -152,6 +163,17 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
                 packedLight,
                 packedOverlay);
 
+        // Tube connector stubs
+        Level level = be.getLevel();
+        if (level != null) {
+            BlockPos tankPos = be.getBlockPos();
+            for (Direction dir : Direction.values()) {
+                if (level.getBlockState(tankPos.relative(dir)).getBlock() instanceof TubeBlock) {
+                    drawStub(solid, mat, dir, lazuriteSprite, packedLight, packedOverlay);
+                }
+            }
+        }
+
         poseStack.popPose();
     }
 
@@ -161,6 +183,65 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
                 .getAtlas(InventoryMenu.BLOCK_ATLAS)
                 .getSprite(loc);
     }
+
+    private static void drawStub(
+            VertexConsumer vc, Matrix4f mat, Direction dir, TextureAtlasSprite sp, int light, int overlay) {
+        float s = STUB_MIN, e = STUB_MAX, d = STUB_D;
+        float x0, y0, z0, x1, y1, z1;
+        switch (dir) {
+            case DOWN -> {
+                x0 = s;
+                y0 = 0;
+                z0 = s;
+                x1 = e;
+                y1 = d;
+                z1 = e;
+            }
+            case UP -> {
+                x0 = s;
+                y0 = 1 - d;
+                z0 = s;
+                x1 = e;
+                y1 = 1;
+                z1 = e;
+            }
+            case NORTH -> {
+                x0 = s;
+                y0 = s;
+                z0 = 0;
+                x1 = e;
+                y1 = e;
+                z1 = d;
+            }
+            case SOUTH -> {
+                x0 = s;
+                y0 = s;
+                z0 = 1 - d;
+                x1 = e;
+                y1 = e;
+                z1 = 1;
+            }
+            case WEST -> {
+                x0 = 0;
+                y0 = s;
+                z0 = s;
+                x1 = d;
+                y1 = e;
+                z1 = e;
+            }
+            default -> {
+                x0 = 1 - d;
+                y0 = s;
+                z0 = s;
+                x1 = 1;
+                y1 = e;
+                z1 = e;
+            }
+        }
+        drawBox(vc, mat, x0, y0, z0, x1, y1, z1, sp, 255, 255, 255, 255, light, overlay);
+    }
+
+    private static final float SEAM_OFFSET = 0.001f;
 
     private static void drawCylinder(
             VertexConsumer vc,
@@ -179,7 +260,7 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
             int light,
             int overlay) {
         drawBox(vc, mat, xA0, y0, zA0, xA1, y1, zA1, sp, r, g, b, a, light, overlay);
-        drawBox(vc, mat, zA0, y0, xA0, zA1, y1, xA1, sp, r, g, b, a, light, overlay);
+        drawBox(vc, mat, zA0, y0 + SEAM_OFFSET, xA0, zA1, y1 - SEAM_OFFSET, xA1, sp, r, g, b, a, light, overlay);
     }
 
     private static void drawBox(

@@ -10,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import net.bobofraggins.intellistore.external.arsnouveau.SourceTankBlockEntity;
+import net.bobofraggins.intellistore.external.mekanism.GasTankBlockEntity;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
@@ -201,7 +203,9 @@ public final class NetworkInterfaceBFS {
                 "block.intellistore.filing_cabinet",
                 "block.intellistore.junk_drawer",
                 "block.intellistore.bulk_storage_container",
-                "block.intellistore.fluid_tank");
+                "block.intellistore.fluid_tank",
+                "block.intellistore.source_tank",
+                "block.intellistore.gas_tank");
         for (String key : storageOrder) {
             int count = storageCounts.getOrDefault(key, 0);
             if (count > 0) blockList.add(new AttachedEntry(key, count));
@@ -300,6 +304,8 @@ public final class NetworkInterfaceBFS {
         if (be instanceof JunkDrawerBlockEntity) return "block.intellistore.junk_drawer";
         if (be instanceof BulkStorageContainerBlockEntity) return "block.intellistore.bulk_storage_container";
         if (be instanceof FluidTankBlockEntity) return "block.intellistore.fluid_tank";
+        if (be instanceof SourceTankBlockEntity) return "block.intellistore.source_tank";
+        if (be instanceof GasTankBlockEntity) return "block.intellistore.gas_tank";
         return null;
     }
 

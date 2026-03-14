@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.storage.fluidtank;
 
 import com.mojang.serialization.MapCodec;
+import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.InteractionHand;
@@ -39,7 +40,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
  * <p>Right-clicking with a fluid container item (e.g. a bucket) fills or drains the tank.
  * All other fluid movement is via the {@link FluidTankFluidHandler} IFluidHandler capability.
  */
-public class FluidTankBlock extends BaseEntityBlock {
+public class FluidTankBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<FluidTankBlock> CODEC = simpleCodec(FluidTankBlock::new);
 

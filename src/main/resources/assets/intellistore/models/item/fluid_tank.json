@@ -1,3 +1,6 @@
 {
-  "parent": "intellistore:block/fluid_tank"
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "intellistore:item/fluid_tank"
+  }
 }

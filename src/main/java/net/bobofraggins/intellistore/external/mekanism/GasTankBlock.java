@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import mekanism.api.Action;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
+import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -34,7 +35,7 @@ import net.neoforged.neoforge.capabilities.ItemCapability;
  * All other chemical movement is via the {@link GasTankChemicalHandler} capability,
  * consumed directly by Mekanism pressure tubes and Pipez gas pipes.
  */
-public class GasTankBlock extends BaseEntityBlock {
+public class GasTankBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<GasTankBlock> CODEC = simpleCodec(GasTankBlock::new);
 

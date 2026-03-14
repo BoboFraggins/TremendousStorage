@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.storage.fluidtank;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -9,8 +10,11 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
@@ -38,6 +42,8 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/fluid_tank");
     private static final ResourceLocation JAR_GLASS =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
+    private static final ResourceLocation LAZURITE_BLOCK =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/lazurite_block");
 
     // -------------------------------------------------------------------------
     // Geometry constants (block units, 0..1)
@@ -72,6 +78,11 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
     // Minimum visible fill height as a fraction of interior height
     private static final float MIN_FILL_FRAC = 0.05f;
 
+    // Tube connector stub — 4×4 px cross-section matching the tube arm, 2 px deep
+    private static final float STUB_D = 2f / 16f;
+    private static final float STUB_MIN = 6f / 16f;
+    private static final float STUB_MAX = 10f / 16f;
+
     public FluidTankRenderer(BlockEntityRendererProvider.Context ctx) {}
 
     // -------------------------------------------------------------------------
@@ -89,6 +100,7 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
 
         TextureAtlasSprite bodySprite = sprite(TANK_BODY);
         TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
+        TextureAtlasSprite lazuriteSprite = sprite(LAZURITE_BLOCK);
 
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
         VertexConsumer translucent = bufferSource.getBuffer(RenderType.translucent());
@@ -96,7 +108,7 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();
 
-        // ---- Metal body (solid) — top and bottom rims ----
+        // ---- Lazurite rims (solid) — top and bottom cap bands ----
         // Bottom rim
         drawCylinder(
                 solid,
@@ -107,7 +119,7 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                 RIM_H,
                 BODY_B0,
                 BODY_B1,
-                bodySprite,
+                lazuriteSprite,
                 255,
                 255,
                 255,
@@ -124,7 +136,7 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                 1f,
                 BODY_B0,
                 BODY_B1,
-                bodySprite,
+                lazuriteSprite,
                 255,
                 255,
                 255,
@@ -190,6 +202,17 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                 packedLight,
                 packedOverlay);
 
+        // ---- Tube connector stubs (solid lazurite) ----
+        Level level = be.getLevel();
+        if (level != null) {
+            BlockPos tankPos = be.getBlockPos();
+            for (Direction dir : Direction.values()) {
+                if (level.getBlockState(tankPos.relative(dir)).getBlock() instanceof TubeBlock) {
+                    drawStub(solid, mat, dir, lazuriteSprite, packedLight, packedOverlay);
+                }
+            }
+        }
+
         poseStack.popPose();
     }
 
@@ -204,10 +227,72 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                 .getSprite(loc);
     }
 
+    // Tiny Y inset applied to the cross-piece top/bottom to prevent coplanar Z-fighting.
+    private static final float SEAM_OFFSET = 0.001f;
+
+    /** Draws the 4×4×2 px lazurite stub on the face of the tank where a tube connects. */
+    private static void drawStub(
+            VertexConsumer vc, Matrix4f mat, Direction dir, TextureAtlasSprite sp, int light, int overlay) {
+        float s = STUB_MIN, e = STUB_MAX, d = STUB_D;
+        float x0, y0, z0, x1, y1, z1;
+        switch (dir) {
+            case DOWN -> {
+                x0 = s;
+                y0 = 0;
+                z0 = s;
+                x1 = e;
+                y1 = d;
+                z1 = e;
+            }
+            case UP -> {
+                x0 = s;
+                y0 = 1 - d;
+                z0 = s;
+                x1 = e;
+                y1 = 1;
+                z1 = e;
+            }
+            case NORTH -> {
+                x0 = s;
+                y0 = s;
+                z0 = 0;
+                x1 = e;
+                y1 = e;
+                z1 = d;
+            }
+            case SOUTH -> {
+                x0 = s;
+                y0 = s;
+                z0 = 1 - d;
+                x1 = e;
+                y1 = e;
+                z1 = 1;
+            }
+            case WEST -> {
+                x0 = 0;
+                y0 = s;
+                z0 = s;
+                x1 = d;
+                y1 = e;
+                z1 = e;
+            }
+            default -> { // EAST
+                x0 = 1 - d;
+                y0 = s;
+                z0 = s;
+                x1 = 1;
+                y1 = e;
+                z1 = e;
+            }
+        }
+        drawBox(vc, mat, x0, y0, z0, x1, y1, z1, sp, 255, 255, 255, 255, light, overlay);
+    }
+
     /**
-     * Draws a cylinder approximation using 3 overlapping axis-aligned boxes.
+     * Draws a cylinder approximation using 2 overlapping axis-aligned boxes.
      * {@code a0/a1} are the extents on the primary axis, {@code b0/b1} on the cross axis.
-     * The three boxes are: (a0,b0)→(a1,b1), (b0,a0)→(b1,a1), and a diagonal blend.
+     * Box 2 is inset by {@link #SEAM_OFFSET} on Y so its horizontal faces never coplanar-fight
+     * with Box 1.
      */
     private static void drawCylinder(
             VertexConsumer vc,
@@ -227,8 +312,8 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
             int overlay) {
         // Box 1: full X span, narrow Z
         drawBox(vc, mat, xA0, y0, zA0, xA1, y1, zA1, sp, r, g, b, a, light, overlay);
-        // Box 2: narrow X, full Z (cross)
-        drawBox(vc, mat, zA0, y0, xA0, zA1, y1, xA1, sp, r, g, b, a, light, overlay);
+        // Box 2: narrow X, full Z — slightly inset Y to avoid coplanar Z-fight
+        drawBox(vc, mat, zA0, y0 + SEAM_OFFSET, xA0, zA1, y1 - SEAM_OFFSET, xA1, sp, r, g, b, a, light, overlay);
     }
 
     private static void drawBox(

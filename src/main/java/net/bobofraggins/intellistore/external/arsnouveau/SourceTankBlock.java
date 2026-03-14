@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.external.arsnouveau;
 
 import com.mojang.serialization.MapCodec;
+import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
@@ -27,7 +28,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * There is no right-click item interaction because source does not exist as a handheld
  * item container in Ars Nouveau.
  */
-public class SourceTankBlock extends BaseEntityBlock {
+public class SourceTankBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<SourceTankBlock> CODEC = simpleCodec(SourceTankBlock::new);
 

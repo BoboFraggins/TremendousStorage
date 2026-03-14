@@ -1,3 +1,6 @@
 {
-  "parent": "intellistore:block/network_interface_lower"
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "intellistore:item/network_interface"
+  }
 }
