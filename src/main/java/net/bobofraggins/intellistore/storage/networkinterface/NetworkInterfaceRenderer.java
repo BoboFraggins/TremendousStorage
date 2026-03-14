@@ -132,6 +132,11 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         poseStack.popPose();
     }
 
+    @Override
+    public boolean shouldRenderOffScreen(NetworkInterfaceBlockEntity be) {
+        return true;
+    }
+
     // -------------------------------------------------------------------------
     // Geometry helpers
     // -------------------------------------------------------------------------
