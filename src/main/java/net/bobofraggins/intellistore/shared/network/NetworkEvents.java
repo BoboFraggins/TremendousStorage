@@ -55,5 +55,6 @@ public final class NetworkEvents {
                 LocalStorageInteractPacket.TYPE,
                 LocalStorageInteractPacket.STREAM_CODEC,
                 LocalStorageInteractPacket::handle);
+        registrar.playToServer(QuickStackPacket.TYPE, QuickStackPacket.STREAM_CODEC, QuickStackPacket::handle);
     }
 }

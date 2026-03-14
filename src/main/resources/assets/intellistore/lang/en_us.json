@@ -138,6 +138,7 @@
   "item.intellistore.personal_access_terminal.hub_disconnected": "Wireless Hub is no longer connected to this network",
 
   "key.intellistore.open_personal_access_terminal": "Open Personal Access Terminal",
+  "key.intellistore.quick_stack": "Quick Stack",
   "key.categories.intellistore": "IntelliStore",
 
   "block.intellistore.stirling_engine": "Stirling Engine",

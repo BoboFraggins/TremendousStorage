@@ -2,7 +2,9 @@ package net.bobofraggins.intellistore.storage.junkdrawer;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.bobofraggins.intellistore.shared.input.QuickStackClientEvents;
 import net.bobofraggins.intellistore.shared.network.LocalStorageInteractPacket;
+import net.bobofraggins.intellistore.shared.network.QuickStackPacket;
 import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.bobofraggins.intellistore.shared.ui.LocalInventoryPane;
 import net.bobofraggins.intellistore.shared.ui.PlayerInventoryPane;
@@ -66,6 +68,16 @@ public class JunkDrawerScreen extends AbstractContainerScreen<JunkDrawerMenu> {
             counts.add(1L);
         }
         inventoryPane.setContents(stacks, counts);
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (QuickStackClientEvents.QUICK_STACK != null
+                && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)) {
+            PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false));
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override

@@ -1,6 +1,8 @@
 package net.bobofraggins.intellistore.storage.accessterminal;
 
 import java.util.List;
+import net.bobofraggins.intellistore.shared.input.QuickStackClientEvents;
+import net.bobofraggins.intellistore.shared.network.QuickStackPacket;
 import net.bobofraggins.intellistore.shared.network.RequestSatContentsPacket;
 import net.bobofraggins.intellistore.shared.network.SatContentsPacket;
 import net.bobofraggins.intellistore.shared.ui.Dialog;
@@ -81,6 +83,17 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (QuickStackClientEvents.QUICK_STACK != null
+                && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)
+                && menu.hasNetwork()) {
+            PacketDistributor.sendToServer(new QuickStackPacket(menu.getNiPos(), true));
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
