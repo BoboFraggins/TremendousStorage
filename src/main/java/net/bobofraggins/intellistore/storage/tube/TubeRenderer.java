@@ -75,7 +75,7 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     private static final float A_MAX = C_MAX; // Arm cross-section max
     // Arms stop just short of the block face to avoid Z-fighting with the neighbour's face
     private static final float A_FACE_LO = EPS;
-    private static final float A_FACE_HI = 1f - EPS;
+    private static final float A_FACE_HI = 1f - 2 * EPS;
 
     // One pixel in block-unit space (1/16)
     private static final float PX = 1f / 16f;
