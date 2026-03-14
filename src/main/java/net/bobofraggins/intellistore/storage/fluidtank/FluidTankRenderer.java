@@ -20,74 +20,40 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
 
 /**
- * Renders the Fluid Tank as a glass cylinder with a variable fluid fill level.
+ * Renders the Fluid Tank as a jar-in-a-jar: lazurite base, glass walls, fluid fill block.
  *
- * <p>All geometry is drawn by this BESR — the JSON block model provides only the particle
- * texture. Rendering layers (back to front):
+ * <p>All geometry is drawn by this BESR. Rendering layers (back to front):
  * <ol>
- *   <li>Metal body (solid) — 3-box cylinder approximation, flat top and bottom rims.
- *   <li>Fluid fill (translucent) — fluid colour and texture, height proportional to fill.
- *       At least {@value #MIN_FILL_FRAC} × interior height when the tank is locked, so the
- *       fluid type is always identifiable. Glowing fluids render at full brightness.
- *   <li>Glass cylinder walls (translucent) — drawn on top of the fluid.
+ *   <li>Lazurite base (solid) — full-footprint slab, 2/16 tall.
+ *   <li>Fluid fill (translucent) — tinted box rising proportionally with fill level.
+ *   <li>Glass walls + top (translucent, double-sided) — drawn last so it overlays the fluid.
  * </ol>
  */
 public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEntity> {
 
-    // -------------------------------------------------------------------------
-    // Texture locations
-    // -------------------------------------------------------------------------
-
-    private static final ResourceLocation TANK_BODY =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/fluid_tank");
-    private static final ResourceLocation JAR_GLASS =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
     private static final ResourceLocation LAZURITE_BLOCK =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/lazurite_block");
+    private static final ResourceLocation JAR_GLASS =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
 
-    // -------------------------------------------------------------------------
-    // Geometry constants (block units, 0..1)
-    // -------------------------------------------------------------------------
+    /** Small offset to prevent Z-fighting with adjacent block faces. */
+    private static final float EPS = 1e-4f;
 
-    // Metal rims — top and bottom band height
-    private static final float RIM_H = 2f / 16f;
+    // Fluid interior bounds (inside the glass)
+    private static final float FLUID_MIN = 2f / 16f;
+    private static final float FLUID_MAX = 14f / 16f;
+    private static final float FLUID_FLOOR = 3f / 16f;
+    private static final float FLUID_CEIL = 15f / 16f;
+    private static final float FLUID_H = FLUID_CEIL - FLUID_FLOOR;
 
-    // Metal body: 3 overlapping boxes forming a cylinder cross-section
-    private static final float BODY_A0 = 1f / 16f;
-    private static final float BODY_A1 = 15f / 16f;
-    private static final float BODY_B0 = 2f / 16f;
-    private static final float BODY_B1 = 14f / 16f;
-
-    // Glass cylinder: slightly inside the metal body
-    private static final float GLASS_A0 = 2f / 16f;
-    private static final float GLASS_A1 = 14f / 16f;
-    private static final float GLASS_B0 = 3f / 16f;
-    private static final float GLASS_B1 = 13f / 16f;
-    private static final float GLASS_FLOOR = RIM_H;
-    private static final float GLASS_CEIL = 1f - RIM_H;
-
-    // Fluid interior: one pixel inside the glass
-    private static final float FLUID_A0 = 3f / 16f;
-    private static final float FLUID_A1 = 13f / 16f;
-    private static final float FLUID_B0 = 4f / 16f;
-    private static final float FLUID_B1 = 12f / 16f;
-    private static final float FLUID_FLOOR = GLASS_FLOOR + 1f / 16f;
-    private static final float FLUID_CEIL = GLASS_CEIL - 1f / 16f;
-    private static final float FLUID_INTERIOR_H = FLUID_CEIL - FLUID_FLOOR;
-
-    // Minimum visible fill height as a fraction of interior height
     private static final float MIN_FILL_FRAC = 0.05f;
 
-    // Tube connector stub — 4×4 px cross-section matching the tube arm, 2 px deep
+    // Tube connector stub dimensions
     private static final float STUB_D = 2f / 16f;
     private static final float STUB_MIN = 6f / 16f;
     private static final float STUB_MAX = 10f / 16f;
 
     public FluidTankRenderer(BlockEntityRendererProvider.Context ctx) {}
-
-    // -------------------------------------------------------------------------
-    // Render
-    // -------------------------------------------------------------------------
 
     @Override
     public void render(
@@ -98,9 +64,8 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
             int packedLight,
             int packedOverlay) {
 
-        TextureAtlasSprite bodySprite = sprite(TANK_BODY);
-        TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
         TextureAtlasSprite lazuriteSprite = sprite(LAZURITE_BLOCK);
+        TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
 
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
         VertexConsumer translucent = bufferSource.getBuffer(RenderType.translucent());
@@ -108,34 +73,16 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();
 
-        // ---- Lazurite rims (solid) — top and bottom cap bands ----
-        // Bottom rim
-        drawCylinder(
+        // ---- Lazurite base (solid) ----
+        drawBox(
                 solid,
                 mat,
-                BODY_A0,
-                0,
-                BODY_A1,
-                RIM_H,
-                BODY_B0,
-                BODY_B1,
-                lazuriteSprite,
-                255,
-                255,
-                255,
-                255,
-                packedLight,
-                packedOverlay);
-        // Top rim
-        drawCylinder(
-                solid,
-                mat,
-                BODY_A0,
-                1f - RIM_H,
-                BODY_A1,
-                1f,
-                BODY_B0,
-                BODY_B1,
+                EPS,
+                EPS,
+                EPS,
+                1f - EPS,
+                2f / 16f,
+                1f - EPS,
                 lazuriteSprite,
                 255,
                 255,
@@ -151,7 +98,7 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
             float fillFrac = be.getAmount() > 0
                     ? Math.max(MIN_FILL_FRAC, (float) be.getAmount() / FluidTankBlockEntity.CAPACITY)
                     : MIN_FILL_FRAC;
-            float fluidTop = FLUID_FLOOR + fillFrac * FLUID_INTERIOR_H;
+            float fillTop = FLUID_FLOOR + fillFrac * FLUID_H;
 
             IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fluid.getFluid());
             TextureAtlasSprite fluidSprite = sprite(ext.getStillTexture(fluid));
@@ -163,18 +110,17 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
             int fa = (tint >> 24) & 0xFF;
             if (fa == 0) fa = 255;
 
-            // Glowing fluids (e.g. lava) render at full brightness
             int fluidLight = fluid.getFluidType().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
 
-            drawCylinder(
+            drawBox(
                     translucent,
                     mat,
-                    FLUID_A0,
+                    FLUID_MIN,
                     FLUID_FLOOR,
-                    FLUID_A1,
-                    fluidTop,
-                    FLUID_B0,
-                    FLUID_B1,
+                    FLUID_MIN,
+                    FLUID_MAX,
+                    fillTop,
+                    FLUID_MAX,
                     fluidSprite,
                     fr,
                     fg,
@@ -184,16 +130,16 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                     packedOverlay);
         }
 
-        // ---- Glass cylinder (translucent) — drawn after fluid so it overlays correctly ----
-        drawCylinder(
+        // ---- Glass walls + top (translucent, no bottom, double-sided) ----
+        drawBoxNoBottom(
                 translucent,
                 mat,
-                GLASS_A0,
-                GLASS_FLOOR,
-                GLASS_A1,
-                GLASS_CEIL,
-                GLASS_B0,
-                GLASS_B1,
+                1f / 16f,
+                2f / 16f,
+                1f / 16f,
+                15f / 16f,
+                1f,
+                15f / 16f,
                 glassSprite,
                 255,
                 255,
@@ -227,10 +173,6 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                 .getSprite(loc);
     }
 
-    // Tiny Y inset applied to the cross-piece top/bottom to prevent coplanar Z-fighting.
-    private static final float SEAM_OFFSET = 0.001f;
-
-    /** Draws the 4×4×2 px lazurite stub on the face of the tank where a tube connects. */
     private static void drawStub(
             VertexConsumer vc, Matrix4f mat, Direction dir, TextureAtlasSprite sp, int light, int overlay) {
         float s = STUB_MIN, e = STUB_MAX, d = STUB_D;
@@ -276,7 +218,7 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                 y1 = e;
                 z1 = e;
             }
-            default -> { // EAST
+            default -> {
                 x0 = 1 - d;
                 y0 = s;
                 z0 = s;
@@ -286,34 +228,6 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
             }
         }
         drawBox(vc, mat, x0, y0, z0, x1, y1, z1, sp, 255, 255, 255, 255, light, overlay);
-    }
-
-    /**
-     * Draws a cylinder approximation using 2 overlapping axis-aligned boxes.
-     * {@code a0/a1} are the extents on the primary axis, {@code b0/b1} on the cross axis.
-     * Box 2 is inset by {@link #SEAM_OFFSET} on Y so its horizontal faces never coplanar-fight
-     * with Box 1.
-     */
-    private static void drawCylinder(
-            VertexConsumer vc,
-            Matrix4f mat,
-            float xA0,
-            float y0,
-            float xA1,
-            float y1,
-            float zA0,
-            float zA1,
-            TextureAtlasSprite sp,
-            int r,
-            int g,
-            int b,
-            int a,
-            int light,
-            int overlay) {
-        // Box 1: full X span, narrow Z
-        drawBox(vc, mat, xA0, y0, zA0, xA1, y1, zA1, sp, r, g, b, a, light, overlay);
-        // Box 2: narrow X, full Z — slightly inset Y to avoid coplanar Z-fight
-        drawBox(vc, mat, zA0, y0 + SEAM_OFFSET, xA0, zA1, y1 - SEAM_OFFSET, xA1, sp, r, g, b, a, light, overlay);
     }
 
     private static void drawBox(
@@ -333,11 +247,11 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
             int light,
             int overlay) {
         float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
-        // -Y (bottom)
+        // -Y
         quad(
                 vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0,
                 -1, 0);
-        // +Y (top)
+        // +Y
         quad(
                 vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0,
                 1, 0);
@@ -359,6 +273,65 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                 0, 0);
     }
 
+    /**
+     * Draws all faces except the bottom (-Y), double-sided, so the glass is visible from
+     * both outside and inside.
+     */
+    private static void drawBoxNoBottom(
+            VertexConsumer vc,
+            Matrix4f mat,
+            float x0,
+            float y0,
+            float z0,
+            float x1,
+            float y1,
+            float z1,
+            TextureAtlasSprite sp,
+            int r,
+            int g,
+            int b,
+            int a,
+            int light,
+            int overlay) {
+        float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
+        // +Y outer then inner
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0,
+                1, 0);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0, 0,
+                -1, 0);
+        // -Z (north) outer then inner
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0,
+                0, -1);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0, 0,
+                0, 1);
+        // +Z (south) outer then inner
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0,
+                0, 1);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1, 0,
+                0, -1);
+        // -X (west) outer then inner
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1,
+                0, 0);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0, 1,
+                0, 0);
+        // +X (east) outer then inner
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
+                0, 0);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y0, z1, x1, y0, z0, x1, y1, z0, x1, y1, z1, -1,
+                0, 0);
+    }
+
+    @SuppressWarnings("java:S107")
     private static void quad(
             VertexConsumer vc,
             Matrix4f mat,

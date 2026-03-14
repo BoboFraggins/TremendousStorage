@@ -18,50 +18,27 @@ import net.minecraft.world.level.Level;
 import org.joml.Matrix4f;
 
 /**
- * Renders the Gas Tank as a glass cylinder with a variable chemical fill level.
+ * Renders the Gas Tank as a jar with a tinted chemical fill block.
  *
- * <p>Geometry and texture are identical to {@link net.bobofraggins.intellistore.storage.fluidtank.FluidTankRenderer}
- * — metal rims, then chemical fill (translucent, coloured by {@link ChemicalStack#getChemicalTint()}),
- * then glass walls.
+ * <p>Geometry matches {@link net.bobofraggins.intellistore.storage.fluidtank.FluidTankRenderer}:
+ * lazurite base slab, translucent chemical fill block, glass walls + top.
  */
 public class GasTankRenderer implements BlockEntityRenderer<GasTankBlockEntity> {
 
-    // -------------------------------------------------------------------------
-    // Texture locations (reuse Fluid Tank textures)
-    // -------------------------------------------------------------------------
-
-    private static final ResourceLocation TANK_BODY =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/fluid_tank");
-    private static final ResourceLocation JAR_GLASS =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
     private static final ResourceLocation LAZURITE_BLOCK =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/lazurite_block");
+    private static final ResourceLocation JAR_GLASS =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
+    private static final ResourceLocation FLUID_TANK =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/fluid_tank");
 
-    // -------------------------------------------------------------------------
-    // Geometry constants — identical to FluidTankRenderer
-    // -------------------------------------------------------------------------
+    private static final float EPS = 1e-4f;
 
-    private static final float RIM_H = 2f / 16f;
-
-    private static final float BODY_A0 = 1f / 16f;
-    private static final float BODY_A1 = 15f / 16f;
-    private static final float BODY_B0 = 2f / 16f;
-    private static final float BODY_B1 = 14f / 16f;
-
-    private static final float GLASS_A0 = 2f / 16f;
-    private static final float GLASS_A1 = 14f / 16f;
-    private static final float GLASS_B0 = 3f / 16f;
-    private static final float GLASS_B1 = 13f / 16f;
-    private static final float GLASS_FLOOR = RIM_H;
-    private static final float GLASS_CEIL = 1f - RIM_H;
-
-    private static final float FLUID_A0 = 3f / 16f;
-    private static final float FLUID_A1 = 13f / 16f;
-    private static final float FLUID_B0 = 4f / 16f;
-    private static final float FLUID_B1 = 12f / 16f;
-    private static final float FLUID_FLOOR = GLASS_FLOOR + 1f / 16f;
-    private static final float FLUID_CEIL = GLASS_CEIL - 1f / 16f;
-    private static final float FLUID_INTERIOR_H = FLUID_CEIL - FLUID_FLOOR;
+    private static final float FLUID_MIN = 2f / 16f;
+    private static final float FLUID_MAX = 14f / 16f;
+    private static final float FLUID_FLOOR = 3f / 16f;
+    private static final float FLUID_CEIL = 15f / 16f;
+    private static final float FLUID_H = FLUID_CEIL - FLUID_FLOOR;
 
     private static final float MIN_FILL_FRAC = 0.05f;
 
@@ -70,10 +47,6 @@ public class GasTankRenderer implements BlockEntityRenderer<GasTankBlockEntity> 
     private static final float STUB_MAX = 10f / 16f;
 
     public GasTankRenderer(BlockEntityRendererProvider.Context ctx) {}
-
-    // -------------------------------------------------------------------------
-    // Render
-    // -------------------------------------------------------------------------
 
     @Override
     public void render(
@@ -84,9 +57,9 @@ public class GasTankRenderer implements BlockEntityRenderer<GasTankBlockEntity> 
             int packedLight,
             int packedOverlay) {
 
-        TextureAtlasSprite bodySprite = sprite(TANK_BODY);
-        TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
         TextureAtlasSprite lazuriteSprite = sprite(LAZURITE_BLOCK);
+        TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
+        TextureAtlasSprite fluidSprite = sprite(FLUID_TANK);
 
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
         VertexConsumer translucent = bufferSource.getBuffer(RenderType.translucent());
@@ -94,33 +67,16 @@ public class GasTankRenderer implements BlockEntityRenderer<GasTankBlockEntity> 
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();
 
-        // ---- Lazurite rims (solid) — bottom cap band ----
-        drawCylinder(
+        // ---- Lazurite base (solid) ----
+        drawBox(
                 solid,
                 mat,
-                BODY_A0,
-                0,
-                BODY_A1,
-                RIM_H,
-                BODY_B0,
-                BODY_B1,
-                lazuriteSprite,
-                255,
-                255,
-                255,
-                255,
-                packedLight,
-                packedOverlay);
-        // ---- Lazurite rims (solid) — top cap band ----
-        drawCylinder(
-                solid,
-                mat,
-                BODY_A0,
-                1f - RIM_H,
-                BODY_A1,
-                1f,
-                BODY_B0,
-                BODY_B1,
+                EPS,
+                EPS,
+                EPS,
+                1f - EPS,
+                2f / 16f,
+                1f - EPS,
                 lazuriteSprite,
                 255,
                 255,
@@ -136,9 +92,8 @@ public class GasTankRenderer implements BlockEntityRenderer<GasTankBlockEntity> 
             float fillFrac = be.getAmount() > 0
                     ? Math.max(MIN_FILL_FRAC, (float) be.getAmount() / GasTankBlockEntity.CAPACITY)
                     : MIN_FILL_FRAC;
-            float fillTop = FLUID_FLOOR + fillFrac * FLUID_INTERIOR_H;
+            float fillTop = FLUID_FLOOR + fillFrac * FLUID_H;
 
-            // getChemicalTint() returns ARGB int (same format as fluid tint)
             int tint = chemical.getChemicalTint();
             int fr = (tint >> 16) & 0xFF;
             int fg = (tint >> 8) & 0xFF;
@@ -146,16 +101,16 @@ public class GasTankRenderer implements BlockEntityRenderer<GasTankBlockEntity> 
             int fa = (tint >> 24) & 0xFF;
             if (fa == 0) fa = 255;
 
-            drawCylinder(
+            drawBox(
                     translucent,
                     mat,
-                    FLUID_A0,
+                    FLUID_MIN,
                     FLUID_FLOOR,
-                    FLUID_A1,
+                    FLUID_MIN,
+                    FLUID_MAX,
                     fillTop,
-                    FLUID_B0,
-                    FLUID_B1,
-                    bodySprite,
+                    FLUID_MAX,
+                    fluidSprite,
                     fr,
                     fg,
                     fb,
@@ -164,16 +119,16 @@ public class GasTankRenderer implements BlockEntityRenderer<GasTankBlockEntity> 
                     packedOverlay);
         }
 
-        // ---- Glass cylinder (translucent) — drawn after fill ----
-        drawCylinder(
+        // ---- Glass walls + top (translucent, no bottom, double-sided) ----
+        drawBoxNoBottom(
                 translucent,
                 mat,
-                GLASS_A0,
-                GLASS_FLOOR,
-                GLASS_A1,
-                GLASS_CEIL,
-                GLASS_B0,
-                GLASS_B1,
+                1f / 16f,
+                2f / 16f,
+                1f / 16f,
+                15f / 16f,
+                1f,
+                15f / 16f,
                 glassSprite,
                 255,
                 255,
@@ -182,7 +137,7 @@ public class GasTankRenderer implements BlockEntityRenderer<GasTankBlockEntity> 
                 packedLight,
                 packedOverlay);
 
-        // ---- Tube connector stubs ----
+        // ---- Tube connector stubs (solid lazurite) ----
         Level level = be.getLevel();
         if (level != null) {
             BlockPos tankPos = be.getBlockPos();
@@ -195,10 +150,6 @@ public class GasTankRenderer implements BlockEntityRenderer<GasTankBlockEntity> 
 
         poseStack.popPose();
     }
-
-    // -------------------------------------------------------------------------
-    // Geometry helpers (identical to FluidTankRenderer)
-    // -------------------------------------------------------------------------
 
     private static TextureAtlasSprite sprite(ResourceLocation loc) {
         return Minecraft.getInstance()
@@ -264,28 +215,6 @@ public class GasTankRenderer implements BlockEntityRenderer<GasTankBlockEntity> 
         drawBox(vc, mat, x0, y0, z0, x1, y1, z1, sp, 255, 255, 255, 255, light, overlay);
     }
 
-    private static final float SEAM_OFFSET = 0.001f;
-
-    private static void drawCylinder(
-            VertexConsumer vc,
-            Matrix4f mat,
-            float xA0,
-            float y0,
-            float xA1,
-            float y1,
-            float zA0,
-            float zA1,
-            TextureAtlasSprite sp,
-            int r,
-            int g,
-            int b,
-            int a,
-            int light,
-            int overlay) {
-        drawBox(vc, mat, xA0, y0, zA0, xA1, y1, zA1, sp, r, g, b, a, light, overlay);
-        drawBox(vc, mat, zA0, y0 + SEAM_OFFSET, xA0, zA1, y1 - SEAM_OFFSET, xA1, sp, r, g, b, a, light, overlay);
-    }
-
     private static void drawBox(
             VertexConsumer vc,
             Matrix4f mat,
@@ -320,6 +249,60 @@ public class GasTankRenderer implements BlockEntityRenderer<GasTankBlockEntity> 
                 0, 0);
         quad(
                 vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
+                0, 0);
+    }
+
+    private static void drawBoxNoBottom(
+            VertexConsumer vc,
+            Matrix4f mat,
+            float x0,
+            float y0,
+            float z0,
+            float x1,
+            float y1,
+            float z1,
+            TextureAtlasSprite sp,
+            int r,
+            int g,
+            int b,
+            int a,
+            int light,
+            int overlay) {
+        float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
+        // +Y outer then inner
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0,
+                1, 0);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0, 0,
+                -1, 0);
+        // -Z (north) outer then inner
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0,
+                0, -1);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0, 0,
+                0, 1);
+        // +Z (south) outer then inner
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0,
+                0, 1);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1, 0,
+                0, -1);
+        // -X (west) outer then inner
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1,
+                0, 0);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0, 1,
+                0, 0);
+        // +X (east) outer then inner
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
+                0, 0);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y0, z1, x1, y0, z0, x1, y1, z0, x1, y1, z1, -1,
                 0, 0);
     }
 
