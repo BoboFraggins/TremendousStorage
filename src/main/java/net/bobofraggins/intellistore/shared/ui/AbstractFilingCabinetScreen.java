@@ -16,10 +16,12 @@ import net.neoforged.neoforge.network.PacketDistributor;
  * {@link net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetScreen} and
  * {@link net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetScreen}.
  *
- * <p>Handles the void-excess toggle button, folder/extraction slot backgrounds, ghost rendering
- * for locked-but-empty extraction slots, title label, and the standard render pipeline. Subclasses
- * supply the background height, player inventory y, and the action to fire when the void-excess
- * button is clicked.
+ * <p>Handles the slide-out config drawer (toggled by a "≡" button in the title bar), folder and
+ * extraction slot backgrounds, ghost rendering for locked-but-empty extraction slots, title label,
+ * and the standard render pipeline.
+ *
+ * <p>Subclasses supply the background height, player inventory y, and a {@link ConfigDrawer}
+ * populated with whatever config controls they expose (e.g. void excess, priority).
  */
 public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabinetMenu>
         extends AbstractContainerScreen<M> {
@@ -27,52 +29,39 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
     protected static final int BG_WIDTH = 176;
 
     private static final PlayerInventoryPane PLAYER_INV_PANE = new PlayerInventoryPane();
-    private static final int BTN_W = 120;
-    private static final int BTN_H = 14;
-    private static final int BTN_Y = 18;
 
     /** Y position of the player inventory rows (relative to topPos), set by subclass. */
     private final int playerInvY;
 
+    private final ConfigDrawer configDrawer;
     private Dialog dialog;
-    private Button voidExcessButton;
 
-    protected AbstractFilingCabinetScreen(M menu, Inventory inv, Component title, int bgHeight, int playerInvY) {
+    protected AbstractFilingCabinetScreen(
+            M menu, Inventory inv, Component title, int bgHeight, int playerInvY, ConfigDrawer configDrawer) {
         super(menu, inv, title);
         this.playerInvY = playerInvY;
+        this.configDrawer = configDrawer;
         dialog = new Dialog(Dialog.blankPane(BG_WIDTH, bgHeight - Dialog.TITLE_H - Dialog.BOTTOM_PADDING));
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
     }
 
-    /**
-     * Returns the action to run when the void-excess button is clicked.
-     * Implementations should toggle {@code menu.isVoidExcess()}, call
-     * {@code menu.setVoidExcess()}, and send the appropriate packet to the server.
-     */
-    protected abstract Button.OnPress voidExcessAction();
-
     @Override
     protected void init() {
         super.init();
         dialog.init(leftPos, topPos);
-        int btnX = leftPos + (BG_WIDTH - BTN_W) / 2;
-        int btnY = topPos + BTN_Y;
-        voidExcessButton = addRenderableWidget(Button.builder(voidExcessLabel(), voidExcessAction())
-                .bounds(btnX, btnY, BTN_W, BTN_H)
+        configDrawer.init(leftPos, topPos, imageHeight);
+
+        // "≡" toggle button in the top-left of the title bar
+        addRenderableWidget(Button.builder(Component.literal("\u2261"), btn -> configDrawer.toggle())
+                .bounds(leftPos + 3, topPos + 2, 20, 13)
                 .build());
     }
 
-    private Component voidExcessLabel() {
-        return menu.isVoidExcess()
-                ? Component.translatable("screen.intellistore.void_excess_on")
-                : Component.translatable("screen.intellistore.void_excess_off");
-    }
-
     @Override
-    protected void containerTick() {
-        super.containerTick();
-        if (voidExcessButton != null) voidExcessButton.setMessage(voidExcessLabel());
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (configDrawer.mouseClicked(mouseX, mouseY, button)) return true;
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
@@ -96,6 +85,8 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         int x = leftPos, y = topPos;
 
+        // Drawer renders first so the dialog's left border appears on top of it
+        configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
 
         // Folder slots and extraction slots — 8 vertical rows, two columns

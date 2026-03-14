@@ -2,6 +2,8 @@ package net.bobofraggins.intellistore.storage.tubeattachments;
 
 import net.bobofraggins.intellistore.shared.network.SetStorageInterfacePriorityPacket;
 import net.bobofraggins.intellistore.shared.priority.Priority;
+import net.bobofraggins.intellistore.shared.ui.ConfigDrawer;
+import net.bobofraggins.intellistore.shared.ui.PriorityPane;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -13,9 +15,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 /**
  * Priority screen for a Storage Interface attachment on a Tube face.
  *
- * <p>Background panel: 176 × 50 pixels. Shows the attachment title and a
- * [▼] [Current Priority Name] [▲] row, matching the style of
- * {@link net.bobofraggins.intellistore.shared.ui.PriorityScreen}.
+ * <p>Background panel: 176 x 17 pixels (title bar only). The priority control lives in the
+ * slide-out config drawer opened by the "≡" button in the top-left of the title bar.
  */
 public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInterfaceMenu> {
 
@@ -23,56 +24,31 @@ public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInter
             ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
 
     private static final int BG_WIDTH = 176;
-    private static final int BG_HEIGHT = 50;
+    private static final int BG_HEIGHT = 17;
 
-    private static final int LABEL_Y = 20;
-    private static final int ROW_Y = 31;
-    private static final int BTN_W = 20;
-    private static final int BTN_H = 14;
-    private static final int LBL_W = 56;
-    private static final int GAP = 2;
-    private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W;
-
-    private Button downBtn;
-    private Button upBtn;
+    private final ConfigDrawer configDrawer;
 
     public StorageInterfaceScreen(StorageInterfaceMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         this.imageWidth = BG_WIDTH;
         this.imageHeight = BG_HEIGHT;
+        configDrawer = new ConfigDrawer(new StorageInterfacePriorityPane(menu));
     }
 
     @Override
     protected void init() {
         super.init();
-        int rowX = leftPos + (BG_WIDTH - ROW_W) / 2;
-        int btnY = topPos + ROW_Y;
+        configDrawer.init(leftPos, topPos, BG_HEIGHT);
 
-        // ▼ — decrease priority
-        downBtn = addRenderableWidget(Button.builder(Component.literal("▼"), btn -> {
-                    int next = Math.max(0, menu.getPriority() - 1);
-                    PacketDistributor.sendToServer(
-                            new SetStorageInterfacePriorityPacket(menu.getPos(), menu.getFaceIndex(), next));
-                })
-                .bounds(rowX, btnY, BTN_W, BTN_H)
-                .build());
-
-        // ▲ — increase priority
-        upBtn = addRenderableWidget(Button.builder(Component.literal("▲"), btn -> {
-                    int next = Math.min(Priority.VALUES.length - 1, menu.getPriority() + 1);
-                    PacketDistributor.sendToServer(
-                            new SetStorageInterfacePriorityPacket(menu.getPos(), menu.getFaceIndex(), next));
-                })
-                .bounds(rowX + BTN_W + GAP + LBL_W + GAP, btnY, BTN_W, BTN_H)
+        addRenderableWidget(Button.builder(Component.literal("\u2261"), btn -> configDrawer.toggle())
+                .bounds(leftPos + 3, topPos + 2, 20, 13)
                 .build());
     }
 
     @Override
-    protected void containerTick() {
-        super.containerTick();
-        int selected = menu.getPriority();
-        if (downBtn != null) downBtn.active = (selected > 0);
-        if (upBtn != null) upBtn.active = (selected < Priority.VALUES.length - 1);
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (configDrawer.mouseClicked(mouseX, mouseY, button)) return true;
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
@@ -84,44 +60,53 @@ public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInter
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        int x = leftPos, y = topPos;
-
-        // Title bar from generic_54
-        graphics.blit(BG_TEXTURE, x, y, 0, 0, BG_WIDTH, 17);
-
-        // Gray panel body
-        graphics.fill(x, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFC6C6C6);
-
-        // Border lines
-        graphics.fill(x, y + 17, x + 1, y + BG_HEIGHT, 0xFF555555);
-        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFFFFFFF);
-        graphics.fill(x, y + BG_HEIGHT - 1, x + BG_WIDTH, y + BG_HEIGHT, 0xFF555555);
-
-        // "Priority:" label row
-        Component priorityLabel = Component.translatable("screen.intellistore.priority_label");
-        graphics.drawString(
-                font, priorityLabel, x + (BG_WIDTH - font.width(priorityLabel)) / 2, y + LABEL_Y, 0x404040, false);
-
-        // Current priority name in inset label area
-        int rowX = x + (BG_WIDTH - ROW_W) / 2;
-        int lblX0 = rowX + BTN_W + GAP;
-        int lblY = y + ROW_Y;
-
-        graphics.fill(lblX0, lblY, lblX0 + LBL_W, lblY + 1, 0xFF373737);
-        graphics.fill(lblX0, lblY + 1, lblX0 + 1, lblY + BTN_H, 0xFF373737);
-        graphics.fill(lblX0, lblY + BTN_H, lblX0 + LBL_W + 1, lblY + BTN_H + 1, 0xFFFFFFFF);
-        graphics.fill(lblX0 + LBL_W, lblY, lblX0 + LBL_W + 1, lblY + BTN_H, 0xFFFFFFFF);
-        graphics.fill(lblX0 + 1, lblY + 1, lblX0 + LBL_W, lblY + BTN_H, 0xFF8B8B8B);
-
-        Priority current = Priority.fromOrdinal(menu.getPriority());
-        String name = Component.translatable(current.translationKey()).getString();
-        int nameX = lblX0 + (LBL_W - font.width(name)) / 2;
-        int nameY = lblY + (BTN_H - 8) / 2;
-        graphics.drawString(font, name, nameX, nameY, 0x404040, false);
+        configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
+        // Title bar only
+        graphics.blit(BG_TEXTURE, leftPos, topPos, 0, 0, BG_WIDTH, BG_HEIGHT);
     }
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
         graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 4, 0x404040, false);
+    }
+
+    // -------------------------------------------------------------------------
+    // Inner class: priority pane that sends StorageInterface-specific packets
+    // -------------------------------------------------------------------------
+
+    private static final class StorageInterfacePriorityPane extends PriorityPane {
+
+        private final StorageInterfaceMenu menu;
+
+        StorageInterfacePriorityPane(StorageInterfaceMenu menu) {
+            super(menu::getPriority, menu.getPos());
+            this.menu = menu;
+        }
+
+        @Override
+        public boolean mouseClicked(double localX, double localY, int button) {
+            if (button != 0) return false;
+            int selected = menu.getPriority();
+            // Mirror the layout from PriorityPane: ROW_W=100, centred in WIDTH=110
+            int rowX = (preferredWidth() - 100) / 2;
+            int downBtnX = rowX;
+            int upBtnX = rowX + 20 + 2 + 56 + 2;
+            int rowY = 14;
+            int btnH = 14;
+
+            if (localX >= downBtnX && localX < downBtnX + 20 && localY >= rowY && localY < rowY + btnH) {
+                if (selected > 0)
+                    PacketDistributor.sendToServer(
+                            new SetStorageInterfacePriorityPacket(menu.getPos(), menu.getFaceIndex(), selected - 1));
+                return true;
+            }
+            if (localX >= upBtnX && localX < upBtnX + 20 && localY >= rowY && localY < rowY + btnH) {
+                if (selected < Priority.VALUES.length - 1)
+                    PacketDistributor.sendToServer(
+                            new SetStorageInterfacePriorityPacket(menu.getPos(), menu.getFaceIndex(), selected + 1));
+                return true;
+            }
+            return false;
+        }
     }
 }

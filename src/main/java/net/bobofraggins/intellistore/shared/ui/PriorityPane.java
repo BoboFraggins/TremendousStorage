@@ -12,25 +12,20 @@ import net.neoforged.neoforge.network.PacketDistributor;
 /**
  * Dialog pane that renders a priority control (▼ / ▲ buttons and current priority label).
  *
- * <p>Stateless rendering equivalent to {@link PriorityControl} used as an {@link IDialogPane},
- * but decoupled from the menu type so it can be embedded in any screen's dialog.
+ * <p>Layout adapts to the {@code width} passed to {@link #render}, so it works correctly inside a
+ * {@link ConfigDrawer} or any other width container. Button placement is always centred.
  */
 public class PriorityPane implements IDialogPane {
 
-    // Layout constants — identical to PriorityControl
     private static final int PANE_HEIGHT = 33;
-    private static final int PANE_WIDTH = 176;
     private static final int LABEL_Y = 3;
     private static final int ROW_Y = 14;
     private static final int BTN_W = 20;
     private static final int BTN_H = 14;
     private static final int LBL_W = 56;
     private static final int GAP = 2;
+    /** Total width of [▼][gap][label][gap][▲] row. */
     private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W; // 100
-    private static final int ROW_X = (PANE_WIDTH - ROW_W) / 2; // 38
-    private static final int DOWN_BTN_X = ROW_X;
-    private static final int UP_BTN_X = ROW_X + BTN_W + GAP + LBL_W + GAP;
-    private static final int LBL_X = ROW_X + BTN_W + GAP;
 
     private final IntSupplier priorityGetter;
     private final BlockPos pos;
@@ -46,7 +41,7 @@ public class PriorityPane implements IDialogPane {
 
     @Override
     public int preferredWidth() {
-        return PANE_WIDTH;
+        return ConfigDrawer.WIDTH;
     }
 
     @Override
@@ -58,23 +53,27 @@ public class PriorityPane implements IDialogPane {
     public void render(
             GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
         int selected = priorityGetter.getAsInt();
+        int rowX = (width - ROW_W) / 2;
+        int downBtnX = rowX;
+        int upBtnX = rowX + BTN_W + GAP + LBL_W + GAP;
+        int lblX = rowX + BTN_W + GAP;
 
         Component priorityLabel = Component.translatable("screen.intellistore.priority_label");
         graphics.drawString(font, priorityLabel, (width - font.width(priorityLabel)) / 2, LABEL_Y, 0x404040, false);
 
-        drawButton(graphics, font, DOWN_BTN_X, ROW_Y, BTN_W, BTN_H, "▼", selected > 0);
-        drawButton(graphics, font, UP_BTN_X, ROW_Y, BTN_W, BTN_H, "▲", selected < Priority.VALUES.length - 1);
+        drawButton(graphics, font, downBtnX, ROW_Y, BTN_W, BTN_H, "▼", selected > 0);
+        drawButton(graphics, font, upBtnX, ROW_Y, BTN_W, BTN_H, "▲", selected < Priority.VALUES.length - 1);
 
         // Inset label box
-        graphics.fill(LBL_X, ROW_Y, LBL_X + LBL_W, ROW_Y + 1, 0xFF373737);
-        graphics.fill(LBL_X, ROW_Y + 1, LBL_X + 1, ROW_Y + BTN_H, 0xFF373737);
-        graphics.fill(LBL_X, ROW_Y + BTN_H, LBL_X + LBL_W + 1, ROW_Y + BTN_H + 1, 0xFFFFFFFF);
-        graphics.fill(LBL_X + LBL_W, ROW_Y, LBL_X + LBL_W + 1, ROW_Y + BTN_H, 0xFFFFFFFF);
-        graphics.fill(LBL_X + 1, ROW_Y + 1, LBL_X + LBL_W, ROW_Y + BTN_H, 0xFF8B8B8B);
+        graphics.fill(lblX, ROW_Y, lblX + LBL_W, ROW_Y + 1, 0xFF373737);
+        graphics.fill(lblX, ROW_Y + 1, lblX + 1, ROW_Y + BTN_H, 0xFF373737);
+        graphics.fill(lblX, ROW_Y + BTN_H, lblX + LBL_W + 1, ROW_Y + BTN_H + 1, 0xFFFFFFFF);
+        graphics.fill(lblX + LBL_W, ROW_Y, lblX + LBL_W + 1, ROW_Y + BTN_H, 0xFFFFFFFF);
+        graphics.fill(lblX + 1, ROW_Y + 1, lblX + LBL_W, ROW_Y + BTN_H, 0xFF8B8B8B);
 
         Priority current = Priority.fromOrdinal(selected);
         String name = Component.translatable(current.translationKey()).getString();
-        int nameX = LBL_X + (LBL_W - font.width(name)) / 2;
+        int nameX = lblX + (LBL_W - font.width(name)) / 2;
         int nameY = ROW_Y + (BTN_H - 8) / 2;
         graphics.drawString(font, name, nameX, nameY, 0x404040, false);
     }
@@ -83,12 +82,15 @@ public class PriorityPane implements IDialogPane {
     public boolean mouseClicked(double localX, double localY, int button) {
         if (button != 0) return false;
         int selected = priorityGetter.getAsInt();
+        int rowX = (preferredWidth() - ROW_W) / 2;
+        int downBtnX = rowX;
+        int upBtnX = rowX + BTN_W + GAP + LBL_W + GAP;
 
-        if (isInButton(localX, localY, DOWN_BTN_X)) {
+        if (isInButton(localX, localY, downBtnX)) {
             if (selected > 0) PacketDistributor.sendToServer(new SetPriorityPacket(pos, selected - 1));
             return true;
         }
-        if (isInButton(localX, localY, UP_BTN_X)) {
+        if (isInButton(localX, localY, upBtnX)) {
             if (selected < Priority.VALUES.length - 1)
                 PacketDistributor.sendToServer(new SetPriorityPacket(pos, selected + 1));
             return true;

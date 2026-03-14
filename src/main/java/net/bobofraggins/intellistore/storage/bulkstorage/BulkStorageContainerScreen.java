@@ -5,6 +5,7 @@ import java.util.List;
 import net.bobofraggins.intellistore.shared.input.QuickStackClientEvents;
 import net.bobofraggins.intellistore.shared.network.LocalStorageInteractPacket;
 import net.bobofraggins.intellistore.shared.network.QuickStackPacket;
+import net.bobofraggins.intellistore.shared.ui.ConfigDrawer;
 import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.bobofraggins.intellistore.shared.ui.LocalInventoryPane;
 import net.bobofraggins.intellistore.shared.ui.PlayerInventoryPane;
@@ -12,6 +13,7 @@ import net.bobofraggins.intellistore.shared.ui.PriorityPane;
 import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -22,29 +24,35 @@ import net.neoforged.neoforge.network.PacketDistributor;
 /**
  * Screen for the Bulk Storage Container.
  *
- * <p>Displays the block's stored items in a scrollable grid (same layout as the Access Terminal
- * network inventory), a priority control, and the player inventory.
+ * <p>Displays the block's stored items in a scrollable grid, a priority control (in the slide-out
+ * config drawer), and the player inventory.
  */
 public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStorageContainerMenu> {
 
     private final LocalInventoryPane inventoryPane;
     private final Dialog dialog;
+    private final ConfigDrawer configDrawer;
 
     public BulkStorageContainerScreen(BulkStorageContainerMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         inventoryPane = new LocalInventoryPane();
-        dialog = new Dialog(
-                new PriorityPane(menu::getPriority, menu.getPos()), inventoryPane, new PlayerInventoryPane());
+        dialog = new Dialog(inventoryPane, new PlayerInventoryPane());
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
+        configDrawer = new ConfigDrawer(new PriorityPane(menu::getPriority, menu.getPos()));
     }
 
     @Override
     protected void init() {
         super.init();
         dialog.init(leftPos, topPos);
+        configDrawer.init(leftPos, topPos, imageHeight);
         inventoryPane.setClickHandler((idx, amount, toCursor) -> PacketDistributor.sendToServer(
                 new LocalStorageInteractPacket(menu.getPos(), true, idx, amount, toCursor)));
+
+        addRenderableWidget(Button.builder(Component.literal("\u2261"), btn -> configDrawer.toggle())
+                .bounds(leftPos + 3, topPos + 2, 20, 13)
+                .build());
     }
 
     @Override
@@ -82,6 +90,7 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (configDrawer.mouseClicked(mouseX, mouseY, button)) return true;
         if (dialog.mouseClicked(mouseX, mouseY, button)) return true;
         return super.mouseClicked(mouseX, mouseY, button);
     }
@@ -98,7 +107,7 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
         super.render(graphics, mouseX, mouseY, partialTick);
         renderTooltip(graphics, mouseX, mouseY);
 
-        int paneAbsY = dialog.getPaneAbsY(1);
+        int paneAbsY = dialog.getPaneAbsY(0);
         ItemStack hovered = inventoryPane.getHoveredStack(mouseX - leftPos, mouseY - paneAbsY);
         if (hovered != null) {
             graphics.renderTooltip(font, hovered, mouseX, mouseY);
@@ -107,6 +116,7 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+        configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
     }
 
