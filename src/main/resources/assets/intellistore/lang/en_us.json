@@ -89,6 +89,7 @@
 
   "block.intellistore.network_interface": "Network Interface",
   "block.intellistore.access_terminal": "Access Terminal",
+  "block.intellistore.storage_access_terminal": "Access Terminal",
 
   "screen.intellistore.access_terminal": "Access Terminal",
   "screen.intellistore.access_terminal.connected": "Network: Connected",
@@ -102,6 +103,7 @@
   "item.intellistore.zombie_brain.tooltip": "Brrraaaiinnnsss...",
   "item.intellistore.brain": "Brain",
   "item.intellistore.brain.tooltip": "Good as new!",
+  "fluid_type.intellistore.healing_salve": "Healing Salve",
   "item.intellistore.healing_salve_bucket": "Healing Salve Bucket",
 
   "screen.intellistore.network_interface": "Network Interface",

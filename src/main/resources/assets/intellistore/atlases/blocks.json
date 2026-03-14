@@ -4,6 +4,11 @@
       "type": "directory",
       "source": "block",
       "prefix": "block/"
+    },
+    {
+      "type": "directory",
+      "source": "fluid",
+      "prefix": "fluid/"
     }
   ]
 }
