@@ -13,23 +13,24 @@ import net.neoforged.neoforge.network.PacketDistributor;
 /**
  * Screen for the Filing Cabinet block.
  *
- * <p>Layout (176 × 204 px):
+ * <p>Layout (176 × 300 px):
  * <ul>
- *   <li>Title centred at y=4
+ *   <li>Title centred in title bar
  *   <li>"Void Excess: ON/OFF" toggle button (120×14) centred at y=18
- *   <li>2 rows × 4 columns of folder slots starting at x=29, y=44 (18×18 each)
- *   <li>"Priority:" label centred at y=86
- *   <li>[▼] [name] [▲] row centred at y=96
- *   <li>Player inventory 3×9 starting at y=118
- *   <li>Player hotbar at y=176
+ *   <li>8 folder slots (left col) + 8 extraction slots (right col), y=36..179
+ *   <li>"Priority:" label centred at y=184
+ *   <li>[▼] [name] [▲] row centred at y=194
+ *   <li>Player inventory 3×9 starting at y=214
+ *   <li>Player hotbar at y=272
  * </ul>
  */
 public class FilingCabinetScreen extends AbstractFilingCabinetScreen<FilingCabinetMenu> {
 
-    private static final int BG_HEIGHT = 204;
+    private static final int BG_HEIGHT = 300;
+    private static final int PLAYER_INV_Y = 214;
 
-    private static final int PRIORITY_LABEL_Y = 86;
-    private static final int PRIORITY_ROW_Y = 96;
+    private static final int PRIORITY_LABEL_Y = 184;
+    private static final int PRIORITY_ROW_Y = 194;
     private static final int BTN_W = 20;
     private static final int BTN_H = 14;
     private static final int LBL_W = 56;
@@ -37,7 +38,7 @@ public class FilingCabinetScreen extends AbstractFilingCabinetScreen<FilingCabin
     private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W;
 
     public FilingCabinetScreen(FilingCabinetMenu menu, Inventory inv, Component title) {
-        super(menu, inv, title, BG_HEIGHT);
+        super(menu, inv, title, BG_HEIGHT, PLAYER_INV_Y);
     }
 
     @Override

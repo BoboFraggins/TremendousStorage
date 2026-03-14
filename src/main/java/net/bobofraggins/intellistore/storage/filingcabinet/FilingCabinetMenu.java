@@ -15,9 +15,10 @@ import net.minecraft.world.inventory.SimpleContainerData;
  *
  * <p>Slot layout (mirrors the Personal Filing Cabinet menu):
  * <ul>
- *   <li>[0..7]   8 folder slots (only accept ManillaFolderItem, stack size 1) at x=29, y=44
- *   <li>[8..34]  Player main inventory (27 slots) at y=118
- *   <li>[35..43] Player hotbar (9 slots) at y=176
+ *   <li>[0..7]   8 folder slots (only accept ManillaFolderItem, stack size 1) at x=68, y=36+i×18
+ *   <li>[8..15]  8 extraction slots (read-only view of each folder's contents) at x=90, y=36+i×18
+ *   <li>[16..42] Player main inventory (27 slots) at y=214
+ *   <li>[43..51] Player hotbar (9 slots) at y=272
  * </ul>
  *
  * <p>ContainerData[0]: voidExcess (0=OFF, 1=ON)
@@ -57,7 +58,7 @@ public class FilingCabinetMenu extends AbstractFilingCabinetMenu {
             }
         };
 
-        addAllSlots(be, playerInv, 118, 176);
+        addAllSlots(be, playerInv, 214, 272);
         addDataSlots(data);
     }
 
@@ -68,7 +69,7 @@ public class FilingCabinetMenu extends AbstractFilingCabinetMenu {
         this.be = null;
         this.data = new SimpleContainerData(2);
 
-        addAllSlots(new SimpleContainer(FOLDER_SLOTS), playerInv, 118, 176);
+        addAllSlots(new SimpleContainer(FOLDER_SLOTS), playerInv, 214, 272);
         addDataSlots(data);
     }
 

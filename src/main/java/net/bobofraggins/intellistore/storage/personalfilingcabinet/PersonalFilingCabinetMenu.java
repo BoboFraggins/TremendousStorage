@@ -90,7 +90,7 @@ public class PersonalFilingCabinetMenu extends AbstractFilingCabinetMenu {
             }
         };
 
-        addAllSlots(container, playerInv, 86, 144);
+        addAllSlots(container, playerInv, 186, 244);
         addDataSlots(data);
     }
 

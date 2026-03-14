@@ -10,21 +10,22 @@ import net.neoforged.neoforge.network.PacketDistributor;
 /**
  * Screen for the Personal Filing Cabinet item.
  *
- * <p>Layout (176 × 170 px):
+ * <p>Layout (176 × 270 px):
  * <ul>
- *   <li>Title centred at y=6
+ *   <li>Title centred in title bar
  *   <li>"Void Excess: ON/OFF" toggle button (120×14) centred at y=18
- *   <li>2 rows × 4 columns of folder slots starting at x=29, y=44 (18×18 each)
- *   <li>Player inventory 3×9 starting at y=86
- *   <li>Player hotbar at y=144
+ *   <li>8 folder slots (left col) + 8 extraction slots (right col), y=36..179
+ *   <li>Player inventory 3×9 starting at y=186
+ *   <li>Player hotbar at y=244
  * </ul>
  */
 public class PersonalFilingCabinetScreen extends AbstractFilingCabinetScreen<PersonalFilingCabinetMenu> {
 
-    private static final int BG_HEIGHT = 170;
+    private static final int BG_HEIGHT = 270;
+    private static final int PLAYER_INV_Y = 186;
 
     public PersonalFilingCabinetScreen(PersonalFilingCabinetMenu menu, Inventory inv, Component title) {
-        super(menu, inv, title, BG_HEIGHT);
+        super(menu, inv, title, BG_HEIGHT, PLAYER_INV_Y);
     }
 
     @Override
