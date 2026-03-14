@@ -18,13 +18,13 @@ import net.minecraft.world.level.Level;
 import org.joml.Matrix4f;
 
 /**
- * Renders the Wireless Hub as a Jacob's Ladder — two metal rods rising from an iron base,
+ * Renders the Wireless Hub as a Jacob's Ladder — two Lazurite rods rising from a Lazurite base,
  * with an animated electric arc climbing between them.
  *
  * <p>Rendering layers (all drawn by this BESR; JSON model provides particle texture only):
  * <ol>
- *   <li>Iron base — solid, 8×8×2 px slab centred on the block.
- *   <li>Two vertical iron rods — solid, 1×12×1 px each, separated by 5px.
+ *   <li>Lazurite base — solid, 8×8×2 px slab centred on the block.
+ *   <li>Two vertical Lazurite rods — solid, 1×12×1 px each, separated by 5px.
  *   <li>Animated arc — translucent blue quad-strip that climbs from rod-bottom to rod-top
  *       over a 40-tick (2 s) cycle, with random per-frame zigzag offsets.
  * </ol>
@@ -38,8 +38,8 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
     // Textures
     // -------------------------------------------------------------------------
 
-    private static final ResourceLocation IRON_BLOCK =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "block/iron_block");
+    private static final ResourceLocation LAZURITE_BLOCK =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/lazurite_block");
 
     // -------------------------------------------------------------------------
     // Geometry constants — all in block units (0..1), matching the JSON model
@@ -101,7 +101,7 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
             int packedLight,
             int packedOverlay) {
 
-        TextureAtlasSprite iron = sprite(IRON_BLOCK);
+        TextureAtlasSprite iron = sprite(LAZURITE_BLOCK);
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
 
         poseStack.pushPose();
@@ -124,7 +124,7 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
 
         Matrix4f mat = poseStack.last().pose();
 
-        // ---- Iron base ----
+        // ---- Lazurite base ----
         drawBox(
                 solid,
                 mat,

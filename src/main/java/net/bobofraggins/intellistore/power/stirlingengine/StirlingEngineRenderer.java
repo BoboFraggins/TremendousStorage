@@ -17,20 +17,20 @@ import org.joml.Matrix4f;
  *
  * <p>The piston animates (bouncing up and down) only when a heat source is present below
  * the engine (i.e. when {@link StirlingEngineBlockEntity#isHeated()} returns true).
- * When idle the piston sits at its lowest position, 1 px proud of the iron block top.
+ * When idle the piston sits at its lowest position, 1 px proud of the Lazurite block top.
  *
  * <p>Geometry (all in 1/16ths of a block):
  * <ul>
- *   <li>Iron base   — [2,EPS,2] → [14,6,14]  (12px wide, 6px tall)
- *   <li>Iron top    — [4,6,4]   → [12,10,12]  (8px wide, 4px tall, centred)
+ *   <li>Lazurite base — [2,EPS,2] → [14,6,14]  (12px wide, 6px tall)
+ *   <li>Lazurite top  — [4,6,4]   → [12,10,12]  (8px wide, 4px tall, centred)
  *   <li>Copper piston — [5,?,5] → [11,?,11]  (6px wide, 6px tall, Y position animated)
  *       piston top: 11/16 (rest) … 16/16 (extended)
  * </ul>
  */
 public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngineBlockEntity> {
 
-    private static final ResourceLocation IRON_BLOCK =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "block/iron_block");
+    private static final ResourceLocation LAZURITE_BLOCK =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/lazurite_block");
     private static final ResourceLocation COPPER_BLOCK =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/stirling_engine_piston");
 
@@ -40,11 +40,11 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
     /** Piston height in world units (6 px). */
     private static final float PISTON_HEIGHT = 6f / 16f;
 
-    /** Y of the iron-top surface (10 px). */
-    private static final float IRON_TOP_Y = 10f / 16f;
+    /** Y of the Lazurite-top surface (10 px). */
+    private static final float LAZURITE_TOP_Y = 10f / 16f;
 
-    /** Piston top at rest: 1 px proud of the iron block top. */
-    private static final float PISTON_TOP_MIN = IRON_TOP_Y + 1f / 16f;
+    /** Piston top at rest: 1 px proud of the Lazurite block top. */
+    private static final float PISTON_TOP_MIN = LAZURITE_TOP_Y + 1f / 16f;
 
     /** Piston top at full extension: 2 px short of block top, keeping bottom 2px hidden. */
     private static final float PISTON_TOP_MAX = 14f / 16f;
@@ -66,7 +66,7 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
             int packedLight,
             int packedOverlay) {
 
-        TextureAtlasSprite ironSprite = sprite(IRON_BLOCK);
+        TextureAtlasSprite ironSprite = sprite(LAZURITE_BLOCK);
         TextureAtlasSprite copperSprite = sprite(COPPER_BLOCK);
 
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
@@ -74,10 +74,10 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();
 
-        // ---- Iron base: 12 px wide, 6 px tall ----
+        // ---- Lazurite base: 12 px wide, 6 px tall ----
         drawBox(solid, mat, 2f / 16, EPS, 2f / 16, 14f / 16, 6f / 16, 14f / 16, ironSprite, packedLight, packedOverlay);
 
-        // ---- Iron block top: 8 px wide, 4 px tall, centred ----
+        // ---- Lazurite block top: 8 px wide, 4 px tall, centred ----
         drawBox(
                 solid,
                 mat,
@@ -85,7 +85,7 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
                 6f / 16,
                 4f / 16,
                 12f / 16,
-                IRON_TOP_Y,
+                LAZURITE_TOP_Y,
                 12f / 16,
                 ironSprite,
                 packedLight,
