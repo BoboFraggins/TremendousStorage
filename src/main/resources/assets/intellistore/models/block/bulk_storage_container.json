@@ -1,5 +1,6 @@
 {
   "parent": "minecraft:block/block",
+  "render_type": "minecraft:cutout_mipped",
   "textures": {
     "particle": "intellistore:block/bulk_storage_container_front",
     "top": "intellistore:block/filing_cabinet_side",
