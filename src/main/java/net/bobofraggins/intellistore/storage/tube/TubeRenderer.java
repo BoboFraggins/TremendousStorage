@@ -1220,8 +1220,7 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     /**
      * Draws an 8×8×2 attachment plate flush with the outside face, slightly inset to avoid
      * z-fighting with adjacent blocks. The outward face uses {@code faceSprite} tinted by
-     * {@code r,g,b}; the four side edges use {@code sideSprite} tinted dark steel. The inner
-     * face is omitted (not visible).
+     * {@code r,g,b}; the four side edges and inner face use {@code sideSprite} tinted dark steel.
      */
     private static void drawAttachmentPlate(
             VertexConsumer vc,
@@ -1286,9 +1285,7 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                 z1 = P_MAX;
             } // EAST
         }
-        Direction inner = dir.getOpposite();
         for (Direction face : Direction.values()) {
-            if (face == inner) continue;
             boolean isOutward = (face == dir);
             TextureAtlasSprite sp = isOutward ? faceSprite : sideSprite;
             int cr = isOutward ? r : TRIM_R;
