@@ -12,8 +12,10 @@ import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.IVanillaCategoryExtensionRegistration;
+import mezz.jei.api.runtime.IJeiRuntime;
 import net.bobofraggins.intellistore.shared.network.SetImportExportFilterPacket;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderExtractRecipe;
@@ -78,6 +80,16 @@ public class IntelliStoreJeiPlugin implements IModPlugin {
      * Registers ghost ingredient handlers so players can drag items from JEI directly
      * into the 9 filter slots of the Import Interface and Export Interface screens.
      */
+    @Override
+    public void onRuntimeAvailable(IJeiRuntime runtime) {
+        SearchSync.setProvider(runtime.getIngredientFilter()::getFilterText);
+    }
+
+    @Override
+    public void onRuntimeUnavailable() {
+        SearchSync.setProvider(null);
+    }
+
     @Override
     public void registerGuiHandlers(IGuiHandlerRegistration reg) {
         reg.addGhostIngredientHandler(ImportInterfaceScreen.class, new InterfaceGhostHandler<>());

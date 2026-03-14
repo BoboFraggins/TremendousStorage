@@ -5,6 +5,7 @@ import net.bobofraggins.intellistore.shared.network.RequestSatContentsPacket;
 import net.bobofraggins.intellistore.shared.network.SatContentsPacket;
 import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.bobofraggins.intellistore.shared.ui.PlayerInventoryPane;
+import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -70,6 +71,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     @Override
     protected void containerTick() {
         super.containerTick();
+        networkPane.setFilter(SearchSync.getFilter());
         List<ItemStack> pending = SatContentsPacket.PENDING_STACKS;
         if (pending != null && pending != networkPane.getStacks()) {
             networkPane.setContents(pending, SatContentsPacket.PENDING_COUNTS);

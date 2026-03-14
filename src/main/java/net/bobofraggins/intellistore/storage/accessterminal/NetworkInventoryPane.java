@@ -1,11 +1,13 @@
 package net.bobofraggins.intellistore.storage.accessterminal;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.network.SatExtractPacket;
 import net.bobofraggins.intellistore.shared.network.SatInsertPacket;
 import net.bobofraggins.intellistore.shared.ui.IDialogPane;
 import net.bobofraggins.intellistore.shared.util.CountFormat;
+import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
@@ -19,6 +21,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
  * <p>Local coordinate origin (0, 0) sits at {@code topPos + Dialog.TITLE_H}.
  * The grid itself is inset by 1 px at the top ({@link AccessTerminalLayout#NETWORK_Y} −
  * {@link AccessTerminalLayout#TITLE_H} = 1).
+ *
+ * <p>When a JEI search filter is active (via {@link SearchSync}), the grid shows only matching
+ * items. Clicks use the displayed item's identity (not a positional index), so filtering does not
+ * affect extraction correctness.
  */
 public class NetworkInventoryPane implements IDialogPane {
 
@@ -37,8 +43,18 @@ public class NetworkInventoryPane implements IDialogPane {
     // -------------------------------------------------------------------------
 
     private final AccessTerminalMenu menu;
+
+    /** Full unfiltered list received from the server. */
+    private List<ItemStack> allStacks = List.of();
+
+    private List<Long> allCounts = List.of();
+
+    /** Filtered view rendered in the grid. May be the same object as allStacks when no filter. */
     private List<ItemStack> stacks = List.of();
+
     private List<Long> counts = List.of();
+
+    private String appliedFilter = "";
     private int scrollOffset = 0;
 
     /** False until the first server response arrives. */
@@ -117,22 +133,40 @@ public class NetworkInventoryPane implements IDialogPane {
     // Public API
     // -------------------------------------------------------------------------
 
+    /** Stores the full server-provided list and applies the current filter. */
     public void setContents(List<ItemStack> stacks, List<Long> counts) {
-        this.stacks = stacks;
-        this.counts = counts;
+        this.allStacks = stacks;
+        this.allCounts = counts;
         this.hasContents = true;
-        clampScroll();
+        applyFilter();
+    }
+
+    /**
+     * Updates the active search filter and rebuilds the display list.
+     *
+     * <p>No-op when the filter has not changed since the last call.
+     */
+    public void setFilter(String filter) {
+        if (filter.equals(appliedFilter)) return;
+        appliedFilter = filter;
+        applyFilter();
     }
 
     public void reset() {
+        this.allStacks = List.of();
+        this.allCounts = List.of();
         this.stacks = List.of();
         this.counts = List.of();
         this.hasContents = false;
         this.scrollOffset = 0;
     }
 
+    /**
+     * Returns the full unfiltered stack list — used by {@link AccessTerminalScreen} to detect when
+     * new server data has arrived.
+     */
     public List<ItemStack> getStacks() {
-        return stacks;
+        return allStacks;
     }
 
     /**
@@ -151,6 +185,25 @@ public class NetworkInventoryPane implements IDialogPane {
     // -------------------------------------------------------------------------
     // Private helpers
     // -------------------------------------------------------------------------
+
+    private void applyFilter() {
+        if (appliedFilter.isEmpty()) {
+            stacks = allStacks;
+            counts = allCounts;
+        } else {
+            List<ItemStack> fs = new ArrayList<>();
+            List<Long> fc = new ArrayList<>();
+            for (int i = 0; i < allStacks.size(); i++) {
+                if (SearchSync.matches(allStacks.get(i), appliedFilter)) {
+                    fs.add(allStacks.get(i));
+                    fc.add(allCounts.get(i));
+                }
+            }
+            stacks = fs;
+            counts = fc;
+        }
+        clampScroll();
+    }
 
     private boolean isInGrid(double localX, double localY) {
         return localX >= GRID_X

@@ -1,8 +1,10 @@
 package net.bobofraggins.intellistore.shared.ui;
 
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.util.CountFormat;
+import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalLayout;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -19,6 +21,10 @@ import net.minecraft.world.item.ItemStack;
  *
  * <p>Grid interactions (click to extract, click with carried item to insert) are routed to a
  * {@link GridClickHandler} supplied by the hosting screen.
+ *
+ * <p>When a JEI search filter is active (via {@link SearchSync}), the grid shows only matching
+ * items. Click indices reported to {@link GridClickHandler} are always the <em>original</em>
+ * indices in the unfiltered list so that server-side extraction stays correct.
  */
 public class LocalInventoryPane implements IDialogPane {
 
@@ -29,7 +35,8 @@ public class LocalInventoryPane implements IDialogPane {
      *   <li>{@code idx == -1}: player clicked the grid while holding an item — insert from cursor.
      *   <li>{@code idx >= 0}: player clicked an occupied grid slot — extract {@code amount} items;
      *       {@code toCursor = true} places them on the cursor, {@code false} sends them directly
-     *       to the player's inventory (shift-click behaviour).
+     *       to the player's inventory (shift-click behaviour). The index is always relative to the
+     *       <em>unfiltered</em> list regardless of any active search filter.
      * </ul>
      */
     @FunctionalInterface
@@ -51,8 +58,24 @@ public class LocalInventoryPane implements IDialogPane {
     // State
     // -------------------------------------------------------------------------
 
-    private List<ItemStack> stacks = List.of();
-    private List<Long> counts = List.of();
+    /** Full unfiltered contents supplied by the hosting screen. */
+    private List<ItemStack> allStacks = List.of();
+
+    private List<Long> allCounts = List.of();
+
+    /** Filtered view rendered in the grid. May be the same object as allStacks when no filter. */
+    private List<ItemStack> displayStacks = List.of();
+
+    private List<Long> displayCounts = List.of();
+
+    /**
+     * Maps displayed index → original index in allStacks. {@code null} means identity (no filter
+     * active).
+     */
+    @Nullable
+    private int[] toOriginal = null;
+
+    private String appliedFilter = "";
     private int scrollOffset = 0;
 
     @Nullable
@@ -62,10 +85,23 @@ public class LocalInventoryPane implements IDialogPane {
     // Public API
     // -------------------------------------------------------------------------
 
+    /** Replaces the full item list and re-applies the current filter. */
     public void setContents(List<ItemStack> stacks, List<Long> counts) {
-        this.stacks = stacks;
-        this.counts = counts;
-        clampScroll();
+        this.allStacks = stacks;
+        this.allCounts = counts;
+        applyFilter();
+    }
+
+    /**
+     * Updates the active search filter and rebuilds the display list.
+     *
+     * <p>The filter string should be the raw output of {@link SearchSync#getFilter()} — already
+     * lowercased and stripped. This method is a no-op when the filter has not changed.
+     */
+    public void setFilter(String filter) {
+        if (filter.equals(appliedFilter)) return;
+        appliedFilter = filter;
+        applyFilter();
     }
 
     public void setClickHandler(GridClickHandler handler) {
@@ -73,8 +109,8 @@ public class LocalInventoryPane implements IDialogPane {
     }
 
     /**
-     * Returns the item stack under the given pane-local mouse position, or {@code null} if
-     * the cursor is outside the grid or no item is there.
+     * Returns the item stack under the given pane-local mouse position, or {@code null} if the
+     * cursor is outside the grid or no item is there. Uses the current filtered view.
      */
     @Nullable
     public ItemStack getHoveredStack(double localX, double localY) {
@@ -82,7 +118,7 @@ public class LocalInventoryPane implements IDialogPane {
         int col = (int) ((localX - GRID_X) / AccessTerminalLayout.SLOT_SIZE);
         int row = (int) ((localY - GRID_Y) / AccessTerminalLayout.SLOT_SIZE);
         int idx = (row + scrollOffset) * AccessTerminalLayout.NETWORK_COLS + col;
-        return (idx >= 0 && idx < stacks.size()) ? stacks.get(idx) : null;
+        return (idx >= 0 && idx < displayStacks.size()) ? displayStacks.get(idx) : null;
     }
 
     // -------------------------------------------------------------------------
@@ -121,16 +157,18 @@ public class LocalInventoryPane implements IDialogPane {
 
         int col = (int) ((localX - GRID_X) / AccessTerminalLayout.SLOT_SIZE);
         int row = (int) ((localY - GRID_Y) / AccessTerminalLayout.SLOT_SIZE);
-        int idx = (row + scrollOffset) * AccessTerminalLayout.NETWORK_COLS + col;
+        int displayedIdx = (row + scrollOffset) * AccessTerminalLayout.NETWORK_COLS + col;
 
-        if (idx >= 0 && idx < stacks.size()) {
-            long count = counts.get(idx);
-            int maxStack = stacks.get(idx).getMaxStackSize();
+        if (displayedIdx >= 0 && displayedIdx < displayStacks.size()) {
+            long count = displayCounts.get(displayedIdx);
+            int maxStack = displayStacks.get(displayedIdx).getMaxStackSize();
+            // Translate to the original unfiltered index for server-side extraction
+            int originalIdx = (toOriginal != null) ? toOriginal[displayedIdx] : displayedIdx;
             if (Screen.hasShiftDown()) {
-                clickHandler.onClick(idx, (int) Math.min(count, maxStack), false);
+                clickHandler.onClick(originalIdx, (int) Math.min(count, maxStack), false);
             } else {
                 int amount = (button == 1) ? 1 : (int) Math.min(count, maxStack);
-                clickHandler.onClick(idx, amount, true);
+                clickHandler.onClick(originalIdx, amount, true);
             }
         }
         return true;
@@ -150,6 +188,29 @@ public class LocalInventoryPane implements IDialogPane {
     // Private helpers
     // -------------------------------------------------------------------------
 
+    private void applyFilter() {
+        if (appliedFilter.isEmpty()) {
+            displayStacks = allStacks;
+            displayCounts = allCounts;
+            toOriginal = null;
+        } else {
+            List<ItemStack> fs = new ArrayList<>();
+            List<Long> fc = new ArrayList<>();
+            List<Integer> map = new ArrayList<>();
+            for (int i = 0; i < allStacks.size(); i++) {
+                if (SearchSync.matches(allStacks.get(i), appliedFilter)) {
+                    fs.add(allStacks.get(i));
+                    fc.add(allCounts.get(i));
+                    map.add(i);
+                }
+            }
+            displayStacks = fs;
+            displayCounts = fc;
+            toOriginal = map.stream().mapToInt(i -> i).toArray();
+        }
+        clampScroll();
+    }
+
     private boolean isInGrid(double localX, double localY) {
         return localX >= GRID_X
                 && localX < GRID_X + AccessTerminalLayout.NETWORK_W
@@ -158,7 +219,8 @@ public class LocalInventoryPane implements IDialogPane {
     }
 
     private void clampScroll() {
-        int totalRows = (stacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS;
+        int totalRows =
+                (displayStacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS;
         int maxScroll = Math.max(0, totalRows - AccessTerminalLayout.NETWORK_VISIBLE_ROWS);
         scrollOffset = Math.max(0, Math.min(scrollOffset, maxScroll));
     }
@@ -175,16 +237,16 @@ public class LocalInventoryPane implements IDialogPane {
                     AccessTerminalLayout.SLOT_SIZE);
         }
 
-        if (stacks.isEmpty()) return;
+        if (displayStacks.isEmpty()) return;
 
         int firstIdx = scrollOffset * AccessTerminalLayout.NETWORK_COLS;
         for (int row = 0; row < AccessTerminalLayout.NETWORK_VISIBLE_ROWS; row++) {
             for (int col = 0; col < AccessTerminalLayout.NETWORK_COLS; col++) {
                 int idx = firstIdx + row * AccessTerminalLayout.NETWORK_COLS + col;
-                if (idx >= stacks.size()) return;
+                if (idx >= displayStacks.size()) return;
 
-                ItemStack stack = stacks.get(idx);
-                long count = counts.get(idx);
+                ItemStack stack = displayStacks.get(idx);
+                long count = displayCounts.get(idx);
                 int sx = GRID_X + col * AccessTerminalLayout.SLOT_SIZE + 1;
                 int sy = GRID_Y + row * AccessTerminalLayout.SLOT_SIZE + 1;
 
@@ -202,7 +264,7 @@ public class LocalInventoryPane implements IDialogPane {
         graphics.fill(SCROLLBAR_X, barY, SCROLLBAR_X + AccessTerminalLayout.SCROLLBAR_W, barY + barH, 0x40000000);
 
         int totalRows = Math.max(
-                (stacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
+                (displayStacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
         int thumbH = Math.max(8, barH * AccessTerminalLayout.NETWORK_VISIBLE_ROWS / totalRows);
         int maxScroll = Math.max(1, totalRows - AccessTerminalLayout.NETWORK_VISIBLE_ROWS);
         int thumbY = barY + (barH - thumbH) * scrollOffset / maxScroll;

@@ -7,6 +7,7 @@ import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.bobofraggins.intellistore.shared.ui.LocalInventoryPane;
 import net.bobofraggins.intellistore.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.intellistore.shared.ui.PriorityPane;
+import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -47,6 +48,7 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
     @Override
     protected void containerTick() {
         super.containerTick();
+        inventoryPane.setFilter(SearchSync.getFilter());
         refreshInventory();
     }
 
