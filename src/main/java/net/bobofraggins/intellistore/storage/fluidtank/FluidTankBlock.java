@@ -73,8 +73,8 @@ public class FluidTankBlock extends BaseEntityBlock implements NetworkConnector 
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        // ENTITYBLOCK_ANIMATED required for the BlockEntityRenderer to be called.
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        // MODEL renders the block model (base slab + glass jar); BESR handles fluid fill + stubs.
+        return RenderShape.MODEL;
     }
 
     private static final int BOTTLE_MB = 250;

@@ -1,5 +1,6 @@
 package net.bobofraggins.intellistore.external.arsnouveau;
 
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -17,7 +18,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Stores Ars Nouveau source in quantities up to {@value #CAPACITY}.
+ * Stores Ars Nouveau source. Capacity starts at {@value #BASE_CAPACITY} (4× a vanilla Source
+ * Jar) at {@link StorageTier#PAPER} and multiplies by 4 with each tier upgrade.
  *
  * <p>Source is a plain {@code int} — there is no "type"; the tank is always unlocked.
  * All automation access is via the {@link SourceTankSourceCapHandler} {@code ISourceCap}
@@ -25,11 +27,12 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class SourceTankBlockEntity extends BlockEntity implements MenuProvider {
 
-    /** 100,000 source — 10× a vanilla Source Jar (10,000). */
-    public static final int CAPACITY = 100_000;
+    /** Capacity at {@link StorageTier#PAPER} (4× a vanilla Source Jar of 10,000). Each tier multiplies by 4. */
+    public static final int BASE_CAPACITY = 40_000;
 
     private int amount = 0;
     private boolean voidExcess = false;
+    private StorageTier tier = StorageTier.PAPER;
 
     public SourceTankBlockEntity(BlockPos pos, BlockState state) {
         super(SourceTankRegistration.SOURCE_TANK_BE_TYPE.get(), pos, state);
@@ -41,6 +44,19 @@ public class SourceTankBlockEntity extends BlockEntity implements MenuProvider {
 
     public int getAmount() {
         return amount;
+    }
+
+    public int getCapacity() {
+        return (int) tier.getScaledCapacity(BASE_CAPACITY);
+    }
+
+    public StorageTier getTier() {
+        return tier;
+    }
+
+    public void setTier(StorageTier tier) {
+        this.tier = tier;
+        setChanged();
     }
 
     public boolean isVoidExcess() {
@@ -65,7 +81,7 @@ public class SourceTankBlockEntity extends BlockEntity implements MenuProvider {
      */
     public int receive(int requested, boolean simulate) {
         if (requested <= 0) return 0;
-        int space = CAPACITY - amount;
+        int space = getCapacity() - amount;
         int toReceive = Math.min(requested, space);
         if (toReceive <= 0) return 0;
         if (!simulate) {
@@ -139,12 +155,14 @@ public class SourceTankBlockEntity extends BlockEntity implements MenuProvider {
 
     private static final String TAG_AMOUNT = "Amount";
     private static final String TAG_VOID_EXCESS = "VoidExcess";
+    private static final String TAG_TIER = "Tier";
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putInt(TAG_AMOUNT, amount);
         tag.putBoolean(TAG_VOID_EXCESS, voidExcess);
+        tag.putString(TAG_TIER, tier.getId());
     }
 
     @Override
@@ -152,6 +170,7 @@ public class SourceTankBlockEntity extends BlockEntity implements MenuProvider {
         super.loadAdditional(tag, registries);
         amount = tag.getInt(TAG_AMOUNT);
         voidExcess = tag.getBoolean(TAG_VOID_EXCESS);
+        tier = StorageTier.fromId(tag.getString(TAG_TIER));
     }
 
     // -------------------------------------------------------------------------

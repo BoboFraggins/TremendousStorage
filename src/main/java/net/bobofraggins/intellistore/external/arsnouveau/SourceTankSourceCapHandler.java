@@ -18,7 +18,7 @@ public class SourceTankSourceCapHandler implements ISourceCap {
 
     @Override
     public boolean canAcceptSource(int amount) {
-        return be.isVoidExcess() || be.getAmount() < SourceTankBlockEntity.CAPACITY;
+        return be.isVoidExcess() || be.getAmount() < be.getCapacity();
     }
 
     @Override
@@ -28,12 +28,12 @@ public class SourceTankSourceCapHandler implements ISourceCap {
 
     @Override
     public int getMaxExtract() {
-        return SourceTankBlockEntity.CAPACITY;
+        return be.getCapacity();
     }
 
     @Override
     public int getMaxReceive() {
-        return SourceTankBlockEntity.CAPACITY;
+        return be.getCapacity();
     }
 
     @Override
@@ -43,7 +43,7 @@ public class SourceTankSourceCapHandler implements ISourceCap {
 
     @Override
     public int getSourceCapacity() {
-        return SourceTankBlockEntity.CAPACITY;
+        return be.getCapacity();
     }
 
     @Override

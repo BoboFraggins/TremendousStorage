@@ -6,7 +6,7 @@ import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -20,26 +20,25 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
 
 /**
- * Renders the Fluid Tank as a jar-in-a-jar: lazurite base, glass walls, fluid fill block.
+ * Renders the Fluid Tank's dynamic content: fluid fill level and tube-connector stubs.
  *
- * <p>All geometry is drawn by this BESR. Rendering layers (back to front):
- * <ol>
- *   <li>Lazurite base (solid) — full-footprint slab, 2/16 tall.
- *   <li>Fluid fill (translucent) — tinted box rising proportionally with fill level.
- *   <li>Glass walls + top (translucent, double-sided) — drawn last so it overlays the fluid.
- * </ol>
+ * <p>The static shell (lazurite base slab and glass jar walls) is rendered by the block model
+ * ({@code models/block/fluid_tank.json}) via {@link net.minecraft.world.level.block.RenderShape#MODEL}.
+ * This BESR is responsible only for the parts that change at runtime:
+ * <ul>
+ *   <li>Fluid fill box (translucent, height proportional to fill fraction)
+ *   <li>Tube-connector stubs on faces adjacent to a {@link TubeBlock} (solid lazurite)
+ * </ul>
  */
 public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEntity> {
 
     private static final ResourceLocation LAZURITE_BLOCK =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/lazurite_block");
-    private static final ResourceLocation JAR_GLASS =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
 
     /** Small offset to prevent Z-fighting with adjacent block faces. */
     private static final float EPS = 1e-4f;
 
-    // Fluid interior bounds (inside the glass)
+    // Fluid interior bounds (inside the glass jar)
     private static final float FLUID_MIN = 2f / 16f;
     private static final float FLUID_MAX = 14f / 16f;
     private static final float FLUID_FLOOR = 3f / 16f;
@@ -64,39 +63,15 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
             int packedLight,
             int packedOverlay) {
 
-        TextureAtlasSprite lazuriteSprite = sprite(LAZURITE_BLOCK);
-        TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
-
-        VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
-        VertexConsumer translucent = bufferSource.getBuffer(RenderType.translucent());
-
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();
-
-        // ---- Lazurite base (solid) ----
-        drawBox(
-                solid,
-                mat,
-                EPS,
-                EPS,
-                EPS,
-                1f - EPS,
-                2f / 16f,
-                1f - EPS,
-                lazuriteSprite,
-                255,
-                255,
-                255,
-                255,
-                packedLight,
-                packedOverlay);
 
         // ---- Fluid fill (translucent) ----
         if (be.isLocked()) {
             FluidStack fluid = be.getStoredFluid();
 
             float fillFrac = be.getAmount() > 0
-                    ? Math.max(MIN_FILL_FRAC, (float) be.getAmount() / FluidTankBlockEntity.CAPACITY)
+                    ? Math.max(MIN_FILL_FRAC, (float) be.getAmount() / be.getCapacity())
                     : MIN_FILL_FRAC;
             float fillTop = FLUID_FLOOR + fillFrac * FLUID_H;
 
@@ -112,6 +87,7 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
 
             int fluidLight = fluid.getFluidType().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
 
+            VertexConsumer translucent = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
             drawBox(
                     translucent,
                     mat,
@@ -130,31 +106,24 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                     packedOverlay);
         }
 
-        // ---- Glass walls + top (translucent, no bottom, double-sided) ----
-        drawBoxNoBottom(
-                translucent,
-                mat,
-                1f / 16f,
-                2f / 16f,
-                1f / 16f,
-                15f / 16f,
-                1f,
-                15f / 16f,
-                glassSprite,
-                255,
-                255,
-                255,
-                255,
-                packedLight,
-                packedOverlay);
-
         // ---- Tube connector stubs (solid lazurite) ----
         Level level = be.getLevel();
         if (level != null) {
             BlockPos tankPos = be.getBlockPos();
+            boolean hasStub = false;
             for (Direction dir : Direction.values()) {
                 if (level.getBlockState(tankPos.relative(dir)).getBlock() instanceof TubeBlock) {
-                    drawStub(solid, mat, dir, lazuriteSprite, packedLight, packedOverlay);
+                    hasStub = true;
+                    break;
+                }
+            }
+            if (hasStub) {
+                TextureAtlasSprite lazuriteSprite = sprite(LAZURITE_BLOCK);
+                VertexConsumer solid = bufferSource.getBuffer(Sheets.solidBlockSheet());
+                for (Direction dir : Direction.values()) {
+                    if (level.getBlockState(tankPos.relative(dir)).getBlock() instanceof TubeBlock) {
+                        drawStub(solid, mat, dir, lazuriteSprite, packedLight, packedOverlay);
+                    }
                 }
             }
         }
@@ -270,64 +239,6 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
         // +X (east)
         quad(
                 vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
-                0, 0);
-    }
-
-    /**
-     * Draws all faces except the bottom (-Y), double-sided, so the glass is visible from
-     * both outside and inside.
-     */
-    private static void drawBoxNoBottom(
-            VertexConsumer vc,
-            Matrix4f mat,
-            float x0,
-            float y0,
-            float z0,
-            float x1,
-            float y1,
-            float z1,
-            TextureAtlasSprite sp,
-            int r,
-            int g,
-            int b,
-            int a,
-            int light,
-            int overlay) {
-        float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
-        // +Y outer then inner
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0,
-                1, 0);
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0, 0,
-                -1, 0);
-        // -Z (north) outer then inner
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0,
-                0, -1);
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0, 0,
-                0, 1);
-        // +Z (south) outer then inner
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0,
-                0, 1);
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1, 0,
-                0, -1);
-        // -X (west) outer then inner
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1,
-                0, 0);
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0, 1,
-                0, 0);
-        // +X (east) outer then inner
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
-                0, 0);
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y0, z1, x1, y0, z0, x1, y1, z0, x1, y1, z1, -1,
                 0, 0);
     }
 

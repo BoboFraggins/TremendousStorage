@@ -3,6 +3,7 @@ package net.bobofraggins.intellistore.external.arsnouveau;
 import com.hollingsworth.arsnouveau.api.source.ISourceCap;
 import com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry;
 import net.bobofraggins.intellistore.IntelliStore;
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -17,6 +18,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -94,6 +96,7 @@ public final class SourceTankRegistration {
         modBus.addListener(SourceTankRegistration::registerCapabilities);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modBus.addListener(SourceTankRegistration::registerRenderers);
+            modBus.addListener(SourceTankRegistration::registerBlockColors);
         }
     }
 
@@ -105,5 +108,17 @@ public final class SourceTankRegistration {
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(SOURCE_TANK_BE_TYPE.get(), SourceTankRenderer::new);
+    }
+
+    private static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+        event.register(
+                (state, level, pos, tintIndex) -> {
+                    if (tintIndex != 0 || level == null || pos == null) return -1;
+                    if (level.getBlockEntity(pos) instanceof SourceTankBlockEntity be) {
+                        return be.getTier().getColor();
+                    }
+                    return StorageTier.PAPER.getColor();
+                },
+                SOURCE_TANK.get());
     }
 }

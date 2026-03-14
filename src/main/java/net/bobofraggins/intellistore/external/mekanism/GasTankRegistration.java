@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.external.mekanism;
 
 import mekanism.api.chemical.IChemicalHandler;
 import net.bobofraggins.intellistore.IntelliStore;
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -17,6 +18,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.capabilities.BlockCapability;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -103,6 +105,7 @@ public final class GasTankRegistration {
         modBus.addListener(GasTankRegistration::registerCapabilities);
         if (FMLEnvironment.dist == Dist.CLIENT) {
             modBus.addListener(GasTankRegistration::registerRenderers);
+            modBus.addListener(GasTankRegistration::registerBlockColors);
         }
     }
 
@@ -113,5 +116,17 @@ public final class GasTankRegistration {
 
     private static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(GAS_TANK_BE_TYPE.get(), GasTankRenderer::new);
+    }
+
+    private static void registerBlockColors(RegisterColorHandlersEvent.Block event) {
+        event.register(
+                (state, level, pos, tintIndex) -> {
+                    if (tintIndex != 0 || level == null || pos == null) return -1;
+                    if (level.getBlockEntity(pos) instanceof GasTankBlockEntity be) {
+                        return be.getTier().getColor();
+                    }
+                    return StorageTier.PAPER.getColor();
+                },
+                GAS_TANK.get());
     }
 }

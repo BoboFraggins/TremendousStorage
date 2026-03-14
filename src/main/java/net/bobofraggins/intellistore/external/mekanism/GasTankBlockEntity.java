@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.external.mekanism;
 
 import mekanism.api.chemical.ChemicalStack;
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -19,7 +20,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Stores a single Mekanism chemical type in quantities up to {@value #CAPACITY} mB.
+ * Stores a single Mekanism chemical type. Capacity starts at {@value #BASE_CAPACITY} mB
+ * (16 buckets) at {@link StorageTier#PAPER} and multiplies by 4 with each tier upgrade.
  *
  * <p>The tank is unlocked ({@code storedChemical} is EMPTY) when fresh and locks to the first
  * chemical inserted. It stays locked at amount 0 after a full drain.
@@ -29,13 +31,15 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class GasTankBlockEntity extends BlockEntity implements MenuProvider {
 
-    public static final long CAPACITY = 128_000L;
+    /** Capacity at {@link StorageTier#PAPER} (16 buckets). Each tier multiplies by 4. */
+    public static final long BASE_CAPACITY = 16_000L;
 
     /** Type key — always has amount=1. EMPTY means unlocked. */
     private ChemicalStack storedChemical = ChemicalStack.EMPTY;
 
     private long amount = 0L;
     private boolean voidExcess = false;
+    private StorageTier tier = StorageTier.PAPER;
 
     public GasTankBlockEntity(BlockPos pos, BlockState state) {
         super(GasTankRegistration.GAS_TANK_BE_TYPE.get(), pos, state);
@@ -56,6 +60,19 @@ public class GasTankBlockEntity extends BlockEntity implements MenuProvider {
 
     public long getAmount() {
         return amount;
+    }
+
+    public long getCapacity() {
+        return tier.getScaledCapacity(BASE_CAPACITY);
+    }
+
+    public StorageTier getTier() {
+        return tier;
+    }
+
+    public void setTier(StorageTier tier) {
+        this.tier = tier;
+        setChanged();
     }
 
     public boolean isVoidExcess() {
@@ -86,7 +103,7 @@ public class GasTankBlockEntity extends BlockEntity implements MenuProvider {
             return 0; // locked to a different chemical
         }
 
-        long space = CAPACITY - amount;
+        long space = getCapacity() - amount;
         long toInsert = Math.min(requested, space);
         if (toInsert <= 0) return 0;
 
@@ -168,6 +185,7 @@ public class GasTankBlockEntity extends BlockEntity implements MenuProvider {
     private static final String TAG_CHEMICAL = "StoredChemical";
     private static final String TAG_AMOUNT = "Amount";
     private static final String TAG_VOID_EXCESS = "VoidExcess";
+    private static final String TAG_TIER = "Tier";
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
@@ -177,12 +195,14 @@ public class GasTankBlockEntity extends BlockEntity implements MenuProvider {
         }
         tag.putLong(TAG_AMOUNT, amount);
         tag.putBoolean(TAG_VOID_EXCESS, voidExcess);
+        tag.putString(TAG_TIER, tier.getId());
     }
 
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         voidExcess = tag.getBoolean(TAG_VOID_EXCESS);
+        tier = StorageTier.fromId(tag.getString(TAG_TIER));
         if (tag.contains(TAG_CHEMICAL, Tag.TAG_COMPOUND)) {
             storedChemical = ChemicalStack.OPTIONAL_CODEC
                     .parse(

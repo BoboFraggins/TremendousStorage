@@ -46,7 +46,7 @@ public class FluidTankJadePlugin implements IWailaPlugin {
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
             if (!(accessor.getBlockEntity() instanceof FluidTankBlockEntity be)) return;
             data.putLong(KEY_AMOUNT, be.getAmount());
-            data.putLong(KEY_CAPACITY, FluidTankBlockEntity.CAPACITY);
+            data.putLong(KEY_CAPACITY, be.getCapacity());
             FluidStack fluid = be.getStoredFluid();
             if (!fluid.isEmpty()) {
                 data.put(KEY_FLUID, fluid.save(accessor.getLevel().registryAccess()));

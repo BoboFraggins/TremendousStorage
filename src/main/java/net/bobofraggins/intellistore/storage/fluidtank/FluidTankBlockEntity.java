@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.storage.fluidtank;
 
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -19,7 +20,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
- * Stores a single fluid type in quantities up to {@value #CAPACITY} mB (128 buckets).
+ * Stores a single fluid type. Capacity starts at {@value #BASE_CAPACITY} mB (16 buckets) at
+ * {@link StorageTier#PAPER} and multiplies by 4 with each tier upgrade.
  *
  * <p>The tank is unlocked (storedFluid is EMPTY) when fresh and locks to the first fluid
  * inserted. It stays locked at amount 0 after drain — use Whiteout Tape in the crafting grid
@@ -31,13 +33,15 @@ import net.neoforged.neoforge.fluids.FluidStack;
  */
 public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
 
-    public static final long CAPACITY = 128_000L; // 128 buckets
+    /** Capacity at {@link StorageTier#PAPER} (16 buckets). Each tier multiplies by 4. */
+    public static final long BASE_CAPACITY = 16_000L;
 
     /** Type key — always has amount=1. EMPTY means unlocked. */
     private FluidStack storedFluid = FluidStack.EMPTY;
 
     private long amount = 0L;
     private boolean voidExcess = false;
+    private StorageTier tier = StorageTier.PAPER;
 
     public FluidTankBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.FLUID_TANK_BE_TYPE.get(), pos, state);
@@ -58,6 +62,19 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
 
     public long getAmount() {
         return amount;
+    }
+
+    public long getCapacity() {
+        return tier.getScaledCapacity(BASE_CAPACITY);
+    }
+
+    public StorageTier getTier() {
+        return tier;
+    }
+
+    public void setTier(StorageTier tier) {
+        this.tier = tier;
+        setChanged();
     }
 
     public boolean isVoidExcess() {
@@ -88,7 +105,7 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
             return 0; // locked to a different fluid
         }
 
-        long space = CAPACITY - amount;
+        long space = getCapacity() - amount;
         long toInsert = Math.min(requested, space);
         if (toInsert <= 0) return 0;
 
@@ -177,6 +194,7 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
     private static final String TAG_FLUID = "StoredFluid";
     private static final String TAG_AMOUNT = "Amount";
     private static final String TAG_VOID_EXCESS = "VoidExcess";
+    private static final String TAG_TIER = "Tier";
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
@@ -186,12 +204,14 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
         }
         tag.putLong(TAG_AMOUNT, amount);
         tag.putBoolean(TAG_VOID_EXCESS, voidExcess);
+        tag.putString(TAG_TIER, tier.getId());
     }
 
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         voidExcess = tag.getBoolean(TAG_VOID_EXCESS);
+        tier = StorageTier.fromId(tag.getString(TAG_TIER));
         if (tag.contains(TAG_FLUID)) {
             storedFluid = FluidStack.parseOptional(registries, tag.getCompound(TAG_FLUID));
             if (!storedFluid.isEmpty()) {

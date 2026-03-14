@@ -56,7 +56,7 @@ public class GasTankChemicalHandler implements IChemicalHandler {
 
     @Override
     public long getChemicalTankCapacity(int tank) {
-        return GasTankBlockEntity.CAPACITY;
+        return be.getCapacity();
     }
 
     @Override

@@ -43,7 +43,7 @@ public class FluidTankFluidHandler implements IFluidHandler {
 
     @Override
     public int getTankCapacity(int tank) {
-        return (int) Math.min(Integer.MAX_VALUE, FluidTankBlockEntity.CAPACITY);
+        return (int) Math.min(Integer.MAX_VALUE, be.getCapacity());
     }
 
     @Override

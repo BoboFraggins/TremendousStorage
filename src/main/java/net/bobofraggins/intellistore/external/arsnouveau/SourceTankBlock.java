@@ -61,7 +61,8 @@ public class SourceTankBlock extends BaseEntityBlock implements NetworkConnector
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        // MODEL renders the block model (base slab + glass jar); BESR handles source fill + stubs.
+        return RenderShape.MODEL;
     }
 
     /** Right-click with empty hand → open tank settings screen. */

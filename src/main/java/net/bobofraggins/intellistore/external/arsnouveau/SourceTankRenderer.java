@@ -6,7 +6,7 @@ import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -18,22 +18,24 @@ import net.minecraft.world.level.Level;
 import org.joml.Matrix4f;
 
 /**
- * Renders the Source Tank as a jar with a glowing teal source fill.
+ * Renders the Source Tank's dynamic content: source fill level and tube-connector stubs.
  *
- * <p>Geometry matches {@link net.bobofraggins.intellistore.storage.fluidtank.FluidTankRenderer}:
- * lazurite base slab, translucent source fill block, glass walls + top.
+ * <p>The static shell (lazurite base slab and glass jar walls) is rendered by the block model
+ * ({@code models/block/source_tank.json}) via {@link net.minecraft.world.level.block.RenderShape#MODEL}.
+ * This BESR is responsible only for the parts that change at runtime:
+ * <ul>
+ *   <li>Source fill box (translucent glowing teal, height proportional to fill fraction)
+ *   <li>Tube-connector stubs on faces adjacent to a {@link TubeBlock} (solid lazurite)
+ * </ul>
  */
 public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEntity> {
 
     private static final ResourceLocation LAZURITE_BLOCK =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/lazurite_block");
-    private static final ResourceLocation JAR_GLASS =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
     private static final ResourceLocation FLUID_TANK =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/fluid_tank");
 
-    private static final float EPS = 1e-4f;
-
+    // Source interior bounds (inside the glass jar)
     private static final float FLUID_MIN = 2f / 16f;
     private static final float FLUID_MAX = 14f / 16f;
     private static final float FLUID_FLOOR = 3f / 16f;
@@ -42,6 +44,7 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
 
     private static final float MIN_FILL_FRAC = 0.05f;
 
+    // Tube connector stub dimensions
     private static final float STUB_D = 2f / 16f;
     private static final float STUB_MIN = 6f / 16f;
     private static final float STUB_MAX = 10f / 16f;
@@ -63,38 +66,16 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
             int packedLight,
             int packedOverlay) {
 
-        TextureAtlasSprite lazuriteSprite = sprite(LAZURITE_BLOCK);
-        TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
-        TextureAtlasSprite fluidSprite = sprite(FLUID_TANK);
-
-        VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
-        VertexConsumer translucent = bufferSource.getBuffer(RenderType.translucent());
-
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();
 
-        // ---- Lazurite base (solid) ----
-        drawBox(
-                solid,
-                mat,
-                EPS,
-                EPS,
-                EPS,
-                1f - EPS,
-                2f / 16f,
-                1f - EPS,
-                lazuriteSprite,
-                255,
-                255,
-                255,
-                255,
-                packedLight,
-                packedOverlay);
-
         // ---- Source fill (translucent, glowing) ----
         if (be.getAmount() > 0) {
-            float fillFrac = Math.max(MIN_FILL_FRAC, (float) be.getAmount() / SourceTankBlockEntity.CAPACITY);
+            float fillFrac = Math.max(MIN_FILL_FRAC, (float) be.getAmount() / be.getCapacity());
             float fillTop = FLUID_FLOOR + fillFrac * FLUID_H;
+
+            TextureAtlasSprite fillSprite = sprite(FLUID_TANK);
+            VertexConsumer translucent = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
             drawBox(
                     translucent,
                     mat,
@@ -104,7 +85,7 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
                     FLUID_MAX,
                     fillTop,
                     FLUID_MAX,
-                    fluidSprite,
+                    fillSprite,
                     SOURCE_R,
                     SOURCE_G,
                     SOURCE_B,
@@ -113,37 +94,34 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
                     packedOverlay);
         }
 
-        // ---- Glass walls + top (translucent, no bottom, double-sided) ----
-        drawBoxNoBottom(
-                translucent,
-                mat,
-                1f / 16f,
-                2f / 16f,
-                1f / 16f,
-                15f / 16f,
-                1f,
-                15f / 16f,
-                glassSprite,
-                255,
-                255,
-                255,
-                255,
-                packedLight,
-                packedOverlay);
-
         // ---- Tube connector stubs (solid lazurite) ----
         Level level = be.getLevel();
         if (level != null) {
             BlockPos tankPos = be.getBlockPos();
+            boolean hasStub = false;
             for (Direction dir : Direction.values()) {
                 if (level.getBlockState(tankPos.relative(dir)).getBlock() instanceof TubeBlock) {
-                    drawStub(solid, mat, dir, lazuriteSprite, packedLight, packedOverlay);
+                    hasStub = true;
+                    break;
+                }
+            }
+            if (hasStub) {
+                TextureAtlasSprite lazuriteSprite = sprite(LAZURITE_BLOCK);
+                VertexConsumer solid = bufferSource.getBuffer(Sheets.solidBlockSheet());
+                for (Direction dir : Direction.values()) {
+                    if (level.getBlockState(tankPos.relative(dir)).getBlock() instanceof TubeBlock) {
+                        drawStub(solid, mat, dir, lazuriteSprite, packedLight, packedOverlay);
+                    }
                 }
             }
         }
 
         poseStack.popPose();
     }
+
+    // -------------------------------------------------------------------------
+    // Geometry helpers
+    // -------------------------------------------------------------------------
 
     private static TextureAtlasSprite sprite(ResourceLocation loc) {
         return Minecraft.getInstance()
@@ -226,77 +204,29 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
             int light,
             int overlay) {
         float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
+        // -Y
         quad(
                 vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0,
                 -1, 0);
+        // +Y
         quad(
                 vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0,
                 1, 0);
+        // -Z (north)
         quad(
                 vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0,
                 0, -1);
+        // +Z (south)
         quad(
                 vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0,
                 0, 1);
+        // -X (west)
         quad(
                 vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1,
                 0, 0);
+        // +X (east)
         quad(
                 vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
-                0, 0);
-    }
-
-    private static void drawBoxNoBottom(
-            VertexConsumer vc,
-            Matrix4f mat,
-            float x0,
-            float y0,
-            float z0,
-            float x1,
-            float y1,
-            float z1,
-            TextureAtlasSprite sp,
-            int r,
-            int g,
-            int b,
-            int a,
-            int light,
-            int overlay) {
-        float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
-        // +Y outer then inner
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0,
-                1, 0);
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0, 0,
-                -1, 0);
-        // -Z (north) outer then inner
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0,
-                0, -1);
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0, 0,
-                0, 1);
-        // +Z (south) outer then inner
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0,
-                0, 1);
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1, 0,
-                0, -1);
-        // -X (west) outer then inner
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1,
-                0, 0);
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0, 1,
-                0, 0);
-        // +X (east) outer then inner
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
-                0, 0);
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y0, z1, x1, y0, z0, x1, y1, z0, x1, y1, z1, -1,
                 0, 0);
     }
 

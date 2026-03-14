@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 /** Material tiers for upgradeable storage blocks (Bulk Storage Container and Junk Drawer). */
 public enum StorageTier {
-    PAPER("paper", 4_096L, 0xF9F9F9),
+    PAPER("paper", 4_096L, 0xC8A855),
     COPPER("copper", 16_384L, 0xC07645),
     IRON("iron", 65_536L, 0xCFCFCF),
     GOLD("gold", 131_072L, 0xFFD83D),
@@ -34,6 +34,14 @@ public enum StorageTier {
     /** ARGB color for {@code IBlockColor}/{@code IItemColor} tinting. */
     public int getColor() {
         return color;
+    }
+
+    /**
+     * Returns {@code base} × 4^{@link #ordinal()} — used by tanks to compute their capacity at
+     * this tier. PAPER returns {@code base}, COPPER returns {@code base × 4}, etc.
+     */
+    public long getScaledCapacity(long base) {
+        return base << (ordinal() * 2);
     }
 
     /**
