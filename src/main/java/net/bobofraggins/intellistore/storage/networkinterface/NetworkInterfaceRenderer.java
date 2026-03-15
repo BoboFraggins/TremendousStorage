@@ -94,9 +94,9 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 packedLight,
                 packedOverlay);
 
-        // ---- Glass — single-block height, 1px inset, no bottom face ----
-        float gx0 = 1f / 16, gx1 = 15f / 16;
-        float gz0 = 1f / 16, gz1 = 15f / 16;
+        // ---- Glass — single-block height, full width, no bottom face ----
+        float gx0 = EPS, gx1 = 1f - EPS;
+        float gz0 = EPS, gz1 = 1f - EPS;
         float gy0 = 2f / 16, gy1 = 1f;
         drawBoxNoBottom(
                 translucent, mat, gx0, gy0, gz0, gx1, gy1, gz1, glassSprite, 255, 255, 255, packedLight, packedOverlay);
