@@ -7,6 +7,7 @@ import net.bobofraggins.intellistore.shared.register.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -45,6 +46,8 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/lazurite_block");
     private static final ResourceLocation JAR_GLASS =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
+    private static final ResourceLocation HEALING_SALVE_STILL =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "fluid/healing_salve_still");
     // -------------------------------------------------------------------------
     // Constants
     // -------------------------------------------------------------------------
@@ -93,6 +96,27 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
                 255,
                 255,
                 255,
+                255,
+                packedLight,
+                packedOverlay);
+
+        // ---- Healing Salve fluid fill (full-width, base top to 1px from top) ----
+        TextureAtlasSprite fluidSprite = sprite(HEALING_SALVE_STILL);
+        VertexConsumer translucent = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
+        drawBox(
+                translucent,
+                mat,
+                EPS * 2,
+                2f / 16 + EPS,
+                EPS * 2,
+                1f - EPS * 2,
+                14f / 16,
+                1f - EPS * 2,
+                fluidSprite,
+                255,
+                255,
+                255,
+                160,
                 packedLight,
                 packedOverlay);
 
@@ -169,27 +193,34 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
             int r,
             int g,
             int b,
+            int a,
             int light,
             int overlay) {
         float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
         // -Y
         quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0, -1,
-                0);
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0,
+                -1, 0);
         // +Y
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0, 1, 0);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0,
+                1, 0);
         // -Z (north)
         quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0, 0,
-                -1);
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0,
+                0, -1);
         // +Z (south)
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0, 0, 1);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0,
+                0, 1);
         // -X (west)
         quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1, 0,
-                0);
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1,
+                0, 0);
         // +X (east)
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1, 0, 0);
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
+                0, 0);
     }
 
     /**
@@ -216,30 +247,40 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
             int overlay) {
         float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
         // +Y (top) — outer then inner
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0, 1, 0);
         quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0, 0, -1,
-                0);
+                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1,
+                0, 1, 0);
+        quad(
+                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0,
+                0, -1, 0);
         // -Z (north) — outer then inner
         quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0, 0,
-                -1);
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0, 0, 0, 1);
-        // +Z (south) — outer then inner
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0, 0, 1);
+                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0,
+                0, 0, -1);
         quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1, 0, 0,
-                -1);
+                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0,
+                0, 0, 1);
+        // +Z (south) — outer then inner
+        quad(
+                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1,
+                0, 0, 1);
+        quad(
+                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1,
+                0, 0, -1);
         // -X (west) — outer then inner
         quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1, 0,
-                0);
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0, 1, 0, 0);
-        // +X (east) — outer then inner
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1, 0, 0);
+                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0,
+                -1, 0, 0);
         quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y0, z1, x1, y0, z0, x1, y1, z0, x1, y1, z1, -1, 0,
-                0);
+                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0,
+                1, 0, 0);
+        // +X (east) — outer then inner
+        quad(
+                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1,
+                1, 0, 0);
+        quad(
+                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x1, y0, z1, x1, y0, z0, x1, y1, z0, x1, y1, z1,
+                -1, 0, 0);
     }
 
     private static void quad(
@@ -248,6 +289,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
             int r,
             int g,
             int b,
+            int a,
             int light,
             int overlay,
             float u0,
@@ -270,25 +312,25 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
             float ny,
             float nz) {
         vc.addVertex(mat, x3, y3, z3)
-                .setColor(r, g, b, 255)
+                .setColor(r, g, b, a)
                 .setUv(u0, v1)
                 .setOverlay(overlay)
                 .setLight(light)
                 .setNormal(nx, ny, nz);
         vc.addVertex(mat, x2, y2, z2)
-                .setColor(r, g, b, 255)
+                .setColor(r, g, b, a)
                 .setUv(u1, v1)
                 .setOverlay(overlay)
                 .setLight(light)
                 .setNormal(nx, ny, nz);
         vc.addVertex(mat, x1, y1, z1)
-                .setColor(r, g, b, 255)
+                .setColor(r, g, b, a)
                 .setUv(u1, v0)
                 .setOverlay(overlay)
                 .setLight(light)
                 .setNormal(nx, ny, nz);
         vc.addVertex(mat, x0, y0, z0)
-                .setColor(r, g, b, 255)
+                .setColor(r, g, b, a)
                 .setUv(u0, v0)
                 .setOverlay(overlay)
                 .setLight(light)
