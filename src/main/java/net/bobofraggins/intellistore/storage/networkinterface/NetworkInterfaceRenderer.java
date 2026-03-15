@@ -71,7 +71,9 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
 
         VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
-        VertexConsumer translucent = bufferSource.getBuffer(RenderType.translucent());
+        // Cutout (not translucent) so transparent glass pixels are discarded rather than
+        // writing depth — otherwise the brain fails depth test through the glass interior.
+        VertexConsumer cutout = bufferSource.getBuffer(RenderType.cutout());
 
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();
@@ -99,7 +101,7 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
         float gz0 = EPS, gz1 = 1f - EPS;
         float gy0 = 2f / 16, gy1 = 1f;
         drawBoxNoBottom(
-                translucent, mat, gx0, gy0, gz0, gx1, gy1, gz1, glassSprite, 255, 255, 255, packedLight, packedOverlay);
+                cutout, mat, gx0, gy0, gz0, gx1, gy1, gz1, glassSprite, 255, 255, 255, packedLight, packedOverlay);
 
         // ---- Animated floating brain (item renderer — matches vanilla dropped items) ----
         // ItemModelGenerator automatically produces per-pixel edge faces from the
