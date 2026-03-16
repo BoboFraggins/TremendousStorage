@@ -124,6 +124,8 @@
   "item.intellistore.brain.tooltip": "Good as new!",
   "fluid_type.intellistore.healing_salve": "Healing Salve",
   "item.intellistore.healing_salve_bucket": "Healing Salve Bucket",
+  "fluid_type.intellistore.molten_lazurite": "Molten Lazurite",
+  "item.intellistore.molten_lazurite_bucket": "Molten Lazurite Bucket",
 
   "screen.intellistore.network_interface": "Network Interface",
   "screen.intellistore.network_interface.valid": "Network: Valid",

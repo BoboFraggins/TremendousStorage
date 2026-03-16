@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore;
 
 import com.mojang.logging.LogUtils;
 import net.bobofraggins.intellistore.external.mekanism.MekanismIntegration;
+import net.bobofraggins.intellistore.external.productivemetalworks.ProductiveMetalworksIntegration;
 import net.bobofraggins.intellistore.shared.config.IntelliStoreConfig;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.neoforged.bus.api.IEventBus;
@@ -21,6 +22,9 @@ public class IntelliStore {
         Registration.register(modEventBus);
         if (ModList.get().isLoaded("mekanism")) {
             MekanismIntegration.register(modEventBus);
+        }
+        if (ModList.get().isLoaded("productivemetalworks")) {
+            ProductiveMetalworksIntegration.register(modEventBus);
         }
         LOGGER.info("IntelliStore initialized");
     }

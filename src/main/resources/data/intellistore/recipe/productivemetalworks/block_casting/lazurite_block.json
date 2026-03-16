@@ -1,0 +1,5 @@
+{
+  "type": "productivemetalworks:block_casting",
+  "fluid": { "amount": 810, "tag": "c:molten_lazurite" },
+  "result": { "count": 1, "id": "intellistore:lazurite_block" }
+}

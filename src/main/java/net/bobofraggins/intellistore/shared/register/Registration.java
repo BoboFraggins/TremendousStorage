@@ -5,6 +5,8 @@ import java.util.EnumMap;
 import java.util.Map;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.external.arsnouveau.SourceTankRegistration;
+import net.bobofraggins.intellistore.external.exdeorum.ExDeorumIntegration;
+import net.bobofraggins.intellistore.external.exnihilosequentia.ExNihiloSequentiaIntegration;
 import net.bobofraggins.intellistore.external.mekanism.GasTankRegistration;
 import net.bobofraggins.intellistore.lazurite.LazuriteBarsBlock;
 import net.bobofraggins.intellistore.lazurite.LazuriteOreBlock;
@@ -369,30 +371,8 @@ public final class Registration {
     public static final DeferredHolder<Item, BlockItem> LAZURITE_DEEPSLATE_ORE_ITEM =
             ITEMS.registerSimpleBlockItem("lazurite_deepslate_ore", LAZURITE_DEEPSLATE_ORE);
 
-    public static final DeferredHolder<Item, Item> LAZURITE_ORE_CHUNK =
-            ITEMS.register("lazurite_ore_chunk", () -> new Item(new Item.Properties()));
-
-    public static final DeferredHolder<Item, Item> LAZURITE_PIECES =
-            ITEMS.register("lazurite_pieces", () -> new Item(new Item.Properties()));
-
     public static final DeferredHolder<Item, Item> RAW_LAZURITE =
             ITEMS.register("raw_lazurite", () -> new Item(new Item.Properties()));
-
-    // Mekanism processing intermediates
-    public static final DeferredHolder<Item, Item> LAZURITE_DUST =
-            ITEMS.register("lazurite_dust", () -> new Item(new Item.Properties()));
-
-    public static final DeferredHolder<Item, Item> LAZURITE_DIRTY_DUST =
-            ITEMS.register("lazurite_dirty_dust", () -> new Item(new Item.Properties()));
-
-    public static final DeferredHolder<Item, Item> LAZURITE_CLUMP =
-            ITEMS.register("lazurite_clump", () -> new Item(new Item.Properties()));
-
-    public static final DeferredHolder<Item, Item> LAZURITE_SHARD =
-            ITEMS.register("lazurite_shard", () -> new Item(new Item.Properties()));
-
-    public static final DeferredHolder<Item, Item> LAZURITE_CRYSTAL =
-            ITEMS.register("lazurite_crystal", () -> new Item(new Item.Properties()));
 
     public static final DeferredHolder<Item, Item> LAZURITE_INGOT =
             ITEMS.register("lazurite_ingot", () -> new Item(new Item.Properties()));
@@ -787,16 +767,7 @@ public final class Registration {
                         output.accept(LAZURITE_BARS_ITEM.get());
                         output.accept(LAZURITE_ORE_ITEM.get());
                         output.accept(LAZURITE_DEEPSLATE_ORE_ITEM.get());
-                        output.accept(LAZURITE_ORE_CHUNK.get());
-                        output.accept(LAZURITE_PIECES.get());
                         output.accept(RAW_LAZURITE.get());
-                        if (ModList.get().isLoaded("mekanism")) {
-                            output.accept(LAZURITE_DUST.get());
-                            output.accept(LAZURITE_DIRTY_DUST.get());
-                            output.accept(LAZURITE_CLUMP.get());
-                            output.accept(LAZURITE_SHARD.get());
-                            output.accept(LAZURITE_CRYSTAL.get());
-                        }
                         output.accept(LAZURITE_NUGGET.get());
                         output.accept(LAZURITE_INGOT.get());
                         output.accept(LAZURITE_BLOCK_ITEM.get());
@@ -873,6 +844,12 @@ public final class Registration {
         modEventBus.addListener(Registration::registerCapabilities);
         modEventBus.addListener(Registration::onCommonSetup);
         NeoForge.EVENT_BUS.register(PersonalFilingCabinetEvents.class);
+        if (ModList.get().isLoaded("exdeorum")) {
+            ExDeorumIntegration.register(modEventBus);
+        }
+        if (ModList.get().isLoaded("exnihilosequentia")) {
+            ExNihiloSequentiaIntegration.register(modEventBus);
+        }
         if (ModList.get().isLoaded("mekanism")) {
             GasTankRegistration.register(modEventBus);
         }

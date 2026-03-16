@@ -93,3 +93,10 @@ type="optional"
 versionRange="[5,)"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="productivemetalworks"
+type="optional"
+versionRange="[1,)"
+ordering="NONE"
+side="BOTH"
