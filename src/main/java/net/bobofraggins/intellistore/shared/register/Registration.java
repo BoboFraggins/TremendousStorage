@@ -378,6 +378,22 @@ public final class Registration {
     public static final DeferredHolder<Item, Item> RAW_LAZURITE =
             ITEMS.register("raw_lazurite", () -> new Item(new Item.Properties()));
 
+    // Mekanism processing intermediates
+    public static final DeferredHolder<Item, Item> LAZURITE_DUST =
+            ITEMS.register("lazurite_dust", () -> new Item(new Item.Properties()));
+
+    public static final DeferredHolder<Item, Item> LAZURITE_DIRTY_DUST =
+            ITEMS.register("lazurite_dirty_dust", () -> new Item(new Item.Properties()));
+
+    public static final DeferredHolder<Item, Item> LAZURITE_CLUMP =
+            ITEMS.register("lazurite_clump", () -> new Item(new Item.Properties()));
+
+    public static final DeferredHolder<Item, Item> LAZURITE_SHARD =
+            ITEMS.register("lazurite_shard", () -> new Item(new Item.Properties()));
+
+    public static final DeferredHolder<Item, Item> LAZURITE_CRYSTAL =
+            ITEMS.register("lazurite_crystal", () -> new Item(new Item.Properties()));
+
     public static final DeferredHolder<Item, Item> LAZURITE_INGOT =
             ITEMS.register("lazurite_ingot", () -> new Item(new Item.Properties()));
 
@@ -774,6 +790,13 @@ public final class Registration {
                         output.accept(LAZURITE_ORE_CHUNK.get());
                         output.accept(LAZURITE_PIECES.get());
                         output.accept(RAW_LAZURITE.get());
+                        if (ModList.get().isLoaded("mekanism")) {
+                            output.accept(LAZURITE_DUST.get());
+                            output.accept(LAZURITE_DIRTY_DUST.get());
+                            output.accept(LAZURITE_CLUMP.get());
+                            output.accept(LAZURITE_SHARD.get());
+                            output.accept(LAZURITE_CRYSTAL.get());
+                        }
                         output.accept(LAZURITE_NUGGET.get());
                         output.accept(LAZURITE_INGOT.get());
                         output.accept(LAZURITE_BLOCK_ITEM.get());

@@ -31,6 +31,13 @@
 
   "item.intellistore.lazurite_ore_chunk": "Lazurite Ore Chunk",
   "item.intellistore.lazurite_pieces": "Lazurite Pieces",
+  "item.intellistore.lazurite_dust": "Lazurite Dust",
+  "item.intellistore.lazurite_dirty_dust": "Dirty Lazurite Dust",
+  "item.intellistore.lazurite_clump": "Lazurite Clump",
+  "item.intellistore.lazurite_shard": "Lazurite Shard",
+  "item.intellistore.lazurite_crystal": "Lazurite Crystal",
+  "chemical.intellistore.dirty_lazurite": "Dirty Lazurite",
+  "chemical.intellistore.clean_lazurite": "Clean Lazurite",
   "item.intellistore.lazurite_seeds": "Lazurite Seeds",
   "item.intellistore.lazurite_essence": "Lazurite Essence",
 
