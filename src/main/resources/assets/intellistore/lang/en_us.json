@@ -29,6 +29,9 @@
   "block.intellistore.gas_tank": "Gas Tank",
   "block.intellistore.source_tank": "Source Tank",
 
+  "item.intellistore.lazurite_seeds": "Lazurite Seeds",
+  "item.intellistore.lazurite_essence": "Lazurite Essence",
+
   "item.intellistore.paper_manila_folder": "Manila Folder",
   "item.intellistore.copper_manila_folder": "Copper Folder",
   "item.intellistore.iron_manila_folder": "Iron Folder",

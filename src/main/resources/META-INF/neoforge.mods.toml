@@ -58,3 +58,10 @@ type="optional"
 versionRange="[5,)"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="mysticalagriculture"
+type="optional"
+versionRange="[8,)"
+ordering="NONE"
+side="BOTH"

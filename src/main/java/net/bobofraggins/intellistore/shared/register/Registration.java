@@ -1,5 +1,6 @@
 package net.bobofraggins.intellistore.shared.register;
 
+import com.blakebr0.mysticalagriculture.api.MysticalAgricultureAPI;
 import java.util.EnumMap;
 import java.util.Map;
 import net.bobofraggins.intellistore.IntelliStore;
@@ -84,6 +85,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
@@ -785,6 +787,14 @@ public final class Registration {
                         }
                         if (ModList.get().isLoaded("ars_nouveau")) {
                             output.accept(SourceTankRegistration.SOURCE_TANK_ITEM.get());
+                        }
+                        if (ModList.get().isLoaded("mysticalagriculture")) {
+                            var lazurite = MysticalAgricultureAPI.getCropRegistry()
+                                    .getCropById(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "lazurite"));
+                            if (lazurite != null) {
+                                output.accept(lazurite.getSeedsItem());
+                                output.accept(lazurite.getEssenceItem());
+                            }
                         }
                         output.accept(NETWORK_INTERFACE_ITEM.get());
                         output.accept(STORAGE_ACCESS_TERMINAL_ITEM.get());
