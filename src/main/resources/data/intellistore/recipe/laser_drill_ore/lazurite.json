@@ -1,10 +1,4 @@
 {
-  "neoforge:conditions": [
-    {
-      "type": "neoforge:tag_empty",
-      "tag": "c:raw_materials/osmium"
-    }
-  ],
   "type": "industrialforegoing:laser_drill_ore",
   "catalyst": {
     "item": "industrialforegoing:blue_laser_lens"
