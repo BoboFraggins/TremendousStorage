@@ -16,6 +16,7 @@ import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlock;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineEnergyHandler;
 import net.bobofraggins.intellistore.shared.config.IntelliStoreConfig;
+import net.bobofraggins.intellistore.shared.loot.LootModifiers;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.shared.ui.PriorityControl;
 import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
@@ -856,6 +857,7 @@ public final class Registration {
         if (ModList.get().isLoaded("ars_nouveau")) {
             SourceTankRegistration.register(modEventBus);
         }
+        LootModifiers.register(modEventBus);
     }
 
     private static void onCommonSetup(FMLCommonSetupEvent event) {
