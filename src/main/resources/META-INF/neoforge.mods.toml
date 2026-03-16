@@ -86,3 +86,10 @@ type="optional"
 versionRange="[2,)"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="exnihilosequentia"
+type="optional"
+versionRange="[5,)"
+ordering="NONE"
+side="BOTH"

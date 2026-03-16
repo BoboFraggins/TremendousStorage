@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xx",
+    "xx"
+  ],
+  "key": {
+    "x": {
+      "item": "intellistore:lazurite_pieces"
+    }
+  },
+  "result": {
+    "id": "intellistore:raw_lazurite",
+    "count": 1
+  }
+}

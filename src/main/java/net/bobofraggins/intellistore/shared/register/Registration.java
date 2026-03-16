@@ -372,6 +372,9 @@ public final class Registration {
     public static final DeferredHolder<Item, Item> LAZURITE_ORE_CHUNK =
             ITEMS.register("lazurite_ore_chunk", () -> new Item(new Item.Properties()));
 
+    public static final DeferredHolder<Item, Item> LAZURITE_PIECES =
+            ITEMS.register("lazurite_pieces", () -> new Item(new Item.Properties()));
+
     public static final DeferredHolder<Item, Item> RAW_LAZURITE =
             ITEMS.register("raw_lazurite", () -> new Item(new Item.Properties()));
 
@@ -769,6 +772,7 @@ public final class Registration {
                         output.accept(LAZURITE_ORE_ITEM.get());
                         output.accept(LAZURITE_DEEPSLATE_ORE_ITEM.get());
                         output.accept(LAZURITE_ORE_CHUNK.get());
+                        output.accept(LAZURITE_PIECES.get());
                         output.accept(RAW_LAZURITE.get());
                         output.accept(LAZURITE_NUGGET.get());
                         output.accept(LAZURITE_INGOT.get());
