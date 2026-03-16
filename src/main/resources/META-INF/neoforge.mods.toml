@@ -79,3 +79,10 @@ type="optional"
 versionRange="[3,)"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="exdeorum"
+type="optional"
+versionRange="[2,)"
+ordering="NONE"
+side="BOTH"

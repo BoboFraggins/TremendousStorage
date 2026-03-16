@@ -1,0 +1,7 @@
+{
+  "type": "exdeorum:ore_chunk",
+  "ore": "c:ores/lazurite",
+  "ore_chunk": {
+    "item": "intellistore:lazurite_ore_chunk"
+  }
+}
