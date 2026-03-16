@@ -1,0 +1,29 @@
+{
+  "type": "productivebees:centrifuge",
+  "ingredient": {
+    "type": "productivebees:component",
+    "components": {
+      "productivebees:bee_type": "intellistore:lazurite"
+    },
+    "items": "productivebees:configurable_honeycomb"
+  },
+  "outputs": [
+    {
+      "item": {
+        "item": "intellistore:raw_lazurite"
+      },
+      "chance": 0.4
+    },
+    {
+      "item": {
+        "item": "productivebees:wax"
+      }
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "productivebees:bee_exists",
+      "bee": "intellistore:lazurite"
+    }
+  ]
+}

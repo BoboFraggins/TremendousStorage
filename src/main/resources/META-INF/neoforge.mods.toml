@@ -65,3 +65,10 @@ type="optional"
 versionRange="[8,)"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="productivebees"
+type="optional"
+versionRange="[13,)"
+ordering="NONE"
+side="BOTH"

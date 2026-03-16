@@ -1,0 +1,18 @@
+{
+  "primaryColor": "#3F74BE",
+  "secondaryColor": "#804f40",
+  "tertiaryColor": "#1E3049",
+  "particleColor": "#2E558A",
+  "particleType": "pop",
+  "flowerTag": "c:storage_blocks/lazurite",
+  "renderer": "default_crystal",
+  "conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:storage_blocks/lazurite"
+      }
+    }
+  ]
+}
