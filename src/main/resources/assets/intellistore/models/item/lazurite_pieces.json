@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "intellistore:item/lazurite_pieces"
+    "layer0": "intellistore:item/exnihilosequentia/lazurite_pieces"
   }
 }

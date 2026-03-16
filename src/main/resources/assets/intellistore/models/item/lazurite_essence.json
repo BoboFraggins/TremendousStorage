@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "intellistore:item/lazurite_essence"
+    "layer0": "intellistore:item/mysticalagriculture/lazurite_essence"
   }
 }
