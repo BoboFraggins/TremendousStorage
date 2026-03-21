@@ -69,14 +69,14 @@ side="BOTH"
 [[dependencies.${mod_id}]]
 modId="productivebees"
 type="optional"
-versionRange="[13.13.0,)"
+versionRange="[1.21.1-13.13.0,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="industrialforegoing"
 type="optional"
-versionRange="[3.6.38,)"
+versionRange="[1.21-3.6.38,)"
 ordering="NONE"
 side="BOTH"
 
