@@ -3,6 +3,7 @@ package net.bobofraggins.intellistore;
 import com.mojang.logging.LogUtils;
 import net.bobofraggins.intellistore.external.mekanism.MekanismIntegration;
 import net.bobofraggins.intellistore.external.productivemetalworks.ProductiveMetalworksIntegration;
+import net.bobofraggins.intellistore.external.structurepoolapi.StructurePoolIntegration;
 import net.bobofraggins.intellistore.shared.config.IntelliStoreConfig;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.neoforged.bus.api.IEventBus;
@@ -25,6 +26,9 @@ public class IntelliStore {
         }
         if (ModList.get().isLoaded("productivemetalworks")) {
             ProductiveMetalworksIntegration.register(modEventBus);
+        }
+        if (ModList.get().isLoaded("structure_pool_api")) {
+            StructurePoolIntegration.register();
         }
         LOGGER.info("IntelliStore initialized");
     }

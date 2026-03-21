@@ -100,3 +100,10 @@ type="optional"
 versionRange="[1,)"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="structure_pool_api"
+type="optional"
+versionRange="[1.2,)"
+ordering="NONE"
+side="BOTH"

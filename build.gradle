@@ -86,6 +86,7 @@ dependencies {
     compileOnly "com.hollingsworth.ars_nouveau:ars_nouveau-1.21.1:5.11.2.1298"
     compileOnly "com.blakebr0.cucumber:Cucumber:1.21.1-8.0.15"
     compileOnly "com.blakebr0.mysticalagriculture:MysticalAgriculture:1.21.1-8.0.23"
+    compileOnly "maven.modrinth:structure-pool-api:${structure_pool_api_version}"
 }
 
 tasks.withType(ProcessResources).configureEach {
