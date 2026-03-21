@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import net.bobofraggins.intellistore.external.mekanism.MekanismIntegration;
 import net.bobofraggins.intellistore.external.productivemetalworks.ProductiveMetalworksIntegration;
 import net.bobofraggins.intellistore.external.structurepoolapi.StructurePoolIntegration;
+import net.bobofraggins.intellistore.shared.config.IntelliStoreClientConfig;
 import net.bobofraggins.intellistore.shared.config.IntelliStoreConfig;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.neoforged.bus.api.IEventBus;
@@ -20,6 +21,7 @@ public class IntelliStore {
 
     public IntelliStore(IEventBus modEventBus, ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.COMMON, IntelliStoreConfig.SPEC, "intellistore-common.toml");
+        modContainer.registerConfig(ModConfig.Type.CLIENT, IntelliStoreClientConfig.SPEC, "intellistore-client.toml");
         Registration.register(modEventBus);
         if (ModList.get().isLoaded("mekanism")) {
             MekanismIntegration.register(modEventBus);

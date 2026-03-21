@@ -3,6 +3,7 @@ package net.bobofraggins.intellistore.shared.ui;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
+import net.bobofraggins.intellistore.shared.config.IntelliStoreClientConfig;
 import net.bobofraggins.intellistore.shared.util.CountFormat;
 import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalLayout;
@@ -51,8 +52,7 @@ public class LocalInventoryPane implements IDialogPane {
     private static final int GRID_Y = AccessTerminalLayout.NETWORK_Y - AccessTerminalLayout.TITLE_H; // 1
     private static final int SCROLLBAR_X = AccessTerminalLayout.SCROLLBAR_X;
 
-    // Same height as NetworkInventoryPane: CRAFTING_Y - TITLE_H = 77
-    private static final int HEIGHT = AccessTerminalLayout.CRAFTING_Y - AccessTerminalLayout.TITLE_H;
+    // GRID_Y(1) + rows*SLOT_SIZE + bottom_gap(4) — computed dynamically from config
 
     // -------------------------------------------------------------------------
     // State
@@ -153,7 +153,7 @@ public class LocalInventoryPane implements IDialogPane {
 
     @Override
     public int preferredHeight() {
-        return HEIGHT;
+        return IntelliStoreClientConfig.getVisibleRows() * AccessTerminalLayout.SLOT_SIZE + 5;
     }
 
     @Override
@@ -233,11 +233,10 @@ public class LocalInventoryPane implements IDialogPane {
     // Private helpers
     // -------------------------------------------------------------------------
 
-    /** Returns 3 when a filter is active (to make room for the filter label), otherwise 4. */
+    /** Returns one fewer row when a filter is active (to make room for the filter label). */
     private int visibleRows() {
-        return appliedFilter.isEmpty()
-                ? AccessTerminalLayout.NETWORK_VISIBLE_ROWS
-                : AccessTerminalLayout.NETWORK_VISIBLE_ROWS - 1;
+        int base = IntelliStoreClientConfig.getVisibleRows();
+        return appliedFilter.isEmpty() ? base : base - 1;
     }
 
     private void applyFilter() {

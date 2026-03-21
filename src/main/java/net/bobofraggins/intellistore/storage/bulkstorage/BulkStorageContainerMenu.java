@@ -1,5 +1,6 @@
 package net.bobofraggins.intellistore.storage.bulkstorage;
 
+import net.bobofraggins.intellistore.shared.config.IntelliStoreClientConfig;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -34,38 +35,46 @@ public class BulkStorageContainerMenu extends AbstractContainerMenu {
     private static final int HOTBAR_START = 27;
     private static final int HOTBAR_END = 36;
 
-    // Y positions matching PlayerInventoryPane rendered inside the Dialog
-    // (TITLE_H=17) + (LocalInventoryPane=77) + (button gap=20) = 114 from topPos
-    // PriorityPane is now in the ConfigDrawer, not in the Dialog body.
-    private static final int PLAYER_INV_Y = 121;
-    private static final int HOTBAR_Y = 179; // 121 + PlayerInventoryPane.HOTBAR_Y(58)
-
     private final BlockPos pos;
     private final ContainerData data;
 
-    /** Server-side constructor. */
+    /** Server-side constructor. Uses the default row count (slot positions are unused server-side). */
     public BulkStorageContainerMenu(int id, Inventory inv, BlockPos pos, ContainerData data) {
+        this(id, inv, pos, data, IntelliStoreClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
+    }
+
+    /** Client-side constructor. Reads the configured row count for the current GUI scale. */
+    public BulkStorageContainerMenu(int id, Inventory inv, FriendlyByteBuf buf) {
+        this(id, inv, buf.readBlockPos(), new SimpleContainerData(1), IntelliStoreClientConfig.getVisibleRowsSafe());
+    }
+
+    /**
+     * Internal constructor that computes player inventory slot Y positions from the given row
+     * count.
+     *
+     * <p>Layout: title(17) + blank(7) + invPane(rows×18+5) + blank(20) + playerInv
+     * → playerInvY = 49 + rows×18.
+     */
+    private BulkStorageContainerMenu(int id, Inventory inv, BlockPos pos, ContainerData data, int rows) {
         super(Registration.BULK_STORAGE_CONTAINER_MENU.get(), id);
         this.pos = pos;
         this.data = data;
 
+        int playerInvY = 49 + rows * 18;
+        int hotbarY = playerInvY + 58; // 3 rows × 18 + 4 gap
+
         // Player main inventory (3 rows × 9 cols)
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(inv, col + row * 9 + 9, 8 + col * 18, PLAYER_INV_Y + row * 18));
+                addSlot(new Slot(inv, col + row * 9 + 9, 8 + col * 18, playerInvY + row * 18));
             }
         }
         // Player hotbar
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(inv, col, 8 + col * 18, HOTBAR_Y));
+            addSlot(new Slot(inv, col, 8 + col * 18, hotbarY));
         }
 
         addDataSlots(data);
-    }
-
-    /** Client-side constructor. */
-    public BulkStorageContainerMenu(int id, Inventory inv, FriendlyByteBuf buf) {
-        this(id, inv, buf.readBlockPos(), new SimpleContainerData(1));
     }
 
     public BlockPos getPos() {

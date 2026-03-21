@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.storage.accessterminal;
 
 import java.util.Optional;
 import javax.annotation.Nullable;
+import net.bobofraggins.intellistore.shared.config.IntelliStoreClientConfig;
 import net.bobofraggins.intellistore.shared.network.RequestSatContentsPacket;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
@@ -68,7 +69,31 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     // Server-side constructor (called by Provider)
     // -------------------------------------------------------------------------
 
+    /**
+     * Server-side constructor. Uses the default row count (slot positions are unused server-side).
+     */
     public AccessTerminalMenu(int id, Inventory inv, BlockPos satPos, @Nullable BlockPos niPos) {
+        this(id, inv, satPos, niPos, IntelliStoreClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
+    }
+
+    /** Client-side constructor. Reads the configured row count for the current GUI scale. */
+    public AccessTerminalMenu(int id, Inventory inv, FriendlyByteBuf buf) {
+        this(
+                id,
+                inv,
+                buf.readBlockPos(),
+                buf.readBoolean() ? buf.readBlockPos() : null,
+                IntelliStoreClientConfig.getVisibleRowsSafe());
+    }
+
+    /**
+     * Internal constructor that computes all slot Y positions from the given network grid row
+     * count.
+     *
+     * <p>Layout: title(17) + networkPane(rows×18+5) + craftingPane(58) + playerInv
+     * → craftingY = 22 + rows×18; fixed 58-px offsets to player inv and hotbar.
+     */
+    private AccessTerminalMenu(int id, Inventory inv, BlockPos satPos, @Nullable BlockPos niPos, int rows) {
         super(Registration.STORAGE_ACCESS_TERMINAL_MENU.get(), id);
         this.satPos = satPos;
         this.niPos = niPos;
@@ -76,17 +101,15 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         this.craftSlots = new TransientCraftingContainer(this, 3, 3);
         this.access = ContainerLevelAccess.create(inv.player.level(), satPos);
 
-        // All coordinates come from AccessTerminalLayout — the single source of truth.
         final int S = AccessTerminalLayout.SLOT_SIZE;
+        // craftingY shifts with the network pane height; offsets below it are fixed.
+        int craftingY = AccessTerminalLayout.TITLE_H + rows * S + 5; // 22 + rows*18
+        int playerInvY = craftingY + (AccessTerminalLayout.PLAYER_INV_Y - AccessTerminalLayout.CRAFTING_Y); // +58
+        int hotbarY = playerInvY + (AccessTerminalLayout.HOTBAR_Y - AccessTerminalLayout.PLAYER_INV_Y); // +58
 
-        // Slot 0: craft result
+        // Slot 0: craft result (one slot-row below craftingY)
         addSlot(new ResultSlot(
-                inv.player,
-                craftSlots,
-                resultSlots,
-                0,
-                AccessTerminalLayout.CRAFTING_RESULT_X,
-                AccessTerminalLayout.CRAFTING_RESULT_Y));
+                inv.player, craftSlots, resultSlots, 0, AccessTerminalLayout.CRAFTING_RESULT_X, craftingY + S));
 
         // Slots 1-9: 3×3 crafting grid
         for (int row = 0; row < 3; row++) {
@@ -95,7 +118,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                         craftSlots,
                         col + row * 3,
                         AccessTerminalLayout.CRAFTING_GRID_X + col * S,
-                        AccessTerminalLayout.CRAFTING_Y + row * S));
+                        craftingY + row * S));
             }
         }
 
@@ -103,25 +126,14 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 addSlot(new Slot(
-                        inv,
-                        col + row * 9 + 9,
-                        AccessTerminalLayout.PLAYER_INV_X + col * S,
-                        AccessTerminalLayout.PLAYER_INV_Y + row * S));
+                        inv, col + row * 9 + 9, AccessTerminalLayout.PLAYER_INV_X + col * S, playerInvY + row * S));
             }
         }
 
         // Slots 37-45: player hotbar
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(inv, col, AccessTerminalLayout.HOTBAR_X + col * S, AccessTerminalLayout.HOTBAR_Y));
+            addSlot(new Slot(inv, col, AccessTerminalLayout.HOTBAR_X + col * S, hotbarY));
         }
-    }
-
-    // -------------------------------------------------------------------------
-    // Client-side constructor (reads from FriendlyByteBuf)
-    // -------------------------------------------------------------------------
-
-    public AccessTerminalMenu(int id, Inventory inv, FriendlyByteBuf buf) {
-        this(id, inv, buf.readBlockPos(), buf.readBoolean() ? buf.readBlockPos() : null);
     }
 
     // -------------------------------------------------------------------------
