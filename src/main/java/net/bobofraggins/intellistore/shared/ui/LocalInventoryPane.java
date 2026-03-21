@@ -305,7 +305,7 @@ public class LocalInventoryPane implements IDialogPane {
                     GRID_X,
                     GRID_Y + row * AccessTerminalLayout.SLOT_SIZE,
                     7,
-                    17 + row * AccessTerminalLayout.SLOT_SIZE,
+                    17,
                     AccessTerminalLayout.NETWORK_W,
                     AccessTerminalLayout.SLOT_SIZE);
         }
