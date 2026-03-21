@@ -36,7 +36,7 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
     public BulkStorageContainerScreen(BulkStorageContainerMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         inventoryPane = new LocalInventoryPane();
-        dialog = new Dialog(inventoryPane, new PlayerInventoryPane());
+        dialog = new Dialog(inventoryPane, Dialog.blankPane(PlayerInventoryPane.WIDTH, 14), new PlayerInventoryPane());
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
         configDrawer = new ConfigDrawer(new PriorityPane(menu::getPriority, menu.getPos()));
@@ -58,7 +58,7 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
         addRenderableWidget(Button.builder(
                         Component.literal("+"),
                         btn -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false)))
-                .bounds(leftPos + dialog.totalWidth() - 22, dialog.getPaneAbsY(1) - 14, 20, 13)
+                .bounds(leftPos + dialog.totalWidth() - 27, dialog.getPaneAbsY(2) - 14, 20, 13)
                 .build());
     }
 

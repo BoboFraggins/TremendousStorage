@@ -9,6 +9,7 @@ import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.bobofraggins.intellistore.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -45,7 +46,11 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     public AccessTerminalScreen(AccessTerminalMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         networkPane = new NetworkInventoryPane(menu);
-        dialog = new Dialog(networkPane, new CraftingGridPane(), new PlayerInventoryPane());
+        dialog = new Dialog(
+                networkPane,
+                new CraftingGridPane(),
+                Dialog.blankPane(AccessTerminalLayout.BG_WIDTH, 14),
+                new PlayerInventoryPane());
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
     }
@@ -58,6 +63,13 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     protected void init() {
         super.init();
         dialog.init(leftPos, topPos);
+
+        // "+" quick stack button above the player inventory, right-aligned
+        addRenderableWidget(Button.builder(
+                        Component.literal("+"),
+                        btn -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getNiPos(), true)))
+                .bounds(leftPos + dialog.totalWidth() - 27, dialog.getPaneAbsY(3) - 14, 20, 13)
+                .build());
 
         if (menu.hasNetwork()) {
             PacketDistributor.sendToServer(new RequestSatContentsPacket(menu.getNiPos()));

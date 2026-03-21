@@ -61,7 +61,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         addRenderableWidget(Button.builder(
                         Component.literal("+"),
                         btn -> PacketDistributor.sendToServer(new QuickStackFilingCabinetPacket()))
-                .bounds(leftPos + BG_WIDTH - 22, topPos + playerInvY - 14, 20, 13)
+                .bounds(leftPos + BG_WIDTH - 27, topPos + playerInvY - 14, 20, 13)
                 .build());
     }
 

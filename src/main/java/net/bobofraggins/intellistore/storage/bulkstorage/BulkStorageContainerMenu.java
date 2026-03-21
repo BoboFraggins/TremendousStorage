@@ -35,10 +35,10 @@ public class BulkStorageContainerMenu extends AbstractContainerMenu {
     private static final int HOTBAR_END = 36;
 
     // Y positions matching PlayerInventoryPane rendered inside the Dialog
-    // (TITLE_H=17) + (LocalInventoryPane=77) = 94 from topPos
+    // (TITLE_H=17) + (LocalInventoryPane=77) + (button gap=14) = 108 from topPos
     // PriorityPane is now in the ConfigDrawer, not in the Dialog body.
-    private static final int PLAYER_INV_Y = 94;
-    private static final int HOTBAR_Y = 152; // 94 + PlayerInventoryPane.HOTBAR_Y(58)
+    private static final int PLAYER_INV_Y = 108;
+    private static final int HOTBAR_Y = 166; // 108 + PlayerInventoryPane.HOTBAR_Y(58)
 
     private final BlockPos pos;
     private final ContainerData data;
