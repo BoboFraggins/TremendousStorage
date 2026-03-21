@@ -56,8 +56,8 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
 
         // Config toggle button in the top-left of the title bar
         addRenderableWidget(new ImageButton(
-                leftPos + 3,
-                topPos + 1,
+                leftPos + 8,
+                topPos + 6,
                 16,
                 16,
                 new WidgetSprites(

@@ -13,9 +13,11 @@ import net.bobofraggins.intellistore.shared.ui.PriorityPane;
 import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -50,9 +52,15 @@ public class JunkDrawerScreen extends AbstractContainerScreen<JunkDrawerMenu> {
         inventoryPane.setClickHandler((idx, amount, toCursor) -> PacketDistributor.sendToServer(
                 new LocalStorageInteractPacket(menu.getPos(), false, idx, amount, toCursor)));
 
-        addRenderableWidget(Button.builder(Component.literal("\u2261"), btn -> configDrawer.toggle())
-                .bounds(leftPos + 3, topPos + 2, 20, 13)
-                .build());
+        addRenderableWidget(new ImageButton(
+                leftPos + 8,
+                topPos + 6,
+                16,
+                16,
+                new WidgetSprites(
+                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config"),
+                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config_focused")),
+                btn -> configDrawer.toggle()));
     }
 
     @Override

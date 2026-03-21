@@ -2,49 +2,54 @@ package net.bobofraggins.intellistore.storage.tubeattachments;
 
 import net.bobofraggins.intellistore.shared.network.SetStorageInterfacePriorityPacket;
 import net.bobofraggins.intellistore.shared.priority.Priority;
+import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Priority screen for a Storage Interface attachment on a Tube face.
  *
- * <p>Background panel: 176 × 50 pixels. Shows the attachment title and a
- * [▼] [Current Priority Name] [▲] row, matching the style of
- * {@link net.bobofraggins.intellistore.shared.ui.PriorityScreen}.
+ * <p>Shows the attachment title and a [▼] [Current Priority Name] [▲] row,
+ * using the standard Dialog background with 5 px content padding on all sides.
  */
 public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInterfaceMenu> {
 
-    private static final ResourceLocation BG_TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
-
     private static final int BG_WIDTH = 176;
-    private static final int BG_HEIGHT = 50;
 
-    private static final int LABEL_Y = 20;
-    private static final int ROW_Y = 31;
+    // Content layout (absolute offsets from topPos)
+    private static final int LABEL_Y = Dialog.TITLE_H + 5; // 5 px from body top
+    private static final int ROW_Y = LABEL_Y + 8 + 5; // label height + 5 px gap
+
     private static final int BTN_W = 20;
     private static final int BTN_H = 14;
     private static final int LBL_W = 56;
     private static final int GAP = 2;
     private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W;
 
+    // Body height: from TITLE_H to (ROW_Y + BTN_H + 5 px bottom padding)
+    private static final int BODY_H = ROW_Y + BTN_H + 5 - Dialog.TITLE_H;
+
+    private final Dialog dialog;
+
     private Button downBtn;
     private Button upBtn;
 
     public StorageInterfaceScreen(StorageInterfaceMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth = BG_WIDTH;
-        this.imageHeight = BG_HEIGHT;
+        dialog = new Dialog(Dialog.blankPane(BG_WIDTH, BODY_H));
+        this.imageWidth = dialog.totalWidth();
+        this.imageHeight = dialog.totalHeight();
     }
 
     @Override
     protected void init() {
         super.init();
+        dialog.init(leftPos, topPos);
+
         int rowX = leftPos + (BG_WIDTH - ROW_W) / 2;
         int btnY = topPos + ROW_Y;
 
@@ -86,18 +91,9 @@ public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInter
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         int x = leftPos, y = topPos;
 
-        // Title bar from generic_54
-        graphics.blit(BG_TEXTURE, x, y, 0, 0, BG_WIDTH, 17);
+        dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
 
-        // Gray panel body
-        graphics.fill(x, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFC6C6C6);
-
-        // Border lines
-        graphics.fill(x, y + 17, x + 1, y + BG_HEIGHT, 0xFF555555);
-        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFFFFFFF);
-        graphics.fill(x, y + BG_HEIGHT - 1, x + BG_WIDTH, y + BG_HEIGHT, 0xFF555555);
-
-        // "Priority:" label row
+        // "Priority:" label
         Component priorityLabel = Component.translatable("screen.intellistore.priority_label");
         graphics.drawString(
                 font, priorityLabel, x + (BG_WIDTH - font.width(priorityLabel)) / 2, y + LABEL_Y, 0x404040, false);
@@ -122,6 +118,6 @@ public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInter
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 4, 0x404040, false);
+        // Title is drawn by Dialog.
     }
 }

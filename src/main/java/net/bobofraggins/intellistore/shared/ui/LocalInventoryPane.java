@@ -69,11 +69,17 @@ public class LocalInventoryPane implements IDialogPane {
     private List<Long> displayCounts = List.of();
 
     /**
-     * Maps displayed index → original index in allStacks. {@code null} means identity (no filter
-     * active).
+     * Maps displayed index → allStacks index. {@code null} means identity (no filter active).
      */
     @Nullable
     private int[] toOriginal = null;
+
+    /**
+     * Maps allStacks index → original server-side index. {@code null} when the caller did not
+     * pre-sort the list (allStacks indices equal server indices directly).
+     */
+    @Nullable
+    private int[] baseToOriginal = null;
 
     private String appliedFilter = "";
     private int scrollOffset = 0;
@@ -89,6 +95,20 @@ public class LocalInventoryPane implements IDialogPane {
     public void setContents(List<ItemStack> stacks, List<Long> counts) {
         this.allStacks = stacks;
         this.allCounts = counts;
+        this.baseToOriginal = null;
+        applyFilter();
+    }
+
+    /**
+     * Replaces the full item list with an explicit sort-order mapping and re-applies the filter.
+     *
+     * @param sortedToOriginal maps each position in {@code stacks} to the corresponding
+     *     server-side index in the block entity's unsorted inventory.
+     */
+    public void setContents(List<ItemStack> stacks, List<Long> counts, int[] sortedToOriginal) {
+        this.allStacks = stacks;
+        this.allCounts = counts;
+        this.baseToOriginal = sortedToOriginal;
         applyFilter();
     }
 
@@ -162,8 +182,9 @@ public class LocalInventoryPane implements IDialogPane {
         if (displayedIdx >= 0 && displayedIdx < displayStacks.size()) {
             long count = displayCounts.get(displayedIdx);
             int maxStack = displayStacks.get(displayedIdx).getMaxStackSize();
-            // Translate to the original unfiltered index for server-side extraction
-            int originalIdx = (toOriginal != null) ? toOriginal[displayedIdx] : displayedIdx;
+            // Translate display index → allStacks index → server-side index
+            int allStacksIdx = (toOriginal != null) ? toOriginal[displayedIdx] : displayedIdx;
+            int originalIdx = (baseToOriginal != null) ? baseToOriginal[allStacksIdx] : allStacksIdx;
             if (Screen.hasShiftDown()) {
                 clickHandler.onClick(originalIdx, (int) Math.min(count, maxStack), false);
             } else {

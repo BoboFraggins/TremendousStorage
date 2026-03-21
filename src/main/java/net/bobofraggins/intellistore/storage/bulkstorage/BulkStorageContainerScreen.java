@@ -54,8 +54,8 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
                 new LocalStorageInteractPacket(menu.getPos(), true, idx, amount, toCursor)));
 
         addRenderableWidget(new ImageButton(
-                leftPos + 3,
-                topPos + 1,
+                leftPos + 8,
+                topPos + 6,
                 16,
                 16,
                 new WidgetSprites(
@@ -104,7 +104,8 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
             sorted.add(stacks.get(i));
             sortedCounts.add(counts.get(i));
         }
-        inventoryPane.setContents(sorted, sortedCounts);
+        int[] sortedToOriginal = order.stream().mapToInt(i -> i).toArray();
+        inventoryPane.setContents(sorted, sortedCounts, sortedToOriginal);
     }
 
     @Override
