@@ -7,6 +7,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
@@ -17,15 +18,28 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class PriorityPane implements IDialogPane {
 
-    private static final int PANE_HEIGHT = 33;
+    private static final int PANE_HEIGHT = 35;
     private static final int LABEL_Y = 3;
     private static final int ROW_Y = 14;
-    private static final int BTN_W = 20;
-    private static final int BTN_H = 14;
+    private static final int BTN_W = 16;
+    private static final int BTN_H = 16;
     private static final int LBL_W = 56;
     private static final int GAP = 2;
     /** Total width of [▼][gap][label][gap][▲] row. */
-    private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W; // 100
+    private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W; // 92
+
+    private static final ResourceLocation BTN_DOWN =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/widget/button_down.png");
+    private static final ResourceLocation BTN_DOWN_FOCUSED =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/widget/button_down_focused.png");
+    private static final ResourceLocation BTN_DOWN_DISABLED =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/widget/button_down_disabled.png");
+    private static final ResourceLocation BTN_UP =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/widget/button_up.png");
+    private static final ResourceLocation BTN_UP_FOCUSED =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/widget/button_up_focused.png");
+    private static final ResourceLocation BTN_UP_DISABLED =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/widget/button_up_disabled.png");
 
     private final IntSupplier priorityGetter;
     private final BlockPos pos;
@@ -61,8 +75,15 @@ public class PriorityPane implements IDialogPane {
         Component priorityLabel = Component.translatable("screen.intellistore.priority_label");
         graphics.drawString(font, priorityLabel, (width - font.width(priorityLabel)) / 2, LABEL_Y, 0x404040, false);
 
-        drawButton(graphics, font, downBtnX, ROW_Y, BTN_W, BTN_H, "▼", selected > 0);
-        drawButton(graphics, font, upBtnX, ROW_Y, BTN_W, BTN_H, "▲", selected < Priority.VALUES.length - 1);
+        boolean canDown = selected > 0;
+        boolean canUp = selected < Priority.VALUES.length - 1;
+        ResourceLocation downTex = !canDown
+                ? BTN_DOWN_DISABLED
+                : (isInButton(localMouseX, localMouseY, downBtnX) ? BTN_DOWN_FOCUSED : BTN_DOWN);
+        ResourceLocation upTex =
+                !canUp ? BTN_UP_DISABLED : (isInButton(localMouseX, localMouseY, upBtnX) ? BTN_UP_FOCUSED : BTN_UP);
+        graphics.blit(downTex, downBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
+        graphics.blit(upTex, upBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
 
         // Inset label box
         graphics.fill(lblX, ROW_Y, lblX + LBL_W, ROW_Y + 1, 0xFF373737);
@@ -104,18 +125,5 @@ public class PriorityPane implements IDialogPane {
 
     private static boolean isInButton(double lx, double ly, int btnX) {
         return lx >= btnX && lx < btnX + BTN_W && ly >= ROW_Y && ly < ROW_Y + BTN_H;
-    }
-
-    private static void drawButton(
-            GuiGraphics graphics, Font font, int x, int y, int w, int h, String label, boolean active) {
-        int fillColor = active ? 0xFFC6C6C6 : 0xFF9B9B9B;
-        graphics.fill(x, y, x + w, y + 1, 0xFF555555);
-        graphics.fill(x, y + 1, x + 1, y + h, 0xFF555555);
-        graphics.fill(x, y + h, x + w, y + h + 1, 0xFFFFFFFF);
-        graphics.fill(x + w, y, x + w + 1, y + h + 1, 0xFFFFFFFF);
-        graphics.fill(x + 1, y + 1, x + w, y + h, fillColor);
-        int lx = x + (w - font.width(label)) / 2;
-        int ly = y + (h - 8) / 2;
-        graphics.drawString(font, label, lx, ly, active ? 0x404040 : 0x707070, false);
     }
 }

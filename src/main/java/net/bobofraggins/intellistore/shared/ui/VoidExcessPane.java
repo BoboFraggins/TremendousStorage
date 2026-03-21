@@ -4,6 +4,7 @@ import java.util.function.BooleanSupplier;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Config drawer pane for the void-excess toggle.
@@ -14,10 +15,16 @@ import net.minecraft.network.chat.Component;
  */
 public class VoidExcessPane implements IDialogPane {
 
-    private static final int PANE_HEIGHT = 26;
-    private static final int BTN_H = 14;
-    private static final int PAD_X = 6;
-    private static final int BTN_Y = 6;
+    private static final int PANE_HEIGHT = 36;
+    private static final int LABEL_Y = 3;
+    private static final int TOGGLE_Y = 14;
+    private static final int TOGGLE_W = 64;
+    private static final int TOGGLE_H = 16;
+
+    private static final ResourceLocation TOGGLE_ON =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/widget/toggle_on.png");
+    private static final ResourceLocation TOGGLE_OFF =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/widget/toggle_off.png");
 
     private final BooleanSupplier stateGetter;
     private final Runnable toggleAction;
@@ -40,34 +47,22 @@ public class VoidExcessPane implements IDialogPane {
     @Override
     public void render(
             GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
-        boolean on = stateGetter.getAsBoolean();
-        String label = (on
-                        ? Component.translatable("screen.intellistore.void_excess_on")
-                        : Component.translatable("screen.intellistore.void_excess_off"))
-                .getString();
-        int btnW = width - 2 * PAD_X;
-        drawButton(graphics, font, PAD_X, BTN_Y, btnW, BTN_H, label);
+        Component label = Component.translatable("screen.intellistore.void_excess_label");
+        graphics.drawString(font, label, (width - font.width(label)) / 2, LABEL_Y, 0x404040, false);
+
+        int toggleX = (width - TOGGLE_W) / 2;
+        ResourceLocation tex = stateGetter.getAsBoolean() ? TOGGLE_ON : TOGGLE_OFF;
+        graphics.blit(tex, toggleX, TOGGLE_Y, 0, 0, TOGGLE_W, TOGGLE_H, TOGGLE_W, TOGGLE_H);
     }
 
     @Override
     public boolean mouseClicked(double localX, double localY, int button) {
         if (button != 0) return false;
-        int btnW = preferredWidth() - 2 * PAD_X;
-        if (localX >= PAD_X && localX < PAD_X + btnW && localY >= BTN_Y && localY < BTN_Y + BTN_H) {
+        int toggleX = (preferredWidth() - TOGGLE_W) / 2;
+        if (localX >= toggleX && localX < toggleX + TOGGLE_W && localY >= TOGGLE_Y && localY < TOGGLE_Y + TOGGLE_H) {
             toggleAction.run();
             return true;
         }
         return false;
-    }
-
-    private static void drawButton(GuiGraphics graphics, Font font, int x, int y, int w, int h, String label) {
-        graphics.fill(x, y, x + w, y + 1, 0xFF555555);
-        graphics.fill(x, y + 1, x + 1, y + h, 0xFF555555);
-        graphics.fill(x, y + h, x + w, y + h + 1, 0xFFFFFFFF);
-        graphics.fill(x + w, y, x + w + 1, y + h + 1, 0xFFFFFFFF);
-        graphics.fill(x + 1, y + 1, x + w, y + h, 0xFFC6C6C6);
-        int lx = x + (w - font.width(label)) / 2;
-        int ly = y + (h - 8) / 2;
-        graphics.drawString(font, label, lx, ly, 0x404040, false);
     }
 }
