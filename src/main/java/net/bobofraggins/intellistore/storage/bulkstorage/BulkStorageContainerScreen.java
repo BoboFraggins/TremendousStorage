@@ -39,7 +39,11 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
     public BulkStorageContainerScreen(BulkStorageContainerMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         inventoryPane = new LocalInventoryPane();
-        dialog = new Dialog(inventoryPane, Dialog.blankPane(PlayerInventoryPane.WIDTH, 20), new PlayerInventoryPane());
+        dialog = new Dialog(
+                Dialog.blankPane(PlayerInventoryPane.WIDTH, 7),
+                inventoryPane,
+                Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
+                new PlayerInventoryPane());
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
         configDrawer = new ConfigDrawer(new PriorityPane(menu::getPriority, menu.getPos()));
@@ -65,7 +69,7 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
 
         addRenderableWidget(new ImageButton(
                 leftPos + dialog.totalWidth() - 26,
-                dialog.getPaneAbsY(2) - 20,
+                dialog.getPaneAbsY(3) - 20,
                 16,
                 16,
                 new WidgetSprites(
@@ -139,7 +143,7 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
         super.render(graphics, mouseX, mouseY, partialTick);
         renderTooltip(graphics, mouseX, mouseY);
 
-        int paneAbsY = dialog.getPaneAbsY(0);
+        int paneAbsY = dialog.getPaneAbsY(1);
         ItemStack hovered = inventoryPane.getHoveredStack(mouseX - leftPos, mouseY - paneAbsY);
         if (hovered != null) {
             graphics.renderTooltip(font, hovered, mouseX, mouseY);

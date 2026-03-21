@@ -38,8 +38,8 @@ public class JunkDrawerMenu extends AbstractContainerMenu {
     // Y positions matching PlayerInventoryPane rendered inside the Dialog
     // (TITLE_H=17) + (LocalInventoryPane=77) = 94 from topPos
     // PriorityPane is now in the ConfigDrawer, not in the Dialog body.
-    private static final int PLAYER_INV_Y = 94;
-    private static final int HOTBAR_Y = 152; // 94 + PlayerInventoryPane.HOTBAR_Y(58)
+    private static final int PLAYER_INV_Y = 101;
+    private static final int HOTBAR_Y = 159; // 101 + PlayerInventoryPane.HOTBAR_Y(58)
 
     private final BlockPos pos;
     private final ContainerData data;
