@@ -1219,8 +1219,8 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
 
     /**
      * Draws an 8×8×2 attachment plate flush with the outside face, slightly inset to avoid
-     * z-fighting with adjacent blocks. The outward face uses {@code faceSprite} tinted by
-     * {@code r,g,b}; the four side edges and inner face use {@code sideSprite} tinted dark steel.
+     * z-fighting with adjacent blocks. The outward and inward faces use {@code faceSprite} tinted
+     * by {@code r,g,b}; the four side edges use {@code sideSprite} tinted dark steel.
      */
     private static void drawAttachmentPlate(
             VertexConsumer vc,
@@ -1286,11 +1286,11 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
             } // EAST
         }
         for (Direction face : Direction.values()) {
-            boolean isOutward = (face == dir);
-            TextureAtlasSprite sp = isOutward ? faceSprite : sideSprite;
-            int cr = isOutward ? r : TRIM_R;
-            int cg = isOutward ? g : TRIM_G;
-            int cb = isOutward ? b : TRIM_B;
+            boolean isTexturedFace = (face == dir || face == dir.getOpposite());
+            TextureAtlasSprite sp = isTexturedFace ? faceSprite : sideSprite;
+            int cr = isTexturedFace ? r : TRIM_R;
+            int cg = isTexturedFace ? g : TRIM_G;
+            int cb = isTexturedFace ? b : TRIM_B;
             float shadeF =
                     switch (face) {
                         case UP -> SHADE_UP;
