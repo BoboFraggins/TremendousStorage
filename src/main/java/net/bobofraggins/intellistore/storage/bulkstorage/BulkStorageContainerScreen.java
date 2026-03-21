@@ -97,7 +97,9 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
         // Sort alphabetically by display name to match Access Terminal order
         List<Integer> order = new ArrayList<>(n);
         for (int i = 0; i < n; i++) order.add(i);
-        order.sort(Comparator.comparing(i -> stacks.get(i).getHoverName().getString()));
+        order.sort(Comparator.comparingLong((Integer i) -> counts.get(i))
+                .reversed()
+                .thenComparing(i -> stacks.get(i).getHoverName().getString()));
         List<ItemStack> sorted = new ArrayList<>(n);
         List<Long> sortedCounts = new ArrayList<>(n);
         for (int i : order) {
