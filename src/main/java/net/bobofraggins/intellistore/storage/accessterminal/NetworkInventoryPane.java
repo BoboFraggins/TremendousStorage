@@ -317,6 +317,9 @@ public class NetworkInventoryPane implements IDialogPane {
         int barY = GRID_Y;
         int barH = rows * AccessTerminalLayout.SLOT_SIZE;
 
+        // Left border
+        graphics.fill(SCROLLBAR_X - 1, barY, SCROLLBAR_X, barY + barH, 0xFF555555);
+
         // Track
         graphics.fill(SCROLLBAR_X, barY, SCROLLBAR_X + AccessTerminalLayout.SCROLLBAR_W, barY + barH, 0x40000000);
 
