@@ -48,4 +48,22 @@ public interface IDialogPane {
     default boolean mouseScrolled(double localX, double localY, double dx, double dy) {
         return false;
     }
+
+    /**
+     * Handle a mouse drag in pane-local coordinates.
+     *
+     * @return true if this pane consumed the event
+     */
+    default boolean mouseDragged(double localX, double localY, int button, double dragX, double dragY) {
+        return false;
+    }
+
+    /**
+     * Handle a mouse button release in pane-local coordinates.
+     *
+     * @return true if this pane consumed the event
+     */
+    default boolean mouseReleased(double localX, double localY, int button) {
+        return false;
+    }
 }

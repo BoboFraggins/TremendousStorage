@@ -78,6 +78,9 @@ public class Dialog {
     private final int width;
     private final List<IDialogPane> panes;
 
+    /** Index of the pane that last consumed a mouseClicked; -1 if none. Used to route drags. */
+    private int activePaneIndex = -1;
+
     /** Y offset of each pane relative to the body start (i.e. relative to {@code y + TITLE_H}). */
     private final int[] paneYOffsets;
 
@@ -211,11 +214,15 @@ public class Dialog {
 
     /** Routes a mouse click to the pane under the cursor. Returns true if consumed. */
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        activePaneIndex = -1;
         for (int i = 0; i < panes.size(); i++) {
             int paneAbsY = getPaneAbsY(i);
             int paneH = panes.get(i).preferredHeight();
             if (mouseY >= paneAbsY && mouseY < paneAbsY + paneH) {
-                return panes.get(i).mouseClicked(mouseX - x, mouseY - paneAbsY, button);
+                if (panes.get(i).mouseClicked(mouseX - x, mouseY - paneAbsY, button)) {
+                    activePaneIndex = i;
+                    return true;
+                }
             }
         }
         return false;
@@ -229,6 +236,32 @@ public class Dialog {
             if (mouseY >= paneAbsY && mouseY < paneAbsY + paneH) {
                 return panes.get(i).mouseScrolled(mouseX - x, mouseY - paneAbsY, dx, dy);
             }
+        }
+        return false;
+    }
+
+    /**
+     * Routes a mouse drag to the pane that consumed the last {@link #mouseClicked}.
+     * Returns true if consumed.
+     */
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (activePaneIndex >= 0) {
+            int paneAbsY = getPaneAbsY(activePaneIndex);
+            return panes.get(activePaneIndex).mouseDragged(mouseX - x, mouseY - paneAbsY, button, dragX, dragY);
+        }
+        return false;
+    }
+
+    /**
+     * Routes a mouse release to the pane that consumed the last {@link #mouseClicked}.
+     * Returns true if consumed.
+     */
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (activePaneIndex >= 0) {
+            int paneAbsY = getPaneAbsY(activePaneIndex);
+            boolean result = panes.get(activePaneIndex).mouseReleased(mouseX - x, mouseY - paneAbsY, button);
+            activePaneIndex = -1;
+            return result;
         }
         return false;
     }

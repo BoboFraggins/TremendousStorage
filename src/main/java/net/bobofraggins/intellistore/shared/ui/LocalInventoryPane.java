@@ -83,6 +83,7 @@ public class LocalInventoryPane implements IDialogPane {
 
     private String appliedFilter = "";
     private int scrollOffset = 0;
+    private boolean draggingScrollbar = false;
 
     @Nullable
     private GridClickHandler clickHandler;
@@ -164,6 +165,11 @@ public class LocalInventoryPane implements IDialogPane {
 
     @Override
     public boolean mouseClicked(double localX, double localY, int button) {
+        if (isInScrollbar(localX, localY)) {
+            draggingScrollbar = true;
+            scrollToY(localY);
+            return true;
+        }
         if (!isInGrid(localX, localY) || clickHandler == null) return false;
 
         var mc = Minecraft.getInstance();
@@ -197,9 +203,27 @@ public class LocalInventoryPane implements IDialogPane {
 
     @Override
     public boolean mouseScrolled(double localX, double localY, double dx, double dy) {
-        if (isInGrid(localX, localY)) {
+        if (isInGrid(localX, localY) || isInScrollbar(localX, localY)) {
             scrollOffset -= (int) Math.signum(dy);
             clampScroll();
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean mouseDragged(double localX, double localY, int button, double dragX, double dragY) {
+        if (draggingScrollbar) {
+            scrollToY(localY);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean mouseReleased(double localX, double localY, int button) {
+        if (draggingScrollbar) {
+            draggingScrollbar = false;
             return true;
         }
         return false;
@@ -244,6 +268,27 @@ public class LocalInventoryPane implements IDialogPane {
                 && localX < GRID_X + AccessTerminalLayout.NETWORK_W
                 && localY >= GRID_Y
                 && localY < GRID_Y + visibleRows() * AccessTerminalLayout.SLOT_SIZE;
+    }
+
+    private boolean isInScrollbar(double localX, double localY) {
+        int barH = visibleRows() * AccessTerminalLayout.SLOT_SIZE;
+        return localX >= SCROLLBAR_X
+                && localX < SCROLLBAR_X + AccessTerminalLayout.SCROLLBAR_W
+                && localY >= GRID_Y
+                && localY < GRID_Y + barH;
+    }
+
+    /** Maps a pane-local Y coordinate inside the scrollbar track to a scroll offset. */
+    private void scrollToY(double localY) {
+        int rows = visibleRows();
+        int barH = rows * AccessTerminalLayout.SLOT_SIZE;
+        int totalRows = Math.max(
+                (displayStacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
+        int maxScroll = Math.max(0, totalRows - rows);
+        if (maxScroll == 0) return;
+        double ratio = (localY - GRID_Y) / (double) barH;
+        scrollOffset = (int) Math.round(ratio * maxScroll);
+        clampScroll();
     }
 
     private void clampScroll() {
