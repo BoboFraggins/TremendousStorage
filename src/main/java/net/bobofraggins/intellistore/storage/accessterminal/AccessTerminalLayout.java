@@ -43,7 +43,7 @@ public final class AccessTerminalLayout {
     // ── Player inventory ──────────────────────────────────────────────────────
 
     public static final int PLAYER_INV_X = 8;
-    public static final int PLAYER_INV_Y = CRAFTING_Y + CRAFTING_H + GAP + 14; // 166
+    public static final int PLAYER_INV_Y = CRAFTING_Y + CRAFTING_H + GAP; // 152
     public static final int PLAYER_INV_ROWS = 3;
 
     // ── Hotbar ────────────────────────────────────────────────────────────────

@@ -167,7 +167,7 @@ public class LocalInventoryPane implements IDialogPane {
             if (Screen.hasShiftDown()) {
                 clickHandler.onClick(originalIdx, (int) Math.min(count, maxStack), false);
             } else {
-                int amount = (button == 1) ? 1 : (int) Math.min(count, maxStack);
+                int amount = (button == 1) ? (int) Math.max(1, (count + 1) / 2) : (int) Math.min(count, maxStack);
                 clickHandler.onClick(originalIdx, amount, true);
             }
         }

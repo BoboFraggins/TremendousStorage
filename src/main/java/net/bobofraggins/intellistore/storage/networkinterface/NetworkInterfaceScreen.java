@@ -5,10 +5,10 @@ import net.bobofraggins.intellistore.shared.input.QuickStackClientEvents;
 import net.bobofraggins.intellistore.shared.network.NetworkContentsPacket;
 import net.bobofraggins.intellistore.shared.network.QuickStackPacket;
 import net.bobofraggins.intellistore.shared.network.RequestNetworkContentsPacket;
+import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -26,9 +26,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInterfaceMenu> {
 
-    private static final ResourceLocation BG_TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
-
     private static final int BG_WIDTH = 176;
     private static final int BG_HEIGHT = 220;
 
@@ -38,18 +35,22 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
     private static final int ROW_HEIGHT = 12;
     private static final int LIST_Y_START = 30;
 
+    private final Dialog dialog;
+
     private List<String> entries = List.of();
     private int scrollOffset = 0;
 
     public NetworkInterfaceScreen(NetworkInterfaceMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth = BG_WIDTH;
-        this.imageHeight = BG_HEIGHT;
+        dialog = new Dialog(Dialog.blankPane(BG_WIDTH, BG_HEIGHT - Dialog.TITLE_H - Dialog.BOTTOM_PADDING));
+        this.imageWidth = dialog.totalWidth();
+        this.imageHeight = dialog.totalHeight();
     }
 
     @Override
     protected void init() {
         super.init();
+        dialog.init(leftPos, topPos);
         // Request block list from server
         PacketDistributor.sendToServer(new RequestNetworkContentsPacket(menu.getPos()));
         // Clear stale data from a previous screen open
@@ -115,18 +116,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         int x = leftPos, y = topPos;
 
-        // Title bar (top 17px of generic_54)
-        graphics.blit(BG_TEXTURE, x, y, 0, 0, BG_WIDTH, 17);
-
-        // Gray fill for the rest of the panel
-        graphics.fill(x, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFC6C6C6);
-
-        // Left and right border lines
-        graphics.fill(x, y + 17, x + 1, y + BG_HEIGHT, 0xFF555555);
-        graphics.fill(x + BG_WIDTH - 1, y + 17, x + BG_WIDTH, y + BG_HEIGHT, 0xFFFFFFFF);
-
-        // Bottom border
-        graphics.fill(x, y + BG_HEIGHT - 1, x + BG_WIDTH, y + BG_HEIGHT, 0xFF555555);
+        dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
 
         // Validity indicator line below title bar
         boolean valid = menu.isNetworkValid();
@@ -193,6 +183,6 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 4, 0x404040, false);
+        // Title is drawn by Dialog.
     }
 }

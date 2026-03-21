@@ -111,7 +111,8 @@ public class NetworkInventoryPane implements IDialogPane {
                 PacketDistributor.sendToServer(
                         new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, false));
             } else {
-                int amount = (button == 1) ? 1 : (int) Math.min(totalCount, maxStack);
+                int amount =
+                        (button == 1) ? (int) Math.max(1, (totalCount + 1) / 2) : (int) Math.min(totalCount, maxStack);
                 PacketDistributor.sendToServer(
                         new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, true));
             }

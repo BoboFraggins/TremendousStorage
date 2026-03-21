@@ -3,9 +3,11 @@ package net.bobofraggins.intellistore.shared.ui;
 import net.bobofraggins.intellistore.shared.input.QuickStackClientEvents;
 import net.bobofraggins.intellistore.shared.network.QuickStackFilingCabinetPacket;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -52,17 +54,27 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         dialog.init(leftPos, topPos);
         configDrawer.init(leftPos, topPos, imageHeight);
 
-        // "≡" toggle button in the top-left of the title bar
-        addRenderableWidget(Button.builder(Component.literal("\u2261"), btn -> configDrawer.toggle())
-                .bounds(leftPos + 3, topPos + 2, 20, 13)
-                .build());
+        // Config toggle button in the top-left of the title bar
+        addRenderableWidget(new ImageButton(
+                leftPos + 3,
+                topPos + 1,
+                16,
+                16,
+                new WidgetSprites(
+                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config"),
+                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config_focused")),
+                btn -> configDrawer.toggle()));
 
-        // "+" quick stack button above the player inventory, right-aligned
-        addRenderableWidget(Button.builder(
-                        Component.literal("+"),
-                        btn -> PacketDistributor.sendToServer(new QuickStackFilingCabinetPacket()))
-                .bounds(leftPos + BG_WIDTH - 27, topPos + playerInvY - 14, 20, 13)
-                .build());
+        // Quick stack button above the player inventory, right-aligned
+        addRenderableWidget(new ImageButton(
+                leftPos + BG_WIDTH - 26,
+                topPos + playerInvY - 20,
+                16,
+                16,
+                new WidgetSprites(
+                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack"),
+                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack_focused")),
+                btn -> PacketDistributor.sendToServer(new QuickStackFilingCabinetPacket())));
     }
 
     @Override

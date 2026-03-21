@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.storage.bulkstorage;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import net.bobofraggins.intellistore.shared.input.QuickStackClientEvents;
 import net.bobofraggins.intellistore.shared.network.LocalStorageInteractPacket;
@@ -13,9 +14,11 @@ import net.bobofraggins.intellistore.shared.ui.PriorityPane;
 import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -36,7 +39,7 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
     public BulkStorageContainerScreen(BulkStorageContainerMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         inventoryPane = new LocalInventoryPane();
-        dialog = new Dialog(inventoryPane, Dialog.blankPane(PlayerInventoryPane.WIDTH, 14), new PlayerInventoryPane());
+        dialog = new Dialog(inventoryPane, Dialog.blankPane(PlayerInventoryPane.WIDTH, 20), new PlayerInventoryPane());
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
         configDrawer = new ConfigDrawer(new PriorityPane(menu::getPriority, menu.getPos()));
@@ -50,16 +53,25 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
         inventoryPane.setClickHandler((idx, amount, toCursor) -> PacketDistributor.sendToServer(
                 new LocalStorageInteractPacket(menu.getPos(), true, idx, amount, toCursor)));
 
-        addRenderableWidget(Button.builder(Component.literal("\u2261"), btn -> configDrawer.toggle())
-                .bounds(leftPos + 3, topPos + 2, 20, 13)
-                .build());
+        addRenderableWidget(new ImageButton(
+                leftPos + 3,
+                topPos + 1,
+                16,
+                16,
+                new WidgetSprites(
+                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config"),
+                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config_focused")),
+                btn -> configDrawer.toggle()));
 
-        // "+" quick stack button above the player inventory, right-aligned
-        addRenderableWidget(Button.builder(
-                        Component.literal("+"),
-                        btn -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false)))
-                .bounds(leftPos + dialog.totalWidth() - 27, dialog.getPaneAbsY(2) - 14, 20, 13)
-                .build());
+        addRenderableWidget(new ImageButton(
+                leftPos + dialog.totalWidth() - 26,
+                dialog.getPaneAbsY(2) - 20,
+                16,
+                16,
+                new WidgetSprites(
+                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack"),
+                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack_focused")),
+                btn -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false))));
     }
 
     @Override
@@ -82,7 +94,17 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
             stacks.add(bulk.getType(i));
             counts.add(bulk.getCount(i));
         }
-        inventoryPane.setContents(stacks, counts);
+        // Sort alphabetically by display name to match Access Terminal order
+        List<Integer> order = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) order.add(i);
+        order.sort(Comparator.comparing(i -> stacks.get(i).getHoverName().getString()));
+        List<ItemStack> sorted = new ArrayList<>(n);
+        List<Long> sortedCounts = new ArrayList<>(n);
+        for (int i : order) {
+            sorted.add(stacks.get(i));
+            sortedCounts.add(counts.get(i));
+        }
+        inventoryPane.setContents(sorted, sortedCounts);
     }
 
     @Override
