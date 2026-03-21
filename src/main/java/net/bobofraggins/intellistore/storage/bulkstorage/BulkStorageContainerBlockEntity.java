@@ -19,17 +19,13 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -58,113 +54,6 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
 
     @Nullable
     private BlockPos cachedNiPos = null;
-
-    // -------------------------------------------------------------------------
-    // Lid animation state (client-side only)
-    // -------------------------------------------------------------------------
-
-    /** Number of players with this block's menu open (synced from server via block event). */
-    public int openCount = 0;
-
-    /** Animation progress last tick (0 = closed, 1 = fully open). */
-    public float prevLidAngle = 0f;
-
-    /** Animation progress this tick. */
-    public float lidAngle = 0f;
-
-    // -------------------------------------------------------------------------
-    // ContainerOpenersCounter
-    // -------------------------------------------------------------------------
-
-    private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter() {
-        @Override
-        protected void onOpen(Level level, BlockPos pos, BlockState state) {
-            level.playSound(
-                    null,
-                    pos.getX() + 0.5,
-                    pos.getY() + 0.5,
-                    pos.getZ() + 0.5,
-                    SoundEvents.CHEST_OPEN,
-                    SoundSource.BLOCKS,
-                    0.5f,
-                    level.random.nextFloat() * 0.1f + 0.9f);
-        }
-
-        @Override
-        protected void onClose(Level level, BlockPos pos, BlockState state) {
-            level.playSound(
-                    null,
-                    pos.getX() + 0.5,
-                    pos.getY() + 0.5,
-                    pos.getZ() + 0.5,
-                    SoundEvents.CHEST_CLOSE,
-                    SoundSource.BLOCKS,
-                    0.5f,
-                    level.random.nextFloat() * 0.1f + 0.9f);
-        }
-
-        @Override
-        protected void openerCountChanged(Level level, BlockPos pos, BlockState state, int oldCount, int newCount) {
-            level.blockEvent(pos, state.getBlock(), 1, newCount);
-        }
-
-        @Override
-        protected boolean isOwnContainer(Player player) {
-            return player.containerMenu instanceof BulkStorageContainerMenu m
-                    && m.getPos().equals(worldPosition);
-        }
-    };
-
-    public void startOpen(Player player) {
-        if (!isRemoved() && !player.isSpectator()) {
-            openersCounter.incrementOpeners(player, getLevel(), getBlockPos(), getBlockState());
-        }
-    }
-
-    public void stopOpen(Player player) {
-        if (!isRemoved() && !player.isSpectator()) {
-            openersCounter.decrementOpeners(player, getLevel(), getBlockPos(), getBlockState());
-        }
-    }
-
-    /** Called from {@link BulkStorageContainerBlock#onRemove} to force-close all openers. */
-    public void recheckOpeners(Level level, BlockPos pos, BlockState state) {
-        openersCounter.recheckOpeners(level, pos, state);
-    }
-
-    // -------------------------------------------------------------------------
-    // Block event (server → client open-count sync)
-    // -------------------------------------------------------------------------
-
-    @Override
-    public boolean triggerEvent(int id, int type) {
-        if (id == 1) {
-            openCount = type;
-            return true;
-        }
-        return super.triggerEvent(id, type);
-    }
-
-    // -------------------------------------------------------------------------
-    // Tickers
-    // -------------------------------------------------------------------------
-
-    public static void serverTick(Level level, BlockPos pos, BlockState state, BulkStorageContainerBlockEntity be) {
-        be.openersCounter.recheckOpeners(level, pos, state);
-    }
-
-    public static void clientTick(Level level, BlockPos pos, BlockState state, BulkStorageContainerBlockEntity be) {
-        be.prevLidAngle = be.lidAngle;
-        if (be.openCount > 0 && be.lidAngle < 1f) {
-            be.lidAngle = Math.min(1f, be.lidAngle + 0.1f);
-        } else if (be.openCount == 0 && be.lidAngle > 0f) {
-            be.lidAngle = Math.max(0f, be.lidAngle - 0.1f);
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Constructor
-    // -------------------------------------------------------------------------
 
     public BulkStorageContainerBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.BULK_STORAGE_CONTAINER_BE_TYPE.get(), pos, state);

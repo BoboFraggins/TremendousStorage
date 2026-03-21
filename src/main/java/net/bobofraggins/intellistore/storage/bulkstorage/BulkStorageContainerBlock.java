@@ -1,11 +1,11 @@
 package net.bobofraggins.intellistore.storage.bulkstorage;
 
 import com.mojang.serialization.MapCodec;
-import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -13,8 +13,6 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -64,25 +62,7 @@ public class BulkStorageContainerBlock extends BaseEntityBlock implements Networ
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
-    }
-
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
-            Level level, BlockState state, BlockEntityType<T> type) {
-        return createTickerHelper(
-                type,
-                Registration.BULK_STORAGE_CONTAINER_BE_TYPE.get(),
-                level.isClientSide()
-                        ? BulkStorageContainerBlockEntity::clientTick
-                        : BulkStorageContainerBlockEntity::serverTick);
-    }
-
-    @Override
-    public boolean triggerEvent(BlockState state, Level level, BlockPos pos, int id, int param) {
-        super.triggerEvent(state, level, pos, id, param);
-        BlockEntity be = level.getBlockEntity(pos);
-        return be != null && be.triggerEvent(id, param);
+        return RenderShape.MODEL;
     }
 
     @Override
@@ -102,20 +82,9 @@ public class BulkStorageContainerBlock extends BaseEntityBlock implements Networ
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
-        if (level.getBlockEntity(pos) instanceof BulkStorageContainerBlockEntity be) {
-            be.startOpen(player);
-            player.openMenu(be, buf -> buf.writeBlockPos(pos));
+        if (level.getBlockEntity(pos) instanceof MenuProvider mp) {
+            player.openMenu(mp, buf -> buf.writeBlockPos(pos));
         }
         return InteractionResult.SUCCESS;
-    }
-
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof BulkStorageContainerBlockEntity be) {
-                be.recheckOpeners(level, pos, state);
-            }
-        }
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }
