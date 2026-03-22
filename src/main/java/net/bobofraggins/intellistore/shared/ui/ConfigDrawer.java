@@ -88,38 +88,40 @@ public class ConfigDrawer {
         if (p <= 0.001f) return;
 
         int drawerX = dialogX - WIDTH;
-        int drawerH = dialogH;
+        int drawerTop = dialogY + 10;
+        int drawerH = dialogH - 20;
 
-        // Scissor to the currently-visible portion (slides open from right to left)
+        // Scissor to the currently-visible portion (slides open from right to left).
+        // Right boundary extends 1 px into the dialog border to eliminate the seam.
         int visibleLeft = dialogX - Math.round(WIDTH * p);
-        graphics.enableScissor(visibleLeft, dialogY, dialogX, dialogY + drawerH);
+        graphics.enableScissor(visibleLeft, drawerTop, dialogX + 1, drawerTop + drawerH);
 
-        // Body fill
-        graphics.fill(drawerX + CORNER, dialogY + CORNER, dialogX, dialogY + drawerH - CORNER, COLOR_BODY);
+        // Body fill — extend 1 px right to cover the dialog's left border pixel
+        graphics.fill(drawerX + CORNER, drawerTop + CORNER, dialogX + 1, drawerTop + drawerH - CORNER, COLOR_BODY);
 
         // Top-left corner + top edge
-        graphics.blit(TEX_CORNER_TL, drawerX, dialogY, 0, 0, CORNER, CORNER, CORNER, CORNER);
+        graphics.blit(TEX_CORNER_TL, drawerX, drawerTop, 0, 0, CORNER, CORNER, CORNER, CORNER);
         int edgeW = WIDTH - CORNER;
         for (int px = 0; px < edgeW; px++) {
-            graphics.blit(TEX_EDGE_TOP, drawerX + CORNER + px, dialogY, 0, 0, 1, CORNER, 1, CORNER);
+            graphics.blit(TEX_EDGE_TOP, drawerX + CORNER + px, drawerTop, 0, 0, 1, CORNER, 1, CORNER);
         }
 
         // Left edge
         int midH = drawerH - 2 * CORNER;
         for (int py = 0; py < midH; py++) {
-            graphics.blit(TEX_EDGE_LEFT, drawerX, dialogY + CORNER + py, 0, 0, CORNER, 1, CORNER, 1);
+            graphics.blit(TEX_EDGE_LEFT, drawerX, drawerTop + CORNER + py, 0, 0, CORNER, 1, CORNER, 1);
         }
 
         // Bottom-left corner + bottom edge
-        graphics.blit(TEX_CORNER_BL, drawerX, dialogY + drawerH - CORNER, 0, 0, CORNER, CORNER, CORNER, CORNER);
+        graphics.blit(TEX_CORNER_BL, drawerX, drawerTop + drawerH - CORNER, 0, 0, CORNER, CORNER, CORNER, CORNER);
         for (int px = 0; px < edgeW; px++) {
             graphics.blit(
-                    TEX_EDGE_BOTTOM, drawerX + CORNER + px, dialogY + drawerH - CORNER, 0, 0, 1, CORNER, 1, CORNER);
+                    TEX_EDGE_BOTTOM, drawerX + CORNER + px, drawerTop + drawerH - CORNER, 0, 0, 1, CORNER, 1, CORNER);
         }
 
-        // Pane content
+        // Pane content — offset by top inset
         for (int i = 0; i < panes.size(); i++) {
-            int paneAbsY = dialogY + paneYOffsets[i];
+            int paneAbsY = dialogY + 10 + paneYOffsets[i];
             int localMouseX = mouseX - drawerX;
             int localMouseY = mouseY - paneAbsY;
             graphics.pose().pushPose();
@@ -141,10 +143,10 @@ public class ConfigDrawer {
 
         int drawerX = dialogX - WIDTH;
         if (mouseX < drawerX || mouseX >= dialogX) return false;
-        if (mouseY < dialogY || mouseY >= dialogY + dialogH) return false;
+        if (mouseY < dialogY + 10 || mouseY >= dialogY + dialogH - 10) return false;
 
         for (int i = 0; i < panes.size(); i++) {
-            int paneAbsY = dialogY + paneYOffsets[i];
+            int paneAbsY = dialogY + 10 + paneYOffsets[i];
             int paneH = panes.get(i).preferredHeight();
             if (mouseY >= paneAbsY && mouseY < paneAbsY + paneH) {
                 return panes.get(i).mouseClicked(mouseX - drawerX, mouseY - paneAbsY, button);

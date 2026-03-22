@@ -125,12 +125,8 @@ public class PriorityControl extends AbstractContainerMenu implements IDialogPan
         boolean upActive = selected < Priority.VALUES.length - 1;
         drawButton(graphics, font, UP_BTN_X, ROW_Y, BTN_W, BTN_H, "▲", upActive);
 
-        // Inset label box
-        graphics.fill(LBL_X, ROW_Y, LBL_X + LBL_W, ROW_Y + 1, 0xFF373737); // top
-        graphics.fill(LBL_X, ROW_Y + 1, LBL_X + 1, ROW_Y + BTN_H, 0xFF373737); // left
-        graphics.fill(LBL_X, ROW_Y + BTN_H, LBL_X + LBL_W + 1, ROW_Y + BTN_H + 1, 0xFFFFFFFF); // bottom
-        graphics.fill(LBL_X + LBL_W, ROW_Y, LBL_X + LBL_W + 1, ROW_Y + BTN_H, 0xFFFFFFFF); // right
-        graphics.fill(LBL_X + 1, ROW_Y + 1, LBL_X + LBL_W, ROW_Y + BTN_H, 0xFF8B8B8B); // fill
+        // Label box (no border, matches dialog background)
+        graphics.fill(LBL_X, ROW_Y, LBL_X + LBL_W, ROW_Y + BTN_H, 0xFFC6C6C6);
 
         // Priority name centred in label box
         Priority current = Priority.fromOrdinal(selected);

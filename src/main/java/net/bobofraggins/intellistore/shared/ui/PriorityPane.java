@@ -1,14 +1,12 @@
 package net.bobofraggins.intellistore.shared.ui;
 
+import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
-import net.bobofraggins.intellistore.shared.network.SetPriorityPacket;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Dialog pane that renders a priority control (▼ / ▲ buttons and current priority label).
@@ -42,11 +40,11 @@ public class PriorityPane implements IDialogPane {
             ResourceLocation.fromNamespaceAndPath("intellistore", "textures/gui/widget/button_up_disabled.png");
 
     private final IntSupplier priorityGetter;
-    private final BlockPos pos;
+    private final IntConsumer prioritySetter;
 
-    public PriorityPane(IntSupplier priorityGetter, BlockPos pos) {
+    public PriorityPane(IntSupplier priorityGetter, IntConsumer prioritySetter) {
         this.priorityGetter = priorityGetter;
-        this.pos = pos;
+        this.prioritySetter = prioritySetter;
     }
 
     // -------------------------------------------------------------------------
@@ -85,12 +83,8 @@ public class PriorityPane implements IDialogPane {
         graphics.blit(downTex, downBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
         graphics.blit(upTex, upBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
 
-        // Inset label box
-        graphics.fill(lblX, ROW_Y, lblX + LBL_W, ROW_Y + 1, 0xFF373737);
-        graphics.fill(lblX, ROW_Y + 1, lblX + 1, ROW_Y + BTN_H, 0xFF373737);
-        graphics.fill(lblX, ROW_Y + BTN_H, lblX + LBL_W + 1, ROW_Y + BTN_H + 1, 0xFFFFFFFF);
-        graphics.fill(lblX + LBL_W, ROW_Y, lblX + LBL_W + 1, ROW_Y + BTN_H, 0xFFFFFFFF);
-        graphics.fill(lblX + 1, ROW_Y + 1, lblX + LBL_W, ROW_Y + BTN_H, 0xFF8B8B8B);
+        // Label box (no border)
+        graphics.fill(lblX, ROW_Y, lblX + LBL_W, ROW_Y + BTN_H, 0xFFC6C6C6);
 
         Priority current = Priority.fromOrdinal(selected);
         String name = Component.translatable(current.translationKey()).getString();
@@ -108,12 +102,11 @@ public class PriorityPane implements IDialogPane {
         int upBtnX = rowX + BTN_W + GAP + LBL_W + GAP;
 
         if (isInButton(localX, localY, downBtnX)) {
-            if (selected > 0) PacketDistributor.sendToServer(new SetPriorityPacket(pos, selected - 1));
+            if (selected > 0) prioritySetter.accept(selected - 1);
             return true;
         }
         if (isInButton(localX, localY, upBtnX)) {
-            if (selected < Priority.VALUES.length - 1)
-                PacketDistributor.sendToServer(new SetPriorityPacket(pos, selected + 1));
+            if (selected < Priority.VALUES.length - 1) prioritySetter.accept(selected + 1);
             return true;
         }
         return false;

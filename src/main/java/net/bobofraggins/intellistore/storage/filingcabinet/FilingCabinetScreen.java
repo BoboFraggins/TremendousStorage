@@ -1,5 +1,6 @@
 package net.bobofraggins.intellistore.storage.filingcabinet;
 
+import net.bobofraggins.intellistore.shared.network.SetPriorityPacket;
 import net.bobofraggins.intellistore.shared.network.SetVoidExcessPacket;
 import net.bobofraggins.intellistore.shared.ui.AbstractFilingCabinetScreen;
 import net.bobofraggins.intellistore.shared.ui.ConfigDrawer;
@@ -39,6 +40,8 @@ public class FilingCabinetScreen extends AbstractFilingCabinetScreen<FilingCabin
                             menu.setVoidExcess(next);
                             PacketDistributor.sendToServer(new SetVoidExcessPacket(menu.getPos(), next));
                         }),
-                        new PriorityPane(menu::getPriority, menu.getPos())));
+                        new PriorityPane(
+                                menu::getPriority,
+                                p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p)))));
     }
 }

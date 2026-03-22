@@ -7,10 +7,9 @@ import net.bobofraggins.intellistore.shared.network.RequestSatContentsPacket;
 import net.bobofraggins.intellistore.shared.network.SatContentsPacket;
 import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.bobofraggins.intellistore.shared.ui.PlayerInventoryPane;
+import net.bobofraggins.intellistore.shared.ui.PressableIconButton;
 import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -63,15 +62,14 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         dialog.init(leftPos, topPos);
 
         // Quick stack button above the player inventory, right-aligned
-        addRenderableWidget(new ImageButton(
+        addRenderableWidget(new PressableIconButton(
                 leftPos + dialog.totalWidth() - 26,
                 dialog.getPaneAbsY(2) - 20,
                 16,
                 16,
-                new WidgetSprites(
-                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack"),
-                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack_focused")),
-                btn -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getNiPos(), true))));
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack"),
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack_focused"),
+                () -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getNiPos(), true))));
 
         if (menu.hasNetwork()) {
             PacketDistributor.sendToServer(new RequestSatContentsPacket(menu.getNiPos()));

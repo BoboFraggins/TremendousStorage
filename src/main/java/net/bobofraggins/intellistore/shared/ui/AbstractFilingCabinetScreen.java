@@ -3,8 +3,6 @@ package net.bobofraggins.intellistore.shared.ui;
 import net.bobofraggins.intellistore.shared.input.QuickStackClientEvents;
 import net.bobofraggins.intellistore.shared.network.QuickStackFilingCabinetPacket;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -55,26 +53,24 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         configDrawer.init(leftPos, topPos, imageHeight);
 
         // Config toggle button in the top-left of the title bar
-        addRenderableWidget(new ImageButton(
+        addRenderableWidget(new PressableIconButton(
                 leftPos + 8,
                 topPos + 6,
                 16,
                 16,
-                new WidgetSprites(
-                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config"),
-                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config_focused")),
-                btn -> configDrawer.toggle()));
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config"),
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config_focused"),
+                () -> configDrawer.toggle()));
 
         // Quick stack button above the player inventory, right-aligned
-        addRenderableWidget(new ImageButton(
+        addRenderableWidget(new PressableIconButton(
                 leftPos + BG_WIDTH - 26,
                 topPos + playerInvY - 20,
                 16,
                 16,
-                new WidgetSprites(
-                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack"),
-                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack_focused")),
-                btn -> PacketDistributor.sendToServer(new QuickStackFilingCabinetPacket())));
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack"),
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack_focused"),
+                () -> PacketDistributor.sendToServer(new QuickStackFilingCabinetPacket())));
     }
 
     @Override

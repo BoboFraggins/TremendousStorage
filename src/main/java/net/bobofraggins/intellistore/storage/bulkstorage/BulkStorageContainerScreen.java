@@ -6,16 +6,16 @@ import java.util.List;
 import net.bobofraggins.intellistore.shared.input.QuickStackClientEvents;
 import net.bobofraggins.intellistore.shared.network.LocalStorageInteractPacket;
 import net.bobofraggins.intellistore.shared.network.QuickStackPacket;
+import net.bobofraggins.intellistore.shared.network.SetPriorityPacket;
 import net.bobofraggins.intellistore.shared.ui.ConfigDrawer;
 import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.bobofraggins.intellistore.shared.ui.LocalInventoryPane;
 import net.bobofraggins.intellistore.shared.ui.PlayerInventoryPane;
+import net.bobofraggins.intellistore.shared.ui.PressableIconButton;
 import net.bobofraggins.intellistore.shared.ui.PriorityPane;
 import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -46,7 +46,8 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
                 new PlayerInventoryPane());
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
-        configDrawer = new ConfigDrawer(new PriorityPane(menu::getPriority, menu.getPos()));
+        configDrawer = new ConfigDrawer(new PriorityPane(
+                menu::getPriority, p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
     }
 
     @Override
@@ -57,25 +58,23 @@ public class BulkStorageContainerScreen extends AbstractContainerScreen<BulkStor
         inventoryPane.setClickHandler((idx, amount, toCursor) -> PacketDistributor.sendToServer(
                 new LocalStorageInteractPacket(menu.getPos(), true, idx, amount, toCursor)));
 
-        addRenderableWidget(new ImageButton(
+        addRenderableWidget(new PressableIconButton(
                 leftPos + 8,
                 topPos + 6,
                 16,
                 16,
-                new WidgetSprites(
-                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config"),
-                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config_focused")),
-                btn -> configDrawer.toggle()));
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config"),
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config_focused"),
+                () -> configDrawer.toggle()));
 
-        addRenderableWidget(new ImageButton(
+        addRenderableWidget(new PressableIconButton(
                 leftPos + dialog.totalWidth() - 26,
                 dialog.getPaneAbsY(3) - 20,
                 16,
                 16,
-                new WidgetSprites(
-                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack"),
-                        ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack_focused")),
-                btn -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false))));
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack"),
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_quick_stack_focused"),
+                () -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false))));
     }
 
     @Override

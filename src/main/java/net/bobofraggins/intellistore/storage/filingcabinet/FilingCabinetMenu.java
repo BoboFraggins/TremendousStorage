@@ -36,21 +36,16 @@ public class FilingCabinetMenu extends AbstractFilingCabinetMenu {
         this.pos = pos;
         this.be = be;
 
-        boolean[] voidExcessHolder = {be.isVoidExcess()};
-        int[] priorityHolder = {be.getPriority().ordinal()};
         this.data = new SimpleContainerData(2) {
             @Override
             public int get(int index) {
-                if (index == 0) return voidExcessHolder[0] ? 1 : 0;
-                if (index == 1) return priorityHolder[0];
+                if (index == 0) return be.isVoidExcess() ? 1 : 0;
+                if (index == 1) return be.getPriority().ordinal();
                 return 0;
             }
 
             @Override
-            public void set(int index, int value) {
-                if (index == 0) voidExcessHolder[0] = (value != 0);
-                else if (index == 1) priorityHolder[0] = value;
-            }
+            public void set(int index, int value) {}
 
             @Override
             public int getCount() {
