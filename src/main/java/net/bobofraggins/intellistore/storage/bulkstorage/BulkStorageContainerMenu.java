@@ -49,8 +49,7 @@ public class BulkStorageContainerMenu extends AbstractContainerMenu {
     }
 
     /**
-     * Internal constructor that computes player inventory slot Y positions from the given row
-     * count.
+     * Internal constructor that computes player inventory slot Y positions from the given row count.
      *
      * <p>Layout: title(17) + blank(7) + invPane(rows×18+5) + blank(20) + playerInv
      * → playerInvY = 49 + rows×18.
@@ -83,6 +82,16 @@ public class BulkStorageContainerMenu extends AbstractContainerMenu {
 
     public int getPriority() {
         return data.get(0);
+    }
+
+    @Override
+    public void removed(Player player) {
+        super.removed(player);
+        if (!player.level().isClientSide()) {
+            if (player.level().getBlockEntity(pos) instanceof BulkStorageContainerBlockEntity be) {
+                be.stopOpen(player);
+            }
+        }
     }
 
     @Override

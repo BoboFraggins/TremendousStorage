@@ -4,6 +4,7 @@ import com.hollingsworth.arsnouveau.api.source.ISourceCap;
 import com.hollingsworth.arsnouveau.setup.registry.CapabilityRegistry;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
+import net.bobofraggins.intellistore.shared.storage.TieredBlockItem;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -74,7 +75,8 @@ public final class SourceTankRegistration {
                         .sound(SoundType.GLASS)
                         .noOcclusion()));
 
-        SOURCE_TANK_ITEM = ITEMS.registerSimpleBlockItem("source_tank", SOURCE_TANK);
+        SOURCE_TANK_ITEM =
+                ITEMS.register("source_tank", () -> new TieredBlockItem(SOURCE_TANK.get(), new Item.Properties()));
 
         SOURCE_TANK_BE_TYPE = BLOCK_ENTITY_TYPES.register(
                 "source_tank", () -> BlockEntityType.Builder.of(SourceTankBlockEntity::new, SOURCE_TANK.get())

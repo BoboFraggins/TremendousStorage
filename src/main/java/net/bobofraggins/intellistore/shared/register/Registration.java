@@ -18,6 +18,7 @@ import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineEnergyHa
 import net.bobofraggins.intellistore.shared.config.IntelliStoreConfig;
 import net.bobofraggins.intellistore.shared.loot.LootModifiers;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
+import net.bobofraggins.intellistore.shared.storage.TieredBlockItem;
 import net.bobofraggins.intellistore.shared.ui.PriorityControl;
 import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
@@ -258,7 +259,7 @@ public final class Registration {
                     .sound(SoundType.METAL)));
 
     public static final DeferredHolder<Item, BlockItem> JUNK_DRAWER_ITEM =
-            ITEMS.registerSimpleBlockItem("junk_drawer", JUNK_DRAWER);
+            ITEMS.register("junk_drawer", () -> new TieredBlockItem(JUNK_DRAWER.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<JunkDrawerBlockEntity>> JUNK_DRAWER_BE_TYPE =
             BLOCK_ENTITY_TYPES.register(
@@ -272,8 +273,8 @@ public final class Registration {
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)));
 
-    public static final DeferredHolder<Item, BlockItem> BULK_STORAGE_CONTAINER_ITEM =
-            ITEMS.registerSimpleBlockItem("bulk_storage_container", BULK_STORAGE_CONTAINER);
+    public static final DeferredHolder<Item, BlockItem> BULK_STORAGE_CONTAINER_ITEM = ITEMS.register(
+            "bulk_storage_container", () -> new TieredBlockItem(BULK_STORAGE_CONTAINER.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BulkStorageContainerBlockEntity>>
             BULK_STORAGE_CONTAINER_BE_TYPE =
@@ -326,7 +327,7 @@ public final class Registration {
                     .sound(SoundType.GLASS)));
 
     public static final DeferredHolder<Item, BlockItem> FLUID_TANK_ITEM =
-            ITEMS.registerSimpleBlockItem("fluid_tank", FLUID_TANK);
+            ITEMS.register("fluid_tank", () -> new TieredBlockItem(FLUID_TANK.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidTankBlockEntity>> FLUID_TANK_BE_TYPE =
             BLOCK_ENTITY_TYPES.register(

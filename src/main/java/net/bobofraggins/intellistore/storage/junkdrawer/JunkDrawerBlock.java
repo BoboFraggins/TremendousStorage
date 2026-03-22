@@ -1,12 +1,15 @@
 package net.bobofraggins.intellistore.storage.junkdrawer;
 
 import com.mojang.serialization.MapCodec;
+import java.util.List;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -17,6 +20,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
@@ -76,6 +81,20 @@ public class JunkDrawerBlock extends BaseEntityBlock implements NetworkConnector
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof JunkDrawerBlockEntity be) {
             be.setChanged();
         }
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        List<ItemStack> drops = super.getDrops(state, params);
+        BlockEntity be = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+        if (be instanceof JunkDrawerBlockEntity junk) {
+            for (ItemStack drop : drops) {
+                if (drop.getItem() instanceof BlockItem) {
+                    junk.saveToItem(drop, params.getLevel().registryAccess());
+                }
+            }
+        }
+        return drops;
     }
 
     @Override

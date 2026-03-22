@@ -3,6 +3,7 @@ package net.bobofraggins.intellistore.external.mekanism;
 import mekanism.api.chemical.IChemicalHandler;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
+import net.bobofraggins.intellistore.shared.storage.TieredBlockItem;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -83,7 +84,7 @@ public final class GasTankRegistration {
                         .sound(SoundType.GLASS)
                         .noOcclusion()));
 
-        GAS_TANK_ITEM = ITEMS.registerSimpleBlockItem("gas_tank", GAS_TANK);
+        GAS_TANK_ITEM = ITEMS.register("gas_tank", () -> new TieredBlockItem(GAS_TANK.get(), new Item.Properties()));
 
         GAS_TANK_BE_TYPE = BLOCK_ENTITY_TYPES.register(
                 "gas_tank", () -> BlockEntityType.Builder.of(GasTankBlockEntity::new, GAS_TANK.get())
