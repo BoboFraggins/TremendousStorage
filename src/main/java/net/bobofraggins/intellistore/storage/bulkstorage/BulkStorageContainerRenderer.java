@@ -85,7 +85,19 @@ public class BulkStorageContainerRenderer
         float r = ((color >> 16) & 0xFF) / 255f;
         float g = ((color >> 8) & 0xFF) / 255f;
         float b = (color & 0xFF) / 255f;
-        renderer.renderModel(poseStack.last(), consumer, null, lidModel, r, g, b, packedLight, packedOverlay);
+        // Apply the same directional shading the chunk renderer uses for the body, so the lid
+        // brightness matches the body face it sits above.
+        float shade = level != null ? level.getShade(facing, true) : 1f;
+        renderer.renderModel(
+                poseStack.last(),
+                consumer,
+                null,
+                lidModel,
+                r * shade,
+                g * shade,
+                b * shade,
+                packedLight,
+                packedOverlay);
 
         poseStack.popPose();
     }
