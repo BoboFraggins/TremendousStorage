@@ -4,8 +4,8 @@
 	"parent": "bulk_storage",
 	"texture_size": [128, 128],
 	"textures": {
-		"0": "textures/bulk_storage_texture",
-		"particle": "textures/bulk_storage_texture"
+		"0": "intellistore:block/bulk_storage_texture",
+		"particle": "intellistore:block/bulk_storage_texture"
 	},
 	"elements": [
 		{
