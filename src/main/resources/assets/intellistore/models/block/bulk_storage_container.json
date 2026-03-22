@@ -1,7 +1,7 @@
 {
   "textures": {
-    "particle": "intellistore:block/bulk_storage_container",
-    "texture": "intellistore:block/bulk_storage_container"
+    "particle": "intellistore:block/bulk_storage_texture",
+    "texture": "intellistore:block/bulk_storage_texture"
   },
   "elements": [
     {
