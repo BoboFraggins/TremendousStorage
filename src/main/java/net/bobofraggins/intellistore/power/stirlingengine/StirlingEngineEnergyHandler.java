@@ -45,7 +45,7 @@ public class StirlingEngineEnergyHandler implements IEnergyStorage {
 
     @Override
     public int getMaxEnergyStored() {
-        return StirlingEngineBlockEntity.MAX_ENERGY;
+        return be.getMaxEnergy();
     }
 
     @Override

@@ -572,7 +572,7 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> STIRLING_ENGINE_ITEM =
-            ITEMS.registerSimpleBlockItem("stirling_engine", STIRLING_ENGINE);
+            ITEMS.register("stirling_engine", () -> new TieredBlockItem(STIRLING_ENGINE.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StirlingEngineBlockEntity>>
             STIRLING_ENGINE_BE_TYPE = BLOCK_ENTITY_TYPES.register("stirling_engine", () -> BlockEntityType.Builder.of(

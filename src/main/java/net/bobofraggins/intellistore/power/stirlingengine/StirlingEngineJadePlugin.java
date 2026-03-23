@@ -1,5 +1,6 @@
 package net.bobofraggins.intellistore.power.stirlingengine;
 
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -43,12 +44,16 @@ public class StirlingEngineJadePlugin implements IWailaPlugin {
 
         private static final String KEY_HEATED = "Heated";
         private static final String KEY_STORED = "EnergyStored";
+        private static final String KEY_MAX = "MaxEnergy";
+        private static final String KEY_TIER = "Tier";
 
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
             if (!(accessor.getBlockEntity() instanceof StirlingEngineBlockEntity be)) return;
             data.putBoolean(KEY_HEATED, be.isHeated());
             data.putInt(KEY_STORED, be.getEnergyStored());
+            data.putInt(KEY_MAX, be.getMaxEnergy());
+            data.putString(KEY_TIER, be.getTier().getId());
         }
 
         @Override
@@ -61,15 +66,21 @@ public class StirlingEngineJadePlugin implements IWailaPlugin {
             CompoundTag data = accessor.getServerData();
             boolean heated = data.getBoolean(KEY_HEATED);
             int stored = data.getInt(KEY_STORED);
+            int max = data.getInt(KEY_MAX);
+            StorageTier tier = StorageTier.fromId(data.getString(KEY_TIER));
 
+            if (tier != StorageTier.PAPER) {
+                String tierName = Character.toUpperCase(tier.getId().charAt(0))
+                        + tier.getId().substring(1);
+                tooltip.add(Component.literal(tierName));
+            }
             if (!heated) {
                 tooltip.add(Component.translatable("jade.intellistore.stirling_engine.hint"));
             } else {
                 tooltip.add(Component.translatable(
                         "jade.intellistore.stirling_engine.stored",
                         net.bobofraggins.intellistore.shared.util.CountFormat.format(stored),
-                        net.bobofraggins.intellistore.shared.util.CountFormat.format(
-                                StirlingEngineBlockEntity.MAX_ENERGY)));
+                        net.bobofraggins.intellistore.shared.util.CountFormat.format(max)));
             }
         }
     }

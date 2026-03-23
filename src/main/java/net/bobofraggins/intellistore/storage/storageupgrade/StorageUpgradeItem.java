@@ -1,5 +1,6 @@
 package net.bobofraggins.intellistore.storage.storageupgrade;
 
+import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
@@ -46,6 +47,11 @@ public class StorageUpgradeItem extends Item {
         } else if (be instanceof JunkDrawerBlockEntity junk && junk.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 junk.setTier(to);
+            }
+            matches = true;
+        } else if (be instanceof StirlingEngineBlockEntity engine && engine.getTier() == from) {
+            if (!ctx.getLevel().isClientSide()) {
+                engine.setTier(to);
             }
             matches = true;
         }

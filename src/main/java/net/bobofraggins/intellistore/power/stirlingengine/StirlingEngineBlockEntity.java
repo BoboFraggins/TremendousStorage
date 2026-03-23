@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.power.stirlingengine;
 
 import net.bobofraggins.intellistore.shared.config.IntelliStoreConfig;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -34,10 +35,12 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
  */
 public class StirlingEngineBlockEntity extends BlockEntity {
 
-    public static final int MAX_ENERGY = 100_000;
-    /** Max FE pushed per adjacent block per tick. */
-    private static final int PUSH_PER_TICK = 100;
+    /** Base buffer capacity at PAPER tier. Scales 4× per tier via {@link StorageTier#getScaledCapacity}. */
+    public static final int BASE_MAX_ENERGY = 100_000;
+    /** Base FE pushed per adjacent block per tick at PAPER tier. Scales 4× per tier. */
+    private static final int BASE_PUSH_PER_TICK = 100;
 
+    private StorageTier tier = StorageTier.PAPER;
     private int energyStored = 0;
 
     /** True when the block below is a recognised heat source. Synced to client. */
@@ -62,8 +65,9 @@ public class StirlingEngineBlockEntity extends BlockEntity {
         boolean wasHeated = heated;
         heated = generation > 0;
 
-        if (heated && energyStored < MAX_ENERGY) {
-            energyStored = Math.min(MAX_ENERGY, energyStored + generation);
+        int maxEnergy = getMaxEnergy();
+        if (heated && energyStored < maxEnergy) {
+            energyStored = Math.min(maxEnergy, energyStored + generation);
         }
 
         pushEnergy();
@@ -74,13 +78,15 @@ public class StirlingEngineBlockEntity extends BlockEntity {
         }
     }
 
-    private int getHeatGeneration() {
+    public int getHeatGeneration() {
         BlockState below = level.getBlockState(worldPosition.below());
-        if (below.is(Blocks.LAVA)) return 50;
-        if (below.is(Blocks.MAGMA_BLOCK)) return 25;
-        if (below.is(Blocks.CAMPFIRE) && below.getValue(CampfireBlock.LIT)) return 15;
-        if (below.is(Blocks.SOUL_CAMPFIRE) && below.getValue(CampfireBlock.LIT)) return 15;
-        return 0;
+        int base;
+        if (below.is(Blocks.LAVA)) base = 50;
+        else if (below.is(Blocks.MAGMA_BLOCK)) base = 25;
+        else if ((below.is(Blocks.CAMPFIRE) || below.is(Blocks.SOUL_CAMPFIRE)) && below.getValue(CampfireBlock.LIT))
+            base = 15;
+        else return 0;
+        return (int) tier.getScaledCapacity(base);
     }
 
     private void pushEnergy() {
@@ -89,7 +95,7 @@ public class StirlingEngineBlockEntity extends BlockEntity {
             BlockPos adjPos = worldPosition.relative(dir);
             IEnergyStorage storage = level.getCapability(Capabilities.EnergyStorage.BLOCK, adjPos, dir.getOpposite());
             if (storage == null || !storage.canReceive()) continue;
-            int toSend = Math.min(energyStored, PUSH_PER_TICK);
+            int toSend = Math.min(energyStored, (int) tier.getScaledCapacity(BASE_PUSH_PER_TICK));
             int accepted = storage.receiveEnergy(toSend, false);
             energyStored -= accepted;
             if (energyStored <= 0) break;
@@ -111,6 +117,15 @@ public class StirlingEngineBlockEntity extends BlockEntity {
     // Accessors
     // -------------------------------------------------------------------------
 
+    public StorageTier getTier() {
+        return tier;
+    }
+
+    public void setTier(StorageTier tier) {
+        this.tier = tier;
+        setChanged();
+    }
+
     public boolean isHeated() {
         return heated;
     }
@@ -120,7 +135,7 @@ public class StirlingEngineBlockEntity extends BlockEntity {
     }
 
     public int getMaxEnergy() {
-        return MAX_ENERGY;
+        return (int) tier.getScaledCapacity(BASE_MAX_ENERGY);
     }
 
     /**
@@ -128,7 +143,7 @@ public class StirlingEngineBlockEntity extends BlockEntity {
      * Returns the amount actually accepted.
      */
     public int receiveEnergy(int maxReceive, boolean simulate) {
-        int space = MAX_ENERGY - energyStored;
+        int space = getMaxEnergy() - energyStored;
         int accepted = Math.min(maxReceive, space);
         if (!simulate && accepted > 0) {
             energyStored += accepted;
@@ -163,6 +178,7 @@ public class StirlingEngineBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
+        tag.putString("Tier", tier.getId());
         tag.putInt("EnergyStored", energyStored);
         tag.putBoolean("Heated", heated);
     }
@@ -170,6 +186,7 @@ public class StirlingEngineBlockEntity extends BlockEntity {
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+        tier = StorageTier.fromId(tag.getString("Tier"));
         energyStored = tag.getInt("EnergyStored");
         heated = tag.getBoolean("Heated");
     }
