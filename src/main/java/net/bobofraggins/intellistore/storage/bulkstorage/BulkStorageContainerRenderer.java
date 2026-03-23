@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.storage.bulkstorage;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -13,9 +14,12 @@ import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
+import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
  * Renders only the animated lid of the Bulk Storage Container.
@@ -55,17 +59,16 @@ public class BulkStorageContainerRenderer
 
         Minecraft mc = Minecraft.getInstance();
         BakedModel lidModel = mc.getModelManager().getModel(LID_MODEL);
-        var renderer = mc.getBlockRenderer().getModelRenderer();
-        var consumer = bufferSource.getBuffer(RenderType.solid());
+        VertexConsumer consumer = bufferSource.getBuffer(RenderType.solid());
 
-        // The block is solid/opaque, so the light level at its own interior position is 0.
-        // Sample from above the block to get the ambient light the lid is actually exposed to.
+        // Sample light at the block's own position, same as the chunk renderer does for the body.
         Level level = be.getLevel();
         if (level != null) {
-            packedLight = LevelRenderer.getLightColor(level, be.getBlockPos().above());
+            packedLight = LevelRenderer.getLightColor(level, be.getBlockPos());
         }
 
-        Direction facing = be.getBlockState().getValue(BulkStorageContainerBlock.FACING);
+        BlockState blockState = be.getBlockState();
+        Direction facing = blockState.getValue(BulkStorageContainerBlock.FACING);
         float yRot = facingYRot(facing);
 
         poseStack.pushPose();
@@ -85,21 +88,69 @@ public class BulkStorageContainerRenderer
         float r = ((color >> 16) & 0xFF) / 255f;
         float g = ((color >> 8) & 0xFF) / 255f;
         float b = (color & 0xFF) / 255f;
-        // Apply the same directional shading the chunk renderer uses for the body, so the lid
-        // brightness matches the body face it sits above.
-        float shade = level != null ? level.getShade(facing, true) : 1f;
-        renderer.renderModel(
-                poseStack.last(),
-                consumer,
-                null,
-                lidModel,
-                r * shade,
-                g * shade,
-                b * shade,
-                packedLight,
-                packedOverlay);
+
+        // Render each quad with per-face directional shading, matching what the chunk renderer
+        // applies to the body. Tinted quads (tintindex >= 0) receive tier color × shade;
+        // untinted quads receive shade only (white × shade).
+        PoseStack.Pose pose = poseStack.last();
+        RandomSource random = RandomSource.create();
+        renderQuadsWithShading(
+                consumer, pose, lidModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
 
         poseStack.popPose();
+    }
+
+    /**
+     * Renders all quads of the given model with per-face directional shading, matching the
+     * chunk renderer's behavior. Tinted quads receive the tier color × shade; untinted quads
+     * receive shade × white (1,1,1).
+     */
+    private static void renderQuadsWithShading(
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            BakedModel model,
+            BlockState blockState,
+            Level level,
+            float r,
+            float g,
+            float b,
+            int packedLight,
+            int packedOverlay,
+            RandomSource random) {
+        for (Direction dir : Direction.values()) {
+            random.setSeed(42L);
+            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.solid())) {
+                float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
+                float qr, qg, qb;
+                if (quad.getTintIndex() >= 0) {
+                    qr = r * shade;
+                    qg = g * shade;
+                    qb = b * shade;
+                } else {
+                    qr = shade;
+                    qg = shade;
+                    qb = shade;
+                }
+                consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, packedOverlay);
+            }
+        }
+        // Unculled quads
+        random.setSeed(42L);
+        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.solid())) {
+            Direction dir = quad.getDirection();
+            float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
+            float qr, qg, qb;
+            if (quad.getTintIndex() >= 0) {
+                qr = r * shade;
+                qg = g * shade;
+                qb = b * shade;
+            } else {
+                qr = shade;
+                qg = shade;
+                qb = shade;
+            }
+            consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, packedOverlay);
+        }
     }
 
     @Override
