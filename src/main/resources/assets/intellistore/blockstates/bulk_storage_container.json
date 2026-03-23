@@ -1,8 +1,12 @@
 {
-  "variants": {
-    "facing=north": { "model": "intellistore:block/bulk_storage_container_body" },
-    "facing=south": { "model": "intellistore:block/bulk_storage_container_body", "y": 180 },
-    "facing=west":  { "model": "intellistore:block/bulk_storage_container_body", "y": 270 },
-    "facing=east":  { "model": "intellistore:block/bulk_storage_container_body", "y": 90 }
-  }
+  "multipart": [
+    { "when": { "facing": "north" }, "apply": { "model": "intellistore:block/bulk_storage_container_body" } },
+    { "when": { "facing": "south" }, "apply": { "model": "intellistore:block/bulk_storage_container_body", "y": 180 } },
+    { "when": { "facing": "east" },  "apply": { "model": "intellistore:block/bulk_storage_container_body", "y": 90 } },
+    { "when": { "facing": "west" },  "apply": { "model": "intellistore:block/bulk_storage_container_body", "y": 270 } },
+    { "when": { "north": "true" }, "apply": { "model": "intellistore:block/bulk_storage_container_attachment" } },
+    { "when": { "south": "true" }, "apply": { "model": "intellistore:block/bulk_storage_container_attachment", "y": 180 } },
+    { "when": { "east": "true" },  "apply": { "model": "intellistore:block/bulk_storage_container_attachment", "y": 90 } },
+    { "when": { "west": "true" },  "apply": { "model": "intellistore:block/bulk_storage_container_attachment", "y": 270 } }
+  ]
 }

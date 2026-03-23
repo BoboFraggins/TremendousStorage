@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
+import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
@@ -21,6 +22,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -43,6 +45,13 @@ public class BulkStorageContainerBlock extends BaseEntityBlock implements Networ
 
     public static final MapCodec<BulkStorageContainerBlock> CODEC = simpleCodec(BulkStorageContainerBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final BooleanProperty NORTH = BooleanProperty.create("north");
+    public static final BooleanProperty SOUTH = BooleanProperty.create("south");
+    public static final BooleanProperty EAST = BooleanProperty.create("east");
+    public static final BooleanProperty WEST = BooleanProperty.create("west");
+
+    private static final Direction[] HORIZONTALS = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
+    private static final BooleanProperty[] H_PROPS = {NORTH, SOUTH, EAST, WEST};
 
     @Override
     public MapCodec<BulkStorageContainerBlock> codec() {
@@ -51,17 +60,36 @@ public class BulkStorageContainerBlock extends BaseEntityBlock implements Networ
 
     public BulkStorageContainerBlock(Properties props) {
         super(props);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
+        registerDefaultState(stateDefinition
+                .any()
+                .setValue(FACING, Direction.NORTH)
+                .setValue(NORTH, false)
+                .setValue(SOUTH, false)
+                .setValue(EAST, false)
+                .setValue(WEST, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, NORTH, SOUTH, EAST, WEST);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        return defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite());
+        Direction facing = ctx.getHorizontalDirection().getOpposite();
+        return computeConnections(defaultBlockState().setValue(FACING, facing), ctx.getLevel(), ctx.getClickedPos());
+    }
+
+    private BlockState computeConnections(BlockState state, Level level, BlockPos pos) {
+        for (int i = 0; i < HORIZONTALS.length; i++) {
+            state = state.setValue(H_PROPS[i], canConnect(level, pos, HORIZONTALS[i]));
+        }
+        return state;
+    }
+
+    private static boolean canConnect(Level level, BlockPos pos, Direction dir) {
+        Block neighbor = level.getBlockState(pos.relative(dir)).getBlock();
+        return neighbor instanceof TubeBlock || neighbor instanceof NetworkConnector;
     }
 
     @Override
@@ -105,8 +133,14 @@ public class BulkStorageContainerBlock extends BaseEntityBlock implements Networ
             Block neighborBlock,
             BlockPos neighborPos,
             boolean movedByPiston) {
-        if (!level.isClientSide() && level.getBlockEntity(pos) instanceof BulkStorageContainerBlockEntity be) {
-            be.setChanged();
+        if (!level.isClientSide()) {
+            BlockState updated = computeConnections(state, level, pos);
+            if (updated != state) {
+                level.setBlock(pos, updated, 2);
+            }
+            if (level.getBlockEntity(pos) instanceof BulkStorageContainerBlockEntity be) {
+                be.setChanged();
+            }
         }
     }
 
