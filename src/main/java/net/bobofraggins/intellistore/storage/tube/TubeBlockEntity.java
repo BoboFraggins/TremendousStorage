@@ -43,7 +43,7 @@ public class TubeBlockEntity extends BlockEntity {
     private static final int TRANSFER_INTERVAL = 20;
     private static final int PLACER_BREAKER_INTERVAL = 5;
     /** FE pushed per tick to an adjacent machine via any attachment face. */
-    private static final int ENERGY_DISTRIBUTION_RATE = 512;
+    private static final int ENERGY_DISTRIBUTION_RATE = 16_000;
 
     /** The type of attachment on each face (indexed by Direction ordinal). */
     private final AttachmentType[] attachmentType = new AttachmentType[] {
