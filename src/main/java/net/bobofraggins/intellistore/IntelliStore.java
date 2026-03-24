@@ -34,7 +34,7 @@ public class IntelliStore {
             StructurePoolIntegration.register();
         }
         if (ModList.get().isLoaded("create")) {
-            CreateIntegration.register();
+            CreateIntegration.register(modEventBus);
         }
         LOGGER.info("IntelliStore initialized");
     }
