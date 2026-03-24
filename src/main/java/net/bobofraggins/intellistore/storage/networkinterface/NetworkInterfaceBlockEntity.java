@@ -248,7 +248,11 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("screen.intellistore.network_interface");
+        Component base = Component.translatable("screen.intellistore.network_interface");
+        if (tier == StorageTier.PAPER) return base;
+        String label =
+                Character.toUpperCase(tier.getId().charAt(0)) + tier.getId().substring(1);
+        return base.copy().append(Component.literal(" (" + label + ")"));
     }
 
     @Override

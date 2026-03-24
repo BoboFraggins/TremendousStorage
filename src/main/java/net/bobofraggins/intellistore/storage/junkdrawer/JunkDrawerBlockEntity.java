@@ -262,7 +262,11 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.intellistore.junk_drawer");
+        Component base = Component.translatable("block.intellistore.junk_drawer");
+        if (tier == StorageTier.PAPER) return base;
+        String label =
+                Character.toUpperCase(tier.getId().charAt(0)) + tier.getId().substring(1);
+        return base.copy().append(Component.literal(" (" + label + ")"));
     }
 
     @Override

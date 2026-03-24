@@ -309,7 +309,11 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.intellistore.bulk_storage_container");
+        Component base = Component.translatable("block.intellistore.bulk_storage_container");
+        if (tier == StorageTier.PAPER) return base;
+        String label =
+                Character.toUpperCase(tier.getId().charAt(0)) + tier.getId().substring(1);
+        return base.copy().append(Component.literal(" (" + label + ")"));
     }
 
     @Override
