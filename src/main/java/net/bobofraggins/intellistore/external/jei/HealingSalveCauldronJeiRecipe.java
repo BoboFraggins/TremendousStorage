@@ -30,25 +30,25 @@ public final class HealingSalveCauldronJeiRecipe {
         return steps;
     }
 
-    /** Making Healing Salve: Glistering Melon → Water Cauldron → Healing Salve Cauldron → Bucket. */
+    /** Making Healing Salve: Glistering Melon → Water Bucket → Cauldron → Healing Salve Bucket. */
     public static HealingSalveCauldronJeiRecipe makeSalve() {
         return new HealingSalveCauldronJeiRecipe(List.of(
                 new Step(
                         new ItemStack(Items.GLISTERING_MELON_SLICE),
                         RecipeIngredientRole.INPUT,
-                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.glistering_melon")),
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.make.glistering_melon")),
+                new Step(
+                        new ItemStack(Items.WATER_BUCKET),
+                        RecipeIngredientRole.CATALYST,
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.make.water_bucket")),
                 new Step(
                         new ItemStack(Items.CAULDRON),
                         RecipeIngredientRole.CATALYST,
-                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.water_cauldron")),
-                new Step(
-                        new ItemStack(Registration.HEALING_SALVE_CAULDRON_ITEM.get()),
-                        RecipeIngredientRole.CATALYST,
-                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.salve_cauldron")),
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.make.cauldron")),
                 new Step(
                         new ItemStack(Registration.HEALING_SALVE_BUCKET.get()),
                         RecipeIngredientRole.OUTPUT,
-                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.salve_bucket_collect"))));
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.make.output"))));
     }
 
     /** Healing Zombie Brain: Zombie Brain → Healing Salve Bucket → Cauldron → Brain. */
@@ -57,18 +57,18 @@ public final class HealingSalveCauldronJeiRecipe {
                 new Step(
                         new ItemStack(Registration.ZOMBIE_BRAIN.get()),
                         RecipeIngredientRole.INPUT,
-                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.zombie_brain")),
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.heal.zombie_brain")),
                 new Step(
                         new ItemStack(Registration.HEALING_SALVE_BUCKET.get()),
                         RecipeIngredientRole.CATALYST,
-                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.salve_bucket_fill")),
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.heal.salve_bucket")),
                 new Step(
                         new ItemStack(Items.CAULDRON),
                         RecipeIngredientRole.CATALYST,
-                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.plain_cauldron")),
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.heal.cauldron")),
                 new Step(
                         new ItemStack(Registration.BRAIN.get()),
                         RecipeIngredientRole.OUTPUT,
-                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.brain"))));
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.heal.output"))));
     }
 }
