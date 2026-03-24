@@ -1,0 +1,78 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "intellistore:block/junk_drawer_texture",
+    "texture": "intellistore:block/junk_drawer_texture"
+  },
+  "elements": [
+    {
+      "name": "north_attachment",
+      "from": [
+        6,
+        6,
+        0
+      ],
+      "to": [
+        10,
+        10,
+        1
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            10.0,
+            8.0,
+            11.0,
+            9.0
+          ],
+          "texture": "#texture"
+        },
+        "south": {
+          "uv": [
+            8.0,
+            10.0,
+            9.0,
+            11.0
+          ],
+          "texture": "#texture"
+        },
+        "east": {
+          "uv": [
+            11.0,
+            13.75,
+            11.25,
+            14.75
+          ],
+          "texture": "#texture"
+        },
+        "west": {
+          "uv": [
+            9.75,
+            13.75,
+            10.0,
+            14.75
+          ],
+          "texture": "#texture"
+        },
+        "up": {
+          "uv": [
+            14.75,
+            4.25,
+            13.75,
+            4.0
+          ],
+          "texture": "#texture"
+        },
+        "down": {
+          "uv": [
+            14.75,
+            4.25,
+            13.75,
+            4.5
+          ],
+          "texture": "#texture"
+        }
+      }
+    }
+  ]
+}

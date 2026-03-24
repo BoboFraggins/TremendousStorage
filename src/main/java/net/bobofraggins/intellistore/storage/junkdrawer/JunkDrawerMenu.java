@@ -87,6 +87,16 @@ public class JunkDrawerMenu extends AbstractContainerMenu {
     }
 
     @Override
+    public void removed(Player player) {
+        super.removed(player);
+        if (!player.level().isClientSide()) {
+            if (player.level().getBlockEntity(pos) instanceof JunkDrawerBlockEntity be) {
+                be.stopOpen(player);
+            }
+        }
+    }
+
+    @Override
     public boolean stillValid(Player player) {
         return true;
     }

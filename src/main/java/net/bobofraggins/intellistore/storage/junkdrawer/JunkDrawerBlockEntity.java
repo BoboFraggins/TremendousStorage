@@ -14,22 +14,27 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
- * Stores up to {@value #CAPACITY} individual items, one per slot.
+ * Stores individual items, one per slot (capacity determined by {@link StorageTier}).
  *
  * <p>The Junk Drawer is the complement of Manila Folders: it accepts <em>only</em> items that
  * folders reject — specifically, items that are damageable (tools, armour, weapons) or that
@@ -55,6 +60,113 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
 
     @Nullable
     private BlockPos cachedNiPos = null;
+
+    // -------------------------------------------------------------------------
+    // Door animation state (client-side only)
+    // -------------------------------------------------------------------------
+
+    /** Number of players with this block's menu open (synced from server via block event). */
+    public int openCount = 0;
+
+    /** Animation progress last tick (0 = closed, 1 = fully open). */
+    public float prevDoorAngle = 0f;
+
+    /** Animation progress this tick. */
+    public float doorAngle = 0f;
+
+    // -------------------------------------------------------------------------
+    // ContainerOpenersCounter
+    // -------------------------------------------------------------------------
+
+    private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter() {
+        @Override
+        protected void onOpen(Level level, BlockPos pos, BlockState state) {
+            level.playSound(
+                    null,
+                    pos.getX() + 0.5,
+                    pos.getY() + 0.5,
+                    pos.getZ() + 0.5,
+                    SoundEvents.CHEST_OPEN,
+                    SoundSource.BLOCKS,
+                    0.5f,
+                    level.random.nextFloat() * 0.1f + 0.9f);
+        }
+
+        @Override
+        protected void onClose(Level level, BlockPos pos, BlockState state) {
+            level.playSound(
+                    null,
+                    pos.getX() + 0.5,
+                    pos.getY() + 0.5,
+                    pos.getZ() + 0.5,
+                    SoundEvents.CHEST_CLOSE,
+                    SoundSource.BLOCKS,
+                    0.5f,
+                    level.random.nextFloat() * 0.1f + 0.9f);
+        }
+
+        @Override
+        protected void openerCountChanged(Level level, BlockPos pos, BlockState state, int oldCount, int newCount) {
+            level.blockEvent(pos, state.getBlock(), 1, newCount);
+        }
+
+        @Override
+        protected boolean isOwnContainer(Player player) {
+            return player.containerMenu instanceof JunkDrawerMenu m
+                    && m.getPos().equals(worldPosition);
+        }
+    };
+
+    public void startOpen(Player player) {
+        if (!isRemoved() && !player.isSpectator()) {
+            openersCounter.incrementOpeners(player, getLevel(), getBlockPos(), getBlockState());
+        }
+    }
+
+    public void stopOpen(Player player) {
+        if (!isRemoved() && !player.isSpectator()) {
+            openersCounter.decrementOpeners(player, getLevel(), getBlockPos(), getBlockState());
+        }
+    }
+
+    /** Called from {@link JunkDrawerBlock#onRemove} to force-close all openers. */
+    public void recheckOpeners(Level level, BlockPos pos, BlockState state) {
+        openersCounter.recheckOpeners(level, pos, state);
+    }
+
+    // -------------------------------------------------------------------------
+    // Block event (server → client open-count sync)
+    // -------------------------------------------------------------------------
+
+    @Override
+    public boolean triggerEvent(int id, int type) {
+        if (id == 1) {
+            openCount = type;
+            return true;
+        }
+        return super.triggerEvent(id, type);
+    }
+
+    // -------------------------------------------------------------------------
+    // Tickers
+    // -------------------------------------------------------------------------
+
+    public static void serverTick(Level level, BlockPos pos, BlockState state, JunkDrawerBlockEntity be) {
+        be.openersCounter.recheckOpeners(level, pos, state);
+    }
+
+    public static void clientTick(Level level, BlockPos pos, BlockState state, JunkDrawerBlockEntity be) {
+        be.prevDoorAngle = be.doorAngle;
+        if (be.openCount > 0 && be.doorAngle < 1f) {
+            be.doorAngle = Math.min(1f, be.doorAngle + 0.1f);
+        } else if (be.openCount == 0 && be.doorAngle > 0f) {
+            be.doorAngle = Math.max(0f, be.doorAngle - 0.1f);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Constructor
+    // -------------------------------------------------------------------------
 
     public JunkDrawerBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.JUNK_DRAWER_BE_TYPE.get(), pos, state);
@@ -243,5 +355,14 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
+        super.onDataPacket(net, pkt, registries);
+        // Re-render the chunk section so IBlockColor picks up the new tier color immediately.
+        if (level != null && level.isClientSide()) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
     }
 }

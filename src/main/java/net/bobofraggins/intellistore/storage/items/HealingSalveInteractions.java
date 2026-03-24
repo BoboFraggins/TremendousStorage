@@ -17,7 +17,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
  * <ol>
  *   <li>Water cauldron + Glistering Melon Slice → Healing Salve cauldron (consumes melon)
  *   <li>Healing Salve cauldron + empty bucket → Healing Salve Bucket (empties cauldron)
- *   <li>Healing Salve cauldron + Zombie Brain → spawns Brain item entity (empties cauldron)
+ *   <li>Healing Salve cauldron + Zombie Brain → spawns Brain item entity (cauldron stays full)
  * </ol>
  *
  * <p>Call {@link #register()} from {@code FMLCommonSetupEvent} via {@code enqueueWork}.
@@ -58,7 +58,7 @@ public final class HealingSalveInteractions {
             return ItemInteractionResult.sidedSuccess(level.isClientSide);
         });
 
-        // 3. Healing Salve cauldron + Zombie Brain → spawns Brain item entity
+        // 3. Healing Salve cauldron + Zombie Brain → spawns Brain item entity (cauldron stays full)
         CAULDRON_INTERACTIONS.map().put(Registration.ZOMBIE_BRAIN.get(), (state, level, pos, player, hand, stack) -> {
             if (!level.isClientSide) {
                 stack.shrink(1);
@@ -71,7 +71,6 @@ public final class HealingSalveInteractions {
                         new ItemStack(Registration.BRAIN.get()));
                 brainEntity.setDeltaMovement(0, 0.25, 0);
                 level.addFreshEntity(brainEntity);
-                level.setBlockAndUpdate(pos, Blocks.CAULDRON.defaultBlockState());
                 level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide);

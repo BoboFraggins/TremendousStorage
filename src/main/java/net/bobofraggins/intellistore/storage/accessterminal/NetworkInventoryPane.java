@@ -106,7 +106,7 @@ public class NetworkInventoryPane implements IDialogPane {
         }
 
         int col = (int) ((localX - GRID_X) / AccessTerminalLayout.SLOT_SIZE);
-        int row = (int) ((localY - GRID_Y) / AccessTerminalLayout.SLOT_SIZE);
+        int row = (int) ((localY - gridStartY()) / AccessTerminalLayout.SLOT_SIZE);
         int idx = (row + scrollOffset) * AccessTerminalLayout.NETWORK_COLS + col;
 
         if (hasContents && idx >= 0 && idx < stacks.size() && menu.hasNetwork()) {
@@ -203,7 +203,7 @@ public class NetworkInventoryPane implements IDialogPane {
     public ItemStack getHoveredStack(double localX, double localY) {
         if (!hasContents || !isInGrid(localX, localY)) return null;
         int col = (int) ((localX - GRID_X) / AccessTerminalLayout.SLOT_SIZE);
-        int row = (int) ((localY - GRID_Y) / AccessTerminalLayout.SLOT_SIZE);
+        int row = (int) ((localY - gridStartY()) / AccessTerminalLayout.SLOT_SIZE);
         int idx = (row + scrollOffset) * AccessTerminalLayout.NETWORK_COLS + col;
         return (idx >= 0 && idx < stacks.size()) ? stacks.get(idx) : null;
     }
@@ -216,6 +216,11 @@ public class NetworkInventoryPane implements IDialogPane {
     private int visibleRows() {
         int base = IntelliStoreClientConfig.getVisibleRows();
         return appliedFilter.isEmpty() ? base : base - 1;
+    }
+
+    /** Top Y of the item grid — shifts down by one slot when a filter label occupies the top row. */
+    private int gridStartY() {
+        return appliedFilter.isEmpty() ? GRID_Y : GRID_Y + AccessTerminalLayout.SLOT_SIZE;
     }
 
     private void applyFilter() {
@@ -238,18 +243,20 @@ public class NetworkInventoryPane implements IDialogPane {
     }
 
     private boolean isInGrid(double localX, double localY) {
+        int startY = gridStartY();
         return localX >= GRID_X
                 && localX < GRID_X + AccessTerminalLayout.NETWORK_W
-                && localY >= GRID_Y
-                && localY < GRID_Y + visibleRows() * AccessTerminalLayout.SLOT_SIZE;
+                && localY >= startY
+                && localY < startY + visibleRows() * AccessTerminalLayout.SLOT_SIZE;
     }
 
     private boolean isInScrollbar(double localX, double localY) {
+        int startY = gridStartY();
         int barH = visibleRows() * AccessTerminalLayout.SLOT_SIZE;
         return localX >= SCROLLBAR_X
                 && localX < SCROLLBAR_X + AccessTerminalLayout.SCROLLBAR_W
-                && localY >= GRID_Y
-                && localY < GRID_Y + barH;
+                && localY >= startY
+                && localY < startY + barH;
     }
 
     private void scrollToY(double localY) {
@@ -259,7 +266,7 @@ public class NetworkInventoryPane implements IDialogPane {
                 (stacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
         int maxScroll = Math.max(0, totalRows - rows);
         if (maxScroll == 0) return;
-        double ratio = (localY - GRID_Y) / (double) barH;
+        double ratio = (localY - gridStartY()) / (double) barH;
         scrollOffset = (int) Math.round(ratio * maxScroll);
         clampScroll();
     }
@@ -272,24 +279,35 @@ public class NetworkInventoryPane implements IDialogPane {
 
     private void drawGrid(GuiGraphics graphics, Font font) {
         int rows = visibleRows();
+        int startY = gridStartY();
+
+        // Filter label at the top row when a search filter is active
+        if (!appliedFilter.isEmpty()) {
+            graphics.fill(
+                    GRID_X,
+                    GRID_Y,
+                    GRID_X + AccessTerminalLayout.NETWORK_W,
+                    GRID_Y + AccessTerminalLayout.SLOT_SIZE,
+                    0xFF1C1C1C);
+            String label = "Filtered: " + appliedFilter;
+            int maxW = AccessTerminalLayout.NETWORK_W - 4;
+            if (font.width(label) > maxW) {
+                label = font.plainSubstrByWidth(label, maxW - font.width("...")) + "...";
+            }
+            int labelY = GRID_Y + (AccessTerminalLayout.SLOT_SIZE - font.lineHeight) / 2;
+            graphics.drawString(font, label, GRID_X + 2, labelY, 0xFFCCCCCC, false);
+        }
+
         // Slot outlines from the chest-row strip in generic_54.png
         for (int row = 0; row < rows; row++) {
             graphics.blit(
                     BG_TEXTURE,
                     GRID_X,
-                    GRID_Y + row * AccessTerminalLayout.SLOT_SIZE,
+                    startY + row * AccessTerminalLayout.SLOT_SIZE,
                     7,
                     17,
                     AccessTerminalLayout.NETWORK_W,
                     AccessTerminalLayout.SLOT_SIZE);
-        }
-
-        // Filter label occupies the 4th-row area when a search filter is active
-        if (!appliedFilter.isEmpty()) {
-            int labelY = GRID_Y
-                    + rows * AccessTerminalLayout.SLOT_SIZE
-                    + (AccessTerminalLayout.SLOT_SIZE - font.lineHeight) / 2;
-            graphics.drawString(font, "Filtered: " + appliedFilter, GRID_X + 2, labelY, 0xFF808080, false);
         }
 
         if (!hasContents) return;
@@ -303,7 +321,7 @@ public class NetworkInventoryPane implements IDialogPane {
                 ItemStack stack = stacks.get(idx);
                 long count = counts.get(idx);
                 int sx = GRID_X + col * AccessTerminalLayout.SLOT_SIZE + 1;
-                int sy = GRID_Y + row * AccessTerminalLayout.SLOT_SIZE + 1;
+                int sy = startY + row * AccessTerminalLayout.SLOT_SIZE + 1;
 
                 graphics.renderItem(stack, sx, sy);
                 String countStr = count > 1 ? CountFormat.format(count) : null;
@@ -314,7 +332,7 @@ public class NetworkInventoryPane implements IDialogPane {
 
     private void drawScrollbar(GuiGraphics graphics) {
         int rows = visibleRows();
-        int barY = GRID_Y;
+        int barY = gridStartY();
         int barH = rows * AccessTerminalLayout.SLOT_SIZE;
 
         // Left border
