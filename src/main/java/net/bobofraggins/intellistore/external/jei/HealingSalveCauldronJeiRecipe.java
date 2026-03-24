@@ -1,15 +1,74 @@
 package net.bobofraggins.intellistore.external.jei;
 
+import java.util.List;
+import mezz.jei.api.recipe.RecipeIngredientRole;
+import net.bobofraggins.intellistore.shared.register.Registration;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+
 /**
- * Marker recipe object for the JEI Healing Salve cauldron recipe guide.
+ * Data carrier for a Healing Salve cauldron recipe guide displayed in JEI.
  *
- * <p>There is exactly one instance: {@link #INSTANCE}. The category
- * {@link HealingSalveCauldronCategory} uses it solely as a data carrier for the single "heal a
- * Zombie Brain in a Healing Salve Cauldron" guide entry.
+ * <p>Each instance holds four {@link Step}s shown top-to-bottom in
+ * {@link HealingSalveCauldronCategory}. Instances are created lazily (in
+ * {@link #makeSalve()} / {@link #healBrain()}) so that item registry objects are
+ * guaranteed to be populated by the time JEI calls {@code registerRecipes}.
  */
 public final class HealingSalveCauldronJeiRecipe {
 
-    public static final HealingSalveCauldronJeiRecipe INSTANCE = new HealingSalveCauldronJeiRecipe();
+    /** One row in the vertical guide: the item to display, its JEI role, and a tooltip hint. */
+    public record Step(ItemStack stack, RecipeIngredientRole role, Component tooltip) {}
 
-    private HealingSalveCauldronJeiRecipe() {}
+    private final List<Step> steps;
+
+    private HealingSalveCauldronJeiRecipe(List<Step> steps) {
+        this.steps = steps;
+    }
+
+    public List<Step> steps() {
+        return steps;
+    }
+
+    /** Making Healing Salve: Glistering Melon → Water Cauldron → Healing Salve Cauldron → Bucket. */
+    public static HealingSalveCauldronJeiRecipe makeSalve() {
+        return new HealingSalveCauldronJeiRecipe(List.of(
+                new Step(
+                        new ItemStack(Items.GLISTERING_MELON_SLICE),
+                        RecipeIngredientRole.INPUT,
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.glistering_melon")),
+                new Step(
+                        new ItemStack(Items.CAULDRON),
+                        RecipeIngredientRole.CATALYST,
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.water_cauldron")),
+                new Step(
+                        new ItemStack(Registration.HEALING_SALVE_CAULDRON_ITEM.get()),
+                        RecipeIngredientRole.CATALYST,
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.salve_cauldron")),
+                new Step(
+                        new ItemStack(Registration.HEALING_SALVE_BUCKET.get()),
+                        RecipeIngredientRole.OUTPUT,
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.salve_bucket_collect"))));
+    }
+
+    /** Healing Zombie Brain: Zombie Brain → Healing Salve Bucket → Cauldron → Brain. */
+    public static HealingSalveCauldronJeiRecipe healBrain() {
+        return new HealingSalveCauldronJeiRecipe(List.of(
+                new Step(
+                        new ItemStack(Registration.ZOMBIE_BRAIN.get()),
+                        RecipeIngredientRole.INPUT,
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.zombie_brain")),
+                new Step(
+                        new ItemStack(Registration.HEALING_SALVE_BUCKET.get()),
+                        RecipeIngredientRole.CATALYST,
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.salve_bucket_fill")),
+                new Step(
+                        new ItemStack(Items.CAULDRON),
+                        RecipeIngredientRole.CATALYST,
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.plain_cauldron")),
+                new Step(
+                        new ItemStack(Registration.BRAIN.get()),
+                        RecipeIngredientRole.OUTPUT,
+                        Component.translatable("jei.intellistore.healing_salve_cauldron.step.brain"))));
+    }
 }

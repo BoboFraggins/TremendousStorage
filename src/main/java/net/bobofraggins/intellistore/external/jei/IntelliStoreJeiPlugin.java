@@ -56,7 +56,9 @@ public class IntelliStoreJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipes(IRecipeRegistration reg) {
-        reg.addRecipes(HealingSalveCauldronCategory.RECIPE_TYPE, List.of(HealingSalveCauldronJeiRecipe.INSTANCE));
+        reg.addRecipes(
+                HealingSalveCauldronCategory.RECIPE_TYPE,
+                List.of(HealingSalveCauldronJeiRecipe.makeSalve(), HealingSalveCauldronJeiRecipe.healBrain()));
     }
 
     @Override

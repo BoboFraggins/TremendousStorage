@@ -5,20 +5,19 @@ import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
-import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.bobofraggins.intellistore.shared.register.Registration;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * JEI recipe category for the Healing Salve cauldron: Zombie Brain → Brain.
+ * JEI recipe category for the Healing Salve cauldron.
  *
- * <p>Displays a vertical guide showing the four items involved: Zombie Brain → Healing Salve
- * Bucket → Cauldron → Brain, with small downward arrows between each step.
+ * <p>Displays a vertical guide showing four items top-to-bottom with downward arrows between
+ * them. Handles two recipes: making Healing Salve (Glistering Melon → Water Cauldron → Healing
+ * Salve Cauldron → Bucket) and healing a Zombie Brain (Zombie Brain → Healing Salve Bucket →
+ * Cauldron → Brain).
  */
 public class HealingSalveCauldronCategory implements IRecipeCategory<HealingSalveCauldronJeiRecipe> {
 
@@ -26,19 +25,14 @@ public class HealingSalveCauldronCategory implements IRecipeCategory<HealingSalv
             RecipeType.create("intellistore", "healing_salve_cauldron", HealingSalveCauldronJeiRecipe.class);
 
     private static final int SLOT_X = 4;
-    private static final int SLOT_Y_0 = 0;
-    private static final int SLOT_Y_1 = 24;
-    private static final int SLOT_Y_2 = 48;
-    private static final int SLOT_Y_3 = 72;
+    private static final int[] SLOT_YS = {0, 24, 48, 72};
     private static final int WIDTH = 26;
     private static final int HEIGHT = 90;
     private static final int ARROW_COLOR = 0xFF555555;
 
-    private final IDrawable background;
     private final IDrawable icon;
 
     public HealingSalveCauldronCategory(IGuiHelper helper) {
-        background = helper.createBlankDrawable(WIDTH, HEIGHT);
         icon = helper.createDrawableItemLike(Items.CAULDRON);
     }
 
@@ -53,8 +47,13 @@ public class HealingSalveCauldronCategory implements IRecipeCategory<HealingSalv
     }
 
     @Override
-    public IDrawable getBackground() {
-        return background;
+    public int getWidth() {
+        return WIDTH;
+    }
+
+    @Override
+    public int getHeight() {
+        return HEIGHT;
     }
 
     @Override
@@ -64,13 +63,13 @@ public class HealingSalveCauldronCategory implements IRecipeCategory<HealingSalv
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, HealingSalveCauldronJeiRecipe recipe, IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.INPUT, SLOT_X, SLOT_Y_0)
-                .addItemStack(new ItemStack(Registration.ZOMBIE_BRAIN.get()));
-        builder.addSlot(RecipeIngredientRole.CATALYST, SLOT_X, SLOT_Y_1)
-                .addItemStack(new ItemStack(Registration.HEALING_SALVE_BUCKET.get()));
-        builder.addSlot(RecipeIngredientRole.CATALYST, SLOT_X, SLOT_Y_2).addItemStack(new ItemStack(Items.CAULDRON));
-        builder.addSlot(RecipeIngredientRole.OUTPUT, SLOT_X, SLOT_Y_3)
-                .addItemStack(new ItemStack(Registration.BRAIN.get()));
+        var steps = recipe.steps();
+        for (int i = 0; i < steps.size(); i++) {
+            var step = steps.get(i);
+            builder.addSlot(step.role(), SLOT_X, SLOT_YS[i])
+                    .addItemStack(step.stack())
+                    .addTooltipCallback((slotView, tooltip) -> tooltip.add(step.tooltip()));
+        }
     }
 
     @Override
