@@ -286,7 +286,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         super.saveAdditional(tag, registries);
         tag.putInt("EnergyStored", energyStored);
         tag.putBoolean("Powered", powered);
-        tag.putString("NiTier", tier.getId());
+        tag.putString("Tier", tier.getId());
     }
 
     @Override
@@ -294,7 +294,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         super.loadAdditional(tag, registries);
         energyStored = tag.getInt("EnergyStored");
         powered = tag.getBoolean("Powered");
-        tier = StorageTier.fromId(tag.getString("NiTier"));
+        tier = StorageTier.fromId(tag.getString("Tier"));
     }
 
     // -------------------------------------------------------------------------

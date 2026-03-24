@@ -1,12 +1,14 @@
 package net.bobofraggins.intellistore.storage.networkinterface;
 
 import com.mojang.serialization.MapCodec;
+import java.util.List;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
@@ -14,6 +16,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
@@ -56,6 +60,24 @@ public class NetworkInterfaceBlock extends BaseEntityBlock {
         if (level.isClientSide()) return null;
         return createTickerHelper(
                 type, Registration.NETWORK_INTERFACE_BE_TYPE.get(), (lvl, pos, st, be) -> be.serverTick());
+    }
+
+    // -------------------------------------------------------------------------
+    // Drops — persist tier (and energy) to dropped item
+    // -------------------------------------------------------------------------
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        List<ItemStack> drops = super.getDrops(state, params);
+        BlockEntity be = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+        if (be instanceof NetworkInterfaceBlockEntity ni) {
+            for (ItemStack drop : drops) {
+                if (drop.getItem() instanceof net.minecraft.world.item.BlockItem) {
+                    ni.saveToItem(drop, params.getLevel().registryAccess());
+                }
+            }
+        }
+        return drops;
     }
 
     // -------------------------------------------------------------------------

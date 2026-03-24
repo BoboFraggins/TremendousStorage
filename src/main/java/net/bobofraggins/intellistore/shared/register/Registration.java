@@ -501,8 +501,8 @@ public final class Registration {
                     .noOcclusion()
                     .lightLevel(state -> 8)));
 
-    public static final DeferredHolder<Item, BlockItem> NETWORK_INTERFACE_ITEM =
-            ITEMS.registerSimpleBlockItem("network_interface", NETWORK_INTERFACE);
+    public static final DeferredHolder<Item, BlockItem> NETWORK_INTERFACE_ITEM = ITEMS.register(
+            "network_interface", () -> new TieredBlockItem(NETWORK_INTERFACE.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<NetworkInterfaceBlockEntity>>
             NETWORK_INTERFACE_BE_TYPE =
