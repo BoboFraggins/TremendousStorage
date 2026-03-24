@@ -53,40 +53,6 @@ public class JunkDrawerRenderer
         };
     }
 
-    /**
-     * Returns the door hinge position in world/post-facing-rotation space.
-     * The hinge moves with the facing rotation, so the pivot must be adjusted accordingly.
-     */
-    private static float hingeX(Direction facing) {
-        float n = HINGE_X_MODEL / 16f;
-        float z = HINGE_Z_MODEL / 16f;
-        return switch (facing) {
-            case SOUTH -> 1f - n;
-            case EAST -> 1f - z;
-            case WEST -> z;
-            default -> n; // NORTH
-        };
-    }
-
-    private static float hingeZ(Direction facing) {
-        float n = HINGE_X_MODEL / 16f;
-        float z = HINGE_Z_MODEL / 16f;
-        return switch (facing) {
-            case SOUTH -> 1f - z;
-            case EAST -> n;
-            case WEST -> 1f - n;
-            default -> z; // NORTH
-        };
-    }
-
-    /**
-     * Sign of the door-open Y rotation. Always negative because the rotation is applied in
-     * world/post-facing space, so the handedness is the same for all facing directions.
-     */
-    private static float rotDir(Direction facing) {
-        return -1f;
-    }
-
     public JunkDrawerRenderer(BlockEntityRendererProvider.Context ctx) {}
 
     @Override
@@ -119,12 +85,13 @@ public class JunkDrawerRenderer
         poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
         poseStack.translate(-0.5, -0.5, -0.5);
 
-        // Animate door: pivot at hinge edge in world/post-facing space.
+        // Animate door: pivot at hinge in model space. The facing rotation above already
+        // transforms the coordinate frame, so the pivot is always the model-space position.
         float openFraction = Mth.lerp(partialTick, be.prevDoorAngle, be.doorAngle);
-        float hx = hingeX(facing);
-        float hz = hingeZ(facing);
+        float hx = HINGE_X_MODEL / 16f;
+        float hz = HINGE_Z_MODEL / 16f;
         poseStack.translate(hx, 0, hz);
-        poseStack.mulPose(Axis.YP.rotationDegrees(rotDir(facing) * openFraction * 90f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(-openFraction * 90f));
         poseStack.translate(-hx, 0, -hz);
 
         int color = be.getTier().getColor();
