@@ -42,6 +42,8 @@ public class TubeBlockEntity extends BlockEntity {
     private static final int TRANSFER_AMOUNT = 64;
     private static final int TRANSFER_INTERVAL = 20;
     private static final int PLACER_BREAKER_INTERVAL = 5;
+    /** FE pushed per tick to an adjacent machine via any attachment face. */
+    private static final int ENERGY_DISTRIBUTION_RATE = 512;
 
     /** The type of attachment on each face (indexed by Direction ordinal). */
     private final AttachmentType[] attachmentType = new AttachmentType[] {
@@ -109,6 +111,24 @@ public class TubeBlockEntity extends BlockEntity {
 
     /** Called every server tick by {@link TubeBlock#getTicker}. */
     public static void serverTick(Level level, BlockPos pos, BlockState state, TubeBlockEntity be) {
+        // Energy distribution: push FE to any adjacent block that accepts energy, once per tick.
+        for (int i = 0; i < 6; i++) {
+            if (be.attachmentType[i] == AttachmentType.NONE) continue;
+            Direction dir = Direction.values()[i];
+            var energyStorage =
+                    level.getCapability(Capabilities.EnergyStorage.BLOCK, pos.relative(dir), dir.getOpposite());
+            if (energyStorage == null || !energyStorage.canReceive()) continue;
+            NetworkItemHandler network = be.getNetworkView();
+            if (network == null) continue;
+            net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity ni =
+                    network.getNetworkInterface();
+            if (ni == null || !ni.isPowered()) continue;
+            int toSend = energyStorage.receiveEnergy(ENERGY_DISTRIBUTION_RATE, true);
+            if (toSend <= 0) continue;
+            int extracted = ni.extractEnergyForDistribution(toSend, false);
+            if (extracted > 0) energyStorage.receiveEnergy(extracted, false);
+        }
+
         for (int i = 0; i < 6; i++) {
             AttachmentType type = be.attachmentType[i];
             if (type == AttachmentType.NONE || type == AttachmentType.STORAGE_INTERFACE) continue;

@@ -168,6 +168,22 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     }
 
     /**
+     * Extracts energy from the NI's buffer for distribution to adjacent machines via tube
+     * attachments. Returns the amount actually extracted.
+     */
+    public int extractEnergyForDistribution(int maxExtract, boolean simulate) {
+        int available = Math.min(maxExtract, energyStored);
+        if (!simulate && available > 0) {
+            energyStored -= available;
+            super.setChanged();
+            if (level != null) {
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
+        }
+        return available;
+    }
+
+    /**
      * Receives energy into the NI's buffer. Called by external energy sources
      * (Stirling Engine push, Pipez pipe injection, Mekanism cable injection, etc.).
      * Returns the amount actually accepted.
