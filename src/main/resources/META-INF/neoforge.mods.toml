@@ -107,3 +107,10 @@ type="optional"
 versionRange="[1.2,)"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="create"
+type="optional"
+versionRange="[6,)"
+ordering="NONE"
+side="BOTH"

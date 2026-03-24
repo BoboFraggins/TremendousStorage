@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore;
 
 import com.mojang.logging.LogUtils;
+import net.bobofraggins.intellistore.external.create.CreateIntegration;
 import net.bobofraggins.intellistore.external.mekanism.MekanismIntegration;
 import net.bobofraggins.intellistore.external.productivemetalworks.ProductiveMetalworksIntegration;
 import net.bobofraggins.intellistore.external.structurepoolapi.StructurePoolIntegration;
@@ -31,6 +32,9 @@ public class IntelliStore {
         }
         if (ModList.get().isLoaded("structure_pool_api")) {
             StructurePoolIntegration.register();
+        }
+        if (ModList.get().isLoaded("create")) {
+            CreateIntegration.register();
         }
         LOGGER.info("IntelliStore initialized");
     }
