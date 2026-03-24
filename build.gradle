@@ -75,6 +75,11 @@ repositories {
         name = "Blake's Mods Maven"
         url = "https://maven.blakesmods.com"
     }
+    maven {
+        name = "CurseForge Maven"
+        url = "https://cursemaven.com"
+        content { includeGroup "curse.maven" }
+    }
 }
 
 dependencies {
@@ -87,6 +92,7 @@ dependencies {
     compileOnly "com.blakebr0.cucumber:Cucumber:1.21.1-8.0.15"
     compileOnly "com.blakebr0.mysticalagriculture:MysticalAgriculture:1.21.1-8.0.23"
     compileOnly "maven.modrinth:structure-pool-api:${structure_pool_api_version}"
+    compileOnly("curse.maven:create-328085:7408951") { transitive = false }
 }
 
 tasks.withType(ProcessResources).configureEach {
