@@ -62,8 +62,8 @@ public class JunkDrawerRenderer
         float z = HINGE_Z_MODEL / 16f;
         return switch (facing) {
             case SOUTH -> 1f - n;
-            case EAST -> z;
-            case WEST -> 1f - z;
+            case EAST -> 1f - z;
+            case WEST -> z;
             default -> n; // NORTH
         };
     }
@@ -73,18 +73,18 @@ public class JunkDrawerRenderer
         float z = HINGE_Z_MODEL / 16f;
         return switch (facing) {
             case SOUTH -> 1f - z;
-            case EAST -> 1f - n;
-            case WEST -> n;
+            case EAST -> n;
+            case WEST -> 1f - n;
             default -> z; // NORTH
         };
     }
 
     /**
-     * Sign of the door-open Y rotation. North/South open with negative Y;
-     * East/West open with positive Y — because the facing rotation flips the handedness.
+     * Sign of the door-open Y rotation. Always negative because the rotation is applied in
+     * world/post-facing space, so the handedness is the same for all facing directions.
      */
     private static float rotDir(Direction facing) {
-        return (facing == Direction.EAST || facing == Direction.WEST) ? 1f : -1f;
+        return -1f;
     }
 
     public JunkDrawerRenderer(BlockEntityRendererProvider.Context ctx) {}
@@ -203,6 +203,13 @@ public class JunkDrawerRenderer
 
     @Override
     public AABB getRenderBoundingBox(JunkDrawerBlockEntity be) {
-        return new AABB(be.getBlockPos()).expandTowards(0, 0, -1).expandTowards(1, 0, 0);
+        Direction facing = be.getBlockState().getValue(JunkDrawerBlock.FACING);
+        AABB base = new AABB(be.getBlockPos());
+        return switch (facing) {
+            case SOUTH -> base.expandTowards(0, 0, 1).expandTowards(-1, 0, 0);
+            case EAST -> base.expandTowards(1, 0, 0).expandTowards(0, 0, -1);
+            case WEST -> base.expandTowards(-1, 0, 0).expandTowards(0, 0, 1);
+            default -> base.expandTowards(0, 0, -1).expandTowards(1, 0, 0); // NORTH
+        };
     }
 }
