@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.storage.networkinterface;
 
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -52,6 +53,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     /** Re-entrancy guard: true while a BFS scan is in progress. */
     private boolean scanning = false;
 
+    private StorageTier tier = StorageTier.PAPER;
     private int energyStored = 0;
     /** Whether the network had enough power last tick. Synced to clients. */
     private boolean powered = false;
@@ -104,6 +106,29 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
             cachedHandler = new NiItemHandler(cachedScan.insertOrder());
         }
         return cachedHandler;
+    }
+
+    // -------------------------------------------------------------------------
+    // Tier
+    // -------------------------------------------------------------------------
+
+    public StorageTier getTier() {
+        return tier;
+    }
+
+    public void setTier(StorageTier tier) {
+        this.tier = tier;
+        setChanged();
+    }
+
+    /** Items transferred per import/export operation (1 at PAPER, doubles each tier). */
+    public int getAttachmentTransferAmount() {
+        return 1 << tier.ordinal();
+    }
+
+    /** FE pushed per tick per attachment face (1,000 at PAPER, 4× per tier). */
+    public int getAttachmentEnergyRate() {
+        return (int) tier.getScaledCapacity(1_000);
     }
 
     // -------------------------------------------------------------------------
@@ -257,6 +282,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         super.saveAdditional(tag, registries);
         tag.putInt("EnergyStored", energyStored);
         tag.putBoolean("Powered", powered);
+        tag.putString("NiTier", tier.getId());
     }
 
     @Override
@@ -264,6 +290,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         super.loadAdditional(tag, registries);
         energyStored = tag.getInt("EnergyStored");
         powered = tag.getBoolean("Powered");
+        tier = StorageTier.fromId(tag.getString("NiTier"));
     }
 
     // -------------------------------------------------------------------------

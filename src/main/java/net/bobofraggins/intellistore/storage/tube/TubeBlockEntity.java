@@ -39,11 +39,8 @@ import net.neoforged.neoforge.items.IItemHandler;
  */
 public class TubeBlockEntity extends BlockEntity {
 
-    private static final int TRANSFER_AMOUNT = 64;
-    private static final int TRANSFER_INTERVAL = 20;
+    private static final int TRANSFER_INTERVAL = 10;
     private static final int PLACER_BREAKER_INTERVAL = 5;
-    /** FE pushed per tick to an adjacent machine via any attachment face. */
-    private static final int ENERGY_DISTRIBUTION_RATE = 16_000;
 
     /** The type of attachment on each face (indexed by Direction ordinal). */
     private final AttachmentType[] attachmentType = new AttachmentType[] {
@@ -123,7 +120,7 @@ public class TubeBlockEntity extends BlockEntity {
             net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity ni =
                     network.getNetworkInterface();
             if (ni == null || !ni.isPowered()) continue;
-            int toSend = energyStorage.receiveEnergy(ENERGY_DISTRIBUTION_RATE, true);
+            int toSend = energyStorage.receiveEnergy(ni.getAttachmentEnergyRate(), true);
             if (toSend <= 0) continue;
             int extracted = ni.extractEnergyForDistribution(toSend, false);
             if (extracted > 0) energyStorage.receiveEnergy(extracted, false);
@@ -152,10 +149,11 @@ public class TubeBlockEntity extends BlockEntity {
                         network.getNetworkInterface();
                 if (ni != null && !ni.isPowered()) continue;
 
+                int transferAmount = (ni != null) ? ni.getAttachmentTransferAmount() : 1;
                 if (type == AttachmentType.IMPORT_INTERFACE) {
-                    doImport(neighbor, network, be.filterSlots[i], be.filterMode[i]);
+                    doImport(neighbor, network, be.filterSlots[i], be.filterMode[i], transferAmount);
                 } else {
-                    doExport(network, neighbor, be.filterSlots[i], be.filterMode[i]);
+                    doExport(network, neighbor, be.filterSlots[i], be.filterMode[i], transferAmount);
                 }
 
             } else if (type == AttachmentType.PLACER_INTERFACE || type == AttachmentType.BREAKER_INTERFACE) {
@@ -182,17 +180,21 @@ public class TubeBlockEntity extends BlockEntity {
 
     /**
      * Pulls items from the external {@code source} inventory into the {@code network}.
-     * Scans source slots in order; transfers the first passing stack, up to TRANSFER_AMOUNT.
+     * Scans source slots in order; transfers the first passing stack, up to {@code transferAmount}.
      */
     private static void doImport(
-            IItemHandler source, NetworkItemHandler network, ItemStack[] filter, boolean rejectMode) {
+            IItemHandler source,
+            NetworkItemHandler network,
+            ItemStack[] filter,
+            boolean rejectMode,
+            int transferAmount) {
         int slots = source.getSlots();
         for (int s = 0; s < slots; s++) {
             ItemStack inSlot = source.getStackInSlot(s);
             if (inSlot.isEmpty()) continue;
             if (!passesFilter(inSlot, filter, rejectMode)) continue;
 
-            int toMove = Math.min(inSlot.getCount(), TRANSFER_AMOUNT);
+            int toMove = Math.min(inSlot.getCount(), transferAmount);
             // Simulate extract
             ItemStack extracted = source.extractItem(s, toMove, true);
             if (extracted.isEmpty()) continue;
@@ -209,17 +211,17 @@ public class TubeBlockEntity extends BlockEntity {
 
     /**
      * Pulls items from the {@code network} and pushes them into the external {@code dest} inventory.
-     * Scans network slots in order; transfers the first passing stack, up to TRANSFER_AMOUNT.
+     * Scans network slots in order; transfers the first passing stack, up to {@code transferAmount}.
      */
     private static void doExport(
-            NetworkItemHandler network, IItemHandler dest, ItemStack[] filter, boolean rejectMode) {
+            NetworkItemHandler network, IItemHandler dest, ItemStack[] filter, boolean rejectMode, int transferAmount) {
         int slots = network.getSlots();
         for (int s = 0; s < slots; s++) {
             ItemStack inSlot = network.getStackInSlot(s);
             if (inSlot.isEmpty()) continue;
             if (!passesFilter(inSlot, filter, rejectMode)) continue;
 
-            int toMove = Math.min(inSlot.getCount(), TRANSFER_AMOUNT);
+            int toMove = Math.min(inSlot.getCount(), transferAmount);
             // Simulate extract from network
             ItemStack extracted = network.extractItem(s, toMove, true);
             if (extracted.isEmpty()) continue;

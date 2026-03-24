@@ -4,6 +4,7 @@ import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEnt
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
+import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
@@ -52,6 +53,11 @@ public class StorageUpgradeItem extends Item {
         } else if (be instanceof StirlingEngineBlockEntity engine && engine.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 engine.setTier(to);
+            }
+            matches = true;
+        } else if (be instanceof NetworkInterfaceBlockEntity ni && ni.getTier() == from) {
+            if (!ctx.getLevel().isClientSide()) {
+                ni.setTier(to);
             }
             matches = true;
         }
