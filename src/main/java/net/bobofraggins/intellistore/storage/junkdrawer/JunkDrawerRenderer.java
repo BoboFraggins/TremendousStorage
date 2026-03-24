@@ -39,9 +39,9 @@ public class JunkDrawerRenderer
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/junk_drawer_door"));
 
     /** Hinge x coordinate in model space (0–16), from Blockbench rotation origin. */
-    private static final float HINGE_X_MODEL = 13.9336f;
+    private static final float HINGE_X_MODEL = 15f;
     /** Hinge z coordinate in model space (0–16), from Blockbench rotation origin. */
-    private static final float HINGE_Z_MODEL = 4.5f;
+    private static final float HINGE_Z_MODEL = 4f;
 
     /** Y-rotation in degrees to apply for each facing direction (model default is NORTH). */
     private static float facingYRot(Direction facing) {
