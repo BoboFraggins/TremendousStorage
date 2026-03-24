@@ -10,6 +10,8 @@ import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
+import mezz.jei.api.registration.IRecipeCategoryRegistration;
+import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.IVanillaCategoryExtensionRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
@@ -47,9 +49,23 @@ public class IntelliStoreJeiPlugin implements IModPlugin {
     }
 
     @Override
+    public void registerCategories(IRecipeCategoryRegistration reg) {
+        reg.addRecipeCategories(
+                new HealingSalveCauldronCategory(reg.getJeiHelpers().getGuiHelper()));
+    }
+
+    @Override
+    public void registerRecipes(IRecipeRegistration reg) {
+        reg.addRecipes(HealingSalveCauldronCategory.RECIPE_TYPE, List.of(HealingSalveCauldronJeiRecipe.INSTANCE));
+    }
+
+    @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration reg) {
         reg.addRecipeCatalyst(
                 Registration.STORAGE_ACCESS_TERMINAL_ITEM.get().getDefaultInstance(), RecipeTypes.CRAFTING);
+        reg.addRecipeCatalyst(
+                Registration.HEALING_SALVE_CAULDRON_ITEM.get().getDefaultInstance(),
+                HealingSalveCauldronCategory.RECIPE_TYPE);
     }
 
     @Override
