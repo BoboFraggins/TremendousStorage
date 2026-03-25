@@ -137,7 +137,7 @@ public class FilingCabinetItemHandler implements IItemHandler {
         int remainder = (int) result.remainder();
 
         if (!simulate) {
-            be.setFolder(slot, setContents(folder, result.updated()));
+            be.notifyFolderContentsChanged(slot, setContents(folder, result.updated()));
         }
 
         if (be.isVoidExcess()) return ItemStack.EMPTY;
@@ -167,7 +167,7 @@ public class FilingCabinetItemHandler implements IItemHandler {
         if (!simulate) {
             FolderContents.ExtractResult result = contents.extract(toExtract);
             // Folder stays locked to its item type at count 0
-            be.setFolder(slot, setContents(folder, result.updated()));
+            be.notifyFolderContentsChanged(slot, setContents(folder, result.updated()));
         }
 
         return stored.copyWithCount((int) toExtract);

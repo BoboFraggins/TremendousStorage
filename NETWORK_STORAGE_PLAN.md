@@ -155,10 +155,10 @@ for structural changes (tier upgrade, block removal).
 The storage blocks already have `getOrFindNiPos()` — use it to obtain the NI BE, then call
 `markContentsDirty()` on it.
 
-- [ ] Add `topologyDirty` and `contentsDirty` flags to `NetworkInterfaceBlockEntity`
-- [ ] Add `markContentsDirty()` method (sets `contentsDirty`, does NOT null `cachedScan`)
-- [ ] Add `notifyNiContentsChanged(ServerLevel)` to `NiCacheHolder` interface
-- [ ] Update FilingCabinet, BulkStorage, and JunkDrawer `setChanged()` to call `notifyNiContentsChanged()` for item mutations and `invalidateNiCache()` only for structural changes
+- [ ] Add `topologyDirty` and `contentsDirty` flags to `NetworkInterfaceBlockEntity` — added `contentsDirty`; `topologyDirty` is redundant with `cachedScan == null` so omitted
+- [x] Add `markContentsDirty()` method (sets `contentsDirty`, does NOT null `cachedScan`)
+- [x] Add `notifyNiContentsChanged(ServerLevel)` to `NiCacheHolder` interface (as a default method)
+- [x] Update FilingCabinet, BulkStorage, and JunkDrawer `setChanged()` to call `notifyNiContentsChanged()` for item mutations and `invalidateNiCache()` only for structural changes
 
 ---
 

@@ -46,12 +46,17 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     /** FE/t consumed by this NI itself. */
     public static final int NI_COST = 5;
 
-    /** Lazily built; {@code null} = stale. */
+    /** Lazily built; {@code null} = stale (topology changed). */
     private NetworkScanResult cachedScan = null;
     /** Lazily built alongside {@link #cachedScan}; {@code null} = stale. */
     private NiItemHandler cachedHandler = null;
     /** Re-entrancy guard: true while a BFS scan is in progress. */
     private boolean scanning = false;
+    /**
+     * True when a storage block's item contents changed but the network topology is intact.
+     * Set by {@link #markContentsDirty()}; cleared when the KeyCounter is rebuilt (Phase 5).
+     */
+    private boolean contentsDirty = false;
 
     private StorageTier tier = StorageTier.PAPER;
     private int energyStored = 0;
@@ -240,6 +245,22 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
             level.invalidateCapabilities(worldPosition);
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
+    }
+
+    /**
+     * Marks this NI's item contents as stale without invalidating the topology scan.
+     *
+     * <p>Called by connected storage blocks after item insertions/extractions. Unlike
+     * {@link #setChanged()}, this does <em>not</em> null {@link #cachedScan} or trigger a BFS
+     * re-scan — the network topology is unchanged.
+     */
+    public void markContentsDirty() {
+        contentsDirty = true;
+    }
+
+    /** Returns true if a storage block's item contents have changed since the last rebuild. */
+    public boolean isContentsDirty() {
+        return contentsDirty;
     }
 
     // -------------------------------------------------------------------------

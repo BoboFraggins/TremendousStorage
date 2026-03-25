@@ -256,7 +256,7 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
                 orderedKeys.add(key);
             }
             cachedTotalCount += toInsert;
-            setChanged();
+            notifyItemsChanged();
         }
 
         return amount - toInsert;
@@ -292,7 +292,7 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
                 items.put(key, remaining);
             }
             cachedTotalCount -= toExtract;
-            setChanged();
+            notifyItemsChanged();
         }
 
         return typeStack.copyWithCount((int) toExtract);
@@ -346,6 +346,20 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
     // -------------------------------------------------------------------------
     // NiCacheHolder + setChanged
     // -------------------------------------------------------------------------
+
+    /**
+     * Lightweight notification for item-content mutations (insert/extract).
+     *
+     * <p>Persists NBT and tells the NI the contents changed, but does NOT invalidate the
+     * topology cache or fire {@code level.invalidateCapabilities} — the handler identity is
+     * unchanged and no BFS re-scan is needed.
+     */
+    private void notifyItemsChanged() {
+        super.setChanged();
+        if (level instanceof ServerLevel sl) {
+            notifyNiContentsChanged(sl);
+        }
+    }
 
     @Override
     public void invalidateNiCache() {

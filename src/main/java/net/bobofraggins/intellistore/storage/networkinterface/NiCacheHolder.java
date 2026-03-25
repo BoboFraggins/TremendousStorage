@@ -24,4 +24,20 @@ public interface NiCacheHolder {
 
     /** Clears the cached NI position. Called from {@code setChanged()}. */
     void invalidateNiCache();
+
+    /**
+     * Notifies the connected Network Interface that this block's item contents changed, without
+     * triggering a full topology re-scan.
+     *
+     * <p>Obtains the NI via {@link #getOrFindNiPos} and calls
+     * {@link NetworkInterfaceBlockEntity#markContentsDirty()} on it. This is a no-op if no NI
+     * is reachable.
+     */
+    default void notifyNiContentsChanged(ServerLevel level) {
+        BlockPos niPos = getOrFindNiPos(level);
+        if (niPos == null) return;
+        if (level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni) {
+            ni.markContentsDirty();
+        }
+    }
 }

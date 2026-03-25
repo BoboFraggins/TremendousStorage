@@ -72,6 +72,22 @@ public class FilingCabinetBlockEntity extends BlockEntity
         }
     }
 
+    /**
+     * Updates a folder slot's stack and notifies the NI of the content change, without
+     * triggering a full topology invalidation.
+     *
+     * <p>Called by {@link FilingCabinetItemHandler} after inserting into or extracting from a
+     * folder's embedded inventory. Placing or removing a folder itself uses
+     * {@link #setFolder(int, ItemStack)} which calls the full {@link #setChanged()}.
+     */
+    void notifyFolderContentsChanged(int slot, ItemStack updated) {
+        folders.set(slot, updated);
+        super.setChanged();
+        if (level instanceof ServerLevel sl) {
+            notifyNiContentsChanged(sl);
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Container interface
     // -------------------------------------------------------------------------

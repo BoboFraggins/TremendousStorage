@@ -237,7 +237,7 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
         if (!keySet.add(key)) return false; // O(1) duplicate check
         orderedKeys.add(key);
         cachedTotalCount++;
-        setChanged();
+        notifyItemsChanged();
         return true;
     }
 
@@ -251,7 +251,7 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
         StorageKey key = orderedKeys.remove(index);
         keySet.remove(key);
         cachedTotalCount--;
-        setChanged();
+        notifyItemsChanged();
         return key.toDisplayStack();
     }
 
@@ -303,6 +303,19 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
     // -------------------------------------------------------------------------
     // NiCacheHolder + setChanged
     // -------------------------------------------------------------------------
+
+    /**
+     * Lightweight notification for item-content mutations (addItem/removeItem).
+     *
+     * <p>Persists NBT and tells the NI the contents changed, but does NOT invalidate the
+     * topology cache or fire {@code level.invalidateCapabilities}.
+     */
+    private void notifyItemsChanged() {
+        super.setChanged();
+        if (level instanceof ServerLevel sl) {
+            notifyNiContentsChanged(sl);
+        }
+    }
 
     @Override
     public void invalidateNiCache() {
