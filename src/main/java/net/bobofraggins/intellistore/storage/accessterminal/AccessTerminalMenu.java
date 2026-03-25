@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.config.IntelliStoreClientConfig;
 import net.bobofraggins.intellistore.shared.network.RequestSatContentsPacket;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.KeyCounter;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -64,6 +65,9 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
 
     @Nullable
     private final BlockPos niPos;
+
+    /** Last cache revision we sent to this player; -1 = never sent. */
+    private long lastSentRevision = -1;
 
     // -------------------------------------------------------------------------
     // Server-side constructor (called by Provider)
@@ -245,9 +249,9 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                         slot.set(remainder);
                         slotsChanged(craftSlots);
                         // Refresh the client's network grid
-                        IItemHandler refreshed = ni.getItemHandler();
-                        if (refreshed != null && player instanceof ServerPlayer sp) {
-                            PacketDistributor.sendToPlayer(sp, RequestSatContentsPacket.buildContentsPacket(refreshed));
+                        KeyCounter inventory = ni.getCachedInventory();
+                        if (inventory != null && player instanceof ServerPlayer sp) {
+                            PacketDistributor.sendToPlayer(sp, RequestSatContentsPacket.buildContentsPacket(inventory));
                         }
                         return copy;
                     }
@@ -352,6 +356,27 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             if (!extracted.isEmpty()) return extracted;
         }
         return ItemStack.EMPTY;
+    }
+
+    // -------------------------------------------------------------------------
+    // Push-based real-time network inventory updates (Phase 7+8)
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void broadcastChanges() {
+        super.broadcastChanges();
+        if (!hasNetwork() || player.level().isClientSide()) return;
+        if (!(player.level().getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
+        if (!(player instanceof ServerPlayer sp)) return;
+
+        long rev = ni.getCacheRevision();
+        if (rev != lastSentRevision) {
+            KeyCounter inventory = ni.getCachedInventory();
+            if (inventory != null) {
+                PacketDistributor.sendToPlayer(sp, RequestSatContentsPacket.buildContentsPacket(inventory));
+                lastSentRevision = rev;
+            }
+        }
     }
 
     // -------------------------------------------------------------------------

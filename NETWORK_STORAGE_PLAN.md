@@ -193,11 +193,12 @@ private Object2LongOpenHashMap<StorageKey> keySerials;       // StorageKey → s
 This replaces the current pattern where `AccessTerminalMenu` iterates all handler slots every
 time to build its `List<ItemStack>` / `List<Long>` response.
 
-- [ ] Add `cachedAvailableStacks`, `cachedAmountSnapshot`, `nextSerial`, `keySerials` fields to `NetworkInterfaceBlockEntity`
-- [ ] Implement `getCachedInventory()` with lazy rebuild on `contentsDirty`
-- [ ] Implement `rebuildCache()`: collect all stacks into fresh `KeyCounter`, diff against snapshot, update snapshot, assign serials, notify watchers
-- [ ] Update `serverTick()` with rebuild schedule (every tick if watchers present, lazy otherwise)
-- [ ] Update `AccessTerminalMenu` to use `getCachedInventory()` instead of iterating handler slots directly
+- [x] Add `cachedAvailableStacks` and `cacheRevision` fields to `NetworkInterfaceBlockEntity` (simplified from plan — no diff/serial tracking needed for this phase)
+- [x] Implement `getCachedInventory()` with lazy rebuild on `contentsDirty`
+- [x] Implement `rebuildCache()`: collect all stacks into fresh `KeyCounter` via `IKeyCounterContributor` or slot-walk fallback; clear `contentsDirty`; increment `cacheRevision`
+- [x] Update `serverTick()` to call `rebuildCache()` when `contentsDirty`
+- [x] Update `AccessTerminalMenu` and `RequestSatContentsPacket` to use `getCachedInventory()` instead of iterating handler slots directly
+- [x] Create `IKeyCounterContributor` interface; implement in `BulkStorageContainerItemHandler`, `JunkDrawerItemHandler`, `FilingCabinetItemHandler`
 
 ---
 
@@ -244,13 +245,12 @@ record UnmountRequest(IItemHandler handler) implements PendingOp {}
 private final List<PendingOp> pendingOps = new ArrayList<>();
 ```
 
-- [ ] Create `IPreferredStorage` interface with `isPreferredFor(StorageKey)`
-- [ ] Implement `IPreferredStorage` in `BulkStorageContainerItemHandler` (`items.containsKey(key)`)
-- [ ] Implement `IPreferredStorage` in `FilingCabinetItemHandler` (slot accepts check)
-- [ ] Change `NetworkScanResult.insertOrder` to `NavigableMap<Integer, List<IItemHandler>> insertBuckets`
-- [ ] Rewrite `NiItemHandler.insertItem()` with two-phase algorithm (preferred-first per bucket)
-- [ ] Add `operationInProgress` flag and `pendingOps` queue to `NiItemHandler`
-- [ ] Drain `pendingOps` after each insert/extract completes
+- [x] Create `IPreferredStorage` interface with `isPreferredFor(StorageKey)`
+- [x] Implement `IPreferredStorage` in `BulkStorageContainerItemHandler` (`items.containsKey(key)`)
+- [x] Implement `IPreferredStorage` in `FilingCabinetItemHandler` (slot accepts check)
+- [x] Add `insertBuckets: NavigableMap<Integer, List<IItemHandler>>` to `NetworkScanResult` (kept `insertOrder` for extraction slot resolution)
+- [x] Rewrite `NiItemHandler.insertItem()` with two-phase algorithm (preferred-first per bucket)
+- [ ] Add `operationInProgress` flag and `pendingOps` queue to `NiItemHandler` — skipped; reentrancy guard in NI BE's `getScan()` is sufficient for current usage
 
 ---
 
@@ -286,12 +286,10 @@ every call to `insertItem`/`extractItem`. After a non-simulate operation, calls
 (EMPTY / NORMAL / FULL) to drive visual indicators — for now, just the dirty propagation is
 needed; LED state can be added later.
 
-- [ ] Create `INetworkListener` interface with `onSubscriptionSet()` and `onStackChange()`
-- [ ] Create `IKeySubscription` interface with `add()` and `setWatchAll()`
-- [ ] Create `WatcherRegistry` (held by NI BE) with `perKeyInterests` multimap and `globalWatchers` list
-- [ ] Wire `WatcherRegistry` notifications into `rebuildCache()` diff loop
-- [ ] Create `HandlerInterceptor` wrapping `IItemHandler`; call `markContentsDirty()` after non-simulate operations
-- [ ] Define `ContainerState` enum (EMPTY / NORMAL / FULL) for future LED indicators
+- [x] Push-based real-time updates implemented via `AccessTerminalMenu.broadcastChanges()` override (simplified Phase 7 — no watcher registry needed; revision counter on NI BE drives per-tick delta sends)
+- [ ] Create `INetworkListener` / `IKeySubscription` / `WatcherRegistry` — deferred; `broadcastChanges()` approach covers the use case without the complexity
+- [ ] Create `HandlerInterceptor` — deferred; `markContentsDirty()` is already called by storage blocks directly
+- [ ] Define `ContainerState` enum — deferred (future LED indicators)
 
 ---
 
@@ -325,13 +323,9 @@ boolean viewDirty;                                 // true = rebuild view before
 
 The existing full-dump path stays as a fallback and for initial population on menu open.
 
-- [ ] Add `NetworkInventoryRepo` client-side class with `Long2ObjectOpenHashMap<GridEntry> entriesBySerial`, `List<GridEntry> view`, `boolean viewDirty`
-- [ ] Define `GridEntry` record (`long serial`, `StorageKey key`, `long amount`)
-- [ ] Add server-side delta tracking in `AccessTerminalMenu`: collect changed keys each tick from `rebuildCache()` diff
-- [ ] Implement full-dump packet (sent on menu open): `(serial, ItemStack, count)` tuples
-- [ ] Implement delta packet (sent each tick with changes): `(serial, newAmount)` per changed key; `0` signals removal
-- [ ] Update `NetworkInventoryPane` to apply full-dump and delta packets to `NetworkInventoryRepo`
-- [ ] Implement `viewDirty` logic: skip re-sort during scroll, rebuild before next render otherwise
+- [x] Server push via `AccessTerminalMenu.broadcastChanges()`: sends full `SatContentsPacket` each tick when `cacheRevision` changes (covers initial open + incremental updates)
+- [ ] `NetworkInventoryRepo` with `Long2ObjectOpenHashMap<GridEntry>` and delta packets — deferred; current approach sends full snapshot per revision change which is sufficient for now
+- [ ] True incremental delta packets — deferred for future optimization
 
 ---
 

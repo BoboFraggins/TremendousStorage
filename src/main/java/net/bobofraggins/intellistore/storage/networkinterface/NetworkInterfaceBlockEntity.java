@@ -1,6 +1,9 @@
 package net.bobofraggins.intellistore.storage.networkinterface;
 
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.IKeyCounterContributor;
+import net.bobofraggins.intellistore.shared.storage.KeyCounter;
+import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -15,6 +18,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -54,9 +58,14 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     private boolean scanning = false;
     /**
      * True when a storage block's item contents changed but the network topology is intact.
-     * Set by {@link #markContentsDirty()}; cleared when the KeyCounter is rebuilt (Phase 5).
+     * Set by {@link #markContentsDirty()}; cleared when the KeyCounter is rebuilt.
      */
     private boolean contentsDirty = false;
+
+    /** Aggregate cache of all items in the network. Null until first rebuild. */
+    private KeyCounter cachedAvailableStacks = null;
+    /** Monotonically increasing counter; incremented each time the cache is rebuilt. */
+    private long cacheRevision = 0;
 
     private StorageTier tier = StorageTier.PAPER;
     private int energyStored = 0;
@@ -103,14 +112,57 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
 
     /**
      * Returns the network's composite item handler, or {@code null} if the scan is unavailable.
-     * Insert = highest-priority first; extract = lowest-priority first.
+     * Insert = highest-priority first (two-phase); extract = by insert order slot index.
      */
     public IItemHandler getItemHandler() {
         if (getScan() == null) return null;
         if (cachedHandler == null) {
-            cachedHandler = new NiItemHandler(cachedScan.insertOrder());
+            cachedHandler = new NiItemHandler(cachedScan.insertOrder(), cachedScan.insertBuckets());
         }
         return cachedHandler;
+    }
+
+    // -------------------------------------------------------------------------
+    // Aggregate item cache
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the cached aggregate inventory, rebuilding lazily if stale or null.
+     * Returns null on the client side or before the level is available.
+     */
+    public KeyCounter getCachedInventory() {
+        if (level == null || level.isClientSide()) return null;
+        if (cachedAvailableStacks == null || contentsDirty) {
+            rebuildCache();
+        }
+        return cachedAvailableStacks;
+    }
+
+    /** Returns a monotonic counter that increments each time the cache is rebuilt. */
+    public long getCacheRevision() {
+        return cacheRevision;
+    }
+
+    private void rebuildCache() {
+        NetworkScanResult scan = getScan();
+        KeyCounter fresh = new KeyCounter();
+        if (scan != null) {
+            for (IItemHandler handler : scan.insertOrder()) {
+                if (handler instanceof IKeyCounterContributor contributor) {
+                    contributor.contributeToKeyCounter(fresh);
+                } else {
+                    int slots = handler.getSlots();
+                    for (int s = 0; s < slots; s++) {
+                        ItemStack stack = handler.getStackInSlot(s);
+                        if (stack.isEmpty()) continue;
+                        fresh.add(StorageKey.of(stack), stack.getCount());
+                    }
+                }
+            }
+        }
+        cachedAvailableStacks = fresh;
+        contentsDirty = false;
+        cacheRevision++;
     }
 
     // -------------------------------------------------------------------------
@@ -195,6 +247,11 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         if (powered != wasPowered) {
             setChanged();
         }
+
+        // Rebuild aggregate item cache if contents changed
+        if (contentsDirty) {
+            rebuildCache();
+        }
     }
 
     /**
@@ -240,6 +297,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     public void setChanged() {
         cachedScan = null; // invalidate before capability notification fires
         cachedHandler = null;
+        cachedAvailableStacks = null; // topology change — full rebuild needed
         super.setChanged();
         if (level != null) {
             level.invalidateCapabilities(worldPosition);

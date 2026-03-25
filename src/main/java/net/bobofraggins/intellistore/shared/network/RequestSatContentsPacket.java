@@ -1,11 +1,14 @@
 package net.bobofraggins.intellistore.shared.network;
 
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.bobofraggins.intellistore.IntelliStore;
+import net.bobofraggins.intellistore.shared.storage.KeyCounter;
+import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -49,13 +52,13 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
                 return;
             }
 
-            IItemHandler handler = ni.getItemHandler();
-            if (handler == null) {
+            KeyCounter inventory = ni.getCachedInventory();
+            if (inventory == null) {
                 PacketDistributor.sendToPlayer(player, new SatContentsPacket(List.of(), List.of()));
                 return;
             }
 
-            PacketDistributor.sendToPlayer(player, buildContentsPacket(handler));
+            PacketDistributor.sendToPlayer(player, buildContentsPacket(inventory));
         });
     }
 
@@ -113,6 +116,32 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
         }
 
         // Sort: highest count first, then display name ascending, then highest durability first
+        entries.sort(Comparator.comparingLong(Entry::count)
+                .reversed()
+                .thenComparing(Entry::name)
+                .thenComparing(Comparator.comparingInt(Entry::durability).reversed()));
+
+        List<ItemStack> stacks = new ArrayList<>(entries.size());
+        List<Long> counts = new ArrayList<>(entries.size());
+        for (Entry entry : entries) {
+            stacks.add(entry.stack());
+            counts.add(entry.count());
+        }
+        return new SatContentsPacket(List.copyOf(stacks), List.copyOf(counts));
+    }
+
+    /** Builds a {@link SatContentsPacket} from a pre-aggregated {@link KeyCounter}. */
+    public static SatContentsPacket buildContentsPacket(KeyCounter inventory) {
+        record Entry(ItemStack stack, long count, String name, int durability) {}
+        List<Entry> entries = new ArrayList<>();
+        for (Object2LongMap.Entry<StorageKey> e : inventory.allEntries()) {
+            long count = e.getLongValue();
+            if (count <= 0) continue;
+            ItemStack rep = e.getKey().toDisplayStack();
+            int durability = rep.getMaxDamage() - rep.getDamageValue();
+            entries.add(new Entry(rep, count, rep.getDisplayName().getString(), durability));
+        }
+
         entries.sort(Comparator.comparingLong(Entry::count)
                 .reversed()
                 .thenComparing(Entry::name)

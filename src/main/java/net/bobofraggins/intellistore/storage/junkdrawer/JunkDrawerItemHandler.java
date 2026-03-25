@@ -1,5 +1,7 @@
 package net.bobofraggins.intellistore.storage.junkdrawer;
 
+import net.bobofraggins.intellistore.shared.storage.IKeyCounterContributor;
+import net.bobofraggins.intellistore.shared.storage.KeyCounter;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -25,7 +27,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  *   <li>Out-of-range slot indices return EMPTY.
  * </ol>
  */
-public class JunkDrawerItemHandler implements IItemHandler {
+public class JunkDrawerItemHandler implements IItemHandler, IKeyCounterContributor {
 
     private final JunkDrawerBlockEntity be;
 
@@ -76,5 +78,10 @@ public class JunkDrawerItemHandler implements IItemHandler {
         if (slot < 0 || slot >= be.size()) return ItemStack.EMPTY;
         if (simulate) return be.get(slot).copy();
         return be.removeItem(slot);
+    }
+
+    @Override
+    public void contributeToKeyCounter(KeyCounter kc) {
+        be.populateKeyCounter(kc);
     }
 }

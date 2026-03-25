@@ -1,16 +1,23 @@
 package net.bobofraggins.intellistore.storage.networkinterface;
 
 import java.util.List;
+import java.util.NavigableMap;
 import javax.annotation.Nonnull;
+import net.bobofraggins.intellistore.shared.storage.IPreferredStorage;
+import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * The {@link IItemHandler} exposed by a Network Interface block entity.
  *
- * <p>Insertion fills the highest-priority storage first. Slot indices are consistent
- * across {@link #getStackInSlot} and {@link #extractItem} — both use insert order —
- * so callers can safely iterate slots and extract by the same index.
+ * <p>Insertion uses a two-phase algorithm per priority bucket: handlers that already store the
+ * item type (implementing {@link IPreferredStorage}) are tried first within each bucket, then
+ * all remaining handlers in that bucket. This prevents fragmentation across containers of the
+ * same priority.
+ *
+ * <p>Slot indices are consistent across {@link #getStackInSlot} and {@link #extractItem} — both
+ * use insert order — so callers can safely iterate slots and extract by the same index.
  *
  * <p>Slot counts are computed dynamically on every call because underlying handlers
  * (e.g. Bulk Storage Container) report different slot counts as items are inserted or
@@ -20,9 +27,11 @@ import net.neoforged.neoforge.items.IItemHandler;
 public class NiItemHandler implements IItemHandler {
 
     private final List<IItemHandler> insertOrder;
+    private final NavigableMap<Integer, List<IItemHandler>> insertBuckets;
 
-    public NiItemHandler(List<IItemHandler> insertOrder) {
+    public NiItemHandler(List<IItemHandler> insertOrder, NavigableMap<Integer, List<IItemHandler>> insertBuckets) {
         this.insertOrder = List.copyOf(insertOrder);
+        this.insertBuckets = insertBuckets;
     }
 
     // -------------------------------------------------------------------------
@@ -85,17 +94,31 @@ public class NiItemHandler implements IItemHandler {
     }
 
     // -------------------------------------------------------------------------
-    // IItemHandler — insert (highest-priority first, slot param ignored)
+    // IItemHandler — insert (two-phase per priority bucket)
     // -------------------------------------------------------------------------
 
     @Override
     @Nonnull
     public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
         if (stack.isEmpty()) return ItemStack.EMPTY;
+        StorageKey key = StorageKey.of(stack);
         ItemStack remaining = stack;
-        for (IItemHandler handler : insertOrder) {
-            remaining = tryInsertIntoHandler(handler, remaining, simulate);
-            if (remaining.isEmpty()) return ItemStack.EMPTY;
+        // Two-phase insert per priority bucket: preferred handlers first, then all others
+        for (List<IItemHandler> bucket : insertBuckets.values()) {
+            // Phase 1: handlers that already store this item type
+            for (IItemHandler handler : bucket) {
+                if (handler instanceof IPreferredStorage ps && ps.isPreferredFor(key)) {
+                    remaining = tryInsertIntoHandler(handler, remaining, simulate);
+                    if (remaining.isEmpty()) return ItemStack.EMPTY;
+                }
+            }
+            // Phase 2: handlers that don't already store this item type
+            for (IItemHandler handler : bucket) {
+                if (!(handler instanceof IPreferredStorage ps) || !ps.isPreferredFor(key)) {
+                    remaining = tryInsertIntoHandler(handler, remaining, simulate);
+                    if (remaining.isEmpty()) return ItemStack.EMPTY;
+                }
+            }
         }
         return remaining;
     }

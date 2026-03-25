@@ -1,5 +1,9 @@
 package net.bobofraggins.intellistore.storage.filingcabinet;
 
+import net.bobofraggins.intellistore.shared.storage.IKeyCounterContributor;
+import net.bobofraggins.intellistore.shared.storage.IPreferredStorage;
+import net.bobofraggins.intellistore.shared.storage.KeyCounter;
+import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
@@ -31,7 +35,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  *   <li>The folder remains locked to its item type even when drained to count 0.
  * </ol>
  */
-public class FilingCabinetItemHandler implements IItemHandler {
+public class FilingCabinetItemHandler implements IItemHandler, IKeyCounterContributor, IPreferredStorage {
 
     private final FilingCabinetBlockEntity be;
 
@@ -171,5 +175,38 @@ public class FilingCabinetItemHandler implements IItemHandler {
         }
 
         return stored.copyWithCount((int) toExtract);
+    }
+
+    // -------------------------------------------------------------------------
+    // IKeyCounterContributor
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void contributeToKeyCounter(KeyCounter kc) {
+        for (int slot = 0; slot < FilingCabinetBlockEntity.SLOT_COUNT; slot++) {
+            ItemStack folder = be.getFolder(slot);
+            if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) continue;
+            FolderContents contents = getContents(folder);
+            if (contents.isEmpty() || contents.count() == 0) continue;
+            if (contents.storedItem().isEmpty()) continue;
+            ItemStack stored = contents.storedItem().get();
+            kc.add(StorageKey.of(stored), contents.count());
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // IPreferredStorage
+    // -------------------------------------------------------------------------
+
+    @Override
+    public boolean isPreferredFor(StorageKey key) {
+        ItemStack probe = key.toDisplayStack();
+        for (int slot = 0; slot < FilingCabinetBlockEntity.SLOT_COUNT; slot++) {
+            ItemStack folder = be.getFolder(slot);
+            if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) continue;
+            FolderContents contents = getContents(folder);
+            if (contents.accepts(probe)) return true;
+        }
+        return false;
     }
 }

@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.KeyCounter;
 import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBFS;
@@ -253,6 +254,17 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
         cachedTotalCount--;
         notifyItemsChanged();
         return key.toDisplayStack();
+    }
+
+    // -------------------------------------------------------------------------
+    // KeyCounter contribution
+    // -------------------------------------------------------------------------
+
+    /** Adds all stored items (count = 1 each) to the given KeyCounter. */
+    public void populateKeyCounter(KeyCounter kc) {
+        for (StorageKey key : orderedKeys) {
+            kc.add(key, 1L);
+        }
     }
 
     // -------------------------------------------------------------------------

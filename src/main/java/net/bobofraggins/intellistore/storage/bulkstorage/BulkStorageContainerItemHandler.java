@@ -1,5 +1,9 @@
 package net.bobofraggins.intellistore.storage.bulkstorage;
 
+import net.bobofraggins.intellistore.shared.storage.IKeyCounterContributor;
+import net.bobofraggins.intellistore.shared.storage.IPreferredStorage;
+import net.bobofraggins.intellistore.shared.storage.KeyCounter;
+import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -23,7 +27,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  *   <li>When a type's count reaches zero its slot is removed.
  * </ol>
  */
-public class BulkStorageContainerItemHandler implements IItemHandler {
+public class BulkStorageContainerItemHandler implements IItemHandler, IKeyCounterContributor, IPreferredStorage {
 
     private final BulkStorageContainerBlockEntity be;
 
@@ -68,5 +72,15 @@ public class BulkStorageContainerItemHandler implements IItemHandler {
     @Override
     public ItemStack extractItem(int slot, int amount, boolean simulate) {
         return be.extract(slot, amount, simulate);
+    }
+
+    @Override
+    public void contributeToKeyCounter(KeyCounter kc) {
+        be.populateKeyCounter(kc);
+    }
+
+    @Override
+    public boolean isPreferredFor(StorageKey key) {
+        return be.contains(key);
     }
 }

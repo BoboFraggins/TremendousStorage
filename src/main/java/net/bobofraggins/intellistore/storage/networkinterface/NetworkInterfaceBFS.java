@@ -9,7 +9,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 import java.util.Set;
+import java.util.TreeMap;
 import net.bobofraggins.intellistore.external.arsnouveau.SourceTankBlockEntity;
 import net.bobofraggins.intellistore.external.mekanism.GasTankBlockEntity;
 import net.bobofraggins.intellistore.shared.priority.Priority;
@@ -193,6 +195,17 @@ public final class NetworkInterfaceBFS {
         List<IItemHandler> insertOrder = new ArrayList<>(handlerEntries.size());
         for (HandlerEntry e : handlerEntries) insertOrder.add(e.handler());
 
+        // Build priority buckets for two-phase insert (highest priority first via reverseOrder)
+        TreeMap<Integer, List<IItemHandler>> buckets = new TreeMap<>(Comparator.reverseOrder());
+        for (HandlerEntry e : handlerEntries) {
+            buckets.computeIfAbsent(e.priority().ordinal(), k -> new ArrayList<>())
+                    .add(e.handler());
+        }
+        NavigableMap<Integer, List<IItemHandler>> insertBuckets = new TreeMap<>(Comparator.reverseOrder());
+        for (Map.Entry<Integer, List<IItemHandler>> entry : buckets.entrySet()) {
+            insertBuckets.put(entry.getKey(), List.copyOf(entry.getValue()));
+        }
+
         // Build UI block list: storage blocks first, then tubes
         List<AttachedEntry> blockList = new ArrayList<>();
         // Aggregate duplicate storage keys
@@ -217,7 +230,12 @@ public final class NetworkInterfaceBFS {
             blockList.add(new AttachedEntry("block.intellistore." + colorName + "_tube", tubeCounts.get(colorName)));
         }
 
-        return new NetworkScanResult(List.copyOf(insertOrder), List.copyOf(blockList), otherNiCount == 0, fePerTick);
+        return new NetworkScanResult(
+                List.copyOf(insertOrder),
+                Collections.unmodifiableNavigableMap(insertBuckets),
+                List.copyOf(blockList),
+                otherNiCount == 0,
+                fePerTick);
     }
 
     // -------------------------------------------------------------------------

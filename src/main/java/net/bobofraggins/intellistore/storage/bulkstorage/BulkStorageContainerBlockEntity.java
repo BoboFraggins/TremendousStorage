@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.KeyCounter;
 import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBFS;
@@ -296,6 +297,23 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
         }
 
         return typeStack.copyWithCount((int) toExtract);
+    }
+
+    // -------------------------------------------------------------------------
+    // KeyCounter contribution
+    // -------------------------------------------------------------------------
+
+    /** Adds all stored items with their actual counts to the given KeyCounter. */
+    public void populateKeyCounter(KeyCounter kc) {
+        for (StorageKey key : orderedKeys) {
+            long count = items.getLong(key);
+            if (count > 0) kc.add(key, count);
+        }
+    }
+
+    /** Returns true if this container already holds items of the given key. */
+    public boolean contains(StorageKey key) {
+        return items.containsKey(key);
     }
 
     // -------------------------------------------------------------------------
