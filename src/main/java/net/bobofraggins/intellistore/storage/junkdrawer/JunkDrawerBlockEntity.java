@@ -1,10 +1,13 @@
 package net.bobofraggins.intellistore.storage.junkdrawer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
@@ -50,7 +53,10 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder {
 
-    private final List<ItemStack> items = new ArrayList<>();
+    // keySet provides O(1) duplicate detection; orderedKeys provides stable index-based access
+    private final Set<StorageKey> keySet = new HashSet<>();
+    private final List<StorageKey> orderedKeys = new ArrayList<>();
+    private long cachedTotalCount = 0;
     private Priority priority = Priority.NORMAL;
     private StorageTier tier = StorageTier.PAPER;
 
@@ -193,15 +199,15 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
     // -------------------------------------------------------------------------
 
     public int size() {
-        return items.size();
+        return orderedKeys.size();
     }
 
     public boolean isEmpty() {
-        return items.isEmpty();
+        return orderedKeys.isEmpty();
     }
 
     public boolean isFull() {
-        return items.size() >= getCapacity();
+        return cachedTotalCount >= getCapacity();
     }
 
     public StorageTier getTier() {
@@ -215,18 +221,22 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
 
     /** Returns the item at {@code index} (count == 1), or {@link ItemStack#EMPTY}. */
     public ItemStack get(int index) {
-        if (index < 0 || index >= items.size()) return ItemStack.EMPTY;
-        return items.get(index);
+        if (index < 0 || index >= orderedKeys.size()) return ItemStack.EMPTY;
+        return orderedKeys.get(index).toDisplayStack();
     }
 
     /**
      * Appends one copy (count = 1) of the given stack.
      *
-     * @return true if the item was added; false if the drawer is full or the item is not accepted.
+     * @return true if the item was added; false if the drawer is full, the item is not accepted,
+     *     or an identical item (same type + components) is already present.
      */
     public boolean addItem(ItemStack stack) {
         if (isFull() || !accepts(stack)) return false;
-        items.add(stack.copyWithCount(1));
+        StorageKey key = StorageKey.of(stack);
+        if (!keySet.add(key)) return false; // O(1) duplicate check
+        orderedKeys.add(key);
+        cachedTotalCount++;
         setChanged();
         return true;
     }
@@ -237,10 +247,12 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
      * @return the removed stack (count == 1), or {@link ItemStack#EMPTY} if out of range.
      */
     public ItemStack removeItem(int index) {
-        if (index < 0 || index >= items.size()) return ItemStack.EMPTY;
-        ItemStack removed = items.remove(index);
+        if (index < 0 || index >= orderedKeys.size()) return ItemStack.EMPTY;
+        StorageKey key = orderedKeys.remove(index);
+        keySet.remove(key);
+        cachedTotalCount--;
         setChanged();
-        return removed;
+        return key.toDisplayStack();
     }
 
     // -------------------------------------------------------------------------
@@ -327,8 +339,8 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         ListTag list = new ListTag();
-        for (ItemStack stack : items) {
-            list.add(stack.save(registries));
+        for (StorageKey key : orderedKeys) {
+            list.add(key.toDisplayStack().save(registries));
         }
         tag.put(TAG_ITEMS, list);
         tag.putInt("Priority", priority.ordinal());
@@ -338,10 +350,18 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        items.clear();
+        keySet.clear();
+        orderedKeys.clear();
+        cachedTotalCount = 0;
         ListTag list = tag.getList(TAG_ITEMS, Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
-            ItemStack.parse(registries, list.getCompound(i)).ifPresent(items::add);
+            ItemStack.parse(registries, list.getCompound(i)).ifPresent(stack -> {
+                StorageKey key = StorageKey.of(stack);
+                if (keySet.add(key)) {
+                    orderedKeys.add(key);
+                    cachedTotalCount++;
+                }
+            });
         }
         priority = Priority.fromOrdinal(tag.getInt("Priority"));
         tier = StorageTier.fromId(tag.getString("Tier"));

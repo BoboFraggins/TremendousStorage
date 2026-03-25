@@ -1,10 +1,12 @@
 package net.bobofraggins.intellistore.storage.bulkstorage;
 
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
@@ -47,9 +49,10 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class BulkStorageContainerBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder {
 
-    // Each entry: type key (count==1) + stored count
-    private final List<ItemStack> types = new ArrayList<>();
-    private final List<Long> counts = new ArrayList<>();
+    // O(1) lookup by key; orderedKeys provides stable index-based access
+    private final Object2LongOpenHashMap<StorageKey> items = new Object2LongOpenHashMap<>();
+    private final List<StorageKey> orderedKeys = new ArrayList<>();
+    private long cachedTotalCount = 0;
     private Priority priority = Priority.LOW;
     private StorageTier tier = StorageTier.PAPER;
 
@@ -190,17 +193,15 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
 
     /** Total number of items stored across all types. */
     public long totalCount() {
-        long total = 0;
-        for (long c : counts) total += c;
-        return total;
+        return cachedTotalCount;
     }
 
     public boolean isEmpty() {
-        return types.isEmpty();
+        return orderedKeys.isEmpty();
     }
 
     public boolean isFull() {
-        return totalCount() >= getCapacity();
+        return cachedTotalCount >= getCapacity();
     }
 
     public StorageTier getTier() {
@@ -214,19 +215,19 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
 
     /** Number of distinct item types currently stored. */
     public int typeCount() {
-        return types.size();
+        return orderedKeys.size();
     }
 
     /** Returns the type key at {@code index} (count == 1), or {@link ItemStack#EMPTY}. */
     public ItemStack getType(int index) {
-        if (index < 0 || index >= types.size()) return ItemStack.EMPTY;
-        return types.get(index);
+        if (index < 0 || index >= orderedKeys.size()) return ItemStack.EMPTY;
+        return orderedKeys.get(index).toDisplayStack();
     }
 
     /** Returns the stored count for the type at {@code index}, or 0. */
     public long getCount(int index) {
-        if (index < 0 || index >= counts.size()) return 0;
-        return counts.get(index);
+        if (index < 0 || index >= orderedKeys.size()) return 0;
+        return items.getLong(orderedKeys.get(index));
     }
 
     // -------------------------------------------------------------------------
@@ -241,20 +242,20 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
     public long insert(ItemStack type, long amount, boolean simulate) {
         if (amount <= 0 || !accepts(type)) return amount;
 
-        long space = getCapacity() - totalCount();
+        long space = getCapacity() - cachedTotalCount;
         if (space <= 0) return amount;
 
         long toInsert = Math.min(amount, space);
 
         if (!simulate) {
-            // Find existing entry for this type
-            int idx = findType(type);
-            if (idx >= 0) {
-                counts.set(idx, counts.get(idx) + toInsert);
+            StorageKey key = StorageKey.of(type);
+            if (items.containsKey(key)) {
+                items.addTo(key, toInsert);
             } else {
-                types.add(type.copyWithCount(1));
-                counts.add(toInsert);
+                items.put(key, toInsert);
+                orderedKeys.add(key);
             }
+            cachedTotalCount += toInsert;
             setChanged();
         }
 
@@ -267,27 +268,34 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
      * @return the extracted stack (may be smaller than requested), or EMPTY if nothing available.
      */
     public ItemStack extract(int index, long amount, boolean simulate) {
-        if (index < 0 || index >= types.size()) return ItemStack.EMPTY;
+        if (index < 0 || index >= orderedKeys.size()) return ItemStack.EMPTY;
 
-        ItemStack type = types.get(index);
-        long stored = counts.get(index);
+        StorageKey key = orderedKeys.get(index);
+        long stored = items.getLong(key);
         if (stored == 0) return ItemStack.EMPTY;
 
-        long toExtract = Math.min(amount, Math.min(type.getMaxStackSize(), stored));
+        ItemStack typeStack = key.toDisplayStack();
+        long toExtract = Math.min(amount, Math.min(typeStack.getMaxStackSize(), stored));
         if (toExtract <= 0) return ItemStack.EMPTY;
 
         if (!simulate) {
             long remaining = stored - toExtract;
             if (remaining == 0) {
-                types.remove(index);
-                counts.remove(index);
+                // Swap-with-last for O(1) removal — order is not contractually guaranteed
+                int lastIdx = orderedKeys.size() - 1;
+                StorageKey last = orderedKeys.remove(lastIdx);
+                if (index != lastIdx) {
+                    orderedKeys.set(index, last);
+                }
+                items.removeLong(key);
             } else {
-                counts.set(index, remaining);
+                items.put(key, remaining);
             }
+            cachedTotalCount -= toExtract;
             setChanged();
         }
 
-        return type.copyWithCount((int) toExtract);
+        return typeStack.copyWithCount((int) toExtract);
     }
 
     // -------------------------------------------------------------------------
@@ -336,18 +344,6 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
     }
 
     // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    /** Returns the index of an existing entry matching {@code type}, or -1. */
-    int findType(ItemStack type) {
-        for (int i = 0; i < types.size(); i++) {
-            if (ItemStack.isSameItemSameComponents(types.get(i), type)) return i;
-        }
-        return -1;
-    }
-
-    // -------------------------------------------------------------------------
     // NiCacheHolder + setChanged
     // -------------------------------------------------------------------------
 
@@ -388,10 +384,10 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         ListTag list = new ListTag();
-        for (int i = 0; i < types.size(); i++) {
+        for (StorageKey key : orderedKeys) {
             CompoundTag entry = new CompoundTag();
-            entry.put(TAG_TYPE, types.get(i).save(registries));
-            entry.putLong(TAG_COUNT, counts.get(i));
+            entry.put(TAG_TYPE, key.toDisplayStack().save(registries));
+            entry.putLong(TAG_COUNT, items.getLong(key));
             list.add(entry);
         }
         tag.put(TAG_TYPES, list);
@@ -402,14 +398,18 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        types.clear();
-        counts.clear();
+        items.clear();
+        orderedKeys.clear();
+        cachedTotalCount = 0;
         ListTag list = tag.getList(TAG_TYPES, Tag.TAG_COMPOUND);
         for (int i = 0; i < list.size(); i++) {
             CompoundTag entry = list.getCompound(i);
+            long count = entry.getLong(TAG_COUNT);
             ItemStack.parse(registries, entry.getCompound(TAG_TYPE)).ifPresent(stack -> {
-                types.add(stack.copyWithCount(1));
-                counts.add(entry.getLong(TAG_COUNT));
+                StorageKey key = StorageKey.of(stack);
+                items.put(key, count);
+                orderedKeys.add(key);
+                cachedTotalCount += count;
             });
         }
         priority = Priority.fromOrdinal(tag.getInt("Priority"));
