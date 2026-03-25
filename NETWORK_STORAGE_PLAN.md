@@ -123,11 +123,11 @@ The `Reference2ObjectOpenHashMap` outer key uses `==` identity on `Item` singlet
 hashing at the outer level at all. Looking up "total Oak Logs" is one identity comparison + one
 hash map lookup into the `VariantCounter`.
 
-- [ ] Create `VariantCounter` interface
-- [ ] Implement `UnorderedVariantMap` (`Object2LongOpenHashMap<StorageKey>`)
-- [ ] Implement `FuzzyVariantMap` (`Object2LongAVLTreeMap<StorageKey>`) with `findFuzzy(int, int)`
-- [ ] Create `KeyCounter` with `Reference2ObjectOpenHashMap<Item, VariantCounter>` outer map
-- [ ] Implement `KeyCounter.add()`, `remove()`, `getAmount()`, `getVariants()`, `clear()`, `allEntries()`
+- [x] Create `VariantCounter` interface
+- [x] Implement `UnorderedVariantMap` (`Object2LongOpenHashMap<StorageKey>`)
+- [x] Implement `FuzzyVariantMap` (`Object2LongAVLTreeMap<StorageKey>`) with `findFuzzy(int, int)`
+- [x] Create `KeyCounter` with `Reference2ObjectOpenHashMap<Item, VariantCounter>` outer map
+- [x] Implement `KeyCounter.add()`, `remove()`, `getAmount()`, `getVariants()`, `clear()`, `allEntries()`
 
 ---
 

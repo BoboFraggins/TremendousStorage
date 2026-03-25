@@ -103,16 +103,20 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
             totals.computeIfAbsent(key, k -> new long[1])[0] += inSlot.getCount();
         }
 
-        // Pre-compute display names once to avoid re-materialising per sort comparison
-        record Entry(ItemStack stack, long count, String name) {}
+        // Pre-compute display names and durability once to avoid re-materialising per comparison
+        record Entry(ItemStack stack, long count, String name, int durability) {}
         List<Entry> entries = new ArrayList<>(totals.size());
         for (Map.Entry<StackKey, long[]> e : totals.entrySet()) {
             ItemStack rep = e.getKey().representative();
-            entries.add(new Entry(rep, e.getValue()[0], rep.getDisplayName().getString()));
+            int durability = rep.getMaxDamage() - rep.getDamageValue();
+            entries.add(new Entry(rep, e.getValue()[0], rep.getDisplayName().getString(), durability));
         }
 
-        // Sort: highest count first, then display name ascending
-        entries.sort(Comparator.comparingLong(Entry::count).reversed().thenComparing(Entry::name));
+        // Sort: highest count first, then display name ascending, then highest durability first
+        entries.sort(Comparator.comparingLong(Entry::count)
+                .reversed()
+                .thenComparing(Entry::name)
+                .thenComparing(Comparator.comparingInt(Entry::durability).reversed()));
 
         List<ItemStack> stacks = new ArrayList<>(entries.size());
         List<Long> counts = new ArrayList<>(entries.size());
