@@ -78,11 +78,11 @@ public class BulkStorageContainerRenderer
         poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
         poseStack.translate(-0.5, -0.5, -0.5);
 
-        // Animate lid: pivot at back-bottom edge of lid (z=15/16, y=11/16 in model space)
+        // Animate lid: pivot at back-bottom edge of lid (z=15/16, y=9/16 in model space)
         float openFraction = Mth.lerp(partialTick, be.prevLidAngle, be.lidAngle);
-        poseStack.translate(0.0, 11.0 / 16.0, 15.0 / 16.0);
+        poseStack.translate(0.0, 9.0 / 16.0, 15.0 / 16.0);
         poseStack.mulPose(Axis.XP.rotationDegrees(openFraction * 90f));
-        poseStack.translate(0.0, -11.0 / 16.0, -15.0 / 16.0);
+        poseStack.translate(0.0, -9.0 / 16.0, -15.0 / 16.0);
 
         int color = be.getTier().getColor();
         float r = ((color >> 16) & 0xFF) / 255f;
