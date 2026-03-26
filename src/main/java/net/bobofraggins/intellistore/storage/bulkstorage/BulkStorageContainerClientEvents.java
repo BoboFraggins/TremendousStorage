@@ -24,8 +24,9 @@ public final class BulkStorageContainerClientEvents {
 
     @SubscribeEvent
     public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        // Body model is loaded automatically via the blockstate JSON.
-        // Lid model must be registered here since the BESR looks it up by standalone location.
+        // Both body and lid are rendered by the BESR, so both must be registered as standalone models.
+        event.register(ModelResourceLocation.standalone(
+                ResourceLocation.fromNamespaceAndPath("intellistore", "block/bulk_storage_container_body")));
         event.register(ModelResourceLocation.standalone(
                 ResourceLocation.fromNamespaceAndPath("intellistore", "block/bulk_storage_container_lid")));
     }

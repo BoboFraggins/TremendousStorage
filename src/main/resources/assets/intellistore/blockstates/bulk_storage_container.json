@@ -1,9 +1,6 @@
 {
   "multipart": [
-    { "when": { "facing": "north" }, "apply": { "model": "intellistore:block/bulk_storage_container_body" } },
-    { "when": { "facing": "south" }, "apply": { "model": "intellistore:block/bulk_storage_container_body", "y": 180 } },
-    { "when": { "facing": "east" },  "apply": { "model": "intellistore:block/bulk_storage_container_body", "y": 90 } },
-    { "when": { "facing": "west" },  "apply": { "model": "intellistore:block/bulk_storage_container_body", "y": 270 } },
+    { "apply": { "model": "intellistore:block/bulk_storage_container_particle" } },
 
     { "when": { "facing": "north", "south": "true" }, "apply": { "model": "intellistore:block/bulk_storage_container_attachment", "y": 180 } },
     { "when": { "facing": "north", "east": "true"  }, "apply": { "model": "intellistore:block/bulk_storage_container_attachment", "y": 90 } },

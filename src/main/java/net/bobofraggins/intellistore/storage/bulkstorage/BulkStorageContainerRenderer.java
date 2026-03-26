@@ -22,17 +22,19 @@ import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
- * Renders only the animated lid of the Bulk Storage Container.
+ * Renders the body and animated lid of the Bulk Storage Container.
  *
- * <p>The static body is rendered by the chunk renderer via the blockstate model
- * ({@code bulk_storage_container_body}), which gives it proper AO and face culling.
- * This BESR handles only the lid animation: pivot at z=15/16, y=11/16 in model space,
- * rotating around the X axis (positive rotation opens the lid, front rises up).
+ * <p>Both parts are rendered here so they share the same lighting pipeline and
+ * exhibit no AO mismatch (matching the approach used by vanilla chests). The body
+ * is rendered first with only the facing Y-rotation applied; the lid is then rendered
+ * with the additional pivot animation: z=15/16, y=9/16, rotating around the X axis.
  */
 public class BulkStorageContainerRenderer
         implements BlockEntityRenderer<BulkStorageContainerBlockEntity>,
                 IBlockEntityRendererExtension<BulkStorageContainerBlockEntity> {
 
+    private static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/bulk_storage_container_body"));
     private static final ModelResourceLocation LID_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/bulk_storage_container_lid"));
 
@@ -58,10 +60,10 @@ public class BulkStorageContainerRenderer
             int packedOverlay) {
 
         Minecraft mc = Minecraft.getInstance();
+        BakedModel bodyModel = mc.getModelManager().getModel(BODY_MODEL);
         BakedModel lidModel = mc.getModelManager().getModel(LID_MODEL);
         VertexConsumer consumer = bufferSource.getBuffer(RenderType.solid());
 
-        // Sample light at the block's own position, same as the chunk renderer does for the body.
         Level level = be.getLevel();
         if (level != null) {
             packedLight = LevelRenderer.getLightColor(level, be.getBlockPos());
@@ -71,32 +73,34 @@ public class BulkStorageContainerRenderer
         Direction facing = blockState.getValue(BulkStorageContainerBlock.FACING);
         float yRot = facingYRot(facing);
 
-        poseStack.pushPose();
-
-        // Match the facing rotation applied to the body by the chunk renderer
-        poseStack.translate(0.5, 0.5, 0.5);
-        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
-        poseStack.translate(-0.5, -0.5, -0.5);
-
-        // Animate lid: pivot at back-bottom edge of lid (z=15/16, y=9/16 in model space)
-        float openFraction = Mth.lerp(partialTick, be.prevLidAngle, be.lidAngle);
-        poseStack.translate(0.0, 9.0 / 16.0, 15.0 / 16.0);
-        poseStack.mulPose(Axis.XP.rotationDegrees(openFraction * 90f));
-        poseStack.translate(0.0, -9.0 / 16.0, -15.0 / 16.0);
-
         int color = be.getTier().getColor();
         float r = ((color >> 16) & 0xFF) / 255f;
         float g = ((color >> 8) & 0xFF) / 255f;
         float b = (color & 0xFF) / 255f;
 
-        // Render each quad with per-face directional shading, matching what the chunk renderer
-        // applies to the body. Tinted quads (tintindex >= 0) receive tier color × shade;
-        // untinted quads receive shade only (white × shade).
-        PoseStack.Pose pose = poseStack.last();
         RandomSource random = RandomSource.create();
-        renderQuadsWithShading(
-                consumer, pose, lidModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
 
+        // Render body with facing rotation only.
+        poseStack.pushPose();
+        poseStack.translate(0.5, 0.5, 0.5);
+        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
+        poseStack.translate(-0.5, -0.5, -0.5);
+        renderQuadsWithShading(
+                consumer, poseStack.last(), bodyModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
+        poseStack.popPose();
+
+        // Render lid with facing rotation + pivot animation.
+        // Pivot at back-bottom edge of lid (z=15/16, y=9/16 in model space).
+        float openFraction = Mth.lerp(partialTick, be.prevLidAngle, be.lidAngle);
+        poseStack.pushPose();
+        poseStack.translate(0.5, 0.5, 0.5);
+        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
+        poseStack.translate(-0.5, -0.5, -0.5);
+        poseStack.translate(0.0, 9.0 / 16.0, 15.0 / 16.0);
+        poseStack.mulPose(Axis.XP.rotationDegrees(openFraction * 90f));
+        poseStack.translate(0.0, -9.0 / 16.0, -15.0 / 16.0);
+        renderQuadsWithShading(
+                consumer, poseStack.last(), lidModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
         poseStack.popPose();
     }
 
