@@ -41,6 +41,12 @@ public class AccessTerminalBlock extends BaseEntityBlock implements NetworkConne
 
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
 
+    // Body bounds (foot + body elements, ignoring keyboard/mouse): x=4-14, y=0-14, z=5-16
+    private static final net.minecraft.world.phys.shapes.VoxelShape SHAPE_NORTH = Block.box(4, 0, 5, 14, 14, 16);
+    private static final net.minecraft.world.phys.shapes.VoxelShape SHAPE_SOUTH = Block.box(2, 0, 0, 12, 14, 11);
+    private static final net.minecraft.world.phys.shapes.VoxelShape SHAPE_EAST = Block.box(0, 0, 4, 11, 14, 14);
+    private static final net.minecraft.world.phys.shapes.VoxelShape SHAPE_WEST = Block.box(5, 0, 2, 16, 14, 12);
+
     @Override
     public MapCodec<AccessTerminalBlock> codec() {
         return CODEC;
@@ -67,6 +73,20 @@ public class AccessTerminalBlock extends BaseEntityBlock implements NetworkConne
                         BlockStateProperties.HORIZONTAL_FACING,
                         ctx.getHorizontalDirection().getOpposite())
                 .setValue(ACTIVE, false);
+    }
+
+    @Override
+    public net.minecraft.world.phys.shapes.VoxelShape getShape(
+            BlockState state,
+            net.minecraft.world.level.BlockGetter level,
+            BlockPos pos,
+            net.minecraft.world.phys.shapes.CollisionContext context) {
+        return switch (state.getValue(BlockStateProperties.HORIZONTAL_FACING)) {
+            case SOUTH -> SHAPE_SOUTH;
+            case EAST -> SHAPE_EAST;
+            case WEST -> SHAPE_WEST;
+            default -> SHAPE_NORTH;
+        };
     }
 
     @Override

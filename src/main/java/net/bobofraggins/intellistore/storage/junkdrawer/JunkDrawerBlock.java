@@ -59,6 +59,8 @@ public class JunkDrawerBlock extends BaseEntityBlock implements NetworkConnector
     };
     private static final BooleanProperty[] DIR_PROPS = {NORTH, SOUTH, EAST, WEST, UP, DOWN};
 
+    private static final VoxelShape SHAPE = Block.box(1, 1, 1, 15, 15, 15);
+
     @Override
     public MapCodec<JunkDrawerBlock> codec() {
         return CODEC;
@@ -103,6 +105,15 @@ public class JunkDrawerBlock extends BaseEntityBlock implements NetworkConnector
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new JunkDrawerBlockEntity(pos, state);
+    }
+
+    @Override
+    public VoxelShape getShape(
+            BlockState state,
+            BlockGetter level,
+            BlockPos pos,
+            net.minecraft.world.phys.shapes.CollisionContext context) {
+        return SHAPE;
     }
 
     @Override

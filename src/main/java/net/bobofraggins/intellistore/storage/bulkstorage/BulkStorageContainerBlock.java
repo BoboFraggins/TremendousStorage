@@ -53,6 +53,8 @@ public class BulkStorageContainerBlock extends BaseEntityBlock implements Networ
     private static final Direction[] HORIZONTALS = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
     private static final BooleanProperty[] H_PROPS = {NORTH, SOUTH, EAST, WEST};
 
+    private static final VoxelShape SHAPE = Block.box(1, 0, 1, 15, 14, 15);
+
     @Override
     public MapCodec<BulkStorageContainerBlock> codec() {
         return CODEC;
@@ -95,6 +97,15 @@ public class BulkStorageContainerBlock extends BaseEntityBlock implements Networ
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new BulkStorageContainerBlockEntity(pos, state);
+    }
+
+    @Override
+    public VoxelShape getShape(
+            BlockState state,
+            BlockGetter level,
+            BlockPos pos,
+            net.minecraft.world.phys.shapes.CollisionContext context) {
+        return SHAPE;
     }
 
     @Override

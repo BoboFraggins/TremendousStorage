@@ -256,7 +256,8 @@ public final class Registration {
             () -> new JunkDrawerBlock(BlockBehaviour.Properties.of()
                     .strength(5.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
-                    .sound(SoundType.METAL)));
+                    .sound(SoundType.METAL)
+                    .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> JUNK_DRAWER_ITEM =
             ITEMS.register("junk_drawer", () -> new TieredBlockItem(JUNK_DRAWER.get(), new Item.Properties()));
@@ -271,7 +272,8 @@ public final class Registration {
             () -> new BulkStorageContainerBlock(BlockBehaviour.Properties.of()
                     .strength(5.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
-                    .sound(SoundType.METAL)));
+                    .sound(SoundType.METAL)
+                    .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> BULK_STORAGE_CONTAINER_ITEM = ITEMS.register(
             "bulk_storage_container", () -> new TieredBlockItem(BULK_STORAGE_CONTAINER.get(), new Item.Properties()));

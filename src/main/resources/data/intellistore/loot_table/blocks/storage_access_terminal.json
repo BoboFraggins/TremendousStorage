@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "intellistore:access_terminal"
+          "name": "intellistore:storage_access_terminal"
         }
       ],
       "conditions": [
