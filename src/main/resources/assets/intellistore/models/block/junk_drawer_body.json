@@ -1,4 +1,5 @@
 {
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "intellistore:block/junk_drawer_texture",
     "texture": "intellistore:block/junk_drawer_texture"

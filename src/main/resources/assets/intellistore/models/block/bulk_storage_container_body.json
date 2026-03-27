@@ -1,4 +1,5 @@
 {
+  "parent": "minecraft:block/block",
   "textures": {
     "particle": "intellistore:block/bulk_storage_texture",
     "texture": "intellistore:block/bulk_storage_texture"

@@ -1,6 +1,6 @@
 {
   "parent": "intellistore:block/access_terminal_off",
   "textures": {
-    "screen": "intellistore:block/pet_screen_on"
+    "screen": "intellistore:block/access_terminal_on"
   }
 }
