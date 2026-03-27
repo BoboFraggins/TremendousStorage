@@ -22,26 +22,25 @@ import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
- * Renders only the animated door of the Junk Drawer.
+ * Renders the body and animated door of the Junk Drawer.
  *
- * <p>The static body is rendered by the chunk renderer via the blockstate model
- * ({@code junk_drawer_body}), which gives it proper AO and face culling.
- * This BESR handles only the door animation: pivot at the east edge of the door panel,
- * rotating around the Y axis (positive rotation opens the door outward toward the viewer).
- *
- * <p>The pivot in model space is at x={@value #HINGE_X_MODEL}, z={@value #HINGE_Z_MODEL},
- * derived from the Blockbench rotation origin shared by all door elements.
+ * <p>Both parts are rendered here so they share the same lighting pipeline and
+ * exhibit no AO mismatch (matching the approach used by vanilla chests). The body
+ * is rendered first with only the facing Y-rotation applied; the door is then rendered
+ * with the additional pivot animation: x=15/16, z=6/16, rotating around the Y axis.
  */
 public class JunkDrawerRenderer
         implements BlockEntityRenderer<JunkDrawerBlockEntity>, IBlockEntityRendererExtension<JunkDrawerBlockEntity> {
 
+    private static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/junk_drawer_body"));
     static final ModelResourceLocation DOOR_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/junk_drawer_door"));
 
     /** Hinge x coordinate in model space (0–16), from Blockbench rotation origin. */
     private static final float HINGE_X_MODEL = 15f;
     /** Hinge z coordinate in model space (0–16), from Blockbench rotation origin. */
-    private static final float HINGE_Z_MODEL = 4f;
+    private static final float HINGE_Z_MODEL = 6f;
 
     /** Y-rotation in degrees to apply for each facing direction (model default is NORTH). */
     private static float facingYRot(Direction facing) {
@@ -65,10 +64,10 @@ public class JunkDrawerRenderer
             int packedOverlay) {
 
         Minecraft mc = Minecraft.getInstance();
+        BakedModel bodyModel = mc.getModelManager().getModel(BODY_MODEL);
         BakedModel doorModel = mc.getModelManager().getModel(DOOR_MODEL);
-        VertexConsumer consumer = bufferSource.getBuffer(RenderType.cutoutMipped());
+        VertexConsumer consumer = bufferSource.getBuffer(RenderType.solid());
 
-        // Sample light at the block's own position, same as the chunk renderer does for the body.
         Level level = be.getLevel();
         if (level != null) {
             packedLight = LevelRenderer.getLightColor(level, be.getBlockPos());
@@ -78,35 +77,36 @@ public class JunkDrawerRenderer
         Direction facing = blockState.getValue(JunkDrawerBlock.FACING);
         float yRot = facingYRot(facing);
 
-        poseStack.pushPose();
-
-        // Match the facing rotation applied to the body by the chunk renderer.
-        poseStack.translate(0.5, 0.5, 0.5);
-        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
-        poseStack.translate(-0.5, -0.5, -0.5);
-
-        // Animate door: pivot at hinge in model space. The facing rotation above already
-        // transforms the coordinate frame, so the pivot is always the model-space position.
-        float openFraction = Mth.lerp(partialTick, be.prevDoorAngle, be.doorAngle);
-        float hx = HINGE_X_MODEL / 16f;
-        float hz = HINGE_Z_MODEL / 16f;
-        poseStack.translate(hx, 0, hz);
-        poseStack.mulPose(Axis.YP.rotationDegrees(-openFraction * 90f));
-        poseStack.translate(-hx, 0, -hz);
-
         int color = be.getTier().getColor();
         float r = ((color >> 16) & 0xFF) / 255f;
         float g = ((color >> 8) & 0xFF) / 255f;
         float b = (color & 0xFF) / 255f;
 
-        // Render each quad with per-face directional shading, matching what the chunk renderer
-        // applies to the body. Tinted quads (tintindex >= 0) receive tier color × shade;
-        // untinted quads receive shade only (white × shade).
-        PoseStack.Pose pose = poseStack.last();
         RandomSource random = RandomSource.create();
-        renderQuadsWithShading(
-                consumer, pose, doorModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
 
+        // Render body with facing rotation only.
+        poseStack.pushPose();
+        poseStack.translate(0.5, 0.5, 0.5);
+        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
+        poseStack.translate(-0.5, -0.5, -0.5);
+        renderQuadsWithShading(
+                consumer, poseStack.last(), bodyModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
+        poseStack.popPose();
+
+        // Render door with facing rotation + pivot animation.
+        // Pivot at hinge edge of door (x=15/16, z=6/16 in model space).
+        float openFraction = Mth.lerp(partialTick, be.prevDoorAngle, be.doorAngle);
+        float hx = HINGE_X_MODEL / 16f;
+        float hz = HINGE_Z_MODEL / 16f;
+        poseStack.pushPose();
+        poseStack.translate(0.5, 0.5, 0.5);
+        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
+        poseStack.translate(-0.5, -0.5, -0.5);
+        poseStack.translate(hx, 0, hz);
+        poseStack.mulPose(Axis.YP.rotationDegrees(-openFraction * 90f));
+        poseStack.translate(-hx, 0, -hz);
+        renderQuadsWithShading(
+                consumer, poseStack.last(), doorModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
         poseStack.popPose();
     }
 
@@ -129,7 +129,7 @@ public class JunkDrawerRenderer
             RandomSource random) {
         for (Direction dir : Direction.values()) {
             random.setSeed(42L);
-            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.cutoutMipped())) {
+            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.solid())) {
                 float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
                 float qr, qg, qb;
                 if (quad.getTintIndex() >= 0) {
@@ -146,7 +146,7 @@ public class JunkDrawerRenderer
         }
         // Unculled quads
         random.setSeed(42L);
-        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.cutoutMipped())) {
+        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.solid())) {
             Direction dir = quad.getDirection();
             float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
             float qr, qg, qb;

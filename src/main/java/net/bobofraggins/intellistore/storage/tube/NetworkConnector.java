@@ -25,6 +25,7 @@ package net.bobofraggins.intellistore.storage.tube;
  *   <li>{@link net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlock}
  *   <li>{@link net.bobofraggins.intellistore.external.arsnouveau.SourceTankBlock}
  *   <li>{@link net.bobofraggins.intellistore.external.mekanism.GasTankBlock}
+ *   <li>{@link net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlock}
  * </ul>
  */
 public interface NetworkConnector {}

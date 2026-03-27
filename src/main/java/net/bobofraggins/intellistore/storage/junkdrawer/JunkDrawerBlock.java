@@ -51,9 +51,13 @@ public class JunkDrawerBlock extends BaseEntityBlock implements NetworkConnector
     public static final BooleanProperty SOUTH = BooleanProperty.create("south");
     public static final BooleanProperty EAST = BooleanProperty.create("east");
     public static final BooleanProperty WEST = BooleanProperty.create("west");
+    public static final BooleanProperty UP = BooleanProperty.create("up");
+    public static final BooleanProperty DOWN = BooleanProperty.create("down");
 
-    private static final Direction[] HORIZONTALS = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
-    private static final BooleanProperty[] H_PROPS = {NORTH, SOUTH, EAST, WEST};
+    private static final Direction[] ALL_DIRECTIONS = {
+        Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.UP, Direction.DOWN
+    };
+    private static final BooleanProperty[] DIR_PROPS = {NORTH, SOUTH, EAST, WEST, UP, DOWN};
 
     @Override
     public MapCodec<JunkDrawerBlock> codec() {
@@ -68,12 +72,14 @@ public class JunkDrawerBlock extends BaseEntityBlock implements NetworkConnector
                 .setValue(NORTH, false)
                 .setValue(SOUTH, false)
                 .setValue(EAST, false)
-                .setValue(WEST, false));
+                .setValue(WEST, false)
+                .setValue(UP, false)
+                .setValue(DOWN, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, NORTH, SOUTH, EAST, WEST);
+        builder.add(FACING, NORTH, SOUTH, EAST, WEST, UP, DOWN);
     }
 
     @Override
@@ -83,8 +89,8 @@ public class JunkDrawerBlock extends BaseEntityBlock implements NetworkConnector
     }
 
     private BlockState computeConnections(BlockState state, Level level, BlockPos pos) {
-        for (int i = 0; i < HORIZONTALS.length; i++) {
-            state = state.setValue(H_PROPS[i], canConnect(level, pos, HORIZONTALS[i]));
+        for (int i = 0; i < ALL_DIRECTIONS.length; i++) {
+            state = state.setValue(DIR_PROPS[i], canConnect(level, pos, ALL_DIRECTIONS[i]));
         }
         return state;
     }

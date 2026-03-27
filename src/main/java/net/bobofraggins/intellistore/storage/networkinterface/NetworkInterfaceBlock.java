@@ -3,6 +3,7 @@ package net.bobofraggins.intellistore.storage.networkinterface;
 import com.mojang.serialization.MapCodec;
 import java.util.List;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
@@ -23,7 +24,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 /** A single-block-tall Network Interface. */
-public class NetworkInterfaceBlock extends BaseEntityBlock {
+public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<NetworkInterfaceBlock> CODEC = simpleCodec(NetworkInterfaceBlock::new);
 
