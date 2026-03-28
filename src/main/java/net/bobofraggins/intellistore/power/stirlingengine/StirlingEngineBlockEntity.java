@@ -21,22 +21,24 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
  * Block entity for the Stirling Engine generator.
  *
  * <p>Checks the block directly below each tick and generates FE based on the heat source:
+ *
  * <ul>
  *   <li>Lava block → 50 FE/t
  *   <li>Magma block → 25 FE/t
  *   <li>Lit campfire → 15 FE/t
  * </ul>
  *
- * <p>Stores up to 100,000 FE internally and pushes energy to all adjacent blocks
- * that expose an {@link IEnergyStorage} capability.
+ * <p>Stores up to 100,000 FE internally and pushes energy to all adjacent blocks that expose an
+ * {@link IEnergyStorage} capability.
  *
- * <p>Client-side, {@link #animationTicks} advances while {@link #heated} is true,
- * driving the spinning flywheel animation in {@link StirlingEngineRenderer}.
+ * <p>Client-side, {@link #animationTicks} advances while {@link #heated} is true, driving the
+ * flywheel animation in {@link StirlingEngineRenderer}.
  */
 public class StirlingEngineBlockEntity extends BlockEntity {
 
     /** Base buffer capacity at PAPER tier. Scales 4× per tier via {@link StorageTier#getScaledCapacity}. */
     public static final int BASE_MAX_ENERGY = 100_000;
+
     /** Base FE pushed per adjacent block per tick at PAPER tier. Scales 4× per tier. */
     private static final int BASE_PUSH_PER_TICK = 100;
 
@@ -72,7 +74,6 @@ public class StirlingEngineBlockEntity extends BlockEntity {
 
         pushEnergy();
 
-        // Sync heated state to clients when it changes
         if (heated != wasHeated) {
             setChanged();
         }
@@ -106,10 +107,12 @@ public class StirlingEngineBlockEntity extends BlockEntity {
     // Client tick
     // -------------------------------------------------------------------------
 
+    public static final float CYCLE_TICKS = 40f;
+
     public void clientTick() {
         if (heated) {
-            animationTicks += 1.5f;
-            if (animationTicks > 3600f) animationTicks -= 3600f; // keep small
+            animationTicks += 1.0f;
+            if (animationTicks >= CYCLE_TICKS) animationTicks -= CYCLE_TICKS;
         }
     }
 
@@ -136,20 +139,6 @@ public class StirlingEngineBlockEntity extends BlockEntity {
 
     public int getMaxEnergy() {
         return (int) tier.getScaledCapacity(BASE_MAX_ENERGY);
-    }
-
-    /**
-     * Receive energy from an adjacent energy source (e.g., a Pipez energy pipe).
-     * Returns the amount actually accepted.
-     */
-    public int receiveEnergy(int maxReceive, boolean simulate) {
-        int space = getMaxEnergy() - energyStored;
-        int accepted = Math.min(maxReceive, space);
-        if (!simulate && accepted > 0) {
-            energyStored += accepted;
-            setChanged();
-        }
-        return accepted;
     }
 
     /** Called by {@link StirlingEngineEnergyHandler} to extract energy from the buffer. */

@@ -2,58 +2,63 @@ package net.bobofraggins.intellistore.power.stirlingengine;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
-import org.joml.Matrix4f;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.model.data.ModelData;
 
-/**
- * Renders the Stirling Engine as a Lazurite base + Lazurite block top with a sliding piston.
- *
- * <p>The piston animates (bouncing up and down) only when a heat source is present below
- * the engine (i.e. when {@link StirlingEngineBlockEntity#isHeated()} returns true).
- * When idle the piston sits at its lowest position, 1 px proud of the Lazurite block top.
- *
- * <p>Geometry (all in 1/16ths of a block):
- * <ul>
- *   <li>Lazurite base — [2,EPS,2] → [14,6,14]  (12px wide, 6px tall)
- *   <li>Lazurite top  — [4,6,4]   → [12,10,12]  (8px wide, 4px tall, centred)
- *   <li>Copper piston — [5,?,5] → [11,?,11]  (6px wide, 6px tall, Y position animated)
- *       piston top: 11/16 (rest) … 16/16 (extended)
- * </ul>
- */
+/** Renders the Stirling Engine body, animated flywheel, piston, and dynamic bridge connector. */
 public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngineBlockEntity> {
 
-    private static final ResourceLocation LAZURITE_BLOCK =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/lazurite_block");
-    private static final ResourceLocation COPPER_BLOCK =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/stirling_engine_piston");
+    private static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/stirling_engine_body"));
+    private static final ModelResourceLocation FLYWHEEL_MODEL = ModelResourceLocation.standalone(
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/stirling_engine_flywheel"));
+    private static final ModelResourceLocation PISTON_MODEL = ModelResourceLocation.standalone(
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/stirling_engine_piston"));
+    private static final ModelResourceLocation BRIDGE_MODEL = ModelResourceLocation.standalone(
+            ResourceLocation.fromNamespaceAndPath("intellistore", "block/stirling_engine_bridge"));
 
-    /** Small offset to prevent Z-fighting with adjacent block faces. */
-    private static final float EPS = 1e-4f;
+    /** Flywheel rotation pivot in block space (0–1). Centre of flywheel disc at X=3.225, Y=5.6, Z=4.6. */
+    private static final float FW_X = 3.225f / 16f;
 
-    /** Piston height in world units (6 px). */
-    private static final float PISTON_HEIGHT = 6f / 16f;
+    private static final float FW_Y = 5.6f / 16f;
+    private static final float FW_Z = 4.6f / 16f;
 
-    /** Y of the Lazurite-top surface (10 px). */
-    private static final float LAZURITE_TOP_Y = 10f / 16f;
+    /**
+     * Max piston retraction in block space (0–1). Piston connector near-face at Z=3.4/16; jacket
+     * inner opening at Z≈7.76/16. Retract up to 4.0/16 leaving small clearance.
+     */
+    private static final float MAX_PISTON_RETRACT = 4.0f / 16f;
 
-    /** Piston top at rest: 1 px proud of the Lazurite block top. */
-    private static final float PISTON_TOP_MIN = LAZURITE_TOP_Y + 1f / 16f;
+    /**
+     * Flywheel attachment point (centre of the flywheel-side connector's Z=7.55 face) expressed as
+     * an offset relative to the flywheel pivot, in YZ-plane block units (/16).
+     */
+    private static final float FA_REL_X = (4.85f - 3.225f) / 16f; // 1.625/16
 
-    /** Piston top at full extension: 2 px short of block top, keeping bottom 2px hidden. */
-    private static final float PISTON_TOP_MAX = 14f / 16f;
+    private static final float FA_REL_Y = (5.525f - 5.6f) / 16f; // -0.075/16
+    private static final float FA_REL_Z = (7.55f - 4.6f) / 16f; // 2.95/16
 
-    /** animationTicks units per second (1.5 per client tick × 20 ticks/s = 30). */
-    private static final float TICKS_PER_SECOND = 30f;
+    /** Bridge model — piston-end face centre in model space. */
+    private static final float BRIDGE_CX = (5.65f + 6.1f) / 2f / 16f; // 5.875/16
 
-    /** One full piston cycle = 2 seconds. */
-    private static final float CYCLE_TICKS = TICKS_PER_SECOND * 2f;
+    private static final float BRIDGE_CY = (5.3f + 5.75f) / 2f / 16f; // 5.525/16
+    private static final float BRIDGE_Z0 = 3.35f / 16f; // piston-end Z
+    private static final float BRIDGE_Z1 = 7.55f / 16f; // flywheel-end Z
+    private static final float BRIDGE_REST_LEN = BRIDGE_Z1 - BRIDGE_Z0; // 4.2/16
 
     public StirlingEngineRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -66,154 +71,179 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
             int packedLight,
             int packedOverlay) {
 
-        TextureAtlasSprite ironSprite = sprite(LAZURITE_BLOCK);
-        TextureAtlasSprite copperSprite = sprite(COPPER_BLOCK);
+        Minecraft mc = Minecraft.getInstance();
+        BakedModel bodyModel = mc.getModelManager().getModel(BODY_MODEL);
+        BakedModel flywheelModel = mc.getModelManager().getModel(FLYWHEEL_MODEL);
+        BakedModel pistonModel = mc.getModelManager().getModel(PISTON_MODEL);
+        BakedModel bridgeModel = mc.getModelManager().getModel(BRIDGE_MODEL);
+        VertexConsumer consumer = bufferSource.getBuffer(RenderType.solid());
 
-        VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
-
-        poseStack.pushPose();
-        Matrix4f mat = poseStack.last().pose();
-
-        // ---- Lazurite base: 12 px wide, 6 px tall ----
-        drawBox(solid, mat, 2f / 16, EPS, 2f / 16, 14f / 16, 6f / 16, 14f / 16, ironSprite, packedLight, packedOverlay);
-
-        // ---- Lazurite block top: 8 px wide, 4 px tall, centred ----
-        drawBox(
-                solid,
-                mat,
-                4f / 16,
-                6f / 16,
-                4f / 16,
-                12f / 16,
-                LAZURITE_TOP_Y,
-                12f / 16,
-                ironSprite,
-                packedLight,
-                packedOverlay);
-
-        // ---- Copper piston: 6 px wide, slides up/down when heated ----
-        float pistonTop;
-        if (be.isHeated()) {
-            float time = be.animationTicks + partialTick * 1.5f;
-            // sin oscillates -1 … +1; map to 0 … 1 for piston travel.
-            float t = ((float) Math.sin(time * Math.PI / (CYCLE_TICKS / 2f)) + 1f) / 2f;
-            pistonTop = PISTON_TOP_MIN + t * (PISTON_TOP_MAX - PISTON_TOP_MIN);
-        } else {
-            pistonTop = PISTON_TOP_MIN;
+        Level level = be.getLevel();
+        if (level != null) {
+            packedLight = LevelRenderer.getLightColor(level, be.getBlockPos());
         }
-        float pistonBot = pistonTop - PISTON_HEIGHT;
 
-        drawBox(
-                solid,
-                mat,
-                5f / 16,
-                pistonBot,
-                5f / 16,
-                11f / 16,
-                pistonTop,
-                11f / 16,
-                copperSprite,
+        BlockState blockState = be.getBlockState();
+        RandomSource random = RandomSource.create();
+
+        // Tier color — applied as a tint to the flywheel disc elements.
+        int tierColor = be.getTier().getColor();
+        float tr = ((tierColor >> 16) & 0xFF) / 255f;
+        float tg = ((tierColor >> 8) & 0xFF) / 255f;
+        float tb = (tierColor & 0xFF) / 255f;
+
+        // t in [0, 1) — fraction through the 40-tick cycle. Zero when not heated.
+        float t = be.isHeated() ? (be.animationTicks + partialTick) / StirlingEngineBlockEntity.CYCLE_TICKS : 0f;
+        float theta = Mth.TWO_PI * t;
+        float cosT = Mth.cos(theta);
+        float sinT = Mth.sin(theta);
+
+        // Piston translation: sinusoidal retract toward the jacket once per cycle.
+        float pistonZ = MAX_PISTON_RETRACT * (1f - Mth.cos(Mth.TWO_PI * t)) / 2f;
+
+        // Static body (base plate + cylinder + jacket trim)
+        poseStack.pushPose();
+        renderQuads(
+                consumer,
+                poseStack.last(),
+                bodyModel,
+                blockState,
+                level,
                 packedLight,
-                packedOverlay);
-
+                packedOverlay,
+                random,
+                1f,
+                1f,
+                1f);
         poseStack.popPose();
+
+        // Flywheel: one full revolution per cycle, rotating around the X axis through its centre.
+        // Disc elements are tinted with the tier color.
+        poseStack.pushPose();
+        poseStack.translate(FW_X, FW_Y, FW_Z);
+        poseStack.mulPose(Axis.XP.rotationDegrees(360f * t));
+        poseStack.translate(-FW_X, -FW_Y, -FW_Z);
+        renderQuads(
+                consumer,
+                poseStack.last(),
+                flywheelModel,
+                blockState,
+                level,
+                packedLight,
+                packedOverlay,
+                random,
+                tr,
+                tg,
+                tb);
+        poseStack.popPose();
+
+        // Piston: sinusoidal retract-and-return once per cycle along +Z (toward the jacket).
+        poseStack.pushPose();
+        poseStack.translate(0f, 0f, pistonZ);
+        renderQuads(
+                consumer,
+                poseStack.last(),
+                pistonModel,
+                blockState,
+                level,
+                packedLight,
+                packedOverlay,
+                random,
+                1f,
+                1f,
+                1f);
+        poseStack.popPose();
+
+        // Bridge connector: dynamically repositioned so its two ends stay in contact with the
+        // flywheel-side connector (which rotates) and the piston-side connector (which translates).
+
+        // Piston attachment: centre of bridge at its piston-end face, shifted by piston translation.
+        float paX = BRIDGE_CX;
+        float paY = BRIDGE_CY;
+        float paZ = BRIDGE_Z0 + pistonZ;
+
+        // Flywheel attachment: centre of the flywheel-side connector's Z=7.55 face, rotated with the
+        // flywheel around the flywheel pivot.
+        float faY = FW_Y + FA_REL_Y * cosT - FA_REL_Z * sinT;
+        float faZ = FW_Z + FA_REL_Y * sinT + FA_REL_Z * cosT;
+
+        float dy = faY - paY;
+        float dz = faZ - paZ;
+
+        // Both attachment X values are fixed (flywheel rotates around X axis), so the bridge only
+        // moves in the YZ plane. Ignore dx and rotate purely around the X axis.
+        float yzDist = Mth.sqrt(dy * dy + dz * dz);
+        if (yzDist > 1e-4f) {
+            poseStack.pushPose();
+            // 1. Move local origin to piston attachment (will be the bridge's piston-end pivot).
+            poseStack.translate(paX, paY, paZ);
+            // 2. Rotate local Z axis in the YZ plane to point toward flywheel attachment.
+            float pitch = (float) Math.atan2(-dy, dz);
+            poseStack.mulPose(Axis.XP.rotation(pitch));
+            // 3. Scale local Z so bridge spans the YZ distance between the two attachment points.
+            poseStack.scale(1f, 1f, yzDist / BRIDGE_REST_LEN);
+            // 4. Shift bridge model so its piston-end face centre sits at local origin.
+            poseStack.translate(-BRIDGE_CX, -BRIDGE_CY, -BRIDGE_Z0);
+            renderQuads(
+                    consumer,
+                    poseStack.last(),
+                    bridgeModel,
+                    blockState,
+                    level,
+                    packedLight,
+                    packedOverlay,
+                    random,
+                    1f,
+                    1f,
+                    1f);
+            poseStack.popPose();
+        }
     }
 
-    // -------------------------------------------------------------------------
-    // Geometry helpers
-    // -------------------------------------------------------------------------
-
-    private static TextureAtlasSprite sprite(ResourceLocation loc) {
-        return Minecraft.getInstance()
-                .getModelManager()
-                .getAtlas(InventoryMenu.BLOCK_ATLAS)
-                .getSprite(loc);
-    }
-
-    private static void drawBox(
-            VertexConsumer vc,
-            Matrix4f mat,
-            float x0,
-            float y0,
-            float z0,
-            float x1,
-            float y1,
-            float z1,
-            TextureAtlasSprite sp,
-            int light,
-            int overlay) {
-        float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
-        int r = 255, g = 255, b = 255;
-        // -Y
-        quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0, -1,
-                0);
-        // +Y
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0, 1, 0);
-        // -Z
-        quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0, 0,
-                -1);
-        // +Z
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0, 0, 1);
-        // -X
-        quad(
-                vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1, 0,
-                0);
-        // +X
-        quad(vc, mat, r, g, b, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1, 0, 0);
-    }
-
-    private static void quad(
-            VertexConsumer vc,
-            Matrix4f mat,
-            int r,
-            int g,
-            int b,
-            int light,
-            int overlay,
-            float u0,
-            float v0,
-            float u1,
-            float v1,
-            float x0,
-            float y0,
-            float z0,
-            float x1,
-            float y1,
-            float z1,
-            float x2,
-            float y2,
-            float z2,
-            float x3,
-            float y3,
-            float z3,
-            float nx,
-            float ny,
-            float nz) {
-        vc.addVertex(mat, x3, y3, z3)
-                .setColor(r, g, b, 255)
-                .setUv(u0, v1)
-                .setOverlay(overlay)
-                .setLight(light)
-                .setNormal(nx, ny, nz);
-        vc.addVertex(mat, x2, y2, z2)
-                .setColor(r, g, b, 255)
-                .setUv(u1, v1)
-                .setOverlay(overlay)
-                .setLight(light)
-                .setNormal(nx, ny, nz);
-        vc.addVertex(mat, x1, y1, z1)
-                .setColor(r, g, b, 255)
-                .setUv(u1, v0)
-                .setOverlay(overlay)
-                .setLight(light)
-                .setNormal(nx, ny, nz);
-        vc.addVertex(mat, x0, y0, z0)
-                .setColor(r, g, b, 255)
-                .setUv(u0, v0)
-                .setOverlay(overlay)
-                .setLight(light)
-                .setNormal(nx, ny, nz);
+    /**
+     * Renders all quads of a baked model with directional shading. Quads that have a tint index ≥ 0
+     * are multiplied by the supplied {@code r}/{@code g}/{@code b} tint (pass 1, 1, 1 for no tint).
+     */
+    private static void renderQuads(
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            BakedModel model,
+            BlockState blockState,
+            Level level,
+            int packedLight,
+            int packedOverlay,
+            RandomSource random,
+            float r,
+            float g,
+            float b) {
+        for (Direction dir : Direction.values()) {
+            random.setSeed(42L);
+            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.solid())) {
+                float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
+                float qr, qg, qb;
+                if (quad.getTintIndex() >= 0) {
+                    qr = r * shade;
+                    qg = g * shade;
+                    qb = b * shade;
+                } else {
+                    qr = qg = qb = shade;
+                }
+                consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, packedOverlay);
+            }
+        }
+        random.setSeed(42L);
+        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.solid())) {
+            Direction dir = quad.getDirection();
+            float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
+            float qr, qg, qb;
+            if (quad.getTintIndex() >= 0) {
+                qr = r * shade;
+                qg = g * shade;
+                qb = b * shade;
+            } else {
+                qr = qg = qb = shade;
+            }
+            consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, packedOverlay);
+        }
     }
 }

@@ -2,7 +2,6 @@ package net.bobofraggins.intellistore.power.stirlingengine;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
-import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -17,7 +16,7 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 /** A heat-powered energy generator that converts heat from blocks below into RF. */
-public class StirlingEngineBlock extends BaseEntityBlock implements NetworkConnector {
+public class StirlingEngineBlock extends BaseEntityBlock {
 
     public static final MapCodec<StirlingEngineBlock> CODEC = simpleCodec(StirlingEngineBlock::new);
 
@@ -46,8 +45,7 @@ public class StirlingEngineBlock extends BaseEntityBlock implements NetworkConne
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         List<ItemStack> drops = super.getDrops(state, params);
-        BlockEntity be = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
-        if (be instanceof StirlingEngineBlockEntity engine) {
+        if (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof StirlingEngineBlockEntity engine) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof net.minecraft.world.item.BlockItem) {
                     engine.saveToItem(drop, params.getLevel().registryAccess());

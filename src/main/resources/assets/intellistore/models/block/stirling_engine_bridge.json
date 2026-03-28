@@ -1,0 +1,21 @@
+{
+  "parent": "minecraft:block/block",
+  "texture_size": [64, 64],
+  "textures": {
+    "texture": "intellistore:block/stirling_engine_texture",
+    "particle": "intellistore:block/stirling_engine_texture"
+  },
+  "elements": [
+    {
+      "from": [5.65, 5.3, 3.35], "to": [6.1, 5.75, 7.55],
+      "faces": {
+        "north": {"uv": [4.25, 11, 4.375, 11.125],   "texture": "#texture"},
+        "south": {"uv": [4.5, 11, 4.625, 11.125],    "texture": "#texture"},
+        "east":  {"uv": [10, 3.25, 11, 3.375],       "texture": "#texture"},
+        "west":  {"uv": [10, 3.5, 11, 3.625],        "texture": "#texture"},
+        "up":    {"uv": [3.625, 11, 3.5, 10],        "texture": "#texture"},
+        "down":  {"uv": [3.875, 10, 3.75, 11],       "texture": "#texture"}
+      }
+    }
+  ]
+}
