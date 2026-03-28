@@ -7,14 +7,14 @@
   },
   "elements": [
     {
-      "from": [5.65, 5.3, 3.35], "to": [6.1, 5.75, 7.55],
+      "from": [5.55, 7.3, 3.15], "to": [6, 7.75, 7.65],
       "faces": {
-        "north": {"uv": [4.25, 11, 4.375, 11.125],   "texture": "#texture"},
-        "south": {"uv": [4.5, 11, 4.625, 11.125],    "texture": "#texture"},
-        "east":  {"uv": [10, 3.25, 11, 3.375],       "texture": "#texture"},
-        "west":  {"uv": [10, 3.5, 11, 3.625],        "texture": "#texture"},
-        "up":    {"uv": [3.625, 11, 3.5, 10],        "texture": "#texture"},
-        "down":  {"uv": [3.875, 10, 3.75, 11],       "texture": "#texture"}
+        "north": {"uv": [0.25, 11.5, 0.375, 11.625],   "texture": "#texture"},
+        "south": {"uv": [0.5, 11.5, 0.625, 11.625],    "texture": "#texture"},
+        "east":  {"uv": [10.25, 8.75, 11.375, 8.875],  "texture": "#texture"},
+        "west":  {"uv": [10.25, 9, 11.375, 9.125],     "texture": "#texture"},
+        "up":    {"uv": [2.875, 11.375, 2.75, 10.25],  "texture": "#texture"},
+        "down":  {"uv": [9.375, 10.25, 9.25, 11.375],  "texture": "#texture"}
       }
     }
   ]

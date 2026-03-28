@@ -31,10 +31,10 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
     private static final ModelResourceLocation BRIDGE_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/stirling_engine_bridge"));
 
-    /** Flywheel rotation pivot in block space (0–1). Centre of flywheel disc at X=3.225, Y=5.6, Z=4.6. */
+    /** Flywheel rotation pivot in block space (0–1). Centre of flywheel disc at X=3.225, Y=7.6, Z=4.6. */
     private static final float FW_X = 3.225f / 16f;
 
-    private static final float FW_Y = 5.6f / 16f;
+    private static final float FW_Y = 7.6f / 16f;
     private static final float FW_Z = 4.6f / 16f;
 
     /**
@@ -47,17 +47,17 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
      * Flywheel attachment point (centre of the flywheel-side connector's Z=7.55 face) expressed as
      * an offset relative to the flywheel pivot, in YZ-plane block units (/16).
      */
-    private static final float FA_REL_X = (4.85f - 3.225f) / 16f; // 1.625/16
+    private static final float FA_REL_X = (4.8f - 3.225f) / 16f; // 1.575/16
 
     private static final float FA_REL_Y = (5.525f - 5.6f) / 16f; // -0.075/16
     private static final float FA_REL_Z = (7.55f - 4.6f) / 16f; // 2.95/16
 
     /** Bridge model — piston-end face centre in model space. */
-    private static final float BRIDGE_CX = (5.65f + 6.1f) / 2f / 16f; // 5.875/16
+    private static final float BRIDGE_CX = (5.55f + 6.0f) / 2f / 16f; // 5.775/16
 
-    private static final float BRIDGE_CY = (5.3f + 5.75f) / 2f / 16f; // 5.525/16
-    private static final float BRIDGE_Z0 = 3.35f / 16f; // piston-end Z
-    private static final float BRIDGE_Z1 = 7.55f / 16f; // flywheel-end Z
+    private static final float BRIDGE_CY = (7.3f + 7.75f) / 2f / 16f; // 7.525/16
+    private static final float BRIDGE_Z0 = 3.15f / 16f; // piston-end Z
+    private static final float BRIDGE_Z1 = 7.65f / 16f; // flywheel-end Z
     private static final float BRIDGE_REST_LEN = BRIDGE_Z1 - BRIDGE_Z0; // 4.2/16
 
     public StirlingEngineRenderer(BlockEntityRendererProvider.Context ctx) {}
