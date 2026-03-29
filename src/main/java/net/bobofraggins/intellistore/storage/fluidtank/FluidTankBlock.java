@@ -1,6 +1,7 @@
 package net.bobofraggins.intellistore.storage.fluidtank;
 
 import com.mojang.serialization.MapCodec;
+import java.util.List;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -8,6 +9,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
@@ -25,6 +27,8 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -83,6 +87,20 @@ public class FluidTankBlock extends BaseEntityBlock implements NetworkConnector 
     @Override
     public VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
         return Shapes.empty();
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        List<ItemStack> drops = super.getDrops(state, params);
+        BlockEntity be = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+        if (be instanceof FluidTankBlockEntity tank) {
+            for (ItemStack drop : drops) {
+                if (drop.getItem() instanceof BlockItem) {
+                    tank.saveToItem(drop, params.getLevel().registryAccess());
+                }
+            }
+        }
+        return drops;
     }
 
     private static final int BOTTLE_MB = 250;
