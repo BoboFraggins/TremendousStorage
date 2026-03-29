@@ -3,7 +3,8 @@
     "render_type": "minecraft:cutout",
     "textures": {
         "0": "intellistore:block/tank_texture",
-        "particle": "intellistore:block/tank_texture"
+        "particle": "intellistore:block/tank_texture",
+        "1": "intellistore:block/tank_cap_fluid"
     },
     "elements": [
         {
@@ -914,12 +915,12 @@
             "faces": {
                 "north": {
                     "uv": [
-                        1.5,
-                        8.0,
-                        1.75,
-                        8.25
+                        0,
+                        0,
+                        16,
+                        16
                     ],
-                    "texture": "#0"
+                    "texture": "#1"
                 },
                 "east": {
                     "uv": [
@@ -1000,12 +1001,12 @@
                 },
                 "south": {
                     "uv": [
-                        1.5,
-                        8.75,
-                        1.75,
-                        9.0
+                        0,
+                        0,
+                        16,
+                        16
                     ],
-                    "texture": "#0"
+                    "texture": "#1"
                 },
                 "west": {
                     "uv": [
@@ -1059,12 +1060,12 @@
                 },
                 "east": {
                     "uv": [
-                        1.5,
-                        9.0,
-                        1.75,
-                        9.25
+                        0,
+                        0,
+                        16,
+                        16
                     ],
-                    "texture": "#0"
+                    "texture": "#1"
                 },
                 "south": {
                     "uv": [
@@ -1145,12 +1146,12 @@
                 },
                 "west": {
                     "uv": [
-                        5.5,
-                        9.25,
-                        5.75,
-                        9.5
+                        0,
+                        0,
+                        16,
+                        16
                     ],
-                    "texture": "#0"
+                    "texture": "#1"
                 },
                 "up": {
                     "uv": [
