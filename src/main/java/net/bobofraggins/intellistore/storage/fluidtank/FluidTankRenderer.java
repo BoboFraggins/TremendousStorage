@@ -26,7 +26,7 @@ import org.joml.Matrix4f;
  * ({@code models/block/fluid_tank.json}) via {@link net.minecraft.world.level.block.RenderShape#MODEL}.
  * This BESR is responsible only for the parts that change at runtime:
  * <ul>
- *   <li>Fluid fill box (translucent, height proportional to fill fraction)
+ *   <li>Fluid fill octagonal prism (translucent, height proportional to fill fraction)
  *   <li>Tube-connector stubs on faces adjacent to a {@link TubeBlock} (solid lazurite)
  * </ul>
  */
@@ -39,18 +39,25 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
     private static final float EPS = 1e-4f;
 
     // Fluid interior bounds (inside the glass jar)
-    private static final float FLUID_MIN = 2f / 16f;
-    private static final float FLUID_MAX = 14f / 16f;
     private static final float FLUID_FLOOR = 3f / 16f;
-    private static final float FLUID_CEIL = 15f / 16f;
+    private static final float FLUID_CEIL = 13f / 16f;
     private static final float FLUID_H = FLUID_CEIL - FLUID_FLOOR;
-
-    private static final float MIN_FILL_FRAC = 0.05f;
 
     // Tube connector stub dimensions
     private static final float STUB_D = 2f / 16f;
     private static final float STUB_MIN = 6f / 16f;
     private static final float STUB_MAX = 10f / 16f;
+
+    // Octagon XZ vertices (all in [0,1] block space)
+    // A = NW, B = NE, C = EN, D = ES, E = SE, F = SW, G = WS, H = WN
+    private static final float AX = 5.5f / 16f, AZ = 2f / 16f;
+    private static final float BX = 10.5f / 16f, BZ = 2f / 16f;
+    private static final float CX = 14f / 16f, CZ = 5.5f / 16f;
+    private static final float DX = 14f / 16f, DZ = 10.5f / 16f;
+    private static final float EX = 10.5f / 16f, EZ = 14f / 16f;
+    private static final float FX = 5.5f / 16f, FZ = 14f / 16f;
+    private static final float GX = 2f / 16f, GZ = 10.5f / 16f;
+    private static final float HX = 2f / 16f, HZ = 5.5f / 16f;
 
     public FluidTankRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -66,17 +73,16 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();
 
-        // ---- Fluid fill (translucent) ----
+        // ---- Fluid fill (translucent octagonal prism) ----
         if (be.isLocked()) {
             FluidStack fluid = be.getStoredFluid();
 
-            float fillFrac = be.getAmount() > 0
-                    ? Math.max(MIN_FILL_FRAC, (float) be.getAmount() / be.getCapacity())
-                    : MIN_FILL_FRAC;
+            float fillFrac = Math.max(0.01f, (float) be.getAmount() / be.getCapacity());
             float fillTop = FLUID_FLOOR + fillFrac * FLUID_H;
+            float fillHeight = fillTop - FLUID_FLOOR;
 
             IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fluid.getFluid());
-            TextureAtlasSprite fluidSprite = sprite(ext.getStillTexture(fluid));
+            TextureAtlasSprite fluidSprite = sprite(ext.getFlowingTexture(fluid));
 
             int tint = ext.getTintColor(fluid);
             int fr = (tint >> 16) & 0xFF;
@@ -88,22 +94,289 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
             int fluidLight = fluid.getFluidType().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
 
             VertexConsumer translucent = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
-            drawBox(
+
+            // UV coords for side faces: width=5 texture pixels, height proportional to fill
+            float uLeft = fluidSprite.getU(0);
+            float uRight = fluidSprite.getU(5f);
+            float vTop = fluidSprite.getV(0);
+            float vBottom = fluidSprite.getV(fillHeight * 16f);
+
+            // UV coords for top face: full sprite
+            float uT0 = fluidSprite.getU(0);
+            float uT1 = fluidSprite.getU(16f);
+            float vT0 = fluidSprite.getV(0);
+            float vT1 = fluidSprite.getV(16f);
+
+            // 8 side faces — CCW winding when viewed from outside
+            // Face A->B (north, normal 0,0,-1): emit B-bot, A-bot, A-top, B-top
+            quadFluid(
                     translucent,
                     mat,
-                    FLUID_MIN,
-                    FLUID_FLOOR,
-                    FLUID_MIN,
-                    FLUID_MAX,
-                    fillTop,
-                    FLUID_MAX,
-                    fluidSprite,
                     fr,
                     fg,
                     fb,
                     fa,
                     fluidLight,
-                    packedOverlay);
+                    packedOverlay,
+                    uLeft,
+                    vTop,
+                    uRight,
+                    vBottom,
+                    BX,
+                    FLUID_FLOOR,
+                    BZ,
+                    AX,
+                    FLUID_FLOOR,
+                    AZ,
+                    AX,
+                    fillTop,
+                    AZ,
+                    BX,
+                    fillTop,
+                    BZ,
+                    0f,
+                    0f,
+                    -1f);
+
+            // Face B->C (NE, normal 0.7071,0,-0.7071): emit C-bot, B-bot, B-top, C-top
+            quadFluid(
+                    translucent,
+                    mat,
+                    fr,
+                    fg,
+                    fb,
+                    fa,
+                    fluidLight,
+                    packedOverlay,
+                    uLeft,
+                    vTop,
+                    uRight,
+                    vBottom,
+                    CX,
+                    FLUID_FLOOR,
+                    CZ,
+                    BX,
+                    FLUID_FLOOR,
+                    BZ,
+                    BX,
+                    fillTop,
+                    BZ,
+                    CX,
+                    fillTop,
+                    CZ,
+                    0.7071f,
+                    0f,
+                    -0.7071f);
+
+            // Face C->D (east, normal 1,0,0): emit D-bot, C-bot, C-top, D-top
+            quadFluid(
+                    translucent,
+                    mat,
+                    fr,
+                    fg,
+                    fb,
+                    fa,
+                    fluidLight,
+                    packedOverlay,
+                    uLeft,
+                    vTop,
+                    uRight,
+                    vBottom,
+                    DX,
+                    FLUID_FLOOR,
+                    DZ,
+                    CX,
+                    FLUID_FLOOR,
+                    CZ,
+                    CX,
+                    fillTop,
+                    CZ,
+                    DX,
+                    fillTop,
+                    DZ,
+                    1f,
+                    0f,
+                    0f);
+
+            // Face D->E (SE, normal 0.7071,0,0.7071): emit E-bot, D-bot, D-top, E-top
+            quadFluid(
+                    translucent,
+                    mat,
+                    fr,
+                    fg,
+                    fb,
+                    fa,
+                    fluidLight,
+                    packedOverlay,
+                    uLeft,
+                    vTop,
+                    uRight,
+                    vBottom,
+                    EX,
+                    FLUID_FLOOR,
+                    EZ,
+                    DX,
+                    FLUID_FLOOR,
+                    DZ,
+                    DX,
+                    fillTop,
+                    DZ,
+                    EX,
+                    fillTop,
+                    EZ,
+                    0.7071f,
+                    0f,
+                    0.7071f);
+
+            // Face E->F (south, normal 0,0,1): emit F-bot, E-bot, E-top, F-top
+            quadFluid(
+                    translucent,
+                    mat,
+                    fr,
+                    fg,
+                    fb,
+                    fa,
+                    fluidLight,
+                    packedOverlay,
+                    uLeft,
+                    vTop,
+                    uRight,
+                    vBottom,
+                    FX,
+                    FLUID_FLOOR,
+                    FZ,
+                    EX,
+                    FLUID_FLOOR,
+                    EZ,
+                    EX,
+                    fillTop,
+                    EZ,
+                    FX,
+                    fillTop,
+                    FZ,
+                    0f,
+                    0f,
+                    1f);
+
+            // Face F->G (SW, normal -0.7071,0,0.7071): emit G-bot, F-bot, F-top, G-top
+            quadFluid(
+                    translucent,
+                    mat,
+                    fr,
+                    fg,
+                    fb,
+                    fa,
+                    fluidLight,
+                    packedOverlay,
+                    uLeft,
+                    vTop,
+                    uRight,
+                    vBottom,
+                    GX,
+                    FLUID_FLOOR,
+                    GZ,
+                    FX,
+                    FLUID_FLOOR,
+                    FZ,
+                    FX,
+                    fillTop,
+                    FZ,
+                    GX,
+                    fillTop,
+                    GZ,
+                    -0.7071f,
+                    0f,
+                    0.7071f);
+
+            // Face G->H (west, normal -1,0,0): emit H-bot, G-bot, G-top, H-top
+            quadFluid(
+                    translucent,
+                    mat,
+                    fr,
+                    fg,
+                    fb,
+                    fa,
+                    fluidLight,
+                    packedOverlay,
+                    uLeft,
+                    vTop,
+                    uRight,
+                    vBottom,
+                    HX,
+                    FLUID_FLOOR,
+                    HZ,
+                    GX,
+                    FLUID_FLOOR,
+                    GZ,
+                    GX,
+                    fillTop,
+                    GZ,
+                    HX,
+                    fillTop,
+                    HZ,
+                    -1f,
+                    0f,
+                    0f);
+
+            // Face H->A (NW, normal -0.7071,0,-0.7071): emit A-bot, H-bot, H-top, A-top
+            quadFluid(
+                    translucent,
+                    mat,
+                    fr,
+                    fg,
+                    fb,
+                    fa,
+                    fluidLight,
+                    packedOverlay,
+                    uLeft,
+                    vTop,
+                    uRight,
+                    vBottom,
+                    AX,
+                    FLUID_FLOOR,
+                    AZ,
+                    HX,
+                    FLUID_FLOOR,
+                    HZ,
+                    HX,
+                    fillTop,
+                    HZ,
+                    AX,
+                    fillTop,
+                    AZ,
+                    -0.7071f,
+                    0f,
+                    -0.7071f);
+
+            // Top face: flat quad covering octagon bounding box, normal (0,1,0)
+            quadFluid(
+                    translucent,
+                    mat,
+                    fr,
+                    fg,
+                    fb,
+                    fa,
+                    fluidLight,
+                    packedOverlay,
+                    uT0,
+                    vT0,
+                    uT1,
+                    vT1,
+                    2f / 16f,
+                    fillTop,
+                    2f / 16f,
+                    14f / 16f,
+                    fillTop,
+                    2f / 16f,
+                    14f / 16f,
+                    fillTop,
+                    14f / 16f,
+                    2f / 16f,
+                    fillTop,
+                    14f / 16f,
+                    0f,
+                    1f,
+                    0f);
         }
 
         // ---- Tube connector stubs (solid lazurite) ----
@@ -140,6 +413,65 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                 .getModelManager()
                 .getAtlas(InventoryMenu.BLOCK_ATLAS)
                 .getSprite(loc);
+    }
+
+    /**
+     * Emits a single quad for the fluid prism using pre-computed atlas UV coordinates.
+     * Vertex order: v0, v1, v2, v3 (CCW from outside).
+     */
+    @SuppressWarnings("java:S107")
+    private static void quadFluid(
+            VertexConsumer vc,
+            Matrix4f mat,
+            int r,
+            int g,
+            int b,
+            int a,
+            int light,
+            int overlay,
+            float uLeft,
+            float vTop,
+            float uRight,
+            float vBottom,
+            float x0,
+            float y0,
+            float z0,
+            float x1,
+            float y1,
+            float z1,
+            float x2,
+            float y2,
+            float z2,
+            float x3,
+            float y3,
+            float z3,
+            float nx,
+            float ny,
+            float nz) {
+        vc.addVertex(mat, x0, y0, z0)
+                .setColor(r, g, b, a)
+                .setUv(uLeft, vBottom)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x1, y1, z1)
+                .setColor(r, g, b, a)
+                .setUv(uRight, vBottom)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x2, y2, z2)
+                .setColor(r, g, b, a)
+                .setUv(uRight, vTop)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x3, y3, z3)
+                .setColor(r, g, b, a)
+                .setUv(uLeft, vTop)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
     }
 
     private static void drawStub(
