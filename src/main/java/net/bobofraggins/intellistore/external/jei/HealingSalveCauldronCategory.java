@@ -7,9 +7,9 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import net.bobofraggins.intellistore.shared.register.Registration;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Items;
 
 /**
  * JEI recipe category for the Healing Salve cauldron.
@@ -33,7 +33,7 @@ public class HealingSalveCauldronCategory implements IRecipeCategory<HealingSalv
     private final IDrawable icon;
 
     public HealingSalveCauldronCategory(IGuiHelper helper) {
-        icon = helper.createDrawableItemLike(Items.CAULDRON);
+        icon = helper.createDrawableItemLike(Registration.HEALING_SALVE_CAULDRON_ITEM.get());
     }
 
     @Override
