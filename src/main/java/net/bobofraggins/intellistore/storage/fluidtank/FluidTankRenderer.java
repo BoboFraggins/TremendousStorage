@@ -350,8 +350,48 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                     0f,
                     -0.7071f);
 
-            // Top face: flat quad covering octagon bounding box, normal (0,1,0)
-            // Wound CCW from above (NW → SW → SE → NE) so it is visible from above.
+            // Top face: octagonal prism cap, decomposed into 3 quads (all CCW from above).
+            // UV maps [x=2/16..14/16, z=2/16..14/16] → full sprite.
+            float topUa = Mth.lerp(3.5f / 12f, uT0, uT1); // x=5.5/16 (A,F)
+            float topUb = Mth.lerp(8.5f / 12f, uT0, uT1); // x=10.5/16 (B,E)
+            float topVh = Mth.lerp(3.5f / 12f, vT0, vT1); // z=5.5/16 (H,C)
+            float topVg = Mth.lerp(8.5f / 12f, vT0, vT1); // z=10.5/16 (G,D)
+
+            // North trapezoid: H(2,5.5)→C(14,5.5)→B(10.5,2)→A(5.5,2)
+            quadFluidV(
+                    translucent,
+                    mat,
+                    fr,
+                    fg,
+                    fb,
+                    fa,
+                    fluidLight,
+                    packedOverlay,
+                    HX,
+                    fillTop,
+                    HZ,
+                    uT0,
+                    topVh,
+                    CX,
+                    fillTop,
+                    CZ,
+                    uT1,
+                    topVh,
+                    BX,
+                    fillTop,
+                    BZ,
+                    topUb,
+                    vT0,
+                    AX,
+                    fillTop,
+                    AZ,
+                    topUa,
+                    vT0,
+                    0f,
+                    1f,
+                    0f);
+
+            // Middle rectangle: G(2,10.5)→D(14,10.5)→C(14,5.5)→H(2,5.5)
             quadFluid(
                     translucent,
                     mat,
@@ -362,21 +402,55 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                     fluidLight,
                     packedOverlay,
                     uT0,
-                    vT0,
+                    topVh,
                     uT1,
+                    topVg,
+                    GX,
+                    fillTop,
+                    GZ,
+                    DX,
+                    fillTop,
+                    DZ,
+                    CX,
+                    fillTop,
+                    CZ,
+                    HX,
+                    fillTop,
+                    HZ,
+                    0f,
+                    1f,
+                    0f);
+
+            // South trapezoid: F(5.5,14)→E(10.5,14)→D(14,10.5)→G(2,10.5)
+            quadFluidV(
+                    translucent,
+                    mat,
+                    fr,
+                    fg,
+                    fb,
+                    fa,
+                    fluidLight,
+                    packedOverlay,
+                    FX,
+                    fillTop,
+                    FZ,
+                    topUa,
                     vT1,
-                    2f / 16f,
+                    EX,
                     fillTop,
-                    2f / 16f,
-                    2f / 16f,
+                    EZ,
+                    topUb,
+                    vT1,
+                    DX,
                     fillTop,
-                    14f / 16f,
-                    14f / 16f,
+                    DZ,
+                    uT1,
+                    topVg,
+                    GX,
                     fillTop,
-                    14f / 16f,
-                    14f / 16f,
-                    fillTop,
-                    2f / 16f,
+                    GZ,
+                    uT0,
+                    topVg,
                     0f,
                     1f,
                     0f);
@@ -472,6 +546,69 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
         vc.addVertex(mat, x3, y3, z3)
                 .setColor(r, g, b, a)
                 .setUv(uLeft, vTop)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+    }
+
+    /**
+     * Emits a single quad with explicit per-vertex atlas UV coordinates.
+     * Each vertex is described by (x,y,z, u,v) in the argument list.
+     */
+    @SuppressWarnings("java:S107")
+    private static void quadFluidV(
+            VertexConsumer vc,
+            Matrix4f mat,
+            int r,
+            int g,
+            int b,
+            int a,
+            int light,
+            int overlay,
+            float x0,
+            float y0,
+            float z0,
+            float su0,
+            float sv0,
+            float x1,
+            float y1,
+            float z1,
+            float su1,
+            float sv1,
+            float x2,
+            float y2,
+            float z2,
+            float su2,
+            float sv2,
+            float x3,
+            float y3,
+            float z3,
+            float su3,
+            float sv3,
+            float nx,
+            float ny,
+            float nz) {
+        vc.addVertex(mat, x0, y0, z0)
+                .setColor(r, g, b, a)
+                .setUv(su0, sv0)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x1, y1, z1)
+                .setColor(r, g, b, a)
+                .setUv(su1, sv1)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x2, y2, z2)
+                .setColor(r, g, b, a)
+                .setUv(su2, sv2)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x3, y3, z3)
+                .setColor(r, g, b, a)
+                .setUv(su3, sv3)
                 .setOverlay(overlay)
                 .setLight(light)
                 .setNormal(nx, ny, nz);
