@@ -4,7 +4,7 @@
     "textures": {
         "0": "intellistore:block/tank_texture",
         "particle": "intellistore:block/tank_texture",
-        "1": "intellistore:block/tank_cap_gas"
+        "1": "intellistore:block/tank_cap_battery"
     },
     "elements": [
         {

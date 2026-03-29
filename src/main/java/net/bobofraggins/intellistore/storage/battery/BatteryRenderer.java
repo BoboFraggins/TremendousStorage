@@ -1,4 +1,4 @@
-package net.bobofraggins.intellistore.external.arsnouveau;
+package net.bobofraggins.intellistore.storage.battery;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.bobofraggins.intellistore.shared.tank.AbstractTankRenderer;
@@ -12,38 +12,36 @@ import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 
 /**
- * Renders the Source Tank's dynamic content: source fill level and tube-connector stubs.
+ * Renders the Battery's dynamic content: energy fill level and tube-connector stubs.
  *
- * <p>The static shell is rendered by the block model ({@code models/block/source_tank.json}).
- * This BESR handles the translucent octagonal-prism fill and lazurite connector stubs.
+ * <p>The fill is drawn as a yellow-tinted flowing-water animation to suggest electrical energy.
+ * The static shell is rendered by the block model ({@code models/block/battery.json}).
  */
-public class SourceTankRenderer extends AbstractTankRenderer<SourceTankBlockEntity> {
+public class BatteryRenderer extends AbstractTankRenderer<BatteryBlockEntity> {
 
-    private static final ResourceLocation FLUID_TANK =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/fluid_tank");
+    // Vanilla flowing-water animated sprite — its white/gray pixels tint cleanly to yellow
+    private static final ResourceLocation WATER_FLOW = ResourceLocation.withDefaultNamespace("block/water_flow");
 
-    // Ars Nouveau source colour: teal-blue glow
-    private static final int SOURCE_R = 60;
-    private static final int SOURCE_G = 180;
-    private static final int SOURCE_B = 220;
-    private static final int SOURCE_A = 210;
+    // Bright yellow, slightly transparent
+    private static final int FILL_R = 255;
+    private static final int FILL_G = 210;
+    private static final int FILL_B = 30;
+    private static final int FILL_A = 200;
 
-    public SourceTankRenderer(BlockEntityRendererProvider.Context ctx) {}
+    private static final float MIN_FILL_FRAC = 0.05f;
+
+    public BatteryRenderer(BlockEntityRendererProvider.Context ctx) {}
 
     @Override
     protected void renderFill(
-            SourceTankBlockEntity be,
-            Matrix4f mat,
-            MultiBufferSource bufferSource,
-            int packedLight,
-            int packedOverlay) {
+            BatteryBlockEntity be, Matrix4f mat, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
 
-        if (be.getAmount() <= 0) return;
+        if (be.getEnergyStored() <= 0) return;
 
-        float fillFrac = Math.max(0.05f, (float) be.getAmount() / be.getCapacity());
+        float fillFrac = Math.max(MIN_FILL_FRAC, (float) be.getEnergyStored() / be.getMaxEnergy());
         float fillTop = FLUID_FLOOR + fillFrac * FLUID_H;
 
-        var fillSprite = sprite(FLUID_TANK);
+        var fillSprite = sprite(WATER_FLOW);
         VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
 
         float uLeft = fillSprite.getU0();
@@ -54,10 +52,10 @@ public class SourceTankRenderer extends AbstractTankRenderer<SourceTankBlockEnti
         FluidTankRenderer.renderOctagonalPrism(
                 vc,
                 mat,
-                SOURCE_R,
-                SOURCE_G,
-                SOURCE_B,
-                SOURCE_A,
+                FILL_R,
+                FILL_G,
+                FILL_B,
+                FILL_A,
                 LightTexture.FULL_BRIGHT,
                 packedOverlay,
                 uLeft,

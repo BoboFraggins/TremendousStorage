@@ -24,6 +24,9 @@ import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
+import net.bobofraggins.intellistore.storage.battery.BatteryBlock;
+import net.bobofraggins.intellistore.storage.battery.BatteryBlockEntity;
+import net.bobofraggins.intellistore.storage.battery.BatteryEnergyHandler;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlock;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerItemHandler;
@@ -334,6 +337,25 @@ public final class Registration {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidTankBlockEntity>> FLUID_TANK_BE_TYPE =
             BLOCK_ENTITY_TYPES.register(
                     "fluid_tank", () -> BlockEntityType.Builder.of(FluidTankBlockEntity::new, FLUID_TANK.get())
+                            .build(null));
+
+    // -------------------------------------------------------------------------
+    // Battery
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<BatteryBlock> BATTERY = BLOCKS.register(
+            "battery",
+            () -> new BatteryBlock(BlockBehaviour.Properties.of()
+                    .strength(3.0f, 1000.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.GLASS)));
+
+    public static final DeferredHolder<Item, BlockItem> BATTERY_ITEM =
+            ITEMS.register("battery", () -> new TieredBlockItem(BATTERY.get(), new Item.Properties()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BatteryBlockEntity>> BATTERY_BE_TYPE =
+            BLOCK_ENTITY_TYPES.register(
+                    "battery", () -> BlockEntityType.Builder.of(BatteryBlockEntity::new, BATTERY.get())
                             .build(null));
 
     // -------------------------------------------------------------------------
@@ -788,6 +810,7 @@ public final class Registration {
                             output.accept(upgrade.get());
                         }
                         output.accept(FLUID_TANK_ITEM.get());
+                        output.accept(BATTERY_ITEM.get());
                         if (ModList.get().isLoaded("mekanism")) {
                             output.accept(GasTankRegistration.GAS_TANK_ITEM.get());
                         }
@@ -891,6 +914,8 @@ public final class Registration {
                 (be, side) -> new NiEnergyHandler(be));
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> new TubeEnergyHandler(be));
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK, BATTERY_BE_TYPE.get(), (be, side) -> new BatteryEnergyHandler(be));
         if (IntelliStoreConfig.STIRLING_ENGINE_ENABLED.get()) {
             event.registerBlockEntity(
                     Capabilities.EnergyStorage.BLOCK,

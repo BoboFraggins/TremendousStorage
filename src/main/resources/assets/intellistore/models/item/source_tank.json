@@ -1,6 +1,1 @@
-{
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "intellistore:item/source_tank"
-  }
-}
+{ "parent": "intellistore:block/source_tank" }

@@ -1,5 +1,8 @@
 {
   "variants": {
-    "": { "model": "intellistore:block/source_tank" }
+    "facing=north": { "model": "intellistore:block/source_tank" },
+    "facing=south": { "model": "intellistore:block/source_tank", "y": 180 },
+    "facing=east":  { "model": "intellistore:block/source_tank", "y": 270 },
+    "facing=west":  { "model": "intellistore:block/source_tank", "y": 90 }
   }
 }
