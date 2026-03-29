@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
@@ -82,30 +83,31 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
             float fillHeight = fillTop - FLUID_FLOOR;
 
             IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fluid.getFluid());
-            TextureAtlasSprite fluidSprite = sprite(ext.getFlowingTexture(fluid));
+            TextureAtlasSprite fluidSprite = sprite(ext.getStillTexture(fluid));
 
             int tint = ext.getTintColor(fluid);
             int fr = (tint >> 16) & 0xFF;
             int fg = (tint >> 8) & 0xFF;
             int fb = tint & 0xFF;
             int fa = (tint >> 24) & 0xFF;
-            if (fa == 0) fa = 255;
+            if (fa == 0) fa = 77; // ~30% opacity default
 
             int fluidLight = fluid.getFluidType().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
 
             VertexConsumer translucent = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
 
-            // UV coords for side faces: width=5 texture pixels, height proportional to fill
-            float uLeft = fluidSprite.getU(0);
-            float uRight = fluidSprite.getU(5f);
-            float vTop = fluidSprite.getV(0);
-            float vBottom = fluidSprite.getV(fillHeight * 16f);
+            // UV coords — use exact sprite atlas bounds to avoid sampling adjacent sprites.
+            // V is lerped by fill fraction so the texture scales with the fluid level.
+            float uLeft = fluidSprite.getU0();
+            float uRight = fluidSprite.getU1();
+            float vTop = fluidSprite.getV0();
+            float vBottom = Mth.lerp(fillFrac, fluidSprite.getV0(), fluidSprite.getV1());
 
             // UV coords for top face: full sprite
-            float uT0 = fluidSprite.getU(0);
-            float uT1 = fluidSprite.getU(16f);
-            float vT0 = fluidSprite.getV(0);
-            float vT1 = fluidSprite.getV(16f);
+            float uT0 = fluidSprite.getU0();
+            float uT1 = fluidSprite.getU1();
+            float vT0 = fluidSprite.getV0();
+            float vT1 = fluidSprite.getV1();
 
             // 8 side faces — CCW winding when viewed from outside
             // Face A->B (north, normal 0,0,-1): emit B-bot, A-bot, A-top, B-top
@@ -349,6 +351,7 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                     -0.7071f);
 
             // Top face: flat quad covering octagon bounding box, normal (0,1,0)
+            // Wound CCW from above (NW → SW → SE → NE) so it is visible from above.
             quadFluid(
                     translucent,
                     mat,
@@ -365,15 +368,15 @@ public class FluidTankRenderer implements BlockEntityRenderer<FluidTankBlockEnti
                     2f / 16f,
                     fillTop,
                     2f / 16f,
-                    14f / 16f,
-                    fillTop,
-                    2f / 16f,
-                    14f / 16f,
-                    fillTop,
-                    14f / 16f,
                     2f / 16f,
                     fillTop,
                     14f / 16f,
+                    14f / 16f,
+                    fillTop,
+                    14f / 16f,
+                    14f / 16f,
+                    fillTop,
+                    2f / 16f,
                     0f,
                     1f,
                     0f);
