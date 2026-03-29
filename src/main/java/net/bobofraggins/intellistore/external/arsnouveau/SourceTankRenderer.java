@@ -91,7 +91,8 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
                     SOURCE_B,
                     SOURCE_A,
                     LightTexture.FULL_BRIGHT,
-                    packedOverlay);
+                    packedOverlay,
+                    null);
         }
 
         // ---- Tube connector stubs (solid lazurite) ----
@@ -184,7 +185,7 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
                 z1 = e;
             }
         }
-        drawBox(vc, mat, x0, y0, z0, x1, y1, z1, sp, 255, 255, 255, 255, light, overlay);
+        drawBox(vc, mat, x0, y0, z0, x1, y1, z1, sp, 255, 255, 255, 255, light, overlay, dir);
     }
 
     private static void drawBox(
@@ -202,32 +203,39 @@ public class SourceTankRenderer implements BlockEntityRenderer<SourceTankBlockEn
             int b,
             int a,
             int light,
-            int overlay) {
+            int overlay,
+            Direction skipFace) {
         float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
         // -Y
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0,
-                -1, 0);
+        if (skipFace != Direction.DOWN)
+            quad(
+                    vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0,
+                    0, -1, 0);
         // +Y
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0,
-                1, 0);
+        if (skipFace != Direction.UP)
+            quad(
+                    vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1,
+                    0, 1, 0);
         // -Z (north)
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0,
-                0, -1);
+        if (skipFace != Direction.NORTH)
+            quad(
+                    vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0,
+                    0, 0, -1);
         // +Z (south)
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0,
-                0, 1);
+        if (skipFace != Direction.SOUTH)
+            quad(
+                    vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1,
+                    0, 0, 1);
         // -X (west)
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1,
-                0, 0);
+        if (skipFace != Direction.WEST)
+            quad(
+                    vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0,
+                    -1, 0, 0);
         // +X (east)
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
-                0, 0);
+        if (skipFace != Direction.EAST)
+            quad(
+                    vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1,
+                    1, 0, 0);
     }
 
     @SuppressWarnings("java:S107")
