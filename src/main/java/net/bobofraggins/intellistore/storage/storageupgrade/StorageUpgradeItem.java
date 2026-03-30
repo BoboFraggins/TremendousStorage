@@ -1,9 +1,12 @@
 package net.bobofraggins.intellistore.storage.storageupgrade;
 
+import net.bobofraggins.intellistore.external.arsnouveau.SourceTankBlockEntity;
+import net.bobofraggins.intellistore.external.mekanism.GasTankBlockEntity;
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.battery.BatteryBlockEntity;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
+import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.world.InteractionResult;
@@ -64,6 +67,21 @@ public class StorageUpgradeItem extends Item {
         } else if (be instanceof BatteryBlockEntity battery && battery.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 battery.setTier(to);
+            }
+            matches = true;
+        } else if (be instanceof FluidTankBlockEntity tank && tank.getTier() == from) {
+            if (!ctx.getLevel().isClientSide()) {
+                tank.setTier(to);
+            }
+            matches = true;
+        } else if (be instanceof SourceTankBlockEntity tank && tank.getTier() == from) {
+            if (!ctx.getLevel().isClientSide()) {
+                tank.setTier(to);
+            }
+            matches = true;
+        } else if (be instanceof GasTankBlockEntity tank && tank.getTier() == from) {
+            if (!ctx.getLevel().isClientSide()) {
+                tank.setTier(to);
             }
             matches = true;
         }

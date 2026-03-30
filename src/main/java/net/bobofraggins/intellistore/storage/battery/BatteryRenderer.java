@@ -14,18 +14,18 @@ import org.joml.Matrix4f;
 /**
  * Renders the Battery's dynamic content: energy fill level and tube-connector stubs.
  *
- * <p>The fill is drawn as a yellow-tinted flowing-water animation to suggest electrical energy.
+ * <p>The fill is drawn as a neon-green-tinted flowing-water animation to suggest electrical energy.
  * The static shell is rendered by the block model ({@code models/block/battery.json}).
  */
 public class BatteryRenderer extends AbstractTankRenderer<BatteryBlockEntity> {
 
-    // Vanilla flowing-water animated sprite — its white/gray pixels tint cleanly to yellow
+    // Vanilla flowing-water animated sprite — its white/gray pixels tint cleanly
     private static final ResourceLocation WATER_FLOW = ResourceLocation.withDefaultNamespace("block/water_flow");
 
-    // Bright yellow, slightly transparent
-    private static final int FILL_R = 255;
-    private static final int FILL_G = 210;
-    private static final int FILL_B = 30;
+    // Neon green, slightly transparent
+    private static final int FILL_R = 57;
+    private static final int FILL_G = 255;
+    private static final int FILL_B = 20;
     private static final int FILL_A = 200;
 
     private static final float MIN_FILL_FRAC = 0.05f;

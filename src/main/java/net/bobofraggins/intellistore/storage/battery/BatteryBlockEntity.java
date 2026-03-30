@@ -68,7 +68,10 @@ public class BatteryBlockEntity extends BlockEntity {
         this.tier = tier;
         energyStored = Math.min(energyStored, getMaxEnergy());
         setChanged();
-        if (level != null) level.invalidateCapabilities(worldPosition);
+        if (level != null) {
+            level.invalidateCapabilities(worldPosition);
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
     }
 
     public int getEnergyStored() {
