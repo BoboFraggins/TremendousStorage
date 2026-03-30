@@ -2,6 +2,8 @@ package net.bobofraggins.intellistore.storage.networkinterface;
 
 import java.util.List;
 import java.util.NavigableMap;
+import java.util.Set;
+import net.minecraft.core.BlockPos;
 import net.neoforged.neoforge.items.IItemHandler;
 
 /**
@@ -15,10 +17,12 @@ import net.neoforged.neoforge.items.IItemHandler;
  * @param isValid {@code true} if exactly one Network Interface is present on the network
  * @param totalFePerTick total FE/t consumed by all network components (NI + SATs + Hubs +
  *     attachments)
+ * @param tubePositions all tube block positions visited during the BFS scan (unmodifiable)
  */
 public record NetworkScanResult(
         List<IItemHandler> insertOrder,
         NavigableMap<Integer, List<IItemHandler>> insertBuckets,
         List<AttachedEntry> blockList,
         boolean isValid,
-        int totalFePerTick) {}
+        int totalFePerTick,
+        Set<BlockPos> tubePositions) {}

@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.storage.storageupgrade;
 
 import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
+import net.bobofraggins.intellistore.storage.battery.BatteryBlockEntity;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
@@ -58,6 +59,11 @@ public class StorageUpgradeItem extends Item {
         } else if (be instanceof NetworkInterfaceBlockEntity ni && ni.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 ni.setTier(to);
+            }
+            matches = true;
+        } else if (be instanceof BatteryBlockEntity battery && battery.getTier() == from) {
+            if (!ctx.getLevel().isClientSide()) {
+                battery.setTier(to);
             }
             matches = true;
         }

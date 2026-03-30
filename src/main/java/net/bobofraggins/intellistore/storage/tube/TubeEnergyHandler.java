@@ -11,7 +11,9 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
  * the network to inject energy directly into the NI's buffer, even if they are not
  * physically adjacent to the NI block itself.
  *
- * <p>The handler only supports {@code receiveEnergy}; extraction is not allowed.
+ * <p>The handler supports {@code receiveEnergy} for external energy injection, and
+ * {@code extractEnergy} for pulling <em>spare</em> energy — the amount above the NI's
+ * current-tick consumption reserve — allowing Battery blocks to charge from the network.
  */
 public class TubeEnergyHandler implements IEnergyStorage {
 
@@ -37,7 +39,11 @@ public class TubeEnergyHandler implements IEnergyStorage {
 
     @Override
     public int extractEnergy(int maxExtract, boolean simulate) {
-        return 0;
+        NetworkInterfaceBlockEntity ni = resolveNi();
+        if (ni == null) return 0;
+        int spare = ni.getEnergyStored() - ni.getTotalConsumption();
+        if (spare <= 0) return 0;
+        return ni.extractEnergyForDistribution(Math.min(maxExtract, spare), simulate);
     }
 
     @Override
@@ -53,7 +59,9 @@ public class TubeEnergyHandler implements IEnergyStorage {
 
     @Override
     public boolean canExtract() {
-        return false;
+        NetworkInterfaceBlockEntity ni = resolveNi();
+        if (ni == null) return false;
+        return ni.getEnergyStored() > ni.getTotalConsumption();
     }
 
     @Override

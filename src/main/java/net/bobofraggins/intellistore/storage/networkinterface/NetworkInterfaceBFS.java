@@ -237,7 +237,8 @@ public final class NetworkInterfaceBFS {
                 Collections.unmodifiableNavigableMap(insertBuckets),
                 List.copyOf(blockList),
                 otherNiCount == 0,
-                fePerTick);
+                fePerTick,
+                Set.copyOf(visitedTubes));
     }
 
     // -------------------------------------------------------------------------

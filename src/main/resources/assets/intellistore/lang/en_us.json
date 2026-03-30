@@ -28,6 +28,7 @@
   "block.intellistore.fluid_tank": "Fluid Tank",
   "block.intellistore.gas_tank": "Gas Tank",
   "block.intellistore.source_tank": "Source Tank",
+  "block.intellistore.battery": "Battery",
 
   "item.intellistore.lazurite_ore_chunk": "Lazurite Ore Chunk",
   "item.intellistore.lazurite_pieces": "Lazurite Pieces",
