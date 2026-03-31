@@ -1,15 +1,25 @@
 package net.bobofraggins.intellistore.shared.network;
 
+import java.util.Set;
 import net.bobofraggins.intellistore.IntelliStore;
+import net.bobofraggins.intellistore.shared.storage.KeyCounter;
+import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.intellistore.storage.networkinterface.NiItemHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.common.SoundActions;
+import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -22,6 +32,10 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * Extracts up to {@code amount} items matching {@code target} (by item type + components)
  * from the network via the NI's item handler, and places them in the player's inventory.
  * Sends back an updated {@link SatContentsPacket} after the operation.
+ *
+ * <p>For fluid-backed slots (detected via {@link NiItemHandler#isFluidSlot}), an empty bucket
+ * must be present in the player's cursor; one empty bucket is consumed per filled bucket
+ * extracted.
  */
 public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount, boolean toCursor)
         implements CustomPacketPayload {
@@ -61,20 +75,45 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount, boo
             IItemHandler handler = ni.getItemHandler();
             if (handler == null) return;
 
-            // Extract up to `amount` items matching target type+components
-            ItemStack result = ItemStack.EMPTY;
+            NiItemHandler niHandler = (handler instanceof NiItemHandler nhi) ? nhi : null;
+
+            ItemStack carried = player.containerMenu.getCarried();
             int remaining = packet.amount();
+            ItemStack result = ItemStack.EMPTY;
+            boolean anyFluidExtracted = false;
+
             for (int s = 0; s < handler.getSlots() && remaining > 0; s++) {
                 ItemStack inSlot = handler.getStackInSlot(s);
                 if (inSlot.isEmpty() || !ItemStack.isSameItemSameComponents(inSlot, packet.target())) continue;
 
-                int toExtract = Math.min(remaining, inSlot.getCount());
-                ItemStack extracted = handler.extractItem(s, toExtract, false);
-                if (extracted.isEmpty()) continue;
-
-                remaining -= extracted.getCount();
-                if (result.isEmpty()) result = extracted;
-                else result.grow(extracted.getCount());
+                boolean isFluid = niHandler != null && niHandler.isFluidSlot(s);
+                if (isFluid) {
+                    // Fluid slot: require and consume empty bucket(s) from cursor
+                    if (carried.isEmpty() || !carried.is(Items.BUCKET)) break;
+                    int bucketsAvailable = carried.getCount();
+                    int toExtract = Math.min(remaining, bucketsAvailable);
+                    ItemStack extracted = handler.extractItem(s, toExtract, false);
+                    if (extracted.isEmpty()) continue;
+                    // Consume empty buckets equal to the number extracted
+                    carried.shrink(extracted.getCount());
+                    if (carried.isEmpty()) {
+                        player.containerMenu.setCarried(ItemStack.EMPTY);
+                    } else {
+                        player.containerMenu.setCarried(carried);
+                    }
+                    remaining -= extracted.getCount();
+                    if (result.isEmpty()) result = extracted;
+                    else result.grow(extracted.getCount());
+                    anyFluidExtracted = true;
+                } else {
+                    // Regular item slot: extract normally
+                    int toExtract = Math.min(remaining, inSlot.getCount());
+                    ItemStack extracted = handler.extractItem(s, toExtract, false);
+                    if (extracted.isEmpty()) continue;
+                    remaining -= extracted.getCount();
+                    if (result.isEmpty()) result = extracted;
+                    else result.grow(extracted.getCount());
+                }
             }
 
             // Route to cursor or directly to inventory
@@ -86,10 +125,30 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount, boo
                 }
             }
 
-            // Refresh client's item list
-            IItemHandler refreshedHandler = ni.getItemHandler();
-            if (refreshedHandler != null) {
-                PacketDistributor.sendToPlayer(player, RequestSatContentsPacket.buildContentsPacket(refreshedHandler));
+            // Play bucket-fill sound when fluid was extracted via an empty bucket
+            if (anyFluidExtracted && !result.isEmpty()) {
+                FluidUtil.getFluidContained(result).ifPresent(fluidStack -> {
+                    SoundEvent sound = fluidStack.getFluidType().getSound(SoundActions.BUCKET_FILL);
+                    if (sound == null) sound = SoundEvents.BUCKET_FILL;
+                    player.level()
+                            .playSound(
+                                    null,
+                                    player.getX(),
+                                    player.getY(),
+                                    player.getZ(),
+                                    sound,
+                                    SoundSource.BLOCKS,
+                                    1.0f,
+                                    1.0f);
+                });
+            }
+
+            // Refresh client's item list (using KeyCounter path to include fluid tagging)
+            KeyCounter refreshed = ni.getCachedInventory();
+            if (refreshed != null) {
+                Set<StorageKey> fluidKeys = ni.getFluidStorageKeys();
+                PacketDistributor.sendToPlayer(
+                        player, RequestSatContentsPacket.buildContentsPacket(refreshed, fluidKeys));
             }
         });
     }

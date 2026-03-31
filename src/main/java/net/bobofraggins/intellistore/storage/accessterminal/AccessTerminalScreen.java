@@ -76,6 +76,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         }
         SatContentsPacket.PENDING_STACKS = null;
         SatContentsPacket.PENDING_COUNTS = List.of();
+        SatContentsPacket.PENDING_FLUID_INDICES = java.util.Set.of();
     }
 
     // -------------------------------------------------------------------------
@@ -89,6 +90,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         List<ItemStack> pending = SatContentsPacket.PENDING_STACKS;
         if (pending != null && pending != networkPane.getStacks()) {
             networkPane.setContents(pending, SatContentsPacket.PENDING_COUNTS);
+            networkPane.setFluidIndices(SatContentsPacket.PENDING_FLUID_INDICES);
         }
     }
 

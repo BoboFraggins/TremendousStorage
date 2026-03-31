@@ -3,13 +3,16 @@ package net.bobofraggins.intellistore.storage.fluidtank;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
+import net.bobofraggins.intellistore.storage.networkinterface.NiLink;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -35,6 +38,8 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
 
     /** Capacity at {@link StorageTier#PAPER} (16 buckets). Each tier multiplies by 4. */
     public static final long BASE_CAPACITY = 16_000L;
+
+    private final NiLink niLink = new NiLink();
 
     /** Type key — always has amount=1. EMPTY means unlocked. */
     private FluidStack storedFluid = FluidStack.EMPTY;
@@ -114,7 +119,7 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
                 storedFluid = fluid.copyWithAmount(1);
             }
             amount += toInsert;
-            setChanged();
+            notifyFluidChanged();
         }
         return toInsert;
     }
@@ -134,7 +139,7 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
         FluidStack result = storedFluid.copyWithAmount((int) toExtract);
         if (!simulate) {
             amount -= toExtract;
-            setChanged();
+            notifyFluidChanged();
         }
         return result;
     }
@@ -143,15 +148,29 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
     public void clearFluid() {
         storedFluid = FluidStack.EMPTY;
         amount = 0;
-        setChanged();
+        notifyFluidChanged();
     }
 
     // -------------------------------------------------------------------------
-    // setChanged
+    // setChanged / notifyFluidChanged
     // -------------------------------------------------------------------------
+
+    /**
+     * Lightweight notification for fluid-content mutations (insert/extract/clear).
+     *
+     * <p>Saves NBT, notifies the NI that contents changed, and syncs to clients.
+     * Does NOT invalidate capabilities or the NI topology cache.
+     */
+    private void notifyFluidChanged() {
+        super.setChanged();
+        if (level instanceof ServerLevel sl) {
+            niLink.notifyChanged(sl, worldPosition, getBlockState());
+        }
+    }
 
     @Override
     public void setChanged() {
+        niLink.invalidate();
         super.setChanged();
         if (level != null) {
             level.invalidateCapabilities(worldPosition);
@@ -221,6 +240,44 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
             storedFluid = FluidStack.EMPTY;
         }
         amount = tag.getLong(TAG_AMOUNT);
+    }
+
+    // -------------------------------------------------------------------------
+    // Item component sync
+    // -------------------------------------------------------------------------
+
+    /**
+     * Populates the {@link Registration#FLUID_TANK_CONTENTS} component on the dropped/saved item
+     * so the fluid state is preserved without duplicating it in {@code block_entity_data}.
+     */
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder components) {
+        super.collectImplicitComponents(components);
+        components.set(Registration.FLUID_TANK_CONTENTS.get(), new FluidTankContents(storedFluid, amount));
+    }
+
+    /**
+     * Restores fluid state from {@link Registration#FLUID_TANK_CONTENTS} when the block item is
+     * placed back in the world. Falls back gracefully for old items that only have
+     * {@code block_entity_data} (fluid is then loaded by {@link #loadAdditional}).
+     */
+    @Override
+    protected void applyImplicitComponents(BlockEntity.DataComponentInput input) {
+        super.applyImplicitComponents(input);
+        FluidTankContents contents = input.get(Registration.FLUID_TANK_CONTENTS);
+        if (contents != null) {
+            storedFluid = contents.storedFluid().isEmpty()
+                    ? net.neoforged.neoforge.fluids.FluidStack.EMPTY
+                    : contents.storedFluid().copyWithAmount(1);
+            amount = contents.amount();
+        }
+    }
+
+    /** Removes fluid fields from the NBT tag since they are stored in the component instead. */
+    @Override
+    public void removeComponentsFromTag(CompoundTag tag) {
+        tag.remove(TAG_FLUID);
+        tag.remove(TAG_AMOUNT);
     }
 
     // -------------------------------------------------------------------------

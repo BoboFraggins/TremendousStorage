@@ -20,6 +20,7 @@ import net.bobofraggins.intellistore.storage.battery.BatteryBlockEntity;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
+import net.bobofraggins.intellistore.storage.fluidtank.FluidTankItemAdapter;
 import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.bobofraggins.intellistore.storage.tube.TubeBlock;
@@ -312,6 +313,8 @@ public final class NetworkInterfaceBFS {
         if (handler != null) {
             Priority priority = resolvePriority(tubeBE, tubeDir.ordinal(), neighborBE);
             handlerEntries.add(new HandlerEntry(handler, priority));
+        } else if (neighborBE instanceof FluidTankBlockEntity tank) {
+            handlerEntries.add(new HandlerEntry(new FluidTankItemAdapter(tank), Priority.NORMAL));
         }
 
         // Record block type for UI list

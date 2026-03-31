@@ -5,6 +5,7 @@ import java.util.NavigableMap;
 import javax.annotation.Nonnull;
 import net.bobofraggins.intellistore.shared.storage.IPreferredStorage;
 import net.bobofraggins.intellistore.shared.storage.StorageKey;
+import net.bobofraggins.intellistore.storage.fluidtank.FluidTankItemAdapter;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -55,6 +56,20 @@ public class NiItemHandler implements IItemHandler {
             remaining -= slots;
         }
         return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // Package-private helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns {@code true} if the given global slot index maps to a {@link FluidTankItemAdapter}.
+     * Used by {@link net.bobofraggins.intellistore.shared.network.SatExtractPacket} to enforce
+     * the empty-bucket requirement before extracting fluid.
+     */
+    public boolean isFluidSlot(int globalSlot) {
+        SlotRef ref = resolveSlot(globalSlot, insertOrder);
+        return ref != null && ref.handler() instanceof FluidTankItemAdapter;
     }
 
     // -------------------------------------------------------------------------

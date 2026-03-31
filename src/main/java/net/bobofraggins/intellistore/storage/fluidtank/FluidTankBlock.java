@@ -2,9 +2,13 @@ package net.bobofraggins.intellistore.storage.fluidtank;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
+import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
@@ -33,6 +37,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -137,6 +142,7 @@ public class FluidTankBlock extends BaseEntityBlock implements NetworkConnector 
                 be.extract(BOTTLE_MB, false);
                 ItemStack waterBottle = PotionContents.createItemStack(Items.POTION, Potions.WATER);
                 player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, waterBottle));
+                level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
                 return ItemInteractionResult.SUCCESS;
             }
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -153,6 +159,7 @@ public class FluidTankBlock extends BaseEntityBlock implements NetworkConnector 
                     be.insert(water, BOTTLE_MB, false);
                     player.setItemInHand(
                             hand, ItemUtils.createFilledResult(stack, player, new ItemStack(Items.GLASS_BOTTLE)));
+                    level.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
                     return ItemInteractionResult.SUCCESS;
                 }
             }
@@ -163,7 +170,29 @@ public class FluidTankBlock extends BaseEntityBlock implements NetworkConnector 
         IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, state, null, null);
         if (handler == null) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 
+        // Determine sound direction before the interaction mutates the item stack.
+        // Empty bucket / empty tank item → we are filling it (BUCKET_FILL sound).
+        // Filled bucket / non-empty tank item → we are emptying it (BUCKET_EMPTY sound).
+        boolean filling;
+        if (stack.is(Items.BUCKET)) {
+            filling = true;
+        } else if (stack.getItem() instanceof FluidTankItem) {
+            FluidTankContents tankContents =
+                    stack.getOrDefault(Registration.FLUID_TANK_CONTENTS.get(), FluidTankContents.EMPTY);
+            filling = tankContents.amount() == 0;
+        } else {
+            filling = false;
+        }
         boolean success = FluidUtil.interactWithFluidHandler(player, hand, handler);
+        if (success && level.getBlockEntity(pos) instanceof FluidTankBlockEntity be) {
+            FluidStack stored = be.getStoredFluid();
+            if (!stored.isEmpty()) {
+                SoundEvent sound =
+                        stored.getFluidType().getSound(filling ? SoundActions.BUCKET_FILL : SoundActions.BUCKET_EMPTY);
+                if (sound == null) sound = filling ? SoundEvents.BUCKET_FILL : SoundEvents.BUCKET_EMPTY;
+                level.playSound(null, pos, sound, SoundSource.BLOCKS, 1.0f, 1.0f);
+            }
+        }
         return success ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 

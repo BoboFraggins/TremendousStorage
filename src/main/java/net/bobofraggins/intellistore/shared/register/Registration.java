@@ -41,6 +41,8 @@ import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlock;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankContents;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankFluidHandler;
+import net.bobofraggins.intellistore.storage.fluidtank.FluidTankItem;
+import net.bobofraggins.intellistore.storage.fluidtank.FluidTankItemFluidHandler;
 import net.bobofraggins.intellistore.storage.items.BrainItem;
 import net.bobofraggins.intellistore.storage.items.HealingSalveBlock;
 import net.bobofraggins.intellistore.storage.items.HealingSalveCauldronBlock;
@@ -332,7 +334,7 @@ public final class Registration {
                     .sound(SoundType.GLASS)));
 
     public static final DeferredHolder<Item, BlockItem> FLUID_TANK_ITEM =
-            ITEMS.register("fluid_tank", () -> new TieredBlockItem(FLUID_TANK.get(), new Item.Properties()));
+            ITEMS.register("fluid_tank", () -> new FluidTankItem(FLUID_TANK.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidTankBlockEntity>> FLUID_TANK_BE_TYPE =
             BLOCK_ENTITY_TYPES.register(
@@ -903,6 +905,10 @@ public final class Registration {
                 (be, side) -> new BulkStorageContainerItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK, FLUID_TANK_BE_TYPE.get(), (be, side) -> new FluidTankFluidHandler(be));
+        event.registerItem(
+                Capabilities.FluidHandler.ITEM,
+                (stack, ctx) -> new FluidTankItemFluidHandler(stack),
+                FLUID_TANK_ITEM.get());
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
         event.registerBlockEntity(

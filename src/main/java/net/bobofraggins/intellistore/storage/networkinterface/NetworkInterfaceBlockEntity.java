@@ -1,10 +1,12 @@
 package net.bobofraggins.intellistore.storage.networkinterface;
 
+import java.util.Set;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.shared.storage.IKeyCounterContributor;
 import net.bobofraggins.intellistore.shared.storage.KeyCounter;
 import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
+import net.bobofraggins.intellistore.storage.fluidtank.FluidTankItemAdapter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -120,6 +122,28 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
             cachedHandler = new NiItemHandler(cachedScan.insertOrder(), cachedScan.insertBuckets());
         }
         return cachedHandler;
+    }
+
+    // -------------------------------------------------------------------------
+    // Fluid storage keys
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the set of StorageKeys that are backed by at least one FluidTankItemAdapter
+     * in the current network scan. Used when building SatContentsPacket to tag fluid entries.
+     */
+    public Set<StorageKey> getFluidStorageKeys() {
+        NetworkScanResult scan = getScan();
+        if (scan == null) return Set.of();
+        KeyCounter tmp = new KeyCounter();
+        for (IItemHandler h : scan.insertOrder()) {
+            if (h instanceof FluidTankItemAdapter adapter) {
+                adapter.contributeToKeyCounter(tmp);
+            }
+        }
+        Set<StorageKey> keys = new java.util.HashSet<>();
+        tmp.allEntries().forEach(e -> keys.add(e.getKey()));
+        return keys;
     }
 
     // -------------------------------------------------------------------------

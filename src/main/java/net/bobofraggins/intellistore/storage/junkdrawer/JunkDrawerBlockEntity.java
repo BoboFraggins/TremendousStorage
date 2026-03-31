@@ -10,9 +10,8 @@ import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.shared.storage.KeyCounter;
 import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
-import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBFS;
-import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NiCacheHolder;
+import net.bobofraggins.intellistore.storage.networkinterface.NiLink;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -65,8 +64,7 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
         return tier.getCapacity();
     }
 
-    @Nullable
-    private BlockPos cachedNiPos = null;
+    private final NiLink niLink = new NiLink();
 
     // -------------------------------------------------------------------------
     // Door animation state (client-side only)
@@ -325,23 +323,19 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
     private void notifyItemsChanged() {
         super.setChanged();
         if (level instanceof ServerLevel sl) {
-            notifyNiContentsChanged(sl);
+            niLink.notifyChanged(sl, worldPosition, getBlockState());
         }
     }
 
     @Override
     public void invalidateNiCache() {
-        cachedNiPos = null;
+        niLink.invalidate();
     }
 
     @Override
     @Nullable
     public BlockPos getOrFindNiPos(ServerLevel level) {
-        if (cachedNiPos != null && !(level.getBlockEntity(cachedNiPos) instanceof NetworkInterfaceBlockEntity)) {
-            cachedNiPos = null;
-        }
-        if (cachedNiPos == null) cachedNiPos = AccessTerminalBFS.findNI(level, worldPosition);
-        return cachedNiPos;
+        return niLink.getOrFindNiPos(level, worldPosition);
     }
 
     @Override

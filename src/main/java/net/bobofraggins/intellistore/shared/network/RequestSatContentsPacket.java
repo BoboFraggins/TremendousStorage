@@ -4,8 +4,10 @@ import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.shared.storage.KeyCounter;
 import net.bobofraggins.intellistore.shared.storage.StorageKey;
@@ -48,17 +50,18 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
 
             BlockEntity be = player.level().getBlockEntity(packet.niPos());
             if (!(be instanceof NetworkInterfaceBlockEntity ni)) {
-                PacketDistributor.sendToPlayer(player, new SatContentsPacket(List.of(), List.of()));
+                PacketDistributor.sendToPlayer(player, new SatContentsPacket(List.of(), List.of(), Set.of()));
                 return;
             }
 
             KeyCounter inventory = ni.getCachedInventory();
             if (inventory == null) {
-                PacketDistributor.sendToPlayer(player, new SatContentsPacket(List.of(), List.of()));
+                PacketDistributor.sendToPlayer(player, new SatContentsPacket(List.of(), List.of(), Set.of()));
                 return;
             }
 
-            PacketDistributor.sendToPlayer(player, buildContentsPacket(inventory));
+            Set<StorageKey> fluidKeys = ni.getFluidStorageKeys();
+            PacketDistributor.sendToPlayer(player, buildContentsPacket(inventory, fluidKeys));
         });
     }
 
@@ -66,10 +69,6 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
     // Helper — build aggregated item list
     // -------------------------------------------------------------------------
 
-    /**
-     * Aggregates all items in the handler by type+components, sorts by count desc
-     * then display name asc, and returns a {@link SatContentsPacket}.
-     */
     /**
      * A stable hash key for an ItemStack that ignores count.
      *
@@ -127,11 +126,19 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
             stacks.add(entry.stack());
             counts.add(entry.count());
         }
-        return new SatContentsPacket(List.copyOf(stacks), List.copyOf(counts));
+        return new SatContentsPacket(List.copyOf(stacks), List.copyOf(counts), Set.of());
     }
 
     /** Builds a {@link SatContentsPacket} from a pre-aggregated {@link KeyCounter}. */
     public static SatContentsPacket buildContentsPacket(KeyCounter inventory) {
+        return buildContentsPacket(inventory, Set.of());
+    }
+
+    /**
+     * Builds a {@link SatContentsPacket} from a pre-aggregated {@link KeyCounter}, tagging
+     * entries whose {@link StorageKey} appears in {@code fluidKeys} as fluid-backed.
+     */
+    public static SatContentsPacket buildContentsPacket(KeyCounter inventory, Set<StorageKey> fluidKeys) {
         record Entry(ItemStack stack, long count, String name, int durability) {}
         List<Entry> entries = new ArrayList<>();
         for (Object2LongMap.Entry<StorageKey> e : inventory.allEntries()) {
@@ -149,10 +156,15 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
 
         List<ItemStack> stacks = new ArrayList<>(entries.size());
         List<Long> counts = new ArrayList<>(entries.size());
-        for (Entry entry : entries) {
+        Set<Integer> fluidIndices = new HashSet<>();
+        for (int i = 0; i < entries.size(); i++) {
+            Entry entry = entries.get(i);
             stacks.add(entry.stack());
             counts.add(entry.count());
+            if (fluidKeys.contains(StorageKey.of(entry.stack()))) {
+                fluidIndices.add(i);
+            }
         }
-        return new SatContentsPacket(List.copyOf(stacks), List.copyOf(counts));
+        return new SatContentsPacket(List.copyOf(stacks), List.copyOf(counts), Set.copyOf(fluidIndices));
     }
 }

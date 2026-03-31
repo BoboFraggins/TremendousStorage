@@ -1,7 +1,9 @@
 package net.bobofraggins.intellistore.storage.accessterminal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.config.IntelliStoreClientConfig;
 import net.bobofraggins.intellistore.shared.network.SatExtractPacket;
@@ -14,6 +16,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
@@ -50,10 +53,16 @@ public class NetworkInventoryPane implements IDialogPane {
 
     private List<Long> allCounts = List.of();
 
+    /** Parallel to allStacks: true for entries backed by a fluid tank. */
+    private List<Boolean> allIsFluid = List.of();
+
     /** Filtered view rendered in the grid. May be the same object as allStacks when no filter. */
     private List<ItemStack> stacks = List.of();
 
     private List<Long> counts = List.of();
+
+    /** Filtered view of allIsFluid, parallel to stacks. */
+    private List<Boolean> isFluid = List.of();
 
     private String appliedFilter = "";
     private int scrollOffset = 0;
@@ -113,15 +122,28 @@ public class NetworkInventoryPane implements IDialogPane {
             ItemStack target = stacks.get(idx);
             long totalCount = counts.get(idx);
             int maxStack = target.getMaxStackSize();
-            if (Screen.hasShiftDown()) {
-                int amount = (int) Math.min(totalCount, maxStack);
-                PacketDistributor.sendToServer(
-                        new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, false));
+
+            boolean isFluidSlot = !isFluid.isEmpty() && idx < isFluid.size() && isFluid.get(idx);
+            if (isFluidSlot) {
+                // Fluid slot: require an empty bucket in the cursor
+                ItemStack cursorStack = menu.getCarried();
+                if (cursorStack.isEmpty() || !cursorStack.is(Items.BUCKET)) {
+                    return true; // block but consume the event
+                }
+                // Always extract 1 bucket per click for fluid slots
+                PacketDistributor.sendToServer(new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), 1, true));
             } else {
-                int amount =
-                        (button == 1) ? (int) Math.max(1, (totalCount + 1) / 2) : (int) Math.min(totalCount, maxStack);
-                PacketDistributor.sendToServer(
-                        new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, true));
+                if (Screen.hasShiftDown()) {
+                    int amount = (int) Math.min(totalCount, maxStack);
+                    PacketDistributor.sendToServer(
+                            new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, false));
+                } else {
+                    int amount = (button == 1)
+                            ? (int) Math.max(1, (totalCount + 1) / 2)
+                            : (int) Math.min(totalCount, maxStack);
+                    PacketDistributor.sendToServer(
+                            new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, true));
+                }
             }
         }
         return true;
@@ -163,7 +185,21 @@ public class NetworkInventoryPane implements IDialogPane {
     public void setContents(List<ItemStack> stacks, List<Long> counts) {
         this.allStacks = stacks;
         this.allCounts = counts;
+        this.allIsFluid = Collections.nCopies(stacks.size(), false);
         this.hasContents = true;
+        applyFilter();
+    }
+
+    /**
+     * Updates the fluid-backed entry flags, parallel to the allStacks list.
+     * Call this after {@link #setContents} whenever a new packet arrives.
+     */
+    public void setFluidIndices(Set<Integer> indices) {
+        List<Boolean> fluid = new ArrayList<>(allStacks.size());
+        for (int i = 0; i < allStacks.size(); i++) {
+            fluid.add(indices.contains(i));
+        }
+        this.allIsFluid = List.copyOf(fluid);
         applyFilter();
     }
 
@@ -181,8 +217,10 @@ public class NetworkInventoryPane implements IDialogPane {
     public void reset() {
         this.allStacks = List.of();
         this.allCounts = List.of();
+        this.allIsFluid = List.of();
         this.stacks = List.of();
         this.counts = List.of();
+        this.isFluid = List.of();
         this.hasContents = false;
         this.scrollOffset = 0;
     }
@@ -227,17 +265,21 @@ public class NetworkInventoryPane implements IDialogPane {
         if (appliedFilter.isEmpty()) {
             stacks = allStacks;
             counts = allCounts;
+            isFluid = allIsFluid;
         } else {
             List<ItemStack> fs = new ArrayList<>();
             List<Long> fc = new ArrayList<>();
+            List<Boolean> ff = new ArrayList<>();
             for (int i = 0; i < allStacks.size(); i++) {
                 if (SearchSync.matches(allStacks.get(i), appliedFilter)) {
                     fs.add(allStacks.get(i));
                     fc.add(allCounts.get(i));
+                    ff.add(allIsFluid.isEmpty() ? false : allIsFluid.get(i));
                 }
             }
             stacks = fs;
             counts = fc;
+            isFluid = ff;
         }
         clampScroll();
     }

@@ -103,9 +103,12 @@
   "screen.intellistore.silk_touch_on": "Silk Touch: ON",
   "screen.intellistore.silk_touch_off": "Silk Touch: OFF",
 
+  "item.intellistore.fluid_tank.tooltip": "%1$s / %2$s mB %3$s",
+
   "screen.intellistore.void_excess_label": "Void Excess:",
   "screen.intellistore.void_excess_on": "Void Excess: ON",
   "screen.intellistore.void_excess_off": "Void Excess: OFF",
+  "screen.intellistore.clear_tank_contents": "Clear Contents",
 
   "block.intellistore.network_interface": "Network Interface",
   "block.intellistore.access_terminal": "Access Terminal",

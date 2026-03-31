@@ -18,6 +18,8 @@ public final class NetworkEvents {
         registrar.playToServer(SetPriorityPacket.TYPE, SetPriorityPacket.STREAM_CODEC, SetPriorityPacket::handle);
         registrar.playToServer(SetVoidExcessPacket.TYPE, SetVoidExcessPacket.STREAM_CODEC, SetVoidExcessPacket::handle);
         registrar.playToServer(
+                ClearTankContentsPacket.TYPE, ClearTankContentsPacket.STREAM_CODEC, ClearTankContentsPacket::handle);
+        registrar.playToServer(
                 SetStorageInterfacePriorityPacket.TYPE,
                 SetStorageInterfacePriorityPacket.STREAM_CODEC,
                 SetStorageInterfacePriorityPacket::handle);
