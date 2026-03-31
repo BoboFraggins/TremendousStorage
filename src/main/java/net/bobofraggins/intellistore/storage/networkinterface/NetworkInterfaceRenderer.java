@@ -4,61 +4,88 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.tank.AbstractTankRenderer;
+import net.bobofraggins.intellistore.storage.fluidtank.FluidTankRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
 
 /**
- * Renders the Network Interface block as a brain-in-a-jar.
+ * Renders the Network Interface block as a fluid tank containing an animated floating brain.
  *
- * <p>The block uses {@link net.minecraft.world.level.block.RenderShape#ENTITYBLOCK_ANIMATED},
- * so the JSON block models are empty — this BESR draws everything:
+ * <p>The static tank shell (octagonal cage) is rendered by the block model
+ * ({@code models/block/network_interface.json}). This BESR handles:
  * <ul>
- *   <li>Lazurite base (solid, blocky-cylinder approximation)
- *   <li>Glass cylinder + dome (translucent)
- *   <li>Blue water/fluid interior (translucent, inset)
- *   <li>Animated floating Brain item
- *   <li>Status dots (green = valid, red = invalid network)
+ *   <li>Water fill at 90% (octagonal prism, translucent)
+ *   <li>Tube-connector stubs (via {@link AbstractTankRenderer})
+ *   <li>Animated floating Brain item (bobbing + rotating)
  * </ul>
- *
- * <p>All geometry coordinates are in fractions of a block (1/16ths internally).
- * No {@code ItemBlockRenderTypes} registration is needed — using
- * {@link RenderType#translucent()} in the buffer source handles translucency in NeoForge 1.21.1.
  */
-public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInterfaceBlockEntity> {
+public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterfaceBlockEntity> {
 
-    // -------------------------------------------------------------------------
-    // Texture locations
-    // -------------------------------------------------------------------------
-
-    private static final ResourceLocation LAZURITE_BLOCK =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/lazurite_block");
-    private static final ResourceLocation JAR_GLASS =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/jar_glass");
-    private static final ResourceLocation HEALING_SALVE_STILL =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "fluid/healing_salve_still");
-    // -------------------------------------------------------------------------
-    // Constants
-    // -------------------------------------------------------------------------
-
-    /** Small offset to prevent Z-fighting with adjacent block faces. */
-    private static final float EPS = 1e-4f;
+    private static final float FILL_FRAC = 0.9f;
 
     public NetworkInterfaceRenderer(BlockEntityRendererProvider.Context ctx) {}
 
     // -------------------------------------------------------------------------
-    // Render
+    // Fill — water at 90%
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected void renderFill(
+            NetworkInterfaceBlockEntity be,
+            Matrix4f mat,
+            MultiBufferSource bufferSource,
+            int packedLight,
+            int packedOverlay) {
+
+        FluidStack water = new FluidStack(Fluids.WATER, 1000);
+        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Fluids.WATER);
+        var fluidSprite = sprite(ext.getStillTexture(water));
+
+        int tint = ext.getTintColor(water);
+        int fr = (tint >> 16) & 0xFF;
+        int fg = (tint >> 8) & 0xFF;
+        int fb = tint & 0xFF;
+        int fa = (tint >> 24) & 0xFF;
+        if (fa == 0) fa = 160;
+
+        float fillTop = FLUID_FLOOR + FILL_FRAC * FLUID_H;
+
+        VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
+
+        FluidTankRenderer.renderOctagonalPrism(
+                vc,
+                mat,
+                fr,
+                fg,
+                fb,
+                fa,
+                packedLight,
+                packedOverlay,
+                fluidSprite.getU0(),
+                fluidSprite.getV0(),
+                fluidSprite.getU1(),
+                Mth.lerp(FILL_FRAC, fluidSprite.getV0(), fluidSprite.getV1()),
+                fluidSprite.getU0(),
+                fluidSprite.getU1(),
+                fluidSprite.getV0(),
+                fluidSprite.getV1(),
+                fillTop);
+    }
+
+    // -------------------------------------------------------------------------
+    // Brain animation on top of the inherited fill + stub rendering
     // -------------------------------------------------------------------------
 
     @Override
@@ -70,78 +97,20 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
             int packedLight,
             int packedOverlay) {
 
-        TextureAtlasSprite ironSprite = sprite(LAZURITE_BLOCK);
-        TextureAtlasSprite glassSprite = sprite(JAR_GLASS);
+        super.render(be, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
 
-        VertexConsumer solid = bufferSource.getBuffer(RenderType.solid());
-        // Cutout (not translucent) so transparent glass pixels are discarded rather than
-        // writing depth — otherwise the brain fails depth test through the glass interior.
-        VertexConsumer cutout = bufferSource.getBuffer(RenderType.cutout());
+        if (be.getLevel() == null) return;
 
-        poseStack.pushPose();
-        Matrix4f mat = poseStack.last().pose();
-
-        // ---- Iron base — full footprint, 2/16 tall (1/8 block), solid ----
-        // EPS lift off floor and inset from block edges to avoid Z-fighting.
-        drawBox(
-                solid,
-                mat,
-                EPS,
-                EPS,
-                EPS,
-                1f - EPS,
-                2f / 16,
-                1f - EPS,
-                ironSprite,
-                255,
-                255,
-                255,
-                255,
-                packedLight,
-                packedOverlay);
-
-        // ---- Healing Salve fluid fill (full-width, base top to 1px from top) ----
-        TextureAtlasSprite fluidSprite = sprite(HEALING_SALVE_STILL);
-        VertexConsumer translucent = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
-        drawBox(
-                translucent,
-                mat,
-                EPS * 2,
-                2f / 16 + EPS,
-                EPS * 2,
-                1f - EPS * 2,
-                14f / 16,
-                1f - EPS * 2,
-                fluidSprite,
-                255,
-                255,
-                255,
-                160,
-                packedLight,
-                packedOverlay);
-
-        // ---- Glass — single-block height, full width, no bottom face ----
-        float gx0 = EPS, gx1 = 1f - EPS;
-        float gz0 = EPS, gz1 = 1f - EPS;
-        float gy0 = 2f / 16, gy1 = 1f;
-        drawBoxNoBottom(
-                cutout, mat, gx0, gy0, gz0, gx1, gy1, gz1, glassSprite, 255, 255, 255, packedLight, packedOverlay);
-
-        // ---- Animated floating brain (item renderer — matches vanilla dropped items) ----
-        // ItemModelGenerator automatically produces per-pixel edge faces from the
-        // item/generated model, giving the sprite the same depth as a dropped item.
         double time = (be.getLevel().getGameTime() + partialTick) / 20.0;
         float bob = (float) Math.sin(time * Math.PI * 0.5) * 0.04f;
-
-        // Centre at x=0.5, z=0.5; float at 50% of block height.
         float rotY = (float) ((time * 20.0) % 360.0);
+
+        poseStack.pushPose();
         poseStack.translate(0.5, 0.5 + bob, 0.5);
-        poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(rotY));
+        poseStack.mulPose(Axis.YP.rotationDegrees(rotY));
         poseStack.scale(0.6f, 0.6f, 0.6f);
         poseStack.mulPose(Axis.XP.rotationDegrees(3f));
 
-        // Render exactly as ItemEntityRenderer does: fetch the baked model, then
-        // call render() with FIXED context (rotation [0,0,0] — sprite stays vertical).
         ItemStack brainStack = new ItemStack(Registration.BRAIN.get());
         BakedModel model = Minecraft.getInstance().getItemRenderer().getModel(brainStack, be.getLevel(), null, 0);
         Minecraft.getInstance()
@@ -167,173 +136,5 @@ public class NetworkInterfaceRenderer implements BlockEntityRenderer<NetworkInte
     @Override
     public AABB getRenderBoundingBox(NetworkInterfaceBlockEntity be) {
         return new AABB(be.getBlockPos()).inflate(1.0);
-    }
-
-    // -------------------------------------------------------------------------
-    // Geometry helpers
-    // -------------------------------------------------------------------------
-
-    private static TextureAtlasSprite sprite(ResourceLocation loc) {
-        return Minecraft.getInstance()
-                .getModelManager()
-                .getAtlas(InventoryMenu.BLOCK_ATLAS)
-                .getSprite(loc);
-    }
-
-    private static void drawBox(
-            VertexConsumer vc,
-            Matrix4f mat,
-            float x0,
-            float y0,
-            float z0,
-            float x1,
-            float y1,
-            float z1,
-            TextureAtlasSprite sp,
-            int r,
-            int g,
-            int b,
-            int a,
-            int light,
-            int overlay) {
-        float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
-        // -Y
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0, 0,
-                -1, 0);
-        // +Y
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1, 0,
-                1, 0);
-        // -Z (north)
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0,
-                0, -1);
-        // +Z (south)
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0,
-                0, 1);
-        // -X (west)
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1,
-                0, 0);
-        // +X (east)
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
-                0, 0);
-    }
-
-    /**
-     * Draws all faces of a box except the bottom (-Y) face, double-sided.
-     *
-     * <p>Each face is emitted twice — once with the outward-facing normal and once with the
-     * inward-facing normal (reversed vertex winding) — so translucent surfaces like glass are
-     * visible from both outside and inside the jar.
-     */
-    private static void drawBoxNoBottom(
-            VertexConsumer vc,
-            Matrix4f mat,
-            float x0,
-            float y0,
-            float z0,
-            float x1,
-            float y1,
-            float z1,
-            TextureAtlasSprite sp,
-            int r,
-            int g,
-            int b,
-            int light,
-            int overlay) {
-        float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
-        // +Y (top) — outer then inner
-        quad(
-                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1,
-                0, 1, 0);
-        quad(
-                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y1, z0, x0, y1, z0,
-                0, -1, 0);
-        // -Z (north) — outer then inner
-        quad(
-                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0,
-                0, 0, -1);
-        quad(
-                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x1, y0, z0, x0, y0, z0, x0, y1, z0, x1, y1, z0,
-                0, 0, 1);
-        // +Z (south) — outer then inner
-        quad(
-                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1,
-                0, 0, 1);
-        quad(
-                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y1, z1, x0, y1, z1,
-                0, 0, -1);
-        // -X (west) — outer then inner
-        quad(
-                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0,
-                -1, 0, 0);
-        quad(
-                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x0, y0, z0, x0, y0, z1, x0, y1, z1, x0, y1, z0,
-                1, 0, 0);
-        // +X (east) — outer then inner
-        quad(
-                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1,
-                1, 0, 0);
-        quad(
-                vc, mat, r, g, b, 255, light, overlay, u0, v0, u1, v1, x1, y0, z1, x1, y0, z0, x1, y1, z0, x1, y1, z1,
-                -1, 0, 0);
-    }
-
-    private static void quad(
-            VertexConsumer vc,
-            Matrix4f mat,
-            int r,
-            int g,
-            int b,
-            int a,
-            int light,
-            int overlay,
-            float u0,
-            float v0,
-            float u1,
-            float v1,
-            float x0,
-            float y0,
-            float z0,
-            float x1,
-            float y1,
-            float z1,
-            float x2,
-            float y2,
-            float z2,
-            float x3,
-            float y3,
-            float z3,
-            float nx,
-            float ny,
-            float nz) {
-        vc.addVertex(mat, x3, y3, z3)
-                .setColor(r, g, b, a)
-                .setUv(u0, v1)
-                .setOverlay(overlay)
-                .setLight(light)
-                .setNormal(nx, ny, nz);
-        vc.addVertex(mat, x2, y2, z2)
-                .setColor(r, g, b, a)
-                .setUv(u1, v1)
-                .setOverlay(overlay)
-                .setLight(light)
-                .setNormal(nx, ny, nz);
-        vc.addVertex(mat, x1, y1, z1)
-                .setColor(r, g, b, a)
-                .setUv(u1, v0)
-                .setOverlay(overlay)
-                .setLight(light)
-                .setNormal(nx, ny, nz);
-        vc.addVertex(mat, x0, y0, z0)
-                .setColor(r, g, b, a)
-                .setUv(u0, v0)
-                .setOverlay(overlay)
-                .setLight(light)
-                .setNormal(nx, ny, nz);
     }
 }
