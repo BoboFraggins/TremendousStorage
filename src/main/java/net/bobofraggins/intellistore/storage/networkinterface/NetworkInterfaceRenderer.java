@@ -59,6 +59,7 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         int fb = tint & 0xFF;
         int fa = (tint >> 24) & 0xFF;
         if (fa == 0) fa = 160;
+        fa /= 2;
 
         float fillTop = FLUID_FLOOR + FILL_FRAC * FLUID_H;
 
