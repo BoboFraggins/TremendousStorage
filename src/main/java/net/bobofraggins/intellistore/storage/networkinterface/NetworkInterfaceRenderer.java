@@ -3,24 +3,20 @@ package net.bobofraggins.intellistore.storage.networkinterface;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.shared.tank.AbstractTankRenderer;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.ItemDisplayContext;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
 
@@ -31,21 +27,12 @@ import org.joml.Matrix4f;
  * ({@code models/block/network_interface.json}). This BESR handles:
  * <ul>
  *   <li>Water fill at 90% (octagonal prism, translucent)
- *   <li>Tube-connector stubs (via {@link AbstractTankRenderer})
- *   <li>Animated floating 3-D brain (bobbing + rotating, rendered from {@code block/brain_3d})
+ *   <li>Animated floating Brain item (bobbing, facing matches placement direction)
  * </ul>
  */
 public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterfaceBlockEntity> {
 
     private static final float FILL_FRAC = 0.9f;
-
-    // Brain model center in 0-1 block space (bounding-box midpoint of brain_3d.json elements).
-    private static final float BRAIN_CX = 6.95f / 16f;
-    private static final float BRAIN_CY = 9.05f / 16f;
-    private static final float BRAIN_CZ = 8.00f / 16f;
-
-    static final ModelResourceLocation BRAIN_MODEL =
-            ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath("intellistore", "block/brain_3d"));
 
     public NetworkInterfaceRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -130,40 +117,26 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
                 };
 
         poseStack.pushPose();
-        poseStack.translate(0.5f, 0.5f + bob, 0.5f);
+        poseStack.translate(0.5, 0.5 + bob, 0.5);
         poseStack.mulPose(Axis.YP.rotationDegrees(brainYRot));
-        poseStack.translate(-BRAIN_CX, -BRAIN_CY, -BRAIN_CZ);
+        poseStack.scale(0.6f, 0.6f, 0.6f);
+        poseStack.mulPose(Axis.XP.rotationDegrees(3f));
 
-        renderBrain(be.getLevel(), be.getBlockState(), bufferSource, poseStack, packedLight, packedOverlay);
+        ItemStack brainStack = new ItemStack(Registration.BRAIN.get());
+        BakedModel model = Minecraft.getInstance().getItemRenderer().getModel(brainStack, be.getLevel(), null, 0);
+        Minecraft.getInstance()
+                .getItemRenderer()
+                .render(
+                        brainStack,
+                        ItemDisplayContext.FIXED,
+                        false,
+                        poseStack,
+                        bufferSource,
+                        packedLight,
+                        packedOverlay,
+                        model);
 
         poseStack.popPose();
-    }
-
-    private static void renderBrain(
-            Level level,
-            BlockState blockState,
-            MultiBufferSource bufferSource,
-            PoseStack poseStack,
-            int packedLight,
-            int packedOverlay) {
-
-        BakedModel model = Minecraft.getInstance().getModelManager().getModel(BRAIN_MODEL);
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.cutout());
-        RandomSource random = RandomSource.create();
-        PoseStack.Pose pose = poseStack.last();
-
-        for (var dir : net.minecraft.core.Direction.values()) {
-            random.setSeed(42L);
-            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.cutout())) {
-                float shade = level.getShade(dir, quad.isShade());
-                vc.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
-            }
-        }
-        random.setSeed(42L);
-        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.cutout())) {
-            float shade = level.getShade(quad.getDirection(), quad.isShade());
-            vc.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
-        }
     }
 
     @Override
