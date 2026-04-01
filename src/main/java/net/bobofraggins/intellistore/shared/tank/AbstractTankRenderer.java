@@ -159,7 +159,7 @@ public abstract class AbstractTankRenderer<T extends BlockEntity> implements Blo
                 z1 = e;
             }
         }
-        drawBox(vc, mat, x0, y0, z0, x1, y1, z1, sp, 255, 255, 255, 255, light, overlay, dir);
+        drawBox(vc, mat, x0, y0, z0, x1, y1, z1, sp, 255, 255, 255, 255, light, overlay, dir, dir.getOpposite());
     }
 
     protected static void drawBox(
@@ -179,28 +179,49 @@ public abstract class AbstractTankRenderer<T extends BlockEntity> implements Blo
             int light,
             int overlay,
             Direction skipFace) {
+        drawBox(vc, mat, x0, y0, z0, x1, y1, z1, sp, r, g, b, a, light, overlay, skipFace, null);
+    }
+
+    protected static void drawBox(
+            VertexConsumer vc,
+            Matrix4f mat,
+            float x0,
+            float y0,
+            float z0,
+            float x1,
+            float y1,
+            float z1,
+            TextureAtlasSprite sp,
+            int r,
+            int g,
+            int b,
+            int a,
+            int light,
+            int overlay,
+            Direction skipFace1,
+            Direction skipFace2) {
         float u0 = sp.getU0(), u1 = sp.getU1(), v0 = sp.getV0(), v1 = sp.getV1();
-        if (skipFace != Direction.DOWN)
+        if (skipFace1 != Direction.DOWN && skipFace2 != Direction.DOWN)
             quad(
                     vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x1, y0, z1, x1, y0, z0, x0, y0, z0,
                     0, -1, 0);
-        if (skipFace != Direction.UP)
+        if (skipFace1 != Direction.UP && skipFace2 != Direction.UP)
             quad(
                     vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x1, y1, z0, x1, y1, z1, x0, y1, z1,
                     0, 1, 0);
-        if (skipFace != Direction.NORTH)
+        if (skipFace1 != Direction.NORTH && skipFace2 != Direction.NORTH)
             quad(
                     vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0,
                     0, 0, -1);
-        if (skipFace != Direction.SOUTH)
+        if (skipFace1 != Direction.SOUTH && skipFace2 != Direction.SOUTH)
             quad(
                     vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1,
                     0, 0, 1);
-        if (skipFace != Direction.WEST)
+        if (skipFace1 != Direction.WEST && skipFace2 != Direction.WEST)
             quad(
                     vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0,
                     -1, 0, 0);
-        if (skipFace != Direction.EAST)
+        if (skipFace1 != Direction.EAST && skipFace2 != Direction.EAST)
             quad(
                     vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1,
                     1, 0, 0);
