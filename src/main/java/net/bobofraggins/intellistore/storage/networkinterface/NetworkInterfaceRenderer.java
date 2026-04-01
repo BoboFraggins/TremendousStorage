@@ -58,7 +58,7 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         int fb = tint & 0xFF;
         int fa = (tint >> 24) & 0xFF;
         if (fa == 0) fa = 160;
-        fa = fa * 2 / 3;
+        fa /= 2;
 
         float fillTop = FLUID_FLOOR + FILL_FRAC * FLUID_H;
 
@@ -106,19 +106,11 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
 
         double time = (be.getLevel().getGameTime() + partialTick) / 20.0;
         float bob = (float) Math.sin(time * Math.PI * 0.25) * 0.04f;
-
-        net.minecraft.core.Direction facing = be.getBlockState().getValue(NetworkInterfaceBlock.FACING);
-        float brainYRot =
-                switch (facing) {
-                    case SOUTH -> -90f;
-                    case EAST -> 180f;
-                    case WEST -> 0f;
-                    default -> 90f; // NORTH
-                };
+        float rotY = (float) ((time * 10.0) % 360.0);
 
         poseStack.pushPose();
         poseStack.translate(0.5, 0.5 + bob, 0.5);
-        poseStack.mulPose(Axis.YP.rotationDegrees(brainYRot));
+        poseStack.mulPose(Axis.YP.rotationDegrees(rotY));
         poseStack.scale(0.6f, 0.6f, 0.6f);
         poseStack.mulPose(Axis.XP.rotationDegrees(3f));
 
