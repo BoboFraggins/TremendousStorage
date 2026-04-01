@@ -2,6 +2,7 @@ package net.bobofraggins.intellistore.storage.networkinterface;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.bobofraggins.intellistore.shared.tank.AbstractTankRenderer;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankRenderer;
 import net.minecraft.client.Minecraft;
@@ -118,6 +119,7 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
 
         poseStack.pushPose();
         poseStack.translate(0.5f, 0.5f + bob, 0.5f);
+        poseStack.mulPose(Axis.YP.rotationDegrees(-90f));
         poseStack.translate(-BRAIN_CX, -BRAIN_CY, -BRAIN_CZ);
 
         renderBrain(be.getLevel(), be.getBlockState(), bufferSource, poseStack, packedLight, packedOverlay);
