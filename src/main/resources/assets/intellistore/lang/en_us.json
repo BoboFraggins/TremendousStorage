@@ -86,6 +86,7 @@
   "priority.intellistore.highest": "Highest",
 
   "screen.intellistore.priority_label": "Priority:",
+  "screen.intellistore.sort_label": "Sort",
   "item.intellistore.storage_interface": "Storage Interface",
   "screen.intellistore.storage_interface": "Storage Interface",
 
@@ -175,6 +176,7 @@
 
   "key.intellistore.open_personal_access_terminal": "Open Personal Access Terminal",
   "key.intellistore.quick_stack": "Quick Stack",
+  "key.intellistore.cycle_sort": "Cycle Sort Mode",
   "key.categories.intellistore": "IntelliStore",
 
   "block.intellistore.stirling_engine": "Stirling Engine",

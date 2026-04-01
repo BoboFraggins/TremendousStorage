@@ -1,11 +1,14 @@
 package net.bobofraggins.intellistore.storage.accessterminal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.config.IntelliStoreClientConfig;
+import net.bobofraggins.intellistore.shared.config.SortMode;
 import net.bobofraggins.intellistore.shared.network.SatExtractPacket;
 import net.bobofraggins.intellistore.shared.network.SatInsertPacket;
 import net.bobofraggins.intellistore.shared.ui.IDialogPane;
@@ -14,6 +17,7 @@ import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -56,6 +60,12 @@ public class NetworkInventoryPane implements IDialogPane {
     /** Parallel to allStacks: true for entries backed by a fluid tank. */
     private List<Boolean> allIsFluid = List.of();
 
+    /**
+     * The most recent raw stacks list sent by the server. Used by {@link #setFluidIndices} to
+     * remap server-relative fluid indices to our stable display-order indices.
+     */
+    private List<ItemStack> lastServerStacks = List.of();
+
     /** Filtered view rendered in the grid. May be the same object as allStacks when no filter. */
     private List<ItemStack> stacks = List.of();
 
@@ -64,6 +74,7 @@ public class NetworkInventoryPane implements IDialogPane {
     /** Filtered view of allIsFluid, parallel to stacks. */
     private List<Boolean> isFluid = List.of();
 
+    private SortMode sortMode = SortMode.AMOUNT;
     private String appliedFilter = "";
     private int scrollOffset = 0;
     private boolean draggingScrollbar = false;
@@ -121,6 +132,7 @@ public class NetworkInventoryPane implements IDialogPane {
         if (hasContents && idx >= 0 && idx < stacks.size() && menu.hasNetwork()) {
             ItemStack target = stacks.get(idx);
             long totalCount = counts.get(idx);
+            if (totalCount == 0) return true; // ghost entry — item no longer in network
             int maxStack = target.getMaxStackSize();
 
             boolean isFluidSlot = !isFluid.isEmpty() && idx < isFluid.size() && isFluid.get(idx);
@@ -133,7 +145,11 @@ public class NetworkInventoryPane implements IDialogPane {
                 // Always extract 1 bucket per click for fluid slots
                 PacketDistributor.sendToServer(new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), 1, true));
             } else {
-                if (Screen.hasShiftDown()) {
+                if (button == 2) {
+                    // Middle-click: extract exactly one item to cursor
+                    PacketDistributor.sendToServer(
+                            new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), 1, true));
+                } else if (Screen.hasShiftDown()) {
                     int amount = (int) Math.min(totalCount, maxStack);
                     PacketDistributor.sendToServer(
                             new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, false));
@@ -181,25 +197,75 @@ public class NetworkInventoryPane implements IDialogPane {
     // Public API
     // -------------------------------------------------------------------------
 
-    /** Stores the full server-provided list and applies the current filter. */
-    public void setContents(List<ItemStack> stacks, List<Long> counts) {
-        this.allStacks = stacks;
-        this.allCounts = counts;
-        this.allIsFluid = Collections.nCopies(stacks.size(), false);
+    /**
+     * Merges a new server-provided list into the display list while preserving display order
+     * (Ghost Mode). On the first call the server list is adopted directly. On subsequent calls
+     * counts are updated in-place by item identity; items that vanish from the network stay
+     * visible at count 0 so the grid does not reorder while the player is interacting with it.
+     * Genuinely new items are appended to the end.
+     */
+    public void setContents(List<ItemStack> newStacks, List<Long> newCounts) {
         this.hasContents = true;
+        this.lastServerStacks = newStacks;
+
+        if (allStacks.isEmpty()) {
+            this.allStacks = new ArrayList<>(newStacks);
+            this.allCounts = new ArrayList<>(newCounts);
+            this.allIsFluid = new ArrayList<>(Collections.nCopies(newStacks.size(), false));
+            sortDisplayList();
+            applyFilter();
+            return;
+        }
+
+        // Update counts in-place; items absent from the server list become ghost entries (count 0).
+        boolean[] serverMatched = new boolean[newStacks.size()];
+        for (int i = 0; i < allStacks.size(); i++) {
+            Long newCount = null;
+            for (int j = 0; j < newStacks.size(); j++) {
+                if (!serverMatched[j] && ItemStack.isSameItemSameComponents(allStacks.get(i), newStacks.get(j))) {
+                    newCount = newCounts.get(j);
+                    serverMatched[j] = true;
+                    break;
+                }
+            }
+            allCounts.set(i, newCount != null ? newCount : 0L);
+        }
+
+        // Append items that are new to the network (not seen before).
+        for (int j = 0; j < newStacks.size(); j++) {
+            if (!serverMatched[j]) {
+                allStacks.add(newStacks.get(j));
+                allCounts.add(newCounts.get(j));
+                allIsFluid.add(false); // setFluidIndices will correct this
+            }
+        }
+
         applyFilter();
     }
 
     /**
-     * Updates the fluid-backed entry flags, parallel to the allStacks list.
-     * Call this after {@link #setContents} whenever a new packet arrives.
+     * Updates the fluid-backed entry flags.
+     *
+     * <p>The incoming {@code indices} reference positions in the server's list
+     * ({@link #lastServerStacks}), which may differ from our stable display order. Items are
+     * matched by identity so the flags stay correct regardless of order changes.
+     *
+     * <p>Call this after {@link #setContents} whenever a new packet arrives.
      */
     public void setFluidIndices(Set<Integer> indices) {
         List<Boolean> fluid = new ArrayList<>(allStacks.size());
         for (int i = 0; i < allStacks.size(); i++) {
-            fluid.add(indices.contains(i));
+            boolean isFluidItem = false;
+            for (int serverIdx : indices) {
+                if (serverIdx < lastServerStacks.size()
+                        && ItemStack.isSameItemSameComponents(allStacks.get(i), lastServerStacks.get(serverIdx))) {
+                    isFluidItem = true;
+                    break;
+                }
+            }
+            fluid.add(isFluidItem);
         }
-        this.allIsFluid = List.copyOf(fluid);
+        this.allIsFluid = fluid;
         applyFilter();
     }
 
@@ -218,6 +284,7 @@ public class NetworkInventoryPane implements IDialogPane {
         this.allStacks = List.of();
         this.allCounts = List.of();
         this.allIsFluid = List.of();
+        this.lastServerStacks = List.of();
         this.stacks = List.of();
         this.counts = List.of();
         this.isFluid = List.of();
@@ -226,11 +293,11 @@ public class NetworkInventoryPane implements IDialogPane {
     }
 
     /**
-     * Returns the full unfiltered stack list — used by {@link AccessTerminalScreen} to detect when
-     * new server data has arrived.
+     * Returns the last raw server list — used by {@link AccessTerminalScreen} to detect when new
+     * server data has arrived via reference-equality comparison against {@code PENDING_STACKS}.
      */
     public List<ItemStack> getStacks() {
-        return allStacks;
+        return lastServerStacks;
     }
 
     /**
@@ -246,9 +313,77 @@ public class NetworkInventoryPane implements IDialogPane {
         return (idx >= 0 && idx < stacks.size()) ? stacks.get(idx) : null;
     }
 
+    public SortMode getSortMode() {
+        return sortMode;
+    }
+
+    /**
+     * Updates the sort mode, re-sorts the display list, and rebuilds the filtered view.
+     * Does nothing if the mode is unchanged.
+     */
+    public void setSortMode(SortMode mode) {
+        if (mode == sortMode) return;
+        sortMode = mode;
+        sortDisplayList();
+        applyFilter();
+    }
+
     // -------------------------------------------------------------------------
     // Private helpers
     // -------------------------------------------------------------------------
+
+    /**
+     * Sorts {@link #allStacks}, {@link #allCounts}, and {@link #allIsFluid} together according
+     * to the current {@link SortMode}. Ghost entries (count 0) always sort last in AMOUNT mode;
+     * in NAME and MOD modes they follow normal ordering.
+     */
+    private void sortDisplayList() {
+        int n = allStacks.size();
+        if (n == 0) return;
+
+        Integer[] indices = new Integer[n];
+        for (int i = 0; i < n; i++) indices[i] = i;
+        Arrays.sort(indices, buildComparator());
+
+        List<ItemStack> sortedStacks = new ArrayList<>(n);
+        List<Long> sortedCounts = new ArrayList<>(n);
+        List<Boolean> sortedFluid = new ArrayList<>(n);
+        for (int i : indices) {
+            sortedStacks.add(allStacks.get(i));
+            sortedCounts.add(allCounts.get(i));
+            sortedFluid.add(i < allIsFluid.size() ? allIsFluid.get(i) : false);
+        }
+        allStacks = sortedStacks;
+        allCounts = sortedCounts;
+        allIsFluid = sortedFluid;
+    }
+
+    private Comparator<Integer> buildComparator() {
+        return switch (sortMode) {
+            case AMOUNT -> (a, b) -> Long.compare(allCounts.get(b), allCounts.get(a));
+            case NAME -> (a, b) -> allStacks
+                    .get(a)
+                    .getHoverName()
+                    .getString()
+                    .compareToIgnoreCase(allStacks.get(b).getHoverName().getString());
+            case MOD -> (a, b) -> {
+                int cmp = modId(allStacks.get(a)).compareToIgnoreCase(modId(allStacks.get(b)));
+                return cmp != 0
+                        ? cmp
+                        : allStacks
+                                .get(a)
+                                .getHoverName()
+                                .getString()
+                                .compareToIgnoreCase(
+                                        allStacks.get(b).getHoverName().getString());
+            };
+        };
+    }
+
+    private static String modId(ItemStack stack) {
+        ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        return key != null ? key.getNamespace() : "";
+    }
 
     /** Returns one fewer row when a filter is active (to make room for the filter label). */
     private int visibleRows() {
@@ -366,8 +501,17 @@ public class NetworkInventoryPane implements IDialogPane {
                 int sy = startY + row * AccessTerminalLayout.SLOT_SIZE + 1;
 
                 graphics.renderItem(stack, sx, sy);
-                String countStr = count > 1 ? CountFormat.format(count) : null;
-                graphics.renderItemDecorations(font, stack, sx, sy, countStr);
+                if (count == 0) {
+                    // Ghost entry: item is no longer in the network. Show a red "0".
+                    graphics.pose().pushPose();
+                    graphics.pose().translate(0, 0, 200);
+                    String zeroStr = "0";
+                    graphics.drawString(font, zeroStr, sx + 19 - font.width(zeroStr), sy + 9, 0xFFFF5555, true);
+                    graphics.pose().popPose();
+                } else {
+                    String countStr = count > 1 ? CountFormat.format(count) : null;
+                    graphics.renderItemDecorations(font, stack, sx, sy, countStr);
+                }
             }
         }
     }

@@ -1,10 +1,17 @@
 package net.bobofraggins.intellistore.storage.accessterminal;
 
 import javax.annotation.Nullable;
+import net.bobofraggins.intellistore.shared.config.SortMode;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NiCacheHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,6 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class AccessTerminalBlockEntity extends BlockEntity implements NiCacheHolder {
 
     private int tickCounter = 0;
+    private SortMode sortMode = SortMode.AMOUNT;
 
     @Nullable
     private BlockPos cachedNiPos = null;
@@ -50,6 +58,54 @@ public class AccessTerminalBlockEntity extends BlockEntity implements NiCacheHol
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
         }
     }
+
+    public SortMode getSortMode() {
+        return sortMode;
+    }
+
+    public void setSortMode(SortMode mode) {
+        this.sortMode = mode;
+        setChanged();
+    }
+
+    // -------------------------------------------------------------------------
+    // NBT
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        tag.putString("SortMode", sortMode.name());
+    }
+
+    @Override
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        try {
+            sortMode = SortMode.valueOf(tag.getString("SortMode"));
+        } catch (IllegalArgumentException e) {
+            sortMode = SortMode.AMOUNT;
+        }
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return saveWithoutMetadata(registries);
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
+        super.onDataPacket(net, pkt, registries);
+    }
+
+    // -------------------------------------------------------------------------
+    // Ticker
+    // -------------------------------------------------------------------------
 
     /** Called each server tick by the block ticker. */
     public void serverTick() {

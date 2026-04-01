@@ -62,5 +62,6 @@ public final class NetworkEvents {
                 QuickStackFilingCabinetPacket.TYPE,
                 QuickStackFilingCabinetPacket.STREAM_CODEC,
                 QuickStackFilingCabinetPacket::handle);
+        registrar.playToServer(SetSortModePacket.TYPE, SetSortModePacket.STREAM_CODEC, SetSortModePacket::handle);
     }
 }

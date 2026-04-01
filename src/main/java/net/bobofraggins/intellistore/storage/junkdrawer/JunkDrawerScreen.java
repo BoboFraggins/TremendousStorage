@@ -1,21 +1,26 @@
 package net.bobofraggins.intellistore.storage.junkdrawer;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import net.bobofraggins.intellistore.shared.config.SortMode;
 import net.bobofraggins.intellistore.shared.input.QuickStackClientEvents;
 import net.bobofraggins.intellistore.shared.network.LocalStorageInteractPacket;
 import net.bobofraggins.intellistore.shared.network.QuickStackPacket;
 import net.bobofraggins.intellistore.shared.network.SetPriorityPacket;
+import net.bobofraggins.intellistore.shared.network.SetSortModePacket;
 import net.bobofraggins.intellistore.shared.ui.ConfigDrawer;
 import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.bobofraggins.intellistore.shared.ui.LocalInventoryPane;
 import net.bobofraggins.intellistore.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.intellistore.shared.ui.PressableIconButton;
 import net.bobofraggins.intellistore.shared.ui.PriorityPane;
+import net.bobofraggins.intellistore.shared.ui.SortPane;
 import net.bobofraggins.intellistore.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -26,8 +31,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 /**
  * Screen for the Junk Drawer.
  *
- * <p>Displays the block's stored items in a scrollable grid, a priority control (in the slide-out
- * config drawer), and the player inventory.
+ * <p>Displays the block's stored items in a scrollable grid, a priority control and sort control
+ * (in the slide-out config drawer), and the player inventory.
  */
 public class JunkDrawerScreen extends AbstractContainerScreen<JunkDrawerMenu> {
 
@@ -35,14 +40,23 @@ public class JunkDrawerScreen extends AbstractContainerScreen<JunkDrawerMenu> {
     private final Dialog dialog;
     private final ConfigDrawer configDrawer;
 
+    /** Client-side sort mode; updated optimistically on cycle for snappy UI. */
+    private SortMode sortMode = SortMode.AMOUNT;
+
     public JunkDrawerScreen(JunkDrawerMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         inventoryPane = new LocalInventoryPane();
         dialog = new Dialog(Dialog.blankPane(PlayerInventoryPane.WIDTH, 7), inventoryPane, new PlayerInventoryPane());
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
-        configDrawer = new ConfigDrawer(new PriorityPane(
-                menu::getPriority, p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
+        configDrawer = new ConfigDrawer(
+                new PriorityPane(
+                        menu::getPriority,
+                        p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))),
+                new SortPane(() -> sortMode, () -> {
+                    sortMode = sortMode.next();
+                    PacketDistributor.sendToServer(new SetSortModePacket(menu.getPos(), sortMode));
+                }));
     }
 
     @Override
@@ -52,6 +66,14 @@ public class JunkDrawerScreen extends AbstractContainerScreen<JunkDrawerMenu> {
         configDrawer.init(leftPos, topPos, imageHeight);
         inventoryPane.setClickHandler((idx, amount, toCursor) -> PacketDistributor.sendToServer(
                 new LocalStorageInteractPacket(menu.getPos(), false, idx, amount, toCursor)));
+
+        // Restore persisted sort mode from the client-side block entity.
+        if (Minecraft.getInstance().level != null) {
+            BlockEntity be = Minecraft.getInstance().level.getBlockEntity(menu.getPos());
+            if (be instanceof JunkDrawerBlockEntity jd) {
+                sortMode = jd.getSortMode();
+            }
+        }
 
         addRenderableWidget(new PressableIconButton(
                 leftPos + 8,
@@ -83,7 +105,29 @@ public class JunkDrawerScreen extends AbstractContainerScreen<JunkDrawerMenu> {
             stacks.add(junk.get(i));
             counts.add(1L);
         }
-        inventoryPane.setContents(stacks, counts);
+        List<Integer> order = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) order.add(i);
+        order.sort(buildComparator(stacks));
+        List<ItemStack> sorted = new ArrayList<>(n);
+        List<Long> sortedCounts = new ArrayList<>(n);
+        for (int i : order) {
+            sorted.add(stacks.get(i));
+            sortedCounts.add(counts.get(i));
+        }
+        int[] sortedToOriginal = order.stream().mapToInt(i -> i).toArray();
+        inventoryPane.setContents(sorted, sortedCounts, sortedToOriginal);
+    }
+
+    private Comparator<Integer> buildComparator(List<ItemStack> stacks) {
+        return switch (sortMode) {
+            case NAME -> Comparator.comparing(i -> stacks.get(i).getHoverName().getString());
+            case MOD -> Comparator.<Integer, String>comparing(i -> {
+                        var key = BuiltInRegistries.ITEM.getKey(stacks.get(i).getItem());
+                        return key != null ? key.getNamespace() : "";
+                    })
+                    .thenComparing(i -> stacks.get(i).getHoverName().getString());
+            default -> Comparator.comparingInt(i -> i); // insertion order for AMOUNT
+        };
     }
 
     @Override

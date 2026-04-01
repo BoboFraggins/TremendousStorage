@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.bobofraggins.intellistore.shared.config.SortMode;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.shared.storage.KeyCounter;
@@ -58,6 +59,7 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
     private final List<StorageKey> orderedKeys = new ArrayList<>();
     private long cachedTotalCount = 0;
     private Priority priority = Priority.NORMAL;
+    private SortMode sortMode = SortMode.AMOUNT;
     private StorageTier tier = StorageTier.PAPER;
 
     public long getCapacity() {
@@ -278,6 +280,15 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
         setChanged();
     }
 
+    public SortMode getSortMode() {
+        return sortMode;
+    }
+
+    public void setSortMode(SortMode mode) {
+        this.sortMode = mode;
+        setChanged();
+    }
+
     // -------------------------------------------------------------------------
     // MenuProvider
     // -------------------------------------------------------------------------
@@ -363,6 +374,7 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
         }
         tag.put(TAG_ITEMS, list);
         tag.putInt("Priority", priority.ordinal());
+        tag.putString("SortMode", sortMode.name());
         tag.putString("Tier", tier.getId());
     }
 
@@ -383,6 +395,11 @@ public class JunkDrawerBlockEntity extends BlockEntity implements MenuProvider, 
             });
         }
         priority = Priority.fromOrdinal(tag.getInt("Priority"));
+        try {
+            sortMode = SortMode.valueOf(tag.getString("SortMode"));
+        } catch (IllegalArgumentException e) {
+            sortMode = SortMode.AMOUNT;
+        }
         tier = StorageTier.fromId(tag.getString("Tier"));
     }
 

@@ -17,6 +17,12 @@ public class IntelliStoreClientConfig {
     public static final ModConfigSpec.IntValue ROWS_SCALE_3;
     public static final ModConfigSpec.IntValue ROWS_SCALE_4_PLUS;
 
+    // -------------------------------------------------------------------------
+    // Network grid sort mode
+    // -------------------------------------------------------------------------
+
+    public static final ModConfigSpec.ConfigValue<String> SORT_MODE;
+
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -28,7 +34,22 @@ public class IntelliStoreClientConfig {
         ROWS_SCALE_4_PLUS = builder.comment("Rows at GUI scale 4 and above.").defineInRange("scale4plus", 4, 1, 50);
         builder.pop();
 
+        SORT_MODE = builder.comment("Sort mode for the network item grid. One of: AMOUNT, NAME, MOD.")
+                .define("sort_mode", SortMode.AMOUNT.name());
+
         SPEC = builder.build();
+    }
+
+    public static SortMode getSortMode() {
+        try {
+            return SortMode.valueOf(SORT_MODE.get());
+        } catch (IllegalArgumentException e) {
+            return SortMode.AMOUNT;
+        }
+    }
+
+    public static void setSortMode(SortMode mode) {
+        SORT_MODE.set(mode.name());
     }
 
     /**

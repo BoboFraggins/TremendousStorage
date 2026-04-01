@@ -11,7 +11,7 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyModifier;
 import org.lwjgl.glfw.GLFW;
 
-/** Client-only mod-bus events for the Quick Stack keybind. */
+/** Client-only mod-bus events for terminal keybinds. */
 @EventBusSubscriber(modid = IntelliStore.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class QuickStackClientEvents {
 
@@ -19,6 +19,9 @@ public final class QuickStackClientEvents {
 
     /** Keybind to Quick Stack matching items into the open storage UI. Default: numpad +. */
     public static KeyMapping QUICK_STACK;
+
+    /** Keybind to cycle the network grid sort mode while a storage terminal is open. Unbound by default. */
+    public static KeyMapping CYCLE_SORT;
 
     @SubscribeEvent
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
@@ -30,5 +33,14 @@ public final class QuickStackClientEvents {
                 GLFW.GLFW_KEY_KP_ADD,
                 "key.categories.intellistore");
         event.register(QUICK_STACK);
+
+        CYCLE_SORT = new KeyMapping(
+                "key.intellistore.cycle_sort",
+                KeyConflictContext.GUI,
+                KeyModifier.NONE,
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_UNKNOWN,
+                "key.categories.intellistore");
+        event.register(CYCLE_SORT);
     }
 }

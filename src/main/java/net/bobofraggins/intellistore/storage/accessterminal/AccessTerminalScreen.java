@@ -1,14 +1,19 @@
 package net.bobofraggins.intellistore.storage.accessterminal;
 
 import java.util.List;
+import net.bobofraggins.intellistore.shared.config.SortMode;
 import net.bobofraggins.intellistore.shared.input.QuickStackClientEvents;
 import net.bobofraggins.intellistore.shared.network.QuickStackPacket;
 import net.bobofraggins.intellistore.shared.network.RequestSatContentsPacket;
 import net.bobofraggins.intellistore.shared.network.SatContentsPacket;
+import net.bobofraggins.intellistore.shared.network.SetSortModePacket;
+import net.bobofraggins.intellistore.shared.ui.ConfigDrawer;
 import net.bobofraggins.intellistore.shared.ui.Dialog;
 import net.bobofraggins.intellistore.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.intellistore.shared.ui.PressableIconButton;
+import net.bobofraggins.intellistore.shared.ui.SortPane;
 import net.bobofraggins.intellistore.shared.util.SearchSync;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -37,8 +42,9 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     // Panes + dialog
     // -------------------------------------------------------------------------
 
-    private NetworkInventoryPane networkPane;
-    private Dialog dialog;
+    private final NetworkInventoryPane networkPane;
+    private final Dialog dialog;
+    private final ConfigDrawer configDrawer;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -50,6 +56,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         dialog = new Dialog(networkPane, new CraftingGridPane(), new PlayerInventoryPane());
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
+        configDrawer = new ConfigDrawer(new SortPane(networkPane::getSortMode, this::cycleSortMode));
     }
 
     // -------------------------------------------------------------------------
@@ -60,8 +67,27 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     protected void init() {
         super.init();
         dialog.init(leftPos, topPos);
+        configDrawer.init(leftPos, topPos, imageHeight);
 
-        // Quick stack button above the player inventory, right-aligned
+        // Restore persisted sort mode from the client-side block entity.
+        if (Minecraft.getInstance().level != null) {
+            var be = Minecraft.getInstance().level.getBlockEntity(menu.getSatPos());
+            if (be instanceof AccessTerminalBlockEntity at) {
+                networkPane.setSortMode(at.getSortMode());
+            }
+        }
+
+        // Config drawer toggle button in the title bar, left-aligned.
+        addRenderableWidget(new PressableIconButton(
+                leftPos + 8,
+                topPos + 6,
+                16,
+                16,
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config"),
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config_focused"),
+                configDrawer::toggle));
+
+        // Quick stack button above the player inventory, right-aligned.
         addRenderableWidget(new PressableIconButton(
                 leftPos + dialog.totalWidth() - 26,
                 dialog.getPaneAbsY(2) - 20,
@@ -98,6 +124,12 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     // Input
     // -------------------------------------------------------------------------
 
+    private void cycleSortMode() {
+        SortMode next = networkPane.getSortMode().next();
+        networkPane.setSortMode(next);
+        PacketDistributor.sendToServer(new SetSortModePacket(menu.getSatPos(), next));
+    }
+
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (QuickStackClientEvents.QUICK_STACK != null
@@ -106,11 +138,16 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
             PacketDistributor.sendToServer(new QuickStackPacket(menu.getNiPos(), true));
             return true;
         }
+        if (QuickStackClientEvents.CYCLE_SORT != null && QuickStackClientEvents.CYCLE_SORT.matches(keyCode, scanCode)) {
+            cycleSortMode();
+            return true;
+        }
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (configDrawer.mouseClicked(mouseX, mouseY, button)) return true;
         if (dialog.mouseClicked(mouseX, mouseY, button)) return true;
         return super.mouseClicked(mouseX, mouseY, button);
     }
@@ -153,6 +190,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+        configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
     }
 
