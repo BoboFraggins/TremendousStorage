@@ -120,9 +120,18 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         double time = (be.getLevel().getGameTime() + partialTick) / 20.0;
         float bob = (float) Math.sin(time * Math.PI * 0.25) * 0.04f;
 
+        net.minecraft.core.Direction facing = be.getBlockState().getValue(NetworkInterfaceBlock.FACING);
+        float brainYRot =
+                switch (facing) {
+                    case SOUTH -> -90f;
+                    case EAST -> 180f;
+                    case WEST -> 0f;
+                    default -> 90f; // NORTH
+                };
+
         poseStack.pushPose();
         poseStack.translate(0.5f, 0.5f + bob, 0.5f);
-        poseStack.mulPose(Axis.YP.rotationDegrees(90f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(brainYRot));
         poseStack.translate(-BRAIN_CX, -BRAIN_CY, -BRAIN_CZ);
 
         renderBrain(be.getLevel(), be.getBlockState(), bufferSource, poseStack, packedLight, packedOverlay);
