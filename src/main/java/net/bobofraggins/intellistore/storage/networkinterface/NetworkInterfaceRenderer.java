@@ -71,7 +71,7 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         int fb = tint & 0xFF;
         int fa = (tint >> 24) & 0xFF;
         if (fa == 0) fa = 160;
-        fa /= 2;
+        fa = fa * 2 / 3;
 
         float fillTop = FLUID_FLOOR + FILL_FRAC * FLUID_H;
 
@@ -98,7 +98,7 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
     }
 
     // -------------------------------------------------------------------------
-    // Brain animation on top of the inherited fill + stub rendering
+    // Brain animation — no tube stubs on the NI
     // -------------------------------------------------------------------------
 
     @Override
@@ -110,7 +110,10 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
             int packedLight,
             int packedOverlay) {
 
-        super.render(be, partialTick, poseStack, bufferSource, packedLight, packedOverlay);
+        // Render fill only (skip AbstractTankRenderer's tube-stub logic).
+        poseStack.pushPose();
+        renderFill(be, poseStack.last().pose(), bufferSource, packedLight, packedOverlay);
+        poseStack.popPose();
 
         if (be.getLevel() == null) return;
 
@@ -119,7 +122,7 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
 
         poseStack.pushPose();
         poseStack.translate(0.5f, 0.5f + bob, 0.5f);
-        poseStack.mulPose(Axis.YP.rotationDegrees(-90f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(90f));
         poseStack.translate(-BRAIN_CX, -BRAIN_CY, -BRAIN_CZ);
 
         renderBrain(be.getLevel(), be.getBlockState(), bufferSource, poseStack, packedLight, packedOverlay);
