@@ -10,6 +10,7 @@ import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBl
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -24,8 +25,10 @@ import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -354,6 +357,66 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             if (!ItemStack.isSameItemSameComponents(handler.getStackInSlot(slot), template)) continue;
             ItemStack extracted = handler.extractItem(slot, template.getMaxStackSize(), false);
             if (!extracted.isEmpty()) return extracted;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    // -------------------------------------------------------------------------
+    // Recipe viewer fill (EMI / REI)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Fills the crafting grid with ingredients for {@code recipe}, pulling items from the network.
+     *
+     * <p>Any existing grid contents that do not match the new recipe are returned to the network
+     * first. For shaped recipes the ingredients are placed in the recipe's natural top-left
+     * position; shapeless recipes fill slots 0–8 in order.
+     */
+    public void fillCraftingGridFromNetwork(ServerLevel level, CraftingRecipe recipe) {
+        if (niPos == null) return;
+        if (!(level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
+        IItemHandler handler = ni.getItemHandler();
+        if (handler == null) return;
+
+        // Return current grid contents to the network.
+        for (int i = 0; i < 9; i++) {
+            ItemStack current = craftSlots.getItem(i);
+            if (!current.isEmpty()) {
+                handler.insertItem(0, current, false);
+                craftSlots.setItem(i, ItemStack.EMPTY);
+            }
+        }
+
+        // Place ingredients from the network into the grid.
+        var ingredients = recipe.getIngredients();
+        if (recipe instanceof ShapedRecipe shaped) {
+            int w = shaped.getWidth();
+            int h = shaped.getHeight();
+            for (int row = 0; row < h; row++) {
+                for (int col = 0; col < w; col++) {
+                    int recipeIdx = row * w + col;
+                    int gridIdx = row * 3 + col;
+                    if (recipeIdx < ingredients.size()) {
+                        craftSlots.setItem(gridIdx, extractOneFromNetwork(handler, ingredients.get(recipeIdx)));
+                    }
+                }
+            }
+        } else {
+            for (int i = 0; i < Math.min(ingredients.size(), 9); i++) {
+                craftSlots.setItem(i, extractOneFromNetwork(handler, ingredients.get(i)));
+            }
+        }
+
+        slotsChanged(craftSlots);
+    }
+
+    private static ItemStack extractOneFromNetwork(IItemHandler handler, Ingredient ingredient) {
+        if (ingredient.isEmpty()) return ItemStack.EMPTY;
+        for (int s = 0; s < handler.getSlots(); s++) {
+            ItemStack inSlot = handler.getStackInSlot(s);
+            if (!inSlot.isEmpty() && ingredient.test(inSlot)) {
+                return handler.extractItem(s, 1, false);
+            }
         }
         return ItemStack.EMPTY;
     }

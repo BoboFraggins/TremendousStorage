@@ -80,6 +80,10 @@ repositories {
         url = "https://cursemaven.com"
         content { includeGroup "curse.maven" }
     }
+    maven {
+        name = "shedaniel Maven"
+        url = "https://maven.shedaniel.me/"
+    }
 }
 
 dependencies {
@@ -93,6 +97,9 @@ dependencies {
     compileOnly "com.blakebr0.mysticalagriculture:MysticalAgriculture:1.21.1-8.0.23"
     compileOnly "maven.modrinth:structure-pool-api:${structure_pool_api_version}"
     compileOnly("curse.maven:create-328085:7408951") { transitive = false }
+    // Recipe viewer integrations — optional at runtime, compile-only for API access
+    compileOnly "maven.modrinth:emi:${emi_version}"
+    compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
 }
 
 tasks.withType(ProcessResources).configureEach {

@@ -63,5 +63,9 @@ public final class NetworkEvents {
                 QuickStackFilingCabinetPacket.STREAM_CODEC,
                 QuickStackFilingCabinetPacket::handle);
         registrar.playToServer(SetSortModePacket.TYPE, SetSortModePacket.STREAM_CODEC, SetSortModePacket::handle);
+        registrar.playToServer(
+                SatFillCraftingGridPacket.TYPE,
+                SatFillCraftingGridPacket.STREAM_CODEC,
+                SatFillCraftingGridPacket::handle);
     }
 }
