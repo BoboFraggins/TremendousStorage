@@ -419,6 +419,20 @@ public final class Registration {
             ITEMS.registerSimpleBlockItem("lazurite_block", LAZURITE_BLOCK);
 
     // -------------------------------------------------------------------------
+    // Canvas block
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<net.minecraft.world.level.block.Block> CANVAS_BLOCK = BLOCKS.register(
+            "canvas_block",
+            () -> new net.minecraft.world.level.block.Block(BlockBehaviour.Properties.of()
+                    .strength(0.5f, 0.5f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.WOOL)));
+
+    public static final DeferredHolder<Item, BlockItem> CANVAS_BLOCK_ITEM =
+            ITEMS.registerSimpleBlockItem("canvas_block", CANVAS_BLOCK);
+
+    // -------------------------------------------------------------------------
     // Lazurite tools
     // -------------------------------------------------------------------------
 
@@ -488,6 +502,12 @@ public final class Registration {
             ITEMS.register("zombie_brain", ZombieBrainItem::new);
 
     public static final DeferredHolder<Item, BrainItem> BRAIN = ITEMS.register("brain", BrainItem::new);
+
+    public static final DeferredHolder<Item, Item> CANVAS =
+            ITEMS.register("canvas", () -> new Item(new Item.Properties()));
+
+    public static final DeferredHolder<Item, Item> BACKPACK =
+            ITEMS.register("backpack", () -> new Item(new Item.Properties()));
 
     public static final DeferredHolder<Item, BucketItem> HEALING_SALVE_BUCKET = ITEMS.register(
             "healing_salve_bucket",
@@ -841,6 +861,9 @@ public final class Registration {
                         output.accept(BREAKER_INTERFACE.get());
                         output.accept(ZOMBIE_BRAIN.get());
                         output.accept(BRAIN.get());
+                        output.accept(CANVAS.get());
+                        output.accept(CANVAS_BLOCK_ITEM.get());
+                        output.accept(BACKPACK.get());
                         output.accept(HEALING_SALVE_BUCKET.get());
                         for (DyeColor color : DyeColor.values()) {
                             output.accept(TUBE_ITEMS.get(color).get());

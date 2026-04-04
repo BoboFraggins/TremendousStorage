@@ -1,0 +1,64 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    [
+      { "item": "minecraft:short_grass" },
+      { "item": "minecraft:tall_grass" },
+      { "item": "minecraft:fern" },
+      { "item": "minecraft:large_fern" }
+    ],
+    [
+      { "item": "minecraft:short_grass" },
+      { "item": "minecraft:tall_grass" },
+      { "item": "minecraft:fern" },
+      { "item": "minecraft:large_fern" }
+    ],
+    [
+      { "item": "minecraft:short_grass" },
+      { "item": "minecraft:tall_grass" },
+      { "item": "minecraft:fern" },
+      { "item": "minecraft:large_fern" }
+    ],
+    [
+      { "item": "minecraft:short_grass" },
+      { "item": "minecraft:tall_grass" },
+      { "item": "minecraft:fern" },
+      { "item": "minecraft:large_fern" }
+    ],
+    [
+      { "item": "minecraft:short_grass" },
+      { "item": "minecraft:tall_grass" },
+      { "item": "minecraft:fern" },
+      { "item": "minecraft:large_fern" }
+    ],
+    [
+      { "item": "minecraft:short_grass" },
+      { "item": "minecraft:tall_grass" },
+      { "item": "minecraft:fern" },
+      { "item": "minecraft:large_fern" }
+    ],
+    [
+      { "item": "minecraft:short_grass" },
+      { "item": "minecraft:tall_grass" },
+      { "item": "minecraft:fern" },
+      { "item": "minecraft:large_fern" }
+    ],
+    [
+      { "item": "minecraft:short_grass" },
+      { "item": "minecraft:tall_grass" },
+      { "item": "minecraft:fern" },
+      { "item": "minecraft:large_fern" }
+    ],
+    [
+      { "item": "minecraft:short_grass" },
+      { "item": "minecraft:tall_grass" },
+      { "item": "minecraft:fern" },
+      { "item": "minecraft:large_fern" }
+    ]
+  ],
+  "result": {
+    "id": "intellistore:canvas",
+    "count": 1
+  },
+  "category": "misc"
+}
