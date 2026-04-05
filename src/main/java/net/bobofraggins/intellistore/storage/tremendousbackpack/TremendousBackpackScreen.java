@@ -1,0 +1,216 @@
+package net.bobofraggins.intellistore.storage.tremendousbackpack;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import net.bobofraggins.intellistore.shared.config.SortMode;
+import net.bobofraggins.intellistore.shared.network.SetTremendousBackpackPriorityPacket;
+import net.bobofraggins.intellistore.shared.network.SetTremendousBackpackSortModePacket;
+import net.bobofraggins.intellistore.shared.network.TremendousBackpackInteractPacket;
+import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.ui.ConfigDrawer;
+import net.bobofraggins.intellistore.shared.ui.Dialog;
+import net.bobofraggins.intellistore.shared.ui.LocalInventoryPane;
+import net.bobofraggins.intellistore.shared.ui.PlayerInventoryPane;
+import net.bobofraggins.intellistore.shared.ui.PressableIconButton;
+import net.bobofraggins.intellistore.shared.ui.PriorityPane;
+import net.bobofraggins.intellistore.shared.ui.SortPane;
+import net.bobofraggins.intellistore.shared.util.SearchSync;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
+
+/**
+ * Screen for the Tremendous Backpack.
+ *
+ * <p>Displays the backpack's stored items in a scrollable grid, priority and sort controls in the
+ * slide-out config drawer, and the player inventory. Reads contents from the client-side backpack
+ * ItemStack's {@link TremendousBackpackContents} data component (synced automatically by
+ * Minecraft's slot tracking when the server modifies the item).
+ */
+public class TremendousBackpackScreen extends AbstractContainerScreen<TremendousBackpackMenu> {
+
+    private final LocalInventoryPane inventoryPane;
+    private final Dialog dialog;
+    private final ConfigDrawer configDrawer;
+
+    /** Client-side sort mode; updated optimistically on cycle for snappy UI. */
+    private SortMode sortMode = SortMode.AMOUNT;
+
+    public TremendousBackpackScreen(TremendousBackpackMenu menu, Inventory inv, Component title) {
+        super(menu, inv, title);
+        inventoryPane = new LocalInventoryPane();
+        dialog = new Dialog(
+                Dialog.blankPane(PlayerInventoryPane.WIDTH, 7),
+                inventoryPane,
+                Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
+                new PlayerInventoryPane());
+        this.imageWidth = dialog.totalWidth();
+        this.imageHeight = dialog.totalHeight();
+        configDrawer = new ConfigDrawer(
+                new PriorityPane(
+                        menu::getPriority,
+                        p -> PacketDistributor.sendToServer(new SetTremendousBackpackPriorityPacket(
+                                menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), p))),
+                new SortPane(() -> sortMode, () -> {
+                    sortMode = sortMode.next();
+                    PacketDistributor.sendToServer(new SetTremendousBackpackSortModePacket(
+                            menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), sortMode.ordinal()));
+                }));
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        dialog.init(leftPos, topPos);
+        configDrawer.init(leftPos, topPos, imageHeight);
+        inventoryPane.setClickHandler(
+                (idx, amount, toCursor) -> PacketDistributor.sendToServer(new TremendousBackpackInteractPacket(
+                        menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), idx, amount, toCursor)));
+
+        // Read initial sort mode from the backpack's current contents
+        TremendousBackpackContents contents = getCurrentContents();
+        sortMode = contents.sortMode();
+
+        addRenderableWidget(new PressableIconButton(
+                leftPos + 8,
+                topPos + 6,
+                16,
+                16,
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config"),
+                ResourceLocation.fromNamespaceAndPath("intellistore", "widget/button_config_focused"),
+                () -> configDrawer.toggle()));
+    }
+
+    @Override
+    protected void containerTick() {
+        super.containerTick();
+        inventoryPane.setFilter(SearchSync.getFilter());
+        refreshInventory();
+    }
+
+    private void refreshInventory() {
+        TremendousBackpackContents contents = getCurrentContents();
+        int n = contents.typeCount();
+        List<ItemStack> stacks = new ArrayList<>(n);
+        List<Long> counts = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) {
+            stacks.add(contents.getType(i));
+            counts.add(contents.getCount(i));
+        }
+        List<Integer> order = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) order.add(i);
+        order.sort(buildComparator(stacks, counts));
+        List<ItemStack> sorted = new ArrayList<>(n);
+        List<Long> sortedCounts = new ArrayList<>(n);
+        for (int i : order) {
+            sorted.add(stacks.get(i));
+            sortedCounts.add(counts.get(i));
+        }
+        int[] sortedToOriginal = order.stream().mapToInt(i -> i).toArray();
+        inventoryPane.setContents(sorted, sortedCounts, sortedToOriginal);
+    }
+
+    /**
+     * Reads the backpack's contents from the client-side player inventory (or Curios slot).
+     * Falls back to EMPTY if the item can't be found.
+     */
+    private TremendousBackpackContents getCurrentContents() {
+        ItemStack stack = getClientBackpackStack();
+        if (stack.isEmpty()) return TremendousBackpackContents.EMPTY;
+        return stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY);
+    }
+
+    private ItemStack getClientBackpackStack() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return ItemStack.EMPTY;
+
+        if (menu.getSlotType()
+                == net.bobofraggins.intellistore.shared.network.OpenTremendousBackpackPacket.SLOT_CURIOS) {
+            try {
+                var inv = mc.player.getCapability(top.theillusivec4.curios.api.CuriosCapability.INVENTORY);
+                if (inv != null) {
+                    var entry = inv.getCurios().get(menu.getSlotId());
+                    if (entry != null) {
+                        ItemStack s = entry.getStacks().getStackInSlot(menu.getSlotIndex());
+                        if (s.getItem() instanceof TremendousBackpackItem) return s;
+                    }
+                }
+            } catch (NoClassDefFoundError | Exception ignored) {
+            }
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack s = mc.player.getInventory().getItem(menu.getSlotIndex());
+        return s.getItem() instanceof TremendousBackpackItem ? s : ItemStack.EMPTY;
+    }
+
+    private Comparator<Integer> buildComparator(List<ItemStack> stacks, List<Long> counts) {
+        return switch (sortMode) {
+            case NAME -> Comparator.comparing(i -> stacks.get(i).getHoverName().getString());
+            case MOD -> Comparator.<Integer, String>comparing(i -> {
+                        var key = BuiltInRegistries.ITEM.getKey(stacks.get(i).getItem());
+                        return key != null ? key.getNamespace() : "";
+                    })
+                    .thenComparing(i -> stacks.get(i).getHoverName().getString());
+            default -> Comparator.comparingLong((Integer i) -> counts.get(i))
+                    .reversed()
+                    .thenComparing(i -> stacks.get(i).getHoverName().getString());
+        };
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (configDrawer.mouseClicked(mouseX, mouseY, button)) return true;
+        if (dialog.mouseClicked(mouseX, mouseY, button)) return true;
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (dialog.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) return true;
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (dialog.mouseDragged(mouseX, mouseY, button, dragX, dragY)) return true;
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (dialog.mouseReleased(mouseX, mouseY, button)) return true;
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        renderBackground(graphics, mouseX, mouseY, partialTick);
+        super.render(graphics, mouseX, mouseY, partialTick);
+        renderTooltip(graphics, mouseX, mouseY);
+
+        int paneAbsY = dialog.getPaneAbsY(1);
+        ItemStack hovered = inventoryPane.getHoveredStack(mouseX - leftPos, mouseY - paneAbsY);
+        if (hovered != null) {
+            graphics.renderTooltip(font, hovered, mouseX, mouseY);
+        }
+    }
+
+    @Override
+    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+        configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
+        dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
+    }
+
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+        // Title is drawn by Dialog.
+    }
+}

@@ -193,7 +193,9 @@
 
   "item.intellistore.canvas": "Canvas",
   "block.intellistore.canvas_block": "Canvas Block",
-  "item.intellistore.backpack": "Backpack",
+
+  "item.intellistore.tremendous_backpack": "Tremendous Backpack",
+  "key.intellistore.open_tremendous_backpack": "Open Tremendous Backpack",
 
   "item.intellistore.personal_filing_cabinet": "Personal Filing Cabinet",
   "screen.intellistore.personal_filing_cabinet": "Personal Filing Cabinet",

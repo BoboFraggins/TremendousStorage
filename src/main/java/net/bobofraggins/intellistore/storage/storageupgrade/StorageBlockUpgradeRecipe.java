@@ -2,6 +2,8 @@ package net.bobofraggins.intellistore.storage.storageupgrade;
 
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
+import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackContents;
+import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackItem;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -45,7 +47,16 @@ public class StorageBlockUpgradeRecipe extends CustomRecipe {
         ItemStack blockStack = pair[0];
         StorageUpgradeItem upgradeItem = (StorageUpgradeItem) pair[1].getItem();
 
-        // Copy existing block_entity_data (preserving all stored items / priority) and bump tier
+        // Tremendous Backpack: upgrade via TremendousBackpackContents data component
+        if (blockStack.getItem() instanceof TremendousBackpackItem) {
+            TremendousBackpackContents current = blockStack.getOrDefault(
+                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY);
+            ItemStack result = blockStack.copyWithCount(1);
+            result.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), current.withTier(upgradeItem.getToTier()));
+            return result;
+        }
+
+        // Block items: copy block_entity_data (preserving stored items / priority) and bump tier
         CustomData existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putString("Tier", upgradeItem.getToTier().getId());
@@ -97,10 +108,19 @@ public class StorageBlockUpgradeRecipe extends CustomRecipe {
     }
 
     private static boolean isStorageBlock(Item item) {
-        return item == Registration.BULK_STORAGE_CONTAINER_ITEM.get() || item == Registration.JUNK_DRAWER_ITEM.get();
+        return item == Registration.BULK_STORAGE_CONTAINER_ITEM.get()
+                || item == Registration.JUNK_DRAWER_ITEM.get()
+                || item instanceof TremendousBackpackItem;
     }
 
     private static StorageTier tierFromStack(ItemStack stack) {
+        // Tremendous Backpack: tier lives in its DataComponent
+        if (stack.getItem() instanceof TremendousBackpackItem) {
+            TremendousBackpackContents contents = stack.getOrDefault(
+                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY);
+            return contents.tier();
+        }
+        // Block items: tier lives in block_entity_data NBT
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data != null) {
             CompoundTag tag = data.getUnsafe();

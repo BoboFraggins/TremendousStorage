@@ -71,6 +71,9 @@ import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilin
 import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetMenu;
 import net.bobofraggins.intellistore.storage.storageupgrade.StorageBlockUpgradeRecipe;
 import net.bobofraggins.intellistore.storage.storageupgrade.StorageUpgradeItem;
+import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackContents;
+import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackItem;
+import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackMenu;
 import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.bobofraggins.intellistore.storage.tube.TubeBlockEntity;
 import net.bobofraggins.intellistore.storage.tube.TubeEnergyHandler;
@@ -226,6 +229,14 @@ public final class Registration {
                     .persistent(com.mojang.serialization.Codec.LONG)
                     .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG)
                     .build());
+
+    /** Data component storing all inventory and settings on a Tremendous Backpack item. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<TremendousBackpackContents>>
+            TREMENDOUS_BACKPACK_CONTENTS = DATA_COMPONENTS.register(
+                    "tremendous_backpack_contents", () -> DataComponentType.<TremendousBackpackContents>builder()
+                            .persistent(TremendousBackpackContents.CODEC)
+                            .networkSynchronized(TremendousBackpackContents.STREAM_CODEC)
+                            .build());
 
     /**
      * Data component storing the folder contents and void-excess flag on a Personal Filing Cabinet item.
@@ -506,8 +517,8 @@ public final class Registration {
     public static final DeferredHolder<Item, Item> CANVAS =
             ITEMS.register("canvas", () -> new Item(new Item.Properties()));
 
-    public static final DeferredHolder<Item, Item> BACKPACK =
-            ITEMS.register("backpack", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, TremendousBackpackItem> TREMENDOUS_BACKPACK =
+            ITEMS.register("tremendous_backpack", TremendousBackpackItem::new);
 
     public static final DeferredHolder<Item, BucketItem> HEALING_SALVE_BUCKET = ITEMS.register(
             "healing_salve_bucket",
@@ -704,6 +715,9 @@ public final class Registration {
             MENU_TYPES.register(
                     "personal_filing_cabinet", () -> IMenuTypeExtension.create(PersonalFilingCabinetMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<TremendousBackpackMenu>> TREMENDOUS_BACKPACK_MENU =
+            MENU_TYPES.register("tremendous_backpack", () -> IMenuTypeExtension.create(TremendousBackpackMenu::new));
+
     // -------------------------------------------------------------------------
     // Items — storage interface / import interface / export interface
     // -------------------------------------------------------------------------
@@ -863,7 +877,7 @@ public final class Registration {
                         output.accept(BRAIN.get());
                         output.accept(CANVAS.get());
                         output.accept(CANVAS_BLOCK_ITEM.get());
-                        output.accept(BACKPACK.get());
+                        output.accept(TREMENDOUS_BACKPACK.get());
                         output.accept(HEALING_SALVE_BUCKET.get());
                         for (DyeColor color : DyeColor.values()) {
                             output.accept(TUBE_ITEMS.get(color).get());
