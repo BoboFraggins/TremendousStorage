@@ -79,10 +79,10 @@ public class FilingCabinetItemHandler implements IItemHandler, IKeyCounterContri
     @Override
     public int getSlotLimit(int slot) {
         ItemStack folder = be.getFolder(slot);
-        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem folderItem)) {
+        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) {
             return 0;
         }
-        long capacity = folderItem.getCapacity();
+        long capacity = ManillaFolderItem.getCapacity(folder);
         return (int) Math.min(Integer.MAX_VALUE, capacity);
     }
 
@@ -122,16 +122,16 @@ public class FilingCabinetItemHandler implements IItemHandler, IKeyCounterContri
         if (stack.isDamageableItem()) return stack; // rule 1: reject damageable
 
         ItemStack folder = be.getFolder(slot);
-        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem folderItem)) {
+        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) {
             return stack; // rule 2: no folder here
         }
 
         FolderContents contents = getContents(folder);
-        long capacity = folderItem.getCapacity();
+        long capacity = ManillaFolderItem.getCapacity(folder);
 
         // Rule 4: unlocked folder — lock it to this item type first
         if (contents.isEmpty()) {
-            contents = new FolderContents(java.util.Optional.of(stack.copyWithCount(1)), 0L);
+            contents = new FolderContents(java.util.Optional.of(stack.copyWithCount(1)), 0L, contents.tier());
         } else if (!contents.accepts(stack)) {
             return stack; // rule 5: locked to a different item
         }

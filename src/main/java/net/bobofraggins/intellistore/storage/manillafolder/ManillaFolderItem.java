@@ -12,22 +12,16 @@ import net.minecraft.world.item.TooltipFlag;
  *
  * <p>The folder is unlocked until the first item is placed inside via the crafting grid
  * ({@link FolderStorageRecipe}). After that it is locked to that item type. Items can be
- * extracted via the crafting grid ({@link FolderExtractRecipe}), and two same-type folders can
- * be merged together ({@link FolderMergeRecipe}).
+ * extracted via the crafting grid ({@link FolderExtractRecipe}), and two same-tier same-type
+ * folders can be merged together ({@link FolderMergeRecipe}).
  *
- * <p>All storage state lives in the {@link FolderContents} data component on the ItemStack.
+ * <p>All storage state lives in the {@link FolderContents} data component on the ItemStack,
+ * including the tier which determines capacity.
  */
 public class ManillaFolderItem extends Item {
 
-    private final FolderTier tier;
-
-    public ManillaFolderItem(FolderTier tier, Properties properties) {
+    public ManillaFolderItem(Properties properties) {
         super(properties);
-        this.tier = tier;
-    }
-
-    public FolderTier getTier() {
-        return tier;
     }
 
     // -------------------------------------------------------------------------
@@ -44,13 +38,23 @@ public class ManillaFolderItem extends Item {
         return copy;
     }
 
-    public long getCapacity() {
-        return tier.getDefaultCapacity();
+    public static long getCapacity(ItemStack stack) {
+        return getContents(stack).getCapacity();
     }
 
     @Override
     public int getMaxStackSize(ItemStack stack) {
         return getContents(stack).isEmpty() ? 64 : 1;
+    }
+
+    @Override
+    public Component getName(ItemStack stack) {
+        FolderContents contents = getContents(stack);
+        String tierId = contents.tier().getId();
+        return Component.translatable(getDescriptionId())
+                .append(Component.literal(" ("))
+                .append(Component.translatable("tier.intellistore." + tierId))
+                .append(Component.literal(")"));
     }
 
     // -------------------------------------------------------------------------
@@ -70,6 +74,6 @@ public class ManillaFolderItem extends Item {
                     stored.getHoverName()));
         }
         lines.add(Component.translatable(
-                "item.intellistore.manila_folder.capacity", CountFormat.format(tier.getDefaultCapacity())));
+                "item.intellistore.manila_folder.capacity", CountFormat.format(contents.getCapacity())));
     }
 }

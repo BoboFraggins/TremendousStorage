@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderItem;
-import net.bobofraggins.intellistore.storage.manillafolder.FolderTier;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
@@ -53,11 +53,15 @@ public class EndCityModifier extends LootModifier {
 
         // Linked ender folder pair (20% chance)
         if (rng.nextFloat() < 0.20f) {
-            FolderTier tier = rng.nextFloat() < 0.80f ? FolderTier.DIAMOND : FolderTier.EMERALD;
-            ItemStack folder1 =
-                    new ItemStack(Registration.ENDER_FOLDERS.get(tier).get());
-            ItemStack folder2 =
-                    new ItemStack(Registration.ENDER_FOLDERS.get(tier).get());
+            StorageTier tier = rng.nextFloat() < 0.80f ? StorageTier.DIAMOND : StorageTier.EMERALD;
+            ItemStack folder1 = new ItemStack(Registration.ENDER_FOLDER.get());
+            folder1.set(
+                    Registration.FOLDER_CONTENTS.get(),
+                    net.bobofraggins.intellistore.storage.manillafolder.FolderContents.EMPTY.withTier(tier));
+            ItemStack folder2 = new ItemStack(Registration.ENDER_FOLDER.get());
+            folder2.set(
+                    Registration.FOLDER_CONTENTS.get(),
+                    net.bobofraggins.intellistore.storage.manillafolder.FolderContents.EMPTY.withTier(tier));
             long linkId = rng.nextLong();
             EnderFolderItem.setLinkId(folder1, linkId);
             EnderFolderItem.setLinkId(folder2, linkId);

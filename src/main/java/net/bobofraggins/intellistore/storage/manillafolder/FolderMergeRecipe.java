@@ -30,6 +30,7 @@ public class FolderMergeRecipe extends CustomRecipe {
         FolderContents c2 = ManillaFolderItem.getContents(pair[1]);
 
         if (c1.isEmpty() || c2.isEmpty()) return false;
+        if (c1.tier() != c2.tier()) return false;
 
         return ItemStack.isSameItemSameComponents(
                 c1.storedItem().get(), c2.storedItem().get());
@@ -48,7 +49,7 @@ public class FolderMergeRecipe extends CustomRecipe {
 
         if (c1.isEmpty() || c2.isEmpty()) return ItemStack.EMPTY;
 
-        long capacity = ((ManillaFolderItem) base.getItem()).getCapacity();
+        long capacity = ManillaFolderItem.getCapacity(base);
         FolderContents.InsertResult result = c1.insert(c2.count(), capacity);
 
         return ManillaFolderItem.setContents(base.copyWithCount(1), result.updated());
@@ -88,8 +89,6 @@ public class FolderMergeRecipe extends CustomRecipe {
         }
 
         if (first.isEmpty() || second.isEmpty()) return null;
-        // Both must be the same tier
-        if (first.getItem() != second.getItem()) return null;
 
         return new ItemStack[] {first, second};
     }

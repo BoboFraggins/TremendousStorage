@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "intellistore:item/gold_ender_folder"
+    "layer0": "intellistore:item/manila_folder"
   }
 }

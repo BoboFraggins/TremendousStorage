@@ -34,8 +34,6 @@ import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderExtractRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderStorageRecipe;
-import net.bobofraggins.intellistore.storage.manillafolder.FolderTier;
-import net.bobofraggins.intellistore.storage.manillafolder.FolderUpgradeRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
@@ -658,37 +656,14 @@ public final class Registration {
             ITEMS.register("whiteout_tape", WhiteoutTapeItem::new);
 
     // -------------------------------------------------------------------------
-    // Items — one entry per tier
+    // Items — Manila Folder and Ender Folder (single items; tier in FolderContents)
     // -------------------------------------------------------------------------
 
-    public static final Map<FolderTier, DeferredHolder<Item, ManillaFolderItem>> MANILA_FOLDERS =
-            new EnumMap<>(FolderTier.class);
+    public static final DeferredHolder<Item, ManillaFolderItem> MANILA_FOLDER =
+            ITEMS.register("manila_folder", () -> new ManillaFolderItem(new Item.Properties()));
 
-    static {
-        for (FolderTier tier : FolderTier.values()) {
-            MANILA_FOLDERS.put(
-                    tier,
-                    ITEMS.register(
-                            tier.getId() + "_manila_folder", () -> new ManillaFolderItem(tier, new Item.Properties())));
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Items — Ender Folders (one per tier)
-    // -------------------------------------------------------------------------
-
-    public static final Map<FolderTier, DeferredHolder<Item, EnderFolderItem>> ENDER_FOLDERS =
-            new EnumMap<>(FolderTier.class);
-
-    static {
-        for (FolderTier tier : FolderTier.values()) {
-            ENDER_FOLDERS.put(
-                    tier,
-                    ITEMS.register(
-                            tier.getId() + "_ender_folder",
-                            () -> new EnderFolderItem(tier, new Item.Properties().stacksTo(1))));
-        }
-    }
+    public static final DeferredHolder<Item, EnderFolderItem> ENDER_FOLDER =
+            ITEMS.register("ender_folder", () -> new EnderFolderItem(new Item.Properties()));
 
     // -------------------------------------------------------------------------
     // Recipe serializers
@@ -713,10 +688,6 @@ public final class Registration {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderFolderRecipe>> ENDER_FOLDER_RECIPE =
             RECIPE_SERIALIZERS.register(
                     "ender_folder", () -> new SimpleCraftingRecipeSerializer<>(EnderFolderRecipe::new));
-
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderUpgradeRecipe>>
-            FOLDER_UPGRADE_RECIPE = RECIPE_SERIALIZERS.register(
-                    "folder_upgrade", () -> new SimpleCraftingRecipeSerializer<>(FolderUpgradeRecipe::new));
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StorageBlockUpgradeRecipe>>
             STORAGE_BLOCK_UPGRADE_RECIPE = RECIPE_SERIALIZERS.register(
@@ -779,12 +750,8 @@ public final class Registration {
                         for (DyeColor color : DyeColor.values()) {
                             output.accept(TUBE_ITEMS.get(color).get());
                         }
-                        for (FolderTier tier : FolderTier.values()) {
-                            output.accept(MANILA_FOLDERS.get(tier).get());
-                        }
-                        for (FolderTier tier : FolderTier.values()) {
-                            output.accept(ENDER_FOLDERS.get(tier).get());
-                        }
+                        output.accept(MANILA_FOLDER.get());
+                        output.accept(ENDER_FOLDER.get());
                         output.accept(PERSONAL_FILING_CABINET.get());
                         output.accept(WHITEOUT_TAPE.get());
                     })

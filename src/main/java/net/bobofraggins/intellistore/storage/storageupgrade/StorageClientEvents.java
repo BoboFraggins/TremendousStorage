@@ -3,6 +3,7 @@ package net.bobofraggins.intellistore.storage.storageupgrade;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
+import net.bobofraggins.intellistore.storage.manillafolder.FolderItemDecorator;
 import net.bobofraggins.intellistore.storage.tremendouschest.TremendousChestBlockEntity;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -11,6 +12,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
 
 /**
  * Client-only event subscriber that registers block and item color handlers for tiered storage
@@ -44,6 +46,13 @@ public final class StorageClientEvents {
         event.register(
                 (stack, tintIndex) -> tintIndex == 0 ? tierColorFromStack(stack) : -1,
                 Registration.TREMENDOUS_CHEST_ITEM.get());
+    }
+
+    @SubscribeEvent
+    public static void onRegisterItemDecorations(RegisterItemDecorationsEvent event) {
+        FolderItemDecorator decorator = new FolderItemDecorator();
+        event.register(Registration.MANILA_FOLDER.get(), decorator);
+        event.register(Registration.ENDER_FOLDER.get(), decorator);
     }
 
     private static int tierColorFromStack(net.minecraft.world.item.ItemStack stack) {

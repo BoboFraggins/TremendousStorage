@@ -3,7 +3,6 @@ package net.bobofraggins.intellistore.storage.enderfolder;
 import java.util.List;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
-import net.bobofraggins.intellistore.storage.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -26,8 +25,8 @@ import net.minecraft.world.item.TooltipFlag;
  */
 public class EnderFolderItem extends ManillaFolderItem {
 
-    public EnderFolderItem(FolderTier tier, Properties properties) {
-        super(tier, properties);
+    public EnderFolderItem(Properties properties) {
+        super(properties);
     }
 
     // -------------------------------------------------------------------------

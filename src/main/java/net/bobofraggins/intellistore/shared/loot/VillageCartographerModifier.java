@@ -4,7 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.storage.manillafolder.FolderTier;
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -30,14 +30,18 @@ public class VillageCartographerModifier extends LootModifier {
         }
 
         float roll = rng.nextFloat();
-        FolderTier tier;
-        if (roll < 0.50f) tier = FolderTier.COPPER;
-        else if (roll < 0.80f) tier = FolderTier.IRON;
-        else if (roll < 0.95f) tier = FolderTier.GOLD;
-        else tier = FolderTier.DIAMOND;
+        StorageTier tier;
+        if (roll < 0.50f) tier = StorageTier.COPPER;
+        else if (roll < 0.80f) tier = StorageTier.IRON;
+        else if (roll < 0.95f) tier = StorageTier.GOLD;
+        else tier = StorageTier.DIAMOND;
 
         int count = 1 + rng.nextInt(3);
-        generatedLoot.add(new ItemStack(Registration.MANILA_FOLDERS.get(tier).get(), count));
+        ItemStack folder = new ItemStack(Registration.MANILA_FOLDER.get(), count);
+        folder.set(
+                Registration.FOLDER_CONTENTS.get(),
+                net.bobofraggins.intellistore.storage.manillafolder.FolderContents.EMPTY.withTier(tier));
+        generatedLoot.add(folder);
         return generatedLoot;
     }
 

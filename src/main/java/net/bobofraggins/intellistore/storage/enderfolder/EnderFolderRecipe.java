@@ -1,9 +1,8 @@
 package net.bobofraggins.intellistore.storage.enderfolder;
 
 import java.security.SecureRandom;
-import java.util.List;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.storage.manillafolder.FolderTier;
+import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -66,8 +65,7 @@ public class EnderFolderRecipe extends CustomRecipe {
 
         long linkId = SECURE_RANDOM.nextLong();
         PENDING_LINK.get()[0] = linkId;
-
-        return makeEnderFolder(found.tier(), linkId);
+        return makeEnderFolder(found.folderContents(), linkId);
     }
 
     // -------------------------------------------------------------------------
@@ -90,7 +88,7 @@ public class EnderFolderRecipe extends CustomRecipe {
         Ingredients found = findIngredients(input);
         if (found == null) return remaining;
 
-        remaining.set(found.secondFolderSlot(), makeEnderFolder(found.tier(), linkId));
+        remaining.set(found.secondFolderSlot(), makeEnderFolder(found.folderContents(), linkId));
         return remaining;
     }
 
@@ -107,14 +105,15 @@ public class EnderFolderRecipe extends CustomRecipe {
     // Helpers
     // -------------------------------------------------------------------------
 
-    private static ItemStack makeEnderFolder(FolderTier tier, long linkId) {
-        ItemStack result = new ItemStack(Registration.ENDER_FOLDERS.get(tier).get());
+    private static ItemStack makeEnderFolder(FolderContents contents, long linkId) {
+        ItemStack result = new ItemStack(Registration.ENDER_FOLDER.get());
+        result.set(Registration.FOLDER_CONTENTS.get(), contents);
         EnderFolderItem.setLinkId(result, linkId);
         return result;
     }
 
     /**
-     * Validates the grid and extracts the positions and tier of the two folder inputs + Eye of Ender.
+     * Validates the grid and extracts the positions and contents of the two folder inputs + Eye of Ender.
      * Returns {@code null} if the grid does not match the recipe.
      *
      * <p>Requirements:
@@ -128,49 +127,34 @@ public class EnderFolderRecipe extends CustomRecipe {
         int firstFolderSlot = -1;
         int secondFolderSlot = -1;
         boolean hasEye = false;
-        FolderTier tier = null;
+        FolderContents firstContents = null;
 
         for (int i = 0; i < input.size(); i++) {
             ItemStack stack = input.getItem(i);
             if (stack.isEmpty()) continue;
 
             if (stack.is(Items.ENDER_EYE)) {
-                if (hasEye) return null; // duplicate Eye
+                if (hasEye) return null;
                 hasEye = true;
-            } else if (stack.getItem() instanceof ManillaFolderItem mf
-                    && !(stack.getItem() instanceof EnderFolderItem)) {
+            } else if (stack.getItem() instanceof ManillaFolderItem && !(stack.getItem() instanceof EnderFolderItem)) {
+                FolderContents contents = ManillaFolderItem.getContents(stack);
                 if (firstFolderSlot == -1) {
                     firstFolderSlot = i;
-                    tier = mf.getTier();
+                    firstContents = contents;
                 } else if (secondFolderSlot == -1) {
-                    if (mf.getTier() != tier) return null; // mismatched tiers
+                    if (contents.tier() != firstContents.tier()) return null;
                     secondFolderSlot = i;
                 } else {
-                    return null; // three or more folders
+                    return null;
                 }
             } else {
-                return null; // unexpected item
+                return null;
             }
         }
 
         if (!hasEye || firstFolderSlot == -1 || secondFolderSlot == -1) return null;
-        return new Ingredients(tier, firstFolderSlot, secondFolderSlot);
+        return new Ingredients(firstContents, firstFolderSlot, secondFolderSlot);
     }
 
-    private record Ingredients(FolderTier tier, int firstFolderSlot, int secondFolderSlot) {}
-
-    // -------------------------------------------------------------------------
-    // Recipe JSON type (one file per tier)
-    // -------------------------------------------------------------------------
-
-    /**
-     * Returns the recipe type key registered in {@link Registration}.
-     * Each tier has its own JSON file: {@code data/intellistore/recipes/{tier}_ender_folder.json}
-     * with {@code "type": "intellistore:ender_folder"}.
-     */
-    public static List<String> recipeJsonIds() {
-        return java.util.Arrays.stream(FolderTier.values())
-                .map(t -> t.getId() + "_ender_folder")
-                .toList();
-    }
+    private record Ingredients(FolderContents folderContents, int firstFolderSlot, int secondFolderSlot) {}
 }

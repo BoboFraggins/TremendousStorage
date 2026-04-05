@@ -10,13 +10,13 @@ import mezz.jei.api.gui.ingredient.ICraftingGridHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
 import net.bobofraggins.intellistore.shared.register.Registration;
+import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderExtractRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderStorageRecipe;
-import net.bobofraggins.intellistore.storage.manillafolder.FolderTier;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
 import net.bobofraggins.intellistore.storage.whiteout.FolderTapeRecipe;
 import net.minecraft.world.item.ItemStack;
@@ -42,26 +42,27 @@ public final class FolderRecipeExtensions {
     }
 
     /** A folder of the given tier filled with {@code count} diamonds. */
-    private static ItemStack filledFolder(FolderTier tier, long count) {
-        ItemStack folder = new ItemStack(Registration.MANILA_FOLDERS.get(tier).get());
-        FolderContents contents = new FolderContents(Optional.of(exampleItem().copyWithCount(1)), count);
+    private static ItemStack filledFolder(StorageTier tier, long count) {
+        ItemStack folder = new ItemStack(Registration.MANILA_FOLDER.get());
+        FolderContents contents = new FolderContents(Optional.of(exampleItem().copyWithCount(1)), count, tier);
         return ManillaFolderItem.setContents(folder, contents);
     }
 
     /** An empty-but-locked folder of the given tier (count = 0, type = Diamond). */
-    private static ItemStack lockedEmptyFolder(FolderTier tier) {
+    private static ItemStack lockedEmptyFolder(StorageTier tier) {
         return filledFolder(tier, 0L);
     }
 
     /** An unlocked (completely empty) folder of the given tier. */
-    private static ItemStack unlockedFolder(FolderTier tier) {
-        ItemStack folder = new ItemStack(Registration.MANILA_FOLDERS.get(tier).get());
-        return ManillaFolderItem.setContents(folder, FolderContents.EMPTY);
+    private static ItemStack unlockedFolder(StorageTier tier) {
+        ItemStack folder = new ItemStack(Registration.MANILA_FOLDER.get());
+        return ManillaFolderItem.setContents(folder, FolderContents.EMPTY.withTier(tier));
     }
 
     /** An Ender Folder of the given tier with a fixed demo link ID. */
-    private static ItemStack enderFolder(FolderTier tier) {
-        ItemStack ef = new ItemStack(Registration.ENDER_FOLDERS.get(tier).get());
+    private static ItemStack enderFolder(StorageTier tier) {
+        ItemStack ef = new ItemStack(Registration.ENDER_FOLDER.get());
+        ef.set(Registration.FOLDER_CONTENTS.get(), FolderContents.EMPTY.withTier(tier));
         EnderFolderItem.setLinkId(ef, 0L);
         return ef;
     }
@@ -76,7 +77,7 @@ public final class FolderRecipeExtensions {
      */
     static final class StorageExtension implements ICraftingCategoryExtension<FolderStorageRecipe> {
 
-        private static final FolderTier[] TIERS = FolderTier.values();
+        private static final StorageTier[] TIERS = StorageTier.values();
 
         @Override
         public void setRecipe(
@@ -89,7 +90,7 @@ public final class FolderRecipeExtensions {
             List<ItemStack> foldersForSlot0 = new ArrayList<>();
             List<ItemStack> itemsForSlot1 = new ArrayList<>();
 
-            for (FolderTier tier : TIERS) {
+            for (StorageTier tier : TIERS) {
                 foldersForSlot0.add(unlockedFolder(tier));
                 itemsForSlot1.add(exampleItem());
             }
@@ -103,11 +104,8 @@ public final class FolderRecipeExtensions {
 
             helper.createAndSetInputs(builder, VanillaTypes.ITEM_STACK, inputs, 1, 1);
 
-            // Output: folder filled with diamonds (use iron tier as representative)
-            helper.createAndSetOutputs(
-                    builder,
-                    VanillaTypes.ITEM_STACK,
-                    Arrays.asList(TIERS[0] != null ? filledFolder(TIERS[0], 1) : filledFolder(FolderTier.IRON, 1)));
+            // Output: folder filled with diamonds (use first tier as representative)
+            helper.createAndSetOutputs(builder, VanillaTypes.ITEM_STACK, Arrays.asList(filledFolder(TIERS[0], 1)));
         }
     }
 
@@ -118,7 +116,7 @@ public final class FolderRecipeExtensions {
     /** Shows: {@code [folder with diamonds]} → {@code [diamonds]}, cycling through tiers. */
     static final class ExtractExtension implements ICraftingCategoryExtension<FolderExtractRecipe> {
 
-        private static final FolderTier[] TIERS = FolderTier.values();
+        private static final StorageTier[] TIERS = StorageTier.values();
 
         @Override
         public void setRecipe(
@@ -129,7 +127,7 @@ public final class FolderRecipeExtensions {
             List<List<ItemStack>> inputs = new ArrayList<>();
 
             List<ItemStack> foldersForSlot0 = new ArrayList<>();
-            for (FolderTier tier : TIERS) {
+            for (StorageTier tier : TIERS) {
                 foldersForSlot0.add(filledFolder(tier, 64L));
             }
             inputs.add(foldersForSlot0);
@@ -151,7 +149,7 @@ public final class FolderRecipeExtensions {
     /** Shows: {@code [folder A] + [folder B]} → {@code [merged folder]}, cycling through tiers. */
     static final class MergeExtension implements ICraftingCategoryExtension<FolderMergeRecipe> {
 
-        private static final FolderTier[] TIERS = FolderTier.values();
+        private static final StorageTier[] TIERS = StorageTier.values();
 
         @Override
         public void setRecipe(
@@ -163,7 +161,7 @@ public final class FolderRecipeExtensions {
 
             List<ItemStack> slot0 = new ArrayList<>();
             List<ItemStack> slot1 = new ArrayList<>();
-            for (FolderTier tier : TIERS) {
+            for (StorageTier tier : TIERS) {
                 slot0.add(filledFolder(tier, 32L));
                 slot1.add(filledFolder(tier, 32L));
             }
@@ -177,7 +175,7 @@ public final class FolderRecipeExtensions {
             helper.createAndSetInputs(builder, VanillaTypes.ITEM_STACK, inputs, 1, 1);
 
             List<ItemStack> outputs = new ArrayList<>();
-            for (FolderTier tier : TIERS) {
+            for (StorageTier tier : TIERS) {
                 outputs.add(filledFolder(tier, 64L));
             }
             helper.createAndSetOutputs(builder, VanillaTypes.ITEM_STACK, outputs);
@@ -191,7 +189,7 @@ public final class FolderRecipeExtensions {
     /** Shows: {@code [whiteout tape] + [locked-empty folder]} → {@code [unlocked folder]}. */
     static final class TapeExtension implements ICraftingCategoryExtension<FolderTapeRecipe> {
 
-        private static final FolderTier[] TIERS = FolderTier.values();
+        private static final StorageTier[] TIERS = StorageTier.values();
 
         @Override
         public void setRecipe(
@@ -203,7 +201,7 @@ public final class FolderRecipeExtensions {
 
             List<ItemStack> tapes = new ArrayList<>();
             List<ItemStack> folders = new ArrayList<>();
-            for (FolderTier tier : TIERS) {
+            for (StorageTier tier : TIERS) {
                 tapes.add(new ItemStack(Registration.WHITEOUT_TAPE.get()));
                 folders.add(lockedEmptyFolder(tier));
             }
@@ -217,7 +215,7 @@ public final class FolderRecipeExtensions {
             helper.createAndSetInputs(builder, VanillaTypes.ITEM_STACK, inputs, 1, 1);
 
             List<ItemStack> outputs = new ArrayList<>();
-            for (FolderTier tier : TIERS) {
+            for (StorageTier tier : TIERS) {
                 outputs.add(unlockedFolder(tier));
             }
             helper.createAndSetOutputs(builder, VanillaTypes.ITEM_STACK, outputs);
@@ -231,7 +229,7 @@ public final class FolderRecipeExtensions {
     /** Shows: {@code [folder] + [eye of ender] + [folder]} → {@code [ender folder]}, per tier. */
     static final class EnderFolderExtension implements ICraftingCategoryExtension<EnderFolderRecipe> {
 
-        private static final FolderTier[] TIERS = FolderTier.values();
+        private static final StorageTier[] TIERS = StorageTier.values();
 
         @Override
         public void setRecipe(
@@ -245,7 +243,7 @@ public final class FolderRecipeExtensions {
             List<ItemStack> slot0 = new ArrayList<>();
             List<ItemStack> slot1 = new ArrayList<>();
             List<ItemStack> slot2 = new ArrayList<>();
-            for (FolderTier tier : TIERS) {
+            for (StorageTier tier : TIERS) {
                 slot0.add(unlockedFolder(tier));
                 slot1.add(new ItemStack(Items.ENDER_EYE));
                 slot2.add(unlockedFolder(tier));
@@ -261,7 +259,7 @@ public final class FolderRecipeExtensions {
             helper.createAndSetInputs(builder, VanillaTypes.ITEM_STACK, inputs, 3, 1);
 
             List<ItemStack> outputs = new ArrayList<>();
-            for (FolderTier tier : TIERS) {
+            for (StorageTier tier : TIERS) {
                 outputs.add(enderFolder(tier));
             }
             helper.createAndSetOutputs(builder, VanillaTypes.ITEM_STACK, outputs);

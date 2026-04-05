@@ -78,7 +78,7 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
                                 .getKey(stored.getItem())
                                 .toString());
                 entry.putLong("count", contents.count());
-                entry.putLong("capacity", ((ManillaFolderItem) folder.getItem()).getCapacity());
+                entry.putLong("capacity", ManillaFolderItem.getCapacity(folder));
                 // Serialize the full ItemStack so we can reconstruct it client-side for the icon
                 entry.put("stack", stored.save(accessor.getLevel().registryAccess()));
                 list.add(entry);

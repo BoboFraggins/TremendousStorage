@@ -38,27 +38,23 @@
   "item.intellistore.lazurite_seeds": "Lazurite Seeds",
   "item.intellistore.lazurite_essence": "Lazurite Essence",
 
-  "item.intellistore.wood_manila_folder": "Manila Folder",
-  "item.intellistore.copper_manila_folder": "Copper Folder",
-  "item.intellistore.iron_manila_folder": "Iron Folder",
-  "item.intellistore.gold_manila_folder": "Gold Folder",
-  "item.intellistore.diamond_manila_folder": "Diamond Folder",
-  "item.intellistore.emerald_manila_folder": "Emerald Folder",
-  "item.intellistore.netherite_manila_folder": "Netherite Folder",
+  "item.intellistore.manila_folder": "Manila Folder",
 
   "item.intellistore.manila_folder.empty": "Empty",
   "item.intellistore.manila_folder.contents": "%1$s %2$s",
   "item.intellistore.manila_folder.capacity": "Capacity: %1$s",
 
-  "item.intellistore.wood_ender_folder": "Ender Folder",
-  "item.intellistore.copper_ender_folder": "Copper Ender Folder",
-  "item.intellistore.iron_ender_folder": "Iron Ender Folder",
-  "item.intellistore.gold_ender_folder": "Gold Ender Folder",
-  "item.intellistore.diamond_ender_folder": "Diamond Ender Folder",
-  "item.intellistore.emerald_ender_folder": "Emerald Ender Folder",
-  "item.intellistore.netherite_ender_folder": "Netherite Ender Folder",
+  "item.intellistore.ender_folder": "Ender Folder",
 
   "item.intellistore.ender_folder.linked": "Link: ...%1$s",
+
+  "tier.intellistore.wood": "Wood",
+  "tier.intellistore.copper": "Copper",
+  "tier.intellistore.iron": "Iron",
+  "tier.intellistore.gold": "Gold",
+  "tier.intellistore.diamond": "Diamond",
+  "tier.intellistore.emerald": "Emerald",
+  "tier.intellistore.netherite": "Netherite",
 
   "item.intellistore.whiteout_tape": "Whiteout Tape",
 

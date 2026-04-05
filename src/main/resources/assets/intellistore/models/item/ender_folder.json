@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "intellistore:item/copper_ender_folder"
+    "layer0": "intellistore:item/ender_folder"
   }
 }

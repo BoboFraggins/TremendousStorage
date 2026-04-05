@@ -23,6 +23,13 @@ public enum StorageTier {
         this.color = 0xFF000000 | color;
     }
 
+    public static final com.mojang.serialization.Codec<StorageTier> CODEC =
+            com.mojang.serialization.Codec.STRING.xmap(StorageTier::fromId, StorageTier::getId);
+
+    public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.FriendlyByteBuf, StorageTier>
+            STREAM_CODEC = net.minecraft.network.codec.StreamCodec.of(
+                    (buf, tier) -> buf.writeUtf(tier.getId()), buf -> fromId(buf.readUtf()));
+
     public String getId() {
         return id;
     }

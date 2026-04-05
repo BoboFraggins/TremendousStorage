@@ -2,6 +2,8 @@ package net.bobofraggins.intellistore.storage.storageupgrade;
 
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
+import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
+import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
 import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackContents;
 import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackItem;
 import net.minecraft.core.HolderLookup;
@@ -46,6 +48,15 @@ public class StorageBlockUpgradeRecipe extends CustomRecipe {
 
         ItemStack blockStack = pair[0];
         StorageUpgradeItem upgradeItem = (StorageUpgradeItem) pair[1].getItem();
+
+        // Folders: tier lives in FolderContents component
+        if (blockStack.getItem() == Registration.MANILA_FOLDER.get()
+                || blockStack.getItem() == Registration.ENDER_FOLDER.get()) {
+            FolderContents current = ManillaFolderItem.getContents(blockStack);
+            ItemStack result = blockStack.copyWithCount(1);
+            result.set(Registration.FOLDER_CONTENTS.get(), current.withTier(upgradeItem.getToTier()));
+            return result;
+        }
 
         // Tremendous Backpack: upgrade via TremendousBackpackContents data component
         if (blockStack.getItem() instanceof TremendousBackpackItem) {
@@ -108,10 +119,17 @@ public class StorageBlockUpgradeRecipe extends CustomRecipe {
     }
 
     private static boolean isStorageBlock(Item item) {
-        return item == Registration.TREMENDOUS_CHEST_ITEM.get() || item instanceof TremendousBackpackItem;
+        return item == Registration.TREMENDOUS_CHEST_ITEM.get()
+                || item instanceof TremendousBackpackItem
+                || item == Registration.MANILA_FOLDER.get()
+                || item == Registration.ENDER_FOLDER.get();
     }
 
     private static StorageTier tierFromStack(ItemStack stack) {
+        // Folders: tier lives in FolderContents component
+        if (stack.getItem() == Registration.MANILA_FOLDER.get() || stack.getItem() == Registration.ENDER_FOLDER.get()) {
+            return ManillaFolderItem.getContents(stack).tier();
+        }
         // Tremendous Backpack: tier lives in its DataComponent
         if (stack.getItem() instanceof TremendousBackpackItem) {
             TremendousBackpackContents contents = stack.getOrDefault(

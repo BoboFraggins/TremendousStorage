@@ -147,11 +147,12 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
                     Slot folderSlot = slots.get(fi);
                     ItemStack folderItem = folderSlot.getItem();
                     if (folderItem.isEmpty()
-                            || !(folderItem.getItem() instanceof ManillaFolderItem folderType)
+                            || !(folderItem.getItem() instanceof ManillaFolderItem)
                             || folderItem.getItem() instanceof EnderFolderItem) continue;
                     FolderContents contents = ManillaFolderItem.getContents(folderItem);
                     if (contents.isEmpty() || !contents.accepts(stack)) continue;
-                    FolderContents.InsertResult result = contents.insert(stack.getCount(), folderType.getCapacity());
+                    FolderContents.InsertResult result =
+                            contents.insert(stack.getCount(), ManillaFolderItem.getCapacity(folderItem));
                     int inserted = (int) (stack.getCount() - result.remainder());
                     if (inserted <= 0) continue;
                     folderSlot.set(ManillaFolderItem.setContents(folderItem.copy(), result.updated()));

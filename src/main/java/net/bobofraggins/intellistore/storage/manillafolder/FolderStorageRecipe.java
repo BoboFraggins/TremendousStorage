@@ -49,7 +49,7 @@ public class FolderStorageRecipe extends CustomRecipe {
         if (folder.isEmpty() || item.isEmpty()) return false;
 
         FolderContents contents = ManillaFolderItem.getContents(folder);
-        long capacity = ((ManillaFolderItem) folder.getItem()).getCapacity();
+        long capacity = ManillaFolderItem.getCapacity(folder);
 
         // Folder is full — nothing to insert
         if (contents.count() >= capacity) return false;
@@ -79,11 +79,14 @@ public class FolderStorageRecipe extends CustomRecipe {
         if (folder.isEmpty() || item.isEmpty()) return ItemStack.EMPTY;
 
         FolderContents contents = ManillaFolderItem.getContents(folder);
-        long capacity = ((ManillaFolderItem) folder.getItem()).getCapacity();
+        long capacity = ManillaFolderItem.getCapacity(folder);
 
         // Lock the folder to this item type on first insert
         if (contents.isEmpty()) {
-            contents = new FolderContents(java.util.Optional.of(item.copyWithCount(1)), 0L);
+            contents = new FolderContents(
+                    java.util.Optional.of(item.copyWithCount(1)),
+                    0L,
+                    ManillaFolderItem.getContents(folder).tier());
         }
 
         FolderContents.InsertResult result = contents.insert(item.getCount(), capacity);
@@ -118,10 +121,13 @@ public class FolderStorageRecipe extends CustomRecipe {
         if (folder.isEmpty() || item.isEmpty() || itemSlot < 0) return remaining;
 
         FolderContents contents = ManillaFolderItem.getContents(folder);
-        long capacity = ((ManillaFolderItem) folder.getItem()).getCapacity();
+        long capacity = ManillaFolderItem.getCapacity(folder);
 
         if (contents.isEmpty()) {
-            contents = new FolderContents(java.util.Optional.of(item.copyWithCount(1)), 0L);
+            contents = new FolderContents(
+                    java.util.Optional.of(item.copyWithCount(1)),
+                    0L,
+                    ManillaFolderItem.getContents(folder).tier());
         }
 
         FolderContents.InsertResult result = contents.insert(item.getCount(), capacity);

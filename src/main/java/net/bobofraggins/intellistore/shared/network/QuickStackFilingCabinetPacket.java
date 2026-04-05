@@ -51,13 +51,13 @@ public record QuickStackFilingCabinetPacket() implements CustomPacketPayload {
                 if (folderItem.isEmpty()) continue;
 
                 // Only plain ManillaFolders — Ender Folders have networked storage semantics
-                if (!(folderItem.getItem() instanceof ManillaFolderItem folderType)
+                if (!(folderItem.getItem() instanceof ManillaFolderItem)
                         || folderItem.getItem() instanceof EnderFolderItem) continue;
 
                 FolderContents contents = ManillaFolderItem.getContents(folderItem);
                 if (contents.isEmpty()) continue; // unlocked — don't start new dedications
 
-                long capacity = folderType.getCapacity();
+                long capacity = ManillaFolderItem.getCapacity(folderItem);
                 boolean changed = false;
 
                 for (int invSlot = 0; invSlot < invSize; invSlot++) {

@@ -48,7 +48,7 @@ public class PersonalFilingCabinetEvents {
 
             for (int fi = 0; fi < folders.size() && !pickedUp.isEmpty(); fi++) {
                 ItemStack folderStack = folders.get(fi);
-                if (folderStack.isEmpty() || !(folderStack.getItem() instanceof ManillaFolderItem folder)) continue;
+                if (folderStack.isEmpty() || !(folderStack.getItem() instanceof ManillaFolderItem)) continue;
 
                 FolderContents fc = folderStack.getItem() instanceof EnderFolderItem
                         ? EnderFolderItem.getLiveContents(folderStack, server)
@@ -58,7 +58,7 @@ public class PersonalFilingCabinetEvents {
                 if (fc.isEmpty() || !fc.accepts(pickedUp)) continue;
 
                 long toInsert = pickedUp.getCount();
-                long capacity = folder.getCapacity();
+                long capacity = ManillaFolderItem.getCapacity(folderStack);
                 FolderContents.InsertResult result = fc.insert(toInsert, capacity);
                 long inserted = toInsert - result.remainder();
                 // If void excess is ON, also consume the overflow (void it)
