@@ -15,7 +15,7 @@ import net.minecraft.world.level.Level;
  * with contents preserved.
  *
  * <p>The upgrade item's {@code fromTier} ID must match the folder's {@link FolderTier} ID (both
- * use the same name strings: "paper", "copper", etc.). The resulting folder is the next tier up,
+ * use the same name strings: "wood", "copper", etc.). The resulting folder is the next tier up,
  * carrying the exact same {@link FolderContents} component — item lock and count are untouched,
  * since upgrading only increases capacity.
  */

@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 /** Material tiers for upgradeable storage blocks. */
 public enum StorageTier {
-    PAPER("paper", 4_096L, 0xC8A855),
+    WOOD("wood", 4_096L, 0xC8A855),
     COPPER("copper", 16_384L, 0xC07645),
     IRON("iron", 65_536L, 0xCFCFCF),
     GOLD("gold", 131_072L, 0xFFD83D),
@@ -38,7 +38,7 @@ public enum StorageTier {
 
     /**
      * Returns {@code base} × 4^{@link #ordinal()} — used by tanks to compute their capacity at
-     * this tier. PAPER returns {@code base}, COPPER returns {@code base × 4}, etc.
+     * this tier. WOOD returns {@code base}, COPPER returns {@code base × 4}, etc.
      */
     public long getScaledCapacity(long base) {
         return base << (ordinal() * 2);
@@ -58,13 +58,13 @@ public enum StorageTier {
     }
 
     /**
-     * Looks up a tier by its {@link #getId() id string}, returning {@link #PAPER} as a safe
+     * Looks up a tier by its {@link #getId() id string}, returning {@link #WOOD} as a safe
      * default if the id is unrecognised.
      */
     public static StorageTier fromId(String id) {
         for (StorageTier tier : values()) {
             if (tier.id.equals(id)) return tier;
         }
-        return PAPER;
+        return WOOD;
     }
 }

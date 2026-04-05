@@ -54,6 +54,6 @@ public final class StorageClientEvents {
                 return StorageTier.fromId(tag.getString("Tier")).getColor();
             }
         }
-        return StorageTier.PAPER.getColor();
+        return StorageTier.WOOD.getColor();
     }
 }

@@ -18,7 +18,7 @@
 
   "block.intellistore.bulk_storage_container": "Bulk Storage",
 
-  "item.intellistore.paper_to_copper_storage_upgrade": "Paper to Copper Storage Upgrade",
+  "item.intellistore.wood_to_copper_storage_upgrade": "Wood to Copper Storage Upgrade",
   "item.intellistore.copper_to_iron_storage_upgrade": "Copper to Iron Storage Upgrade",
   "item.intellistore.iron_to_gold_storage_upgrade": "Iron to Gold Storage Upgrade",
   "item.intellistore.gold_to_diamond_storage_upgrade": "Gold to Diamond Storage Upgrade",
@@ -38,7 +38,7 @@
   "item.intellistore.lazurite_seeds": "Lazurite Seeds",
   "item.intellistore.lazurite_essence": "Lazurite Essence",
 
-  "item.intellistore.paper_manila_folder": "Manila Folder",
+  "item.intellistore.wood_manila_folder": "Manila Folder",
   "item.intellistore.copper_manila_folder": "Copper Folder",
   "item.intellistore.iron_manila_folder": "Iron Folder",
   "item.intellistore.gold_manila_folder": "Gold Folder",
@@ -50,7 +50,7 @@
   "item.intellistore.manila_folder.contents": "%1$s %2$s",
   "item.intellistore.manila_folder.capacity": "Capacity: %1$s",
 
-  "item.intellistore.paper_ender_folder": "Ender Folder",
+  "item.intellistore.wood_ender_folder": "Ender Folder",
   "item.intellistore.copper_ender_folder": "Copper Ender Folder",
   "item.intellistore.iron_ender_folder": "Iron Ender Folder",
   "item.intellistore.gold_ender_folder": "Gold Ender Folder",

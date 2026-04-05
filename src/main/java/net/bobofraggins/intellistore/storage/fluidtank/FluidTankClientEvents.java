@@ -28,7 +28,7 @@ public final class FluidTankClientEvents {
                     if (level.getBlockEntity(pos) instanceof FluidTankBlockEntity be) {
                         return be.getTier().getColor();
                     }
-                    return StorageTier.PAPER.getColor();
+                    return StorageTier.WOOD.getColor();
                 },
                 Registration.FLUID_TANK.get());
     }

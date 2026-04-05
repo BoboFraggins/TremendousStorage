@@ -24,7 +24,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
  * Stores a single fluid type. Capacity starts at {@value #BASE_CAPACITY} mB (16 buckets) at
- * {@link StorageTier#PAPER} and multiplies by 4 with each tier upgrade.
+ * {@link StorageTier#WOOD} and multiplies by 4 with each tier upgrade.
  *
  * <p>The tank is unlocked (storedFluid is EMPTY) when fresh and locks to the first fluid
  * inserted. It stays locked at amount 0 after drain — use Whiteout Tape in the crafting grid
@@ -36,7 +36,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
  */
 public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
 
-    /** Capacity at {@link StorageTier#PAPER} (16 buckets). Each tier multiplies by 4. */
+    /** Capacity at {@link StorageTier#WOOD} (16 buckets). Each tier multiplies by 4. */
     public static final long BASE_CAPACITY = 16_000L;
 
     private final NiLink niLink = new NiLink();
@@ -46,7 +46,7 @@ public class FluidTankBlockEntity extends BlockEntity implements MenuProvider {
 
     private long amount = 0L;
     private boolean voidExcess = false;
-    private StorageTier tier = StorageTier.PAPER;
+    private StorageTier tier = StorageTier.WOOD;
 
     public FluidTankBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.FLUID_TANK_BE_TYPE.get(), pos, state);

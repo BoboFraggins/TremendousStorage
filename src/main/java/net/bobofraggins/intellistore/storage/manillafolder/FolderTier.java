@@ -2,7 +2,7 @@ package net.bobofraggins.intellistore.storage.manillafolder;
 
 /** Material tiers for Manila Folders, in ascending order of capacity. */
 public enum FolderTier {
-    PAPER("paper", 4_096L),
+    WOOD("wood", 4_096L),
     COPPER("copper", 16_384L),
     IRON("iron", 65_536L),
     GOLD("gold", 131_072L),

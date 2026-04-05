@@ -12,7 +12,7 @@ import snownee.jade.api.config.IPluginConfig;
 
 /**
  * Appends the storage tier name to the block display name in the Jade HUD for any tier above
- * {@link StorageTier#PAPER}. Example: "Bulk Storage Container (Diamond)".
+ * {@link StorageTier#WOOD}. Example: "Bulk Storage Container (Diamond)".
  */
 public enum StorageTierJadeComponentProvider implements IComponentProvider<BlockAccessor> {
     INSTANCE;
@@ -27,7 +27,7 @@ public enum StorageTierJadeComponentProvider implements IComponentProvider<Block
         CompoundTag data = accessor.getServerData();
         if (!data.contains("StorageTier")) return;
         StorageTier tier = StorageTier.fromId(data.getString("StorageTier"));
-        if (tier == StorageTier.PAPER) return;
+        if (tier == StorageTier.WOOD) return;
 
         String tierName =
                 Character.toUpperCase(tier.getId().charAt(0)) + tier.getId().substring(1);

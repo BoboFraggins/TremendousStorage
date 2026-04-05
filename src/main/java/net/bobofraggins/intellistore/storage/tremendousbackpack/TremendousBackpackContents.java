@@ -36,11 +36,11 @@ public final class TremendousBackpackContents {
     }
 
     public static final TremendousBackpackContents EMPTY =
-            new TremendousBackpackContents(List.of(), StorageTier.PAPER, Priority.LOW, SortMode.AMOUNT);
+            new TremendousBackpackContents(List.of(), StorageTier.WOOD, Priority.LOW, SortMode.AMOUNT);
 
     public static final Codec<TremendousBackpackContents> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                     Entry.CODEC.listOf().optionalFieldOf("entries", List.of()).forGetter(c -> c.entries),
-                    Codec.STRING.optionalFieldOf("tier", "paper").forGetter(c -> c.tier.getId()),
+                    Codec.STRING.optionalFieldOf("tier", "wood").forGetter(c -> c.tier.getId()),
                     Codec.INT.optionalFieldOf("priority", 0).forGetter(c -> c.priority.ordinal()),
                     Codec.STRING.optionalFieldOf("sort_mode", "AMOUNT").forGetter(c -> c.sortMode.name()))
             .apply(

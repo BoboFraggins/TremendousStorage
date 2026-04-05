@@ -126,6 +126,6 @@ public class StorageBlockUpgradeRecipe extends CustomRecipe {
                 return StorageTier.fromId(tag.getString("Tier"));
             }
         }
-        return StorageTier.PAPER;
+        return StorageTier.WOOD;
     }
 }

@@ -54,7 +54,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     /** Monotonically increasing counter; incremented each time the cache is rebuilt. */
     private long cacheRevision = 0;
 
-    private StorageTier tier = StorageTier.PAPER;
+    private StorageTier tier = StorageTier.WOOD;
 
     public NetworkInterfaceBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.NETWORK_INTERFACE_BE_TYPE.get(), pos, state);
@@ -182,7 +182,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         setChanged();
     }
 
-    /** Items transferred per import/export operation (1 at PAPER, doubles each tier). */
+    /** Items transferred per import/export operation (1 at WOOD, doubles each tier). */
     public int getAttachmentTransferAmount() {
         return 1 << tier.ordinal();
     }
@@ -237,7 +237,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     @Override
     public Component getDisplayName() {
         Component base = Component.translatable("screen.intellistore.network_interface");
-        if (tier == StorageTier.PAPER) return base;
+        if (tier == StorageTier.WOOD) return base;
         String label =
                 Character.toUpperCase(tier.getId().charAt(0)) + tier.getId().substring(1);
         return base.copy().append(Component.literal(" (" + label + ")"));

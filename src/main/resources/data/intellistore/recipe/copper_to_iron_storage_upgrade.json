@@ -7,7 +7,7 @@
   ],
   "key": {
     "I": { "item": "minecraft:iron_ingot" },
-    "U": { "item": "intellistore:paper_to_copper_storage_upgrade" }
+    "U": { "item": "intellistore:wood_to_copper_storage_upgrade" }
   },
   "result": {
     "id": "intellistore:copper_to_iron_storage_upgrade",

@@ -269,9 +269,9 @@ public final class Registration {
     // Storage upgrade items
     // -------------------------------------------------------------------------
 
-    public static final DeferredHolder<Item, StorageUpgradeItem> PAPER_TO_COPPER_STORAGE_UPGRADE = ITEMS.register(
-            "paper_to_copper_storage_upgrade",
-            () -> new StorageUpgradeItem(StorageTier.PAPER, StorageTier.COPPER, new Item.Properties()));
+    public static final DeferredHolder<Item, StorageUpgradeItem> WOOD_TO_COPPER_STORAGE_UPGRADE = ITEMS.register(
+            "wood_to_copper_storage_upgrade",
+            () -> new StorageUpgradeItem(StorageTier.WOOD, StorageTier.COPPER, new Item.Properties()));
 
     public static final DeferredHolder<Item, StorageUpgradeItem> COPPER_TO_IRON_STORAGE_UPGRADE = ITEMS.register(
             "copper_to_iron_storage_upgrade",
@@ -294,7 +294,7 @@ public final class Registration {
             () -> new StorageUpgradeItem(StorageTier.EMERALD, StorageTier.NETHERITE, new Item.Properties()));
 
     public static final DeferredHolder<Item, StorageUpgradeItem>[] STORAGE_UPGRADES = new DeferredHolder[] {
-        PAPER_TO_COPPER_STORAGE_UPGRADE,
+        WOOD_TO_COPPER_STORAGE_UPGRADE,
         COPPER_TO_IRON_STORAGE_UPGRADE,
         IRON_TO_GOLD_STORAGE_UPGRADE,
         GOLD_TO_DIAMOND_STORAGE_UPGRADE,

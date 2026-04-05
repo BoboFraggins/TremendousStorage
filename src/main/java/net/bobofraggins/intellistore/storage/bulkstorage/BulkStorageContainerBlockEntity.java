@@ -41,7 +41,7 @@ import net.minecraft.world.level.block.state.BlockState;
  *
  * <p>Accepts any item (including unstackable items, damageable items, and items with custom
  * component data). The only limit is the total item count across all types, which is determined by
- * the block's {@link StorageTier} (starts at Paper = 4,096; upgradeable to Netherite = 4,194,304).
+ * the block's {@link StorageTier} (starts at Wood = 4,096; upgradeable to Netherite = 4,194,304).
  *
  * <p>Tier is persisted in NBT and retained when the block is broken and replaced.
  *
@@ -56,7 +56,7 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
     private long cachedTotalCount = 0;
     private Priority priority = Priority.LOW;
     private SortMode sortMode = SortMode.AMOUNT;
-    private StorageTier tier = StorageTier.PAPER;
+    private StorageTier tier = StorageTier.WOOD;
 
     public long getCapacity() {
         return tier.getCapacity();
@@ -345,7 +345,7 @@ public class BulkStorageContainerBlockEntity extends BlockEntity implements Menu
     @Override
     public Component getDisplayName() {
         Component base = Component.translatable("block.intellistore.bulk_storage_container");
-        if (tier == StorageTier.PAPER) return base;
+        if (tier == StorageTier.WOOD) return base;
         String label =
                 Character.toUpperCase(tier.getId().charAt(0)) + tier.getId().substring(1);
         return base.copy().append(Component.literal(" (" + label + ")"));
