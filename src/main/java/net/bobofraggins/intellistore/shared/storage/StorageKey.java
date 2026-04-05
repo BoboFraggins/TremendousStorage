@@ -43,7 +43,7 @@ public final class StorageKey {
     /**
      * Creates a key that matches by item type only, ignoring all component data.
      *
-     * <p>Used for fuzzy / range queries (e.g. JunkDrawer "any item of this type").
+     * <p>Used for fuzzy / range queries (e.g. "any item of this type").
      *
      * @throws IllegalArgumentException if the stack is empty
      */

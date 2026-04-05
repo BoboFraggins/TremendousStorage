@@ -255,7 +255,7 @@ public class TubeBlock extends BaseEntityBlock {
      * <p>Connects to:
      * <ul>
      *   <li>Same-color tubes (direct pipe connection)
-     *   <li>{@link NetworkConnector} blocks (mod storage/hub/SAT/NI/Stirling blocks)
+     *   <li>{@link NetworkConnector} blocks (mod storage/hub/SAT/NI blocks)
      *   <li>Any external block when this tube face has an attachment installed on {@code dir}
      * </ul>
      *
@@ -266,7 +266,7 @@ public class TubeBlock extends BaseEntityBlock {
         if (neighborState.getBlock() instanceof TubeBlock tb) {
             return tb.getColor() == this.color;
         }
-        // NetworkConnector blocks (mod storage, SAT, Wireless Hub, Stirling Engine, etc.)
+        // NetworkConnector blocks (mod storage, SAT, Wireless Hub, etc.)
         if (neighborState.getBlock() instanceof NetworkConnector) {
             return true;
         }

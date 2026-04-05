@@ -3,6 +3,5 @@
     "net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalScreen": { "ignore": true },
     "net.bobofraggins.intellistore.shared.ui.AbstractFilingCabinetScreen": { "ignore": true },
     "net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerScreen": { "ignore": true },
-    "net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerScreen": { "ignore": true }
   }
 }

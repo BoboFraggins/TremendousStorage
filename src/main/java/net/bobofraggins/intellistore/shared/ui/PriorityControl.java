@@ -17,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
- * Menu for the priority screen shared by Junk Drawer and Bulk Storage Container.
+ * Menu for the priority screen shared by storage blocks.
  *
  * <p>Implements {@link IDialogPane} so it can be hosted inside a {@link Dialog}.
  *

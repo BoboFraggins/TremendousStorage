@@ -35,8 +35,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * items in a shared pool across any number of distinct item types.
  *
  * <p>Accepts only items that Manila Folders accept: non-damageable items with default component
- * data (plain stackable items). This is the precise complement of the Junk Drawer.
- * There is no locking — any qualifying item may be freely added or removed at any time.
+ * data (plain stackable items). There is no locking — any qualifying item may be freely
+ * added or removed at any time.
  *
  * <p>There is no player-facing UI. All item movement is via hoppers, pipes, or any mod that
  * reads the {@link net.neoforged.neoforge.items.IItemHandler} capability.

@@ -15,11 +15,10 @@ import net.neoforged.neoforge.items.IItemHandler;
  * by the caller. Extraction and read operations map a flat slot index to the correct
  * underlying handler.
  *
- * <p>Slot counts in the underlying handlers are dynamic (JunkDrawer, BulkStorageContainer
- * grow/shrink as items are added), so slot resolution is recalculated on each call.
+ * <p>Slot counts in the underlying handlers are dynamic (BulkStorageContainer grows/shrinks
+ * as items are added), so slot resolution is recalculated on each call.
  *
- * <p>Also holds a reference to the connected {@link NetworkInterfaceBlockEntity} so that
- * {@link TubeEnergyHandler} can route incoming energy to the correct NI buffer.
+ * <p>Also holds a reference to the connected {@link NetworkInterfaceBlockEntity}.
  */
 public class NetworkItemHandler implements IItemHandler {
 

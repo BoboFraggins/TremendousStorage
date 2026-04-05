@@ -11,7 +11,7 @@ import net.minecraft.core.component.DataComponents;
  *
  * <p>Used for damageable items ({@code item.getMaxDamage() > 0}). The damage-ascending order
  * allows {@link #findFuzzy(int, int)} to efficiently return all entries whose damage falls in a
- * given range (useful for JunkDrawer extraction of "any sword with ≤ 50% durability").
+ * given range (useful for extracting "any sword with ≤ 50% durability").
  *
  * <p>The comparator is: damage ascending, then {@link StorageKey#hashCode()} as tiebreaker for a
  * stable total order. Two distinct keys with the same damage and the same hash (astronomically

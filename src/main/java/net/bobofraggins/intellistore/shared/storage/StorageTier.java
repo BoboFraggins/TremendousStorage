@@ -2,7 +2,7 @@ package net.bobofraggins.intellistore.shared.storage;
 
 import javax.annotation.Nullable;
 
-/** Material tiers for upgradeable storage blocks (Bulk Storage Container and Junk Drawer). */
+/** Material tiers for upgradeable storage blocks. */
 public enum StorageTier {
     PAPER("paper", 4_096L, 0xC8A855),
     COPPER("copper", 16_384L, 0xC07645),

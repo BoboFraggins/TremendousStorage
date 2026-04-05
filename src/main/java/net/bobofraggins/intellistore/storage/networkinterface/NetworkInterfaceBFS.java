@@ -33,8 +33,8 @@ import net.neoforged.neoforge.items.IItemHandler;
  *
  * <p>A Network Interface connects to <em>all</em> tube colors. For each directly-adjacent
  * {@link TubeBlock}, this scanner starts a same-color BFS and collects every storage block
- * reachable from those tubes. {@link NetworkConnector} blocks (Filing Cabinet, Junk Drawer,
- * Bulk Storage Container, SAT, Wireless Hub, Stirling Engine) act as color-agnostic bridges:
+ * reachable from those tubes. {@link NetworkConnector} blocks (Filing Cabinet,
+ * Bulk Storage Container, SAT, Wireless Hub) act as color-agnostic bridges:
  * when encountered, the BFS continues through their adjacent tubes of any color, allowing
  * different-colored tube runs to form a single unified network.
  *

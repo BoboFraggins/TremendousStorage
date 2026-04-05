@@ -17,7 +17,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
 /**
- * Crafting recipe: Bulk Storage Container or Junk Drawer item (any tier) + matching Storage
+ * Crafting recipe: upgradeable storage block item (any tier) + matching Storage
  * Upgrade → same block item at the next tier, with all stored contents preserved in NBT.
  *
  * <p>The current tier is read from the item's {@code minecraft:block_entity_data} component

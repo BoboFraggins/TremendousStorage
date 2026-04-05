@@ -23,8 +23,8 @@ import net.minecraft.world.level.block.state.BlockState;
  *   <li>{@link TubeBlock} — directional: only follows faces where the tube has a connection.
  *       Same-color tubes and {@link NetworkConnector} blocks reachable via a connected face
  *       are added to the queue.
- *   <li>{@link NetworkConnector} (Filing Cabinet, Junk Drawer, Bulk Storage, Access Terminal,
- *       Wireless Hub, Stirling Engine) — omnidirectional: checks all six faces freely,
+ *   <li>{@link NetworkConnector} (Filing Cabinet, Bulk Storage, Access Terminal,
+ *       Wireless Hub) — omnidirectional: checks all six faces freely,
  *       reaching adjacent tubes of any color or other connectors without requiring tube
  *       attachments. Two connectors that are directly adjacent are therefore on the same
  *       network.

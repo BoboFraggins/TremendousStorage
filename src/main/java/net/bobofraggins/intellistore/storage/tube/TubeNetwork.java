@@ -26,7 +26,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  *
  * <p>A tube network is the connected component of all {@link TubeBlock} positions reachable
  * from a starting position through same-color tube connections. {@link NetworkConnector} blocks
- * (Filing Cabinet, Junk Drawer, Bulk Storage Container, SAT, Wireless Hub, Stirling Engine)
+ * (Filing Cabinet, Bulk Storage Container, SAT, Wireless Hub)
  * act as color-agnostic bridges: their {@code IItemHandler} is collected as a storage endpoint
  * and the BFS continues through all of their adjacent tubes (any color), allowing different-
  * colored tube runs to share a single network.

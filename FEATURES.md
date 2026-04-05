@@ -18,28 +18,15 @@ NeoForge 1.21.1 · Minecraft 1.21.1
 - Recipe: iron bars ring around a chest (`III/ICI/III`)
 - Pickaxe-minable
 
-### Junk Drawer
-- Stores up to **32,768 individual items**, one per slot (no stacking)
-- Accepts **only** items that Manila Folders reject: damageable items (tools, armour, weapons) and items with non-default component data (enchanted books, named items, potions, etc.)
-- No locking — any qualifying item may be freely added or removed at any time
-- No player UI — automation only (hoppers, pipes, AE2 storage bus via `IItemHandler`)
-- All slots exposed via `IItemHandler`; slot count is dynamic (grows/shrinks with contents)
-- **Priority**: 5 levels (Lowest → Highest); default **Normal**; set via right-click screen
-- Priority is saved to NBT and survives break/replace
-- Drops itself with full contents intact when broken
-- Recipe: iron blocks on corners, iron bars on edges, chest in center (`BIB/ICI/BIB`)
-- Pickaxe-minable
-
 ### Bulk Storage Container
 - Stores up to **32,768 total items** shared across any number of distinct item types
-- Accepts **only** items that Manila Folders accept: non-damageable items with default component data (plain stackable items) — the precise complement of the Junk Drawer
 - No locking — any qualifying item may be freely added or removed at any time
 - No player UI — automation only (hoppers, pipes via `IItemHandler`)
 - Slot count is dynamic (one slot per distinct stored type); each slot presents up to `maxStackSize` items for extraction
 - **Priority**: 5 levels (Lowest → Highest); default **Low**; set via right-click screen
 - Priority is saved to NBT and survives break/replace
 - Drops itself with full contents intact when broken
-- Recipe: iron bars on corners, iron blocks on edges, chest in center (`IBI/BCB/IBI`) — the Junk Drawer recipe with bars and blocks swapped
+- Recipe: iron bars on corners, iron blocks on edges, chest in center (`IBI/BCB/IBI`)
 - Pickaxe-minable
 
 ### Fluid Tank

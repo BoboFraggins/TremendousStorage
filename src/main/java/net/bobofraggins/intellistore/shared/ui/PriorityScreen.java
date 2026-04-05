@@ -6,7 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 
 /**
- * Priority screen for Junk Drawer and Bulk Storage Container.
+ * Priority screen for storage blocks.
  *
  * <p>Hosts a single {@link PriorityControl} pane inside a {@link Dialog}.
  */
