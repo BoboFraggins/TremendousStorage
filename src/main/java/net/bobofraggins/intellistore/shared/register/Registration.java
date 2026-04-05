@@ -62,7 +62,6 @@ import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpa
 import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackMenu;
 import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.bobofraggins.intellistore.storage.tube.TubeBlockEntity;
-import net.bobofraggins.intellistore.storage.tube.TubeEnergyHandler;
 import net.bobofraggins.intellistore.storage.tubeattachments.BreakerInterfaceItem;
 import net.bobofraggins.intellistore.storage.tubeattachments.BreakerInterfaceMenu;
 import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceItem;
@@ -859,7 +858,5 @@ public final class Registration {
                 Capabilities.ItemHandler.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getItemHandler());
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> new TubeEnergyHandler(be));
     }
 }

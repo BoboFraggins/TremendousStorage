@@ -72,12 +72,6 @@ public class TubeBlockEntity extends BlockEntity {
      */
     private NetworkItemHandler networkCache = null;
 
-    /** Per-tube energy buffer for passthrough power distribution. */
-    private int tubeEnergy = 0;
-
-    private static final int MAX_TUBE_ENERGY = 10_000;
-    private static final int TUBE_ENERGY_RATE = 1_000;
-
     public TubeBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.TUBE_BE_TYPE.get(), pos, state);
         for (int i = 0; i < 6; i++) {
@@ -114,20 +108,6 @@ public class TubeBlockEntity extends BlockEntity {
 
     /** Called every server tick by {@link TubeBlock#getTicker}. */
     public static void serverTick(Level level, BlockPos pos, BlockState state, TubeBlockEntity be) {
-        // Energy distribution: push FE from local buffer to any adjacent non-tube block that accepts energy.
-        if (be.tubeEnergy > 0) {
-            for (Direction dir : Direction.values()) {
-                if (be.tubeEnergy <= 0) break;
-                BlockPos adjPos = pos.relative(dir);
-                if (level.getBlockState(adjPos).getBlock() instanceof TubeBlock) continue;
-                var energyStorage = level.getCapability(Capabilities.EnergyStorage.BLOCK, adjPos, dir.getOpposite());
-                if (energyStorage == null || !energyStorage.canReceive()) continue;
-                int toSend = Math.min(be.tubeEnergy, TUBE_ENERGY_RATE);
-                int accepted = energyStorage.receiveEnergy(toSend, false);
-                be.tubeEnergy -= accepted;
-            }
-        }
-
         for (int i = 0; i < 6; i++) {
             AttachmentType type = be.attachmentType[i];
             if (type == AttachmentType.NONE || type == AttachmentType.STORAGE_INTERFACE) continue;
@@ -387,30 +367,6 @@ public class TubeBlockEntity extends BlockEntity {
     }
 
     // -------------------------------------------------------------------------
-    // Tube energy buffer
-    // -------------------------------------------------------------------------
-
-    public int getTubeEnergy() {
-        return tubeEnergy;
-    }
-
-    public int getMaxTubeEnergy() {
-        return MAX_TUBE_ENERGY;
-    }
-
-    public int receiveTubeEnergy(int amount, boolean simulate) {
-        int space = MAX_TUBE_ENERGY - tubeEnergy;
-        int accepted = Math.min(amount, space);
-        if (!simulate) tubeEnergy += accepted;
-        return accepted;
-    }
-
-    public int extractTubeEnergy(int amount, boolean simulate) {
-        int available = Math.min(amount, tubeEnergy);
-        if (!simulate) tubeEnergy -= available;
-        return available;
-    }
-
     // -------------------------------------------------------------------------
     // Accessors — attachment type
     // -------------------------------------------------------------------------
