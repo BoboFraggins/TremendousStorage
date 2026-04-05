@@ -18,22 +18,12 @@ import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
-import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlock;
-import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
-import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerItemHandler;
-import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerMenu;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderRecipe;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlock;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetItemHandler;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetMenu;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlock;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankContents;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankFluidHandler;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankItem;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankItemFluidHandler;
 import net.bobofraggins.intellistore.storage.items.BrainItem;
 import net.bobofraggins.intellistore.storage.items.HealingSalveBlock;
 import net.bobofraggins.intellistore.storage.items.HealingSalveCauldronBlock;
@@ -60,6 +50,16 @@ import net.bobofraggins.intellistore.storage.storageupgrade.StorageUpgradeItem;
 import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackContents;
 import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackItem;
 import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackMenu;
+import net.bobofraggins.intellistore.storage.tremendouschest.TremendousChestBlock;
+import net.bobofraggins.intellistore.storage.tremendouschest.TremendousChestBlockEntity;
+import net.bobofraggins.intellistore.storage.tremendouschest.TremendousChestItemHandler;
+import net.bobofraggins.intellistore.storage.tremendouschest.TremendousChestMenu;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankBlock;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankBlockEntity;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankContents;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankFluidHandler;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankItem;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankItemFluidHandler;
 import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.bobofraggins.intellistore.storage.tube.TubeBlockEntity;
 import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceItem;
@@ -154,11 +154,12 @@ public final class Registration {
                     .networkSynchronized(FolderContents.STREAM_CODEC)
                     .build());
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<FluidTankContents>> FLUID_TANK_CONTENTS =
-            DATA_COMPONENTS.register("fluid_tank_contents", () -> DataComponentType.<FluidTankContents>builder()
-                    .persistent(FluidTankContents.CODEC)
-                    .networkSynchronized(FluidTankContents.STREAM_CODEC)
-                    .build());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<TremendousTankContents>>
+            TREMENDOUS_TANK_CONTENTS = DATA_COMPONENTS.register(
+                    "tremendous_tank_contents", () -> DataComponentType.<TremendousTankContents>builder()
+                            .persistent(TremendousTankContents.CODEC)
+                            .networkSynchronized(TremendousTankContents.STREAM_CODEC)
+                            .build());
 
     /**
      * Data component storing the linked Network Interface {@link BlockPos} in a Wireless SAT item.
@@ -248,22 +249,21 @@ public final class Registration {
                     FilingCabinetBlockEntity::new, FILING_CABINET.get())
             .build(null));
 
-    public static final DeferredBlock<BulkStorageContainerBlock> BULK_STORAGE_CONTAINER = BLOCKS.register(
-            "bulk_storage_container",
-            () -> new BulkStorageContainerBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<TremendousChestBlock> TREMENDOUS_CHEST = BLOCKS.register(
+            "tremendous_chest",
+            () -> new TremendousChestBlock(BlockBehaviour.Properties.of()
                     .strength(5.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)
                     .noOcclusion()));
 
-    public static final DeferredHolder<Item, BlockItem> BULK_STORAGE_CONTAINER_ITEM = ITEMS.register(
-            "bulk_storage_container", () -> new TieredBlockItem(BULK_STORAGE_CONTAINER.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> TREMENDOUS_CHEST_ITEM = ITEMS.register(
+            "tremendous_chest", () -> new TieredBlockItem(TREMENDOUS_CHEST.get(), new Item.Properties()));
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BulkStorageContainerBlockEntity>>
-            BULK_STORAGE_CONTAINER_BE_TYPE =
-                    BLOCK_ENTITY_TYPES.register("bulk_storage_container", () -> BlockEntityType.Builder.of(
-                                    BulkStorageContainerBlockEntity::new, BULK_STORAGE_CONTAINER.get())
-                            .build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TremendousChestBlockEntity>>
+            TREMENDOUS_CHEST_BE_TYPE = BLOCK_ENTITY_TYPES.register("tremendous_chest", () -> BlockEntityType.Builder.of(
+                    TremendousChestBlockEntity::new, TREMENDOUS_CHEST.get())
+            .build(null));
 
     // -------------------------------------------------------------------------
     // Storage upgrade items
@@ -302,20 +302,20 @@ public final class Registration {
         EMERALD_TO_NETHERITE_STORAGE_UPGRADE
     };
 
-    public static final DeferredBlock<FluidTankBlock> FLUID_TANK = BLOCKS.register(
-            "fluid_tank",
-            () -> new FluidTankBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<TremendousTankBlock> TREMENDOUS_TANK = BLOCKS.register(
+            "tremendous_tank",
+            () -> new TremendousTankBlock(BlockBehaviour.Properties.of()
                     .strength(3.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.GLASS)));
 
-    public static final DeferredHolder<Item, BlockItem> FLUID_TANK_ITEM =
-            ITEMS.register("fluid_tank", () -> new FluidTankItem(FLUID_TANK.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> TREMENDOUS_TANK_ITEM = ITEMS.register(
+            "tremendous_tank", () -> new TremendousTankItem(TREMENDOUS_TANK.get(), new Item.Properties()));
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidTankBlockEntity>> FLUID_TANK_BE_TYPE =
-            BLOCK_ENTITY_TYPES.register(
-                    "fluid_tank", () -> BlockEntityType.Builder.of(FluidTankBlockEntity::new, FLUID_TANK.get())
-                            .build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TremendousTankBlockEntity>>
+            TREMENDOUS_TANK_BE_TYPE = BLOCK_ENTITY_TYPES.register("tremendous_tank", () -> BlockEntityType.Builder.of(
+                    TremendousTankBlockEntity::new, TREMENDOUS_TANK.get())
+            .build(null));
 
     // -------------------------------------------------------------------------
     // Lazurite bars
@@ -603,9 +603,8 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<PriorityControl>> PRIORITY_MENU =
             MENU_TYPES.register("priority", () -> IMenuTypeExtension.create(PriorityControl::new));
 
-    public static final DeferredHolder<MenuType<?>, MenuType<BulkStorageContainerMenu>> BULK_STORAGE_CONTAINER_MENU =
-            MENU_TYPES.register(
-                    "bulk_storage_container", () -> IMenuTypeExtension.create(BulkStorageContainerMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<TremendousChestMenu>> TREMENDOUS_CHEST_MENU =
+            MENU_TYPES.register("tremendous_chest", () -> IMenuTypeExtension.create(TremendousChestMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<StorageInterfaceMenu>> STORAGE_INTERFACE_MENU =
             MENU_TYPES.register("storage_interface", () -> IMenuTypeExtension.create(StorageInterfaceMenu::new));
@@ -751,11 +750,11 @@ public final class Registration {
                         output.accept(LAZURITE_HOE.get());
                         output.accept(LAZURITE_PAXEL.get());
                         output.accept(FILING_CABINET_ITEM.get());
-                        output.accept(BULK_STORAGE_CONTAINER_ITEM.get());
+                        output.accept(TREMENDOUS_CHEST_ITEM.get());
                         for (DeferredHolder<Item, StorageUpgradeItem> upgrade : STORAGE_UPGRADES) {
                             output.accept(upgrade.get());
                         }
-                        output.accept(FLUID_TANK_ITEM.get());
+                        output.accept(TREMENDOUS_TANK_ITEM.get());
                         if (ModList.get().isLoaded("mysticalagriculture")) {
                             var lazurite = MysticalAgricultureAPI.getCropRegistry()
                                     .getCropById(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "lazurite"));
@@ -828,14 +827,16 @@ public final class Registration {
                 (be, side) -> new FilingCabinetItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
-                BULK_STORAGE_CONTAINER_BE_TYPE.get(),
-                (be, side) -> new BulkStorageContainerItemHandler(be));
+                TREMENDOUS_CHEST_BE_TYPE.get(),
+                (be, side) -> new TremendousChestItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK, FLUID_TANK_BE_TYPE.get(), (be, side) -> new FluidTankFluidHandler(be));
+                Capabilities.FluidHandler.BLOCK,
+                TREMENDOUS_TANK_BE_TYPE.get(),
+                (be, side) -> new TremendousTankFluidHandler(be));
         event.registerItem(
                 Capabilities.FluidHandler.ITEM,
-                (stack, ctx) -> new FluidTankItemFluidHandler(stack),
-                FLUID_TANK_ITEM.get());
+                (stack, ctx) -> new TremendousTankItemFluidHandler(stack),
+                TREMENDOUS_TANK_ITEM.get());
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
         event.registerBlockEntity(

@@ -15,7 +15,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  * by the caller. Extraction and read operations map a flat slot index to the correct
  * underlying handler.
  *
- * <p>Slot counts in the underlying handlers are dynamic (BulkStorageContainer grows/shrinks
+ * <p>Slot counts in the underlying handlers are dynamic (TremendousChest grows/shrinks
  * as items are added), so slot resolution is recalculated on each call.
  *
  * <p>Also holds a reference to the connected {@link NetworkInterfaceBlockEntity}.
@@ -128,9 +128,9 @@ public class NetworkItemHandler implements IItemHandler {
      * Attempts to insert {@code stack} into every slot of {@code handler} in sequence.
      * Returns whatever could not be inserted.
      *
-     * <p>Special case: if the handler reports 0 slots (e.g. BulkStorageContainer when
+     * <p>Special case: if the handler reports 0 slots (e.g. TremendousChest when
      * empty — its slot count equals the number of distinct item types stored), we still
-     * try slot 0 because BulkStorageContainerItemHandler ignores the slot parameter and
+     * try slot 0 because TremendousChestItemHandler ignores the slot parameter and
      * routes through its own insertion logic.
      */
     private static ItemStack tryInsertIntoHandler(IItemHandler handler, ItemStack stack, boolean simulate) {

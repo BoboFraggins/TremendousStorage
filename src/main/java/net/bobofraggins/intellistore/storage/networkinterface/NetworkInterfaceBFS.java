@@ -13,10 +13,10 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import net.bobofraggins.intellistore.shared.priority.Priority;
-import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlockEntity;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankItemAdapter;
+import net.bobofraggins.intellistore.storage.tremendouschest.TremendousChestBlockEntity;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankBlockEntity;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankItemAdapter;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.bobofraggins.intellistore.storage.tube.TubeBlockEntity;
@@ -34,7 +34,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  * <p>A Network Interface connects to <em>all</em> tube colors. For each directly-adjacent
  * {@link TubeBlock}, this scanner starts a same-color BFS and collects every storage block
  * reachable from those tubes. {@link NetworkConnector} blocks (Filing Cabinet,
- * Bulk Storage Container, SAT, Wireless Hub) act as color-agnostic bridges:
+ * Tremendous Chest, SAT, Wireless Hub) act as color-agnostic bridges:
  * when encountered, the BFS continues through their adjacent tubes of any color, allowing
  * different-colored tube runs to form a single unified network.
  *
@@ -172,8 +172,8 @@ public final class NetworkInterfaceBFS {
         // Defined display order for storage types
         List<String> storageOrder = List.of(
                 "block.intellistore.filing_cabinet",
-                "block.intellistore.bulk_storage_container",
-                "block.intellistore.fluid_tank");
+                "block.intellistore.tremendous_chest",
+                "block.intellistore.tremendous_tank");
         for (String key : storageOrder) {
             int count = storageCounts.getOrDefault(key, 0);
             if (count > 0) blockList.add(new AttachedEntry(key, count));
@@ -256,8 +256,8 @@ public final class NetworkInterfaceBFS {
         if (handler != null) {
             Priority priority = resolvePriority(tubeBE, tubeDir.ordinal(), neighborBE);
             handlerEntries.add(new HandlerEntry(handler, priority));
-        } else if (neighborBE instanceof FluidTankBlockEntity tank) {
-            handlerEntries.add(new HandlerEntry(new FluidTankItemAdapter(tank), Priority.NORMAL));
+        } else if (neighborBE instanceof TremendousTankBlockEntity tank) {
+            handlerEntries.add(new HandlerEntry(new TremendousTankItemAdapter(tank), Priority.NORMAL));
         }
 
         // Record block type for UI list
@@ -268,8 +268,8 @@ public final class NetworkInterfaceBFS {
     /** Returns the translation key for the UI list, or {@code null} if the block should be hidden. */
     private static String blockListKey(BlockEntity be) {
         if (be instanceof FilingCabinetBlockEntity) return "block.intellistore.filing_cabinet";
-        if (be instanceof BulkStorageContainerBlockEntity) return "block.intellistore.bulk_storage_container";
-        if (be instanceof FluidTankBlockEntity) return "block.intellistore.fluid_tank";
+        if (be instanceof TremendousChestBlockEntity) return "block.intellistore.tremendous_chest";
+        if (be instanceof TremendousTankBlockEntity) return "block.intellistore.tremendous_tank";
         return null;
     }
 
@@ -280,7 +280,7 @@ public final class NetworkInterfaceBFS {
         }
 
         if (neighborBE instanceof FilingCabinetBlockEntity fc) return fc.getPriority();
-        if (neighborBE instanceof BulkStorageContainerBlockEntity bs) return bs.getPriority();
+        if (neighborBE instanceof TremendousChestBlockEntity bs) return bs.getPriority();
         return Priority.NORMAL;
     }
 }

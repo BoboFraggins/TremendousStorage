@@ -16,7 +16,7 @@
   "block.intellistore.filing_cabinet": "Filing Cabinet",
   "screen.intellistore.filing_cabinet": "Filing Cabinet",
 
-  "block.intellistore.bulk_storage_container": "Bulk Storage",
+  "block.intellistore.tremendous_chest": "Tremendous Chest",
 
   "item.intellistore.wood_to_copper_storage_upgrade": "Wood to Copper Storage Upgrade",
   "item.intellistore.copper_to_iron_storage_upgrade": "Copper to Iron Storage Upgrade",
@@ -24,7 +24,7 @@
   "item.intellistore.gold_to_diamond_storage_upgrade": "Gold to Diamond Storage Upgrade",
   "item.intellistore.diamond_to_emerald_storage_upgrade": "Diamond to Emerald Storage Upgrade",
   "item.intellistore.emerald_to_netherite_storage_upgrade": "Emerald to Netherite Storage Upgrade",
-  "block.intellistore.fluid_tank": "Fluid Tank",
+  "block.intellistore.tremendous_tank": "Tremendous Tank",
 
   "item.intellistore.lazurite_ore_chunk": "Lazurite Ore Chunk",
   "item.intellistore.lazurite_pieces": "Lazurite Pieces",
@@ -66,11 +66,11 @@
 
   "jade.intellistore.filing_cabinet.slot": "%2$s of %3$s %1$s",
 
-  "jade.intellistore.bulk_storage_container.empty": "Empty",
-  "jade.intellistore.bulk_storage_container.total": "%1$s / %2$s items",
+  "jade.intellistore.tremendous_chest.empty": "Empty",
+  "jade.intellistore.tremendous_chest.total": "%1$s / %2$s items",
 
-  "jade.intellistore.fluid_tank.empty": "Empty",
-  "jade.intellistore.fluid_tank.contents": "%1$s mB of %2$s mB %3$s",
+  "jade.intellistore.tremendous_tank.empty": "Empty",
+  "jade.intellistore.tremendous_tank.contents": "%1$s mB of %2$s mB %3$s",
 
   "priority.intellistore.lowest": "Lowest",
   "priority.intellistore.low": "Low",
@@ -91,7 +91,7 @@
   "screen.intellistore.filter_accept": "Mode: Accept",
   "screen.intellistore.filter_reject": "Mode: Reject",
 
-  "item.intellistore.fluid_tank.tooltip": "%1$s / %2$s mB %3$s",
+  "item.intellistore.tremendous_tank.tooltip": "%1$s / %2$s mB %3$s",
 
   "screen.intellistore.void_excess_label": "Void Excess:",
   "screen.intellistore.void_excess_on": "Void Excess: ON",

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " G ",
+    " J ",
+    " B "
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "J": {
+      "item": "intellistore:tremendous_chest"
+    },
+    "B": {
+      "item": "minecraft:bucket"
+    }
+  },
+  "result": {
+    "id": "intellistore:tremendous_tank",
+    "count": 1
+  },
+  "category": "misc"
+}

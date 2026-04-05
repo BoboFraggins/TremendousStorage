@@ -2,7 +2,7 @@ package net.bobofraggins.intellistore.shared.network;
 
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlockEntity;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -16,7 +16,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 /**
  * Server-bound packet: toggle the "void excess" setting on a storage block.
  *
- * <p>Valid for Filing Cabinet and Fluid Tank.
+ * <p>Valid for Filing Cabinet and Tremendous Tank.
  */
 public record SetVoidExcessPacket(BlockPos pos, boolean voidExcess) implements CustomPacketPayload {
 
@@ -41,7 +41,7 @@ public record SetVoidExcessPacket(BlockPos pos, boolean voidExcess) implements C
             BlockEntity be = player.level().getBlockEntity(packet.pos());
             if (be instanceof FilingCabinetBlockEntity fc) {
                 fc.setVoidExcess(packet.voidExcess());
-            } else if (be instanceof FluidTankBlockEntity ft) {
+            } else if (be instanceof TremendousTankBlockEntity ft) {
                 ft.setVoidExcess(packet.voidExcess());
             }
         });

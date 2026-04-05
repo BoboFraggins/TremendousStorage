@@ -2,7 +2,7 @@ package net.bobofraggins.intellistore.shared.ui;
 
 import net.bobofraggins.intellistore.shared.network.ClearTankContentsPacket;
 import net.bobofraggins.intellistore.shared.network.SetVoidExcessPacket;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankBlockEntity;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -12,12 +12,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
- * Settings screen shared by Fluid Tank, Gas Tank, and Source Tank.
+ * Settings screen shared by Tremendous Tank, Gas Tank, and Source Tank.
  *
  * <p>Background panel: 176 × 85 pixels. Contains:
  * <ul>
  *   <li>"Void Excess" toggle button
- *   <li>"Clear Contents" button (Fluid Tank only — hidden for Gas/Source Tank)
+ *   <li>"Clear Contents" button (Tremendous Tank only — hidden for Gas/Source Tank)
  * </ul>
  */
 public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu> {
@@ -46,9 +46,9 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
                 .bounds(btnX, topPos + VOID_Y_OFFSET, 120, 20)
                 .build());
 
-        // "Clear Contents" button — only shown when the block entity is a Fluid Tank
+        // "Clear Contents" button — only shown when the block entity is a Tremendous Tank
         BlockEntity be = minecraft.level != null ? minecraft.level.getBlockEntity(menu.getPos()) : null;
-        if (be instanceof FluidTankBlockEntity) {
+        if (be instanceof TremendousTankBlockEntity) {
             addRenderableWidget(Button.builder(
                             Component.translatable("screen.intellistore.clear_tank_contents"),
                             btn -> PacketDistributor.sendToServer(new ClearTankContentsPacket(menu.getPos())))

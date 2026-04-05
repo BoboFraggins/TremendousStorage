@@ -1,16 +1,16 @@
 package net.bobofraggins.intellistore.storage.storageupgrade;
 
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
-import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.intellistore.storage.tremendouschest.TremendousChestBlockEntity;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
- * Upgrade item that raises a Bulk Storage Container by one {@link StorageTier}.
+ * Upgrade item that raises a Tremendous Chest by one {@link StorageTier}.
  *
  * <p>Right-clicking the item on a matching block with the correct current tier consumes the item
  * and upgrades the block. The upgrade is retained in block-entity NBT and survives break/replace.
@@ -39,7 +39,7 @@ public class StorageUpgradeItem extends Item {
         BlockEntity be = ctx.getLevel().getBlockEntity(ctx.getClickedPos());
 
         boolean matches = false;
-        if (be instanceof BulkStorageContainerBlockEntity bulk && bulk.getTier() == from) {
+        if (be instanceof TremendousChestBlockEntity bulk && bulk.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 bulk.setTier(to);
             }
@@ -49,7 +49,7 @@ public class StorageUpgradeItem extends Item {
                 ni.setTier(to);
             }
             matches = true;
-        } else if (be instanceof FluidTankBlockEntity tank && tank.getTier() == from) {
+        } else if (be instanceof TremendousTankBlockEntity tank && tank.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 tank.setTier(to);
             }

@@ -16,7 +16,7 @@ import net.minecraft.world.item.ItemStack;
 /**
  * DataComponent stored on every Tremendous Backpack ItemStack.
  *
- * <p>Mirrors the storage model of {@code BulkStorageContainerBlockEntity}: items are identified
+ * <p>Mirrors the storage model of {@code TremendousChestBlockEntity}: items are identified
  * by type+component-patch key, stored with long counts, in insertion order.
  * Instances are immutable; mutation returns new instances via {@link #withInserted} and
  * {@link #withExtracted}.

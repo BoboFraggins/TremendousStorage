@@ -1,7 +1,7 @@
 package net.bobofraggins.intellistore.shared.network;
 
 import net.bobofraggins.intellistore.IntelliStore;
-import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
+import net.bobofraggins.intellistore.storage.tremendouschest.TremendousChestBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -60,7 +60,7 @@ public record LocalStorageInteractPacket(BlockPos pos, boolean isBulk, int typeI
                 if (carried.isEmpty()) return;
 
                 ItemStack remainder;
-                if (!(be instanceof BulkStorageContainerBlockEntity bulk)) return;
+                if (!(be instanceof TremendousChestBlockEntity bulk)) return;
                 long left = bulk.insert(carried, carried.getCount(), false);
                 remainder = left == 0 ? ItemStack.EMPTY : carried.copyWithCount((int) left);
                 player.containerMenu.setCarried(remainder);
@@ -70,7 +70,7 @@ public record LocalStorageInteractPacket(BlockPos pos, boolean isBulk, int typeI
                 if (packet.toCursor() && !player.containerMenu.getCarried().isEmpty()) return;
 
                 ItemStack result;
-                if (!(be instanceof BulkStorageContainerBlockEntity bulk)) return;
+                if (!(be instanceof TremendousChestBlockEntity bulk)) return;
                 result = bulk.extract(packet.typeIndex(), packet.amount(), false);
 
                 if (!result.isEmpty()) {

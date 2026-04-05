@@ -6,7 +6,7 @@ import net.bobofraggins.intellistore.shared.storage.IKeyCounterContributor;
 import net.bobofraggins.intellistore.shared.storage.KeyCounter;
 import net.bobofraggins.intellistore.shared.storage.StorageKey;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankItemAdapter;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankItemAdapter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -109,7 +109,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     // -------------------------------------------------------------------------
 
     /**
-     * Returns the set of StorageKeys that are backed by at least one FluidTankItemAdapter
+     * Returns the set of StorageKeys that are backed by at least one TremendousTankItemAdapter
      * in the current network scan. Used when building SatContentsPacket to tag fluid entries.
      */
     public Set<StorageKey> getFluidStorageKeys() {
@@ -117,7 +117,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         if (scan == null) return Set.of();
         KeyCounter tmp = new KeyCounter();
         for (IItemHandler h : scan.insertOrder()) {
-            if (h instanceof FluidTankItemAdapter adapter) {
+            if (h instanceof TremendousTankItemAdapter adapter) {
                 adapter.contributeToKeyCounter(tmp);
             }
         }

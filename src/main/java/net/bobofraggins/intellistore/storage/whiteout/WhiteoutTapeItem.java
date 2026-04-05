@@ -1,9 +1,9 @@
 package net.bobofraggins.intellistore.storage.whiteout;
 
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlockEntity;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +19,7 @@ import net.minecraft.world.item.context.UseOnContext;
  *
  * <p>Right-click on a block:
  * <ul>
- *   <li><b>Fluid Tank</b>: if locked and empty (amount == 0), clears the fluid lock.
+ *   <li><b>Tremendous Tank</b>: if locked and empty (amount == 0), clears the fluid lock.
  *   <li><b>Filing Cabinet</b>: clears all folders in the cabinet that are locked but empty
  *       (storedItem present, count == 0). One tape use per click, regardless of how many
  *       folders are cleared.
@@ -42,7 +42,7 @@ public class WhiteoutTapeItem extends Item {
         var be = level.getBlockEntity(pos);
         var tape = ctx.getItemInHand();
 
-        if (be instanceof FluidTankBlockEntity tank) {
+        if (be instanceof TremendousTankBlockEntity tank) {
             if (!tank.isLocked() || tank.getAmount() > 0) {
                 // Not locked, or still has fluid — nothing to do
                 return InteractionResult.PASS;

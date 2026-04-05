@@ -8,10 +8,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import net.bobofraggins.intellistore.shared.priority.Priority;
-import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.intellistore.storage.tremendouschest.TremendousChestBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -26,7 +26,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  *
  * <p>A tube network is the connected component of all {@link TubeBlock} positions reachable
  * from a starting position through same-color tube connections. {@link NetworkConnector} blocks
- * (Filing Cabinet, Bulk Storage Container, SAT, Wireless Hub)
+ * (Filing Cabinet, Tremendous Chest, SAT, Wireless Hub)
  * act as color-agnostic bridges: their {@code IItemHandler} is collected as a storage endpoint
  * and the BFS continues through all of their adjacent tubes (any color), allowing different-
  * colored tube runs to share a single network.
@@ -145,7 +145,7 @@ public final class TubeNetwork {
 
         BlockEntity neighborBE = level.getBlockEntity(neighborPos);
         if (neighborBE instanceof FilingCabinetBlockEntity fc) return fc.getPriority();
-        if (neighborBE instanceof BulkStorageContainerBlockEntity bs) return bs.getPriority();
+        if (neighborBE instanceof TremendousChestBlockEntity bs) return bs.getPriority();
 
         return Priority.NORMAL;
     }

@@ -1,9 +1,9 @@
 package net.bobofraggins.intellistore.storage.whiteout;
 
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.storage.fluidtank.FluidTankContents;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
+import net.bobofraggins.intellistore.storage.tremendoustank.TremendousTankContents;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
@@ -14,7 +14,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
 /**
- * Crafting recipe: Whiteout Tape + a locked-but-empty Manila Folder or Fluid Tank → unlocked item.
+ * Crafting recipe: Whiteout Tape + a locked-but-empty Manila Folder or Tremendous Tank → unlocked item.
  *
  * <p>The tape loses one durability per use via {@link #getRemainingItems}. When the tape
  * would exceed its max damage it is fully consumed (not returned as a broken item).
@@ -51,7 +51,7 @@ public class FolderTapeRecipe extends CustomRecipe {
     private static ItemStack findTankItem(CraftingInput input) {
         for (int i = 0; i < input.size(); i++) {
             ItemStack s = input.getItem(i);
-            if (s.has(Registration.FLUID_TANK_CONTENTS.get())) return s;
+            if (s.has(Registration.TREMENDOUS_TANK_CONTENTS.get())) return s;
         }
         return ItemStack.EMPTY;
     }
@@ -64,7 +64,8 @@ public class FolderTapeRecipe extends CustomRecipe {
 
     /** True if the tank item is locked to a fluid type but has amount == 0. */
     private static boolean isTankLockedEmpty(ItemStack tank) {
-        FluidTankContents contents = tank.getOrDefault(Registration.FLUID_TANK_CONTENTS.get(), FluidTankContents.EMPTY);
+        TremendousTankContents contents =
+                tank.getOrDefault(Registration.TREMENDOUS_TANK_CONTENTS.get(), TremendousTankContents.EMPTY);
         return contents.isLocked() && contents.amount() == 0;
     }
 
@@ -84,7 +85,7 @@ public class FolderTapeRecipe extends CustomRecipe {
             if (s.getItem() instanceof WhiteoutTapeItem) {
                 if (!tape.isEmpty()) return false; // two tapes
                 tape = s;
-            } else if (s.getItem() instanceof ManillaFolderItem || s.has(Registration.FLUID_TANK_CONTENTS.get())) {
+            } else if (s.getItem() instanceof ManillaFolderItem || s.has(Registration.TREMENDOUS_TANK_CONTENTS.get())) {
                 if (!target.isEmpty()) return false; // two targets
                 target = s;
             } else {
@@ -111,7 +112,7 @@ public class FolderTapeRecipe extends CustomRecipe {
         ItemStack tank = findTankItem(input);
         if (!tank.isEmpty()) {
             ItemStack result = tank.copyWithCount(1);
-            result.set(Registration.FLUID_TANK_CONTENTS.get(), FluidTankContents.EMPTY);
+            result.set(Registration.TREMENDOUS_TANK_CONTENTS.get(), TremendousTankContents.EMPTY);
             return result;
         }
 
