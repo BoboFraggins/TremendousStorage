@@ -78,8 +78,6 @@ public enum TubeJadeComponentProvider implements IComponentProvider<BlockAccesso
             case STORAGE_INTERFACE -> new ItemStack(Registration.STORAGE_INTERFACE.get());
             case IMPORT_INTERFACE -> new ItemStack(Registration.IMPORT_INTERFACE.get());
             case EXPORT_INTERFACE -> new ItemStack(Registration.EXPORT_INTERFACE.get());
-            case PLACER_INTERFACE -> new ItemStack(Registration.PLACER_INTERFACE.get());
-            case BREAKER_INTERFACE -> new ItemStack(Registration.BREAKER_INTERFACE.get());
             default -> ItemStack.EMPTY;
         };
     }

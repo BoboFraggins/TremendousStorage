@@ -62,15 +62,11 @@ import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpa
 import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackMenu;
 import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.bobofraggins.intellistore.storage.tube.TubeBlockEntity;
-import net.bobofraggins.intellistore.storage.tubeattachments.BreakerInterfaceItem;
-import net.bobofraggins.intellistore.storage.tubeattachments.BreakerInterfaceMenu;
 import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceItem;
 import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceMenu;
 import net.bobofraggins.intellistore.storage.tubeattachments.ImportInterfaceItem;
 import net.bobofraggins.intellistore.storage.tubeattachments.ImportInterfaceMenu;
 import net.bobofraggins.intellistore.storage.tubeattachments.InterfaceFilterContents;
-import net.bobofraggins.intellistore.storage.tubeattachments.PlacerInterfaceItem;
-import net.bobofraggins.intellistore.storage.tubeattachments.PlacerInterfaceMenu;
 import net.bobofraggins.intellistore.storage.tubeattachments.StorageInterfaceItem;
 import net.bobofraggins.intellistore.storage.tubeattachments.StorageInterfaceMenu;
 import net.bobofraggins.intellistore.storage.whiteout.FolderTapeRecipe;
@@ -632,12 +628,6 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<ExportInterfaceMenu>> EXPORT_INTERFACE_MENU =
             MENU_TYPES.register("export_interface", () -> IMenuTypeExtension.create(ExportInterfaceMenu::new));
 
-    public static final DeferredHolder<MenuType<?>, MenuType<PlacerInterfaceMenu>> PLACER_INTERFACE_MENU =
-            MENU_TYPES.register("placer_interface", () -> IMenuTypeExtension.create(PlacerInterfaceMenu::new));
-
-    public static final DeferredHolder<MenuType<?>, MenuType<BreakerInterfaceMenu>> BREAKER_INTERFACE_MENU =
-            MENU_TYPES.register("breaker_interface", () -> IMenuTypeExtension.create(BreakerInterfaceMenu::new));
-
     public static final DeferredHolder<MenuType<?>, MenuType<PersonalFilingCabinetMenu>> PERSONAL_FILING_CABINET_MENU =
             MENU_TYPES.register(
                     "personal_filing_cabinet", () -> IMenuTypeExtension.create(PersonalFilingCabinetMenu::new));
@@ -657,12 +647,6 @@ public final class Registration {
 
     public static final DeferredHolder<Item, ExportInterfaceItem> EXPORT_INTERFACE =
             ITEMS.register("export_interface", ExportInterfaceItem::new);
-
-    public static final DeferredHolder<Item, PlacerInterfaceItem> PLACER_INTERFACE =
-            ITEMS.register("placer_interface", PlacerInterfaceItem::new);
-
-    public static final DeferredHolder<Item, BreakerInterfaceItem> BREAKER_INTERFACE =
-            ITEMS.register("breaker_interface", BreakerInterfaceItem::new);
 
     public static final DeferredHolder<Item, PersonalFilingCabinetItem> PERSONAL_FILING_CABINET =
             ITEMS.register("personal_filing_cabinet", PersonalFilingCabinetItem::new);
@@ -787,8 +771,6 @@ public final class Registration {
                         output.accept(STORAGE_INTERFACE.get());
                         output.accept(IMPORT_INTERFACE.get());
                         output.accept(EXPORT_INTERFACE.get());
-                        output.accept(PLACER_INTERFACE.get());
-                        output.accept(BREAKER_INTERFACE.get());
                         output.accept(ZOMBIE_BRAIN.get());
                         output.accept(BRAIN.get());
                         output.accept(CANVAS.get());

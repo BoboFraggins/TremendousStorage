@@ -85,17 +85,11 @@
 
   "item.intellistore.import_interface": "Import Interface",
   "item.intellistore.export_interface": "Export Interface",
-  "item.intellistore.placer_interface": "Placer Interface",
-  "item.intellistore.breaker_interface": "Breaker Interface",
   "screen.intellistore.import_interface": "Import Interface",
   "screen.intellistore.export_interface": "Export Interface",
-  "screen.intellistore.placer_interface": "Placer Interface",
-  "screen.intellistore.breaker_interface": "Breaker Interface",
   "screen.intellistore.filter_label": "Filter:",
   "screen.intellistore.filter_accept": "Mode: Accept",
   "screen.intellistore.filter_reject": "Mode: Reject",
-  "screen.intellistore.silk_touch_on": "Silk Touch: ON",
-  "screen.intellistore.silk_touch_off": "Silk Touch: OFF",
 
   "item.intellistore.fluid_tank.tooltip": "%1$s / %2$s mB %3$s",
 

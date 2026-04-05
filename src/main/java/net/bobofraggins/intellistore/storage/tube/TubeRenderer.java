@@ -58,10 +58,6 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/attachment_import");
     private static final ResourceLocation ATTACH_EXPORT_TEXTURE =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/attachment_export");
-    private static final ResourceLocation ATTACH_PLACER_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/attachment_placer");
-    private static final ResourceLocation ATTACH_BREAKER_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "block/attachment_breaker");
     private static final ResourceLocation ATTACH_STORAGE_TEXTURE =
             ResourceLocation.fromNamespaceAndPath("intellistore", "block/attachment_storage");
 
@@ -126,8 +122,6 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
         TextureAtlasSprite tubeFace4 = atlas.getSprite(TUBE_FACE_4);
         TextureAtlasSprite importSprite = atlas.getSprite(ATTACH_IMPORT_TEXTURE);
         TextureAtlasSprite exportSprite = atlas.getSprite(ATTACH_EXPORT_TEXTURE);
-        TextureAtlasSprite placerSprite = atlas.getSprite(ATTACH_PLACER_TEXTURE);
-        TextureAtlasSprite breakerSprite = atlas.getSprite(ATTACH_BREAKER_TEXTURE);
         TextureAtlasSprite storageSprite = atlas.getSprite(ATTACH_STORAGE_TEXTURE);
 
         VertexConsumer vc = bufferSource.getBuffer(RenderType.solid());
@@ -170,8 +164,6 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
                     switch (aType) {
                         case IMPORT_INTERFACE -> importSprite;
                         case EXPORT_INTERFACE -> exportSprite;
-                        case PLACER_INTERFACE -> placerSprite;
-                        case BREAKER_INTERFACE -> breakerSprite;
                         default -> storageSprite;
                     };
             drawAttachmentPlate(

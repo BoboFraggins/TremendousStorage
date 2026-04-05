@@ -10,7 +10,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 /**
- * Applies Regeneration III (3 minutes) to any player standing in Healing Salve fluid.
+ * Applies Regeneration I (3 minutes) to any player standing in Healing Salve fluid.
  * The effect is re-applied every 5 ticks so it stays close to full duration while
  * the player remains in the fluid.
  */
@@ -32,7 +32,7 @@ public final class HealingSalveEffectHandler {
         if (player.tickCount % INTERVAL != 0) return;
 
         if (player.isInFluidType(Registration.HEALING_SALVE_TYPE.get())) {
-            player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, DURATION, 2, false, true, true));
+            player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, DURATION, 0, false, true, true));
         }
     }
 }
