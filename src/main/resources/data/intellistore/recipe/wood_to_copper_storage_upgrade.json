@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "CCC",
+    "CFC",
+    "CCC"
+  ],
+  "key": {
+    "C": { "item": "minecraft:copper_ingot" },
+    "F": { "item": "intellistore:wood_manila_folder" }
+  },
+  "result": {
+    "id": "intellistore:wood_to_copper_storage_upgrade",
+    "count": 1
+  },
+  "category": "misc"
+}
