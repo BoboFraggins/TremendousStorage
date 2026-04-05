@@ -2,7 +2,6 @@ package net.bobofraggins.intellistore.shared.network;
 
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -25,9 +24,6 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  *       from the container and places them in the player's cursor ({@code toCursor = true}) or
  *       directly into the player's inventory ({@code toCursor = false}).
  * </ul>
- *
- * <p>Both Bulk Storage Container ({@code isBulk = true}) and Junk Drawer ({@code isBulk = false})
- * are handled by this single packet type.
  */
 public record LocalStorageInteractPacket(BlockPos pos, boolean isBulk, int typeIndex, int amount, boolean toCursor)
         implements CustomPacketPayload {
@@ -64,18 +60,9 @@ public record LocalStorageInteractPacket(BlockPos pos, boolean isBulk, int typeI
                 if (carried.isEmpty()) return;
 
                 ItemStack remainder;
-                if (packet.isBulk()) {
-                    if (!(be instanceof BulkStorageContainerBlockEntity bulk)) return;
-                    long left = bulk.insert(carried, carried.getCount(), false);
-                    remainder = left == 0 ? ItemStack.EMPTY : carried.copyWithCount((int) left);
-                } else {
-                    if (!(be instanceof JunkDrawerBlockEntity junk)) return;
-                    remainder = carried.copy();
-                    while (!remainder.isEmpty() && !junk.isFull()) {
-                        if (!junk.addItem(remainder)) break;
-                        remainder.shrink(1);
-                    }
-                }
+                if (!(be instanceof BulkStorageContainerBlockEntity bulk)) return;
+                long left = bulk.insert(carried, carried.getCount(), false);
+                remainder = left == 0 ? ItemStack.EMPTY : carried.copyWithCount((int) left);
                 player.containerMenu.setCarried(remainder);
 
             } else {
@@ -83,13 +70,8 @@ public record LocalStorageInteractPacket(BlockPos pos, boolean isBulk, int typeI
                 if (packet.toCursor() && !player.containerMenu.getCarried().isEmpty()) return;
 
                 ItemStack result;
-                if (packet.isBulk()) {
-                    if (!(be instanceof BulkStorageContainerBlockEntity bulk)) return;
-                    result = bulk.extract(packet.typeIndex(), packet.amount(), false);
-                } else {
-                    if (!(be instanceof JunkDrawerBlockEntity junk)) return;
-                    result = junk.removeItem(packet.typeIndex());
-                }
+                if (!(be instanceof BulkStorageContainerBlockEntity bulk)) return;
+                result = bulk.extract(packet.typeIndex(), packet.amount(), false);
 
                 if (!result.isEmpty()) {
                     if (packet.toCursor()) {

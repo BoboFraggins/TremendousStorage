@@ -108,9 +108,7 @@ public class StorageBlockUpgradeRecipe extends CustomRecipe {
     }
 
     private static boolean isStorageBlock(Item item) {
-        return item == Registration.BULK_STORAGE_CONTAINER_ITEM.get()
-                || item == Registration.JUNK_DRAWER_ITEM.get()
-                || item instanceof TremendousBackpackItem;
+        return item == Registration.BULK_STORAGE_CONTAINER_ITEM.get() || item instanceof TremendousBackpackItem;
     }
 
     private static StorageTier tierFromStack(ItemStack stack) {

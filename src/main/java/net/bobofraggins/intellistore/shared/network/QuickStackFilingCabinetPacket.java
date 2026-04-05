@@ -3,7 +3,6 @@ package net.bobofraggins.intellistore.shared.network;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.shared.ui.AbstractFilingCabinetMenu;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderItem;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.network.FriendlyByteBuf;
@@ -63,7 +62,9 @@ public record QuickStackFilingCabinetPacket() implements CustomPacketPayload {
 
                 for (int invSlot = 0; invSlot < invSize; invSlot++) {
                     ItemStack playerStack = player.getInventory().getItem(invSlot);
-                    if (playerStack.isEmpty() || JunkDrawerBlockEntity.accepts(playerStack)) continue;
+                    if (playerStack.isEmpty()
+                            || playerStack.isDamageableItem()
+                            || !playerStack.isComponentsPatchEmpty()) continue;
                     if (!contents.accepts(playerStack)) continue;
 
                     FolderContents.InsertResult result = contents.insert(playerStack.getCount(), capacity);

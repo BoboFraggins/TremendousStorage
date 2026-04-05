@@ -12,21 +12,14 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
-import net.bobofraggins.intellistore.external.arsnouveau.SourceTankBlockEntity;
-import net.bobofraggins.intellistore.external.mekanism.GasTankBlockEntity;
 import net.bobofraggins.intellistore.shared.priority.Priority;
-import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
-import net.bobofraggins.intellistore.storage.battery.BatteryBlockEntity;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankItemAdapter;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.bobofraggins.intellistore.storage.tube.TubeBlockEntity;
-import net.bobofraggins.intellistore.storage.tubeattachments.AttachmentType;
-import net.bobofraggins.intellistore.storage.wirelesshub.WirelessHubBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -57,13 +50,6 @@ public final class NetworkInterfaceBFS {
 
     private record HandlerEntry(IItemHandler handler, Priority priority) {}
 
-    /** FE/t cost per attached SAT. */
-    private static final int SAT_COST = 5;
-    /** FE/t cost per Wireless Hub. */
-    private static final int HUB_COST = 25;
-    /** FE/t cost per tube attachment (any type). */
-    private static final int ATTACHMENT_COST = 1;
-
     /**
      * Scans the full network reachable from the Network Interface at {@code niPos}.
      *
@@ -81,8 +67,6 @@ public final class NetworkInterfaceBFS {
         Map<String, Integer> tubeCounts = new HashMap<>(); // color name → count
         List<String> storageKeys = new ArrayList<>(); // ordered by discovery
         int otherNiCount = 0;
-        // Power accounting
-        int fePerTick = NetworkInterfaceBlockEntity.NI_COST; // base NI cost
 
         // Single shared queue for the whole scan; tubes of any color may be enqueued
         // (the NI itself is a color-agnostic entry point, and connectors bridge colors)
@@ -97,18 +81,9 @@ public final class NetworkInterfaceBFS {
                 queue.add(neighborPos);
             } else if (neighborState.getBlock() instanceof NetworkConnector && collectedStorage.add(neighborPos)) {
                 processNeighbor(level, neighborPos, neighborState, niPos, niDir, null, handlerEntries, storageKeys);
-                // Count power cost for SAT/Wireless Hub directly adjacent to NI
-                if (neighborState.getBlock() instanceof AccessTerminalBlock) {
-                    fePerTick += SAT_COST;
-                } else {
-                    BlockEntity adjBE = level.getBlockEntity(neighborPos);
-                    if (adjBE instanceof WirelessHubBlockEntity) {
-                        fePerTick += HUB_COST;
-                    }
-                }
                 // Bridge through the connector cluster to adjacent tubes of any color
                 if (visitedConnectors.add(neighborPos)) {
-                    fePerTick += bridgeConnectorCluster(
+                    bridgeConnectorCluster(
                             level,
                             neighborPos,
                             niPos,
@@ -134,15 +109,6 @@ public final class NetworkInterfaceBFS {
 
             TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe ? tbe : null;
 
-            // Count tube attachment power cost
-            if (tubeBE != null) {
-                for (int i = 0; i < 6; i++) {
-                    if (tubeBE.getAttachmentType(i) != AttachmentType.NONE) {
-                        fePerTick += ATTACHMENT_COST;
-                    }
-                }
-            }
-
             for (Direction dir : Direction.values()) {
                 if (!state.getValue(TubeBlock.DIR_PROPS[dir.ordinal()])) continue;
 
@@ -163,20 +129,10 @@ public final class NetworkInterfaceBFS {
                         otherNiCount++;
                     }
 
-                    // Count SAT and Wireless Hub power cost
-                    if (adjState.getBlock() instanceof AccessTerminalBlock) {
-                        fePerTick += SAT_COST;
-                    } else {
-                        BlockEntity adjBE = adjPos.equals(niPos) ? null : level.getBlockEntity(adjPos);
-                        if (adjBE instanceof WirelessHubBlockEntity) {
-                            fePerTick += HUB_COST;
-                        }
-                    }
-
                     // If this neighbor is a NetworkConnector, bridge through it into
                     // adjacent tubes and connectors of any color
                     if (adjState.getBlock() instanceof NetworkConnector && visitedConnectors.add(adjPos)) {
-                        fePerTick += bridgeConnectorCluster(
+                        bridgeConnectorCluster(
                                 level,
                                 adjPos,
                                 niPos,
@@ -216,12 +172,8 @@ public final class NetworkInterfaceBFS {
         // Defined display order for storage types
         List<String> storageOrder = List.of(
                 "block.intellistore.filing_cabinet",
-                "block.intellistore.junk_drawer",
                 "block.intellistore.bulk_storage_container",
-                "block.intellistore.fluid_tank",
-                "block.intellistore.source_tank",
-                "block.intellistore.gas_tank",
-                "block.intellistore.battery");
+                "block.intellistore.fluid_tank");
         for (String key : storageOrder) {
             int count = storageCounts.getOrDefault(key, 0);
             if (count > 0) blockList.add(new AttachedEntry(key, count));
@@ -238,7 +190,6 @@ public final class NetworkInterfaceBFS {
                 Collections.unmodifiableNavigableMap(insertBuckets),
                 List.copyOf(blockList),
                 otherNiCount == 0,
-                fePerTick,
                 Set.copyOf(visitedTubes));
     }
 
@@ -250,11 +201,11 @@ public final class NetworkInterfaceBFS {
      * Flood-fills through all directly-adjacent {@link NetworkConnector} blocks reachable from
      * {@code startConnector} without going through tubes. Enqueues any adjacent {@link TubeBlock}s
      * into {@code tubeQueue} and processes each newly-discovered connector via
-     * {@link #processNeighbor}. Returns the additional FE/t cost for the discovered connectors.
+     * {@link #processNeighbor}.
      *
      * <p>{@code startConnector} must already be in {@code visitedConnectors} before calling.
      */
-    private static int bridgeConnectorCluster(
+    private static void bridgeConnectorCluster(
             ServerLevel level,
             BlockPos startConnector,
             BlockPos niPos,
@@ -264,7 +215,6 @@ public final class NetworkInterfaceBFS {
             List<HandlerEntry> handlerEntries,
             List<String> storageKeys,
             Deque<BlockPos> tubeQueue) {
-        int feCost = 0;
         Deque<BlockPos> pending = new ArrayDeque<>();
         pending.add(startConnector);
         while (!pending.isEmpty()) {
@@ -276,19 +226,12 @@ public final class NetworkInterfaceBFS {
                     tubeQueue.add(adj);
                 } else if (adjState.getBlock() instanceof NetworkConnector && collectedStorage.add(adj)) {
                     processNeighbor(level, adj, adjState, niPos, dir, null, handlerEntries, storageKeys);
-                    if (adjState.getBlock() instanceof AccessTerminalBlock) {
-                        feCost += SAT_COST;
-                    } else {
-                        BlockEntity adjBE = level.getBlockEntity(adj);
-                        if (adjBE instanceof WirelessHubBlockEntity) feCost += HUB_COST;
-                    }
                     if (visitedConnectors.add(adj)) {
                         pending.add(adj);
                     }
                 }
             }
         }
-        return feCost;
     }
 
     private static void processNeighbor(
@@ -325,12 +268,8 @@ public final class NetworkInterfaceBFS {
     /** Returns the translation key for the UI list, or {@code null} if the block should be hidden. */
     private static String blockListKey(BlockEntity be) {
         if (be instanceof FilingCabinetBlockEntity) return "block.intellistore.filing_cabinet";
-        if (be instanceof JunkDrawerBlockEntity) return "block.intellistore.junk_drawer";
         if (be instanceof BulkStorageContainerBlockEntity) return "block.intellistore.bulk_storage_container";
         if (be instanceof FluidTankBlockEntity) return "block.intellistore.fluid_tank";
-        if (be instanceof SourceTankBlockEntity) return "block.intellistore.source_tank";
-        if (be instanceof GasTankBlockEntity) return "block.intellistore.gas_tank";
-        if (be instanceof BatteryBlockEntity) return "block.intellistore.battery";
         return null;
     }
 
@@ -341,7 +280,6 @@ public final class NetworkInterfaceBFS {
         }
 
         if (neighborBE instanceof FilingCabinetBlockEntity fc) return fc.getPriority();
-        if (neighborBE instanceof JunkDrawerBlockEntity jd) return jd.getPriority();
         if (neighborBE instanceof BulkStorageContainerBlockEntity bs) return bs.getPriority();
         return Priority.NORMAL;
     }

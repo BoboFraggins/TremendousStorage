@@ -5,7 +5,6 @@ import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.shared.ui.PriorityScreen;
 import net.bobofraggins.intellistore.shared.ui.TankSettingsScreen;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerScreen;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerScreen;
 import net.bobofraggins.intellistore.storage.tubeattachments.BreakerInterfaceScreen;
 import net.bobofraggins.intellistore.storage.tubeattachments.ExportInterfaceScreen;
 import net.bobofraggins.intellistore.storage.tubeattachments.ImportInterfaceScreen;
@@ -26,7 +25,6 @@ public final class FilingCabinetClientEvents {
         event.register(Registration.FILING_CABINET_MENU.get(), FilingCabinetScreen::new);
         event.register(Registration.PRIORITY_MENU.get(), PriorityScreen::new);
         event.register(Registration.BULK_STORAGE_CONTAINER_MENU.get(), BulkStorageContainerScreen::new);
-        event.register(Registration.JUNK_DRAWER_MENU.get(), JunkDrawerScreen::new);
         event.register(Registration.TANK_SETTINGS_MENU.get(), TankSettingsScreen::new);
         event.register(Registration.IMPORT_INTERFACE_MENU.get(), ImportInterfaceScreen::new);
         event.register(Registration.EXPORT_INTERFACE_MENU.get(), ExportInterfaceScreen::new);

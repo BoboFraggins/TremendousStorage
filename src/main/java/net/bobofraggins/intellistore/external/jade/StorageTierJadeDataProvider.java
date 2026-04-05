@@ -3,7 +3,6 @@ package net.bobofraggins.intellistore.external.jade;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -34,7 +33,6 @@ public enum StorageTierJadeDataProvider implements IServerDataProvider<BlockAcce
 
     static StorageTier getTier(BlockEntity be) {
         if (be instanceof BulkStorageContainerBlockEntity b) return b.getTier();
-        if (be instanceof JunkDrawerBlockEntity j) return j.getTier();
         if (be instanceof FluidTankBlockEntity f) return f.getTier();
         return null;
     }

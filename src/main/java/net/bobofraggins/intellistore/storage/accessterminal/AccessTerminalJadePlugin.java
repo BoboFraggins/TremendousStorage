@@ -17,12 +17,13 @@ import snownee.jade.api.config.IPluginConfig;
 /**
  * Jade (WAILA) plugin for the Storage Access Terminal.
  *
- * <p>Appends "Not Enough Power" when the connected network is unpowered.
+ * <p>Appends "Network Invalid" when the connected network is not valid.
  */
 @WailaPlugin
 public class AccessTerminalJadePlugin implements IWailaPlugin {
 
-    static final ResourceLocation SAT_PROVIDER = ResourceLocation.fromNamespaceAndPath("intellistore", "sat_power");
+    static final ResourceLocation SAT_PROVIDER =
+            ResourceLocation.fromNamespaceAndPath("intellistore", "sat_network_validity");
 
     @Override
     public void register(IWailaCommonRegistration registration) {
@@ -37,20 +38,20 @@ public class AccessTerminalJadePlugin implements IWailaPlugin {
     enum SatDataProvider implements IBlockComponentProvider, snownee.jade.api.IServerDataProvider<BlockAccessor> {
         INSTANCE;
 
-        private static final String KEY_POWERED = "Powered";
+        private static final String KEY_VALID = "NetworkValid";
 
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
             if (!(accessor.getLevel() instanceof ServerLevel serverLevel)) return;
             net.minecraft.core.BlockPos niPos = AccessTerminalBFS.findNI(serverLevel, accessor.getPosition());
             if (niPos == null) {
-                data.putBoolean(KEY_POWERED, false);
+                data.putBoolean(KEY_VALID, false);
                 return;
             }
             if (serverLevel.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni) {
-                data.putBoolean(KEY_POWERED, ni.isPowered());
+                data.putBoolean(KEY_VALID, ni.isNetworkValid());
             } else {
-                data.putBoolean(KEY_POWERED, false);
+                data.putBoolean(KEY_VALID, false);
             }
         }
 
@@ -62,8 +63,8 @@ public class AccessTerminalJadePlugin implements IWailaPlugin {
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             CompoundTag data = accessor.getServerData();
-            if (data.contains(KEY_POWERED) && !data.getBoolean(KEY_POWERED)) {
-                tooltip.add(Component.translatable("jade.intellistore.not_enough_power")
+            if (data.contains(KEY_VALID) && !data.getBoolean(KEY_VALID)) {
+                tooltip.add(Component.translatable("jade.intellistore.network_interface.invalid")
                         .withStyle(net.minecraft.ChatFormatting.RED));
             }
         }

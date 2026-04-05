@@ -1,8 +1,0 @@
-{
-  "variants": {
-    "facing=north": { "model": "intellistore:block/battery" },
-    "facing=south": { "model": "intellistore:block/battery", "y": 180 },
-    "facing=east":  { "model": "intellistore:block/battery", "y": 270 },
-    "facing=west":  { "model": "intellistore:block/battery", "y": 90 }
-  }
-}

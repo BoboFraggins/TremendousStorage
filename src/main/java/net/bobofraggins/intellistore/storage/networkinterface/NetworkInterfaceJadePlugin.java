@@ -1,6 +1,5 @@
 package net.bobofraggins.intellistore.storage.networkinterface;
 
-import net.bobofraggins.intellistore.shared.util.CountFormat;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -16,17 +15,13 @@ import snownee.jade.api.config.IPluginConfig;
 /**
  * Jade (WAILA) plugin for the Network Interface.
  *
- * <p>Appends:
- * <ul>
- *   <li>Total FE/t consumed by the network
- *   <li>"Not Enough Power" when the network is unpowered
- * </ul>
+ * <p>Appends the network validity status.
  */
 @WailaPlugin
 public class NetworkInterfaceJadePlugin implements IWailaPlugin {
 
     static final ResourceLocation NI_PROVIDER =
-            ResourceLocation.fromNamespaceAndPath("intellistore", "network_interface_power");
+            ResourceLocation.fromNamespaceAndPath("intellistore", "network_interface_status");
 
     @Override
     public void register(IWailaCommonRegistration registration) {
@@ -41,16 +36,12 @@ public class NetworkInterfaceJadePlugin implements IWailaPlugin {
     enum NiDataProvider implements IBlockComponentProvider, snownee.jade.api.IServerDataProvider<BlockAccessor> {
         INSTANCE;
 
-        private static final String KEY_POWERED = "Powered";
-        private static final String KEY_CONSUMPTION = "Consumption";
-        private static final String KEY_STORED = "EnergyStored";
+        private static final String KEY_VALID = "NetworkValid";
 
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
             if (!(accessor.getBlockEntity() instanceof NetworkInterfaceBlockEntity be)) return;
-            data.putBoolean(KEY_POWERED, be.isPowered());
-            data.putInt(KEY_CONSUMPTION, be.getTotalConsumption());
-            data.putInt(KEY_STORED, be.getEnergyStored());
+            data.putBoolean(KEY_VALID, be.isNetworkValid());
         }
 
         @Override
@@ -61,15 +52,9 @@ public class NetworkInterfaceJadePlugin implements IWailaPlugin {
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             CompoundTag data = accessor.getServerData();
-            int consumption = data.getInt(KEY_CONSUMPTION);
-            boolean powered = data.getBoolean(KEY_POWERED);
-
-            // Always show total consumption
-            tooltip.add(Component.translatable(
-                    "jade.intellistore.network_interface.consumption", CountFormat.format(consumption)));
-
-            if (!powered) {
-                tooltip.add(Component.translatable("jade.intellistore.not_enough_power")
+            boolean valid = data.getBoolean(KEY_VALID);
+            if (!valid) {
+                tooltip.add(Component.translatable("jade.intellistore.network_interface.invalid")
                         .withStyle(net.minecraft.ChatFormatting.RED));
             }
         }

@@ -2,7 +2,6 @@ package net.bobofraggins.intellistore.shared.network;
 
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -25,8 +24,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  *
  * <p>When {@code isNetwork} is {@code true}, {@code pos} is a Network Interface position and
  * items are inserted via its {@link IItemHandler}. Otherwise {@code pos} is the local storage
- * block, identified at runtime as either a {@link BulkStorageContainerBlockEntity} or a
- * {@link JunkDrawerBlockEntity}.
+ * block, identified at runtime as a {@link BulkStorageContainerBlockEntity}.
  */
 public record QuickStackPacket(BlockPos pos, boolean isNetwork) implements CustomPacketPayload {
 
@@ -54,8 +52,6 @@ public record QuickStackPacket(BlockPos pos, boolean isNetwork) implements Custo
                 BlockEntity be = player.level().getBlockEntity(packet.pos());
                 if (be instanceof BulkStorageContainerBlockEntity bulk) {
                     handleBulk(bulk, player);
-                } else if (be instanceof JunkDrawerBlockEntity junk) {
-                    handleJunk(junk, player);
                 }
             }
         });
@@ -118,41 +114,13 @@ public record QuickStackPacket(BlockPos pos, boolean isNetwork) implements Custo
         }
     }
 
-    /**
-     * Junk Drawer handler — included for completeness, but is always a no-op in practice:
-     * Quick Stack excludes damageable/component items, which are the only items a Junk Drawer
-     * accepts, so no eligible stack will ever match.
-     */
-    private static void handleJunk(JunkDrawerBlockEntity junk, ServerPlayer player) {
-        int size = player.getInventory().getContainerSize();
-        for (int invSlot = 0; invSlot < size; invSlot++) {
-            ItemStack stack = player.getInventory().getItem(invSlot);
-            if (stack.isEmpty() || isExcluded(stack)) continue;
-
-            boolean found = false;
-            for (int j = 0; j < junk.size(); j++) {
-                if (ItemStack.isSameItemSameComponents(junk.get(j), stack)) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) continue;
-
-            if (!junk.isFull() && junk.addItem(stack)) {
-                stack.shrink(1);
-                if (stack.isEmpty()) player.getInventory().setItem(invSlot, ItemStack.EMPTY);
-                player.getInventory().setChanged();
-            }
-        }
-    }
-
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 
-    /** Items that fit in a Junk Drawer (damageable or non-default components) are excluded. */
+    /** Items that are damageable or have non-default components are excluded from Quick Stack. */
     private static boolean isExcluded(ItemStack stack) {
-        return JunkDrawerBlockEntity.accepts(stack);
+        return stack.isDamageableItem() || !stack.isComponentsPatchEmpty();
     }
 
     private static boolean networkContains(IItemHandler handler, ItemStack stack) {

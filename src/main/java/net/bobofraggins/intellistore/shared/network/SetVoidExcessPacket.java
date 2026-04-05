@@ -16,9 +16,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 /**
  * Server-bound packet: toggle the "void excess" setting on a storage block.
  *
- * <p>Valid for Filing Cabinet, Fluid Tank, Gas Tank, and Source Tank.
- * Gas Tank and Source Tank are referenced by class name only when their mods are present;
- * the instanceof checks are safe because those classes are never loaded otherwise.
+ * <p>Valid for Filing Cabinet and Fluid Tank.
  */
 public record SetVoidExcessPacket(BlockPos pos, boolean voidExcess) implements CustomPacketPayload {
 
@@ -45,23 +43,7 @@ public record SetVoidExcessPacket(BlockPos pos, boolean voidExcess) implements C
                 fc.setVoidExcess(packet.voidExcess());
             } else if (be instanceof FluidTankBlockEntity ft) {
                 ft.setVoidExcess(packet.voidExcess());
-            } else {
-                handleOptional(be, packet.voidExcess());
             }
         });
-    }
-
-    /**
-     * Handles Gas Tank and Source Tank without importing their classes at the top level,
-     * keeping the optional-mod classes safely isolated.
-     */
-    private static void handleOptional(BlockEntity be, boolean value) {
-        if (net.neoforged.fml.ModList.get().isLoaded("mekanism")
-                && be instanceof net.bobofraggins.intellistore.external.mekanism.GasTankBlockEntity gt) {
-            gt.setVoidExcess(value);
-        } else if (net.neoforged.fml.ModList.get().isLoaded("ars_nouveau")
-                && be instanceof net.bobofraggins.intellistore.external.arsnouveau.SourceTankBlockEntity st) {
-            st.setVoidExcess(value);
-        }
     }
 }

@@ -16,7 +16,6 @@
   "block.intellistore.filing_cabinet": "Filing Cabinet",
   "screen.intellistore.filing_cabinet": "Filing Cabinet",
 
-  "block.intellistore.junk_drawer": "Junk Drawer",
   "block.intellistore.bulk_storage_container": "Bulk Storage",
 
   "item.intellistore.paper_to_copper_storage_upgrade": "Paper to Copper Storage Upgrade",
@@ -26,9 +25,6 @@
   "item.intellistore.diamond_to_emerald_storage_upgrade": "Diamond to Emerald Storage Upgrade",
   "item.intellistore.emerald_to_netherite_storage_upgrade": "Emerald to Netherite Storage Upgrade",
   "block.intellistore.fluid_tank": "Fluid Tank",
-  "block.intellistore.gas_tank": "Gas Tank",
-  "block.intellistore.source_tank": "Source Tank",
-  "block.intellistore.battery": "Battery",
 
   "item.intellistore.lazurite_ore_chunk": "Lazurite Ore Chunk",
   "item.intellistore.lazurite_pieces": "Lazurite Pieces",
@@ -69,9 +65,6 @@
   "itemGroup.intellistore": "IntelliStore",
 
   "jade.intellistore.filing_cabinet.slot": "%2$s of %3$s %1$s",
-
-  "jade.intellistore.junk_drawer.empty": "Empty",
-  "jade.intellistore.junk_drawer.total": "%1$s / %2$s items",
 
   "jade.intellistore.bulk_storage_container.empty": "Empty",
   "jade.intellistore.bulk_storage_container.total": "%1$s / %2$s items",
@@ -179,15 +172,7 @@
   "key.intellistore.cycle_sort": "Cycle Sort Mode",
   "key.categories.intellistore": "IntelliStore",
 
-  "block.intellistore.stirling_engine": "Stirling Engine",
-
-  "jade.intellistore.stirling_engine.hint": "Place Above Heat Source",
-  "jade.intellistore.stirling_engine.stored": "%1$s / %2$s FE",
-
-  "jade.intellistore.network_interface.consumption": "%1$s FE/t",
-  "jade.intellistore.not_enough_power": "Not Enough Power",
-
-  "screen.intellistore.not_enough_power": "Not Enough Power",
+  "jade.intellistore.network_interface.invalid": "Network Invalid",
 
   "action.intellistore.deposit_complete": "Deposited items into network",
 

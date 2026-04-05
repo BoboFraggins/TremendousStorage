@@ -3,10 +3,8 @@ package net.bobofraggins.intellistore.storage.accessterminal;
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.register.Registration;
-import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -32,7 +30,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * inventory. Items can be extracted from or inserted into the network.
  *
  * <p>The {@code active} blockstate is kept continuously in sync with the connected
- * NI's power state via a server tick in {@link AccessTerminalBlockEntity} (every 20 t).
+ * NI's network validity state via a server tick in {@link AccessTerminalBlockEntity} (every 20 t).
  * It switches the screen texture to the glowing "on" variant.
  */
 public class AccessTerminalBlock extends BaseEntityBlock implements NetworkConnector {
@@ -125,16 +123,6 @@ public class AccessTerminalBlock extends BaseEntityBlock implements NetworkConne
         if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         BlockPos niPos = AccessTerminalBFS.findNI((ServerLevel) level, pos);
-
-        boolean powered = niPos != null
-                && level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni
-                && ni.isPowered();
-
-        // Power check: if NI is found but network is not powered, show message and do not open
-        if (niPos != null && !powered) {
-            player.displayClientMessage(Component.translatable("screen.intellistore.not_enough_power"), true);
-            return InteractionResult.SUCCESS;
-        }
 
         player.openMenu(new AccessTerminalMenu.Provider(pos, niPos), buf -> {
             buf.writeBlockPos(pos);

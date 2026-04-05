@@ -4,18 +4,12 @@ import com.blakebr0.mysticalagriculture.api.MysticalAgricultureAPI;
 import java.util.EnumMap;
 import java.util.Map;
 import net.bobofraggins.intellistore.IntelliStore;
-import net.bobofraggins.intellistore.external.arsnouveau.SourceTankRegistration;
 import net.bobofraggins.intellistore.external.exdeorum.ExDeorumIntegration;
 import net.bobofraggins.intellistore.external.exnihilosequentia.ExNihiloSequentiaIntegration;
-import net.bobofraggins.intellistore.external.mekanism.GasTankRegistration;
 import net.bobofraggins.intellistore.lazurite.LazuriteBarsBlock;
 import net.bobofraggins.intellistore.lazurite.LazuriteOreBlock;
 import net.bobofraggins.intellistore.lazurite.LazuritePaxelItem;
 import net.bobofraggins.intellistore.lazurite.LazuriteTier;
-import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlock;
-import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
-import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineEnergyHandler;
-import net.bobofraggins.intellistore.shared.config.IntelliStoreConfig;
 import net.bobofraggins.intellistore.shared.loot.LootModifiers;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.shared.storage.TieredBlockItem;
@@ -24,9 +18,6 @@ import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
-import net.bobofraggins.intellistore.storage.battery.BatteryBlock;
-import net.bobofraggins.intellistore.storage.battery.BatteryBlockEntity;
-import net.bobofraggins.intellistore.storage.battery.BatteryEnergyHandler;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlock;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerItemHandler;
@@ -49,10 +40,6 @@ import net.bobofraggins.intellistore.storage.items.HealingSalveCauldronBlock;
 import net.bobofraggins.intellistore.storage.items.HealingSalveFluid;
 import net.bobofraggins.intellistore.storage.items.HealingSalveInteractions;
 import net.bobofraggins.intellistore.storage.items.ZombieBrainItem;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlock;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerItemHandler;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerMenu;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderContents;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderExtractRecipe;
 import net.bobofraggins.intellistore.storage.manillafolder.FolderMergeRecipe;
@@ -63,7 +50,6 @@ import net.bobofraggins.intellistore.storage.manillafolder.ManillaFolderItem;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceMenu;
-import net.bobofraggins.intellistore.storage.networkinterface.NiEnergyHandler;
 import net.bobofraggins.intellistore.storage.personalaccessterminal.PersonalAccessTerminalItem;
 import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetContents;
 import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetEvents;
@@ -267,22 +253,6 @@ public final class Registration {
                     FilingCabinetBlockEntity::new, FILING_CABINET.get())
             .build(null));
 
-    public static final DeferredBlock<JunkDrawerBlock> JUNK_DRAWER = BLOCKS.register(
-            "junk_drawer",
-            () -> new JunkDrawerBlock(BlockBehaviour.Properties.of()
-                    .strength(5.0f, 1000.0f)
-                    .requiresCorrectToolForDrops()
-                    .sound(SoundType.METAL)
-                    .noOcclusion()));
-
-    public static final DeferredHolder<Item, BlockItem> JUNK_DRAWER_ITEM =
-            ITEMS.register("junk_drawer", () -> new TieredBlockItem(JUNK_DRAWER.get(), new Item.Properties()));
-
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<JunkDrawerBlockEntity>> JUNK_DRAWER_BE_TYPE =
-            BLOCK_ENTITY_TYPES.register(
-                    "junk_drawer", () -> BlockEntityType.Builder.of(JunkDrawerBlockEntity::new, JUNK_DRAWER.get())
-                            .build(null));
-
     public static final DeferredBlock<BulkStorageContainerBlock> BULK_STORAGE_CONTAINER = BLOCKS.register(
             "bulk_storage_container",
             () -> new BulkStorageContainerBlock(BlockBehaviour.Properties.of()
@@ -350,25 +320,6 @@ public final class Registration {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidTankBlockEntity>> FLUID_TANK_BE_TYPE =
             BLOCK_ENTITY_TYPES.register(
                     "fluid_tank", () -> BlockEntityType.Builder.of(FluidTankBlockEntity::new, FLUID_TANK.get())
-                            .build(null));
-
-    // -------------------------------------------------------------------------
-    // Battery
-    // -------------------------------------------------------------------------
-
-    public static final DeferredBlock<BatteryBlock> BATTERY = BLOCKS.register(
-            "battery",
-            () -> new BatteryBlock(BlockBehaviour.Properties.of()
-                    .strength(3.0f, 1000.0f)
-                    .requiresCorrectToolForDrops()
-                    .sound(SoundType.GLASS)));
-
-    public static final DeferredHolder<Item, BlockItem> BATTERY_ITEM =
-            ITEMS.register("battery", () -> new TieredBlockItem(BATTERY.get(), new Item.Properties()));
-
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BatteryBlockEntity>> BATTERY_BE_TYPE =
-            BLOCK_ENTITY_TYPES.register(
-                    "battery", () -> BlockEntityType.Builder.of(BatteryBlockEntity::new, BATTERY.get())
                             .build(null));
 
     // -------------------------------------------------------------------------
@@ -617,26 +568,6 @@ public final class Registration {
             ITEMS.register("wireless_sat", PersonalAccessTerminalItem::new);
 
     // -------------------------------------------------------------------------
-    // Stirling Engine block + block entity
-    // -------------------------------------------------------------------------
-
-    public static final DeferredBlock<StirlingEngineBlock> STIRLING_ENGINE = BLOCKS.register(
-            "stirling_engine",
-            () -> new StirlingEngineBlock(BlockBehaviour.Properties.of()
-                    .strength(2.5f)
-                    .requiresCorrectToolForDrops()
-                    .sound(SoundType.METAL)
-                    .noOcclusion()));
-
-    public static final DeferredHolder<Item, BlockItem> STIRLING_ENGINE_ITEM =
-            ITEMS.register("stirling_engine", () -> new TieredBlockItem(STIRLING_ENGINE.get(), new Item.Properties()));
-
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StirlingEngineBlockEntity>>
-            STIRLING_ENGINE_BE_TYPE = BLOCK_ENTITY_TYPES.register("stirling_engine", () -> BlockEntityType.Builder.of(
-                    StirlingEngineBlockEntity::new, STIRLING_ENGINE.get())
-            .build(null));
-
-    // -------------------------------------------------------------------------
     // Tubes (16 colored variants + shared block entity type)
     // -------------------------------------------------------------------------
 
@@ -680,9 +611,6 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<BulkStorageContainerMenu>> BULK_STORAGE_CONTAINER_MENU =
             MENU_TYPES.register(
                     "bulk_storage_container", () -> IMenuTypeExtension.create(BulkStorageContainerMenu::new));
-
-    public static final DeferredHolder<MenuType<?>, MenuType<JunkDrawerMenu>> JUNK_DRAWER_MENU =
-            MENU_TYPES.register("junk_drawer", () -> IMenuTypeExtension.create(JunkDrawerMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<StorageInterfaceMenu>> STORAGE_INTERFACE_MENU =
             MENU_TYPES.register("storage_interface", () -> IMenuTypeExtension.create(StorageInterfaceMenu::new));
@@ -840,19 +768,11 @@ public final class Registration {
                         output.accept(LAZURITE_HOE.get());
                         output.accept(LAZURITE_PAXEL.get());
                         output.accept(FILING_CABINET_ITEM.get());
-                        output.accept(JUNK_DRAWER_ITEM.get());
                         output.accept(BULK_STORAGE_CONTAINER_ITEM.get());
                         for (DeferredHolder<Item, StorageUpgradeItem> upgrade : STORAGE_UPGRADES) {
                             output.accept(upgrade.get());
                         }
                         output.accept(FLUID_TANK_ITEM.get());
-                        output.accept(BATTERY_ITEM.get());
-                        if (ModList.get().isLoaded("mekanism")) {
-                            output.accept(GasTankRegistration.GAS_TANK_ITEM.get());
-                        }
-                        if (ModList.get().isLoaded("ars_nouveau")) {
-                            output.accept(SourceTankRegistration.SOURCE_TANK_ITEM.get());
-                        }
                         if (ModList.get().isLoaded("mysticalagriculture")) {
                             var lazurite = MysticalAgricultureAPI.getCropRegistry()
                                     .getCropById(ResourceLocation.fromNamespaceAndPath(IntelliStore.MODID, "lazurite"));
@@ -865,9 +785,6 @@ public final class Registration {
                         output.accept(STORAGE_ACCESS_TERMINAL_ITEM.get());
                         output.accept(WIRELESS_HUB_ITEM.get());
                         output.accept(WIRELESS_SAT.get());
-                        if (IntelliStoreConfig.STIRLING_ENGINE_ENABLED.get()) {
-                            output.accept(STIRLING_ENGINE_ITEM.get());
-                        }
                         output.accept(STORAGE_INTERFACE.get());
                         output.accept(IMPORT_INTERFACE.get());
                         output.accept(EXPORT_INTERFACE.get());
@@ -916,12 +833,6 @@ public final class Registration {
         if (ModList.get().isLoaded("exnihilosequentia")) {
             ExNihiloSequentiaIntegration.register(modEventBus);
         }
-        if (ModList.get().isLoaded("mekanism")) {
-            GasTankRegistration.register(modEventBus);
-        }
-        if (ModList.get().isLoaded("ars_nouveau")) {
-            SourceTankRegistration.register(modEventBus);
-        }
         LootModifiers.register(modEventBus);
     }
 
@@ -934,8 +845,6 @@ public final class Registration {
                 Capabilities.ItemHandler.BLOCK,
                 FILING_CABINET_BE_TYPE.get(),
                 (be, side) -> new FilingCabinetItemHandler(be));
-        event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK, JUNK_DRAWER_BE_TYPE.get(), (be, side) -> new JunkDrawerItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 BULK_STORAGE_CONTAINER_BE_TYPE.get(),
@@ -950,20 +859,7 @@ public final class Registration {
                 Capabilities.ItemHandler.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getItemHandler());
-        // Energy capabilities
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK,
-                NETWORK_INTERFACE_BE_TYPE.get(),
-                (be, side) -> new NiEnergyHandler(be));
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> new TubeEnergyHandler(be));
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK, BATTERY_BE_TYPE.get(), (be, side) -> new BatteryEnergyHandler(be));
-        if (IntelliStoreConfig.STIRLING_ENGINE_ENABLED.get()) {
-            event.registerBlockEntity(
-                    Capabilities.EnergyStorage.BLOCK,
-                    STIRLING_ENGINE_BE_TYPE.get(),
-                    (be, side) -> new StirlingEngineEnergyHandler(be));
-        }
     }
 }

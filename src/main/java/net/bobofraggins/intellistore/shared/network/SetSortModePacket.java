@@ -4,7 +4,6 @@ import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.shared.config.SortMode;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -18,7 +17,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 /**
  * Server-bound packet: set the sort mode of a storage block.
  *
- * <p>Valid for the Storage Access Terminal, Junk Drawer, and Bulk Storage Container.
+ * <p>Valid for the Storage Access Terminal and Bulk Storage Container.
  */
 public record SetSortModePacket(BlockPos pos, int modeOrdinal) implements CustomPacketPayload {
 
@@ -48,7 +47,6 @@ public record SetSortModePacket(BlockPos pos, int modeOrdinal) implements Custom
             SortMode mode =
                     SortMode.values()[Math.max(0, Math.min(packet.modeOrdinal(), SortMode.values().length - 1))];
             if (be instanceof AccessTerminalBlockEntity at) at.setSortMode(mode);
-            else if (be instanceof JunkDrawerBlockEntity jd) jd.setSortMode(mode);
             else if (be instanceof BulkStorageContainerBlockEntity bs) bs.setSortMode(mode);
         });
     }

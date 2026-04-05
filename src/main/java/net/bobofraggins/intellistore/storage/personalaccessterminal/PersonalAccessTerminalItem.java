@@ -93,10 +93,6 @@ public class PersonalAccessTerminalItem extends Item {
                     Component.translatable("item.intellistore.personal_access_terminal.invalid_network"), true);
             return;
         }
-        if (!ni.isPowered()) {
-            player.displayClientMessage(Component.translatable("screen.intellistore.not_enough_power"), true);
-            return;
-        }
         if (hubPos != null) {
             if (!(level.getBlockEntity(hubPos) instanceof WirelessHubBlockEntity hub)
                     || !niPos.equals(hub.getOrFindNiPos(level))) {

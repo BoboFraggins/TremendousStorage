@@ -10,7 +10,6 @@ import java.util.Set;
 import net.bobofraggins.intellistore.shared.priority.Priority;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlockEntity;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -146,7 +145,6 @@ public final class TubeNetwork {
 
         BlockEntity neighborBE = level.getBlockEntity(neighborPos);
         if (neighborBE instanceof FilingCabinetBlockEntity fc) return fc.getPriority();
-        if (neighborBE instanceof JunkDrawerBlockEntity jd) return jd.getPriority();
         if (neighborBE instanceof BulkStorageContainerBlockEntity bs) return bs.getPriority();
 
         return Priority.NORMAL;

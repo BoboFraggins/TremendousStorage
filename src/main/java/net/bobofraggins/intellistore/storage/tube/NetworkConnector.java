@@ -17,14 +17,10 @@ package net.bobofraggins.intellistore.storage.tube;
  * <p>Blocks that implement this interface:
  * <ul>
  *   <li>{@link net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlock}
- *   <li>{@link net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlock}
  *   <li>{@link net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlock}
  *   <li>{@link net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock}
  *   <li>{@link net.bobofraggins.intellistore.storage.wirelesshub.WirelessHubBlock}
- *   <li>{@link net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlock}
  *   <li>{@link net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlock}
- *   <li>{@link net.bobofraggins.intellistore.external.arsnouveau.SourceTankBlock}
- *   <li>{@link net.bobofraggins.intellistore.external.mekanism.GasTankBlock}
  *   <li>{@link net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlock}
  * </ul>
  */

@@ -4,8 +4,6 @@ import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlo
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlock;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlock;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.storage.tube.TubeBlock;
 import net.bobofraggins.intellistore.storage.tube.TubeBlockEntity;
 import snownee.jade.api.IWailaClientRegistration;
@@ -21,7 +19,6 @@ public class TubeJadePlugin implements IWailaPlugin {
     public void register(IWailaCommonRegistration reg) {
         reg.registerBlockDataProvider(TubeJadeDataProvider.INSTANCE, TubeBlockEntity.class);
         reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, BulkStorageContainerBlockEntity.class);
-        reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, JunkDrawerBlockEntity.class);
         reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, FluidTankBlockEntity.class);
     }
 
@@ -29,7 +26,6 @@ public class TubeJadePlugin implements IWailaPlugin {
     public void registerClient(IWailaClientRegistration reg) {
         reg.registerBlockComponent(TubeJadeComponentProvider.INSTANCE, TubeBlock.class);
         reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, BulkStorageContainerBlock.class);
-        reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, JunkDrawerBlock.class);
         reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, FluidTankBlock.class);
     }
 }

@@ -4,7 +4,6 @@ import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -15,9 +14,9 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 
 /**
  * Client-only event subscriber that registers block and item color handlers for tiered storage
- * blocks (Bulk Storage Container and Junk Drawer).
+ * blocks (Bulk Storage Container).
  *
- * <p>Both blocks have a tint-index-0 overlay layer in their model. The color returned here
+ * <p>The block has a tint-index-0 overlay layer in its model. The color returned here
  * determines the accent square color shown on the block's sides and front.
  */
 @EventBusSubscriber(modid = IntelliStore.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
@@ -37,26 +36,14 @@ public final class StorageClientEvents {
                     return -1;
                 },
                 Registration.BULK_STORAGE_CONTAINER.get());
-
-        event.register(
-                (state, level, pos, tintIndex) -> {
-                    if (tintIndex != 0 || level == null || pos == null) return -1;
-                    BlockEntity be = level.getBlockEntity(pos);
-                    if (be instanceof JunkDrawerBlockEntity junk) {
-                        return junk.getTier().getColor();
-                    }
-                    return -1;
-                },
-                Registration.JUNK_DRAWER.get());
     }
 
     @SubscribeEvent
     public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
-        // BlockItem color for Bulk Storage Container and Junk Drawer (reads tier from NBT component)
+        // BlockItem color for Bulk Storage Container (reads tier from NBT component)
         event.register(
                 (stack, tintIndex) -> tintIndex == 0 ? tierColorFromStack(stack) : -1,
-                Registration.BULK_STORAGE_CONTAINER_ITEM.get(),
-                Registration.JUNK_DRAWER_ITEM.get());
+                Registration.BULK_STORAGE_CONTAINER_ITEM.get());
     }
 
     private static int tierColorFromStack(net.minecraft.world.item.ItemStack stack) {

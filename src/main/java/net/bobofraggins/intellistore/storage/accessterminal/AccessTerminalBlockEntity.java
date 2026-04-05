@@ -20,8 +20,8 @@ import net.minecraft.world.level.block.state.BlockState;
  * Block entity for the Storage Access Terminal.
  *
  * <p>Exists solely to drive a server-side tick that keeps the {@code active} blockstate
- * property in sync with the connected Network Interface's power state. BFS runs every
- * 20 ticks (1 second) to avoid per-tick overhead.
+ * property in sync with the connected Network Interface's network validity state. BFS runs
+ * every 20 ticks (1 second) to avoid per-tick overhead.
  */
 public class AccessTerminalBlockEntity extends BlockEntity implements NiCacheHolder {
 
@@ -115,13 +115,13 @@ public class AccessTerminalBlockEntity extends BlockEntity implements NiCacheHol
         if (!(level instanceof ServerLevel serverLevel)) return;
 
         BlockPos niPos = getOrFindNiPos(serverLevel);
-        boolean powered = niPos != null
+        boolean active = niPos != null
                 && level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni
-                && ni.isPowered();
+                && ni.isNetworkValid();
 
         BlockState state = getBlockState();
-        if (state.getValue(AccessTerminalBlock.ACTIVE) != powered) {
-            level.setBlock(worldPosition, state.setValue(AccessTerminalBlock.ACTIVE, powered), 3);
+        if (state.getValue(AccessTerminalBlock.ACTIVE) != active) {
+            level.setBlock(worldPosition, state.setValue(AccessTerminalBlock.ACTIVE, active), 3);
         }
     }
 }

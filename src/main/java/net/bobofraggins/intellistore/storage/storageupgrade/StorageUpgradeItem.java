@@ -1,13 +1,8 @@
 package net.bobofraggins.intellistore.storage.storageupgrade;
 
-import net.bobofraggins.intellistore.external.arsnouveau.SourceTankBlockEntity;
-import net.bobofraggins.intellistore.external.mekanism.GasTankBlockEntity;
-import net.bobofraggins.intellistore.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.intellistore.shared.storage.StorageTier;
-import net.bobofraggins.intellistore.storage.battery.BatteryBlockEntity;
 import net.bobofraggins.intellistore.storage.bulkstorage.BulkStorageContainerBlockEntity;
 import net.bobofraggins.intellistore.storage.fluidtank.FluidTankBlockEntity;
-import net.bobofraggins.intellistore.storage.junkdrawer.JunkDrawerBlockEntity;
 import net.bobofraggins.intellistore.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
@@ -15,7 +10,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
- * Upgrade item that raises a Bulk Storage Container or Junk Drawer by one {@link StorageTier}.
+ * Upgrade item that raises a Bulk Storage Container by one {@link StorageTier}.
  *
  * <p>Right-clicking the item on a matching block with the correct current tier consumes the item
  * and upgrades the block. The upgrade is retained in block-entity NBT and survives break/replace.
@@ -49,37 +44,12 @@ public class StorageUpgradeItem extends Item {
                 bulk.setTier(to);
             }
             matches = true;
-        } else if (be instanceof JunkDrawerBlockEntity junk && junk.getTier() == from) {
-            if (!ctx.getLevel().isClientSide()) {
-                junk.setTier(to);
-            }
-            matches = true;
-        } else if (be instanceof StirlingEngineBlockEntity engine && engine.getTier() == from) {
-            if (!ctx.getLevel().isClientSide()) {
-                engine.setTier(to);
-            }
-            matches = true;
         } else if (be instanceof NetworkInterfaceBlockEntity ni && ni.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 ni.setTier(to);
             }
             matches = true;
-        } else if (be instanceof BatteryBlockEntity battery && battery.getTier() == from) {
-            if (!ctx.getLevel().isClientSide()) {
-                battery.setTier(to);
-            }
-            matches = true;
         } else if (be instanceof FluidTankBlockEntity tank && tank.getTier() == from) {
-            if (!ctx.getLevel().isClientSide()) {
-                tank.setTier(to);
-            }
-            matches = true;
-        } else if (be instanceof SourceTankBlockEntity tank && tank.getTier() == from) {
-            if (!ctx.getLevel().isClientSide()) {
-                tank.setTier(to);
-            }
-            matches = true;
-        } else if (be instanceof GasTankBlockEntity tank && tank.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 tank.setTier(to);
             }
