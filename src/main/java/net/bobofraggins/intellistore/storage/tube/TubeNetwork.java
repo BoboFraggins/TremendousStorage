@@ -15,7 +15,6 @@ import net.bobofraggins.intellistore.storage.tremendouschest.TremendousChestBloc
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -25,11 +24,9 @@ import net.neoforged.neoforge.items.IItemHandler;
  * Utility class that builds a {@link NetworkItemHandler} for a tube network.
  *
  * <p>A tube network is the connected component of all {@link TubeBlock} positions reachable
- * from a starting position through same-color tube connections. {@link NetworkConnector} blocks
- * (Filing Cabinet, Tremendous Chest, SAT, Wireless Hub)
- * act as color-agnostic bridges: their {@code IItemHandler} is collected as a storage endpoint
- * and the BFS continues through all of their adjacent tubes (any color), allowing different-
- * colored tube runs to share a single network.
+ * from a starting position. {@link NetworkConnector} blocks (Filing Cabinet, Tremendous Chest,
+ * SAT, Wireless Hub) act as bridges: their {@code IItemHandler} is collected as a storage
+ * endpoint and the BFS continues through all of their adjacent tubes.
  *
  * <p>This class is stateless. Call {@link #buildNetworkView} on demand; cache the result in
  * the calling {@link TubeBlockEntity} and invalidate when the topology changes.
@@ -45,11 +42,9 @@ public final class TubeNetwork {
      *
      * @param level  the server-side level
      * @param start  position of the tube initiating the query
-     * @param color  color of the starting tube (same-color tubes are traversed directly;
-     *               different-color tubes may be reached via {@link NetworkConnector} bridges)
      * @return composite handler for the entire network; never null
      */
-    public static NetworkItemHandler buildNetworkView(ServerLevel level, BlockPos start, DyeColor color) {
+    public static NetworkItemHandler buildNetworkView(ServerLevel level, BlockPos start) {
 
         Set<BlockPos> visitedTubes = new HashSet<>();
         Deque<BlockPos> queue = new ArrayDeque<>();
@@ -66,9 +61,7 @@ public final class TubeNetwork {
             if (!visitedTubes.add(pos)) continue;
 
             BlockState state = level.getBlockState(pos);
-            if (!(state.getBlock() instanceof TubeBlock tb)) continue;
-            // Accept any tube color — we may arrive here via a connector bridge
-            DyeColor tubeColor = tb.getColor();
+            if (!(state.getBlock() instanceof TubeBlock)) continue;
 
             TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe ? tbe : null;
 
@@ -79,9 +72,7 @@ public final class TubeNetwork {
                 BlockPos neighborPos = pos.relative(dir);
                 BlockState neighborState = level.getBlockState(neighborPos);
 
-                if (neighborState.getBlock() instanceof TubeBlock neighborTube
-                        && neighborTube.getColor() == tubeColor) {
-                    // Same-color tube: extend BFS directly
+                if (neighborState.getBlock() instanceof TubeBlock) {
                     if (!visitedTubes.contains(neighborPos)) {
                         queue.add(neighborPos);
                     }

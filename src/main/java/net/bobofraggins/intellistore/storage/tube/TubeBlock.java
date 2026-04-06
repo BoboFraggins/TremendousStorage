@@ -1,7 +1,6 @@
 package net.bobofraggins.intellistore.storage.tube;
 
 import com.mojang.serialization.MapCodec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import javax.annotation.Nullable;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.tubeattachments.AttachmentType;
@@ -18,7 +17,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -42,12 +40,9 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 /**
- * A pipe block that visually connects to adjacent same-color tubes and to any block exposing
+ * A pipe block that visually connects to adjacent tubes and to any block exposing
  * an {@code IItemHandler} capability (storage blocks). Tubes have a 4×4 pixel cross-section
  * (1/4 × 1/4 block) and extend arms toward connected faces.
- *
- * <p>Color is stored as a final field (one {@code TubeBlock} instance per {@link DyeColor}).
- * Different-colored tubes do not connect to each other.
  *
  * <p>Each tube face may hold a "Storage Interface" attachment (stored in the block entity).
  * Right-clicking an attachment face opens its priority screen; right-clicking an open face
@@ -59,9 +54,7 @@ public class TubeBlock extends BaseEntityBlock {
     // Codec
     // -------------------------------------------------------------------------
 
-    public static final MapCodec<TubeBlock> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-                    DyeColor.CODEC.fieldOf("color").forGetter(TubeBlock::getColor), propertiesCodec())
-            .apply(instance, TubeBlock::new));
+    public static final MapCodec<TubeBlock> CODEC = simpleCodec(TubeBlock::new);
 
     @Override
     public MapCodec<TubeBlock> codec() {
@@ -116,22 +109,11 @@ public class TubeBlock extends BaseEntityBlock {
     private final VoxelShape[] shapes;
 
     // -------------------------------------------------------------------------
-    // Color
-    // -------------------------------------------------------------------------
-
-    private final DyeColor color;
-
-    public DyeColor getColor() {
-        return color;
-    }
-
-    // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
 
-    public TubeBlock(DyeColor color, Properties props) {
+    public TubeBlock(Properties props) {
         super(props);
-        this.color = color;
         registerDefaultState(buildDefaultState());
         this.shapes = buildShapes();
     }
@@ -254,7 +236,7 @@ public class TubeBlock extends BaseEntityBlock {
      *
      * <p>Connects to:
      * <ul>
-     *   <li>Same-color tubes (direct pipe connection)
+     *   <li>Other tubes (direct pipe connection)
      *   <li>{@link NetworkConnector} blocks (mod storage/hub/SAT/NI blocks)
      *   <li>Any external block when this tube face has an attachment installed on {@code dir}
      * </ul>
@@ -263,8 +245,8 @@ public class TubeBlock extends BaseEntityBlock {
      * a tube attachment is present on that face.
      */
     private boolean canConnectToState(BlockPos tubePos, BlockState neighborState, LevelReader level, Direction dir) {
-        if (neighborState.getBlock() instanceof TubeBlock tb) {
-            return tb.getColor() == this.color;
+        if (neighborState.getBlock() instanceof TubeBlock) {
+            return true;
         }
         // NetworkConnector blocks (mod storage, SAT, Wireless Hub, etc.)
         if (neighborState.getBlock() instanceof NetworkConnector) {

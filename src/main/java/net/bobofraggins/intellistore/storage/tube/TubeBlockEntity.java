@@ -14,7 +14,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -240,8 +239,7 @@ public class TubeBlockEntity extends BlockEntity {
     public NetworkItemHandler getNetworkView() {
         if (level == null || level.isClientSide()) return null;
         if (networkCache == null) {
-            DyeColor color = ((TubeBlock) getBlockState().getBlock()).getColor();
-            networkCache = TubeNetwork.buildNetworkView((ServerLevel) level, worldPosition, color);
+            networkCache = TubeNetwork.buildNetworkView((ServerLevel) level, worldPosition);
         }
         return networkCache;
     }

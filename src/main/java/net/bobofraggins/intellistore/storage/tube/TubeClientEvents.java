@@ -3,12 +3,10 @@ package net.bobofraggins.intellistore.storage.tube;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.shared.register.Registration;
 import net.bobofraggins.intellistore.storage.tubeattachments.StorageInterfaceScreen;
-import net.minecraft.world.item.DyeColor;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 /** Client-only event subscriber for Tube rendering and screen registration. */
@@ -25,15 +23,5 @@ public final class TubeClientEvents {
     @SubscribeEvent
     public static void onRegisterScreens(RegisterMenuScreensEvent event) {
         event.register(Registration.STORAGE_INTERFACE_MENU.get(), StorageInterfaceScreen::new);
-    }
-
-    @SubscribeEvent
-    public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
-        for (DyeColor color : DyeColor.values()) {
-            int tint = color.getTextureDiffuseColor();
-            event.register(
-                    (stack, tintIndex) -> tintIndex == 0 ? tint : 0xFFFFFF,
-                    Registration.TUBE_ITEMS.get(color).get());
-        }
     }
 }

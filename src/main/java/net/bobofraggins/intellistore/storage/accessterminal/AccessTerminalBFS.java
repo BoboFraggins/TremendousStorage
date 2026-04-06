@@ -21,13 +21,12 @@ import net.minecraft.world.level.block.state.BlockState;
  * <p>Two node types are traversed:
  * <ul>
  *   <li>{@link TubeBlock} — directional: only follows faces where the tube has a connection.
- *       Same-color tubes and {@link NetworkConnector} blocks reachable via a connected face
+ *       Adjacent tubes and {@link NetworkConnector} blocks reachable via a connected face
  *       are added to the queue.
  *   <li>{@link NetworkConnector} (Filing Cabinet, Bulk Storage, Access Terminal,
  *       Wireless Hub) — omnidirectional: checks all six faces freely,
- *       reaching adjacent tubes of any color or other connectors without requiring tube
- *       attachments. Two connectors that are directly adjacent are therefore on the same
- *       network.
+ *       reaching adjacent tubes or other connectors without requiring tube attachments.
+ *       Two connectors that are directly adjacent are therefore on the same network.
  * </ul>
  *
  * <p>Returns the {@link BlockPos} of the first {@link NetworkInterfaceBlock} reachable,
@@ -60,14 +59,14 @@ public final class AccessTerminalBFS {
             BlockPos pos = queue.poll();
             BlockState st = level.getBlockState(pos);
 
-            if (st.getBlock() instanceof TubeBlock tube) {
+            if (st.getBlock() instanceof TubeBlock) {
                 // Tubes: only follow connected faces
                 for (Direction dir : Direction.values()) {
                     if (!st.getValue(TubeBlock.DIR_PROPS[dir.ordinal()])) continue;
                     BlockPos adj = pos.relative(dir);
                     Block adjBlock = level.getBlockState(adj).getBlock();
                     if (adjBlock instanceof NetworkInterfaceBlock) return adj;
-                    if (adjBlock instanceof TubeBlock adjTube && adjTube.getColor() == tube.getColor()) {
+                    if (adjBlock instanceof TubeBlock) {
                         if (visited.add(adj)) queue.add(adj);
                     } else if (adjBlock instanceof NetworkConnector) {
                         if (visited.add(adj)) queue.add(adj);

@@ -31,12 +31,8 @@ import net.neoforged.neoforge.items.IItemHandler;
 /**
  * BFS utility that scans a Network Interface's entire connected tube network.
  *
- * <p>A Network Interface connects to <em>all</em> tube colors. For each directly-adjacent
- * {@link TubeBlock}, this scanner starts a same-color BFS and collects every storage block
- * reachable from those tubes. {@link NetworkConnector} blocks (Filing Cabinet,
- * Tremendous Chest, SAT, Wireless Hub) act as color-agnostic bridges:
- * when encountered, the BFS continues through their adjacent tubes of any color, allowing
- * different-colored tube runs to form a single unified network.
+ * <p>{@link NetworkConnector} blocks (Filing Cabinet, Tremendous Chest, SAT, Wireless Hub)
+ * act as bridges: when encountered, the BFS continues through their adjacent tubes.
  *
  * <p>Results are deduped by position, and returned as a {@link NetworkScanResult} with handlers
  * sorted for both insertion (highest-priority first) and extraction (lowest-priority first).
@@ -64,15 +60,14 @@ public final class NetworkInterfaceBFS {
         // Connector blocks whose outgoing tube faces have already been enqueued
         Set<BlockPos> visitedConnectors = new HashSet<>();
         List<HandlerEntry> handlerEntries = new ArrayList<>();
-        Map<String, Integer> tubeCounts = new HashMap<>(); // color name → count
+        int tubeCount = 0;
         List<String> storageKeys = new ArrayList<>(); // ordered by discovery
         int otherNiCount = 0;
 
-        // Single shared queue for the whole scan; tubes of any color may be enqueued
-        // (the NI itself is a color-agnostic entry point, and connectors bridge colors)
+        // Single shared queue for the whole scan
         Deque<BlockPos> queue = new ArrayDeque<>();
 
-        // Seed with every tube adjacent to the NI (any color), and also handle
+        // Seed with every tube adjacent to the NI, and also handle
         // NetworkConnector blocks that are directly adjacent to the NI (no tube required).
         for (Direction niDir : Direction.values()) {
             BlockPos neighborPos = niPos.relative(niDir);
@@ -102,10 +97,9 @@ public final class NetworkInterfaceBFS {
             if (!visitedTubes.add(pos)) continue;
 
             BlockState state = level.getBlockState(pos);
-            if (!(state.getBlock() instanceof TubeBlock tb)) continue;
+            if (!(state.getBlock() instanceof TubeBlock)) continue;
 
-            // Count this tube for the UI list
-            tubeCounts.merge(tb.getColor().getName(), 1, Integer::sum);
+            tubeCount++;
 
             TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe ? tbe : null;
 
@@ -115,8 +109,7 @@ public final class NetworkInterfaceBFS {
                 BlockPos adjPos = pos.relative(dir);
                 BlockState adjState = level.getBlockState(adjPos);
 
-                if (adjState.getBlock() instanceof TubeBlock adjTube && adjTube.getColor() == tb.getColor()) {
-                    // Continue BFS through same-color tubes
+                if (adjState.getBlock() instanceof TubeBlock) {
                     if (!visitedTubes.contains(adjPos)) {
                         queue.add(adjPos);
                     }
@@ -178,11 +171,8 @@ public final class NetworkInterfaceBFS {
             int count = storageCounts.getOrDefault(key, 0);
             if (count > 0) blockList.add(new AttachedEntry(key, count));
         }
-        // Tube entries (sorted by color name for determinism)
-        List<String> sortedColors = new ArrayList<>(tubeCounts.keySet());
-        Collections.sort(sortedColors);
-        for (String colorName : sortedColors) {
-            blockList.add(new AttachedEntry("block.intellistore." + colorName + "_tube", tubeCounts.get(colorName)));
+        if (tubeCount > 0) {
+            blockList.add(new AttachedEntry("block.intellistore.tube", tubeCount));
         }
 
         return new NetworkScanResult(

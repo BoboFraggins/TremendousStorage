@@ -1,8 +1,6 @@
 package net.bobofraggins.intellistore.shared.register;
 
 import com.blakebr0.mysticalagriculture.api.MysticalAgricultureAPI;
-import java.util.EnumMap;
-import java.util.Map;
 import net.bobofraggins.intellistore.IntelliStore;
 import net.bobofraggins.intellistore.external.exdeorum.ExDeorumIntegration;
 import net.bobofraggins.intellistore.external.exnihilosequentia.ExNihiloSequentiaIntegration;
@@ -84,7 +82,6 @@ import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -576,35 +573,22 @@ public final class Registration {
             ITEMS.register("wireless_sat", PersonalAccessTerminalItem::new);
 
     // -------------------------------------------------------------------------
-    // Tubes (16 colored variants + shared block entity type)
+    // Tubes
     // -------------------------------------------------------------------------
 
-    public static final Map<DyeColor, DeferredBlock<TubeBlock>> TUBES = new EnumMap<>(DyeColor.class);
-    public static final Map<DyeColor, DeferredHolder<Item, BlockItem>> TUBE_ITEMS = new EnumMap<>(DyeColor.class);
+    public static final DeferredBlock<TubeBlock> TUBE = BLOCKS.register(
+            "tube",
+            () -> new TubeBlock(BlockBehaviour.Properties.of()
+                    .strength(1.5f, 6.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)
+                    .noOcclusion()));
 
-    static {
-        for (DyeColor color : DyeColor.values()) {
-            String name = color.getName() + "_tube";
-            DeferredBlock<TubeBlock> block = BLOCKS.register(
-                    name,
-                    () -> new TubeBlock(
-                            color,
-                            BlockBehaviour.Properties.of()
-                                    .strength(1.5f, 6.0f)
-                                    .requiresCorrectToolForDrops()
-                                    .sound(SoundType.METAL)
-                                    .noOcclusion()));
-            TUBES.put(color, block);
-            TUBE_ITEMS.put(color, ITEMS.registerSimpleBlockItem(name, block));
-        }
-    }
+    public static final DeferredHolder<Item, BlockItem> TUBE_ITEM = ITEMS.registerSimpleBlockItem("tube", TUBE);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TubeBlockEntity>> TUBE_BE_TYPE =
-            BLOCK_ENTITY_TYPES.register("tube", () -> {
-                TubeBlock[] blocks =
-                        TUBES.values().stream().map(DeferredBlock::get).toArray(TubeBlock[]::new);
-                return BlockEntityType.Builder.of(TubeBlockEntity::new, blocks).build(null);
-            });
+            BLOCK_ENTITY_TYPES.register("tube", () -> BlockEntityType.Builder.of(TubeBlockEntity::new, TUBE.get())
+                    .build(null));
 
     // -------------------------------------------------------------------------
     // Menu types
@@ -762,9 +746,7 @@ public final class Registration {
                         output.accept(CANVAS_BLOCK_ITEM.get());
                         output.accept(TREMENDOUS_BACKPACK.get());
                         output.accept(HEALING_SALVE_BUCKET.get());
-                        for (DyeColor color : DyeColor.values()) {
-                            output.accept(TUBE_ITEMS.get(color).get());
-                        }
+                        output.accept(TUBE_ITEM.get());
                         output.accept(MANILA_FOLDER.get());
                         output.accept(ENDER_FOLDER.get());
                         output.accept(PERSONAL_FILING_CABINET.get());

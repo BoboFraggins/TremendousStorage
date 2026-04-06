@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.joml.Matrix4f;
@@ -104,13 +103,11 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
             int packedOverlay) {
 
         BlockState state = be.getBlockState();
-        if (!(state.getBlock() instanceof TubeBlock tubeBlock)) return;
+        if (!(state.getBlock() instanceof TubeBlock)) return;
 
-        DyeColor dye = tubeBlock.getColor();
-        int texColor = dye.getTextureDiffuseColor();
-        int r = (texColor >> 16) & 0xFF;
-        int g = (texColor >> 8) & 0xFF;
-        int b = texColor & 0xFF;
+        int r = 255;
+        int g = 255;
+        int b = 255;
 
         var atlas = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS);
         TextureAtlasSprite sprite = atlas.getSprite(TUBE_TEXTURE);
