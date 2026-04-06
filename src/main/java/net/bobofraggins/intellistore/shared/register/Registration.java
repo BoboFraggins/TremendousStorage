@@ -16,6 +16,7 @@ import net.bobofraggins.intellistore.shared.ui.TankSettingsMenu;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalMenu;
+import net.bobofraggins.intellistore.storage.baseupgrade.BaseUpgradeItem;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.intellistore.storage.enderfolder.EnderFolderRecipe;
 import net.bobofraggins.intellistore.storage.filingcabinet.FilingCabinetBlock;
@@ -654,6 +655,9 @@ public final class Registration {
     public static final DeferredHolder<Item, WhiteoutTapeItem> WHITEOUT_TAPE =
             ITEMS.register("whiteout_tape", WhiteoutTapeItem::new);
 
+    public static final DeferredHolder<Item, BaseUpgradeItem> BASE_UPGRADE =
+            ITEMS.register("base_upgrade", BaseUpgradeItem::new);
+
     // -------------------------------------------------------------------------
     // Items — Manila Folder and Ender Folder (single items; tier in FolderContents)
     // -------------------------------------------------------------------------
@@ -751,6 +755,7 @@ public final class Registration {
                         output.accept(ENDER_FOLDER.get());
                         output.accept(PERSONAL_FILING_CABINET.get());
                         output.accept(WHITEOUT_TAPE.get());
+                        output.accept(BASE_UPGRADE.get());
                     })
                     .build());
 

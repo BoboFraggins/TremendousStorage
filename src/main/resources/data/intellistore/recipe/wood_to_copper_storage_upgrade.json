@@ -7,7 +7,7 @@
   ],
   "key": {
     "C": { "item": "minecraft:copper_ingot" },
-    "F": { "item": "intellistore:wood_manila_folder" }
+    "F": { "item": "intellistore:base_upgrade" }
   },
   "result": {
     "id": "intellistore:wood_to_copper_storage_upgrade",
