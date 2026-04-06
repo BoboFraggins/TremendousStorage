@@ -1,5 +1,6 @@
 package net.bobofraggins.intellistore.storage.tremendoustank;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.bobofraggins.intellistore.shared.tank.AbstractTankRenderer;
 import net.minecraft.client.renderer.LightTexture;
@@ -20,6 +21,19 @@ import org.joml.Matrix4f;
 public class TremendousTankRenderer extends AbstractTankRenderer<TremendousTankBlockEntity> {
 
     public TremendousTankRenderer(BlockEntityRendererProvider.Context ctx) {}
+
+    @Override
+    public void render(
+            TremendousTankBlockEntity be,
+            float partialTick,
+            PoseStack poseStack,
+            MultiBufferSource bufferSource,
+            int packedLight,
+            int packedOverlay) {
+        poseStack.pushPose();
+        renderFill(be, poseStack.last().pose(), bufferSource, packedLight, packedOverlay);
+        poseStack.popPose();
+    }
 
     @Override
     protected void renderFill(

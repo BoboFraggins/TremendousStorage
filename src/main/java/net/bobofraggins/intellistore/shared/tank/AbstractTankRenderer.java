@@ -39,14 +39,14 @@ public abstract class AbstractTankRenderer<T extends BlockEntity> implements Blo
 
     // Octagon XZ vertices (all in [0,1] block space)
     // A = NW, B = NE, C = EN, D = ES, E = SE, F = SW, G = WS, H = WN
-    protected static final float AX = 5.5f / 16f, AZ = 2f / 16f;
-    protected static final float BX = 10.5f / 16f, BZ = 2f / 16f;
-    protected static final float CX = 14f / 16f, CZ = 5.5f / 16f;
-    protected static final float DX = 14f / 16f, DZ = 10.5f / 16f;
-    protected static final float EX = 10.5f / 16f, EZ = 14f / 16f;
-    protected static final float FX = 5.5f / 16f, FZ = 14f / 16f;
-    protected static final float GX = 2f / 16f, GZ = 10.5f / 16f;
-    protected static final float HX = 2f / 16f, HZ = 5.5f / 16f;
+    protected static final float AX = 6f / 16f, AZ = 1f / 16f;
+    protected static final float BX = 10f / 16f, BZ = 1f / 16f;
+    protected static final float CX = 15f / 16f, CZ = 6f / 16f;
+    protected static final float DX = 15f / 16f, DZ = 10f / 16f;
+    protected static final float EX = 10f / 16f, EZ = 15f / 16f;
+    protected static final float FX = 6f / 16f, FZ = 15f / 16f;
+    protected static final float GX = 1f / 16f, GZ = 10f / 16f;
+    protected static final float HX = 1f / 16f, HZ = 6f / 16f;
 
     /**
      * Renders the fill material for this tank type.
