@@ -6,15 +6,19 @@ import net.bobofraggins.intellistore.shared.register.Registration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 
 /**
  * The Tremendous Backpack — a wearable, upgradeable bulk-storage item.
@@ -26,15 +30,30 @@ import net.minecraft.world.level.Level;
  * <p>All stored items and settings are persisted as a {@link TremendousBackpackContents} data
  * component on the ItemStack.
  */
-public class TremendousBackpackItem extends Item {
+public class TremendousBackpackItem extends BlockItem {
 
-    public TremendousBackpackItem() {
-        super(new Item.Properties().stacksTo(1));
+    public TremendousBackpackItem(Block block) {
+        super(block, new Item.Properties().stacksTo(1));
     }
 
     // -------------------------------------------------------------------------
-    // Right-click to open UI
+    // Right-click to open UI; sneak + right-click on block face to place
     // -------------------------------------------------------------------------
+
+    @Override
+    public InteractionResult useOn(UseOnContext ctx) {
+        Player player = ctx.getPlayer();
+        if (player != null && player.isShiftKeyDown()) {
+            // Sneak + right-click on a block face → place the backpack block.
+            return super.useOn(ctx);
+        }
+        // Right-click (no sneak) → open the backpack UI.
+        if (!ctx.getLevel().isClientSide() && player instanceof ServerPlayer sp) {
+            int slotIndex = ctx.getHand() == InteractionHand.MAIN_HAND ? sp.getInventory().selected : 40;
+            openBackpackUi(sp, OpenTremendousBackpackPacket.SLOT_INVENTORY, slotIndex, "");
+        }
+        return InteractionResult.sidedSuccess(ctx.getLevel().isClientSide());
+    }
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {

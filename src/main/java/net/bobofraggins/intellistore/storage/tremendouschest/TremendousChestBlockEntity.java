@@ -172,7 +172,12 @@ public class TremendousChestBlockEntity extends BlockEntity implements MenuProvi
     // -------------------------------------------------------------------------
 
     public TremendousChestBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.TREMENDOUS_CHEST_BE_TYPE.get(), pos, state);
+        this(Registration.TREMENDOUS_CHEST_BE_TYPE.get(), pos, state);
+    }
+
+    protected TremendousChestBlockEntity(
+            net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
     }
 
     // -------------------------------------------------------------------------

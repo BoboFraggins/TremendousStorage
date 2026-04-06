@@ -45,6 +45,8 @@ import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilin
 import net.bobofraggins.intellistore.storage.personalfilingcabinet.PersonalFilingCabinetMenu;
 import net.bobofraggins.intellistore.storage.storageupgrade.StorageBlockUpgradeRecipe;
 import net.bobofraggins.intellistore.storage.storageupgrade.StorageUpgradeItem;
+import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackBlock;
+import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackBlockEntity;
 import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackContents;
 import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackItem;
 import net.bobofraggins.intellistore.storage.tremendousbackpack.TremendousBackpackMenu;
@@ -263,6 +265,19 @@ public final class Registration {
                     TremendousChestBlockEntity::new, TREMENDOUS_CHEST.get())
             .build(null));
 
+    public static final DeferredBlock<TremendousBackpackBlock> TREMENDOUS_BACKPACK_BLOCK = BLOCKS.register(
+            "tremendous_backpack",
+            () -> new TremendousBackpackBlock(BlockBehaviour.Properties.of()
+                    .strength(2.0f, 1000.0f)
+                    .sound(SoundType.WOOL)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TremendousBackpackBlockEntity>>
+            TREMENDOUS_BACKPACK_BE_TYPE =
+                    BLOCK_ENTITY_TYPES.register("tremendous_backpack", () -> BlockEntityType.Builder.of(
+                                    TremendousBackpackBlockEntity::new, TREMENDOUS_BACKPACK_BLOCK.get())
+                            .build(null));
+
     // -------------------------------------------------------------------------
     // Storage upgrade items
     // -------------------------------------------------------------------------
@@ -462,7 +477,7 @@ public final class Registration {
             ITEMS.register("canvas", () -> new Item(new Item.Properties()));
 
     public static final DeferredHolder<Item, TremendousBackpackItem> TREMENDOUS_BACKPACK =
-            ITEMS.register("tremendous_backpack", TremendousBackpackItem::new);
+            ITEMS.register("tremendous_backpack", () -> new TremendousBackpackItem(TREMENDOUS_BACKPACK_BLOCK.get()));
 
     public static final DeferredHolder<Item, BucketItem> HEALING_SALVE_BUCKET = ITEMS.register(
             "healing_salve_bucket",
@@ -795,6 +810,10 @@ public final class Registration {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 TREMENDOUS_CHEST_BE_TYPE.get(),
+                (be, side) -> new TremendousChestItemHandler(be));
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                TREMENDOUS_BACKPACK_BE_TYPE.get(),
                 (be, side) -> new TremendousChestItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
