@@ -86,8 +86,7 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     }
 
     private static StorageTier tierFromStack(ItemStack stack) {
-        if (stack.getItem() == Registration.MANILA_FOLDER.get()
-                || stack.getItem() == Registration.ENDER_FOLDER.get()) {
+        if (stack.getItem() == Registration.MANILA_FOLDER.get() || stack.getItem() == Registration.ENDER_FOLDER.get()) {
             return ManillaFolderItem.getContents(stack).tier();
         }
         if (stack.getItem() instanceof TremendousBackpackItem) {
