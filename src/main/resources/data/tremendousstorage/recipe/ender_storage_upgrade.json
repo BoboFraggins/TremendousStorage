@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RER",
+    "EBE",
+    "RER"
+  ],
+  "key": {
+    "R": { "item": "minecraft:redstone" },
+    "E": { "item": "minecraft:ender_pearl" },
+    "B": { "item": "tremendousstorage:base_upgrade" }
+  },
+  "result": {
+    "id": "tremendousstorage:ender_storage_upgrade",
+    "count": 1
+  },
+  "category": "misc"
+}

@@ -42,7 +42,7 @@ import net.bobofraggins.tremendousstorage.storage.personalfilingcabinet.Personal
 import net.bobofraggins.tremendousstorage.storage.personalfilingcabinet.PersonalFilingCabinetEvents;
 import net.bobofraggins.tremendousstorage.storage.personalfilingcabinet.PersonalFilingCabinetItem;
 import net.bobofraggins.tremendousstorage.storage.personalfilingcabinet.PersonalFilingCabinetMenu;
-import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageBlockUpgradeRecipe;
+import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageSmithingUpgradeRecipe;
 import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.tremendousbackpack.TremendousBackpackBlock;
 import net.bobofraggins.tremendousstorage.storage.tremendousbackpack.TremendousBackpackBlockEntity;
@@ -658,6 +658,12 @@ public final class Registration {
     public static final DeferredHolder<Item, BaseUpgradeItem> BASE_UPGRADE =
             ITEMS.register("base_upgrade", BaseUpgradeItem::new);
 
+    public static final DeferredHolder<Item, BaseUpgradeItem> CRAFTING_UPGRADE =
+            ITEMS.register("crafting_upgrade", BaseUpgradeItem::new);
+
+    public static final DeferredHolder<Item, BaseUpgradeItem> ENDER_STORAGE_UPGRADE =
+            ITEMS.register("ender_storage_upgrade", BaseUpgradeItem::new);
+
     // -------------------------------------------------------------------------
     // Items — Manila Folder and Ender Folder (single items; tier in FolderContents)
     // -------------------------------------------------------------------------
@@ -692,10 +698,23 @@ public final class Registration {
             RECIPE_SERIALIZERS.register(
                     "ender_folder", () -> new SimpleCraftingRecipeSerializer<>(EnderFolderRecipe::new));
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StorageBlockUpgradeRecipe>>
-            STORAGE_BLOCK_UPGRADE_RECIPE = RECIPE_SERIALIZERS.register(
-                    "storage_block_upgrade",
-                    () -> new SimpleCraftingRecipeSerializer<>(StorageBlockUpgradeRecipe::new));
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StorageSmithingUpgradeRecipe>>
+            STORAGE_SMITHING_UPGRADE_RECIPE = RECIPE_SERIALIZERS.register(
+                    "storage_smithing_upgrade",
+                    () -> new RecipeSerializer<>() {
+                        @Override
+                        public com.mojang.serialization.MapCodec<StorageSmithingUpgradeRecipe> codec() {
+                            return StorageSmithingUpgradeRecipe.CODEC;
+                        }
+
+                        @Override
+                        public net.minecraft.network.codec.StreamCodec<
+                                        net.minecraft.network.RegistryFriendlyByteBuf,
+                                        StorageSmithingUpgradeRecipe>
+                                streamCodec() {
+                            return StorageSmithingUpgradeRecipe.STREAM_CODEC;
+                        }
+                    });
 
     // -------------------------------------------------------------------------
     // Creative tab
@@ -757,6 +776,8 @@ public final class Registration {
                         output.accept(PERSONAL_FILING_CABINET.get());
                         output.accept(WHITEOUT_TAPE.get());
                         output.accept(BASE_UPGRADE.get());
+                        output.accept(CRAFTING_UPGRADE.get());
+                        output.accept(ENDER_STORAGE_UPGRADE.get());
                     })
                     .build());
 

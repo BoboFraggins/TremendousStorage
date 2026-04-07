@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RCR",
+    "CBC",
+    "RCR"
+  ],
+  "key": {
+    "R": { "item": "minecraft:redstone" },
+    "C": { "item": "minecraft:crafting_table" },
+    "B": { "item": "tremendousstorage:base_upgrade" }
+  },
+  "result": {
+    "id": "tremendousstorage:crafting_upgrade",
+    "count": 1
+  },
+  "category": "misc"
+}
