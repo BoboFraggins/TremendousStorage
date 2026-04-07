@@ -51,16 +51,19 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class AccessTerminalMenu extends AbstractContainerMenu {
 
-    private static final int RESULT_SLOT = 0;
-    private static final int CRAFT_START = 1;
-    private static final int CRAFT_END = 10;
-    private static final int INV_START = 10;
-    private static final int INV_END = 37;
-    private static final int HOTBAR_START = 37;
-    private static final int HOTBAR_END = 46;
+    private final boolean hasCraftingUpgrade;
+
+    // Slot indices — depend on hasCraftingUpgrade
+    private final int resultSlot;   // -1 when no crafting
+    private final int craftStart;   // -1 when no crafting
+    private final int craftEnd;     // -1 when no crafting
+    private final int invStart;
+    private final int invEnd;
+    private final int hotbarStart;
+    private final int hotbarEnd;
 
     private final CraftingContainer craftSlots;
-    private final ResultContainer resultSlots = new ResultContainer();
+    private final ResultContainer resultSlots;
     private final ContainerLevelAccess access;
     private final Player player;
 
@@ -79,8 +82,8 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     /**
      * Server-side constructor. Uses the default row count (slot positions are unused server-side).
      */
-    public AccessTerminalMenu(int id, Inventory inv, BlockPos satPos, @Nullable BlockPos niPos) {
-        this(id, inv, satPos, niPos, TremendousStorageClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
+    public AccessTerminalMenu(int id, Inventory inv, BlockPos satPos, @Nullable BlockPos niPos, boolean hasCraftingUpgrade) {
+        this(id, inv, satPos, niPos, hasCraftingUpgrade, TremendousStorageClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
     }
 
     /** Client-side constructor. Reads the configured row count for the current GUI scale. */
@@ -90,6 +93,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                 inv,
                 buf.readBlockPos(),
                 buf.readBoolean() ? buf.readBlockPos() : null,
+                buf.readBoolean(),
                 TremendousStorageClientConfig.getVisibleRowsSafe());
     }
 
@@ -97,39 +101,67 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
      * Internal constructor that computes all slot Y positions from the given network grid row
      * count.
      *
-     * <p>Layout: title(17) + networkPane(rows×18+5) + craftingPane(58) + playerInv
+     * <p>With crafting: title(17) + networkPane(rows×18+5) + craftingPane(58) + playerInv
      * → craftingY = 22 + rows×18; fixed 58-px offsets to player inv and hotbar.
+     * <p>Without crafting: crafting pane is omitted; player inv follows directly after network pane.
      */
-    private AccessTerminalMenu(int id, Inventory inv, BlockPos satPos, @Nullable BlockPos niPos, int rows) {
+    private AccessTerminalMenu(
+            int id, Inventory inv, BlockPos satPos, @Nullable BlockPos niPos, boolean hasCraftingUpgrade, int rows) {
         super(Registration.STORAGE_ACCESS_TERMINAL_MENU.get(), id);
         this.satPos = satPos;
         this.niPos = niPos;
+        this.hasCraftingUpgrade = hasCraftingUpgrade;
         this.player = inv.player;
-        this.craftSlots = new TransientCraftingContainer(this, 3, 3);
         this.access = ContainerLevelAccess.create(inv.player.level(), satPos);
 
         final int S = AccessTerminalLayout.SLOT_SIZE;
-        // craftingY shifts with the network pane height; offsets below it are fixed.
-        int craftingY = AccessTerminalLayout.TITLE_H + rows * S + 5; // 22 + rows*18
-        int playerInvY = craftingY + (AccessTerminalLayout.PLAYER_INV_Y - AccessTerminalLayout.CRAFTING_Y); // +58
-        int hotbarY = playerInvY + (AccessTerminalLayout.HOTBAR_Y - AccessTerminalLayout.PLAYER_INV_Y); // +58
+        int networkPaneBottom = AccessTerminalLayout.TITLE_H + rows * S + 5;
+        int playerInvY;
 
-        // Slot 0: craft result (one slot-row below craftingY)
-        addSlot(new ResultSlot(
-                inv.player, craftSlots, resultSlots, 0, AccessTerminalLayout.CRAFTING_RESULT_X, craftingY + S));
+        if (hasCraftingUpgrade) {
+            this.craftSlots = new TransientCraftingContainer(this, 3, 3);
+            this.resultSlots = new ResultContainer();
 
-        // Slots 1-9: 3×3 crafting grid
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 3; col++) {
-                addSlot(new Slot(
-                        craftSlots,
-                        col + row * 3,
-                        AccessTerminalLayout.CRAFTING_GRID_X + col * S,
-                        craftingY + row * S));
+            int craftingY = networkPaneBottom;
+            playerInvY = craftingY + (AccessTerminalLayout.PLAYER_INV_Y - AccessTerminalLayout.CRAFTING_Y);
+
+            this.resultSlot = 0;
+            this.craftStart = 1;
+            this.craftEnd = 10;
+            this.invStart = 10;
+            this.invEnd = 37;
+            this.hotbarStart = 37;
+            this.hotbarEnd = 46;
+
+            // Slot 0: craft result
+            addSlot(new ResultSlot(
+                    inv.player, craftSlots, resultSlots, 0, AccessTerminalLayout.CRAFTING_RESULT_X, craftingY + S));
+
+            // Slots 1-9: 3×3 crafting grid
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    addSlot(new Slot(
+                            craftSlots,
+                            col + row * 3,
+                            AccessTerminalLayout.CRAFTING_GRID_X + col * S,
+                            craftingY + row * S));
+                }
             }
+        } else {
+            this.craftSlots = null;
+            this.resultSlots = null;
+            playerInvY = networkPaneBottom + 4;
+
+            this.resultSlot = -1;
+            this.craftStart = -1;
+            this.craftEnd = -1;
+            this.invStart = 0;
+            this.invEnd = 27;
+            this.hotbarStart = 27;
+            this.hotbarEnd = 36;
         }
 
-        // Slots 10-36: player main inventory
+        // Player main inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 addSlot(new Slot(
@@ -137,7 +169,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             }
         }
 
-        // Slots 37-45: player hotbar
+        int hotbarY = playerInvY + (AccessTerminalLayout.HOTBAR_Y - AccessTerminalLayout.PLAYER_INV_Y);
         for (int col = 0; col < 9; col++) {
             addSlot(new Slot(inv, col, AccessTerminalLayout.HOTBAR_X + col * S, hotbarY));
         }
@@ -160,12 +192,17 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         return niPos != null;
     }
 
+    public boolean hasCraftingUpgrade() {
+        return hasCraftingUpgrade;
+    }
+
     // -------------------------------------------------------------------------
     // Crafting
     // -------------------------------------------------------------------------
 
     @Override
     public void slotsChanged(net.minecraft.world.Container inventory) {
+        if (!hasCraftingUpgrade) return;
         access.execute((level, pos) -> slotChangedCraftingGrid(this, level, player, craftSlots, resultSlots));
     }
 
@@ -199,7 +236,9 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     @Override
     public void removed(Player player) {
         super.removed(player);
-        access.execute((level, pos) -> clearContainer(player, craftSlots));
+        if (hasCraftingUpgrade) {
+            access.execute((level, pos) -> clearContainer(player, craftSlots));
+        }
     }
 
     @Override
@@ -220,7 +259,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         ItemStack stack = slot.getItem();
         copy = stack.copy();
 
-        if (index == RESULT_SLOT) {
+        if (hasCraftingUpgrade && index == resultSlot) {
             // Snapshot the craft grid before ingredients are consumed by onTake
             ItemStack[] gridSnapshot = new ItemStack[9];
             for (int i = 0; i < 9; i++) {
@@ -228,7 +267,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             }
 
             // Shift-click result: move to inventory
-            if (!moveItemStackTo(stack, INV_START, HOTBAR_END, true)) return ItemStack.EMPTY;
+            if (!moveItemStackTo(stack, invStart, hotbarEnd, true)) return ItemStack.EMPTY;
             slot.onQuickCraft(stack, copy);
 
             if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
@@ -242,7 +281,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             refillCraftGridFromNetwork(player, gridSnapshot);
 
             return copy;
-        } else if (index >= INV_START && index < HOTBAR_END) {
+        } else if (index >= invStart && index < hotbarEnd) {
             // Shift-click player slot: try network first, then swap between inv/hotbar
             if (hasNetwork() && !player.level().isClientSide()) {
                 if (player.level().getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni) {
@@ -250,7 +289,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                     if (handler != null) {
                         ItemStack remainder = handler.insertItem(0, stack, false);
                         slot.set(remainder);
-                        slotsChanged(craftSlots);
+                        if (hasCraftingUpgrade) slotsChanged(craftSlots);
                         // Refresh the client's network grid
                         KeyCounter inventory = ni.getCachedInventory();
                         if (inventory != null && player instanceof ServerPlayer sp) {
@@ -261,13 +300,13 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                 }
             }
             // Fallback: swap between main inv and hotbar
-            if (index < INV_END) {
-                if (!moveItemStackTo(stack, HOTBAR_START, HOTBAR_END, false)) return ItemStack.EMPTY;
+            if (index < invEnd) {
+                if (!moveItemStackTo(stack, hotbarStart, hotbarEnd, false)) return ItemStack.EMPTY;
             } else {
-                if (!moveItemStackTo(stack, INV_START, INV_END, false)) return ItemStack.EMPTY;
+                if (!moveItemStackTo(stack, invStart, invEnd, false)) return ItemStack.EMPTY;
             }
-        } else if (index >= CRAFT_START && index < CRAFT_END) {
-            if (!moveItemStackTo(stack, INV_START, HOTBAR_END, false)) return ItemStack.EMPTY;
+        } else if (hasCraftingUpgrade && index >= craftStart && index < craftEnd) {
+            if (!moveItemStackTo(stack, invStart, hotbarEnd, false)) return ItemStack.EMPTY;
         }
 
         if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
@@ -281,7 +320,8 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
 
     @Override
     public boolean canTakeItemForPickAll(ItemStack stack, Slot slot) {
-        return slot.container != resultSlots && super.canTakeItemForPickAll(stack, slot);
+        if (hasCraftingUpgrade && slot.container == resultSlots) return false;
+        return super.canTakeItemForPickAll(stack, slot);
     }
 
     // -------------------------------------------------------------------------
@@ -299,7 +339,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
      * @param gridSnapshot copies of each craft slot taken just before {@code onTake} ran
      */
     private void refillCraftGridFromNetwork(Player player, ItemStack[] gridSnapshot) {
-        if (!hasNetwork() || player.level().isClientSide()) return;
+        if (!hasCraftingUpgrade || !hasNetwork() || player.level().isClientSide()) return;
         if (!(player.level().getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
         IItemHandler handler = ni.getItemHandler();
         if (handler == null) return;
@@ -373,7 +413,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
      * position; shapeless recipes fill slots 0–8 in order.
      */
     public void fillCraftingGridFromNetwork(ServerLevel level, CraftingRecipe recipe) {
-        if (niPos == null) return;
+        if (!hasCraftingUpgrade || niPos == null) return;
         if (!(level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
         IItemHandler handler = ni.getItemHandler();
         if (handler == null) return;
@@ -446,7 +486,8 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     // MenuProvider inner record
     // -------------------------------------------------------------------------
 
-    public record Provider(BlockPos satPos, @Nullable BlockPos niPos) implements MenuProvider {
+    public record Provider(BlockPos satPos, @Nullable BlockPos niPos, boolean hasCraftingUpgrade)
+            implements MenuProvider {
         @Override
         public Component getDisplayName() {
             return Component.translatable("screen.tremendousstorage.access_terminal");
@@ -454,7 +495,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
 
         @Override
         public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
-            return new AccessTerminalMenu(id, inv, satPos, niPos);
+            return new AccessTerminalMenu(id, inv, satPos, niPos, hasCraftingUpgrade);
         }
     }
 }

@@ -1,29 +1,44 @@
 package net.bobofraggins.tremendousstorage.storage.tremendousbackpack;
 
+import java.util.Optional;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageClientConfig;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 
 /**
  * Menu for the Tremendous Backpack screen.
  *
- * <p>Slot layout:
+ * <p>Without crafting upgrade — slot layout:
  * <ul>
  *   <li>[0..26]  Player main inventory (27 slots)
  *   <li>[27..35] Player hotbar (9 slots)
  * </ul>
  *
- * <p>Shift-clicking a player slot inserts the item into the backpack server-side.
- * Grid extraction is handled by {@link net.bobofraggins.tremendousstorage.shared.network.TremendousBackpackInteractPacket}.
- *
- * <p>A single {@link ContainerData} slot syncs the current priority ordinal from server to client.
+ * <p>With crafting upgrade — slot layout:
+ * <ul>
+ *   <li>[0]      Craft result
+ *   <li>[1..9]   3×3 crafting grid
+ *   <li>[10..36] Player main inventory (27 slots)
+ *   <li>[37..45] Player hotbar (9 slots)
+ * </ul>
  */
 public class TremendousBackpackMenu extends AbstractContainerMenu {
 
@@ -31,10 +46,27 @@ public class TremendousBackpackMenu extends AbstractContainerMenu {
     private final int slotIndex;
     private final String slotId;
     private final ContainerData data;
+    private final boolean hasCraftingUpgrade;
+
+    // Crafting containers — non-null only when hasCraftingUpgrade is true
+    private final CraftingContainer craftSlots;
+    private final ResultContainer resultSlots;
+    private final ContainerLevelAccess access;
+    private final Player player;
+
+    // Slot index ranges — adjusted per hasCraftingUpgrade
+    private final int invStart;
+    private final int hotbarEnd;
 
     /** Server-side constructor. Uses default row count. */
     public TremendousBackpackMenu(
-            int syncId, Inventory playerInv, int slotType, int slotIndex, String slotId, ContainerData data) {
+            int syncId,
+            Inventory playerInv,
+            int slotType,
+            int slotIndex,
+            String slotId,
+            ContainerData data,
+            boolean hasCraftingUpgrade) {
         this(
                 syncId,
                 playerInv,
@@ -42,10 +74,11 @@ public class TremendousBackpackMenu extends AbstractContainerMenu {
                 slotIndex,
                 slotId,
                 data,
+                hasCraftingUpgrade,
                 TremendousStorageClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
     }
 
-    /** Client-side constructor. Reads slot location from the buffer. */
+    /** Client-side constructor. Reads slot location and crafting flag from the buffer. */
     public TremendousBackpackMenu(int syncId, Inventory playerInv, FriendlyByteBuf buf) {
         this(
                 syncId,
@@ -54,27 +87,56 @@ public class TremendousBackpackMenu extends AbstractContainerMenu {
                 buf.readInt(),
                 buf.readUtf(),
                 new SimpleContainerData(1),
+                buf.readBoolean(),
                 TremendousStorageClientConfig.getVisibleRowsSafe());
     }
 
-    /**
-     * Internal constructor. Computes player inventory Y from row count.
-     *
-     * <p>Layout: title(17) + blank(7) + invPane(rows×18+5) + blank(20) + playerInv
-     * → playerInvY = 49 + rows×18.
-     */
     private TremendousBackpackMenu(
-            int syncId, Inventory playerInv, int slotType, int slotIndex, String slotId, ContainerData data, int rows) {
+            int syncId,
+            Inventory playerInv,
+            int slotType,
+            int slotIndex,
+            String slotId,
+            ContainerData data,
+            boolean hasCraftingUpgrade,
+            int rows) {
         super(Registration.TREMENDOUS_BACKPACK_MENU.get(), syncId);
         this.slotType = slotType;
         this.slotIndex = slotIndex;
         this.slotId = slotId;
         this.data = data;
+        this.hasCraftingUpgrade = hasCraftingUpgrade;
+        this.player = playerInv.player;
+        this.access = ContainerLevelAccess.create(playerInv.player.level(), playerInv.player.blockPosition());
 
         int playerInvY = 49 + rows * 18;
         int hotbarY = playerInvY + 58;
 
-        // Player main inventory (3 rows × 9 cols)
+        if (hasCraftingUpgrade) {
+            this.craftSlots = new TransientCraftingContainer(this, 3, 3);
+            this.resultSlots = new ResultContainer();
+
+            // Slot 0: craft result
+            addSlot(new ResultSlot(playerInv.player, craftSlots, resultSlots, 0, 120, playerInvY - 18 + 18));
+
+            // Slots 1-9: 3×3 crafting grid
+            int craftY = playerInvY - 18 - 3 * 18;
+            for (int row = 0; row < 3; row++) {
+                for (int col = 0; col < 3; col++) {
+                    addSlot(new Slot(craftSlots, col + row * 3, 30 + col * 18, craftY + row * 18));
+                }
+            }
+
+            this.invStart = 10;
+            this.hotbarEnd = 46;
+        } else {
+            this.craftSlots = null;
+            this.resultSlots = null;
+            this.invStart = 0;
+            this.hotbarEnd = 36;
+        }
+
+        // Player main inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, playerInvY + row * 18));
@@ -108,9 +170,62 @@ public class TremendousBackpackMenu extends AbstractContainerMenu {
         return data.get(0);
     }
 
-    /** Called from {@link net.bobofraggins.tremendousstorage.shared.network.SetTremendousBackpackPriorityPacket} to push new priority to client. */
+    public boolean hasCraftingUpgrade() {
+        return hasCraftingUpgrade;
+    }
+
+    /** Called from {@link net.bobofraggins.tremendousstorage.shared.network.SetTremendousBackpackPriorityPacket}. */
     public void setPriorityInData(int ordinal) {
         data.set(0, ordinal);
+    }
+
+    // -------------------------------------------------------------------------
+    // Crafting
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void slotsChanged(net.minecraft.world.Container inventory) {
+        if (!hasCraftingUpgrade) return;
+        access.execute((level, p) -> updateCraftResult(this, level, player, craftSlots, resultSlots));
+    }
+
+    private static void updateCraftResult(
+            AbstractContainerMenu menu,
+            Level level,
+            Player player,
+            CraftingContainer craftSlots,
+            ResultContainer resultSlots) {
+        if (level.isClientSide) return;
+        CraftingInput input = craftSlots.asCraftInput();
+        ServerPlayer sp = (ServerPlayer) player;
+        ItemStack result = ItemStack.EMPTY;
+        Optional<RecipeHolder<CraftingRecipe>> optional =
+                level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
+        if (optional.isPresent()) {
+            RecipeHolder<CraftingRecipe> holder = optional.get();
+            if (resultSlots.setRecipeUsed(level, sp, holder)) {
+                ItemStack assembled = holder.value().assemble(input, level.registryAccess());
+                if (assembled.isItemEnabled(level.enabledFeatures())) result = assembled;
+            }
+        }
+        resultSlots.setItem(0, result);
+        menu.setRemoteSlot(0, result);
+        sp.connection.send(new net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket(
+                menu.containerId, menu.incrementStateId(), 0, result));
+    }
+
+    @Override
+    public void removed(Player player) {
+        super.removed(player);
+        if (hasCraftingUpgrade) {
+            access.execute((level, p) -> clearContainer(player, craftSlots));
+        }
+    }
+
+    @Override
+    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot) {
+        if (hasCraftingUpgrade && slot.container == resultSlots) return false;
+        return super.canTakeItemForPickAll(stack, slot);
     }
 
     // -------------------------------------------------------------------------
@@ -122,13 +237,8 @@ public class TremendousBackpackMenu extends AbstractContainerMenu {
         return true;
     }
 
-    @Override
-    public void removed(Player player) {
-        super.removed(player);
-    }
-
     // -------------------------------------------------------------------------
-    // Shift-click: insert player item into backpack
+    // Shift-click
     // -------------------------------------------------------------------------
 
     @Override
@@ -139,26 +249,42 @@ public class TremendousBackpackMenu extends AbstractContainerMenu {
         ItemStack stack = slot.getItem();
         ItemStack original = stack.copy();
 
-        ItemStack backpackStack = TremendousBackpackItem.getBackpackStack(player, slotType, slotIndex, slotId);
-        if (backpackStack.isEmpty()) return ItemStack.EMPTY;
+        if (hasCraftingUpgrade && index == 0) {
+            // Craft result → inventory
+            if (!moveItemStackTo(stack, invStart, hotbarEnd, true)) return ItemStack.EMPTY;
+            slot.onQuickCraft(stack, original);
+            if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
+            else slot.setChanged();
+            slot.onTake(player, stack);
+            return original;
+        }
 
-        TremendousBackpackContents current = backpackStack.getOrDefault(
-                Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY);
-        Object[] result = current.withInserted(stack, stack.getCount());
-        long remainder = (long) result[0];
-        TremendousBackpackContents updated = (TremendousBackpackContents) result[1];
-        int moved = (int) (stack.getCount() - remainder);
+        if (hasCraftingUpgrade && index >= 1 && index < 10) {
+            // Craft grid → inventory
+            if (!moveItemStackTo(stack, invStart, hotbarEnd, false)) return ItemStack.EMPTY;
+        } else if (index >= invStart && index < hotbarEnd) {
+            // Player slot → backpack
+            ItemStack backpackStack = TremendousBackpackItem.getBackpackStack(player, slotType, slotIndex, slotId);
+            if (backpackStack.isEmpty()) return ItemStack.EMPTY;
 
-        if (moved > 0) {
-            backpackStack.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), updated);
-            TremendousBackpackItem.setBackpackStack(player, backpackStack, slotType, slotIndex, slotId);
-            stack.shrink(moved);
+            TremendousBackpackContents current = backpackStack.getOrDefault(
+                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY);
+            Object[] result = current.withInserted(stack, stack.getCount());
+            long remainder = (long) result[0];
+            TremendousBackpackContents updated = (TremendousBackpackContents) result[1];
+            int moved = (int) (stack.getCount() - remainder);
+
+            if (moved > 0) {
+                backpackStack.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), updated);
+                TremendousBackpackItem.setBackpackStack(player, backpackStack, slotType, slotIndex, slotId);
+                stack.shrink(moved);
+            }
         }
 
         if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
         else slot.setChanged();
 
-        if (moved == 0) return ItemStack.EMPTY;
+        if (stack.getCount() == original.getCount()) return ItemStack.EMPTY;
         slot.onTake(player, stack);
         return original;
     }

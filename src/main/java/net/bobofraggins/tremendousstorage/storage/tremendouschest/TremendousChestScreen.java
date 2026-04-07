@@ -10,6 +10,7 @@ import net.bobofraggins.tremendousstorage.shared.network.QuickStackPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetPriorityPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetSortModePacket;
 import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
+import net.bobofraggins.tremendousstorage.shared.ui.CraftingGridPane;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.LocalInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
@@ -46,11 +47,20 @@ public class TremendousChestScreen extends AbstractContainerScreen<TremendousChe
     public TremendousChestScreen(TremendousChestMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         inventoryPane = new LocalInventoryPane();
-        dialog = new Dialog(
-                Dialog.blankPane(PlayerInventoryPane.WIDTH, 7),
-                inventoryPane,
-                Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
-                new PlayerInventoryPane());
+        if (menu.hasCraftingUpgrade()) {
+            dialog = new Dialog(
+                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 7),
+                    inventoryPane,
+                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
+                    new CraftingGridPane(),
+                    new PlayerInventoryPane());
+        } else {
+            dialog = new Dialog(
+                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 7),
+                    inventoryPane,
+                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
+                    new PlayerInventoryPane());
+        }
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
         configDrawer = new ConfigDrawer(

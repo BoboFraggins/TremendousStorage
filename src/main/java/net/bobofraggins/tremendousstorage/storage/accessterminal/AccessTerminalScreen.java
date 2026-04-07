@@ -8,6 +8,7 @@ import net.bobofraggins.tremendousstorage.shared.network.RequestSatContentsPacke
 import net.bobofraggins.tremendousstorage.shared.network.SatContentsPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetSortModePacket;
 import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
+import net.bobofraggins.tremendousstorage.shared.ui.CraftingGridPane;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PressableIconButton;
@@ -53,7 +54,11 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     public AccessTerminalScreen(AccessTerminalMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         networkPane = new NetworkInventoryPane(menu);
-        dialog = new Dialog(networkPane, new CraftingGridPane(), new PlayerInventoryPane());
+        if (menu.hasCraftingUpgrade()) {
+            dialog = new Dialog(networkPane, new CraftingGridPane(), new PlayerInventoryPane());
+        } else {
+            dialog = new Dialog(networkPane, new PlayerInventoryPane());
+        }
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
         configDrawer = new ConfigDrawer(new SortPane(networkPane::getSortMode, this::cycleSortMode));
@@ -88,9 +93,11 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
                 configDrawer::toggle));
 
         // Quick stack button above the player inventory, right-aligned.
+        // Pane index: network(0), [crafting(1),] playerInv(last)
+        int playerInvPaneIndex = menu.hasCraftingUpgrade() ? 2 : 1;
         addRenderableWidget(new PressableIconButton(
                 leftPos + dialog.totalWidth() - 26,
-                dialog.getPaneAbsY(2) - 20,
+                dialog.getPaneAbsY(playerInvPaneIndex) - 20,
                 16,
                 16,
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack"),

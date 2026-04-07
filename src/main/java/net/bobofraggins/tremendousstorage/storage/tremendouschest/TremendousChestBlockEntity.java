@@ -57,6 +57,7 @@ public class TremendousChestBlockEntity extends BlockEntity implements MenuProvi
     private Priority priority = Priority.LOW;
     private SortMode sortMode = SortMode.AMOUNT;
     private StorageTier tier = StorageTier.WOOD;
+    private boolean hasCraftingUpgrade = false;
 
     public long getCapacity() {
         return tier.getCapacity();
@@ -372,7 +373,16 @@ public class TremendousChestBlockEntity extends BlockEntity implements MenuProvi
                 return 1;
             }
         };
-        return new TremendousChestMenu(id, inv, worldPosition, data);
+        return new TremendousChestMenu(id, inv, worldPosition, data, hasCraftingUpgrade);
+    }
+
+    public boolean hasCraftingUpgrade() {
+        return hasCraftingUpgrade;
+    }
+
+    public void setCraftingUpgrade(boolean value) {
+        hasCraftingUpgrade = value;
+        setChanged();
     }
 
     // -------------------------------------------------------------------------
@@ -436,6 +446,7 @@ public class TremendousChestBlockEntity extends BlockEntity implements MenuProvi
         tag.putInt("Priority", priority.ordinal());
         tag.putString("SortMode", sortMode.name());
         tag.putString("Tier", tier.getId());
+        if (hasCraftingUpgrade) tag.putBoolean("CraftingUpgrade", true);
     }
 
     @Override
@@ -462,6 +473,7 @@ public class TremendousChestBlockEntity extends BlockEntity implements MenuProvi
             sortMode = SortMode.AMOUNT;
         }
         tier = StorageTier.fromId(tag.getString("Tier"));
+        hasCraftingUpgrade = tag.getBoolean("CraftingUpgrade");
     }
 
     // -------------------------------------------------------------------------

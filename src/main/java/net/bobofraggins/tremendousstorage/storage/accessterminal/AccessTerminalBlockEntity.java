@@ -27,6 +27,7 @@ public class AccessTerminalBlockEntity extends BlockEntity implements NiCacheHol
 
     private int tickCounter = 0;
     private SortMode sortMode = SortMode.AMOUNT;
+    private boolean hasCraftingUpgrade = false;
 
     @Nullable
     private BlockPos cachedNiPos = null;
@@ -68,6 +69,15 @@ public class AccessTerminalBlockEntity extends BlockEntity implements NiCacheHol
         setChanged();
     }
 
+    public boolean hasCraftingUpgrade() {
+        return hasCraftingUpgrade;
+    }
+
+    public void setCraftingUpgrade(boolean value) {
+        hasCraftingUpgrade = value;
+        setChanged();
+    }
+
     // -------------------------------------------------------------------------
     // NBT
     // -------------------------------------------------------------------------
@@ -76,6 +86,7 @@ public class AccessTerminalBlockEntity extends BlockEntity implements NiCacheHol
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putString("SortMode", sortMode.name());
+        if (hasCraftingUpgrade) tag.putBoolean("CraftingUpgrade", true);
     }
 
     @Override
@@ -86,6 +97,7 @@ public class AccessTerminalBlockEntity extends BlockEntity implements NiCacheHol
         } catch (IllegalArgumentException e) {
             sortMode = SortMode.AMOUNT;
         }
+        hasCraftingUpgrade = tag.getBoolean("CraftingUpgrade");
     }
 
     @Override

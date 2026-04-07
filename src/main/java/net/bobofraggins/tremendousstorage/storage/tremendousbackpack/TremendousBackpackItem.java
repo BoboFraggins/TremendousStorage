@@ -98,10 +98,12 @@ public class TremendousBackpackItem extends BlockItem {
             }
         };
 
-        player.openMenu(new Provider(slotType, slotIndex, slotId, data), buf -> {
+        boolean craftingUpgrade = contents.hasCraftingUpgrade();
+        player.openMenu(new Provider(slotType, slotIndex, slotId, data, craftingUpgrade), buf -> {
             buf.writeInt(slotType);
             buf.writeInt(slotIndex);
             buf.writeUtf(slotId);
+            buf.writeBoolean(craftingUpgrade);
         });
     }
 
@@ -168,12 +170,14 @@ public class TremendousBackpackItem extends BlockItem {
         private final int slotIndex;
         private final String slotId;
         private final ContainerData data;
+        private final boolean hasCraftingUpgrade;
 
-        public Provider(int slotType, int slotIndex, String slotId, ContainerData data) {
+        public Provider(int slotType, int slotIndex, String slotId, ContainerData data, boolean hasCraftingUpgrade) {
             this.slotType = slotType;
             this.slotIndex = slotIndex;
             this.slotId = slotId;
             this.data = data;
+            this.hasCraftingUpgrade = hasCraftingUpgrade;
         }
 
         @Override
@@ -183,7 +187,7 @@ public class TremendousBackpackItem extends BlockItem {
 
         @Override
         public AbstractContainerMenu createMenu(int syncId, Inventory inv, Player player) {
-            return new TremendousBackpackMenu(syncId, inv, slotType, slotIndex, slotId, data);
+            return new TremendousBackpackMenu(syncId, inv, slotType, slotIndex, slotId, data, hasCraftingUpgrade);
         }
     }
 }

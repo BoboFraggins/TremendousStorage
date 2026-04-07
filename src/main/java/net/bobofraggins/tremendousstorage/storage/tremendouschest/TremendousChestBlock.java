@@ -159,7 +159,10 @@ public class TremendousChestBlock extends BaseEntityBlock implements NetworkConn
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (level.getBlockEntity(pos) instanceof TremendousChestBlockEntity be) {
             be.startOpen(player);
-            player.openMenu(be, buf -> buf.writeBlockPos(pos));
+            player.openMenu(be, buf -> {
+                buf.writeBlockPos(pos);
+                buf.writeBoolean(be.hasCraftingUpgrade());
+            });
         }
         return InteractionResult.SUCCESS;
     }

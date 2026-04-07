@@ -37,7 +37,7 @@ public class TremendousBackpackBlockEntity extends TremendousChestBlockEntity {
     public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
         ContainerData data = new SimpleContainerData(1);
         return new net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestMenu(
-                id, inv, worldPosition, data);
+                id, inv, worldPosition, data, hasCraftingUpgrade());
     }
 
     // -------------------------------------------------------------------------

@@ -36,20 +36,22 @@ public final class TremendousBackpackContents {
     }
 
     public static final TremendousBackpackContents EMPTY =
-            new TremendousBackpackContents(List.of(), StorageTier.WOOD, Priority.LOW, SortMode.AMOUNT);
+            new TremendousBackpackContents(List.of(), StorageTier.WOOD, Priority.LOW, SortMode.AMOUNT, false);
 
     public static final Codec<TremendousBackpackContents> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                     Entry.CODEC.listOf().optionalFieldOf("entries", List.of()).forGetter(c -> c.entries),
                     Codec.STRING.optionalFieldOf("tier", "wood").forGetter(c -> c.tier.getId()),
                     Codec.INT.optionalFieldOf("priority", 0).forGetter(c -> c.priority.ordinal()),
-                    Codec.STRING.optionalFieldOf("sort_mode", "AMOUNT").forGetter(c -> c.sortMode.name()))
+                    Codec.STRING.optionalFieldOf("sort_mode", "AMOUNT").forGetter(c -> c.sortMode.name()),
+                    Codec.BOOL.optionalFieldOf("crafting_upgrade", false).forGetter(c -> c.hasCraftingUpgrade))
             .apply(
                     instance,
-                    (entries, tier, priority, sortMode) -> new TremendousBackpackContents(
+                    (entries, tier, priority, sortMode, craftingUpgrade) -> new TremendousBackpackContents(
                             entries,
                             StorageTier.fromId(tier),
                             Priority.fromOrdinal(priority),
-                            parseSortMode(sortMode))));
+                            parseSortMode(sortMode),
+                            craftingUpgrade)));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, TremendousBackpackContents> STREAM_CODEC =
             new StreamCodec<>() {
@@ -62,7 +64,8 @@ public final class TremendousBackpackContents {
                     StorageTier tier = StorageTier.fromId(buf.readUtf());
                     Priority priority = Priority.fromOrdinal(buf.readVarInt());
                     SortMode sortMode = parseSortMode(buf.readUtf());
-                    return new TremendousBackpackContents(entries, tier, priority, sortMode);
+                    boolean craftingUpgrade = buf.readBoolean();
+                    return new TremendousBackpackContents(entries, tier, priority, sortMode, craftingUpgrade);
                 }
 
                 @Override
@@ -71,6 +74,7 @@ public final class TremendousBackpackContents {
                     buf.writeUtf(value.tier.getId());
                     buf.writeVarInt(value.priority.ordinal());
                     buf.writeUtf(value.sortMode.name());
+                    buf.writeBoolean(value.hasCraftingUpgrade);
                 }
             };
 
@@ -78,12 +82,15 @@ public final class TremendousBackpackContents {
     private final StorageTier tier;
     private final Priority priority;
     private final SortMode sortMode;
+    private final boolean hasCraftingUpgrade;
 
-    public TremendousBackpackContents(List<Entry> entries, StorageTier tier, Priority priority, SortMode sortMode) {
+    public TremendousBackpackContents(
+            List<Entry> entries, StorageTier tier, Priority priority, SortMode sortMode, boolean hasCraftingUpgrade) {
         this.entries = List.copyOf(entries);
         this.tier = tier;
         this.priority = priority;
         this.sortMode = sortMode;
+        this.hasCraftingUpgrade = hasCraftingUpgrade;
     }
 
     // -------------------------------------------------------------------------
@@ -104,6 +111,10 @@ public final class TremendousBackpackContents {
 
     public SortMode sortMode() {
         return sortMode;
+    }
+
+    public boolean hasCraftingUpgrade() {
+        return hasCraftingUpgrade;
     }
 
     public long getCapacity() {
@@ -156,7 +167,9 @@ public final class TremendousBackpackContents {
             }
         }
         if (!found) mutable.add(new Entry(type.copyWithCount(1), toInsert));
-        return new Object[] {amount - toInsert, new TremendousBackpackContents(mutable, tier, priority, sortMode)};
+        return new Object[] {
+            amount - toInsert, new TremendousBackpackContents(mutable, tier, priority, sortMode, hasCraftingUpgrade)
+        };
     }
 
     /**
@@ -180,19 +193,25 @@ public final class TremendousBackpackContents {
             mutable.set(index, new Entry(e.type(), remaining));
         }
         ItemStack extracted = e.type().copyWithCount((int) toExtract);
-        return new Object[] {extracted, new TremendousBackpackContents(mutable, tier, priority, sortMode)};
+        return new Object[] {
+            extracted, new TremendousBackpackContents(mutable, tier, priority, sortMode, hasCraftingUpgrade)
+        };
     }
 
     public TremendousBackpackContents withTier(StorageTier newTier) {
-        return new TremendousBackpackContents(entries, newTier, priority, sortMode);
+        return new TremendousBackpackContents(entries, newTier, priority, sortMode, hasCraftingUpgrade);
     }
 
     public TremendousBackpackContents withPriority(Priority newPriority) {
-        return new TremendousBackpackContents(entries, tier, newPriority, sortMode);
+        return new TremendousBackpackContents(entries, tier, newPriority, sortMode, hasCraftingUpgrade);
     }
 
     public TremendousBackpackContents withSortMode(SortMode newSortMode) {
-        return new TremendousBackpackContents(entries, tier, priority, newSortMode);
+        return new TremendousBackpackContents(entries, tier, priority, newSortMode, hasCraftingUpgrade);
+    }
+
+    public TremendousBackpackContents withCraftingUpgrade() {
+        return new TremendousBackpackContents(entries, tier, priority, sortMode, true);
     }
 
     // -------------------------------------------------------------------------
@@ -206,6 +225,7 @@ public final class TremendousBackpackContents {
         return tier == other.tier
                 && priority == other.priority
                 && sortMode == other.sortMode
+                && hasCraftingUpgrade == other.hasCraftingUpgrade
                 && entries.size() == other.entries.size();
     }
 
@@ -214,6 +234,7 @@ public final class TremendousBackpackContents {
         int r = tier.hashCode();
         r = 31 * r + priority.hashCode();
         r = 31 * r + sortMode.hashCode();
+        r = 31 * r + Boolean.hashCode(hasCraftingUpgrade);
         r = 31 * r + entries.size();
         return r;
     }

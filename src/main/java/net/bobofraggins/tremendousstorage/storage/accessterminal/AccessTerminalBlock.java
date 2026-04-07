@@ -123,11 +123,14 @@ public class AccessTerminalBlock extends BaseEntityBlock implements NetworkConne
         if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         BlockPos niPos = AccessTerminalBFS.findNI((ServerLevel) level, pos);
+        boolean craftingUpgrade = level.getBlockEntity(pos) instanceof AccessTerminalBlockEntity be
+                && be.hasCraftingUpgrade();
 
-        player.openMenu(new AccessTerminalMenu.Provider(pos, niPos), buf -> {
+        player.openMenu(new AccessTerminalMenu.Provider(pos, niPos, craftingUpgrade), buf -> {
             buf.writeBlockPos(pos);
             buf.writeBoolean(niPos != null);
             if (niPos != null) buf.writeBlockPos(niPos);
+            buf.writeBoolean(craftingUpgrade);
         });
         return InteractionResult.SUCCESS;
     }

@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.storageupgrade;
 import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.bobofraggins.tremendousstorage.storage.tremendousbackpack.TremendousBackpackContents;
@@ -48,12 +49,16 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
 
     @Override
     public boolean isAdditionIngredient(ItemStack stack) {
-        return stack.getItem() instanceof StorageUpgradeItem;
+        return stack.getItem() instanceof StorageUpgradeItem || stack.getItem() instanceof CraftingUpgradeItem;
     }
 
     @Override
     public boolean matches(SmithingRecipeInput input, Level level) {
         if (!input.template().isEmpty()) return false;
+        if (input.addition().getItem() instanceof CraftingUpgradeItem) {
+            return isCraftingUpgradeTarget(input.base().getItem())
+                    && !alreadyHasCraftingUpgrade(input.base());
+        }
         if (!isStorageBlock(input.base().getItem())) return false;
         if (!(input.addition().getItem() instanceof StorageUpgradeItem upgradeItem)) return false;
         return tierFromStack(input.base()) == upgradeItem.getFromTier();
@@ -61,6 +66,9 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
 
     @Override
     public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
+        if (input.addition().getItem() instanceof CraftingUpgradeItem) {
+            return applyCraftingUpgrade(input.base());
+        }
         return upgrade(input.base(), (StorageUpgradeItem) input.addition().getItem());
     }
 
@@ -83,6 +91,36 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
                 || item instanceof TremendousBackpackItem
                 || item == Registration.MANILA_FOLDER.get()
                 || item == Registration.ENDER_FOLDER.get();
+    }
+
+    private static boolean isCraftingUpgradeTarget(Item item) {
+        return item == Registration.TREMENDOUS_CHEST_ITEM.get() || item instanceof TremendousBackpackItem;
+    }
+
+    private static boolean alreadyHasCraftingUpgrade(ItemStack stack) {
+        if (stack.getItem() instanceof TremendousBackpackItem) {
+            return stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY)
+                    .hasCraftingUpgrade();
+        }
+        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        return data != null && data.getUnsafe().getBoolean("CraftingUpgrade");
+    }
+
+    private static ItemStack applyCraftingUpgrade(ItemStack blockStack) {
+        if (blockStack.getItem() instanceof TremendousBackpackItem) {
+            TremendousBackpackContents current = blockStack.getOrDefault(
+                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY);
+            ItemStack result = blockStack.copyWithCount(1);
+            result.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), current.withCraftingUpgrade());
+            return result;
+        }
+        // Chest item: set CraftingUpgrade in block_entity_data
+        CustomData existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
+        tag.putBoolean("CraftingUpgrade", true);
+        ItemStack result = blockStack.copyWithCount(1);
+        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        return result;
     }
 
     private static StorageTier tierFromStack(ItemStack stack) {
