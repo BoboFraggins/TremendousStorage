@@ -1,7 +1,0 @@
-{
-  "type": "mekanism:dissolution",
-  "chemical_input": { "amount": 1, "chemical": "mekanism:sulfuric_acid" },
-  "item_input": { "count": 3, "tag": "c:raw_materials/lazurite" },
-  "output": { "amount": 2000, "id": "intellistore:dirty_lazurite" },
-  "per_tick_usage": true
-}

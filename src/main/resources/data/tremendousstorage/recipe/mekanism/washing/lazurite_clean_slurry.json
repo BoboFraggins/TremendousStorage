@@ -1,0 +1,6 @@
+{
+  "type": "mekanism:washing",
+  "chemical_input": { "amount": 1, "chemical": "tremendousstorage:dirty_lazurite" },
+  "fluid_input": { "amount": 5, "tag": "minecraft:water" },
+  "output": { "amount": 1, "id": "tremendousstorage:clean_lazurite" }
+}

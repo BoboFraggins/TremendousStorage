@@ -1,7 +1,0 @@
-{
-  "type": "minecraft:smelting",
-  "cookingtime": 200,
-  "experience": 0.35,
-  "ingredient": { "item": "intellistore:lazurite_dust" },
-  "result": { "count": 1, "id": "intellistore:lazurite_ingot" }
-}

@@ -30,8 +30,8 @@ import numpy as np
 from PIL import Image
 
 BBMODEL   = "blockbench/brain.bbmodel"
-BRAIN_PNG = "src/main/resources/assets/intellistore/textures/item/brain.png"
-TEX_PNG   = "src/main/resources/assets/intellistore/textures/block/brain_texture.png"
+BRAIN_PNG = "src/main/resources/assets/tremendousstorage/textures/item/brain.png"
+TEX_PNG   = "src/main/resources/assets/tremendousstorage/textures/block/brain_texture.png"
 
 
 def non_transparent_crop(path: str) -> np.ndarray:

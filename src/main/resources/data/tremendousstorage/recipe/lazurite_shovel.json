@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "I",
+    "S",
+    "S"
+  ],
+  "key": {
+    "I": { "item": "tremendousstorage:lazurite_ingot" },
+    "S": { "item": "minecraft:stick" }
+  },
+  "result": {
+    "id": "tremendousstorage:lazurite_shovel",
+    "count": 1
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:ender_pearl"
+    },
+    {
+      "item": "tremendousstorage:access_terminal"
+    }
+  ],
+  "result": {
+    "id": "tremendousstorage:personal_access_terminal",
+    "count": 1
+  },
+  "category": "misc"
+}

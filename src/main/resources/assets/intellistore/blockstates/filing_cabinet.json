@@ -1,8 +1,0 @@
-{
-  "variants": {
-    "facing=north": { "model": "intellistore:block/filing_cabinet" },
-    "facing=south": { "model": "intellistore:block/filing_cabinet", "y": 180 },
-    "facing=west":  { "model": "intellistore:block/filing_cabinet", "y": 270 },
-    "facing=east":  { "model": "intellistore:block/filing_cabinet", "y": 90 }
-  }
-}

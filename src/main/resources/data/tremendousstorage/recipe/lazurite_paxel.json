@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "AHP",
+    " S ",
+    " S "
+  ],
+  "key": {
+    "A": { "item": "tremendousstorage:lazurite_axe" },
+    "H": { "item": "tremendousstorage:lazurite_shovel" },
+    "P": { "item": "tremendousstorage:lazurite_pickaxe" },
+    "S": { "item": "minecraft:stick" }
+  },
+  "result": {
+    "id": "tremendousstorage:lazurite_paxel",
+    "count": 1
+  }
+}

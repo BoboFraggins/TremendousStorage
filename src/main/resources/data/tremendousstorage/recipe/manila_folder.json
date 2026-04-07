@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "P  ",
+    "P  ",
+    "PPP"
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:paper"
+    }
+  },
+  "result": {
+    "id": "tremendousstorage:manila_folder",
+    "count": 1
+  },
+  "category": "misc"
+}

@@ -1,5 +1,0 @@
-{
-  "type": "mekanism:enriching",
-  "input": { "count": 3, "tag": "c:raw_materials/lazurite" },
-  "output": { "count": 4, "id": "intellistore:lazurite_dust" }
-}

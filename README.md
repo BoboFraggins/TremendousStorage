@@ -1,4 +1,4 @@
-# IntelliStore
+# TremendousStorage
 
 A tech-themed storage mod for Minecraft 1.21.1 (NeoForge), built around the office filing metaphor.
 Store enormous quantities of a single item type, or organize a myriad of items you only have one or
@@ -38,7 +38,7 @@ extract a folder.
 
 ## Credits
 
-IntelliStore is inspired by and derived in part from
+TremendousStorage is inspired by and derived in part from
 **[Real Filing Cabinet](https://github.com/bafomdad/realfilingcabinet)** by
 [bafomdad](https://github.com/bafomdad), which is licensed under the
 [MIT License](https://github.com/bafomdad/realfilingcabinet/blob/master/License.md).

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top":   "tremendousstorage:block/filing_cabinet_side",
+    "front": "tremendousstorage:block/filing_cabinet_front",
+    "side":  "tremendousstorage:block/filing_cabinet_side"
+  }
+}

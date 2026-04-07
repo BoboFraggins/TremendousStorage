@@ -1,6 +1,6 @@
 {
   "values": {
-    "intellistore:molten_lazurite": {
+    "tremendousstorage:molten_lazurite": {
       "units": [
         { "amount": 10,  "unit": "nugget" },
         { "amount": 90,  "unit": "ingot" },

@@ -1,8 +1,0 @@
-{
-  "variants": {
-    "facing=north": { "model": "intellistore:block/tremendous_backpack_particle" },
-    "facing=south": { "model": "intellistore:block/tremendous_backpack_particle", "y": 180 },
-    "facing=east":  { "model": "intellistore:block/tremendous_backpack_particle", "y": 90 },
-    "facing=west":  { "model": "intellistore:block/tremendous_backpack_particle", "y": 270 }
-  }
-}

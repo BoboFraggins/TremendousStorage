@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SLS",
+    "CWC",
+    "SCS"
+  ],
+  "key": {
+    "S": { "item": "minecraft:stick" },
+    "L": { "item": "minecraft:leather" },
+    "C": { "item": "tremendousstorage:canvas" },
+    "W": { "item": "minecraft:chest" }
+  },
+  "result": {
+    "id": "tremendousstorage:backpack",
+    "count": 1
+  },
+  "category": "misc"
+}

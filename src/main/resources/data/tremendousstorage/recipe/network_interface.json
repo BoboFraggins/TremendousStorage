@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "G",
+    "B",
+    "S"
+  ],
+  "key": {
+    "G": {
+      "item": "minecraft:glass"
+    },
+    "B": {
+      "item": "tremendousstorage:brain"
+    },
+    "S": {
+      "item": "tremendousstorage:positive_vibes_bucket"
+    }
+  },
+  "result": {
+    "id": "tremendousstorage:network_interface",
+    "count": 1
+  },
+  "category": "misc"
+}

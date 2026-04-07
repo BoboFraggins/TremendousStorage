@@ -1,0 +1,7 @@
+{
+  "type": "productivemetalworks:item_melting",
+  "ingredient": { "tag": "c:ingots/lazurite" },
+  "result": [{ "fluid": "tremendousstorage:molten_lazurite", "amount": 90 }],
+  "minTemperature": 1000,
+  "maxTemperature": 0
+}

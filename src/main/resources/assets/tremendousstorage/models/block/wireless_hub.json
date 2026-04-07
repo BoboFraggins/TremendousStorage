@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "tremendousstorage:block/lazurite_block"
+  }
+}

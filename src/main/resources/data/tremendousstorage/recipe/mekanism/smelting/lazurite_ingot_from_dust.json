@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:smelting",
+  "cookingtime": 200,
+  "experience": 0.35,
+  "ingredient": { "item": "tremendousstorage:lazurite_dust" },
+  "result": { "count": 1, "id": "tremendousstorage:lazurite_ingot" }
+}

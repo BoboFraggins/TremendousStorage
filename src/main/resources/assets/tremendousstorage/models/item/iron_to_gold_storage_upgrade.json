@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "tremendousstorage:item/iron_to_gold_storage_upgrade"
+  }
+}

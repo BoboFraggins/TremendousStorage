@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "tremendousstorage:item/wood_to_copper_storage_upgrade"
+  }
+}

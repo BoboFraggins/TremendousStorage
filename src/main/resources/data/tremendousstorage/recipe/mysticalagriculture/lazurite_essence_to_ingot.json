@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "tremendousstorage:lazurite_essence" },
+    { "item": "tremendousstorage:lazurite_essence" },
+    { "item": "tremendousstorage:lazurite_essence" },
+    { "item": "tremendousstorage:lazurite_essence" },
+    { "item": "tremendousstorage:lazurite_essence" },
+    { "item": "tremendousstorage:lazurite_essence" },
+    { "item": "tremendousstorage:lazurite_essence" },
+    { "item": "tremendousstorage:lazurite_essence" },
+    { "item": "tremendousstorage:lazurite_essence" }
+  ],
+  "result": { "id": "tremendousstorage:lazurite_ingot", "count": 1 },
+  "category": "misc"
+}

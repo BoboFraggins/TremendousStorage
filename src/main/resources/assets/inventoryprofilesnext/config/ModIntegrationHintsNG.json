@@ -1,7 +1,7 @@
 {
-  "intellistore": {
-    "net.bobofraggins.intellistore.storage.accessterminal.AccessTerminalScreen": { "ignore": true },
-    "net.bobofraggins.intellistore.shared.ui.AbstractFilingCabinetScreen": { "ignore": true },
-    "net.bobofraggins.intellistore.storage.tremendouschest.TremendousChestScreen": { "ignore": true },
+  "tremendousstorage": {
+    "net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalScreen": { "ignore": true },
+    "net.bobofraggins.tremendousstorage.shared.ui.AbstractFilingCabinetScreen": { "ignore": true },
+    "net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestScreen": { "ignore": true },
   }
 }

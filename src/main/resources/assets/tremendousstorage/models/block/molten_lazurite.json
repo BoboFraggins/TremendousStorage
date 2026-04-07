@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "tremendousstorage:fluid/molten_lazurite_still"
+  }
+}

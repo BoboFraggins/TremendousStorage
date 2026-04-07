@@ -1,0 +1,5 @@
+{
+  "type": "mekanism:enriching",
+  "input": { "count": 1, "tag": "c:dirty_dusts/lazurite" },
+  "output": { "count": 1, "id": "tremendousstorage:lazurite_dust" }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xx",
+    "xx"
+  ],
+  "key": {
+    "x": {
+      "item": "tremendousstorage:lazurite_pieces"
+    }
+  },
+  "result": {
+    "id": "tremendousstorage:raw_lazurite",
+    "count": 1
+  }
+}

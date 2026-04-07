@@ -1,7 +1,0 @@
-{
-  "type": "mekanism:injecting",
-  "chemical_input": { "amount": 1, "chemical": "mekanism:hydrogen_chloride" },
-  "item_input": { "count": 1, "tag": "c:crystals/lazurite" },
-  "output": { "count": 1, "id": "intellistore:lazurite_shard" },
-  "per_tick_usage": true
-}

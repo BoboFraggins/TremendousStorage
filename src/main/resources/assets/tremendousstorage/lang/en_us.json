@@ -1,0 +1,166 @@
+{
+  "block.tremendousstorage.lazurite_bars": "Lazurite Bars",
+  "block.tremendousstorage.lazurite_ore": "Lazurite Ore",
+  "block.tremendousstorage.lazurite_deepslate_ore": "Deepslate Lazurite Ore",
+  "item.tremendousstorage.raw_lazurite": "Raw Lazurite",
+  "item.tremendousstorage.lazurite_nugget": "Lazurite Nugget",
+  "item.tremendousstorage.lazurite_ingot": "Lazurite Ingot",
+  "block.tremendousstorage.lazurite_block": "Block of Lazurite",
+  "item.tremendousstorage.lazurite_pickaxe": "Lazurite Pickaxe",
+  "item.tremendousstorage.lazurite_axe": "Lazurite Axe",
+  "item.tremendousstorage.lazurite_shovel": "Lazurite Shovel",
+  "item.tremendousstorage.lazurite_sword": "Lazurite Sword",
+  "item.tremendousstorage.lazurite_hoe": "Lazurite Hoe",
+  "item.tremendousstorage.lazurite_paxel": "Lazurite Paxel",
+
+  "block.tremendousstorage.filing_cabinet": "Filing Cabinet",
+  "screen.tremendousstorage.filing_cabinet": "Filing Cabinet",
+
+  "block.tremendousstorage.tremendous_chest": "Tremendous Chest",
+
+  "item.tremendousstorage.wood_to_copper_storage_upgrade": "Wood to Copper Storage Upgrade",
+  "item.tremendousstorage.copper_to_iron_storage_upgrade": "Copper to Iron Storage Upgrade",
+  "item.tremendousstorage.iron_to_gold_storage_upgrade": "Iron to Gold Storage Upgrade",
+  "item.tremendousstorage.gold_to_diamond_storage_upgrade": "Gold to Diamond Storage Upgrade",
+  "item.tremendousstorage.diamond_to_emerald_storage_upgrade": "Diamond to Emerald Storage Upgrade",
+  "item.tremendousstorage.emerald_to_netherite_storage_upgrade": "Emerald to Netherite Storage Upgrade",
+  "block.tremendousstorage.tremendous_tank": "Tremendous Tank",
+
+  "item.tremendousstorage.lazurite_ore_chunk": "Lazurite Ore Chunk",
+  "item.tremendousstorage.lazurite_pieces": "Lazurite Pieces",
+  "item.tremendousstorage.lazurite_dust": "Lazurite Dust",
+  "item.tremendousstorage.lazurite_dirty_dust": "Dirty Lazurite Dust",
+  "item.tremendousstorage.lazurite_clump": "Lazurite Clump",
+  "item.tremendousstorage.lazurite_shard": "Lazurite Shard",
+  "item.tremendousstorage.lazurite_crystal": "Lazurite Crystal",
+  "chemical.tremendousstorage.dirty_lazurite": "Dirty Lazurite",
+  "chemical.tremendousstorage.clean_lazurite": "Clean Lazurite",
+  "item.tremendousstorage.lazurite_seeds": "Lazurite Seeds",
+  "item.tremendousstorage.lazurite_essence": "Lazurite Essence",
+
+  "item.tremendousstorage.manila_folder": "Manila Folder",
+
+  "item.tremendousstorage.manila_folder.empty": "Empty",
+  "item.tremendousstorage.manila_folder.contents": "%1$s %2$s",
+  "item.tremendousstorage.manila_folder.capacity": "Capacity: %1$s",
+
+  "item.tremendousstorage.ender_folder": "Ender Folder",
+
+  "item.tremendousstorage.ender_folder.linked": "Link: ...%1$s",
+
+  "tier.tremendousstorage.wood": "Wood",
+  "tier.tremendousstorage.copper": "Copper",
+  "tier.tremendousstorage.iron": "Iron",
+  "tier.tremendousstorage.gold": "Gold",
+  "tier.tremendousstorage.diamond": "Diamond",
+  "tier.tremendousstorage.emerald": "Emerald",
+  "tier.tremendousstorage.netherite": "Netherite",
+
+  "item.tremendousstorage.whiteout_tape": "Whiteout Tape",
+
+  "itemGroup.tremendousstorage": "TremendousStorage",
+
+  "jade.tremendousstorage.filing_cabinet.slot": "%2$s of %3$s %1$s",
+
+  "jade.tremendousstorage.tremendous_chest.empty": "Empty",
+  "jade.tremendousstorage.tremendous_chest.total": "%1$s / %2$s items",
+
+  "jade.tremendousstorage.tremendous_tank.empty": "Empty",
+  "jade.tremendousstorage.tremendous_tank.contents": "%1$s mB of %2$s mB %3$s",
+
+  "priority.tremendousstorage.lowest": "Lowest",
+  "priority.tremendousstorage.low": "Low",
+  "priority.tremendousstorage.normal": "Normal",
+  "priority.tremendousstorage.high": "High",
+  "priority.tremendousstorage.highest": "Highest",
+
+  "screen.tremendousstorage.priority_label": "Priority:",
+  "screen.tremendousstorage.sort_label": "Sort",
+  "item.tremendousstorage.storage_interface": "Storage Interface",
+  "screen.tremendousstorage.storage_interface": "Storage Interface",
+
+  "item.tremendousstorage.import_interface": "Import Interface",
+  "item.tremendousstorage.export_interface": "Export Interface",
+  "screen.tremendousstorage.import_interface": "Import Interface",
+  "screen.tremendousstorage.export_interface": "Export Interface",
+  "screen.tremendousstorage.filter_label": "Filter:",
+  "screen.tremendousstorage.filter_accept": "Mode: Accept",
+  "screen.tremendousstorage.filter_reject": "Mode: Reject",
+
+  "item.tremendousstorage.tremendous_tank.tooltip": "%1$s / %2$s mB %3$s",
+
+  "screen.tremendousstorage.void_excess_label": "Void Excess:",
+  "screen.tremendousstorage.void_excess_on": "Void Excess: ON",
+  "screen.tremendousstorage.void_excess_off": "Void Excess: OFF",
+  "screen.tremendousstorage.clear_tank_contents": "Clear Contents",
+
+  "block.tremendousstorage.network_interface": "Network Interface",
+  "block.tremendousstorage.access_terminal": "Access Terminal",
+  "block.tremendousstorage.storage_access_terminal": "Access Terminal",
+
+  "screen.tremendousstorage.access_terminal": "Access Terminal",
+  "screen.tremendousstorage.access_terminal.connected": "Network: Connected",
+  "screen.tremendousstorage.access_terminal.disconnected": "Network: Not Connected",
+  "screen.tremendousstorage.access_terminal.empty": "Network is empty",
+
+  "block.tremendousstorage.positive_vibes": "Positive Vibes",
+  "block.tremendousstorage.positive_vibes_cauldron": "Positive Vibes Cauldron",
+
+  "item.tremendousstorage.zombie_brain": "Zombie Brain",
+  "item.tremendousstorage.zombie_brain.tooltip": "Brrraaaiinnnsss...",
+  "item.tremendousstorage.brain": "Brain",
+  "item.tremendousstorage.brain.tooltip": "Good as new!",
+  "fluid_type.tremendousstorage.positive_vibes": "Positive Vibes",
+  "item.tremendousstorage.positive_vibes_bucket": "Positive Vibes Bucket",
+  "jei.tremendousstorage.positive_vibes_cauldron": "Positive Vibes Cauldron",
+  "jei.tremendousstorage.positive_vibes_cauldron.step.make.glistering_melon": "Right-click on a Water-filled Cauldron",
+  "jei.tremendousstorage.positive_vibes_cauldron.step.make.water_bucket": "Fill an empty Cauldron with this Bucket",
+  "jei.tremendousstorage.positive_vibes_cauldron.step.make.cauldron": "Place in world and fill with Water Bucket",
+  "jei.tremendousstorage.positive_vibes_cauldron.step.make.output": "Scoop out with an empty Bucket",
+  "jei.tremendousstorage.positive_vibes_cauldron.step.heal.zombie_brain": "Right-click on a Positive Vibes Cauldron",
+  "jei.tremendousstorage.positive_vibes_cauldron.step.heal.salve_bucket": "Fill a Cauldron with this Bucket",
+  "jei.tremendousstorage.positive_vibes_cauldron.step.heal.cauldron": "Place in world and fill with Positive Vibes Bucket",
+  "jei.tremendousstorage.positive_vibes_cauldron.step.heal.output": "Healed Zombie Brain",
+  "fluid_type.tremendousstorage.molten_lazurite": "Molten Lazurite",
+  "item.tremendousstorage.molten_lazurite_bucket": "Molten Lazurite Bucket",
+
+  "screen.tremendousstorage.network_interface": "Network Interface",
+  "screen.tremendousstorage.network_interface.valid": "Network: Valid",
+  "screen.tremendousstorage.network_interface.invalid": "Network: Invalid",
+
+  "block.tremendousstorage.tube": "Tube",
+
+  "block.tremendousstorage.wireless_hub": "Wireless Hub",
+  "screen.tremendousstorage.wireless_hub": "Wireless Hub",
+  "screen.tremendousstorage.wireless_hub.unlinked": "Unlinked",
+  "screen.tremendousstorage.wireless_hub.linked": "Linked",
+
+  "item.tremendousstorage.personal_access_terminal": "Personal Access Terminal",
+  "item.tremendousstorage.personal_access_terminal.unlinked": "Not linked to any network",
+  "item.tremendousstorage.personal_access_terminal.linked": "Linked to NI at %1$d, %2$d, %3$d",
+  "item.tremendousstorage.personal_access_terminal.not_linked": "Personal Access Terminal is not linked to a network",
+  "item.tremendousstorage.personal_access_terminal.invalid_network": "Network is unavailable",
+  "item.tremendousstorage.personal_access_terminal.hub_disconnected": "Wireless Hub is no longer connected to this network",
+
+  "key.tremendousstorage.open_personal_access_terminal": "Open Personal Access Terminal",
+  "key.tremendousstorage.quick_stack": "Quick Stack",
+  "key.tremendousstorage.cycle_sort": "Cycle Sort Mode",
+  "key.categories.tremendousstorage": "TremendousStorage",
+
+  "jade.tremendousstorage.network_interface.invalid": "Network Invalid",
+
+  "action.tremendousstorage.deposit_complete": "Deposited items into network",
+
+  "item.tremendousstorage.canvas": "Canvas",
+  "block.tremendousstorage.canvas_block": "Canvas Block",
+
+  "item.tremendousstorage.tremendous_backpack": "Tremendous Backpack",
+  "key.tremendousstorage.open_tremendous_backpack": "Open Tremendous Backpack",
+
+  "item.tremendousstorage.personal_filing_cabinet": "Personal Filing Cabinet",
+  "screen.tremendousstorage.personal_filing_cabinet": "Personal Filing Cabinet",
+
+  "key.tremendousstorage.open_personal_filing_cabinet": "Open Personal Filing Cabinet",
+
+  "item.tremendousstorage.base_upgrade": "Base Upgrade"
+}

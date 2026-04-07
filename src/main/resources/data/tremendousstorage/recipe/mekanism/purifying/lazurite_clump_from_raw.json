@@ -1,0 +1,7 @@
+{
+  "type": "mekanism:purifying",
+  "chemical_input": { "amount": 1, "chemical": "mekanism:oxygen" },
+  "item_input": { "count": 1, "tag": "c:raw_materials/lazurite" },
+  "output": { "count": 2, "id": "tremendousstorage:lazurite_clump" },
+  "per_tick_usage": true
+}

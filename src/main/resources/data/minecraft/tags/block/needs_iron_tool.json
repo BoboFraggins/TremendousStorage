@@ -1,8 +1,8 @@
 {
   "replace": false,
   "values": [
-    "intellistore:lazurite_ore",
-    "intellistore:lazurite_deepslate_ore",
-    "intellistore:lazurite_block"
+    "tremendousstorage:lazurite_ore",
+    "tremendousstorage:lazurite_deepslate_ore",
+    "tremendousstorage:lazurite_block"
   ]
 }

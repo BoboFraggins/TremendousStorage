@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NNN",
+    "NNN",
+    "NNN"
+  ],
+  "key": {
+    "N": { "item": "tremendousstorage:lazurite_nugget" }
+  },
+  "result": { "id": "tremendousstorage:lazurite_ingot", "count": 1 },
+  "category": "misc"
+}

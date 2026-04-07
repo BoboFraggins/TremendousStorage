@@ -1,0 +1,30 @@
+package net.bobofraggins.tremendousstorage.storage.filingcabinet;
+
+import net.bobofraggins.tremendousstorage.TremendousStorage;
+import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.ui.PriorityScreen;
+import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsScreen;
+import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestScreen;
+import net.bobofraggins.tremendousstorage.storage.tubeattachments.ExportInterfaceScreen;
+import net.bobofraggins.tremendousstorage.storage.tubeattachments.ImportInterfaceScreen;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+
+/** Client-only event subscriber for screen registration. */
+@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+public final class FilingCabinetClientEvents {
+
+    private FilingCabinetClientEvents() {}
+
+    @SubscribeEvent
+    public static void onRegisterScreens(RegisterMenuScreensEvent event) {
+        event.register(Registration.FILING_CABINET_MENU.get(), FilingCabinetScreen::new);
+        event.register(Registration.PRIORITY_MENU.get(), PriorityScreen::new);
+        event.register(Registration.TREMENDOUS_CHEST_MENU.get(), TremendousChestScreen::new);
+        event.register(Registration.TANK_SETTINGS_MENU.get(), TankSettingsScreen::new);
+        event.register(Registration.IMPORT_INTERFACE_MENU.get(), ImportInterfaceScreen::new);
+        event.register(Registration.EXPORT_INTERFACE_MENU.get(), ExportInterfaceScreen::new);
+    }
+}

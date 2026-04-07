@@ -1,8 +1,0 @@
-{
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    { "item": "intellistore:lazurite_ingot" }
-  ],
-  "result": { "id": "intellistore:lazurite_nugget", "count": 9 },
-  "category": "misc"
-}

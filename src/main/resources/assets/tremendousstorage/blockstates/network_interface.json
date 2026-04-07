@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "tremendousstorage:block/network_interface" },
+    "facing=south": { "model": "tremendousstorage:block/network_interface" },
+    "facing=east":  { "model": "tremendousstorage:block/network_interface" },
+    "facing=west":  { "model": "tremendousstorage:block/network_interface" }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "tremendousstorage:block/tremendous_tank" },
+    "facing=south": { "model": "tremendousstorage:block/tremendous_tank", "y": 180 },
+    "facing=east":  { "model": "tremendousstorage:block/tremendous_tank", "y": 270 },
+    "facing=west":  { "model": "tremendousstorage:block/tremendous_tank", "y": 90 }
+  }
+}

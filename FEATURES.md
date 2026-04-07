@@ -1,4 +1,4 @@
-# IntelliStore — Feature Reference
+# TremendousStorage — Feature Reference
 
 NeoForge 1.21.1 · Minecraft 1.21.1
 
@@ -277,7 +277,7 @@ A linked pair of Manila Folder variants whose contents are shared globally acros
 - Cascade prevention: cache-clear propagation stops immediately if a tube's cache is already stale
 
 ### Network Connectivity
-The following IntelliStore blocks act as **color-agnostic network connectors**: Filing Cabinet, Junk Drawer, Bulk Storage Container, Storage Access Terminal, Wireless Hub, and Stirling Engine.
+The following TremendousStorage blocks act as **color-agnostic network connectors**: Filing Cabinet, Junk Drawer, Bulk Storage Container, Storage Access Terminal, Wireless Hub, and Stirling Engine.
 
 When the BFS encounters one of these blocks as a tube neighbor it:
 1. Collects the block's `IItemHandler` as a storage endpoint (same as always)
@@ -311,7 +311,7 @@ The network draws FE from the Network Interface's internal buffer each tick. Tot
 ## Optional Dependencies
 
 ### Jade (WAILA) — compileOnly, optional at runtime
-Adds block tooltip overlays when looking at IntelliStore blocks:
+Adds block tooltip overlays when looking at TremendousStorage blocks:
 
 | Block | Tooltip |
 |-------|---------|

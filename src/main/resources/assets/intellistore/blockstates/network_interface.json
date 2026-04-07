@@ -1,8 +1,0 @@
-{
-  "variants": {
-    "facing=north": { "model": "intellistore:block/network_interface" },
-    "facing=south": { "model": "intellistore:block/network_interface" },
-    "facing=east":  { "model": "intellistore:block/network_interface" },
-    "facing=west":  { "model": "intellistore:block/network_interface" }
-  }
-}

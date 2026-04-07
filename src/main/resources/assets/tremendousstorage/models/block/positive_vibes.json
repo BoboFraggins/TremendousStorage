@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "tremendousstorage:fluid/positive_vibes_still"
+  }
+}

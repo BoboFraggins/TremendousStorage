@@ -1,0 +1,5 @@
+{
+  "type": "mekanism:crystallizing",
+  "input": { "amount": 200, "chemical": "tremendousstorage:clean_lazurite" },
+  "output": { "count": 1, "id": "tremendousstorage:lazurite_crystal" }
+}

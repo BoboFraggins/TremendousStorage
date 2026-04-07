@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "intellistore:item/diamond_to_emerald_storage_upgrade"
-  }
-}

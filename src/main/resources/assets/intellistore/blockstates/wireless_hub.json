@@ -1,8 +1,0 @@
-{
-  "variants": {
-    "facing=north": { "model": "intellistore:block/wireless_hub" },
-    "facing=south": { "model": "intellistore:block/wireless_hub" },
-    "facing=east":  { "model": "intellistore:block/wireless_hub" },
-    "facing=west":  { "model": "intellistore:block/wireless_hub" }
-  }
-}

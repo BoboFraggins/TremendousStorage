@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "tremendousstorage:block/filing_cabinet" },
+    "facing=south": { "model": "tremendousstorage:block/filing_cabinet", "y": 180 },
+    "facing=west":  { "model": "tremendousstorage:block/filing_cabinet", "y": 270 },
+    "facing=east":  { "model": "tremendousstorage:block/filing_cabinet", "y": 90 }
+  }
+}

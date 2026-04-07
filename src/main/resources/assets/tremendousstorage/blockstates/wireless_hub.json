@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "tremendousstorage:block/wireless_hub" },
+    "facing=south": { "model": "tremendousstorage:block/wireless_hub" },
+    "facing=east":  { "model": "tremendousstorage:block/wireless_hub" },
+    "facing=west":  { "model": "tremendousstorage:block/wireless_hub" }
+  }
+}

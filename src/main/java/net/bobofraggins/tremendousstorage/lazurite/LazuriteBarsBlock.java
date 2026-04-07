@@ -1,0 +1,11 @@
+package net.bobofraggins.tremendousstorage.lazurite;
+
+import net.minecraft.world.level.block.IronBarsBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+
+public class LazuriteBarsBlock extends IronBarsBlock {
+
+    public LazuriteBarsBlock(BlockBehaviour.Properties properties) {
+        super(properties);
+    }
+}

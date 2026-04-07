@@ -1,10 +1,10 @@
 {
   "replace": false,
   "entries": [
-    "intellistore:village_cartographer_folders",
-    "intellistore:village_weaponsmith_sword",
-    "intellistore:village_toolsmith_tool",
-    "intellistore:end_city",
-    "intellistore:any_chest_secrets"
+    "tremendousstorage:village_cartographer_folders",
+    "tremendousstorage:village_weaponsmith_sword",
+    "tremendousstorage:village_toolsmith_tool",
+    "tremendousstorage:end_city",
+    "tremendousstorage:any_chest_secrets"
   ]
 }

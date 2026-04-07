@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RLR",
+    "LCL",
+    "RLR"
+  ],
+  "key": {
+    "L": {
+      "item": "tremendousstorage:lazurite_ingot"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "C": {
+      "tag": "c:chests"
+    }
+  },
+  "result": {
+    "id": "tremendousstorage:base_upgrade",
+    "count": 1
+  },
+  "category": "misc"
+}

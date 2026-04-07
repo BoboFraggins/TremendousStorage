@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    "PSP",
+    "BP "
+  ],
+  "key": {
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "S": {
+      "item": "minecraft:slime_ball"
+    },
+    "B": {
+      "item": "minecraft:white_dye"
+    }
+  },
+  "result": {
+    "id": "tremendousstorage:whiteout_tape",
+    "count": 1
+  },
+  "category": "misc"
+}
