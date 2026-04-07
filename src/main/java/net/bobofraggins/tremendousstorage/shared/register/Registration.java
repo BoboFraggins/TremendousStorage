@@ -699,9 +699,8 @@ public final class Registration {
                     "ender_folder", () -> new SimpleCraftingRecipeSerializer<>(EnderFolderRecipe::new));
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StorageSmithingUpgradeRecipe>>
-            STORAGE_SMITHING_UPGRADE_RECIPE = RECIPE_SERIALIZERS.register(
-                    "storage_smithing_upgrade",
-                    () -> new RecipeSerializer<>() {
+            STORAGE_SMITHING_UPGRADE_RECIPE =
+                    RECIPE_SERIALIZERS.register("storage_smithing_upgrade", () -> new RecipeSerializer<>() {
                         @Override
                         public com.mojang.serialization.MapCodec<StorageSmithingUpgradeRecipe> codec() {
                             return StorageSmithingUpgradeRecipe.CODEC;
@@ -709,8 +708,7 @@ public final class Registration {
 
                         @Override
                         public net.minecraft.network.codec.StreamCodec<
-                                        net.minecraft.network.RegistryFriendlyByteBuf,
-                                        StorageSmithingUpgradeRecipe>
+                                        net.minecraft.network.RegistryFriendlyByteBuf, StorageSmithingUpgradeRecipe>
                                 streamCodec() {
                             return StorageSmithingUpgradeRecipe.STREAM_CODEC;
                         }
