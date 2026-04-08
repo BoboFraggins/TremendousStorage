@@ -1,8 +1,10 @@
 package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
+import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -11,7 +13,7 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * Menu for the Recycling Bin. Contains one void slot where any item placed into
- * it is immediately destroyed. Player inventory slots are shown below.
+ * it is immediately destroyed, generating Positive Vibes fluid in the block entity.
  */
 public class RecyclingBinMenu extends AbstractContainerMenu {
 
@@ -23,22 +25,16 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
 
     private final BlockPos pos;
 
-    /** Server-side constructor. */
-    public RecyclingBinMenu(int id, Inventory inv, BlockPos pos) {
+    /** Server-side constructor (BE may be null on client). */
+    public RecyclingBinMenu(int id, Inventory inv, BlockPos pos, @Nullable RecyclingBinBlockEntity be) {
         super(Registration.RECYCLING_BIN_MENU.get(), id);
         this.pos = pos;
 
         // Slot 0: void slot — anything placed here is instantly destroyed
-        addSlot(new Slot(new VoidContainer(), 0, VOID_SLOT_X, VOID_SLOT_Y) {
+        addSlot(new Slot(new VoidContainer(be), 0, VOID_SLOT_X, VOID_SLOT_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return true;
-            }
-
-            @Override
-            public void setChanged() {
-                // Destroy the item immediately
-                container.setItem(0, ItemStack.EMPTY);
             }
         });
 
@@ -56,7 +52,7 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
 
     /** Client-side constructor — reads BlockPos from network buffer. */
     public RecyclingBinMenu(int id, Inventory inv, FriendlyByteBuf buf) {
-        this(id, inv, buf.readBlockPos());
+        this(id, inv, buf.readBlockPos(), null);
     }
 
     public BlockPos getPos() {
@@ -81,31 +77,27 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int slotIndex) {
+        if (slotIndex == 0) return ItemStack.EMPTY;
+
+        // Player inventory/hotbar → void slot: destroy the item
         Slot slot = slots.get(slotIndex);
-        if (!slot.hasItem()) return ItemStack.EMPTY;
-
-        ItemStack stack = slot.getItem();
-
-        if (slotIndex == 0) {
-            // Void slot → player inventory — item was already destroyed, nothing to move
-            slot.setChanged();
-            return ItemStack.EMPTY;
-        }
-
-        // Player inventory → void slot (destroy the item)
-        if (slotIndex >= 1) {
+        if (slot.hasItem()) {
             slot.set(ItemStack.EMPTY);
         }
-
         return ItemStack.EMPTY;
     }
 
     // -------------------------------------------------------------------------
-    // Inner: minimal single-slot container whose setItem notifies the void slot
+    // Inner: single-slot void container — notifies BE on item insertion
     // -------------------------------------------------------------------------
 
-    private static class VoidContainer implements net.minecraft.world.Container {
-        private ItemStack item = ItemStack.EMPTY;
+    private static class VoidContainer implements Container {
+        @Nullable
+        private final RecyclingBinBlockEntity be;
+
+        VoidContainer(@Nullable RecyclingBinBlockEntity be) {
+            this.be = be;
+        }
 
         @Override public int getContainerSize() { return 1; }
         @Override public boolean isEmpty() { return true; }
@@ -115,8 +107,10 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
 
         @Override
         public void setItem(int slot, ItemStack stack) {
-            // Destroy by simply not storing it
-            item = ItemStack.EMPTY;
+            if (!stack.isEmpty() && be != null) {
+                be.onItemsDestroyed(stack.getCount());
+            }
+            // Item is not stored — it's destroyed
         }
 
         @Override public void setChanged() {}

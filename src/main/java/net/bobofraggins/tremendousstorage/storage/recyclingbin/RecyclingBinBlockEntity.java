@@ -2,6 +2,8 @@ package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -15,6 +17,62 @@ import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider {
+
+    public static final int FLUID_CAPACITY_MB = 10_000;
+    private static final int MB_PER_ITEM = 10;
+
+    private int vibesAmount = 0;
+
+    // -------------------------------------------------------------------------
+    // Fluid storage
+    // -------------------------------------------------------------------------
+
+    /** Adds up to {@code mB} millibuckets of Positive Vibes, capped at capacity. */
+    public void addVibes(int mB) {
+        vibesAmount = Math.min(FLUID_CAPACITY_MB, vibesAmount + mB);
+        setChanged();
+    }
+
+    public int getVibesAmount() {
+        return vibesAmount;
+    }
+
+    /**
+     * Extracts up to {@code maxDrain} mB. Returns the amount actually drained.
+     * Pass {@code simulate = true} to preview without modifying state.
+     */
+    public int extractVibes(int maxDrain, boolean simulate) {
+        int drained = Math.min(vibesAmount, maxDrain);
+        if (!simulate && drained > 0) {
+            vibesAmount -= drained;
+            setChanged();
+        }
+        return drained;
+    }
+
+    /**
+     * Called when an item is destroyed (from either the menu slot or the item handler).
+     * Adds {@value #MB_PER_ITEM} mB per item in the stack; silently does nothing if full.
+     */
+    public void onItemsDestroyed(int count) {
+        addVibes(count * MB_PER_ITEM);
+    }
+
+    // -------------------------------------------------------------------------
+    // NBT persistence
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        tag.putInt("Vibes", vibesAmount);
+    }
+
+    @Override
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        vibesAmount = tag.getInt("Vibes");
+    }
 
     // -------------------------------------------------------------------------
     // Lid animation state (client-side)
@@ -124,6 +182,6 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
 
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
-        return new RecyclingBinMenu(id, inv, worldPosition);
+        return new RecyclingBinMenu(id, inv, worldPosition, this);
     }
 }

@@ -77,6 +77,8 @@ import net.bobofraggins.tremendousstorage.storage.whiteout.FolderTapeRecipe;
 import net.bobofraggins.tremendousstorage.storage.whiteout.WhiteoutTapeItem;
 import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlock;
 import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinFluidHandler;
+import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinItemHandler;
 import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinMenu;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlock;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEntity;
@@ -942,5 +944,13 @@ public final class Registration {
                 Capabilities.ItemHandler.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getItemHandler());
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                RECYCLING_BIN_BE_TYPE.get(),
+                (be, side) -> new RecyclingBinItemHandler(be));
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                RECYCLING_BIN_BE_TYPE.get(),
+                (be, side) -> new RecyclingBinFluidHandler(be));
     }
 }
