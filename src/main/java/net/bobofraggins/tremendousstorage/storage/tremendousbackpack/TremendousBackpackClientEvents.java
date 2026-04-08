@@ -43,12 +43,15 @@ public final class TremendousBackpackClientEvents {
     @SubscribeEvent
     public static void onRegisterScreens(RegisterMenuScreensEvent event) {
         event.register(Registration.TREMENDOUS_BACKPACK_MENU.get(), TremendousBackpackScreen::new);
+        event.register(Registration.ENDER_TREMENDOUS_BACKPACK_MENU.get(), TremendousBackpackScreen::new);
     }
 
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(
                 Registration.TREMENDOUS_BACKPACK_BE_TYPE.get(), TremendousBackpackRenderer::new);
+        event.registerBlockEntityRenderer(
+                Registration.ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(), TremendousBackpackRenderer::new);
     }
 
     @SubscribeEvent

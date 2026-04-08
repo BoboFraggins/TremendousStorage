@@ -19,6 +19,8 @@ public final class TremendousChestClientEvents {
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(Registration.TREMENDOUS_CHEST_BE_TYPE.get(), TremendousChestRenderer::new);
+        event.registerBlockEntityRenderer(
+                Registration.ENDER_TREMENDOUS_CHEST_BE_TYPE.get(), TremendousChestRenderer::new);
     }
 
     @SubscribeEvent

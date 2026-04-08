@@ -17,6 +17,7 @@
   "screen.tremendousstorage.filing_cabinet": "Filing Cabinet",
 
   "block.tremendousstorage.tremendous_chest": "Tremendous Chest",
+  "block.tremendousstorage.ender_tremendous_chest": "Ender Tremendous Chest",
 
   "item.tremendousstorage.wood_to_copper_storage_upgrade": "Wood to Copper Storage Upgrade",
   "item.tremendousstorage.copper_to_iron_storage_upgrade": "Copper to Iron Storage Upgrade",
@@ -112,6 +113,10 @@
   "item.tremendousstorage.brain.tooltip": "Good as new!",
   "fluid_type.tremendousstorage.positive_vibes": "Positive Vibes",
   "item.tremendousstorage.positive_vibes_bucket": "Positive Vibes Bucket",
+  "jei.tremendousstorage.ender_folder_smithing": "Ender Folder",
+  "jei.tremendousstorage.ender_storage_smithing": "Ender Storage",
+  "jei.tremendousstorage.ender_chest_smithing": "Ender Chest",
+  "jei.tremendousstorage.ender_backpack_smithing": "Ender Backpack",
   "jei.tremendousstorage.positive_vibes_cauldron": "Positive Vibes Cauldron",
   "jei.tremendousstorage.positive_vibes_cauldron.step.make.glistering_melon": "Right-click on a Water-filled Cauldron",
   "jei.tremendousstorage.positive_vibes_cauldron.step.make.water_bucket": "Fill an empty Cauldron with this Bucket",
@@ -155,6 +160,7 @@
   "block.tremendousstorage.canvas_block": "Canvas Block",
 
   "item.tremendousstorage.tremendous_backpack": "Tremendous Backpack",
+  "item.tremendousstorage.ender_tremendous_backpack": "Ender Tremendous Backpack",
   "key.tremendousstorage.open_tremendous_backpack": "Open Tremendous Backpack",
 
   "item.tremendousstorage.personal_filing_cabinet": "Personal Filing Cabinet",

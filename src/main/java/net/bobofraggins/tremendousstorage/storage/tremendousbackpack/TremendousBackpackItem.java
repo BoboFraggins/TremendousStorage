@@ -72,11 +72,22 @@ public class TremendousBackpackItem extends BlockItem {
     /**
      * Opens the Tremendous Backpack UI for the given player using the indicated slot location.
      * Validates that the slot still holds a TremendousBackpackItem before opening.
+     *
+     * <p>Delegates to {@link #openUi} so subclasses (e.g. Ender Backpack) can inject
+     * pre-open sync logic and swap in a different menu type.
      */
     public static void openBackpackUi(ServerPlayer player, int slotType, int slotIndex, String slotId) {
         ItemStack backpackStack = getBackpackStack(player, slotType, slotIndex, slotId);
         if (backpackStack.isEmpty()) return;
+        if (backpackStack.getItem() instanceof TremendousBackpackItem item) {
+            item.openUi(player, backpackStack, slotType, slotIndex, slotId);
+        }
+    }
 
+    /**
+     * Opens the backpack UI. Override in subclasses to sync storage or use a different menu type.
+     */
+    protected void openUi(ServerPlayer player, ItemStack backpackStack, int slotType, int slotIndex, String slotId) {
         TremendousBackpackContents contents = backpackStack.getOrDefault(
                 Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY);
         int initialPriority = contents.priority().ordinal();
@@ -178,6 +189,26 @@ public class TremendousBackpackItem extends BlockItem {
             this.slotId = slotId;
             this.data = data;
             this.hasCraftingUpgrade = hasCraftingUpgrade;
+        }
+
+        protected int getSlotType() {
+            return slotType;
+        }
+
+        protected int getSlotIndex() {
+            return slotIndex;
+        }
+
+        protected String getSlotId() {
+            return slotId;
+        }
+
+        protected ContainerData getData() {
+            return data;
+        }
+
+        protected boolean hasCraftingUpgrade() {
+            return hasCraftingUpgrade;
         }
 
         @Override

@@ -8,6 +8,7 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.ingredients.ITypedIngredient;
+import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
@@ -19,7 +20,6 @@ import net.bobofraggins.tremendousstorage.shared.network.SetImportExportFilterPa
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
-import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderExtractRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderStorageRecipe;
@@ -29,6 +29,7 @@ import net.bobofraggins.tremendousstorage.storage.whiteout.FolderTapeRecipe;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
@@ -50,8 +51,11 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
 
     @Override
     public void registerCategories(IRecipeCategoryRegistration reg) {
+        IGuiHelper guiHelper = reg.getJeiHelpers().getGuiHelper();
         reg.addRecipeCategories(
-                new PositiveVibesCauldronCategory(reg.getJeiHelpers().getGuiHelper()));
+                new PositiveVibesCauldronCategory(guiHelper),
+                new EnderFolderSmithingCategory(guiHelper),
+                new EnderStorageSmithingCategory(guiHelper));
     }
 
     @Override
@@ -59,6 +63,12 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
         reg.addRecipes(
                 PositiveVibesCauldronCategory.RECIPE_TYPE,
                 List.of(PositiveVibesCauldronJeiRecipe.makeSalve(), PositiveVibesCauldronJeiRecipe.healBrain()));
+        reg.addRecipes(
+                EnderFolderSmithingCategory.RECIPE_TYPE,
+                List.of(EnderFolderSmithingCategory.Recipe.INSTANCE));
+        reg.addRecipes(
+                EnderStorageSmithingCategory.RECIPE_TYPE,
+                List.of(EnderStorageSmithingCategory.Recipe.CHEST, EnderStorageSmithingCategory.Recipe.BACKPACK));
     }
 
     @Override
@@ -68,6 +78,16 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
         reg.addRecipeCatalyst(
                 Registration.HEALING_SALVE_CAULDRON_ITEM.get().getDefaultInstance(),
                 PositiveVibesCauldronCategory.RECIPE_TYPE);
+        reg.addRecipeCatalyst(
+                new ItemStack(Items.SMITHING_TABLE), EnderFolderSmithingCategory.RECIPE_TYPE);
+        reg.addRecipeCatalyst(
+                Registration.ENDER_STORAGE_UPGRADE.get().getDefaultInstance(),
+                EnderFolderSmithingCategory.RECIPE_TYPE);
+        reg.addRecipeCatalyst(
+                new ItemStack(Items.SMITHING_TABLE), EnderStorageSmithingCategory.RECIPE_TYPE);
+        reg.addRecipeCatalyst(
+                Registration.ENDER_STORAGE_UPGRADE.get().getDefaultInstance(),
+                EnderStorageSmithingCategory.RECIPE_TYPE);
     }
 
     @Override
@@ -78,8 +98,6 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
                 .addExtension(FolderExtractRecipe.class, new FolderRecipeExtensions.ExtractExtension());
         reg.getCraftingCategory().addExtension(FolderMergeRecipe.class, new FolderRecipeExtensions.MergeExtension());
         reg.getCraftingCategory().addExtension(FolderTapeRecipe.class, new FolderRecipeExtensions.TapeExtension());
-        reg.getCraftingCategory()
-                .addExtension(EnderFolderRecipe.class, new FolderRecipeExtensions.EnderFolderExtension());
     }
 
     @Override

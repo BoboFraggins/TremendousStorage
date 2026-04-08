@@ -396,10 +396,49 @@ public class TremendousChestBlockEntity extends BlockEntity implements MenuProvi
      * topology cache or fire {@code level.invalidateCapabilities} — the handler identity is
      * unchanged and no BFS re-scan is needed.
      */
-    private void notifyItemsChanged() {
+    protected void notifyItemsChanged() {
         super.setChanged();
         if (level instanceof ServerLevel sl) {
             niLink.notifyChanged(sl, worldPosition, getBlockState());
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Protected inventory helpers (used by ender subclasses to sync with storage)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Serialises only the item inventory (the "Types" list) to a tag, without tier/priority/etc.
+     * Used by ender subclasses to persist inventory to shared storage.
+     */
+    protected ListTag saveTypes(HolderLookup.Provider registries) {
+        ListTag list = new ListTag();
+        for (StorageKey key : orderedKeys) {
+            CompoundTag entry = new CompoundTag();
+            entry.put(TAG_TYPE, key.toDisplayStack().save(registries));
+            entry.putLong(TAG_COUNT, items.getLong(key));
+            list.add(entry);
+        }
+        return list;
+    }
+
+    /**
+     * Clears the current inventory and deserialises it from a "Types" list tag.
+     * Used by ender subclasses to restore inventory from shared storage.
+     */
+    protected void loadTypes(ListTag list, HolderLookup.Provider registries) {
+        items.clear();
+        orderedKeys.clear();
+        cachedTotalCount = 0;
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag entry = list.getCompound(i);
+            long count = entry.getLong(TAG_COUNT);
+            ItemStack.parse(registries, entry.getCompound(TAG_TYPE)).ifPresent(stack -> {
+                StorageKey key = StorageKey.of(stack);
+                items.put(key, count);
+                orderedKeys.add(key);
+                cachedTotalCount += count;
+            });
         }
     }
 

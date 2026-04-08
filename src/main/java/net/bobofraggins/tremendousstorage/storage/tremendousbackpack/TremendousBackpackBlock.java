@@ -108,7 +108,7 @@ public class TremendousBackpackBlock extends BaseEntityBlock {
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
-        if (level.getBlockEntity(pos) instanceof TremendousBackpackBlockEntity be) {
+        if (level.getBlockEntity(pos) instanceof net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity be) {
             be.startOpen(player);
             player.openMenu(be, buf -> buf.writeBlockPos(pos));
         }
@@ -119,7 +119,7 @@ public class TremendousBackpackBlock extends BaseEntityBlock {
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
         List<ItemStack> drops = super.getDrops(state, params);
         BlockEntity be = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
-        if (be instanceof TremendousBackpackBlockEntity bulk) {
+        if (be instanceof net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity bulk) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof net.minecraft.world.item.BlockItem) {
                     bulk.saveToItem(drop, params.getLevel().registryAccess());
@@ -132,7 +132,7 @@ public class TremendousBackpackBlock extends BaseEntityBlock {
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof TremendousBackpackBlockEntity be) {
+            if (level.getBlockEntity(pos) instanceof net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity be) {
                 be.recheckOpeners(level, pos, state);
             }
         }

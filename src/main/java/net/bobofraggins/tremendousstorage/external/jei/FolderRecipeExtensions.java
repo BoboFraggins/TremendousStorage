@@ -11,8 +11,6 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
-import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
-import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderExtractRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderMergeRecipe;
@@ -57,14 +55,6 @@ public final class FolderRecipeExtensions {
     private static ItemStack unlockedFolder(StorageTier tier) {
         ItemStack folder = new ItemStack(Registration.MANILA_FOLDER.get());
         return ManillaFolderItem.setContents(folder, FolderContents.EMPTY.withTier(tier));
-    }
-
-    /** An Ender Folder of the given tier with a fixed demo link ID. */
-    private static ItemStack enderFolder(StorageTier tier) {
-        ItemStack ef = new ItemStack(Registration.ENDER_FOLDER.get());
-        ef.set(Registration.FOLDER_CONTENTS.get(), FolderContents.EMPTY.withTier(tier));
-        EnderFolderItem.setLinkId(ef, 0L);
-        return ef;
     }
 
     // -------------------------------------------------------------------------
@@ -222,47 +212,4 @@ public final class FolderRecipeExtensions {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // EnderFolderRecipe — 2 folders + Eye of Ender → 2 Ender Folders (same tier)
-    // -------------------------------------------------------------------------
-
-    /** Shows: {@code [folder] + [eye of ender] + [folder]} → {@code [ender folder]}, per tier. */
-    static final class EnderFolderExtension implements ICraftingCategoryExtension<EnderFolderRecipe> {
-
-        private static final StorageTier[] TIERS = StorageTier.values();
-
-        @Override
-        public void setRecipe(
-                RecipeHolder<EnderFolderRecipe> recipeHolder,
-                IRecipeLayoutBuilder builder,
-                ICraftingGridHelper helper,
-                IFocusGroup focuses) {
-            // Lay out: [folder][eye][folder] in first three slots
-            List<List<ItemStack>> inputs = new ArrayList<>();
-
-            List<ItemStack> slot0 = new ArrayList<>();
-            List<ItemStack> slot1 = new ArrayList<>();
-            List<ItemStack> slot2 = new ArrayList<>();
-            for (StorageTier tier : TIERS) {
-                slot0.add(unlockedFolder(tier));
-                slot1.add(new ItemStack(Items.ENDER_EYE));
-                slot2.add(unlockedFolder(tier));
-            }
-            inputs.add(slot0);
-            inputs.add(slot1);
-            inputs.add(slot2);
-
-            for (int i = 3; i < 9; i++) {
-                inputs.add(List.of());
-            }
-
-            helper.createAndSetInputs(builder, VanillaTypes.ITEM_STACK, inputs, 3, 1);
-
-            List<ItemStack> outputs = new ArrayList<>();
-            for (StorageTier tier : TIERS) {
-                outputs.add(enderFolder(tier));
-            }
-            helper.createAndSetOutputs(builder, VanillaTypes.ITEM_STACK, outputs);
-        }
-    }
 }

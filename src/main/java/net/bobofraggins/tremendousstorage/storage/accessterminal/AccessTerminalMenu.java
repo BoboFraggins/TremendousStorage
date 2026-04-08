@@ -314,7 +314,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
 
         if (stack.getCount() == copy.getCount()) return ItemStack.EMPTY;
         slot.onTake(player, stack);
-        if (index == RESULT_SLOT) player.drop(stack, false);
+        if (index == resultSlot) player.drop(stack, false);
         return copy;
     }
 

@@ -9,6 +9,7 @@ import net.bobofraggins.tremendousstorage.lazurite.LazuriteOreBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuritePaxelItem;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteTier;
 import net.bobofraggins.tremendousstorage.shared.loot.LootModifiers;
+import net.bobofraggins.tremendousstorage.shared.storage.EnderTieredBlockItem;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.storage.TieredBlockItem;
 import net.bobofraggins.tremendousstorage.shared.ui.PriorityControl;
@@ -17,8 +18,16 @@ import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalB
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.BaseUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackSmithingRecipe;
+import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderTremendousBackpackBlock;
+import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderTremendousBackpackBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderTremendousBackpackItem;
+import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderTremendousBackpackMenu;
+import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestSmithingRecipe;
+import net.bobofraggins.tremendousstorage.storage.enderchest.EnderTremendousChestBlock;
+import net.bobofraggins.tremendousstorage.storage.enderchest.EnderTremendousChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
-import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderRecipe;
+import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderSmithingRecipe;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlock;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetItemHandler;
@@ -263,6 +272,24 @@ public final class Registration {
                     TremendousChestBlockEntity::new, TREMENDOUS_CHEST.get())
             .build(null));
 
+    public static final DeferredBlock<EnderTremendousChestBlock> ENDER_TREMENDOUS_CHEST = BLOCKS.register(
+            "ender_tremendous_chest",
+            () -> new EnderTremendousChestBlock(BlockBehaviour.Properties.of()
+                    .strength(5.0f, 1000.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<Item, BlockItem> ENDER_TREMENDOUS_CHEST_ITEM = ITEMS.register(
+            "ender_tremendous_chest",
+            () -> new EnderTieredBlockItem(ENDER_TREMENDOUS_CHEST.get(), new Item.Properties()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderTremendousChestBlockEntity>>
+            ENDER_TREMENDOUS_CHEST_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "ender_tremendous_chest", () -> BlockEntityType.Builder.of(
+                                    EnderTremendousChestBlockEntity::new, ENDER_TREMENDOUS_CHEST.get())
+                            .build(null));
+
     public static final DeferredBlock<TremendousBackpackBlock> TREMENDOUS_BACKPACK_BLOCK = BLOCKS.register(
             "tremendous_backpack",
             () -> new TremendousBackpackBlock(BlockBehaviour.Properties.of()
@@ -274,6 +301,19 @@ public final class Registration {
             TREMENDOUS_BACKPACK_BE_TYPE =
                     BLOCK_ENTITY_TYPES.register("tremendous_backpack", () -> BlockEntityType.Builder.of(
                                     TremendousBackpackBlockEntity::new, TREMENDOUS_BACKPACK_BLOCK.get())
+                            .build(null));
+
+    public static final DeferredBlock<EnderTremendousBackpackBlock> ENDER_TREMENDOUS_BACKPACK_BLOCK = BLOCKS.register(
+            "ender_tremendous_backpack",
+            () -> new EnderTremendousBackpackBlock(BlockBehaviour.Properties.of()
+                    .strength(2.0f, 1000.0f)
+                    .sound(SoundType.WOOL)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderTremendousBackpackBlockEntity>>
+            ENDER_TREMENDOUS_BACKPACK_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "ender_tremendous_backpack", () -> BlockEntityType.Builder.of(
+                                    EnderTremendousBackpackBlockEntity::new, ENDER_TREMENDOUS_BACKPACK_BLOCK.get())
                             .build(null));
 
     // -------------------------------------------------------------------------
@@ -477,6 +517,10 @@ public final class Registration {
     public static final DeferredHolder<Item, TremendousBackpackItem> TREMENDOUS_BACKPACK =
             ITEMS.register("tremendous_backpack", () -> new TremendousBackpackItem(TREMENDOUS_BACKPACK_BLOCK.get()));
 
+    public static final DeferredHolder<Item, EnderTremendousBackpackItem> ENDER_TREMENDOUS_BACKPACK_ITEM =
+            ITEMS.register("ender_tremendous_backpack",
+                    () -> new EnderTremendousBackpackItem(ENDER_TREMENDOUS_BACKPACK_BLOCK.get()));
+
     public static final DeferredHolder<Item, BucketItem> HEALING_SALVE_BUCKET = ITEMS.register(
             "positive_vibes_bucket",
             () -> new BucketItem(
@@ -632,6 +676,11 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<TremendousBackpackMenu>> TREMENDOUS_BACKPACK_MENU =
             MENU_TYPES.register("tremendous_backpack", () -> IMenuTypeExtension.create(TremendousBackpackMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<EnderTremendousBackpackMenu>>
+            ENDER_TREMENDOUS_BACKPACK_MENU = MENU_TYPES.register(
+                    "ender_tremendous_backpack",
+                    () -> IMenuTypeExtension.create(EnderTremendousBackpackMenu::new));
+
     // -------------------------------------------------------------------------
     // Items — storage interface / import interface / export interface
     // -------------------------------------------------------------------------
@@ -694,9 +743,53 @@ public final class Registration {
             RECIPE_SERIALIZERS.register(
                     "folder_tape", () -> new SimpleCraftingRecipeSerializer<>(FolderTapeRecipe::new));
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderFolderRecipe>> ENDER_FOLDER_RECIPE =
-            RECIPE_SERIALIZERS.register(
-                    "ender_folder", () -> new SimpleCraftingRecipeSerializer<>(EnderFolderRecipe::new));
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderChestSmithingRecipe>>
+            ENDER_CHEST_SMITHING_RECIPE =
+                    RECIPE_SERIALIZERS.register("ender_chest_smithing", () -> new RecipeSerializer<>() {
+                        @Override
+                        public com.mojang.serialization.MapCodec<EnderChestSmithingRecipe> codec() {
+                            return EnderChestSmithingRecipe.CODEC;
+                        }
+
+                        @Override
+                        public net.minecraft.network.codec.StreamCodec<
+                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderChestSmithingRecipe>
+                                streamCodec() {
+                            return EnderChestSmithingRecipe.STREAM_CODEC;
+                        }
+                    });
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderBackpackSmithingRecipe>>
+            ENDER_BACKPACK_SMITHING_RECIPE =
+                    RECIPE_SERIALIZERS.register("ender_backpack_smithing", () -> new RecipeSerializer<>() {
+                        @Override
+                        public com.mojang.serialization.MapCodec<EnderBackpackSmithingRecipe> codec() {
+                            return EnderBackpackSmithingRecipe.CODEC;
+                        }
+
+                        @Override
+                        public net.minecraft.network.codec.StreamCodec<
+                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderBackpackSmithingRecipe>
+                                streamCodec() {
+                            return EnderBackpackSmithingRecipe.STREAM_CODEC;
+                        }
+                    });
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderFolderSmithingRecipe>>
+            ENDER_FOLDER_SMITHING_RECIPE =
+                    RECIPE_SERIALIZERS.register("ender_folder_smithing", () -> new RecipeSerializer<>() {
+                        @Override
+                        public com.mojang.serialization.MapCodec<EnderFolderSmithingRecipe> codec() {
+                            return EnderFolderSmithingRecipe.CODEC;
+                        }
+
+                        @Override
+                        public net.minecraft.network.codec.StreamCodec<
+                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderFolderSmithingRecipe>
+                                streamCodec() {
+                            return EnderFolderSmithingRecipe.STREAM_CODEC;
+                        }
+                    });
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StorageSmithingUpgradeRecipe>>
             STORAGE_SMITHING_UPGRADE_RECIPE =
@@ -742,6 +835,7 @@ public final class Registration {
                         output.accept(LAZURITE_PAXEL.get());
                         output.accept(FILING_CABINET_ITEM.get());
                         output.accept(TREMENDOUS_CHEST_ITEM.get());
+                        output.accept(ENDER_TREMENDOUS_CHEST_ITEM.get());
                         for (DeferredHolder<Item, StorageUpgradeItem> upgrade : STORAGE_UPGRADES) {
                             output.accept(upgrade.get());
                         }
@@ -767,6 +861,7 @@ public final class Registration {
                         output.accept(CANVAS.get());
                         output.accept(CANVAS_BLOCK_ITEM.get());
                         output.accept(TREMENDOUS_BACKPACK.get());
+                        output.accept(ENDER_TREMENDOUS_BACKPACK_ITEM.get());
                         output.accept(HEALING_SALVE_BUCKET.get());
                         output.accept(TUBE_ITEM.get());
                         output.accept(MANILA_FOLDER.get());
@@ -821,6 +916,14 @@ public final class Registration {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 TREMENDOUS_BACKPACK_BE_TYPE.get(),
+                (be, side) -> new TremendousChestItemHandler(be));
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ENDER_TREMENDOUS_CHEST_BE_TYPE.get(),
+                (be, side) -> new TremendousChestItemHandler(be));
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(),
                 (be, side) -> new TremendousChestItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,

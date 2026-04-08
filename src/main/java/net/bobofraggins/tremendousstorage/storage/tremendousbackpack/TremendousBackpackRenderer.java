@@ -17,6 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.model.data.ModelData;
@@ -29,10 +30,13 @@ import net.neoforged.neoforge.client.model.data.ModelData;
  *
  * <p>Flap pivot: back-top edge of the main body at (z = 12.251/16, y = 12/16).
  * Opening rotates around the X-axis by up to 90°.
+ *
+ * <p>Uses {@link TremendousChestBlockEntity} as the type bound so it can also render the
+ * Ender Tremendous Backpack block entity, which extends the chest block entity hierarchy.
  */
 public class TremendousBackpackRenderer
-        implements BlockEntityRenderer<TremendousBackpackBlockEntity>,
-                IBlockEntityRendererExtension<TremendousBackpackBlockEntity> {
+        implements BlockEntityRenderer<TremendousChestBlockEntity>,
+                IBlockEntityRendererExtension<TremendousChestBlockEntity> {
 
     static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/tremendous_backpack_body"));
@@ -52,7 +56,7 @@ public class TremendousBackpackRenderer
 
     @Override
     public void render(
-            TremendousBackpackBlockEntity be,
+            TremendousChestBlockEntity be,
             float partialTick,
             PoseStack poseStack,
             MultiBufferSource bufferSource,
@@ -122,12 +126,12 @@ public class TremendousBackpackRenderer
     }
 
     @Override
-    public boolean shouldRenderOffScreen(TremendousBackpackBlockEntity be) {
+    public boolean shouldRenderOffScreen(TremendousChestBlockEntity be) {
         return be.lidAngle > 0f || be.prevLidAngle > 0f;
     }
 
     @Override
-    public AABB getRenderBoundingBox(TremendousBackpackBlockEntity be) {
+    public AABB getRenderBoundingBox(TremendousChestBlockEntity be) {
         return new AABB(be.getBlockPos()).expandTowards(0, 1, 0);
     }
 }

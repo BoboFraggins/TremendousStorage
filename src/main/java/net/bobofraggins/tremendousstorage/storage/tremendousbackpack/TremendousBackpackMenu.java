@@ -9,6 +9,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.ResultContainer;
@@ -68,6 +69,7 @@ public class TremendousBackpackMenu extends AbstractContainerMenu {
             ContainerData data,
             boolean hasCraftingUpgrade) {
         this(
+                Registration.TREMENDOUS_BACKPACK_MENU.get(),
                 syncId,
                 playerInv,
                 slotType,
@@ -81,6 +83,7 @@ public class TremendousBackpackMenu extends AbstractContainerMenu {
     /** Client-side constructor. Reads slot location and crafting flag from the buffer. */
     public TremendousBackpackMenu(int syncId, Inventory playerInv, FriendlyByteBuf buf) {
         this(
+                Registration.TREMENDOUS_BACKPACK_MENU.get(),
                 syncId,
                 playerInv,
                 buf.readInt(),
@@ -91,7 +94,12 @@ public class TremendousBackpackMenu extends AbstractContainerMenu {
                 TremendousStorageClientConfig.getVisibleRowsSafe());
     }
 
-    private TremendousBackpackMenu(
+    /**
+     * Protected constructor that allows subclasses (e.g. ender backpack) to supply their own
+     * {@link MenuType} while reusing all slot-layout logic.
+     */
+    protected TremendousBackpackMenu(
+            MenuType<?> menuType,
             int syncId,
             Inventory playerInv,
             int slotType,
@@ -100,7 +108,7 @@ public class TremendousBackpackMenu extends AbstractContainerMenu {
             ContainerData data,
             boolean hasCraftingUpgrade,
             int rows) {
-        super(Registration.TREMENDOUS_BACKPACK_MENU.get(), syncId);
+        super(menuType, syncId);
         this.slotType = slotType;
         this.slotIndex = slotIndex;
         this.slotId = slotId;
@@ -220,7 +228,11 @@ public class TremendousBackpackMenu extends AbstractContainerMenu {
         if (hasCraftingUpgrade) {
             access.execute((level, p) -> clearContainer(player, craftSlots));
         }
+        onMenuRemoved(player);
     }
+
+    /** Hook called after the menu is closed. Subclasses (e.g. Ender Backpack) override this to sync contents to storage. */
+    protected void onMenuRemoved(Player player) {}
 
     @Override
     public boolean canTakeItemForPickAll(ItemStack stack, Slot slot) {

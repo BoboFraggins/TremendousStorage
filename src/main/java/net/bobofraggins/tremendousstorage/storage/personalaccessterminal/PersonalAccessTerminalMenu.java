@@ -27,7 +27,7 @@ public class PersonalAccessTerminalMenu extends AccessTerminalMenu {
      */
     public PersonalAccessTerminalMenu(int id, Inventory inv, BlockPos niPos) {
         // Pass niPos as both satPos and niPos — stillValid is overridden below.
-        super(id, inv, niPos, niPos);
+        super(id, inv, niPos, niPos, false);
     }
 
     /**

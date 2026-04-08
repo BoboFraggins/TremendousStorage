@@ -112,6 +112,7 @@ public class PersonalAccessTerminalItem extends Item {
             buf.writeBlockPos(niPos); // satPos (ignored by PersonalAccessTerminalMenu.stillValid)
             buf.writeBoolean(true); // hasNiPos = true
             buf.writeBlockPos(niPos); // niPos
+            buf.writeBoolean(false); // hasCraftingUpgrade — wireless SAT has no crafting upgrade
         });
     }
 

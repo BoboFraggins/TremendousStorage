@@ -37,15 +37,17 @@ public final class StorageClientEvents {
                     }
                     return -1;
                 },
-                Registration.TREMENDOUS_CHEST.get());
+                Registration.TREMENDOUS_CHEST.get(),
+                Registration.ENDER_TREMENDOUS_CHEST.get());
     }
 
     @SubscribeEvent
     public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
-        // BlockItem color for Tremendous Chest (reads tier from NBT component)
+        // BlockItem color for Tremendous Chest / Ender Tremendous Chest (reads tier from NBT component)
         event.register(
                 (stack, tintIndex) -> tintIndex == 0 ? tierColorFromStack(stack) : -1,
-                Registration.TREMENDOUS_CHEST_ITEM.get());
+                Registration.TREMENDOUS_CHEST_ITEM.get(),
+                Registration.ENDER_TREMENDOUS_CHEST_ITEM.get());
     }
 
     @SubscribeEvent
