@@ -49,7 +49,8 @@ public class EnderChestSmithingRecipe implements SmithingRecipe {
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {
-        return stack.getItem() == Registration.TREMENDOUS_CHEST_ITEM.get();
+        return stack.getItem() == Registration.TREMENDOUS_CHEST_ITEM.get()
+                || stack.getItem() == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get();
     }
 
     @Override
@@ -66,7 +67,13 @@ public class EnderChestSmithingRecipe implements SmithingRecipe {
 
     @Override
     public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
-        long linkId = SECURE_RANDOM.nextLong();
+        long linkId;
+        if (input.base().getItem() == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()) {
+            linkId = getExistingLinkId(input.base());
+            if (linkId == -1L) linkId = SECURE_RANDOM.nextLong();
+        } else {
+            linkId = SECURE_RANDOM.nextLong();
+        }
         PENDING_LINK.get()[0] = linkId;
         return makeEnderChest(input.base(), linkId);
     }
@@ -78,7 +85,11 @@ public class EnderChestSmithingRecipe implements SmithingRecipe {
         long linkId = PENDING_LINK.get()[0];
         if (linkId != -1L) {
             PENDING_LINK.get()[0] = -1L;
-            remaining.set(1, makeEnderChest(input.base(), linkId));
+            if (input.base().getItem() == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()) {
+                remaining.set(1, input.base().copy());
+            } else {
+                remaining.set(1, makeEnderChest(input.base(), linkId));
+            }
         }
         return remaining;
     }
@@ -96,6 +107,15 @@ public class EnderChestSmithingRecipe implements SmithingRecipe {
     // -------------------------------------------------------------------------
     // Helper
     // -------------------------------------------------------------------------
+
+    private static long getExistingLinkId(ItemStack stack) {
+        CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (existing == null) return -1L;
+        CompoundTag tag = existing.copyTag();
+        return tag.contains(EnderTremendousChestBlockEntity.TAG_LINK_ID)
+                ? tag.getLong(EnderTremendousChestBlockEntity.TAG_LINK_ID)
+                : -1L;
+    }
 
     private static ItemStack makeEnderChest(ItemStack baseStack, long linkId) {
         ItemStack result = new ItemStack(Registration.ENDER_TREMENDOUS_CHEST_ITEM.get());

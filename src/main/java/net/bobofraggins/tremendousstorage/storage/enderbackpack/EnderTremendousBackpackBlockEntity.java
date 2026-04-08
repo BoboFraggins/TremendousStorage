@@ -4,6 +4,7 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderTremendousChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -40,6 +41,26 @@ public class EnderTremendousBackpackBlockEntity extends EnderTremendousChestBloc
     // -------------------------------------------------------------------------
 
     @Override
+    protected void syncTierToStorage(StorageTier tier) {
+        long linkId = getLinkId();
+        if (linkId == -1L || level == null || level.isClientSide()) return;
+        MinecraftServer server = level.getServer();
+        if (server != null) {
+            EnderBackpackStorage.get(server).setTier(linkId, tier);
+        }
+    }
+
+    @Override
+    protected void syncCraftingUpgradeToStorage() {
+        long linkId = getLinkId();
+        if (linkId == -1L || level == null || level.isClientSide()) return;
+        MinecraftServer server = level.getServer();
+        if (server != null) {
+            EnderBackpackStorage.get(server).setCraftingUpgrade(linkId);
+        }
+    }
+
+    @Override
     protected void loadFromStorage() {
         long linkId = getLinkId();
         if (linkId == -1L || level == null || level.isClientSide()) return;
@@ -48,8 +69,21 @@ public class EnderTremendousBackpackBlockEntity extends EnderTremendousChestBloc
         EnderBackpackStorage storage = EnderBackpackStorage.get(server);
         if (storage.hasLink(linkId)) {
             loadTypes(storage.getTypes(linkId), level.registryAccess());
+            StorageTier storageTier = storage.getTier(linkId);
+            StorageTier localTier = getTier();
+            if (localTier.ordinal() > storageTier.ordinal()) {
+                storage.setTier(linkId, localTier);
+            } else {
+                setTierSilent(storageTier); // apply without re-syncing to storage
+            }
+            // Crafting upgrade: OR logic — once any linked copy has it, all get it.
+            if (storage.hasCraftingUpgrade(linkId)) {
+                super.setCraftingUpgrade(true); // silent; storage already has it
+            } else if (hasCraftingUpgrade()) {
+                storage.setCraftingUpgrade(linkId); // push local upgrade to storage
+            }
         } else {
-            storage.initLink(linkId, saveTypes(level.registryAccess()));
+            storage.initLink(linkId, saveTypes(level.registryAccess()), getTier(), hasCraftingUpgrade());
         }
         lastKnownVersion = storage.getVersion(linkId);
     }

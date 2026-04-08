@@ -45,7 +45,8 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {
-        return stack.getItem() == Registration.TREMENDOUS_TANK_ITEM.get();
+        return stack.getItem() == Registration.TREMENDOUS_TANK_ITEM.get()
+                || stack.getItem() == Registration.ENDER_TREMENDOUS_TANK_ITEM.get();
     }
 
     @Override
@@ -62,7 +63,13 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
 
     @Override
     public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
-        long linkId = SECURE_RANDOM.nextLong();
+        long linkId;
+        if (input.base().getItem() == Registration.ENDER_TREMENDOUS_TANK_ITEM.get()) {
+            linkId = getExistingLinkId(input.base());
+            if (linkId == -1L) linkId = SECURE_RANDOM.nextLong();
+        } else {
+            linkId = SECURE_RANDOM.nextLong();
+        }
         PENDING_LINK.get()[0] = linkId;
         return makeEnderTank(input.base(), linkId);
     }
@@ -73,7 +80,11 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
         long linkId = PENDING_LINK.get()[0];
         if (linkId != -1L) {
             PENDING_LINK.get()[0] = -1L;
-            remaining.set(1, makeEnderTank(input.base(), linkId));
+            if (input.base().getItem() == Registration.ENDER_TREMENDOUS_TANK_ITEM.get()) {
+                remaining.set(1, input.base().copy());
+            } else {
+                remaining.set(1, makeEnderTank(input.base(), linkId));
+            }
         }
         return remaining;
     }
@@ -91,6 +102,15 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
     // -------------------------------------------------------------------------
     // Helper
     // -------------------------------------------------------------------------
+
+    private static long getExistingLinkId(ItemStack stack) {
+        CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (existing == null) return -1L;
+        CompoundTag tag = existing.copyTag();
+        return tag.contains(EnderTremendousTankBlockEntity.TAG_LINK_ID)
+                ? tag.getLong(EnderTremendousTankBlockEntity.TAG_LINK_ID)
+                : -1L;
+    }
 
     private static ItemStack makeEnderTank(ItemStack baseStack, long linkId) {
         ItemStack result = new ItemStack(Registration.ENDER_TREMENDOUS_TANK_ITEM.get());

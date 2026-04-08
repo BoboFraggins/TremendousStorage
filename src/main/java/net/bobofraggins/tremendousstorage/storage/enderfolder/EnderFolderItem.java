@@ -55,12 +55,27 @@ public class EnderFolderItem extends ManillaFolderItem {
     /**
      * Returns the live shared {@link FolderContents} for this Ender Folder from the server
      * storage. Falls back to the item's component if the server is unavailable (client-side).
+     *
+     * <p>If the item's tier is higher than what is recorded in storage (e.g. after a smithing
+     * tier upgrade), the storage entry is promoted and the upgrade is propagated to all other
+     * linked Ender Folder items in loaded inventories.
      */
     public static FolderContents getLiveContents(ItemStack stack, MinecraftServer server) {
         if (server == null) return ManillaFolderItem.getContents(stack);
         long linkId = getLinkId(stack);
         if (linkId == -1L) return ManillaFolderItem.getContents(stack);
-        return EnderFolderStorage.get(server).getContents(linkId);
+        EnderFolderStorage storage = EnderFolderStorage.get(server);
+        FolderContents live = storage.getContents(linkId);
+        FolderContents itemContents = ManillaFolderItem.getContents(stack);
+        if (itemContents.tier().ordinal() > live.tier().ordinal()) {
+            // Item has a higher tier — this happens after a smithing tier upgrade.
+            // Promote the storage entry and propagate to all linked items.
+            FolderContents promoted = live.withTier(itemContents.tier());
+            storage.setContents(linkId, promoted);
+            propagateToLoaded(linkId, promoted, server);
+            return promoted;
+        }
+        return live;
     }
 
     /**
@@ -86,13 +101,25 @@ public class EnderFolderItem extends ManillaFolderItem {
     /**
      * Syncs the item's component from the authoritative server storage.
      * Call this when loading an Ender Folder from disk (e.g. player login, chunk load).
+     *
+     * <p>If the item's tier is higher than what is in storage (e.g. after a smithing tier
+     * upgrade), the storage is promoted and the upgrade propagates to all linked items.
      */
     public static void syncFromStorage(ItemStack stack, MinecraftServer server) {
         if (server == null) return;
         long linkId = getLinkId(stack);
         if (linkId == -1L) return;
-        FolderContents live = EnderFolderStorage.get(server).getContents(linkId);
-        stack.set(Registration.FOLDER_CONTENTS.get(), live);
+        EnderFolderStorage storage = EnderFolderStorage.get(server);
+        FolderContents live = storage.getContents(linkId);
+        FolderContents itemContents = ManillaFolderItem.getContents(stack);
+        if (itemContents.tier().ordinal() > live.tier().ordinal()) {
+            FolderContents promoted = live.withTier(itemContents.tier());
+            storage.setContents(linkId, promoted);
+            propagateToLoaded(linkId, promoted, server);
+            stack.set(Registration.FOLDER_CONTENTS.get(), promoted);
+        } else {
+            stack.set(Registration.FOLDER_CONTENTS.get(), live);
+        }
     }
 
     // -------------------------------------------------------------------------

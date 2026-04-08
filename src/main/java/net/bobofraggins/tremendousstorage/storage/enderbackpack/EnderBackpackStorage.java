@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.enderbackpack;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -23,6 +24,8 @@ public class EnderBackpackStorage extends SavedData {
 
     private final Map<Long, ListTag> inventories = new HashMap<>();
     private final Map<Long, Long> versions = new HashMap<>();
+    private final Map<Long, StorageTier> tiers = new HashMap<>();
+    private final Map<Long, Boolean> craftingUpgrades = new HashMap<>();
 
     public static EnderBackpackStorage get(MinecraftServer server) {
         DimensionDataStorage storage = server.overworld().getDataStorage();
@@ -43,15 +46,38 @@ public class EnderBackpackStorage extends SavedData {
         return inventories.getOrDefault(linkId, new ListTag());
     }
 
+    public StorageTier getTier(long linkId) {
+        return tiers.getOrDefault(linkId, StorageTier.WOOD);
+    }
+
+    public boolean hasCraftingUpgrade(long linkId) {
+        return craftingUpgrades.getOrDefault(linkId, false);
+    }
+
+    /** Marks the link as having a crafting upgrade, bumps the version, and marks dirty. */
+    public void setCraftingUpgrade(long linkId) {
+        craftingUpgrades.put(linkId, true);
+        versions.merge(linkId, 1L, Long::sum);
+        setDirty();
+    }
+
+    public void setTier(long linkId, StorageTier tier) {
+        tiers.put(linkId, tier);
+        versions.merge(linkId, 1L, Long::sum);
+        setDirty();
+    }
+
     public void setTypes(long linkId, ListTag types) {
         inventories.put(linkId, types);
         versions.merge(linkId, 1L, Long::sum);
         setDirty();
     }
 
-    public void initLink(long linkId, ListTag types) {
+    public void initLink(long linkId, ListTag types, StorageTier tier, boolean craftingUpgrade) {
         if (!inventories.containsKey(linkId)) {
             inventories.put(linkId, types);
+            tiers.put(linkId, tier);
+            if (craftingUpgrade) craftingUpgrades.put(linkId, true);
             setDirty();
         }
     }
@@ -64,6 +90,12 @@ public class EnderBackpackStorage extends SavedData {
             long linkId = entry.getLong("LinkId");
             ListTag types = entry.getList("Types", Tag.TAG_COMPOUND);
             storage.inventories.put(linkId, types);
+            if (entry.contains("Tier")) {
+                storage.tiers.put(linkId, StorageTier.fromId(entry.getString("Tier")));
+            }
+            if (entry.getBoolean("CraftingUpgrade")) {
+                storage.craftingUpgrades.put(linkId, true);
+            }
         }
         return storage;
     }
@@ -72,9 +104,17 @@ public class EnderBackpackStorage extends SavedData {
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         ListTag links = new ListTag();
         for (Map.Entry<Long, ListTag> entry : inventories.entrySet()) {
+            long linkId = entry.getKey();
             CompoundTag e = new CompoundTag();
-            e.putLong("LinkId", entry.getKey());
+            e.putLong("LinkId", linkId);
             e.put("Types", entry.getValue());
+            StorageTier tier = tiers.getOrDefault(linkId, StorageTier.WOOD);
+            if (tier != StorageTier.WOOD) {
+                e.putString("Tier", tier.getId());
+            }
+            if (craftingUpgrades.getOrDefault(linkId, false)) {
+                e.putBoolean("CraftingUpgrade", true);
+            }
             links.add(e);
         }
         tag.put("Links", links);

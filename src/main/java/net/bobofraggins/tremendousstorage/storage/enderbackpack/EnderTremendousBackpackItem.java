@@ -71,11 +71,24 @@ public class EnderTremendousBackpackItem extends TremendousBackpackItem {
             ListTag saved = storage.getTypes(linkId);
             contents = EnderTremendousBackpackMenu.listTagToContents(
                     saved, contents, player.level().registryAccess());
+            // Tier-max: if item has higher tier (e.g., after smithing upgrade) push to storage
+            net.bobofraggins.tremendousstorage.shared.storage.StorageTier storageTier = storage.getTier(linkId);
+            if (contents.tier().ordinal() > storageTier.ordinal()) {
+                storage.setTier(linkId, contents.tier());
+            } else if (storageTier.ordinal() > contents.tier().ordinal()) {
+                contents = contents.withTier(storageTier);
+            }
+            // Crafting upgrade: OR logic — once any linked copy has it, all get it.
+            if (storage.hasCraftingUpgrade(linkId)) {
+                contents = contents.withCraftingUpgrade();
+            } else if (contents.hasCraftingUpgrade()) {
+                storage.setCraftingUpgrade(linkId);
+            }
         } else {
-            // First open — seed storage with current contents
+            // First open — seed storage with current contents and tier
             ListTag initial = EnderTremendousBackpackMenu.contentsToListTag(
                     contents, player.level().registryAccess());
-            storage.initLink(linkId, initial);
+            storage.initLink(linkId, initial, contents.tier(), contents.hasCraftingUpgrade());
         }
         // Write the freshened contents back onto the item before opening the menu
         backpackStack.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), contents);

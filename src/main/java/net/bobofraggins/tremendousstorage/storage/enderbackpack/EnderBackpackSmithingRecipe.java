@@ -46,7 +46,8 @@ public class EnderBackpackSmithingRecipe implements SmithingRecipe {
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {
-        return stack.getItem() == Registration.TREMENDOUS_BACKPACK.get();
+        return stack.getItem() == Registration.TREMENDOUS_BACKPACK.get()
+                || stack.getItem() == Registration.ENDER_TREMENDOUS_BACKPACK_ITEM.get();
     }
 
     @Override
@@ -63,7 +64,13 @@ public class EnderBackpackSmithingRecipe implements SmithingRecipe {
 
     @Override
     public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
-        long linkId = SECURE_RANDOM.nextLong();
+        long linkId;
+        if (input.base().getItem() == Registration.ENDER_TREMENDOUS_BACKPACK_ITEM.get()) {
+            Long existing = input.base().get(Registration.ENDER_LINK_ID.get());
+            linkId = existing != null ? existing : SECURE_RANDOM.nextLong();
+        } else {
+            linkId = SECURE_RANDOM.nextLong();
+        }
         PENDING_LINK.get()[0] = linkId;
         return makeEnderBackpack(input.base(), linkId);
     }
@@ -74,7 +81,11 @@ public class EnderBackpackSmithingRecipe implements SmithingRecipe {
         long linkId = PENDING_LINK.get()[0];
         if (linkId != -1L) {
             PENDING_LINK.get()[0] = -1L;
-            remaining.set(1, makeEnderBackpack(input.base(), linkId));
+            if (input.base().getItem() == Registration.ENDER_TREMENDOUS_BACKPACK_ITEM.get()) {
+                remaining.set(1, input.base().copy());
+            } else {
+                remaining.set(1, makeEnderBackpack(input.base(), linkId));
+            }
         }
         return remaining;
     }

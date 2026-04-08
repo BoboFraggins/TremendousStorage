@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.endertank;
 
 import java.util.HashMap;
 import java.util.Map;
+import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -25,6 +26,7 @@ public class EnderTankStorage extends SavedData {
 
     private final Map<Long, FluidState> tanks = new HashMap<>();
     private final Map<Long, Long> versions = new HashMap<>();
+    private final Map<Long, StorageTier> tiers = new HashMap<>();
 
     // -------------------------------------------------------------------------
     // Static access
@@ -61,6 +63,16 @@ public class EnderTankStorage extends SavedData {
         return state != null ? state.amount() : 0L;
     }
 
+    public StorageTier getTier(long linkId) {
+        return tiers.getOrDefault(linkId, StorageTier.WOOD);
+    }
+
+    public void setTier(long linkId, StorageTier tier) {
+        tiers.put(linkId, tier);
+        versions.merge(linkId, 1L, Long::sum);
+        setDirty();
+    }
+
     /** Writes the fluid state for the given link ID and marks dirty. */
     public void setState(long linkId, FluidStack type, long amount) {
         tanks.put(linkId, new FluidState(type.isEmpty() ? FluidStack.EMPTY : type.copyWithAmount(1), amount));
@@ -72,9 +84,10 @@ public class EnderTankStorage extends SavedData {
      * Initialises a new link entry. Does nothing if the link ID is already registered
      * (so the second tank placed doesn't overwrite the shared contents with its own stale state).
      */
-    public void initLink(long linkId, FluidStack type, long amount) {
+    public void initLink(long linkId, FluidStack type, long amount, StorageTier tier) {
         if (!tanks.containsKey(linkId)) {
             tanks.put(linkId, new FluidState(type.isEmpty() ? FluidStack.EMPTY : type.copyWithAmount(1), amount));
+            tiers.put(linkId, tier);
             setDirty();
         }
     }
@@ -94,6 +107,9 @@ public class EnderTankStorage extends SavedData {
                     : FluidStack.EMPTY;
             long amount = entry.getLong("Amount");
             storage.tanks.put(linkId, new FluidState(type, amount));
+            if (entry.contains("Tier")) {
+                storage.tiers.put(linkId, StorageTier.fromId(entry.getString("Tier")));
+            }
         }
         return storage;
     }
@@ -102,13 +118,18 @@ public class EnderTankStorage extends SavedData {
     public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
         ListTag links = new ListTag();
         for (Map.Entry<Long, FluidState> entry : tanks.entrySet()) {
+            long linkId = entry.getKey();
             CompoundTag e = new CompoundTag();
-            e.putLong("LinkId", entry.getKey());
+            e.putLong("LinkId", linkId);
             FluidStack type = entry.getValue().type();
             if (!type.isEmpty()) {
                 e.put("Fluid", type.save(registries));
             }
             e.putLong("Amount", entry.getValue().amount());
+            StorageTier tier = tiers.getOrDefault(linkId, StorageTier.WOOD);
+            if (tier != StorageTier.WOOD) {
+                e.putString("Tier", tier.getId());
+            }
             links.add(e);
         }
         tag.put("Links", links);

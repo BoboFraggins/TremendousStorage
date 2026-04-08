@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.endertank;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -50,21 +51,38 @@ public class EnderTremendousTankBlockEntity extends TremendousTankBlockEntity {
     // Storage sync
     // -------------------------------------------------------------------------
 
+    @Override
+    public void setTier(StorageTier tier) {
+        super.setTier(tier);
+        if (linkId != -1L && level != null && !level.isClientSide()) {
+            MinecraftServer server = level.getServer();
+            if (server != null) {
+                EnderTankStorage.get(server).setTier(linkId, tier);
+            }
+        }
+    }
+
     private void loadFromStorage() {
         if (linkId == -1L || level == null || level.isClientSide()) return;
         MinecraftServer server = level.getServer();
         if (server == null) return;
         EnderTankStorage storage = EnderTankStorage.get(server);
         if (storage.hasLink(linkId)) {
-            // Overwrite local state with authoritative storage
+            // Overwrite local fluid state with authoritative storage
             FluidStack type = storage.getStoredFluid(linkId);
             long amount = storage.getAmount(linkId);
-            // Use parent's mutable fields via clearFluid + direct insert
-            // Bypass the overridden clearFluid (don't re-sync) by calling grandparent path:
             forceSetFluidState(type, amount);
+            // Sync tier: push higher tier to storage (handles smithing upgrade), or take storage tier
+            StorageTier storageTier = storage.getTier(linkId);
+            StorageTier localTier = getTier();
+            if (localTier.ordinal() > storageTier.ordinal()) {
+                storage.setTier(linkId, localTier);
+            } else {
+                super.setTier(storageTier); // apply without re-triggering setTier override
+            }
         } else {
-            // First tank of this pair to be placed — seed storage with our fluid state
-            storage.initLink(linkId, getStoredFluid(), getAmount());
+            // First tank of this pair to be placed — seed storage with our fluid state and tier
+            storage.initLink(linkId, getStoredFluid(), getAmount(), getTier());
         }
         lastKnownVersion = storage.getVersion(linkId);
     }

@@ -72,7 +72,49 @@ public class EnderTremendousChestBlockEntity extends TremendousChestBlockEntity 
     // Storage sync helpers
     // -------------------------------------------------------------------------
 
-    /** Reads from EnderChestStorage and overwrites the local in-memory inventory. */
+    /** Sets tier on the local BE only, without writing to shared storage. Used during loadFromStorage. */
+    protected final void setTierSilent(StorageTier tier) {
+        super.setTier(tier);
+    }
+
+    /**
+     * Propagates a crafting upgrade to shared storage so all linked block entities pick it up.
+     * Subclasses override this to route to the correct storage backend.
+     */
+    protected void syncCraftingUpgradeToStorage() {
+        if (linkId == -1L || level == null || level.isClientSide()) return;
+        MinecraftServer server = level.getServer();
+        if (server != null) {
+            getStorage(server).setCraftingUpgrade(linkId);
+        }
+    }
+
+    @Override
+    public void setCraftingUpgrade(boolean value) {
+        super.setCraftingUpgrade(value);
+        if (value) syncCraftingUpgradeToStorage();
+    }
+
+    /**
+     * Writes the tier to the shared storage backend, bumping the version so all linked
+     * block entities pick it up on their next tick. Subclasses override this to route to
+     * the correct storage (e.g. {@link net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackStorage}).
+     */
+    protected void syncTierToStorage(StorageTier tier) {
+        if (linkId == -1L || level == null || level.isClientSide()) return;
+        MinecraftServer server = level.getServer();
+        if (server != null) {
+            getStorage(server).setTier(linkId, tier);
+        }
+    }
+
+    @Override
+    public void setTier(StorageTier tier) {
+        super.setTier(tier);
+        syncTierToStorage(tier);
+    }
+
+    /** Reads from EnderChestStorage and overwrites the local in-memory inventory and tier. */
     protected void loadFromStorage() {
         if (linkId == -1L || level == null || level.isClientSide()) return;
         MinecraftServer server = level.getServer();
@@ -80,9 +122,24 @@ public class EnderTremendousChestBlockEntity extends TremendousChestBlockEntity 
         EnderChestStorage storage = getStorage(server);
         if (storage.hasLink(linkId)) {
             loadTypes(storage.getTypes(linkId), level.registryAccess());
+            // Sync tier: if this BE has a higher tier (e.g. just placed after smithing upgrade),
+            // push that new tier to storage so all linked copies update.
+            StorageTier storageTier = storage.getTier(linkId);
+            StorageTier localTier = getTier();
+            if (localTier.ordinal() > storageTier.ordinal()) {
+                storage.setTier(linkId, localTier);
+            } else {
+                setTierSilent(storageTier); // apply without re-syncing to storage
+            }
+            // Crafting upgrade: OR logic — once any linked copy has it, all get it.
+            if (storage.hasCraftingUpgrade(linkId)) {
+                super.setCraftingUpgrade(true); // silent; storage already has it
+            } else if (hasCraftingUpgrade()) {
+                storage.setCraftingUpgrade(linkId); // push local upgrade to storage
+            }
         } else {
-            // First chest of this pair to be placed — seed the storage with our inventory.
-            storage.initLink(linkId, saveTypes(level.registryAccess()));
+            // First chest of this pair to be placed — seed the storage with our inventory and tier.
+            storage.initLink(linkId, saveTypes(level.registryAccess()), getTier(), hasCraftingUpgrade());
         }
         lastKnownVersion = storage.getVersion(linkId);
     }

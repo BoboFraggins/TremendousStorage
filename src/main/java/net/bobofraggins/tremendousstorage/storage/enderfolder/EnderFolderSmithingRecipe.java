@@ -56,8 +56,7 @@ public class EnderFolderSmithingRecipe implements SmithingRecipe {
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {
-        return stack.getItem() instanceof ManillaFolderItem
-                && !(stack.getItem() instanceof EnderFolderItem);
+        return stack.getItem() instanceof ManillaFolderItem;
     }
 
     @Override
@@ -82,7 +81,13 @@ public class EnderFolderSmithingRecipe implements SmithingRecipe {
 
     @Override
     public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
-        long linkId = SECURE_RANDOM.nextLong();
+        long linkId;
+        if (input.base().getItem() instanceof EnderFolderItem) {
+            linkId = EnderFolderItem.getLinkId(input.base());
+            if (linkId == -1L) linkId = SECURE_RANDOM.nextLong();
+        } else {
+            linkId = SECURE_RANDOM.nextLong();
+        }
         PENDING_LINK.get()[0] = linkId;
         return makeEnderFolder(input.base(), linkId);
     }
@@ -100,7 +105,11 @@ public class EnderFolderSmithingRecipe implements SmithingRecipe {
         if (linkId == -1L) return remaining;
         PENDING_LINK.get()[0] = -1L; // consume
 
-        remaining.set(1, makeEnderFolder(input.base(), linkId));
+        if (input.base().getItem() instanceof EnderFolderItem) {
+            remaining.set(1, input.base().copy());
+        } else {
+            remaining.set(1, makeEnderFolder(input.base(), linkId));
+        }
         return remaining;
     }
 

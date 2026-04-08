@@ -4,6 +4,8 @@ import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderTremendousBackpackItem;
+import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.bobofraggins.tremendousstorage.storage.tremendousbackpack.TremendousBackpackContents;
@@ -87,14 +89,16 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     // -------------------------------------------------------------------------
 
     private static boolean isStorageBlock(Item item) {
-        return item == Registration.TREMENDOUS_CHEST_ITEM.get()
-                || item instanceof TremendousBackpackItem
-                || item == Registration.MANILA_FOLDER.get()
-                || item == Registration.ENDER_FOLDER.get();
+        return item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
+                || item instanceof EnderTremendousBackpackItem
+                || item == Registration.ENDER_FOLDER.get()
+                || item == Registration.ENDER_TREMENDOUS_TANK_ITEM.get();
     }
 
     private static boolean isCraftingUpgradeTarget(Item item) {
-        return item == Registration.TREMENDOUS_CHEST_ITEM.get() || item instanceof TremendousBackpackItem;
+        return item == Registration.TREMENDOUS_CHEST_ITEM.get()
+                || item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
+                || item instanceof TremendousBackpackItem; // covers both ender and regular backpack
     }
 
     private static boolean alreadyHasCraftingUpgrade(ItemStack stack) {
@@ -124,13 +128,14 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     }
 
     private static StorageTier tierFromStack(ItemStack stack) {
-        if (stack.getItem() == Registration.MANILA_FOLDER.get() || stack.getItem() == Registration.ENDER_FOLDER.get()) {
+        if (stack.getItem() instanceof EnderFolderItem) {
             return ManillaFolderItem.getContents(stack).tier();
         }
-        if (stack.getItem() instanceof TremendousBackpackItem) {
+        if (stack.getItem() instanceof EnderTremendousBackpackItem) {
             return stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY)
                     .tier();
         }
+        // Ender chest and ender tank store tier in BLOCK_ENTITY_DATA under "Tier"
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data != null) {
             CompoundTag tag = data.getUnsafe();
@@ -142,20 +147,20 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     }
 
     private static ItemStack upgrade(ItemStack blockStack, StorageUpgradeItem upgradeItem) {
-        if (blockStack.getItem() == Registration.MANILA_FOLDER.get()
-                || blockStack.getItem() == Registration.ENDER_FOLDER.get()) {
+        if (blockStack.getItem() instanceof EnderFolderItem) {
             FolderContents current = ManillaFolderItem.getContents(blockStack);
             ItemStack result = blockStack.copyWithCount(1);
             result.set(Registration.FOLDER_CONTENTS.get(), current.withTier(upgradeItem.getToTier()));
             return result;
         }
-        if (blockStack.getItem() instanceof TremendousBackpackItem) {
+        if (blockStack.getItem() instanceof EnderTremendousBackpackItem) {
             TremendousBackpackContents current = blockStack.getOrDefault(
                     Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY);
             ItemStack result = blockStack.copyWithCount(1);
             result.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), current.withTier(upgradeItem.getToTier()));
             return result;
         }
+        // Ender chest and ender tank: update "Tier" in BLOCK_ENTITY_DATA (preserving LinkId and all other data)
         CustomData existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putString("Tier", upgradeItem.getToTier().getId());
