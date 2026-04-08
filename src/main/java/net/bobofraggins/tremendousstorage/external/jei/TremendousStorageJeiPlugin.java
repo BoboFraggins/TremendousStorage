@@ -68,7 +68,8 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
                 List.of(EnderFolderSmithingCategory.Recipe.INSTANCE));
         reg.addRecipes(
                 EnderStorageSmithingCategory.RECIPE_TYPE,
-                List.of(EnderStorageSmithingCategory.Recipe.CHEST, EnderStorageSmithingCategory.Recipe.BACKPACK));
+                List.of(EnderStorageSmithingCategory.Recipe.CHEST, EnderStorageSmithingCategory.Recipe.BACKPACK,
+                        EnderStorageSmithingCategory.Recipe.TANK));
     }
 
     @Override

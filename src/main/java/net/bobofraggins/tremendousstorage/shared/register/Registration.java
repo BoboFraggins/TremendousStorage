@@ -58,6 +58,10 @@ import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChes
 import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestItemHandler;
 import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestMenu;
+import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankSmithingRecipe;
+import net.bobofraggins.tremendousstorage.storage.endertank.EnderTremendousTankBlock;
+import net.bobofraggins.tremendousstorage.storage.endertank.EnderTremendousTankBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.endertank.EnderTremendousTankItem;
 import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankBlock;
 import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankContents;
@@ -359,6 +363,23 @@ public final class Registration {
             TREMENDOUS_TANK_BE_TYPE = BLOCK_ENTITY_TYPES.register("tremendous_tank", () -> BlockEntityType.Builder.of(
                     TremendousTankBlockEntity::new, TREMENDOUS_TANK.get())
             .build(null));
+
+    public static final DeferredBlock<EnderTremendousTankBlock> ENDER_TREMENDOUS_TANK = BLOCKS.register(
+            "ender_tremendous_tank",
+            () -> new EnderTremendousTankBlock(BlockBehaviour.Properties.of()
+                    .strength(3.0f, 1000.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.GLASS)));
+
+    public static final DeferredHolder<Item, BlockItem> ENDER_TREMENDOUS_TANK_ITEM = ITEMS.register(
+            "ender_tremendous_tank",
+            () -> new EnderTremendousTankItem(ENDER_TREMENDOUS_TANK.get(), new Item.Properties()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderTremendousTankBlockEntity>>
+            ENDER_TREMENDOUS_TANK_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "ender_tremendous_tank", () -> BlockEntityType.Builder.of(
+                                    EnderTremendousTankBlockEntity::new, ENDER_TREMENDOUS_TANK.get())
+                            .build(null));
 
     // -------------------------------------------------------------------------
     // Recycling Bin
@@ -799,6 +820,22 @@ public final class Registration {
                         }
                     });
 
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderTankSmithingRecipe>>
+            ENDER_TANK_SMITHING_RECIPE =
+                    RECIPE_SERIALIZERS.register("ender_tank_smithing", () -> new RecipeSerializer<>() {
+                        @Override
+                        public com.mojang.serialization.MapCodec<EnderTankSmithingRecipe> codec() {
+                            return EnderTankSmithingRecipe.CODEC;
+                        }
+
+                        @Override
+                        public net.minecraft.network.codec.StreamCodec<
+                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderTankSmithingRecipe>
+                                streamCodec() {
+                            return EnderTankSmithingRecipe.STREAM_CODEC;
+                        }
+                    });
+
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StorageSmithingUpgradeRecipe>>
             STORAGE_SMITHING_UPGRADE_RECIPE =
                     RECIPE_SERIALIZERS.register("storage_smithing_upgrade", () -> new RecipeSerializer<>() {
@@ -848,6 +885,7 @@ public final class Registration {
                             output.accept(upgrade.get());
                         }
                         output.accept(TREMENDOUS_TANK_ITEM.get());
+                        output.accept(ENDER_TREMENDOUS_TANK_ITEM.get());
                         if (ModList.get().isLoaded("mysticalagriculture")) {
                             var lazurite = MysticalAgricultureAPI.getCropRegistry()
                                     .getCropById(
@@ -935,6 +973,10 @@ public final class Registration {
         event.registerBlockEntity(
                 Capabilities.FluidHandler.BLOCK,
                 TREMENDOUS_TANK_BE_TYPE.get(),
+                (be, side) -> new TremendousTankFluidHandler(be));
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK,
+                ENDER_TREMENDOUS_TANK_BE_TYPE.get(),
                 (be, side) -> new TremendousTankFluidHandler(be));
         event.registerItem(
                 Capabilities.FluidHandler.ITEM,

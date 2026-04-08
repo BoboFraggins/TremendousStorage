@@ -18,6 +18,7 @@ public final class TremendousTankClientEvents {
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(Registration.TREMENDOUS_TANK_BE_TYPE.get(), TremendousTankRenderer::new);
+        event.registerBlockEntityRenderer(Registration.ENDER_TREMENDOUS_TANK_BE_TYPE.get(), TremendousTankRenderer::new);
     }
 
     @SubscribeEvent
@@ -30,6 +31,7 @@ public final class TremendousTankClientEvents {
                     }
                     return StorageTier.WOOD.getColor();
                 },
-                Registration.TREMENDOUS_TANK.get());
+                Registration.TREMENDOUS_TANK.get(),
+                Registration.ENDER_TREMENDOUS_TANK.get());
     }
 }

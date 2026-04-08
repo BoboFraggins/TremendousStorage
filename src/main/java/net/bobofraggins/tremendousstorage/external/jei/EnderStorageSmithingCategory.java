@@ -52,6 +52,11 @@ public class EnderStorageSmithingCategory
                 tieredBackpacks(),
                 tieredEnderBackpacks());
 
+        public static final Recipe TANK = new Recipe(
+                "jei.tremendousstorage.ender_tank_smithing",
+                tieredTanks(),
+                tieredEnderTanks());
+
         final String titleKey;
         final List<ItemStack> inputs;
         final List<ItemStack> outputs;
@@ -100,6 +105,14 @@ public class EnderStorageSmithingCategory
             return Arrays.stream(StorageTier.values())
                     .map(tier -> new ItemStack(Registration.ENDER_TREMENDOUS_BACKPACK_ITEM.get()))
                     .toList();
+        }
+
+        private static List<ItemStack> tieredTanks() {
+            return List.of(new ItemStack(Registration.TREMENDOUS_TANK_ITEM.get()));
+        }
+
+        private static List<ItemStack> tieredEnderTanks() {
+            return List.of(new ItemStack(Registration.ENDER_TREMENDOUS_TANK_ITEM.get()));
         }
     }
 

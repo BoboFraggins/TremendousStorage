@@ -166,5 +166,8 @@
   "item.tremendousstorage.base_upgrade": "Base Upgrade",
 
   "block.tremendousstorage.recycling_bin": "Recycling Bin",
-  "screen.tremendousstorage.recycling_bin": "Recycling Bin"
+  "screen.tremendousstorage.recycling_bin": "Recycling Bin",
+
+  "block.tremendousstorage.ender_tremendous_tank": "Ender Tremendous Tank",
+  "jei.tremendousstorage.ender_tank_smithing": "Ender Tank"
 }

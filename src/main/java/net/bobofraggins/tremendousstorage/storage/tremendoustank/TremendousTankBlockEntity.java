@@ -49,7 +49,12 @@ public class TremendousTankBlockEntity extends BlockEntity implements MenuProvid
     private StorageTier tier = StorageTier.WOOD;
 
     public TremendousTankBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.TREMENDOUS_TANK_BE_TYPE.get(), pos, state);
+        this(Registration.TREMENDOUS_TANK_BE_TYPE.get(), pos, state);
+    }
+
+    protected TremendousTankBlockEntity(
+            net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
     }
 
     // -------------------------------------------------------------------------
