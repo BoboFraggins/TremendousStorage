@@ -163,5 +163,8 @@
   "item.tremendousstorage.ender_tremendous_backpack": "Ender Tremendous Backpack",
   "key.tremendousstorage.open_tremendous_backpack": "Open Tremendous Backpack",
 
-  "item.tremendousstorage.base_upgrade": "Base Upgrade"
+  "item.tremendousstorage.base_upgrade": "Base Upgrade",
+
+  "block.tremendousstorage.recycling_bin": "Recycling Bin",
+  "screen.tremendousstorage.recycling_bin": "Recycling Bin"
 }

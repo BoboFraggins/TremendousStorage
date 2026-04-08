@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "tremendousstorage:block/recycling_bin_particle" },
+    "facing=south": { "model": "tremendousstorage:block/recycling_bin_particle", "y": 180 },
+    "facing=east":  { "model": "tremendousstorage:block/recycling_bin_particle", "y": 270 },
+    "facing=west":  { "model": "tremendousstorage:block/recycling_bin_particle", "y": 90 }
+  }
+}

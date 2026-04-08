@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "I I",
+    "I I",
+    "III"
+  ],
+  "key": {
+    "I": { "item": "minecraft:iron_ingot" }
+  },
+  "result": {
+    "count": 1,
+    "id": "tremendousstorage:recycling_bin"
+  }
+}

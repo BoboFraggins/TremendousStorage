@@ -75,6 +75,9 @@ import net.bobofraggins.tremendousstorage.storage.tubeattachments.StorageInterfa
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.StorageInterfaceMenu;
 import net.bobofraggins.tremendousstorage.storage.whiteout.FolderTapeRecipe;
 import net.bobofraggins.tremendousstorage.storage.whiteout.WhiteoutTapeItem;
+import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlock;
+import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinMenu;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlock;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubMenu;
@@ -353,6 +356,26 @@ public final class Registration {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TremendousTankBlockEntity>>
             TREMENDOUS_TANK_BE_TYPE = BLOCK_ENTITY_TYPES.register("tremendous_tank", () -> BlockEntityType.Builder.of(
                     TremendousTankBlockEntity::new, TREMENDOUS_TANK.get())
+            .build(null));
+
+    // -------------------------------------------------------------------------
+    // Recycling Bin
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<RecyclingBinBlock> RECYCLING_BIN = BLOCKS.register(
+            "recycling_bin",
+            () -> new RecyclingBinBlock(BlockBehaviour.Properties.of()
+                    .strength(3.0f, 1000.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<Item, BlockItem> RECYCLING_BIN_ITEM =
+            ITEMS.registerSimpleBlockItem("recycling_bin", RECYCLING_BIN);
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RecyclingBinBlockEntity>>
+            RECYCLING_BIN_BE_TYPE = BLOCK_ENTITY_TYPES.register("recycling_bin", () -> BlockEntityType.Builder.of(
+                    RecyclingBinBlockEntity::new, RECYCLING_BIN.get())
             .build(null));
 
     // -------------------------------------------------------------------------
@@ -664,6 +687,9 @@ public final class Registration {
                     "ender_tremendous_backpack",
                     () -> IMenuTypeExtension.create(EnderTremendousBackpackMenu::new));
 
+    public static final DeferredHolder<MenuType<?>, MenuType<RecyclingBinMenu>> RECYCLING_BIN_MENU =
+            MENU_TYPES.register("recycling_bin", () -> IMenuTypeExtension.create(RecyclingBinMenu::new));
+
     // -------------------------------------------------------------------------
     // Items — storage interface / import interface / export interface
     // -------------------------------------------------------------------------
@@ -850,6 +876,7 @@ public final class Registration {
                         output.accept(BASE_UPGRADE.get());
                         output.accept(CRAFTING_UPGRADE.get());
                         output.accept(ENDER_STORAGE_UPGRADE.get());
+                        output.accept(RECYCLING_BIN_ITEM.get());
                     })
                     .build());
 
