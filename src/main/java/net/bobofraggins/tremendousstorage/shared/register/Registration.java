@@ -47,10 +47,6 @@ import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterf
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceMenu;
 import net.bobofraggins.tremendousstorage.storage.personalaccessterminal.PersonalAccessTerminalItem;
-import net.bobofraggins.tremendousstorage.storage.personalfilingcabinet.PersonalFilingCabinetContents;
-import net.bobofraggins.tremendousstorage.storage.personalfilingcabinet.PersonalFilingCabinetEvents;
-import net.bobofraggins.tremendousstorage.storage.personalfilingcabinet.PersonalFilingCabinetItem;
-import net.bobofraggins.tremendousstorage.storage.personalfilingcabinet.PersonalFilingCabinetMenu;
 import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageSmithingUpgradeRecipe;
 import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.tremendousbackpack.TremendousBackpackBlock;
@@ -227,15 +223,6 @@ public final class Registration {
                             .networkSynchronized(TremendousBackpackContents.STREAM_CODEC)
                             .build());
 
-    /**
-     * Data component storing the folder contents and void-excess flag on a Personal Filing Cabinet item.
-     */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<PersonalFilingCabinetContents>>
-            PFC_CONTENTS = DATA_COMPONENTS.register(
-                    "pfc_contents", () -> DataComponentType.<PersonalFilingCabinetContents>builder()
-                            .persistent(PersonalFilingCabinetContents.CODEC)
-                            .networkSynchronized(PersonalFilingCabinetContents.STREAM_CODEC)
-                            .build());
 
     // -------------------------------------------------------------------------
     // Blocks + block entities
@@ -669,10 +656,6 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<ExportInterfaceMenu>> EXPORT_INTERFACE_MENU =
             MENU_TYPES.register("export_interface", () -> IMenuTypeExtension.create(ExportInterfaceMenu::new));
 
-    public static final DeferredHolder<MenuType<?>, MenuType<PersonalFilingCabinetMenu>> PERSONAL_FILING_CABINET_MENU =
-            MENU_TYPES.register(
-                    "personal_filing_cabinet", () -> IMenuTypeExtension.create(PersonalFilingCabinetMenu::new));
-
     public static final DeferredHolder<MenuType<?>, MenuType<TremendousBackpackMenu>> TREMENDOUS_BACKPACK_MENU =
             MENU_TYPES.register("tremendous_backpack", () -> IMenuTypeExtension.create(TremendousBackpackMenu::new));
 
@@ -693,9 +676,6 @@ public final class Registration {
 
     public static final DeferredHolder<Item, ExportInterfaceItem> EXPORT_INTERFACE =
             ITEMS.register("export_interface", ExportInterfaceItem::new);
-
-    public static final DeferredHolder<Item, PersonalFilingCabinetItem> PERSONAL_FILING_CABINET =
-            ITEMS.register("personal_filing_cabinet", PersonalFilingCabinetItem::new);
 
     // -------------------------------------------------------------------------
     // Items — whiteout tape
@@ -866,7 +846,6 @@ public final class Registration {
                         output.accept(TUBE_ITEM.get());
                         output.accept(MANILA_FOLDER.get());
                         output.accept(ENDER_FOLDER.get());
-                        output.accept(PERSONAL_FILING_CABINET.get());
                         output.accept(WHITEOUT_TAPE.get());
                         output.accept(BASE_UPGRADE.get());
                         output.accept(CRAFTING_UPGRADE.get());
@@ -890,7 +869,6 @@ public final class Registration {
         FLUID_TYPE_REGISTER.register(modEventBus);
         modEventBus.addListener(Registration::registerCapabilities);
         modEventBus.addListener(Registration::onCommonSetup);
-        NeoForge.EVENT_BUS.register(PersonalFilingCabinetEvents.class);
         if (ModList.get().isLoaded("exdeorum")) {
             ExDeorumIntegration.register(modEventBus);
         }

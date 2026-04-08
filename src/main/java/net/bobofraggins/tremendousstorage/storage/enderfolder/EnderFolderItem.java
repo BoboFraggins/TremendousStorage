@@ -123,35 +123,6 @@ public class EnderFolderItem extends ManillaFolderItem {
                 s.set(Registration.FOLDER_CONTENTS.get(), fc);
             }
         }
-        // Also check PFC items inside the player's inventory
-        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
-            ItemStack pfcStack = player.getInventory().getItem(i);
-            if (!(pfcStack.getItem()
-                    instanceof
-                    net.bobofraggins.tremendousstorage.storage.personalfilingcabinet.PersonalFilingCabinetItem))
-                continue;
-            net.bobofraggins.tremendousstorage.storage.personalfilingcabinet.PersonalFilingCabinetContents contents =
-                    pfcStack.getOrDefault(
-                            Registration.PFC_CONTENTS.get(),
-                            net.bobofraggins.tremendousstorage.storage.personalfilingcabinet
-                                    .PersonalFilingCabinetContents.EMPTY);
-            java.util.List<ItemStack> folders = new java.util.ArrayList<>(contents.folders());
-            boolean changed = false;
-            for (int fi = 0; fi < folders.size(); fi++) {
-                if (isLinked(folders.get(fi), linkId)) {
-                    ItemStack updated = folders.get(fi).copy();
-                    updated.set(Registration.FOLDER_CONTENTS.get(), fc);
-                    folders.set(fi, updated);
-                    changed = true;
-                }
-            }
-            if (changed) {
-                pfcStack.set(
-                        Registration.PFC_CONTENTS.get(),
-                        new net.bobofraggins.tremendousstorage.storage.personalfilingcabinet
-                                .PersonalFilingCabinetContents(java.util.List.copyOf(folders), contents.voidExcess()));
-            }
-        }
     }
 
     private static boolean isLinked(ItemStack stack, long linkId) {

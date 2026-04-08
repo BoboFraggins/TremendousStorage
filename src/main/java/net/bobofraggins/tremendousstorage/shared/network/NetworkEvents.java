@@ -47,12 +47,6 @@ public final class NetworkEvents {
                 SyncInterfaceFilterPacket.STREAM_CODEC,
                 SyncInterfaceFilterPacket::handle);
         registrar.playToServer(
-                SetPfcVoidExcessPacket.TYPE, SetPfcVoidExcessPacket.STREAM_CODEC, SetPfcVoidExcessPacket::handle);
-        registrar.playToServer(
-                OpenPersonalFilingCabinetPacket.TYPE,
-                OpenPersonalFilingCabinetPacket.STREAM_CODEC,
-                OpenPersonalFilingCabinetPacket::handle);
-        registrar.playToServer(
                 LocalStorageInteractPacket.TYPE,
                 LocalStorageInteractPacket.STREAM_CODEC,
                 LocalStorageInteractPacket::handle);
