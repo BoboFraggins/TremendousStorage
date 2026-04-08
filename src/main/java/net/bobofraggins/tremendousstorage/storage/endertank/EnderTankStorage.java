@@ -24,6 +24,7 @@ public class EnderTankStorage extends SavedData {
     private record FluidState(FluidStack type, long amount) {}
 
     private final Map<Long, FluidState> tanks = new HashMap<>();
+    private final Map<Long, Long> versions = new HashMap<>();
 
     // -------------------------------------------------------------------------
     // Static access
@@ -43,6 +44,11 @@ public class EnderTankStorage extends SavedData {
         return tanks.containsKey(linkId);
     }
 
+    /** Returns a monotonically increasing counter that increments on every {@link #setState} call. */
+    public long getVersion(long linkId) {
+        return versions.getOrDefault(linkId, 0L);
+    }
+
     /** Returns the stored fluid type (amount=1), or EMPTY if unset. */
     public FluidStack getStoredFluid(long linkId) {
         FluidState state = tanks.get(linkId);
@@ -58,6 +64,7 @@ public class EnderTankStorage extends SavedData {
     /** Writes the fluid state for the given link ID and marks dirty. */
     public void setState(long linkId, FluidStack type, long amount) {
         tanks.put(linkId, new FluidState(type.isEmpty() ? FluidStack.EMPTY : type.copyWithAmount(1), amount));
+        versions.merge(linkId, 1L, Long::sum);
         setDirty();
     }
 

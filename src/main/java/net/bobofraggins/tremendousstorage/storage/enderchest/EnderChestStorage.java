@@ -23,6 +23,7 @@ public class EnderChestStorage extends SavedData {
     private static final String SAVE_KEY = "tremendousstorage_ender_chests";
 
     private final Map<Long, ListTag> inventories = new HashMap<>();
+    private final Map<Long, Long> versions = new HashMap<>();
 
     // -------------------------------------------------------------------------
     // Static access
@@ -42,6 +43,11 @@ public class EnderChestStorage extends SavedData {
         return inventories.containsKey(linkId);
     }
 
+    /** Returns a monotonically increasing counter that increments on every {@link #setTypes} call. */
+    public long getVersion(long linkId) {
+        return versions.getOrDefault(linkId, 0L);
+    }
+
     /**
      * Returns the inventory tag for the given link ID, or an empty list tag if none exists.
      */
@@ -54,6 +60,7 @@ public class EnderChestStorage extends SavedData {
      */
     public void setTypes(long linkId, ListTag types) {
         inventories.put(linkId, types);
+        versions.merge(linkId, 1L, Long::sum);
         setDirty();
     }
 

@@ -32,6 +32,7 @@ public class EnderTremendousTankBlockEntity extends TremendousTankBlockEntity {
 
     private long linkId = -1L;
     private boolean needsStorageLoad = false;
+    private long lastKnownVersion = -1L;
 
     public EnderTremendousTankBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.ENDER_TREMENDOUS_TANK_BE_TYPE.get(), pos, state);
@@ -65,6 +66,7 @@ public class EnderTremendousTankBlockEntity extends TremendousTankBlockEntity {
             // First tank of this pair to be placed — seed storage with our fluid state
             storage.initLink(linkId, getStoredFluid(), getAmount());
         }
+        lastKnownVersion = storage.getVersion(linkId);
     }
 
     /** Sets fluid state directly without triggering another syncToStorage. */
@@ -84,7 +86,9 @@ public class EnderTremendousTankBlockEntity extends TremendousTankBlockEntity {
         if (linkId == -1L || level == null || level.isClientSide()) return;
         MinecraftServer server = level.getServer();
         if (server == null) return;
-        EnderTankStorage.get(server).setState(linkId, getStoredFluid(), getAmount());
+        EnderTankStorage storage = EnderTankStorage.get(server);
+        storage.setState(linkId, getStoredFluid(), getAmount());
+        lastKnownVersion = storage.getVersion(linkId);
     }
 
     // -------------------------------------------------------------------------
@@ -120,6 +124,14 @@ public class EnderTremendousTankBlockEntity extends TremendousTankBlockEntity {
         if (be.needsStorageLoad) {
             be.needsStorageLoad = false;
             be.loadFromStorage();
+        } else if (be.linkId != -1L) {
+            MinecraftServer server = level.getServer();
+            if (server != null) {
+                long storageVersion = EnderTankStorage.get(server).getVersion(be.linkId);
+                if (storageVersion != be.lastKnownVersion) {
+                    be.loadFromStorage();
+                }
+            }
         }
     }
 

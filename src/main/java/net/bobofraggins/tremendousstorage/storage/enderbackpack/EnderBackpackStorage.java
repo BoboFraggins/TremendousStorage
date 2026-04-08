@@ -22,6 +22,7 @@ public class EnderBackpackStorage extends SavedData {
     private static final String SAVE_KEY = "tremendousstorage_ender_backpacks";
 
     private final Map<Long, ListTag> inventories = new HashMap<>();
+    private final Map<Long, Long> versions = new HashMap<>();
 
     public static EnderBackpackStorage get(MinecraftServer server) {
         DimensionDataStorage storage = server.overworld().getDataStorage();
@@ -33,12 +34,18 @@ public class EnderBackpackStorage extends SavedData {
         return inventories.containsKey(linkId);
     }
 
+    /** Returns a monotonically increasing counter that increments on every {@link #setTypes} call. */
+    public long getVersion(long linkId) {
+        return versions.getOrDefault(linkId, 0L);
+    }
+
     public ListTag getTypes(long linkId) {
         return inventories.getOrDefault(linkId, new ListTag());
     }
 
     public void setTypes(long linkId, ListTag types) {
         inventories.put(linkId, types);
+        versions.merge(linkId, 1L, Long::sum);
         setDirty();
     }
 

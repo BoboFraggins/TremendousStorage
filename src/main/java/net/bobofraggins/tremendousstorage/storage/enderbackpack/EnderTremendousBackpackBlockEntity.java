@@ -51,6 +51,7 @@ public class EnderTremendousBackpackBlockEntity extends EnderTremendousChestBloc
         } else {
             storage.initLink(linkId, saveTypes(level.registryAccess()));
         }
+        lastKnownVersion = storage.getVersion(linkId);
     }
 
     @Override
@@ -59,8 +60,17 @@ public class EnderTremendousBackpackBlockEntity extends EnderTremendousChestBloc
         if (linkId == -1L || level == null || level.isClientSide()) return;
         MinecraftServer server = level.getServer();
         if (server == null) return;
-        ListTag types = saveTypes(level.registryAccess());
-        EnderBackpackStorage.get(server).setTypes(linkId, types);
+        EnderBackpackStorage storage = EnderBackpackStorage.get(server);
+        storage.setTypes(linkId, saveTypes(level.registryAccess()));
+        lastKnownVersion = storage.getVersion(linkId);
+    }
+
+    @Override
+    protected long getStorageVersion() {
+        long linkId = getLinkId();
+        if (linkId == -1L || level == null || level.isClientSide()) return lastKnownVersion;
+        MinecraftServer server = level.getServer();
+        return server == null ? lastKnownVersion : EnderBackpackStorage.get(server).getVersion(linkId);
     }
 
     // -------------------------------------------------------------------------

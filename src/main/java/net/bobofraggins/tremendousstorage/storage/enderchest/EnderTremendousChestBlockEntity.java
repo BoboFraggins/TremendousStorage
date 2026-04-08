@@ -46,6 +46,7 @@ public class EnderTremendousChestBlockEntity extends TremendousChestBlockEntity 
 
     private long linkId = -1L;
     private boolean needsStorageLoad = false;
+    protected long lastKnownVersion = -1L;
 
     public EnderTremendousChestBlockEntity(BlockPos pos, BlockState state) {
         this(Registration.ENDER_TREMENDOUS_CHEST_BE_TYPE.get(), pos, state);
@@ -83,6 +84,7 @@ public class EnderTremendousChestBlockEntity extends TremendousChestBlockEntity 
             // First chest of this pair to be placed — seed the storage with our inventory.
             storage.initLink(linkId, saveTypes(level.registryAccess()));
         }
+        lastKnownVersion = storage.getVersion(linkId);
     }
 
     /** Writes the local in-memory inventory back to EnderChestStorage. */
@@ -90,11 +92,23 @@ public class EnderTremendousChestBlockEntity extends TremendousChestBlockEntity 
         if (linkId == -1L || level == null || level.isClientSide()) return;
         MinecraftServer server = level.getServer();
         if (server == null) return;
-        getStorage(server).setTypes(linkId, saveTypes(level.registryAccess()));
+        EnderChestStorage storage = getStorage(server);
+        storage.setTypes(linkId, saveTypes(level.registryAccess()));
+        lastKnownVersion = storage.getVersion(linkId);
     }
 
     protected EnderChestStorage getStorage(MinecraftServer server) {
         return EnderChestStorage.get(server);
+    }
+
+    /**
+     * Returns the current version counter from the backing storage for this link ID.
+     * Overridden by subclasses that use a different storage backend (e.g. backpack).
+     */
+    protected long getStorageVersion() {
+        if (linkId == -1L || level == null || level.isClientSide()) return lastKnownVersion;
+        MinecraftServer server = level.getServer();
+        return server == null ? lastKnownVersion : getStorage(server).getVersion(linkId);
     }
 
     // -------------------------------------------------------------------------
@@ -144,6 +158,11 @@ public class EnderTremendousChestBlockEntity extends TremendousChestBlockEntity 
         if (be.needsStorageLoad) {
             be.needsStorageLoad = false;
             be.loadFromStorage();
+        } else {
+            long storageVersion = be.getStorageVersion();
+            if (storageVersion != be.lastKnownVersion) {
+                be.loadFromStorage();
+            }
         }
     }
 
