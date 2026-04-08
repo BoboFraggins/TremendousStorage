@@ -30,26 +30,13 @@ public final class PositiveVibesCauldronJeiRecipe {
         return steps;
     }
 
-    /** Making Positive Vibes: Glistering Melon → Water Bucket → Cauldron → Positive Vibes Bucket. */
-    public static PositiveVibesCauldronJeiRecipe makeSalve() {
+    /** Positive Vibes: obtained by recycling items in the Recycling Bin. */
+    public static PositiveVibesCauldronJeiRecipe obtainedByRecycling() {
         return new PositiveVibesCauldronJeiRecipe(List.of(
-                new Step(
-                        new ItemStack(Items.GLISTERING_MELON_SLICE),
-                        RecipeIngredientRole.INPUT,
-                        Component.translatable(
-                                "jei.tremendousstorage.positive_vibes_cauldron.step.make.glistering_melon")),
-                new Step(
-                        new ItemStack(Items.WATER_BUCKET),
-                        RecipeIngredientRole.CATALYST,
-                        Component.translatable("jei.tremendousstorage.positive_vibes_cauldron.step.make.water_bucket")),
-                new Step(
-                        new ItemStack(Items.CAULDRON),
-                        RecipeIngredientRole.CATALYST,
-                        Component.translatable("jei.tremendousstorage.positive_vibes_cauldron.step.make.cauldron")),
                 new Step(
                         new ItemStack(Registration.HEALING_SALVE_BUCKET.get()),
                         RecipeIngredientRole.OUTPUT,
-                        Component.translatable("jei.tremendousstorage.positive_vibes_cauldron.step.make.output"))));
+                        Component.translatable("jei.tremendousstorage.positive_vibes.obtained_by_recycling"))));
     }
 
     /** Healing Zombie Brain: Zombie Brain → Positive Vibes Bucket → Cauldron → Brain. */

@@ -79,9 +79,10 @@ public class PositiveVibesCauldronCategory implements IRecipeCategory<PositiveVi
             GuiGraphics guiGraphics,
             double mouseX,
             double mouseY) {
-        drawDownArrow(guiGraphics, 19);
-        drawDownArrow(guiGraphics, 43);
-        drawDownArrow(guiGraphics, 67);
+        int count = recipe.steps().size();
+        for (int i = 1; i < count; i++) {
+            drawDownArrow(guiGraphics, SLOT_YS[i] - 5);
+        }
     }
 
     /**

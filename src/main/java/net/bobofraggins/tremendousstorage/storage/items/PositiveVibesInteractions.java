@@ -34,18 +34,7 @@ public final class PositiveVibesInteractions {
     /** Registers all cauldron interactions. Call once during common setup. */
     public static void register() {
 
-        // 1. Water cauldron + Glistering Melon Slice → Positive Vibes cauldron
-        CauldronInteraction.WATER.map().put(Items.GLISTERING_MELON_SLICE, (state, level, pos, player, hand, stack) -> {
-            if (!level.isClientSide) {
-                stack.shrink(1);
-                level.setBlockAndUpdate(
-                        pos, Registration.HEALING_SALVE_CAULDRON.get().defaultBlockState());
-                level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
-            }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
-        });
-
-        // 2. Positive Vibes cauldron + empty bucket → Positive Vibes Bucket
+        // 1. Positive Vibes cauldron + empty bucket → Positive Vibes Bucket
         CAULDRON_INTERACTIONS.map().put(Items.BUCKET, (state, level, pos, player, hand, stack) -> {
             if (!level.isClientSide) {
                 stack.shrink(1);

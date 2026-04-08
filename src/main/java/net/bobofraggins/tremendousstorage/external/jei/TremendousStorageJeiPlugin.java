@@ -62,7 +62,7 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
     public void registerRecipes(IRecipeRegistration reg) {
         reg.addRecipes(
                 PositiveVibesCauldronCategory.RECIPE_TYPE,
-                List.of(PositiveVibesCauldronJeiRecipe.makeSalve(), PositiveVibesCauldronJeiRecipe.healBrain()));
+                List.of(PositiveVibesCauldronJeiRecipe.obtainedByRecycling(), PositiveVibesCauldronJeiRecipe.healBrain()));
         reg.addRecipes(
                 EnderFolderSmithingCategory.RECIPE_TYPE,
                 List.of(EnderFolderSmithingCategory.Recipe.INSTANCE));
