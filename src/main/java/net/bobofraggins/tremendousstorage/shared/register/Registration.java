@@ -37,6 +37,8 @@ import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesBlock;
 import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesCauldronBlock;
 import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesFluid;
 import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesInteractions;
+import net.bobofraggins.tremendousstorage.storage.items.VexRepellentEffect;
+import net.bobofraggins.tremendousstorage.storage.items.VexRepellentPotionItem;
 import net.bobofraggins.tremendousstorage.storage.items.ZombieBrainItem;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderExtractRecipe;
@@ -92,6 +94,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
@@ -155,6 +158,12 @@ public final class Registration {
 
     public static final DeferredRegister<FluidType> FLUID_TYPE_REGISTER =
             DeferredRegister.create(NeoForgeRegistries.Keys.FLUID_TYPES, TremendousStorage.MODID);
+
+    public static final DeferredRegister<MobEffect> MOB_EFFECTS =
+            DeferredRegister.create(Registries.MOB_EFFECT, TremendousStorage.MODID);
+
+    public static final DeferredHolder<MobEffect, VexRepellentEffect> VEX_REPELLENT_EFFECT =
+            MOB_EFFECTS.register("vex_repellent", VexRepellentEffect::new);
 
     // -------------------------------------------------------------------------
     // Data components
@@ -557,6 +566,15 @@ public final class Registration {
     public static final DeferredHolder<Item, Item> POSITIVE_VIBES_BOTTLE =
             ITEMS.register("positive_vibes_bottle", () -> new Item(new Item.Properties()));
 
+    public static final DeferredHolder<Item, VexRepellentPotionItem> VEX_REPELLENT_POTION =
+            ITEMS.register("vex_repellent_potion", () -> new VexRepellentPotionItem(1 * 60 * 20));
+
+    public static final DeferredHolder<Item, VexRepellentPotionItem> VEX_REPELLENT_POTION_EXTENDED =
+            ITEMS.register("vex_repellent_potion_extended", () -> new VexRepellentPotionItem(3 * 60 * 20));
+
+    public static final DeferredHolder<Item, VexRepellentPotionItem> VEX_REPELLENT_POTION_LONG =
+            ITEMS.register("vex_repellent_potion_long", () -> new VexRepellentPotionItem(8 * 60 * 20));
+
     public static final DeferredHolder<Item, BucketItem> HEALING_SALVE_BUCKET = ITEMS.register(
             "positive_vibes_bucket",
             () -> new BucketItem(
@@ -913,6 +931,9 @@ public final class Registration {
                         output.accept(ENDER_TREMENDOUS_BACKPACK_ITEM.get());
                         output.accept(HEALING_SALVE_BUCKET.get());
                         output.accept(POSITIVE_VIBES_BOTTLE.get());
+                        output.accept(VEX_REPELLENT_POTION.get());
+                        output.accept(VEX_REPELLENT_POTION_EXTENDED.get());
+                        output.accept(VEX_REPELLENT_POTION_LONG.get());
                         output.accept(TUBE_ITEM.get());
                         output.accept(MANILA_FOLDER.get());
                         output.accept(ENDER_FOLDER.get());
@@ -938,6 +959,7 @@ public final class Registration {
         MENU_TYPES.register(modEventBus);
         FLUID_REGISTER.register(modEventBus);
         FLUID_TYPE_REGISTER.register(modEventBus);
+        MOB_EFFECTS.register(modEventBus);
         modEventBus.addListener(Registration::registerCapabilities);
         modEventBus.addListener(Registration::onCommonSetup);
         if (ModList.get().isLoaded("exdeorum")) {

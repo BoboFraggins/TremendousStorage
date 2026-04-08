@@ -168,5 +168,11 @@
   "item.tremendousstorage.positive_vibes_bottle": "Positive Vibes Bottle",
 
   "block.tremendousstorage.ender_tremendous_tank": "Ender Tremendous Tank",
-  "jei.tremendousstorage.ender_tank_smithing": "Ender Tank"
+  "jei.tremendousstorage.ender_tank_smithing": "Ender Tank",
+
+  "effect.tremendousstorage.vex_repellent": "Vex Repellent",
+
+  "item.tremendousstorage.vex_repellent_potion": "Vex Repellent",
+  "item.tremendousstorage.vex_repellent_potion_extended": "Extended Vex Repellent",
+  "item.tremendousstorage.vex_repellent_potion_long": "Long Vex Repellent"
 }

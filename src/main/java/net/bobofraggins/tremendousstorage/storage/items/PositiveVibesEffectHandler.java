@@ -33,6 +33,9 @@ public final class PositiveVibesEffectHandler {
 
         if (player.isInFluidType(Registration.HEALING_SALVE_TYPE.get())) {
             player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, DURATION, 0, false, true, true));
+            if (player.isOnFire()) {
+                player.clearFire();
+            }
         }
     }
 }
