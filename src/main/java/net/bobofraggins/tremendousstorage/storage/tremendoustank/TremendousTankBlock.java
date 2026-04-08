@@ -133,15 +133,22 @@ public class TremendousTankBlock extends BaseEntityBlock implements NetworkConne
             BlockHitResult hit) {
         if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
 
-        // --- Bottle handling (250 mB water only) ---
+        // --- Bottle handling (250 mB per bottle) ---
         if (stack.is(Items.GLASS_BOTTLE)) {
             if (!(level.getBlockEntity(pos) instanceof TremendousTankBlockEntity be))
                 return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-            long drained = be.extract(BOTTLE_MB, true).getAmount();
-            if (drained >= BOTTLE_MB) {
+            FluidStack simulated = be.extract(BOTTLE_MB, true);
+            if (simulated.getAmount() >= BOTTLE_MB) {
+                ItemStack result;
+                if (simulated.getFluid() == Fluids.WATER) {
+                    result = PotionContents.createItemStack(Items.POTION, Potions.WATER);
+                } else if (simulated.getFluid() == Registration.HEALING_SALVE_SOURCE.get()) {
+                    result = new ItemStack(Registration.POSITIVE_VIBES_BOTTLE.get());
+                } else {
+                    return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                }
                 be.extract(BOTTLE_MB, false);
-                ItemStack waterBottle = PotionContents.createItemStack(Items.POTION, Potions.WATER);
-                player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, waterBottle));
+                player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, result));
                 level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
                 return ItemInteractionResult.SUCCESS;
             }

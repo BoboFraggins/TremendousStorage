@@ -554,6 +554,9 @@ public final class Registration {
             ITEMS.register("ender_tremendous_backpack",
                     () -> new EnderTremendousBackpackItem(ENDER_TREMENDOUS_BACKPACK_BLOCK.get()));
 
+    public static final DeferredHolder<Item, Item> POSITIVE_VIBES_BOTTLE =
+            ITEMS.register("positive_vibes_bottle", () -> new Item(new Item.Properties()));
+
     public static final DeferredHolder<Item, BucketItem> HEALING_SALVE_BUCKET = ITEMS.register(
             "positive_vibes_bucket",
             () -> new BucketItem(
@@ -909,6 +912,7 @@ public final class Registration {
                         output.accept(TREMENDOUS_BACKPACK.get());
                         output.accept(ENDER_TREMENDOUS_BACKPACK_ITEM.get());
                         output.accept(HEALING_SALVE_BUCKET.get());
+                        output.accept(POSITIVE_VIBES_BOTTLE.get());
                         output.accept(TUBE_ITEM.get());
                         output.accept(MANILA_FOLDER.get());
                         output.accept(ENDER_FOLDER.get());
