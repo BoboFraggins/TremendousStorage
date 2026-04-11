@@ -17,7 +17,11 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * <p>Sent when the player presses the Wireless SAT keybind. The server validates that
  * the player actually has a linked Wireless SAT for this NI before opening the menu.
  */
-public record OpenPersonalAccessTerminalPacket(BlockPos niPos, @Nullable BlockPos hubPos, boolean hasCraftingUpgrade)
+public record OpenPersonalAccessTerminalPacket(
+        BlockPos niPos,
+        @Nullable BlockPos hubPos,
+        @Nullable ResourceLocation hubDimensionId,
+        boolean hasCraftingUpgrade)
         implements CustomPacketPayload {
 
     public static final Type<OpenPersonalAccessTerminalPacket> TYPE =
@@ -29,8 +33,10 @@ public record OpenPersonalAccessTerminalPacket(BlockPos niPos, @Nullable BlockPo
                 public OpenPersonalAccessTerminalPacket decode(RegistryFriendlyByteBuf buf) {
                     BlockPos niPos = BlockPos.STREAM_CODEC.decode(buf);
                     BlockPos hubPos = buf.readBoolean() ? BlockPos.STREAM_CODEC.decode(buf) : null;
+                    ResourceLocation hubDimId = buf.readBoolean()
+                            ? ResourceLocation.STREAM_CODEC.decode(buf) : null;
                     boolean hasCraftingUpgrade = buf.readBoolean();
-                    return new OpenPersonalAccessTerminalPacket(niPos, hubPos, hasCraftingUpgrade);
+                    return new OpenPersonalAccessTerminalPacket(niPos, hubPos, hubDimId, hasCraftingUpgrade);
                 }
 
                 @Override
@@ -39,6 +45,12 @@ public record OpenPersonalAccessTerminalPacket(BlockPos niPos, @Nullable BlockPo
                     if (value.hubPos() != null) {
                         buf.writeBoolean(true);
                         BlockPos.STREAM_CODEC.encode(buf, value.hubPos());
+                    } else {
+                        buf.writeBoolean(false);
+                    }
+                    if (value.hubDimensionId() != null) {
+                        buf.writeBoolean(true);
+                        ResourceLocation.STREAM_CODEC.encode(buf, value.hubDimensionId());
                     } else {
                         buf.writeBoolean(false);
                     }
@@ -54,7 +66,8 @@ public record OpenPersonalAccessTerminalPacket(BlockPos niPos, @Nullable BlockPo
     public static void handle(OpenPersonalAccessTerminalPacket packet, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
-            PersonalAccessTerminalItem.openSatUi(player, packet.niPos(), packet.hubPos(), packet.hasCraftingUpgrade());
+            PersonalAccessTerminalItem.openSatUi(
+                    player, packet.niPos(), packet.hubPos(), packet.hubDimensionId(), packet.hasCraftingUpgrade());
         });
     }
 }

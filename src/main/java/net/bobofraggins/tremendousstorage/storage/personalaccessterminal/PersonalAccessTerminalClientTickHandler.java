@@ -78,7 +78,8 @@ public final class PersonalAccessTerminalClientTickHandler {
         BlockPos niPos = stack.get(Registration.WIRELESS_NI_POS.get());
         if (niPos == null) return null;
         BlockPos hubPos = stack.get(Registration.WIRELESS_HUB_POS.get());
+        net.minecraft.resources.ResourceLocation hubDimId = stack.get(Registration.WIRELESS_HUB_DIMENSION.get());
         boolean hasCraftingUpgrade = Boolean.TRUE.equals(stack.get(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get()));
-        return new OpenPersonalAccessTerminalPacket(niPos, hubPos, hasCraftingUpgrade);
+        return new OpenPersonalAccessTerminalPacket(niPos, hubPos, hubDimId, hasCraftingUpgrade);
     }
 }

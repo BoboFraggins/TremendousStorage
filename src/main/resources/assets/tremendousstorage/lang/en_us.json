@@ -189,5 +189,9 @@
   "item.tremendousstorage.vex_repellent_potion_long": "Long Vex Repellent",
 
   "item.tremendousstorage.puller_upgrade": "Puller Upgrade",
-  "screen.tremendousstorage.puller_upgrade_label": "Puller Sides"
+  "screen.tremendousstorage.puller_upgrade_label": "Puller Sides",
+
+  "item.tremendousstorage.interdimensional_upgrade": "Interdimensional Upgrade",
+  "item.tremendousstorage.interdimensional_upgrade.requires_netherite": "Wireless Hub must be Netherite tier",
+  "item.tremendousstorage.personal_access_terminal.hub_out_of_range": "Wireless Hub is not reachable from this dimension"
 }

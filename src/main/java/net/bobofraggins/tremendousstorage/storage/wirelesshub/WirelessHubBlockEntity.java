@@ -75,6 +75,21 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     }
 
     // -------------------------------------------------------------------------
+    // Interdimensional Upgrade
+    // -------------------------------------------------------------------------
+
+    private boolean interdimensionalUpgrade = false;
+
+    public boolean hasInterdimensionalUpgrade() {
+        return interdimensionalUpgrade;
+    }
+
+    public void setInterdimensionalUpgrade(boolean value) {
+        interdimensionalUpgrade = value;
+        setChanged();
+    }
+
+    // -------------------------------------------------------------------------
     // HAARP Upgrade
     // -------------------------------------------------------------------------
 
@@ -280,9 +295,10 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         if (!(level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
         if (!ni.isNetworkValid()) return;
 
-        // Write the NI position and this hub's position into the item
+        // Write the NI position, this hub's position, and this hub's dimension into the item
         sat.set(Registration.WIRELESS_NI_POS.get(), niPos);
         sat.set(Registration.WIRELESS_HUB_POS.get(), worldPosition);
+        sat.set(Registration.WIRELESS_HUB_DIMENSION.get(), level.dimension().location());
 
         // Move to output slot (slot 1)
         inventory.setStackInSlot(1, sat);
@@ -357,6 +373,7 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         tag.putString("Tier", tier.getId());
         if (haarpUpgrade) tag.putBoolean("HaarpUpgrade", true);
         if (haarpMode != WeatherMode.OFF) tag.putInt("HaarpMode", haarpMode.ordinal());
+        if (interdimensionalUpgrade) tag.putBoolean("InterdimensionalUpgrade", true);
     }
 
     @Override
@@ -369,6 +386,7 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         connected = tag.getBoolean("Connected");
         haarpUpgrade = tag.getBoolean("HaarpUpgrade");
         haarpMode = WeatherMode.fromOrdinal(tag.getInt("HaarpMode"));
+        interdimensionalUpgrade = tag.getBoolean("InterdimensionalUpgrade");
     }
 
     // -------------------------------------------------------------------------

@@ -20,6 +20,7 @@ import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalB
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.BaseUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.HaarpUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.InterdimensionalUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.MagnetUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.PullerUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackSmithingRecipe;
@@ -205,6 +206,18 @@ public final class Registration {
                     .persistent(BlockPos.CODEC)
                     .networkSynchronized(BlockPos.STREAM_CODEC)
                     .build());
+
+    /**
+     * Data component storing the dimension {@link net.minecraft.resources.ResourceLocation} of the
+     * Wireless Hub that linked a Wireless SAT. Used to look up the hub/NI in the correct server
+     * level when the player is in a different dimension.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<net.minecraft.resources.ResourceLocation>>
+            WIRELESS_HUB_DIMENSION = DATA_COMPONENTS.register(
+                    "wireless_hub_dimension", () -> DataComponentType.<net.minecraft.resources.ResourceLocation>builder()
+                            .persistent(net.minecraft.resources.ResourceLocation.CODEC)
+                            .networkSynchronized(net.minecraft.resources.ResourceLocation.STREAM_CODEC)
+                            .build());
 
     /**
      * Presence flag — set on a Wireless SAT item when the Crafting Upgrade has been applied.
@@ -795,6 +808,9 @@ public final class Registration {
     public static final DeferredHolder<Item, PullerUpgradeItem> PULLER_UPGRADE =
             ITEMS.register("puller_upgrade", PullerUpgradeItem::new);
 
+    public static final DeferredHolder<Item, InterdimensionalUpgradeItem> INTERDIMENSIONAL_UPGRADE =
+            ITEMS.register("interdimensional_upgrade", InterdimensionalUpgradeItem::new);
+
     public static final DeferredHolder<Item, ExperienceSyringeItem> EXPERIENCE_SYRINGE =
             ITEMS.register("experience_syringe", ExperienceSyringeItem::new);
 
@@ -979,6 +995,7 @@ public final class Registration {
                         output.accept(MAGNET_UPGRADE.get());
                         output.accept(HAARP_UPGRADE.get());
                         output.accept(PULLER_UPGRADE.get());
+                        output.accept(INTERDIMENSIONAL_UPGRADE.get());
                         output.accept(EXPERIENCE_SYRINGE.get());
                         output.accept(RECYCLING_BIN_ITEM.get());
                     })

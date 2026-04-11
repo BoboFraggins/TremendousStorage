@@ -5,6 +5,7 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.HaarpUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.InterdimensionalUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.MagnetUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.PullerUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
@@ -60,7 +61,8 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
                 || stack.getItem() instanceof CraftingUpgradeItem
                 || stack.getItem() instanceof MagnetUpgradeItem
                 || stack.getItem() instanceof HaarpUpgradeItem
-                || stack.getItem() instanceof PullerUpgradeItem;
+                || stack.getItem() instanceof PullerUpgradeItem
+                || stack.getItem() instanceof InterdimensionalUpgradeItem;
     }
 
     @Override
@@ -77,6 +79,11 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         if (input.addition().getItem() instanceof PullerUpgradeItem) {
             return isPullerUpgradeTarget(input.base().getItem())
                     && !alreadyHasPullerUpgrade(input.base());
+        }
+        if (input.addition().getItem() instanceof InterdimensionalUpgradeItem) {
+            return input.base().getItem() == Registration.WIRELESS_HUB_ITEM.get()
+                    && !alreadyHasInterdimensionalUpgrade(input.base())
+                    && isNetheriteTierItem(input.base());
         }
         if (input.addition().getItem() instanceof HaarpUpgradeItem) {
             return input.base().getItem() == Registration.WIRELESS_HUB.get().asItem()
@@ -97,6 +104,9 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         }
         if (input.addition().getItem() instanceof PullerUpgradeItem) {
             return applyPullerUpgrade(input.base());
+        }
+        if (input.addition().getItem() instanceof InterdimensionalUpgradeItem) {
+            return applyInterdimensionalUpgrade(input.base());
         }
         if (input.addition().getItem() instanceof HaarpUpgradeItem) {
             return applyHaarpUpgrade(input.base());
@@ -221,6 +231,26 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putBoolean("PullerUpgrade", true);
+        ItemStack result = stack.copyWithCount(1);
+        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        return result;
+    }
+
+    private static boolean isNetheriteTierItem(ItemStack stack) {
+        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data == null) return false;
+        return StorageTier.NETHERITE.getId().equals(data.getUnsafe().getString("Tier"));
+    }
+
+    private static boolean alreadyHasInterdimensionalUpgrade(ItemStack stack) {
+        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        return data != null && data.getUnsafe().getBoolean("InterdimensionalUpgrade");
+    }
+
+    private static ItemStack applyInterdimensionalUpgrade(ItemStack stack) {
+        CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
+        tag.putBoolean("InterdimensionalUpgrade", true);
         ItemStack result = stack.copyWithCount(1);
         result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
         return result;
