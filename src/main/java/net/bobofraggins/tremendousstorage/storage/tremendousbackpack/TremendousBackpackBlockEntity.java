@@ -30,7 +30,8 @@ public class TremendousBackpackBlockEntity extends TremendousChestBlockEntity {
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.tremendousstorage.tremendous_backpack");
+        Component base = Component.translatable("block.tremendousstorage.tremendous_backpack");
+        return base.copy().append(Component.literal(buildSuffix(false)));
     }
 
     @Override

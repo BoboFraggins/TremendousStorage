@@ -114,12 +114,7 @@ public class EnderTremendousBackpackBlockEntity extends EnderTremendousChestBloc
     @Override
     public Component getDisplayName() {
         Component base = Component.translatable("block.tremendousstorage.tremendous_backpack");
-        StorageTier t = getTier();
-        if (t == StorageTier.WOOD) {
-            return Component.empty().append(base).append(" (Ender)");
-        }
-        String label = Character.toUpperCase(t.getId().charAt(0)) + t.getId().substring(1);
-        return Component.empty().append(base).append(" (" + label + "/Ender)");
+        return base.copy().append(Component.literal(buildSuffix(true)));
     }
 
     // -------------------------------------------------------------------------

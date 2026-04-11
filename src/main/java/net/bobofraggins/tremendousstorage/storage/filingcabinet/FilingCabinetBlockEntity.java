@@ -315,7 +315,9 @@ public class FilingCabinetBlockEntity extends BlockEntity
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.tremendousstorage.filing_cabinet");
+        Component base = Component.translatable("block.tremendousstorage.filing_cabinet");
+        if (!hasMagnetUpgrade) return base;
+        return base.copy().append(Component.literal(" (Magnetized)"));
     }
 
     @Override

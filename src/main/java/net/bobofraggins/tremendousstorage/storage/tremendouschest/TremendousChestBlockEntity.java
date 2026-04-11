@@ -370,10 +370,24 @@ public class TremendousChestBlockEntity extends BlockEntity implements MenuProvi
     @Override
     public Component getDisplayName() {
         Component base = Component.translatable("block.tremendousstorage.tremendous_chest");
-        if (tier == StorageTier.WOOD) return base;
-        String label =
-                Character.toUpperCase(tier.getId().charAt(0)) + tier.getId().substring(1);
-        return base.copy().append(Component.literal(" (" + label + ")"));
+        return base.copy().append(Component.literal(buildSuffix(false)));
+    }
+
+    /** Builds the " (Tier/Ender/Magnetized)" suffix string. Pass {@code ender=true} for ender variants. */
+    protected String buildSuffix(boolean ender) {
+        StringBuilder sb = new StringBuilder();
+        if (tier != StorageTier.WOOD) {
+            sb.append(Character.toUpperCase(tier.getId().charAt(0))).append(tier.getId().substring(1));
+        }
+        if (ender) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Ender");
+        }
+        if (hasMagnetUpgrade) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Magnetized");
+        }
+        return sb.isEmpty() ? "" : " (" + sb + ")";
     }
 
     @Override
