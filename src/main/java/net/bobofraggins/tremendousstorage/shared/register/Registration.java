@@ -18,6 +18,7 @@ import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalB
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.BaseUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.MagnetUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackSmithingRecipe;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderTremendousBackpackBlock;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderTremendousBackpackBlockEntity;
@@ -763,6 +764,9 @@ public final class Registration {
     public static final DeferredHolder<Item, BaseUpgradeItem> ENDER_STORAGE_UPGRADE =
             ITEMS.register("ender_storage_upgrade", BaseUpgradeItem::new);
 
+    public static final DeferredHolder<Item, MagnetUpgradeItem> MAGNET_UPGRADE =
+            ITEMS.register("magnet_upgrade", MagnetUpgradeItem::new);
+
     // -------------------------------------------------------------------------
     // Items — Manila Folder and Ender Folder (single items; tier in FolderContents)
     // -------------------------------------------------------------------------
@@ -941,6 +945,7 @@ public final class Registration {
                         output.accept(BASE_UPGRADE.get());
                         output.accept(CRAFTING_UPGRADE.get());
                         output.accept(ENDER_STORAGE_UPGRADE.get());
+                        output.accept(MAGNET_UPGRADE.get());
                         output.accept(RECYCLING_BIN_ITEM.get());
                     })
                     .build());

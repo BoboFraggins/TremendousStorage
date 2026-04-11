@@ -14,10 +14,13 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
+import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -26,6 +29,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 /** Stores up to {@value #SLOT_COUNT} Manila Folder stacks. */
 public class FilingCabinetBlockEntity extends BlockEntity
@@ -36,6 +40,7 @@ public class FilingCabinetBlockEntity extends BlockEntity
     private final NonNullList<ItemStack> folders = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
     private Priority priority = Priority.HIGH;
     private boolean voidExcess = false;
+    private boolean hasMagnetUpgrade = false;
 
     @Nullable
     private BlockPos cachedNiPos = null;
@@ -115,6 +120,20 @@ public class FilingCabinetBlockEntity extends BlockEntity
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, FilingCabinetBlockEntity be) {
         be.openersCounter.recheckOpeners(level, pos, state);
+        if (be.hasMagnetUpgrade) {
+            AABB searchArea = new AABB(pos).inflate(3);
+            for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, searchArea)) {
+                if (entity.isRemoved()) continue;
+                ItemStack stack = entity.getItem();
+                if (stack.isEmpty()) continue;
+                ItemStack leftover = be.magnetAbsorb(stack);
+                if (leftover.isEmpty()) {
+                    entity.discard();
+                } else if (leftover.getCount() < stack.getCount()) {
+                    entity.setItem(leftover);
+                }
+            }
+        }
     }
 
     public static void clientTick(Level level, BlockPos pos, BlockState state, FilingCabinetBlockEntity be) {
@@ -257,6 +276,39 @@ public class FilingCabinetBlockEntity extends BlockEntity
         setChanged();
     }
 
+    public boolean hasMagnetUpgrade() {
+        return hasMagnetUpgrade;
+    }
+
+    public void setMagnetUpgrade(boolean value) {
+        hasMagnetUpgrade = value;
+        setChanged();
+    }
+
+    /**
+     * Attempts to absorb as many items from {@code incoming} as possible into folders that are
+     * already locked to that item type. Returns the leftover stack (empty if fully absorbed).
+     */
+    public ItemStack magnetAbsorb(ItemStack incoming) {
+        long remaining = incoming.getCount();
+        for (int slot = 0; slot < SLOT_COUNT && remaining > 0; slot++) {
+            ItemStack folder = folders.get(slot);
+            if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) continue;
+            FolderContents contents = ManillaFolderItem.getContents(folder);
+            if (contents.isEmpty()) continue; // unlocked — not "already in inventory"
+            if (!contents.accepts(incoming)) continue;
+            long capacity = ManillaFolderItem.getCapacity(folder);
+            FolderContents.InsertResult result = contents.insert(remaining, capacity);
+            long absorbed = remaining - result.remainder();
+            if (absorbed > 0) {
+                notifyFolderContentsChanged(slot, ManillaFolderItem.setContents(folder.copyWithCount(1), result.updated()));
+                remaining = result.remainder();
+            }
+        }
+        if (voidExcess) return ItemStack.EMPTY;
+        return remaining == 0 ? ItemStack.EMPTY : incoming.copyWithCount((int) remaining);
+    }
+
     // -------------------------------------------------------------------------
     // MenuProvider
     // -------------------------------------------------------------------------
@@ -281,6 +333,7 @@ public class FilingCabinetBlockEntity extends BlockEntity
         ContainerHelper.saveAllItems(tag, folders, registries);
         tag.putInt("Priority", priority.ordinal());
         tag.putBoolean("VoidExcess", voidExcess);
+        if (hasMagnetUpgrade) tag.putBoolean("MagnetUpgrade", true);
     }
 
     @Override
@@ -289,6 +342,7 @@ public class FilingCabinetBlockEntity extends BlockEntity
         ContainerHelper.loadAllItems(tag, folders, registries);
         priority = Priority.fromOrdinal(tag.getInt("Priority"));
         voidExcess = tag.getBoolean("VoidExcess");
+        hasMagnetUpgrade = tag.getBoolean("MagnetUpgrade");
     }
 
     // -------------------------------------------------------------------------

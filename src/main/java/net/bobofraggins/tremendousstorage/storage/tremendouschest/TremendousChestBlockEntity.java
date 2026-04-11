@@ -30,11 +30,13 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 /**
  * Stores items in a shared pool across any number of distinct types.
@@ -58,6 +60,7 @@ public class TremendousChestBlockEntity extends BlockEntity implements MenuProvi
     private SortMode sortMode = SortMode.AMOUNT;
     private StorageTier tier = StorageTier.WOOD;
     private boolean hasCraftingUpgrade = false;
+    private boolean hasMagnetUpgrade = false;
 
     public long getCapacity() {
         return tier.getCapacity();
@@ -157,6 +160,22 @@ public class TremendousChestBlockEntity extends BlockEntity implements MenuProvi
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, TremendousChestBlockEntity be) {
         be.openersCounter.recheckOpeners(level, pos, state);
+        if (be.hasMagnetUpgrade) {
+            AABB searchArea = new AABB(pos).inflate(3);
+            for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, searchArea)) {
+                if (entity.isRemoved()) continue;
+                ItemStack stack = entity.getItem();
+                if (stack.isEmpty()) continue;
+                StorageKey key = StorageKey.of(stack);
+                if (!be.contains(key)) continue;
+                long remainder = be.insert(stack, stack.getCount(), false);
+                if (remainder <= 0) {
+                    entity.discard();
+                } else {
+                    entity.setItem(stack.copyWithCount((int) remainder));
+                }
+            }
+        }
     }
 
     public static void clientTick(Level level, BlockPos pos, BlockState state, TremendousChestBlockEntity be) {
@@ -385,6 +404,15 @@ public class TremendousChestBlockEntity extends BlockEntity implements MenuProvi
         setChanged();
     }
 
+    public boolean hasMagnetUpgrade() {
+        return hasMagnetUpgrade;
+    }
+
+    public void setMagnetUpgrade(boolean value) {
+        hasMagnetUpgrade = value;
+        setChanged();
+    }
+
     // -------------------------------------------------------------------------
     // NiCacheHolder + setChanged
     // -------------------------------------------------------------------------
@@ -486,6 +514,7 @@ public class TremendousChestBlockEntity extends BlockEntity implements MenuProvi
         tag.putString("SortMode", sortMode.name());
         tag.putString("Tier", tier.getId());
         if (hasCraftingUpgrade) tag.putBoolean("CraftingUpgrade", true);
+        if (hasMagnetUpgrade) tag.putBoolean("MagnetUpgrade", true);
     }
 
     @Override
@@ -513,6 +542,7 @@ public class TremendousChestBlockEntity extends BlockEntity implements MenuProvi
         }
         tier = StorageTier.fromId(tag.getString("Tier"));
         hasCraftingUpgrade = tag.getBoolean("CraftingUpgrade");
+        hasMagnetUpgrade = tag.getBoolean("MagnetUpgrade");
     }
 
     // -------------------------------------------------------------------------
