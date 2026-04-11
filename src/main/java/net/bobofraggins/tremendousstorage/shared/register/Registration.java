@@ -888,7 +888,7 @@ public final class Registration {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TREMENDOUSSTORAGE_TAB =
             CREATIVE_MODE_TABS.register("tremendousstorage", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.tremendousstorage"))
-                    .icon(() -> FILING_CABINET_ITEM.get().getDefaultInstance())
+                    .icon(() -> STORAGE_ACCESS_TERMINAL_ITEM.get().getDefaultInstance())
                     .displayItems((params, output) -> {
                         output.accept(LAZURITE_BARS_ITEM.get());
                         output.accept(LAZURITE_ORE_ITEM.get());
