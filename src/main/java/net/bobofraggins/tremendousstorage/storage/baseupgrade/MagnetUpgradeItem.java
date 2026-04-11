@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.baseupgrade;
 
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
@@ -26,7 +26,7 @@ public class MagnetUpgradeItem extends Item {
         BlockEntity be = ctx.getLevel().getBlockEntity(ctx.getClickedPos());
 
         boolean matches = false;
-        if (be instanceof TremendousChestBlockEntity chest && !chest.hasMagnetUpgrade()) {
+        if (be instanceof ChestBlockEntity chest && !chest.hasMagnetUpgrade()) {
             if (!ctx.getLevel().isClientSide()) {
                 chest.setMagnetUpgrade(true);
             }

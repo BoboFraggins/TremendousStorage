@@ -108,11 +108,11 @@ public class EnderStorageSmithingCategory
         }
 
         private static List<ItemStack> tieredTanks() {
-            return List.of(new ItemStack(Registration.TREMENDOUS_TANK_ITEM.get()));
+            return List.of(new ItemStack(Registration.TANK_ITEM.get()));
         }
 
         private static List<ItemStack> tieredEnderTanks() {
-            return List.of(new ItemStack(Registration.ENDER_TREMENDOUS_TANK_ITEM.get()));
+            return List.of(new ItemStack(Registration.ENDER_TANK_ITEM.get()));
         }
     }
 

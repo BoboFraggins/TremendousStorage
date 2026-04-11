@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.whiteout;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
-import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -42,7 +42,7 @@ public class WhiteoutTapeItem extends Item {
         var be = level.getBlockEntity(pos);
         var tape = ctx.getItemInHand();
 
-        if (be instanceof TremendousTankBlockEntity tank) {
+        if (be instanceof TankBlockEntity tank) {
             if (!tank.isLocked() || tank.getAmount() > 0) {
                 // Not locked, or still has fluid — nothing to do
                 return InteractionResult.PASS;

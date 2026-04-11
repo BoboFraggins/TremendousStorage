@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.network;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -47,7 +47,7 @@ public record SetSortModePacket(BlockPos pos, int modeOrdinal) implements Custom
             SortMode mode =
                     SortMode.values()[Math.max(0, Math.min(packet.modeOrdinal(), SortMode.values().length - 1))];
             if (be instanceof AccessTerminalBlockEntity at) at.setSortMode(mode);
-            else if (be instanceof TremendousChestBlockEntity bs) bs.setSortMode(mode);
+            else if (be instanceof ChestBlockEntity bs) bs.setSortMode(mode);
         });
     }
 }

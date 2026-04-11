@@ -4,12 +4,12 @@ import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
-import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderTremendousBackpackItem;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem;
+import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackItem;
 import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
-import net.bobofraggins.tremendousstorage.storage.tremendousbackpack.TremendousBackpackContents;
-import net.bobofraggins.tremendousstorage.storage.tremendousbackpack.TremendousBackpackItem;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -90,20 +90,20 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
 
     private static boolean isStorageBlock(Item item) {
         return item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
-                || item instanceof EnderTremendousBackpackItem
+                || item instanceof EnderBackpackItem
                 || item == Registration.ENDER_FOLDER.get()
-                || item == Registration.ENDER_TREMENDOUS_TANK_ITEM.get();
+                || item == Registration.ENDER_TANK_ITEM.get();
     }
 
     private static boolean isCraftingUpgradeTarget(Item item) {
         return item == Registration.TREMENDOUS_CHEST_ITEM.get()
                 || item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
-                || item instanceof TremendousBackpackItem; // covers both ender and regular backpack
+                || item instanceof BackpackItem; // covers both ender and regular backpack
     }
 
     private static boolean alreadyHasCraftingUpgrade(ItemStack stack) {
-        if (stack.getItem() instanceof TremendousBackpackItem) {
-            return stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY)
+        if (stack.getItem() instanceof BackpackItem) {
+            return stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY)
                     .hasCraftingUpgrade();
         }
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
@@ -111,9 +111,9 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     }
 
     private static ItemStack applyCraftingUpgrade(ItemStack blockStack) {
-        if (blockStack.getItem() instanceof TremendousBackpackItem) {
-            TremendousBackpackContents current = blockStack.getOrDefault(
-                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY);
+        if (blockStack.getItem() instanceof BackpackItem) {
+            BackpackContents current = blockStack.getOrDefault(
+                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
             ItemStack result = blockStack.copyWithCount(1);
             result.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), current.withCraftingUpgrade());
             return result;
@@ -131,8 +131,8 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         if (stack.getItem() instanceof EnderFolderItem) {
             return ManillaFolderItem.getContents(stack).tier();
         }
-        if (stack.getItem() instanceof EnderTremendousBackpackItem) {
-            return stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY)
+        if (stack.getItem() instanceof EnderBackpackItem) {
+            return stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY)
                     .tier();
         }
         // Ender chest and ender tank store tier in BLOCK_ENTITY_DATA under "Tier"
@@ -153,9 +153,9 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
             result.set(Registration.FOLDER_CONTENTS.get(), current.withTier(upgradeItem.getToTier()));
             return result;
         }
-        if (blockStack.getItem() instanceof EnderTremendousBackpackItem) {
-            TremendousBackpackContents current = blockStack.getOrDefault(
-                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), TremendousBackpackContents.EMPTY);
+        if (blockStack.getItem() instanceof EnderBackpackItem) {
+            BackpackContents current = blockStack.getOrDefault(
+                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
             ItemStack result = blockStack.copyWithCount(1);
             result.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), current.withTier(upgradeItem.getToTier()));
             return result;

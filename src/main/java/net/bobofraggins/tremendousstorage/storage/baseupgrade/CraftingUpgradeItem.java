@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.baseupgrade;
 
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
@@ -25,7 +25,7 @@ public class CraftingUpgradeItem extends Item {
         BlockEntity be = ctx.getLevel().getBlockEntity(ctx.getClickedPos());
 
         boolean matches = false;
-        if (be instanceof TremendousChestBlockEntity chest && !chest.hasCraftingUpgrade()) {
+        if (be instanceof ChestBlockEntity chest && !chest.hasCraftingUpgrade()) {
             if (!ctx.getLevel().isClientSide()) {
                 chest.setCraftingUpgrade(true);
             }

@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.whiteout;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
-import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankContents;
+import net.bobofraggins.tremendousstorage.storage.tank.TankContents;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
@@ -51,7 +51,7 @@ public class FolderTapeRecipe extends CustomRecipe {
     private static ItemStack findTankItem(CraftingInput input) {
         for (int i = 0; i < input.size(); i++) {
             ItemStack s = input.getItem(i);
-            if (s.has(Registration.TREMENDOUS_TANK_CONTENTS.get())) return s;
+            if (s.has(Registration.TANK_CONTENTS.get())) return s;
         }
         return ItemStack.EMPTY;
     }
@@ -64,8 +64,8 @@ public class FolderTapeRecipe extends CustomRecipe {
 
     /** True if the tank item is locked to a fluid type but has amount == 0. */
     private static boolean isTankLockedEmpty(ItemStack tank) {
-        TremendousTankContents contents =
-                tank.getOrDefault(Registration.TREMENDOUS_TANK_CONTENTS.get(), TremendousTankContents.EMPTY);
+        TankContents contents =
+                tank.getOrDefault(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
         return contents.isLocked() && contents.amount() == 0;
     }
 
@@ -85,7 +85,7 @@ public class FolderTapeRecipe extends CustomRecipe {
             if (s.getItem() instanceof WhiteoutTapeItem) {
                 if (!tape.isEmpty()) return false; // two tapes
                 tape = s;
-            } else if (s.getItem() instanceof ManillaFolderItem || s.has(Registration.TREMENDOUS_TANK_CONTENTS.get())) {
+            } else if (s.getItem() instanceof ManillaFolderItem || s.has(Registration.TANK_CONTENTS.get())) {
                 if (!target.isEmpty()) return false; // two targets
                 target = s;
             } else {
@@ -112,7 +112,7 @@ public class FolderTapeRecipe extends CustomRecipe {
         ItemStack tank = findTankItem(input);
         if (!tank.isEmpty()) {
             ItemStack result = tank.copyWithCount(1);
-            result.set(Registration.TREMENDOUS_TANK_CONTENTS.get(), TremendousTankContents.EMPTY);
+            result.set(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
             return result;
         }
 

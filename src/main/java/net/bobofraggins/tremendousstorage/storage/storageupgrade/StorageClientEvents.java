@@ -4,7 +4,7 @@ import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderItemDecorator;
-import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -32,7 +32,7 @@ public final class StorageClientEvents {
                 (state, level, pos, tintIndex) -> {
                     if (tintIndex != 0 || level == null || pos == null) return -1;
                     BlockEntity be = level.getBlockEntity(pos);
-                    if (be instanceof TremendousChestBlockEntity bulk) {
+                    if (be instanceof ChestBlockEntity bulk) {
                         return bulk.getTier().getColor();
                     }
                     return -1;

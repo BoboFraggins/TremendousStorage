@@ -2,8 +2,8 @@ package net.bobofraggins.tremendousstorage.storage.storageupgrade;
 
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
@@ -40,7 +40,7 @@ public class StorageUpgradeItem extends Item {
         BlockEntity be = ctx.getLevel().getBlockEntity(ctx.getClickedPos());
 
         boolean matches = false;
-        if (be instanceof TremendousChestBlockEntity bulk && bulk.getTier() == from) {
+        if (be instanceof ChestBlockEntity bulk && bulk.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 bulk.setTier(to);
             }
@@ -50,7 +50,7 @@ public class StorageUpgradeItem extends Item {
                 ni.setTier(to);
             }
             matches = true;
-        } else if (be instanceof TremendousTankBlockEntity tank && tank.getTier() == from) {
+        } else if (be instanceof TankBlockEntity tank && tank.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 tank.setTier(to);
             }

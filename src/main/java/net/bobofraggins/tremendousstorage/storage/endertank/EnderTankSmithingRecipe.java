@@ -20,7 +20,7 @@ import net.minecraft.world.level.Level;
  * Smithing-table recipe: Tremendous Tank (any tier) + Ender Storage Upgrade →
  * two linked Ender Tremendous Tanks sharing a freshly generated 64-bit {@code linkId}.
  *
- * <p>The BED (tier, voidExcess) and the {@link Registration#TREMENDOUS_TANK_CONTENTS} component
+ * <p>The BED (tier, voidExcess) and the {@link Registration#TANK_CONTENTS} component
  * are copied from the input tank to both outputs. The second tank is returned via
  * {@link #getRemainingItems} in the base slot, as with vanilla smithing remainder items.
  */
@@ -45,8 +45,8 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {
-        return stack.getItem() == Registration.TREMENDOUS_TANK_ITEM.get()
-                || stack.getItem() == Registration.ENDER_TREMENDOUS_TANK_ITEM.get();
+        return stack.getItem() == Registration.TANK_ITEM.get()
+                || stack.getItem() == Registration.ENDER_TANK_ITEM.get();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
     @Override
     public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
         long linkId;
-        if (input.base().getItem() == Registration.ENDER_TREMENDOUS_TANK_ITEM.get()) {
+        if (input.base().getItem() == Registration.ENDER_TANK_ITEM.get()) {
             linkId = getExistingLinkId(input.base());
             if (linkId == -1L) linkId = SECURE_RANDOM.nextLong();
         } else {
@@ -80,7 +80,7 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
         long linkId = PENDING_LINK.get()[0];
         if (linkId != -1L) {
             PENDING_LINK.get()[0] = -1L;
-            if (input.base().getItem() == Registration.ENDER_TREMENDOUS_TANK_ITEM.get()) {
+            if (input.base().getItem() == Registration.ENDER_TANK_ITEM.get()) {
                 remaining.set(1, input.base().copy());
             } else {
                 remaining.set(1, makeEnderTank(input.base(), linkId));
@@ -91,7 +91,7 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
 
     @Override
     public ItemStack getResultItem(HolderLookup.Provider registries) {
-        return new ItemStack(Registration.ENDER_TREMENDOUS_TANK_ITEM.get());
+        return new ItemStack(Registration.ENDER_TANK_ITEM.get());
     }
 
     @Override
@@ -107,24 +107,24 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
         CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (existing == null) return -1L;
         CompoundTag tag = existing.copyTag();
-        return tag.contains(EnderTremendousTankBlockEntity.TAG_LINK_ID)
-                ? tag.getLong(EnderTremendousTankBlockEntity.TAG_LINK_ID)
+        return tag.contains(EnderTankBlockEntity.TAG_LINK_ID)
+                ? tag.getLong(EnderTankBlockEntity.TAG_LINK_ID)
                 : -1L;
     }
 
     private static ItemStack makeEnderTank(ItemStack baseStack, long linkId) {
-        ItemStack result = new ItemStack(Registration.ENDER_TREMENDOUS_TANK_ITEM.get());
+        ItemStack result = new ItemStack(Registration.ENDER_TANK_ITEM.get());
 
         // Copy BED (tier, voidExcess) and add the link ID
         CustomData existing = baseStack.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
-        tag.putLong(EnderTremendousTankBlockEntity.TAG_LINK_ID, linkId);
+        tag.putLong(EnderTankBlockEntity.TAG_LINK_ID, linkId);
         result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
 
         // Copy fluid contents component so both tanks start with the same fluid
-        var contents = baseStack.get(Registration.TREMENDOUS_TANK_CONTENTS.get());
+        var contents = baseStack.get(Registration.TANK_CONTENTS.get());
         if (contents != null) {
-            result.set(Registration.TREMENDOUS_TANK_CONTENTS.get(), contents);
+            result.set(Registration.TANK_CONTENTS.get(), contents);
         }
 
         return result;

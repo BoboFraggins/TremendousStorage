@@ -5,7 +5,7 @@ import java.util.NavigableMap;
 import javax.annotation.Nonnull;
 import net.bobofraggins.tremendousstorage.shared.storage.IPreferredStorage;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
-import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankItemAdapter;
+import net.bobofraggins.tremendousstorage.storage.tank.TankItemAdapter;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -21,7 +21,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  * use insert order — so callers can safely iterate slots and extract by the same index.
  *
  * <p>Slot counts are computed dynamically on every call because underlying handlers
- * (e.g. Tremendous Chest) report different slot counts as items are inserted or
+ * (e.g. Chest) report different slot counts as items are inserted or
  * removed. Caching slot counts at construction time would cause newly-inserted items to
  * be invisible until the next full network re-scan.
  */
@@ -63,13 +63,13 @@ public class NiItemHandler implements IItemHandler {
     // -------------------------------------------------------------------------
 
     /**
-     * Returns {@code true} if the given global slot index maps to a {@link TremendousTankItemAdapter}.
+     * Returns {@code true} if the given global slot index maps to a {@link TankItemAdapter}.
      * Used by {@link net.bobofraggins.tremendousstorage.shared.network.SatExtractPacket} to enforce
      * the empty-bucket requirement before extracting fluid.
      */
     public boolean isFluidSlot(int globalSlot) {
         SlotRef ref = resolveSlot(globalSlot, insertOrder);
-        return ref != null && ref.handler() instanceof TremendousTankItemAdapter;
+        return ref != null && ref.handler() instanceof TankItemAdapter;
     }
 
     // -------------------------------------------------------------------------
@@ -144,7 +144,7 @@ public class NiItemHandler implements IItemHandler {
         for (int s = 0; s < slots && !remaining.isEmpty(); s++) {
             remaining = handler.insertItem(s, remaining, simulate);
         }
-        // TremendousChest empty case: 0 slots but still accepts via slot 0
+        // Chest empty case: 0 slots but still accepts via slot 0
         if (slots == 0 && !remaining.isEmpty()) {
             remaining = handler.insertItem(0, remaining, simulate);
         }

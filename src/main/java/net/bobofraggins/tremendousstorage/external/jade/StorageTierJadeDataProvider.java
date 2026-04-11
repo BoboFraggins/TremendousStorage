@@ -1,8 +1,8 @@
 package net.bobofraggins.tremendousstorage.external.jade;
 
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
-import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -32,8 +32,8 @@ public enum StorageTierJadeDataProvider implements IServerDataProvider<BlockAcce
     }
 
     static StorageTier getTier(BlockEntity be) {
-        if (be instanceof TremendousChestBlockEntity b) return b.getTier();
-        if (be instanceof TremendousTankBlockEntity f) return f.getTier();
+        if (be instanceof ChestBlockEntity b) return b.getTier();
+        if (be instanceof TankBlockEntity f) return f.getTier();
         return null;
     }
 }

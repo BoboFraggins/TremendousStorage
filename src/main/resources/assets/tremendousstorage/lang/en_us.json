@@ -16,8 +16,8 @@
   "block.tremendousstorage.filing_cabinet": "Filing Cabinet",
   "screen.tremendousstorage.filing_cabinet": "Filing Cabinet",
 
-  "block.tremendousstorage.tremendous_chest": "Tremendous Chest",
-  "block.tremendousstorage.ender_tremendous_chest": "Ender Tremendous Chest",
+  "block.tremendousstorage.chest": "Chest",
+  "block.tremendousstorage.ender_chest": "Ender Chest",
 
   "item.tremendousstorage.wood_to_copper_storage_upgrade": "Wood to Copper Storage Upgrade",
   "item.tremendousstorage.copper_to_iron_storage_upgrade": "Copper to Iron Storage Upgrade",
@@ -25,7 +25,7 @@
   "item.tremendousstorage.gold_to_diamond_storage_upgrade": "Gold to Diamond Storage Upgrade",
   "item.tremendousstorage.diamond_to_emerald_storage_upgrade": "Diamond to Emerald Storage Upgrade",
   "item.tremendousstorage.emerald_to_netherite_storage_upgrade": "Emerald to Netherite Storage Upgrade",
-  "block.tremendousstorage.tremendous_tank": "Tremendous Tank",
+  "block.tremendousstorage.tank": "Tank",
 
   "item.tremendousstorage.lazurite_ore_chunk": "Lazurite Ore Chunk",
   "item.tremendousstorage.lazurite_pieces": "Lazurite Pieces",
@@ -63,11 +63,11 @@
 
   "jade.tremendousstorage.filing_cabinet.slot": "%2$s of %3$s %1$s",
 
-  "jade.tremendousstorage.tremendous_chest.empty": "Empty",
-  "jade.tremendousstorage.tremendous_chest.total": "%1$s / %2$s items",
+  "jade.tremendousstorage.chest.empty": "Empty",
+  "jade.tremendousstorage.chest.total": "%1$s / %2$s items",
 
-  "jade.tremendousstorage.tremendous_tank.empty": "Empty",
-  "jade.tremendousstorage.tremendous_tank.contents": "%1$s mB of %2$s mB %3$s",
+  "jade.tremendousstorage.tank.empty": "Empty",
+  "jade.tremendousstorage.tank.contents": "%1$s mB of %2$s mB %3$s",
 
   "priority.tremendousstorage.lowest": "Lowest",
   "priority.tremendousstorage.low": "Low",
@@ -88,7 +88,7 @@
   "screen.tremendousstorage.filter_accept": "Mode: Accept",
   "screen.tremendousstorage.filter_reject": "Mode: Reject",
 
-  "item.tremendousstorage.tremendous_tank.tooltip": "%1$s / %2$s mB %3$s",
+  "item.tremendousstorage.tank.tooltip": "%1$s / %2$s mB %3$s",
 
   "screen.tremendousstorage.void_excess_label": "Void Excess:",
   "screen.tremendousstorage.void_excess_on": "Void Excess: ON",
@@ -156,9 +156,10 @@
   "item.tremendousstorage.canvas": "Canvas",
   "block.tremendousstorage.canvas_block": "Canvas Block",
 
-  "item.tremendousstorage.tremendous_backpack": "Tremendous Backpack",
-  "item.tremendousstorage.ender_tremendous_backpack": "Ender Tremendous Backpack",
-  "key.tremendousstorage.open_tremendous_backpack": "Open Tremendous Backpack",
+  "block.tremendousstorage.backpack": "Backpack",
+  "item.tremendousstorage.backpack": "Backpack",
+  "item.tremendousstorage.ender_backpack": "Ender Backpack",
+  "key.tremendousstorage.open_backpack": "Open Backpack",
 
   "item.tremendousstorage.base_upgrade": "Base Upgrade",
 
@@ -167,7 +168,7 @@
 
   "item.tremendousstorage.positive_vibes_bottle": "Positive Vibes Bottle",
 
-  "block.tremendousstorage.ender_tremendous_tank": "Ender Tremendous Tank",
+  "block.tremendousstorage.ender_tank": "Ender Tank",
   "jei.tremendousstorage.ender_tank_smithing": "Ender Tank",
 
   "effect.tremendousstorage.vex_repellent": "Vex Repellent",

@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 
 import net.bobofraggins.tremendousstorage.shared.network.ClearTankContentsPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetVoidExcessPacket;
-import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -48,7 +48,7 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
 
         // "Clear Contents" button — only shown when the block entity is a Tremendous Tank
         BlockEntity be = minecraft.level != null ? minecraft.level.getBlockEntity(menu.getPos()) : null;
-        if (be instanceof TremendousTankBlockEntity) {
+        if (be instanceof TankBlockEntity) {
             addRenderableWidget(Button.builder(
                             Component.translatable("screen.tremendousstorage.clear_tank_contents"),
                             btn -> PacketDistributor.sendToServer(new ClearTankContentsPacket(menu.getPos())))

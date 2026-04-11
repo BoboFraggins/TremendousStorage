@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.shared.network;
 
 import net.bobofraggins.tremendousstorage.TremendousStorage;
-import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -14,7 +14,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 /**
  * Server-bound packet: clear and unlock the Tremendous Tank at the given position.
  *
- * <p>Calls {@link TremendousTankBlockEntity#clearFluid()}, which sets the amount to zero and removes
+ * <p>Calls {@link TankBlockEntity#clearFluid()}, which sets the amount to zero and removes
  * the fluid-type lock. Sent by the "Clear Contents" button in the tank settings screen.
  */
 public record ClearTankContentsPacket(BlockPos pos) implements CustomPacketPayload {
@@ -34,7 +34,7 @@ public record ClearTankContentsPacket(BlockPos pos) implements CustomPacketPaylo
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
             BlockEntity be = player.level().getBlockEntity(packet.pos());
-            if (be instanceof TremendousTankBlockEntity tank) {
+            if (be instanceof TankBlockEntity tank) {
                 tank.clearFluid();
             }
         });

@@ -11,7 +11,7 @@ import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -136,7 +136,7 @@ public final class TubeNetwork {
 
         BlockEntity neighborBE = level.getBlockEntity(neighborPos);
         if (neighborBE instanceof FilingCabinetBlockEntity fc) return fc.getPriority();
-        if (neighborBE instanceof TremendousChestBlockEntity bs) return bs.getPriority();
+        if (neighborBE instanceof ChestBlockEntity bs) return bs.getPriority();
 
         return Priority.NORMAL;
     }

@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.shared.network;
 
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -41,7 +41,7 @@ public record SetVoidExcessPacket(BlockPos pos, boolean voidExcess) implements C
             BlockEntity be = player.level().getBlockEntity(packet.pos());
             if (be instanceof FilingCabinetBlockEntity fc) {
                 fc.setVoidExcess(packet.voidExcess());
-            } else if (be instanceof TremendousTankBlockEntity ft) {
+            } else if (be instanceof TankBlockEntity ft) {
                 ft.setVoidExcess(packet.voidExcess());
             }
         });

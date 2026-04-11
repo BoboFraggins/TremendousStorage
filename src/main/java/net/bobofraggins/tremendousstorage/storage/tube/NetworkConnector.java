@@ -17,10 +17,10 @@ package net.bobofraggins.tremendousstorage.storage.tube;
  * <p>Blocks that implement this interface:
  * <ul>
  *   <li>{@link net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlock}
- *   <li>{@link net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlock}
+ *   <li>{@link net.bobofraggins.tremendousstorage.storage.chest.ChestBlock}
  *   <li>{@link net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlock}
  *   <li>{@link net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlock}
- *   <li>{@link net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankBlock}
+ *   <li>{@link net.bobofraggins.tremendousstorage.storage.tank.TankBlock}
  *   <li>{@link net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlock}
  * </ul>
  */

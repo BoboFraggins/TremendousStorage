@@ -3,8 +3,8 @@ package net.bobofraggins.tremendousstorage.storage.enderbackpack;
 import java.security.SecureRandom;
 import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.bobofraggins.tremendousstorage.storage.enderchest.EnderTremendousChestBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendousbackpack.TremendousBackpackContents;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
+import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
@@ -23,7 +23,7 @@ import net.minecraft.world.level.Level;
  * two linked Ender Tremendous Backpacks sharing a freshly generated 64-bit {@code linkId}.
  *
  * <p>All data (tier, priority, sort mode, crafting-upgrade flag, inventory) is copied from the
- * input backpack to both outputs via the {@link TremendousBackpackContents} data component.
+ * input backpack to both outputs via the {@link BackpackContents} data component.
  * The second backpack is returned via {@link #getRemainingItems} in the base slot.
  */
 public class EnderBackpackSmithingRecipe implements SmithingRecipe {
@@ -107,8 +107,8 @@ public class EnderBackpackSmithingRecipe implements SmithingRecipe {
     private static ItemStack makeEnderBackpack(ItemStack baseStack, long linkId) {
         ItemStack result = new ItemStack(Registration.ENDER_TREMENDOUS_BACKPACK_ITEM.get());
 
-        // Copy TremendousBackpackContents (item-form inventory, tier, priority, etc.)
-        TremendousBackpackContents contents = baseStack.get(Registration.TREMENDOUS_BACKPACK_CONTENTS.get());
+        // Copy BackpackContents (item-form inventory, tier, priority, etc.)
+        BackpackContents contents = baseStack.get(Registration.TREMENDOUS_BACKPACK_CONTENTS.get());
         if (contents != null) {
             result.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), contents);
         }
@@ -116,14 +116,14 @@ public class EnderBackpackSmithingRecipe implements SmithingRecipe {
         // Copy or create block_entity_data (for when the ender backpack is placed as a block)
         CustomData existing = baseStack.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
-        // If no block_entity_data but TremendousBackpackContents is present, seed it
+        // If no block_entity_data but BackpackContents is present, seed it
         if (existing == null && contents != null) {
             tag.putString("Tier", contents.tier().getId());
             tag.putInt("Priority", contents.priority().ordinal());
             tag.putString("SortMode", contents.sortMode().name());
             if (contents.hasCraftingUpgrade()) tag.putBoolean("CraftingUpgrade", true);
         }
-        tag.putLong(EnderTremendousChestBlockEntity.TAG_LINK_ID, linkId);
+        tag.putLong(EnderChestBlockEntity.TAG_LINK_ID, linkId);
         result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
 
         // Set link ID as a standalone component for fast access in item-form openUi

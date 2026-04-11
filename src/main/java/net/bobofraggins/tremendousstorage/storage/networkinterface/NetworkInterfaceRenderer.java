@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.tank.AbstractTankRenderer;
-import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankRenderer;
+import net.bobofraggins.tremendousstorage.storage.tank.TankRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
@@ -64,7 +64,7 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
 
         VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
 
-        TremendousTankRenderer.renderOctagonalPrism(
+        TankRenderer.renderOctagonalPrism(
                 vc,
                 mat,
                 fr,

@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.shared.network;
 
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -24,7 +24,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  *
  * <p>When {@code isNetwork} is {@code true}, {@code pos} is a Network Interface position and
  * items are inserted via its {@link IItemHandler}. Otherwise {@code pos} is the local storage
- * block, identified at runtime as a {@link TremendousChestBlockEntity}.
+ * block, identified at runtime as a {@link ChestBlockEntity}.
  */
 public record QuickStackPacket(BlockPos pos, boolean isNetwork) implements CustomPacketPayload {
 
@@ -50,7 +50,7 @@ public record QuickStackPacket(BlockPos pos, boolean isNetwork) implements Custo
                 handleNetwork(packet.pos(), player);
             } else {
                 BlockEntity be = player.level().getBlockEntity(packet.pos());
-                if (be instanceof TremendousChestBlockEntity bulk) {
+                if (be instanceof ChestBlockEntity bulk) {
                     handleBulk(bulk, player);
                 }
             }
@@ -95,7 +95,7 @@ public record QuickStackPacket(BlockPos pos, boolean isNetwork) implements Custo
         }
     }
 
-    private static void handleBulk(TremendousChestBlockEntity bulk, ServerPlayer player) {
+    private static void handleBulk(ChestBlockEntity bulk, ServerPlayer player) {
         int size = player.getInventory().getContainerSize();
         for (int invSlot = 0; invSlot < size; invSlot++) {
             ItemStack stack = player.getInventory().getItem(invSlot);
@@ -130,7 +130,7 @@ public record QuickStackPacket(BlockPos pos, boolean isNetwork) implements Custo
         return false;
     }
 
-    private static boolean bulkContains(TremendousChestBlockEntity bulk, ItemStack stack) {
+    private static boolean bulkContains(ChestBlockEntity bulk, ItemStack stack) {
         for (int t = 0; t < bulk.typeCount(); t++) {
             if (ItemStack.isSameItemSameComponents(bulk.getType(t), stack)) return true;
         }

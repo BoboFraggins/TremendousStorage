@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.enderchest;
 import java.security.SecureRandom;
 import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.bobofraggins.tremendousstorage.storage.enderchest.EnderTremendousChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
@@ -112,8 +112,8 @@ public class EnderChestSmithingRecipe implements SmithingRecipe {
         CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (existing == null) return -1L;
         CompoundTag tag = existing.copyTag();
-        return tag.contains(EnderTremendousChestBlockEntity.TAG_LINK_ID)
-                ? tag.getLong(EnderTremendousChestBlockEntity.TAG_LINK_ID)
+        return tag.contains(EnderChestBlockEntity.TAG_LINK_ID)
+                ? tag.getLong(EnderChestBlockEntity.TAG_LINK_ID)
                 : -1L;
     }
 
@@ -123,7 +123,7 @@ public class EnderChestSmithingRecipe implements SmithingRecipe {
         // Copy all existing block_entity_data (tier, priority, crafting upgrade, inventory)
         CustomData existing = baseStack.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
-        tag.putLong(EnderTremendousChestBlockEntity.TAG_LINK_ID, linkId);
+        tag.putLong(EnderChestBlockEntity.TAG_LINK_ID, linkId);
         result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
 
         return result;

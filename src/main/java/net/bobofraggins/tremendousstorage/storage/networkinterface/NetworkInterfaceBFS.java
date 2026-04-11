@@ -14,9 +14,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankItemAdapter;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tank.TankItemAdapter;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.bobofraggins.tremendousstorage.storage.tube.TubeBlock;
 import net.bobofraggins.tremendousstorage.storage.tube.TubeBlockEntity;
@@ -165,8 +165,8 @@ public final class NetworkInterfaceBFS {
         // Defined display order for storage types
         List<String> storageOrder = List.of(
                 "block.tremendousstorage.filing_cabinet",
-                "block.tremendousstorage.tremendous_chest",
-                "block.tremendousstorage.tremendous_tank");
+                "block.tremendousstorage.chest",
+                "block.tremendousstorage.tank");
         for (String key : storageOrder) {
             int count = storageCounts.getOrDefault(key, 0);
             if (count > 0) blockList.add(new AttachedEntry(key, count));
@@ -246,8 +246,8 @@ public final class NetworkInterfaceBFS {
         if (handler != null) {
             Priority priority = resolvePriority(tubeBE, tubeDir.ordinal(), neighborBE);
             handlerEntries.add(new HandlerEntry(handler, priority));
-        } else if (neighborBE instanceof TremendousTankBlockEntity tank) {
-            handlerEntries.add(new HandlerEntry(new TremendousTankItemAdapter(tank), Priority.NORMAL));
+        } else if (neighborBE instanceof TankBlockEntity tank) {
+            handlerEntries.add(new HandlerEntry(new TankItemAdapter(tank), Priority.NORMAL));
         }
 
         // Record block type for UI list
@@ -258,8 +258,8 @@ public final class NetworkInterfaceBFS {
     /** Returns the translation key for the UI list, or {@code null} if the block should be hidden. */
     private static String blockListKey(BlockEntity be) {
         if (be instanceof FilingCabinetBlockEntity) return "block.tremendousstorage.filing_cabinet";
-        if (be instanceof TremendousChestBlockEntity) return "block.tremendousstorage.tremendous_chest";
-        if (be instanceof TremendousTankBlockEntity) return "block.tremendousstorage.tremendous_tank";
+        if (be instanceof ChestBlockEntity) return "block.tremendousstorage.chest";
+        if (be instanceof TankBlockEntity) return "block.tremendousstorage.tank";
         return null;
     }
 
@@ -270,7 +270,7 @@ public final class NetworkInterfaceBFS {
         }
 
         if (neighborBE instanceof FilingCabinetBlockEntity fc) return fc.getPriority();
-        if (neighborBE instanceof TremendousChestBlockEntity bs) return bs.getPriority();
+        if (neighborBE instanceof ChestBlockEntity bs) return bs.getPriority();
         return Priority.NORMAL;
     }
 }

@@ -2,6 +2,6 @@
   "tremendousstorage": {
     "net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalScreen": { "ignore": true },
     "net.bobofraggins.tremendousstorage.shared.ui.AbstractFilingCabinetScreen": { "ignore": true },
-    "net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestScreen": { "ignore": true },
+    "net.bobofraggins.tremendousstorage.storage.chest.ChestScreen": { "ignore": true },
   }
 }

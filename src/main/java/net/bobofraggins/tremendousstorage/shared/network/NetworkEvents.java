@@ -61,20 +61,20 @@ public final class NetworkEvents {
                 SatFillCraftingGridPacket.STREAM_CODEC,
                 SatFillCraftingGridPacket::handle);
         registrar.playToServer(
-                OpenTremendousBackpackPacket.TYPE,
-                OpenTremendousBackpackPacket.STREAM_CODEC,
-                OpenTremendousBackpackPacket::handle);
+                OpenBackpackPacket.TYPE,
+                OpenBackpackPacket.STREAM_CODEC,
+                OpenBackpackPacket::handle);
         registrar.playToServer(
-                TremendousBackpackInteractPacket.TYPE,
-                TremendousBackpackInteractPacket.STREAM_CODEC,
-                TremendousBackpackInteractPacket::handle);
+                BackpackInteractPacket.TYPE,
+                BackpackInteractPacket.STREAM_CODEC,
+                BackpackInteractPacket::handle);
         registrar.playToServer(
-                SetTremendousBackpackPriorityPacket.TYPE,
-                SetTremendousBackpackPriorityPacket.STREAM_CODEC,
-                SetTremendousBackpackPriorityPacket::handle);
+                SetBackpackPriorityPacket.TYPE,
+                SetBackpackPriorityPacket.STREAM_CODEC,
+                SetBackpackPriorityPacket::handle);
         registrar.playToServer(
-                SetTremendousBackpackSortModePacket.TYPE,
-                SetTremendousBackpackSortModePacket.STREAM_CODEC,
-                SetTremendousBackpackSortModePacket::handle);
+                SetBackpackSortModePacket.TYPE,
+                SetBackpackSortModePacket.STREAM_CODEC,
+                SetBackpackSortModePacket::handle);
     }
 }
