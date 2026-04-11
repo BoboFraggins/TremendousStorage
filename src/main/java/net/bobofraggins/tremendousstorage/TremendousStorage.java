@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage;
 import com.mojang.logging.LogUtils;
 import net.bobofraggins.tremendousstorage.external.create.CreateIntegration;
 import net.bobofraggins.tremendousstorage.external.mekanism.MekanismIntegration;
+import net.bobofraggins.tremendousstorage.external.mobgrindinutils.MobGrindingUtilsIntegration;
 import net.bobofraggins.tremendousstorage.external.productivemetalworks.ProductiveMetalworksIntegration;
 import net.bobofraggins.tremendousstorage.external.structurepoolapi.StructurePoolIntegration;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageClientConfig;
@@ -26,6 +27,9 @@ public class TremendousStorage {
         modContainer.registerConfig(
                 ModConfig.Type.CLIENT, TremendousStorageClientConfig.SPEC, "tremendousstorage-client.toml");
         Registration.register(modEventBus);
+        if (!ModList.get().isLoaded("mob_grinding_utils")) {
+            MobGrindingUtilsIntegration.register(modEventBus);
+        }
         if (ModList.get().isLoaded("productivemetalworks")) {
             ProductiveMetalworksIntegration.register(modEventBus);
         }
