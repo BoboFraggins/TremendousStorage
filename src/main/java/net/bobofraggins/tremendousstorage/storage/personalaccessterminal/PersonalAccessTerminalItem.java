@@ -74,7 +74,8 @@ public class PersonalAccessTerminalItem extends Item {
         }
 
         BlockPos hubPos = stack.get(Registration.WIRELESS_HUB_POS.get());
-        openSatUi((ServerPlayer) player, niPos, hubPos);
+        boolean hasCraftingUpgrade = Boolean.TRUE.equals(stack.get(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get()));
+        openSatUi((ServerPlayer) player, niPos, hubPos, hasCraftingUpgrade);
         return InteractionResultHolder.success(stack);
     }
 
@@ -83,7 +84,7 @@ public class PersonalAccessTerminalItem extends Item {
      * Validates that the NI still exists, the network is valid, and — if {@code hubPos} is
      * provided — that the originating Wireless Hub is still present on that network.
      */
-    public static void openSatUi(ServerPlayer player, BlockPos niPos, @Nullable BlockPos hubPos) {
+    public static void openSatUi(ServerPlayer player, BlockPos niPos, @Nullable BlockPos hubPos, boolean hasCraftingUpgrade) {
         ServerLevel level = player.serverLevel();
 
         if (!(level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) {
@@ -108,11 +109,11 @@ public class PersonalAccessTerminalItem extends Item {
 
         // Use the NI position as both satPos and niPos — the client-side constructor reads
         // satPos first, then optionally niPos. PersonalAccessTerminalMenu.stillValid ignores satPos.
-        player.openMenu(new PersonalAccessTerminalMenu.Provider(niPos), buf -> {
+        player.openMenu(new PersonalAccessTerminalMenu.Provider(niPos, hasCraftingUpgrade), buf -> {
             buf.writeBlockPos(niPos); // satPos (ignored by PersonalAccessTerminalMenu.stillValid)
             buf.writeBoolean(true); // hasNiPos = true
             buf.writeBlockPos(niPos); // niPos
-            buf.writeBoolean(false); // hasCraftingUpgrade — wireless SAT has no crafting upgrade
+            buf.writeBoolean(hasCraftingUpgrade);
         });
     }
 

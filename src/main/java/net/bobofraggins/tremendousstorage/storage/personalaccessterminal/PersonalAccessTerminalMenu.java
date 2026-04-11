@@ -23,11 +23,12 @@ public class PersonalAccessTerminalMenu extends AccessTerminalMenu {
     /**
      * Server-side constructor.
      *
-     * @param niPos the linked Network Interface position (used as both satPos and niPos)
+     * @param niPos             the linked Network Interface position (used as both satPos and niPos)
+     * @param hasCraftingUpgrade whether the crafting upgrade is applied to this PAT
      */
-    public PersonalAccessTerminalMenu(int id, Inventory inv, BlockPos niPos) {
+    public PersonalAccessTerminalMenu(int id, Inventory inv, BlockPos niPos, boolean hasCraftingUpgrade) {
         // Pass niPos as both satPos and niPos — stillValid is overridden below.
-        super(id, inv, niPos, niPos, false);
+        super(id, inv, niPos, niPos, hasCraftingUpgrade);
     }
 
     /**
@@ -76,7 +77,7 @@ public class PersonalAccessTerminalMenu extends AccessTerminalMenu {
     // MenuProvider inner record
     // -------------------------------------------------------------------------
 
-    public record Provider(BlockPos niPos) implements MenuProvider {
+    public record Provider(BlockPos niPos, boolean hasCraftingUpgrade) implements MenuProvider {
         @Override
         public Component getDisplayName() {
             return Component.translatable("screen.tremendousstorage.access_terminal");
@@ -84,7 +85,7 @@ public class PersonalAccessTerminalMenu extends AccessTerminalMenu {
 
         @Override
         public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
-            return new PersonalAccessTerminalMenu(id, inv, niPos);
+            return new PersonalAccessTerminalMenu(id, inv, niPos, hasCraftingUpgrade);
         }
     }
 }

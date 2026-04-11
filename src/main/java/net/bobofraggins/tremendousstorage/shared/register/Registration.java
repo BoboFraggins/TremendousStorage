@@ -205,6 +205,17 @@ public final class Registration {
                     .build());
 
     /**
+     * Presence flag — set on a Wireless SAT item when the Crafting Upgrade has been applied.
+     * Stored as a boolean; absent ≡ false.
+     */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>>
+            WIRELESS_SAT_HAS_CRAFTING_UPGRADE = DATA_COMPONENTS.register(
+                    "wireless_sat_has_crafting_upgrade", () -> DataComponentType.<Boolean>builder()
+                            .persistent(com.mojang.serialization.Codec.BOOL)
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.BOOL)
+                            .build());
+
+    /**
      * Data component storing the filter configuration on Import Interface and Export Interface items.
      * Carried on the item so filter state persists through break and re-attach cycles.
      */

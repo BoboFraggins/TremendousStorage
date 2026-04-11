@@ -98,13 +98,17 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     private static boolean isCraftingUpgradeTarget(Item item) {
         return item == Registration.TREMENDOUS_CHEST_ITEM.get()
                 || item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
-                || item instanceof BackpackItem; // covers both ender and regular backpack
+                || item instanceof BackpackItem // covers both ender and regular backpack
+                || item == Registration.WIRELESS_SAT.get();
     }
 
     private static boolean alreadyHasCraftingUpgrade(ItemStack stack) {
         if (stack.getItem() instanceof BackpackItem) {
             return stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY)
                     .hasCraftingUpgrade();
+        }
+        if (stack.is(Registration.WIRELESS_SAT.get())) {
+            return Boolean.TRUE.equals(stack.get(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get()));
         }
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         return data != null && data.getUnsafe().getBoolean("CraftingUpgrade");
@@ -116,6 +120,11 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
                     Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
             ItemStack result = blockStack.copyWithCount(1);
             result.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), current.withCraftingUpgrade());
+            return result;
+        }
+        if (blockStack.is(Registration.WIRELESS_SAT.get())) {
+            ItemStack result = blockStack.copyWithCount(1);
+            result.set(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get(), true);
             return result;
         }
         // Chest item: set CraftingUpgrade in block_entity_data

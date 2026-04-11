@@ -17,7 +17,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * <p>Sent when the player presses the Wireless SAT keybind. The server validates that
  * the player actually has a linked Wireless SAT for this NI before opening the menu.
  */
-public record OpenPersonalAccessTerminalPacket(BlockPos niPos, @Nullable BlockPos hubPos)
+public record OpenPersonalAccessTerminalPacket(BlockPos niPos, @Nullable BlockPos hubPos, boolean hasCraftingUpgrade)
         implements CustomPacketPayload {
 
     public static final Type<OpenPersonalAccessTerminalPacket> TYPE =
@@ -29,7 +29,8 @@ public record OpenPersonalAccessTerminalPacket(BlockPos niPos, @Nullable BlockPo
                 public OpenPersonalAccessTerminalPacket decode(RegistryFriendlyByteBuf buf) {
                     BlockPos niPos = BlockPos.STREAM_CODEC.decode(buf);
                     BlockPos hubPos = buf.readBoolean() ? BlockPos.STREAM_CODEC.decode(buf) : null;
-                    return new OpenPersonalAccessTerminalPacket(niPos, hubPos);
+                    boolean hasCraftingUpgrade = buf.readBoolean();
+                    return new OpenPersonalAccessTerminalPacket(niPos, hubPos, hasCraftingUpgrade);
                 }
 
                 @Override
@@ -41,6 +42,7 @@ public record OpenPersonalAccessTerminalPacket(BlockPos niPos, @Nullable BlockPo
                     } else {
                         buf.writeBoolean(false);
                     }
+                    buf.writeBoolean(value.hasCraftingUpgrade());
                 }
             };
 
@@ -52,7 +54,7 @@ public record OpenPersonalAccessTerminalPacket(BlockPos niPos, @Nullable BlockPo
     public static void handle(OpenPersonalAccessTerminalPacket packet, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
-            PersonalAccessTerminalItem.openSatUi(player, packet.niPos(), packet.hubPos());
+            PersonalAccessTerminalItem.openSatUi(player, packet.niPos(), packet.hubPos(), packet.hasCraftingUpgrade());
         });
     }
 }
