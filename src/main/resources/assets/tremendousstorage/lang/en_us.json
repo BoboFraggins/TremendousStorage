@@ -186,5 +186,8 @@
 
   "item.tremendousstorage.vex_repellent_potion": "Vex Repellent",
   "item.tremendousstorage.vex_repellent_potion_extended": "Extended Vex Repellent",
-  "item.tremendousstorage.vex_repellent_potion_long": "Long Vex Repellent"
+  "item.tremendousstorage.vex_repellent_potion_long": "Long Vex Repellent",
+
+  "item.tremendousstorage.puller_upgrade": "Puller Upgrade",
+  "screen.tremendousstorage.puller_upgrade_label": "Puller Sides"
 }

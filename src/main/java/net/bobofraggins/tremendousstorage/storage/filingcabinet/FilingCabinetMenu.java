@@ -29,12 +29,14 @@ public class FilingCabinetMenu extends AbstractFilingCabinetMenu {
     private final BlockPos pos;
     private final FilingCabinetBlockEntity be;
     private final ContainerData data;
+    private final boolean hasPullerUpgrade;
 
     /** Server-side constructor — called from {@link FilingCabinetBlockEntity#createMenu}. */
     public FilingCabinetMenu(int syncId, Inventory playerInv, BlockPos pos, FilingCabinetBlockEntity be) {
         super(Registration.FILING_CABINET_MENU.get(), syncId);
         this.pos = pos;
         this.be = be;
+        this.hasPullerUpgrade = be.hasPullerUpgrade();
 
         this.data = new SimpleContainerData(2) {
             @Override
@@ -61,6 +63,7 @@ public class FilingCabinetMenu extends AbstractFilingCabinetMenu {
     public FilingCabinetMenu(int syncId, Inventory playerInv, FriendlyByteBuf buf) {
         super(Registration.FILING_CABINET_MENU.get(), syncId);
         this.pos = buf.readBlockPos();
+        this.hasPullerUpgrade = buf.readBoolean();
         this.be = null;
         this.data = new SimpleContainerData(2);
 
@@ -70,6 +73,10 @@ public class FilingCabinetMenu extends AbstractFilingCabinetMenu {
 
     public BlockPos getPos() {
         return pos;
+    }
+
+    public boolean hasPullerUpgrade() {
+        return hasPullerUpgrade;
     }
 
     @Override

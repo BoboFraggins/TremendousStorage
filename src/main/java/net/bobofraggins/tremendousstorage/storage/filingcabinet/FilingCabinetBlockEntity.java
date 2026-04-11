@@ -1,11 +1,13 @@
 package net.bobofraggins.tremendousstorage.storage.filingcabinet;
 
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiCacheHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -27,6 +29,9 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -41,6 +46,12 @@ public class FilingCabinetBlockEntity extends BlockEntity
     private Priority priority = Priority.HIGH;
     private boolean voidExcess = false;
     private boolean hasMagnetUpgrade = false;
+    private boolean hasPullerUpgrade = false;
+    private int pullerSides = 0;
+    private int pullerTickCounter = 0;
+
+    private static final int PULL_TICKS  = 4;
+    private static final int PULL_AMOUNT = 4;
 
     @Nullable
     private BlockPos cachedNiPos = null;
@@ -120,6 +131,10 @@ public class FilingCabinetBlockEntity extends BlockEntity
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, FilingCabinetBlockEntity be) {
         be.openersCounter.recheckOpeners(level, pos, state);
+        if (be.hasPullerUpgrade && be.pullerSides != 0 && ++be.pullerTickCounter >= PULL_TICKS) {
+            be.pullerTickCounter = 0;
+            be.tickPuller(level, pos, state);
+        }
         if (be.hasMagnetUpgrade) {
             AABB searchArea = new AABB(pos).inflate(3);
             for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, searchArea)) {
@@ -285,6 +300,105 @@ public class FilingCabinetBlockEntity extends BlockEntity
         setChanged();
     }
 
+    public boolean hasPullerUpgrade() {
+        return hasPullerUpgrade;
+    }
+
+    public void setPullerUpgrade(boolean value) {
+        hasPullerUpgrade = value;
+        setChanged();
+    }
+
+    public int getPullerSides() {
+        return pullerSides;
+    }
+
+    public void setPullerSides(int mask) {
+        pullerSides = mask;
+        setChanged();
+    }
+
+    // -------------------------------------------------------------------------
+    // Puller logic
+    // -------------------------------------------------------------------------
+
+    private void tickPuller(Level level, BlockPos pos, BlockState state) {
+        Direction facing = state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)
+                ? state.getValue(BlockStateProperties.HORIZONTAL_FACING)
+                : Direction.NORTH;
+        for (int bit = 0; bit < 6; bit++) {
+            if ((pullerSides & (1 << bit)) == 0) continue;
+            Direction worldDir = bitToWorldDir(bit, facing);
+            BlockPos adjacentPos = pos.relative(worldDir);
+            IItemHandler cap = level.getCapability(
+                    Capabilities.ItemHandler.BLOCK, adjacentPos, worldDir.getOpposite());
+            if (cap == null) continue;
+            pullFromHandler(cap);
+        }
+    }
+
+    private void pullFromHandler(IItemHandler handler) {
+        for (int s = 0; s < handler.getSlots(); s++) {
+            ItemStack simulated = handler.extractItem(s, PULL_AMOUNT, true);
+            if (simulated.isEmpty()) continue;
+            ItemStack remainder = pullerAbsorb(simulated, PULL_AMOUNT, true);
+            int canInsert = simulated.getCount() - remainder.getCount();
+            if (canInsert <= 0) continue;
+            ItemStack extracted = handler.extractItem(s, canInsert, false);
+            if (!extracted.isEmpty()) pullerAbsorb(extracted, canInsert, false);
+            break;
+        }
+    }
+
+    /**
+     * Like {@link #magnetAbsorb} but also accepts items into unlocked (empty) folders,
+     * locking them to that item type on first use.
+     *
+     * @param simulate if true, no state is mutated
+     */
+    public ItemStack pullerAbsorb(ItemStack incoming, int maxAmount, boolean simulate) {
+        long remaining = Math.min(incoming.getCount(), maxAmount);
+        for (int slot = 0; slot < SLOT_COUNT && remaining > 0; slot++) {
+            ItemStack folder = folders.get(slot);
+            if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) continue;
+            FolderContents contents = ManillaFolderItem.getContents(folder);
+
+            if (contents.isEmpty()) {
+                // Lock the folder to this item type and insert
+                FolderContents locked = new FolderContents(
+                        Optional.of(incoming.copyWithCount(1)), 0L, contents.tier());
+                FolderContents.InsertResult result = locked.insert(remaining, locked.getCapacity());
+                long absorbed = remaining - result.remainder();
+                if (absorbed > 0 && !simulate) {
+                    notifyFolderContentsChanged(
+                            slot, ManillaFolderItem.setContents(folder.copyWithCount(1), result.updated()));
+                }
+                remaining = result.remainder();
+            } else if (contents.accepts(incoming)) {
+                long capacity = ManillaFolderItem.getCapacity(folder);
+                FolderContents.InsertResult result = contents.insert(remaining, capacity);
+                long absorbed = remaining - result.remainder();
+                if (absorbed > 0 && !simulate) {
+                    notifyFolderContentsChanged(
+                            slot, ManillaFolderItem.setContents(folder.copyWithCount(1), result.updated()));
+                }
+                remaining = result.remainder();
+            }
+        }
+        return remaining == 0 ? ItemStack.EMPTY : incoming.copyWithCount((int) remaining);
+    }
+
+    private static Direction bitToWorldDir(int bit, Direction facing) {
+        return switch (bit) {
+            case 0  -> Direction.UP;
+            case 1  -> Direction.DOWN;
+            case 2  -> facing.getCounterClockWise();
+            case 3  -> facing.getClockWise();
+            case 4  -> facing;
+            default -> facing.getOpposite();
+        };
+    }
+
     /**
      * Attempts to absorb as many items from {@code incoming} as possible into folders that are
      * already locked to that item type. Returns the leftover stack (empty if fully absorbed).
@@ -336,6 +450,10 @@ public class FilingCabinetBlockEntity extends BlockEntity
         tag.putInt("Priority", priority.ordinal());
         tag.putBoolean("VoidExcess", voidExcess);
         if (hasMagnetUpgrade) tag.putBoolean("MagnetUpgrade", true);
+        if (hasPullerUpgrade) {
+            tag.putBoolean("PullerUpgrade", true);
+            tag.putInt("PullerSides", pullerSides);
+        }
     }
 
     @Override
@@ -345,6 +463,8 @@ public class FilingCabinetBlockEntity extends BlockEntity
         priority = Priority.fromOrdinal(tag.getInt("Priority"));
         voidExcess = tag.getBoolean("VoidExcess");
         hasMagnetUpgrade = tag.getBoolean("MagnetUpgrade");
+        hasPullerUpgrade = tag.getBoolean("PullerUpgrade");
+        pullerSides = tag.getInt("PullerSides");
     }
 
     // -------------------------------------------------------------------------

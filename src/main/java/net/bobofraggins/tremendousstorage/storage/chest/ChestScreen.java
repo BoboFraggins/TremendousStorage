@@ -12,10 +12,12 @@ import net.bobofraggins.tremendousstorage.shared.network.SetSortModePacket;
 import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
 import net.bobofraggins.tremendousstorage.shared.ui.CraftingGridPane;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
+import net.bobofraggins.tremendousstorage.shared.ui.IDialogPane;
 import net.bobofraggins.tremendousstorage.shared.ui.LocalInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PressableIconButton;
 import net.bobofraggins.tremendousstorage.shared.ui.PriorityPane;
+import net.bobofraggins.tremendousstorage.shared.ui.PullerSidesPane;
 import net.bobofraggins.tremendousstorage.shared.ui.SortPane;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
@@ -63,14 +65,18 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
         }
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
-        configDrawer = new ConfigDrawer(
-                new PriorityPane(
-                        menu::getPriority,
-                        p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))),
-                new SortPane(() -> sortMode, () -> {
-                    sortMode = sortMode.next();
-                    PacketDistributor.sendToServer(new SetSortModePacket(menu.getPos(), sortMode));
-                }));
+        List<IDialogPane> drawerPanes = new java.util.ArrayList<>();
+        drawerPanes.add(new PriorityPane(
+                menu::getPriority,
+                p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
+        drawerPanes.add(new SortPane(() -> sortMode, () -> {
+            sortMode = sortMode.next();
+            PacketDistributor.sendToServer(new SetSortModePacket(menu.getPos(), sortMode));
+        }));
+        if (menu.hasPullerUpgrade()) {
+            drawerPanes.add(new PullerSidesPane(menu.getPos()));
+        }
+        configDrawer = new ConfigDrawer(drawerPanes.toArray(IDialogPane[]::new));
     }
 
     @Override

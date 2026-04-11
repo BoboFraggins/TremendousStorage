@@ -162,6 +162,7 @@ public class ChestBlock extends BaseEntityBlock implements NetworkConnector {
             player.openMenu(be, buf -> {
                 buf.writeBlockPos(pos);
                 buf.writeBoolean(be.hasCraftingUpgrade());
+                buf.writeBoolean(be.hasPullerUpgrade());
             });
         }
         return InteractionResult.SUCCESS;

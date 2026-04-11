@@ -47,6 +47,7 @@ public class ChestMenu extends AbstractContainerMenu {
     private final BlockPos pos;
     private final ContainerData data;
     private final boolean hasCraftingUpgrade;
+    private final boolean hasPullerUpgrade;
 
     // Crafting containers — non-null only when hasCraftingUpgrade is true
     private final CraftingContainer craftSlots;
@@ -62,10 +63,16 @@ public class ChestMenu extends AbstractContainerMenu {
 
     /** Server-side constructor. Uses the default row count. */
     public ChestMenu(int id, Inventory inv, BlockPos pos, ContainerData data, boolean hasCraftingUpgrade) {
-        this(id, inv, pos, data, hasCraftingUpgrade, TremendousStorageClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
+        this(id, inv, pos, data, hasCraftingUpgrade, false, TremendousStorageClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
     }
 
-    /** Client-side constructor. Reads slot location and crafting flag from the buffer. */
+    /** Server-side constructor with puller upgrade flag. */
+    public ChestMenu(
+            int id, Inventory inv, BlockPos pos, ContainerData data, boolean hasCraftingUpgrade, boolean hasPullerUpgrade) {
+        this(id, inv, pos, data, hasCraftingUpgrade, hasPullerUpgrade, TremendousStorageClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
+    }
+
+    /** Client-side constructor. Reads slot location, crafting flag, and puller flag from the buffer. */
     public ChestMenu(int id, Inventory inv, FriendlyByteBuf buf) {
         this(
                 id,
@@ -73,15 +80,17 @@ public class ChestMenu extends AbstractContainerMenu {
                 buf.readBlockPos(),
                 new SimpleContainerData(1),
                 buf.readBoolean(),
+                buf.readBoolean(),
                 TremendousStorageClientConfig.getVisibleRowsSafe());
     }
 
     private ChestMenu(
-            int id, Inventory inv, BlockPos pos, ContainerData data, boolean hasCraftingUpgrade, int rows) {
+            int id, Inventory inv, BlockPos pos, ContainerData data, boolean hasCraftingUpgrade, boolean hasPullerUpgrade, int rows) {
         super(Registration.TREMENDOUS_CHEST_MENU.get(), id);
         this.pos = pos;
         this.data = data;
         this.hasCraftingUpgrade = hasCraftingUpgrade;
+        this.hasPullerUpgrade = hasPullerUpgrade;
         this.player = inv.player;
         this.access = ContainerLevelAccess.create(inv.player.level(), pos);
 
@@ -140,6 +149,10 @@ public class ChestMenu extends AbstractContainerMenu {
 
     public boolean hasCraftingUpgrade() {
         return hasCraftingUpgrade;
+    }
+
+    public boolean hasPullerUpgrade() {
+        return hasPullerUpgrade;
     }
 
     // -------------------------------------------------------------------------

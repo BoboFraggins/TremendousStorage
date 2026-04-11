@@ -110,7 +110,11 @@ public class BackpackBlock extends BaseEntityBlock {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (level.getBlockEntity(pos) instanceof net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity be) {
             be.startOpen(player);
-            player.openMenu(be, buf -> buf.writeBlockPos(pos));
+            player.openMenu(be, buf -> {
+                buf.writeBlockPos(pos);
+                buf.writeBoolean(be.hasCraftingUpgrade());
+                buf.writeBoolean(false); // backpacks cannot have the puller upgrade
+            });
         }
         return InteractionResult.SUCCESS;
     }

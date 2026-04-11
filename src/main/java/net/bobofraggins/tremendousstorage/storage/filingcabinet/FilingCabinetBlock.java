@@ -152,7 +152,10 @@ public class FilingCabinetBlock extends BaseEntityBlock implements NetworkConnec
         if (be == null) return InteractionResult.FAIL;
 
         be.startOpen(player);
-        player.openMenu(be, buf -> buf.writeBlockPos(pos));
+        player.openMenu(be, buf -> {
+            buf.writeBlockPos(pos);
+            buf.writeBoolean(be.hasPullerUpgrade());
+        });
         return InteractionResult.SUCCESS;
     }
 

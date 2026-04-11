@@ -65,6 +65,10 @@ public final class NetworkEvents {
                 SetHaarpModePacket.STREAM_CODEC,
                 SetHaarpModePacket::handle);
         registrar.playToServer(
+                SetPullerSidesPacket.TYPE,
+                SetPullerSidesPacket.STREAM_CODEC,
+                SetPullerSidesPacket::handle);
+        registrar.playToServer(
                 OpenBackpackPacket.TYPE,
                 OpenBackpackPacket.STREAM_CODEC,
                 OpenBackpackPacket::handle);

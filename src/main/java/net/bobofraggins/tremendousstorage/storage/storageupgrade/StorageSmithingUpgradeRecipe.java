@@ -6,6 +6,7 @@ import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.HaarpUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.MagnetUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.PullerUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem;
 import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
@@ -49,7 +50,8 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     public boolean isBaseIngredient(ItemStack stack) {
         return isStorageBlock(stack.getItem())
                 || isCraftingUpgradeTarget(stack.getItem())
-                || isMagnetUpgradeTarget(stack.getItem());
+                || isMagnetUpgradeTarget(stack.getItem())
+                || isPullerUpgradeTarget(stack.getItem());
     }
 
     @Override
@@ -57,7 +59,8 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         return stack.getItem() instanceof StorageUpgradeItem
                 || stack.getItem() instanceof CraftingUpgradeItem
                 || stack.getItem() instanceof MagnetUpgradeItem
-                || stack.getItem() instanceof HaarpUpgradeItem;
+                || stack.getItem() instanceof HaarpUpgradeItem
+                || stack.getItem() instanceof PullerUpgradeItem;
     }
 
     @Override
@@ -70,6 +73,10 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         if (input.addition().getItem() instanceof MagnetUpgradeItem) {
             return isMagnetUpgradeTarget(input.base().getItem())
                     && !alreadyHasMagnetUpgrade(input.base());
+        }
+        if (input.addition().getItem() instanceof PullerUpgradeItem) {
+            return isPullerUpgradeTarget(input.base().getItem())
+                    && !alreadyHasPullerUpgrade(input.base());
         }
         if (input.addition().getItem() instanceof HaarpUpgradeItem) {
             return input.base().getItem() == Registration.WIRELESS_HUB.get().asItem()
@@ -87,6 +94,9 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         }
         if (input.addition().getItem() instanceof MagnetUpgradeItem) {
             return applyMagnetUpgrade(input.base());
+        }
+        if (input.addition().getItem() instanceof PullerUpgradeItem) {
+            return applyPullerUpgrade(input.base());
         }
         if (input.addition().getItem() instanceof HaarpUpgradeItem) {
             return applyHaarpUpgrade(input.base());
@@ -192,6 +202,25 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putBoolean("MagnetUpgrade", true);
+        ItemStack result = stack.copyWithCount(1);
+        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        return result;
+    }
+
+    private static boolean isPullerUpgradeTarget(Item item) {
+        return item == Registration.TREMENDOUS_CHEST_ITEM.get()
+                || item == Registration.FILING_CABINET_ITEM.get();
+    }
+
+    private static boolean alreadyHasPullerUpgrade(ItemStack stack) {
+        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        return data != null && data.getUnsafe().getBoolean("PullerUpgrade");
+    }
+
+    private static ItemStack applyPullerUpgrade(ItemStack stack) {
+        CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
+        tag.putBoolean("PullerUpgrade", true);
         ItemStack result = stack.copyWithCount(1);
         result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
         return result;
