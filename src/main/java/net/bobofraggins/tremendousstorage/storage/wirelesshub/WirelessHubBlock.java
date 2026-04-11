@@ -6,7 +6,6 @@ import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -86,9 +85,12 @@ public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnecto
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
 
-        if (level.getBlockEntity(pos) instanceof MenuProvider mp) {
-            player.openMenu(mp, buf -> buf.writeBlockPos(pos));
-        }
+        if (!(level.getBlockEntity(pos) instanceof WirelessHubBlockEntity be)) return InteractionResult.FAIL;
+        player.openMenu(be, buf -> {
+            buf.writeBlockPos(pos);
+            buf.writeBoolean(be.hasHaarpUpgrade());
+            buf.writeInt(be.getHaarpMode().ordinal());
+        });
         return InteractionResult.SUCCESS;
     }
 

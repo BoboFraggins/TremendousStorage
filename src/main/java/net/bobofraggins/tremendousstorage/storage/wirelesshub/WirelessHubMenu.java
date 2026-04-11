@@ -7,6 +7,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -23,24 +25,44 @@ import net.neoforged.neoforge.items.SlotItemHandler;
  *   <li>[2..28] Player main inventory (27 slots)
  *   <li>[29..37] Player hotbar (9 slots)
  * </ul>
+ *
+ * <p>One {@link ContainerData} value syncs the HAARP weather mode (ordinal) from server to client.
+ *
+ * <p>When {@code haarpUpgrade} is true the player inventory is shifted down by
+ * {@link #HAARP_SECTION_H} pixels in the screen to make room for the weather-mode panel.
  */
 public class WirelessHubMenu extends AbstractContainerMenu {
 
-    private static final int INPUT_SLOT = 0;
-    private static final int OUTPUT_SLOT = 1;
-    private static final int INV_START = 2;
-    private static final int INV_END = 29;
+    private static final int INPUT_SLOT   = 0;
+    private static final int OUTPUT_SLOT  = 1;
+    private static final int INV_START    = 2;
     private static final int HOTBAR_START = 29;
-    private static final int HOTBAR_END = 38;
+    private static final int HOTBAR_END   = 38;
+
+    /** Height of the HAARP weather-control pane. Matches {@link HaarpWeatherPane#preferredHeight()}. */
+    public static final int HAARP_SECTION_H = 68;
+
+    /** Y position of player inventory when no HAARP upgrade. */
+    public static final int INV_Y_BASE = 84;
+    /** Y position of hotbar when no HAARP upgrade. */
+    public static final int HOTBAR_Y_BASE = 142;
 
     private final BlockPos hubPos;
-    private final IItemHandler hubInventory;
+    private final boolean haarpUpgrade;
+    private final ContainerData data;
 
     /** Server-side constructor. */
-    public WirelessHubMenu(int id, Inventory inv, BlockPos hubPos, IItemHandler hubInventory) {
+    public WirelessHubMenu(
+            int id, Inventory inv, BlockPos hubPos, IItemHandler hubInventory,
+            boolean haarpUpgrade, ContainerData data) {
         super(Registration.WIRELESS_HUB_MENU.get(), id);
         this.hubPos = hubPos;
-        this.hubInventory = hubInventory;
+        this.haarpUpgrade = haarpUpgrade;
+        this.data = data;
+        addDataSlots(data);
+
+        int invY    = haarpUpgrade ? INV_Y_BASE    + HAARP_SECTION_H : INV_Y_BASE;
+        int hotbarY = haarpUpgrade ? HOTBAR_Y_BASE + HAARP_SECTION_H : HOTBAR_Y_BASE;
 
         // Slot 0: input — Wireless SAT only
         addSlot(new SlotItemHandler(hubInventory, 0, 44, 35));
@@ -56,23 +78,34 @@ public class WirelessHubMenu extends AbstractContainerMenu {
         // Player main inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(inv, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+                addSlot(new Slot(inv, col + row * 9 + 9, 8 + col * 18, invY + row * 18));
             }
         }
 
         // Player hotbar
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(inv, col, 8 + col * 18, 142));
+            addSlot(new Slot(inv, col, 8 + col * 18, hotbarY));
         }
     }
 
     /** Client-side constructor. */
     public WirelessHubMenu(int id, Inventory inv, FriendlyByteBuf buf) {
-        this(id, inv, buf.readBlockPos(), new ItemStackHandler(2));
+        this(id, inv, buf.readBlockPos(), new ItemStackHandler(2), buf.readBoolean(), new SimpleContainerData(1));
+        // Note: initial mode value comes from ContainerData sync, not the buf integer
+        buf.readInt(); // consume the int written by the server (mode ordinal)
     }
 
     public BlockPos getHubPos() {
         return hubPos;
+    }
+
+    public boolean hasHaarpUpgrade() {
+        return haarpUpgrade;
+    }
+
+    /** Returns the current HAARP mode ordinal, synced from the server via ContainerData. */
+    public int getHaarpModeOrdinal() {
+        return data.get(0);
     }
 
     @Override

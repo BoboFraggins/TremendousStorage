@@ -43,7 +43,7 @@ public class ExperienceSyringeItem extends Item {
 
         int stored = stack.getOrDefault(Registration.EXPERIENCE_SYRINGE_STORED_XP, 0);
 
-        if (player.isShifting()) {
+        if (player.isShiftKeyDown()) {
             // Deposit: take the XP the player has accumulated in their current level.
             int progressXp = (int) (player.experienceProgress * player.getXpNeededForNextLevel());
             int toStore = Math.min(progressXp, CAPACITY - stored);

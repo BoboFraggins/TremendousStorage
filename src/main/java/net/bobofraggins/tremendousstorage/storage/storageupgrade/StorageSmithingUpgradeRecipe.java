@@ -4,9 +4,10 @@ import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.HaarpUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.MagnetUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem;
-import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackItem;
 import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
@@ -46,12 +47,17 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {
-        return isStorageBlock(stack.getItem());
+        return isStorageBlock(stack.getItem())
+                || isCraftingUpgradeTarget(stack.getItem())
+                || isMagnetUpgradeTarget(stack.getItem());
     }
 
     @Override
     public boolean isAdditionIngredient(ItemStack stack) {
-        return stack.getItem() instanceof StorageUpgradeItem || stack.getItem() instanceof CraftingUpgradeItem;
+        return stack.getItem() instanceof StorageUpgradeItem
+                || stack.getItem() instanceof CraftingUpgradeItem
+                || stack.getItem() instanceof MagnetUpgradeItem
+                || stack.getItem() instanceof HaarpUpgradeItem;
     }
 
     @Override
@@ -60,6 +66,14 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         if (input.addition().getItem() instanceof CraftingUpgradeItem) {
             return isCraftingUpgradeTarget(input.base().getItem())
                     && !alreadyHasCraftingUpgrade(input.base());
+        }
+        if (input.addition().getItem() instanceof MagnetUpgradeItem) {
+            return isMagnetUpgradeTarget(input.base().getItem())
+                    && !alreadyHasMagnetUpgrade(input.base());
+        }
+        if (input.addition().getItem() instanceof HaarpUpgradeItem) {
+            return input.base().getItem() == Registration.WIRELESS_HUB.get().asItem()
+                    && !alreadyHasHaarpUpgrade(input.base());
         }
         if (!isStorageBlock(input.base().getItem())) return false;
         if (!(input.addition().getItem() instanceof StorageUpgradeItem upgradeItem)) return false;
@@ -70,6 +84,12 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
         if (input.addition().getItem() instanceof CraftingUpgradeItem) {
             return applyCraftingUpgrade(input.base());
+        }
+        if (input.addition().getItem() instanceof MagnetUpgradeItem) {
+            return applyMagnetUpgrade(input.base());
+        }
+        if (input.addition().getItem() instanceof HaarpUpgradeItem) {
+            return applyHaarpUpgrade(input.base());
         }
         return upgrade(input.base(), (StorageUpgradeItem) input.addition().getItem());
     }
@@ -89,16 +109,22 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     // -------------------------------------------------------------------------
 
     private static boolean isStorageBlock(Item item) {
-        return item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
-                || item instanceof EnderBackpackItem
+        return item == Registration.TREMENDOUS_CHEST_ITEM.get()
+                || item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
+                || item instanceof BackpackItem
+                || item == Registration.MANILA_FOLDER.get()
                 || item == Registration.ENDER_FOLDER.get()
-                || item == Registration.ENDER_TANK_ITEM.get();
+                || item == Registration.TANK_ITEM.get()
+                || item == Registration.ENDER_TANK_ITEM.get()
+                || item == Registration.NETWORK_INTERFACE_ITEM.get()
+                || item == Registration.WIRELESS_HUB_ITEM.get();
     }
 
     private static boolean isCraftingUpgradeTarget(Item item) {
         return item == Registration.TREMENDOUS_CHEST_ITEM.get()
                 || item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
                 || item instanceof BackpackItem // covers both ender and regular backpack
+                || item == Registration.STORAGE_ACCESS_TERMINAL_ITEM.get()
                 || item == Registration.WIRELESS_SAT.get();
     }
 
@@ -136,15 +162,50 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         return result;
     }
 
+    private static boolean alreadyHasHaarpUpgrade(ItemStack stack) {
+        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        return data != null && data.getUnsafe().getBoolean("HaarpUpgrade");
+    }
+
+    private static ItemStack applyHaarpUpgrade(ItemStack hubStack) {
+        CustomData existing = hubStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
+        tag.putBoolean("HaarpUpgrade", true);
+        ItemStack result = hubStack.copyWithCount(1);
+        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        return result;
+    }
+
+    private static boolean isMagnetUpgradeTarget(Item item) {
+        return item == Registration.TREMENDOUS_CHEST_ITEM.get()
+                || item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
+                || item instanceof BackpackItem
+                || item == Registration.FILING_CABINET_ITEM.get();
+    }
+
+    private static boolean alreadyHasMagnetUpgrade(ItemStack stack) {
+        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        return data != null && data.getUnsafe().getBoolean("MagnetUpgrade");
+    }
+
+    private static ItemStack applyMagnetUpgrade(ItemStack stack) {
+        CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
+        tag.putBoolean("MagnetUpgrade", true);
+        ItemStack result = stack.copyWithCount(1);
+        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        return result;
+    }
+
     private static StorageTier tierFromStack(ItemStack stack) {
-        if (stack.getItem() instanceof EnderFolderItem) {
+        if (stack.getItem() instanceof EnderFolderItem || stack.getItem() == Registration.MANILA_FOLDER.get()) {
             return ManillaFolderItem.getContents(stack).tier();
         }
-        if (stack.getItem() instanceof EnderBackpackItem) {
+        if (stack.getItem() instanceof BackpackItem) {
             return stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY)
                     .tier();
         }
-        // Ender chest and ender tank store tier in BLOCK_ENTITY_DATA under "Tier"
+        // Chest, tank, NI, and WirelessHub store tier in BLOCK_ENTITY_DATA under "Tier"
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data != null) {
             CompoundTag tag = data.getUnsafe();
@@ -156,20 +217,25 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     }
 
     private static ItemStack upgrade(ItemStack blockStack, StorageUpgradeItem upgradeItem) {
-        if (blockStack.getItem() instanceof EnderFolderItem) {
+        if (blockStack.getItem() instanceof EnderFolderItem || blockStack.getItem() == Registration.MANILA_FOLDER.get()) {
             FolderContents current = ManillaFolderItem.getContents(blockStack);
             ItemStack result = blockStack.copyWithCount(1);
             result.set(Registration.FOLDER_CONTENTS.get(), current.withTier(upgradeItem.getToTier()));
             return result;
         }
-        if (blockStack.getItem() instanceof EnderBackpackItem) {
+        if (blockStack.getItem() instanceof BackpackItem) {
+            // Update BackpackContents (item-form UI) and BLOCK_ENTITY_DATA (placed-block tier).
             BackpackContents current = blockStack.getOrDefault(
                     Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+            CustomData existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
+            CompoundTag beTag = existing != null ? existing.copyTag() : new CompoundTag();
+            beTag.putString("Tier", upgradeItem.getToTier().getId());
             ItemStack result = blockStack.copyWithCount(1);
             result.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), current.withTier(upgradeItem.getToTier()));
+            result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(beTag));
             return result;
         }
-        // Ender chest and ender tank: update "Tier" in BLOCK_ENTITY_DATA (preserving LinkId and all other data)
+        // Chest, tank, NI, and WirelessHub: update "Tier" in BLOCK_ENTITY_DATA (preserving LinkId and other data)
         CustomData existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putString("Tier", upgradeItem.getToTier().getId());

@@ -6,8 +6,11 @@ import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiCacheHolder;
+import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkScanResult;
 import net.bobofraggins.tremendousstorage.storage.personalaccessterminal.PersonalAccessTerminalItem;
+import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -19,6 +22,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -39,6 +43,10 @@ import net.neoforged.neoforge.items.ItemStackHandler;
  *
  * <p>Accepts {@link StorageTier} upgrades (right-click with a StorageUpgradeItem). Each tier
  * doubles the wireless range; default (WOOD) is 16 blocks, NETHERITE is infinite.
+ *
+ * <p>With the HAARP Upgrade applied (item or smithing table), adds a weather-control panel to the
+ * UI. Every 60 ticks the hub checks if weather matches the desired mode; if not, it consumes
+ * 1 bucket of Positive Vibes from the nearest connected Recycling Bin and adjusts the weather.
  */
 public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder {
 
@@ -67,6 +75,38 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     }
 
     // -------------------------------------------------------------------------
+    // HAARP Upgrade
+    // -------------------------------------------------------------------------
+
+    private boolean haarpUpgrade = false;
+    private WeatherMode haarpMode = WeatherMode.OFF;
+    private int weatherTickCounter = 0;
+
+    /** Weather-check interval: 60 ticks = 3 seconds. */
+    private static final int WEATHER_CHECK_INTERVAL = 60;
+
+    /** Cost in mB to change weather: 1 bucket = 1000 mB of Positive Vibes. */
+    private static final int VIBES_COST_MB = 1000;
+
+    public boolean hasHaarpUpgrade() {
+        return haarpUpgrade;
+    }
+
+    public void setHaarpUpgrade(boolean value) {
+        haarpUpgrade = value;
+        setChanged();
+    }
+
+    public WeatherMode getHaarpMode() {
+        return haarpMode;
+    }
+
+    public void setHaarpMode(WeatherMode mode) {
+        haarpMode = mode;
+        setChanged();
+    }
+
+    // -------------------------------------------------------------------------
     // Connection state (synced to client)
     // -------------------------------------------------------------------------
 
@@ -78,16 +118,26 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         return connected;
     }
 
-    /** Called each server tick. Checks connection status every 40 ticks and syncs to client. */
+    /** Called each server tick. Checks connection every 40 ticks and HAARP weather every 60 ticks. */
     public void serverTick() {
         if (level == null || level.isClientSide()) return;
+        ServerLevel serverLevel = (ServerLevel) level;
+
         serverTickCounter++;
         if (serverTickCounter >= 40) {
             serverTickCounter = 0;
-            boolean nowConnected = computeConnected((ServerLevel) level);
+            boolean nowConnected = computeConnected(serverLevel);
             if (nowConnected != connected) {
                 connected = nowConnected;
                 level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
+        }
+
+        if (haarpUpgrade && haarpMode != WeatherMode.OFF) {
+            weatherTickCounter++;
+            if (weatherTickCounter >= WEATHER_CHECK_INTERVAL) {
+                weatherTickCounter = 0;
+                tickWeather(serverLevel);
             }
         }
     }
@@ -96,6 +146,63 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         BlockPos niPos = getOrFindNiPos(level);
         if (niPos == null) return false;
         return level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni && ni.isNetworkValid();
+    }
+
+    /**
+     * Checks if the current weather matches {@link #haarpMode}. If not, consumes 1 bucket of
+     * Positive Vibes from the network and adjusts the weather.
+     */
+    private void tickWeather(ServerLevel serverLevel) {
+        boolean raining   = serverLevel.isRaining();
+        boolean thundering = serverLevel.isThundering();
+
+        boolean needsChange = switch (haarpMode) {
+            case NO_RAIN      -> raining;
+            case RAIN         -> !raining || thundering;
+            case THUNDERSTORM -> !thundering;
+            case OFF          -> false;
+        };
+
+        if (!needsChange) return;
+
+        if (!tryConsumeVibes(serverLevel)) return;
+
+        switch (haarpMode) {
+            case NO_RAIN      -> serverLevel.setWeatherParameters(6000, 0, false, false);
+            case RAIN         -> serverLevel.setWeatherParameters(0, 6000, true, false);
+            case THUNDERSTORM -> serverLevel.setWeatherParameters(0, 6000, true, true);
+            case OFF          -> {} // unreachable
+        }
+    }
+
+    /**
+     * Searches the network for a Recycling Bin with enough Positive Vibes and drains
+     * {@link #VIBES_COST_MB} mB from it.
+     *
+     * @return true if the fluid was successfully consumed
+     */
+    private boolean tryConsumeVibes(ServerLevel serverLevel) {
+        BlockPos niPos = getOrFindNiPos(serverLevel);
+        if (niPos == null) return false;
+        if (!(serverLevel.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return false;
+        if (!ni.isNetworkValid()) return false;
+
+        NetworkScanResult scan = ni.getScan();
+        if (scan == null) return false;
+
+        // Check NI position neighbours and all tube-adjacent positions
+        for (BlockPos candidate : scan.tubePositions()) {
+            for (Direction dir : Direction.values()) {
+                BlockPos neighbor = candidate.relative(dir);
+                if (serverLevel.getBlockEntity(neighbor) instanceof RecyclingBinBlockEntity rb) {
+                    if (rb.extractVibes(VIBES_COST_MB, true) >= VIBES_COST_MB) {
+                        rb.extractVibes(VIBES_COST_MB, false);
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     // -------------------------------------------------------------------------
@@ -202,7 +309,12 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
 
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
-        return new WirelessHubMenu(id, inv, worldPosition, inventory);
+        ContainerData data = new ContainerData() {
+            @Override public int get(int i) { return i == 0 ? haarpMode.ordinal() : 0; }
+            @Override public void set(int i, int v) {}
+            @Override public int getCount() { return 1; }
+        };
+        return new WirelessHubMenu(id, inv, worldPosition, inventory, haarpUpgrade, data);
     }
 
     // -------------------------------------------------------------------------
@@ -243,6 +355,8 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         super.saveAdditional(tag, registries);
         tag.put("inventory", inventory.serializeNBT(registries));
         tag.putString("Tier", tier.getId());
+        if (haarpUpgrade) tag.putBoolean("HaarpUpgrade", true);
+        if (haarpMode != WeatherMode.OFF) tag.putInt("HaarpMode", haarpMode.ordinal());
     }
 
     @Override
@@ -253,6 +367,8 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         }
         tier = StorageTier.fromId(tag.getString("Tier"));
         connected = tag.getBoolean("Connected");
+        haarpUpgrade = tag.getBoolean("HaarpUpgrade");
+        haarpMode = WeatherMode.fromOrdinal(tag.getInt("HaarpMode"));
     }
 
     // -------------------------------------------------------------------------
@@ -264,6 +380,8 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         CompoundTag tag = new CompoundTag();
         tag.putString("Tier", tier.getId());
         tag.putBoolean("Connected", connected);
+        tag.putBoolean("HaarpUpgrade", haarpUpgrade);
+        tag.putInt("HaarpMode", haarpMode.ordinal());
         return tag;
     }
 

@@ -19,6 +19,7 @@ import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalB
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.BaseUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.HaarpUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.MagnetUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackSmithingRecipe;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackBlock;
@@ -787,6 +788,9 @@ public final class Registration {
     public static final DeferredHolder<Item, MagnetUpgradeItem> MAGNET_UPGRADE =
             ITEMS.register("magnet_upgrade", MagnetUpgradeItem::new);
 
+    public static final DeferredHolder<Item, HaarpUpgradeItem> HAARP_UPGRADE =
+            ITEMS.register("haarp_upgrade", HaarpUpgradeItem::new);
+
     public static final DeferredHolder<Item, ExperienceSyringeItem> EXPERIENCE_SYRINGE =
             ITEMS.register("experience_syringe", ExperienceSyringeItem::new);
 
@@ -969,6 +973,7 @@ public final class Registration {
                         output.accept(CRAFTING_UPGRADE.get());
                         output.accept(ENDER_STORAGE_UPGRADE.get());
                         output.accept(MAGNET_UPGRADE.get());
+                        output.accept(HAARP_UPGRADE.get());
                         output.accept(EXPERIENCE_SYRINGE.get());
                         output.accept(RECYCLING_BIN_ITEM.get());
                     })

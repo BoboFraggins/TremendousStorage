@@ -98,6 +98,14 @@
   "screen.tremendousstorage.fluid_transfer": "Fill / Drain",
   "screen.tremendousstorage.void_items": "Void Items",
 
+  "item.tremendousstorage.haarp_upgrade": "HAARP Upgrade",
+
+  "screen.tremendousstorage.haarp.weather_mode": "Weather Mode",
+  "screen.tremendousstorage.haarp.off": "Off",
+  "screen.tremendousstorage.haarp.no_rain": "No Rain",
+  "screen.tremendousstorage.haarp.rain": "Rain",
+  "screen.tremendousstorage.haarp.thunderstorm": "Thunderstorm",
+
   "block.tremendousstorage.network_interface": "Network Interface",
   "block.tremendousstorage.access_terminal": "Access Terminal",
   "block.tremendousstorage.storage_access_terminal": "Access Terminal",

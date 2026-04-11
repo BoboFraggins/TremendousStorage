@@ -26,17 +26,17 @@ public final class VexRepellentBrewingRecipes {
     public static void onRegisterBrewingRecipes(RegisterBrewingRecipesEvent event) {
         var builder = event.getBuilder();
 
-        builder.addMix(
+        builder.addRecipe(
                 Ingredient.of(Registration.POSITIVE_VIBES_BOTTLE.get()),
                 Ingredient.of(Items.SHIELD),
                 new ItemStack(Registration.VEX_REPELLENT_POTION.get()));
 
-        builder.addMix(
+        builder.addRecipe(
                 Ingredient.of(Registration.VEX_REPELLENT_POTION.get()),
                 Ingredient.of(Items.REDSTONE),
                 new ItemStack(Registration.VEX_REPELLENT_POTION_EXTENDED.get()));
 
-        builder.addMix(
+        builder.addRecipe(
                 Ingredient.of(Registration.VEX_REPELLENT_POTION_EXTENDED.get()),
                 Ingredient.of(Items.REDSTONE),
                 new ItemStack(Registration.VEX_REPELLENT_POTION_LONG.get()));
