@@ -4,6 +4,7 @@ import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tremendouschest.TremendousChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tremendoustank.TremendousTankBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
@@ -52,6 +53,11 @@ public class StorageUpgradeItem extends Item {
         } else if (be instanceof TremendousTankBlockEntity tank && tank.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 tank.setTier(to);
+            }
+            matches = true;
+        } else if (be instanceof WirelessHubBlockEntity hub && hub.getTier() == from) {
+            if (!ctx.getLevel().isClientSide()) {
+                hub.setTier(to);
             }
             matches = true;
         }

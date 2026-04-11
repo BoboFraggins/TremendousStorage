@@ -96,7 +96,10 @@ public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnecto
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {
-        // Client-only ticker for the arc animation
-        return level.isClientSide ? (lvl, pos, st, be) -> ((WirelessHubBlockEntity) be).clientTick() : null;
+        if (level.isClientSide) {
+            return (lvl, pos, st, be) -> ((WirelessHubBlockEntity) be).clientTick();
+        } else {
+            return (lvl, pos, st, be) -> ((WirelessHubBlockEntity) be).serverTick();
+        }
     }
 }

@@ -6,10 +6,13 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubRenderer;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubScreen;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
@@ -28,6 +31,14 @@ public final class PersonalAccessTerminalClientEvents {
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(Registration.WIRELESS_HUB_BE_TYPE.get(), WirelessHubRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
+        event.register(ModelResourceLocation.standalone(
+                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_base")));
+        event.register(ModelResourceLocation.standalone(
+                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_dish")));
     }
 
     @SubscribeEvent

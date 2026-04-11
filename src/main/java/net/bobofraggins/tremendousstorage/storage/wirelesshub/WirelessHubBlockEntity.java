@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.wirelesshub;
 
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiCacheHolder;
@@ -10,6 +11,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -32,8 +36,67 @@ import net.neoforged.neoforge.items.ItemStackHandler;
  *       on the item and moves it to slot 1.
  *   <li>Slot 1 (right): output-only. Player retrieves the linked Wireless SAT from here.
  * </ul>
+ *
+ * <p>Accepts {@link StorageTier} upgrades (right-click with a StorageUpgradeItem). Each tier
+ * doubles the wireless range; default (WOOD) is 16 blocks, NETHERITE is infinite.
  */
 public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder {
+
+    // -------------------------------------------------------------------------
+    // Tier & range
+    // -------------------------------------------------------------------------
+
+    private StorageTier tier = StorageTier.WOOD;
+
+    public StorageTier getTier() {
+        return tier;
+    }
+
+    public void setTier(StorageTier tier) {
+        this.tier = tier;
+        setChanged();
+    }
+
+    /**
+     * Returns the wireless range in blocks for the current tier.
+     * WOOD=16, COPPER=32, IRON=64, GOLD=128, DIAMOND=256, EMERALD=512, NETHERITE=infinite ({@link Integer#MAX_VALUE}).
+     */
+    public int getRange() {
+        if (tier == StorageTier.NETHERITE) return Integer.MAX_VALUE;
+        return 16 << tier.ordinal();
+    }
+
+    // -------------------------------------------------------------------------
+    // Connection state (synced to client)
+    // -------------------------------------------------------------------------
+
+    /** True when this hub is attached to an active network. Synced to client for dish animation. */
+    private boolean connected = false;
+    private int serverTickCounter = 0;
+
+    public boolean isConnected() {
+        return connected;
+    }
+
+    /** Called each server tick. Checks connection status every 40 ticks and syncs to client. */
+    public void serverTick() {
+        if (level == null || level.isClientSide()) return;
+        serverTickCounter++;
+        if (serverTickCounter >= 40) {
+            serverTickCounter = 0;
+            boolean nowConnected = computeConnected((ServerLevel) level);
+            if (nowConnected != connected) {
+                connected = nowConnected;
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
+        }
+    }
+
+    private boolean computeConnected(ServerLevel level) {
+        BlockPos niPos = getOrFindNiPos(level);
+        if (niPos == null) return false;
+        return level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni && ni.isNetworkValid();
+    }
 
     // -------------------------------------------------------------------------
     // Client-side animation state (not persisted)
@@ -42,7 +105,7 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     @Nullable
     private BlockPos cachedNiPos = null;
 
-    /** Incremented each client tick; drives the arc animation. */
+    /** Incremented each client tick; drives the dish spin animation. */
     private int tickCount = 0;
 
     /** Called each client tick by the block ticker. */
@@ -51,13 +114,13 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     }
 
     /**
-     * Returns a 0..1 progress value for the current arc position.
-     * The arc completes one full cycle every 40 ticks (2 seconds).
+     * Returns the dish Y rotation angle in degrees for the current frame.
+     * Completes one full revolution every 40 ticks (2 seconds).
      *
      * @param partialTick fractional tick for smooth interpolation
      */
-    public float getAnimationProgress(float partialTick) {
-        return (tickCount + partialTick) % 40f / 40f;
+    public float getDishAngle(float partialTick) {
+        return (tickCount + partialTick) % 40f / 40f * 360f;
     }
 
     // -------------------------------------------------------------------------
@@ -179,6 +242,7 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.put("inventory", inventory.serializeNBT(registries));
+        tag.putString("Tier", tier.getId());
     }
 
     @Override
@@ -187,5 +251,24 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         if (tag.contains("inventory")) {
             inventory.deserializeNBT(registries, tag.getCompound("inventory"));
         }
+        tier = StorageTier.fromId(tag.getString("Tier"));
+        connected = tag.getBoolean("Connected");
+    }
+
+    // -------------------------------------------------------------------------
+    // Client sync
+    // -------------------------------------------------------------------------
+
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("Tier", tier.getId());
+        tag.putBoolean("Connected", connected);
+        return tag;
+    }
+
+    @Override
+    public Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
     }
 }
