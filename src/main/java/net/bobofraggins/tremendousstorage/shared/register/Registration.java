@@ -4,6 +4,7 @@ import com.blakebr0.mysticalagriculture.api.MysticalAgricultureAPI;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.external.exdeorum.ExDeorumIntegration;
 import net.bobofraggins.tremendousstorage.external.exnihilosequentia.ExNihiloSequentiaIntegration;
+import net.bobofraggins.tremendousstorage.experiencesyringe.ExperienceSyringeItem;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteBarsBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteOreBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuritePaxelItem;
@@ -233,6 +234,14 @@ public final class Registration {
                     .persistent(com.mojang.serialization.Codec.LONG)
                     .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_LONG)
                     .build());
+
+    /** Data component storing the XP points (= mB of XP fluid) held inside an Experience Syringe. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>>
+            EXPERIENCE_SYRINGE_STORED_XP = DATA_COMPONENTS.register(
+                    "experience_syringe_stored_xp", () -> DataComponentType.<Integer>builder()
+                            .persistent(com.mojang.serialization.Codec.intRange(0, ExperienceSyringeItem.CAPACITY))
+                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_INT)
+                            .build());
 
     /** Data component storing all inventory and settings on a Tremendous Backpack item. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<BackpackContents>>
@@ -767,6 +776,9 @@ public final class Registration {
     public static final DeferredHolder<Item, MagnetUpgradeItem> MAGNET_UPGRADE =
             ITEMS.register("magnet_upgrade", MagnetUpgradeItem::new);
 
+    public static final DeferredHolder<Item, ExperienceSyringeItem> EXPERIENCE_SYRINGE =
+            ITEMS.register("experience_syringe", ExperienceSyringeItem::new);
+
     // -------------------------------------------------------------------------
     // Items — Manila Folder and Ender Folder (single items; tier in FolderContents)
     // -------------------------------------------------------------------------
@@ -946,6 +958,7 @@ public final class Registration {
                         output.accept(CRAFTING_UPGRADE.get());
                         output.accept(ENDER_STORAGE_UPGRADE.get());
                         output.accept(MAGNET_UPGRADE.get());
+                        output.accept(EXPERIENCE_SYRINGE.get());
                         output.accept(RECYCLING_BIN_ITEM.get());
                     })
                     .build());
