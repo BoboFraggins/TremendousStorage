@@ -91,4 +91,12 @@ public class FilingCabinetMenu extends AbstractFilingCabinetMenu {
         if (be == null) return true;
         return be.stillValid(player);
     }
+
+    @Override
+    public void removed(Player player) {
+        super.removed(player);
+        if (!player.level().isClientSide() && be != null) {
+            be.stopOpen(player);
+        }
+    }
 }

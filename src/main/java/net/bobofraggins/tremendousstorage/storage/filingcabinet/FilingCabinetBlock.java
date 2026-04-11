@@ -2,6 +2,8 @@ package net.bobofraggins.tremendousstorage.storage.filingcabinet;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
+import javax.annotation.Nullable;
+import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
@@ -14,6 +16,8 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -71,7 +75,36 @@ public class FilingCabinetBlock extends BaseEntityBlock implements NetworkConnec
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        return RenderShape.ENTITYBLOCK_ANIMATED;
+    }
+
+    @Override
+    public boolean triggerEvent(BlockState state, Level level, BlockPos pos, int id, int param) {
+        super.triggerEvent(state, level, pos, id, param);
+        BlockEntity be = level.getBlockEntity(pos);
+        return be != null && be.triggerEvent(id, param);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
+            Level level, BlockState state, BlockEntityType<T> type) {
+        return createTickerHelper(
+                type,
+                Registration.FILING_CABINET_BE_TYPE.get(),
+                level.isClientSide()
+                        ? FilingCabinetBlockEntity::clientTick
+                        : FilingCabinetBlockEntity::serverTick);
+    }
+
+    @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        if (!state.is(newState.getBlock())) {
+            if (level.getBlockEntity(pos) instanceof FilingCabinetBlockEntity be) {
+                be.recheckOpeners(level, pos, state);
+            }
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 
     @Override
@@ -118,6 +151,7 @@ public class FilingCabinetBlock extends BaseEntityBlock implements NetworkConnec
         FilingCabinetBlockEntity be = getBlockEntity(level, pos);
         if (be == null) return InteractionResult.FAIL;
 
+        be.startOpen(player);
         player.openMenu(be, buf -> buf.writeBlockPos(pos));
         return InteractionResult.SUCCESS;
     }

@@ -14,13 +14,17 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
 
 /** Stores up to {@value #SLOT_COUNT} Manila Folder stacks. */
@@ -35,6 +39,92 @@ public class FilingCabinetBlockEntity extends BlockEntity
 
     @Nullable
     private BlockPos cachedNiPos = null;
+
+    // -------------------------------------------------------------------------
+    // Drawer animation state (client-side only)
+    // -------------------------------------------------------------------------
+
+    /** Number of players with this block's menu open (synced from server via block event). */
+    public int openCount = 0;
+
+    /** Drawer open fraction last tick (0 = closed, 1 = fully open). */
+    public float prevDrawerOffset = 0f;
+
+    /** Drawer open fraction this tick. */
+    public float drawerOffset = 0f;
+
+    // -------------------------------------------------------------------------
+    // ContainerOpenersCounter
+    // -------------------------------------------------------------------------
+
+    private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter() {
+        @Override
+        protected void onOpen(Level level, BlockPos pos, BlockState state) {
+            level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                    SoundEvents.BARREL_OPEN, SoundSource.BLOCKS, 0.5f,
+                    level.random.nextFloat() * 0.1f + 0.9f);
+        }
+
+        @Override
+        protected void onClose(Level level, BlockPos pos, BlockState state) {
+            level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                    SoundEvents.BARREL_CLOSE, SoundSource.BLOCKS, 0.5f,
+                    level.random.nextFloat() * 0.1f + 0.9f);
+        }
+
+        @Override
+        protected void openerCountChanged(Level level, BlockPos pos, BlockState state, int oldCount, int newCount) {
+            level.blockEvent(pos, state.getBlock(), 1, newCount);
+        }
+
+        @Override
+        protected boolean isOwnContainer(Player player) {
+            return player.containerMenu instanceof FilingCabinetMenu m
+                    && m.getPos().equals(worldPosition);
+        }
+    };
+
+    public void startOpen(Player player) {
+        if (!isRemoved() && !player.isSpectator()) {
+            openersCounter.incrementOpeners(player, getLevel(), getBlockPos(), getBlockState());
+        }
+    }
+
+    public void stopOpen(Player player) {
+        if (!isRemoved() && !player.isSpectator()) {
+            openersCounter.decrementOpeners(player, getLevel(), getBlockPos(), getBlockState());
+        }
+    }
+
+    public void recheckOpeners(Level level, BlockPos pos, BlockState state) {
+        openersCounter.recheckOpeners(level, pos, state);
+    }
+
+    @Override
+    public boolean triggerEvent(int id, int type) {
+        if (id == 1) {
+            openCount = type;
+            return true;
+        }
+        return super.triggerEvent(id, type);
+    }
+
+    // -------------------------------------------------------------------------
+    // Tickers
+    // -------------------------------------------------------------------------
+
+    public static void serverTick(Level level, BlockPos pos, BlockState state, FilingCabinetBlockEntity be) {
+        be.openersCounter.recheckOpeners(level, pos, state);
+    }
+
+    public static void clientTick(Level level, BlockPos pos, BlockState state, FilingCabinetBlockEntity be) {
+        be.prevDrawerOffset = be.drawerOffset;
+        if (be.openCount > 0 && be.drawerOffset < 1f) {
+            be.drawerOffset = Math.min(1f, be.drawerOffset + 0.1f);
+        } else if (be.openCount == 0 && be.drawerOffset > 0f) {
+            be.drawerOffset = Math.max(0f, be.drawerOffset - 0.1f);
+        }
+    }
 
     public FilingCabinetBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.FILING_CABINET_BE_TYPE.get(), pos, state);
