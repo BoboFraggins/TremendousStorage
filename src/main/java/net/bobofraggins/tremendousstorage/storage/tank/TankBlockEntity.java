@@ -3,6 +3,11 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsMenu;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiLink;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -41,6 +46,12 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
 
     private final NiLink niLink = new NiLink();
 
+    /**
+     * Two-slot container for the fill/drain pane (slot 0 = input, slot 1 = output).
+     * Changes mark the BE dirty so the contents survive world save.
+     */
+    public final SimpleContainer transferContainer = new SimpleContainer(2);
+
     /** Type key — always has amount=1. EMPTY means unlocked. */
     private FluidStack storedFluid = FluidStack.EMPTY;
 
@@ -55,6 +66,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
     protected TankBlockEntity(
             net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        transferContainer.addListener(c -> super.setChanged());
     }
 
     // -------------------------------------------------------------------------
@@ -184,6 +196,54 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
     }
 
     // -------------------------------------------------------------------------
+    // Server tick — fluid transfer pane
+    // -------------------------------------------------------------------------
+
+    public static void serverTick(
+            net.minecraft.world.level.Level level,
+            net.minecraft.core.BlockPos pos,
+            net.minecraft.world.level.block.state.BlockState state,
+            TankBlockEntity be) {
+        be.tickFluidTransfer();
+    }
+
+    private void tickFluidTransfer() {
+        ItemStack input = transferContainer.getItem(0);
+        if (input.isEmpty()) return;
+        if (!transferContainer.getItem(1).isEmpty()) return; // output blocked
+
+        IFluidHandlerItem handler = input.copy().getCapability(Capabilities.FluidHandler.ITEM);
+        if (handler == null) return;
+
+        FluidStack contained = handler.getFluidInTank(0);
+
+        if (!contained.isEmpty()) {
+            // Item has fluid → insert into tank (must match locked type)
+            if (!storedFluid.isEmpty() && !FluidStack.isSameFluidSameComponents(storedFluid, contained)) return;
+            int fluidAmt = contained.getAmount();
+            long space = getCapacity() - amount;
+            // Hold until tank can accept the full amount (unless it voids excess)
+            if (space < fluidAmt && !voidExcess) return;
+            handler.drain(fluidAmt, IFluidHandler.FluidAction.EXECUTE);
+            insert(contained, fluidAmt, false);
+            transferContainer.setItem(0, ItemStack.EMPTY);
+            transferContainer.setItem(1, handler.getContainer());
+        } else {
+            // Item is empty → fill from tank
+            if (storedFluid.isEmpty() || amount == 0) return;
+            int tryFill = (int) Math.min(amount, Integer.MAX_VALUE);
+            int canFill = handler.fill(storedFluid.copyWithAmount(tryFill), IFluidHandler.FluidAction.SIMULATE);
+            if (canFill <= 0) return; // item doesn't accept this fluid type
+            // Hold until tank has enough to fill the container completely
+            if (amount < canFill) return;
+            extract(canFill, false);
+            handler.fill(storedFluid.copyWithAmount(canFill), IFluidHandler.FluidAction.EXECUTE);
+            transferContainer.setItem(0, ItemStack.EMPTY);
+            transferContainer.setItem(1, handler.getContainer());
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // MenuProvider
     // -------------------------------------------------------------------------
 
@@ -208,7 +268,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
                 return 1;
             }
         };
-        return new TankSettingsMenu(id, inv, worldPosition, data);
+        return new TankSettingsMenu(id, inv, worldPosition, data, transferContainer);
     }
 
     // -------------------------------------------------------------------------
@@ -219,6 +279,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
     private static final String TAG_AMOUNT = "Amount";
     private static final String TAG_VOID_EXCESS = "VoidExcess";
     private static final String TAG_TIER = "Tier";
+    private static final String TAG_TRANSFER = "Transfer";
 
     @Override
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
@@ -229,6 +290,12 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
         tag.putLong(TAG_AMOUNT, amount);
         tag.putBoolean(TAG_VOID_EXCESS, voidExcess);
         tag.putString(TAG_TIER, tier.getId());
+        net.minecraft.nbt.CompoundTag transferTag = new net.minecraft.nbt.CompoundTag();
+        ItemStack in = transferContainer.getItem(0);
+        ItemStack out = transferContainer.getItem(1);
+        if (!in.isEmpty()) transferTag.put("Input", in.save(registries));
+        if (!out.isEmpty()) transferTag.put("Output", out.save(registries));
+        tag.put(TAG_TRANSFER, transferTag);
     }
 
     @Override
@@ -245,6 +312,13 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
             storedFluid = FluidStack.EMPTY;
         }
         amount = tag.getLong(TAG_AMOUNT);
+        if (tag.contains(TAG_TRANSFER)) {
+            net.minecraft.nbt.CompoundTag t = tag.getCompound(TAG_TRANSFER);
+            transferContainer.setItem(0, t.contains("Input")
+                    ? ItemStack.parseOptional(registries, t.getCompound("Input")) : ItemStack.EMPTY);
+            transferContainer.setItem(1, t.contains("Output")
+                    ? ItemStack.parseOptional(registries, t.getCompound("Output")) : ItemStack.EMPTY);
+        }
     }
 
     // -------------------------------------------------------------------------

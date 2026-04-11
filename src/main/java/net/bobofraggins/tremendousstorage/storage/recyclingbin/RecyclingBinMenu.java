@@ -5,28 +5,45 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.capabilities.Capabilities;
 
 /**
- * Menu for the Recycling Bin. Contains one void slot where any item placed into
- * it is immediately destroyed, generating Positive Vibes fluid in the block entity.
+ * Menu for the Recycling Bin.
+ *
+ * <p>Slot layout:
+ * <ul>
+ *   <li>0 — void slot (left pane): any item placed here is instantly destroyed
+ *   <li>1 — fluid-container input (right pane, top)
+ *   <li>2 — fluid-container output (right pane, bottom; output-only)
+ *   <li>3–29 — player inventory
+ *   <li>30–38 — hotbar
+ * </ul>
  */
 public class RecyclingBinMenu extends AbstractContainerMenu {
 
-    static final int VOID_SLOT_X = 80;
-    static final int VOID_SLOT_Y = 20;
+    static final int VOID_SLOT_X  = 36;
+    static final int VOID_SLOT_Y  = 32;
+    static final int FLUID_IN_X   = 124;
+    static final int FLUID_IN_Y   = 24;
+    static final int FLUID_OUT_X  = 124;
+    static final int FLUID_OUT_Y  = 56;
+
     private static final int INV_START_X = 8;
-    private static final int INV_Y = 51;
-    private static final int HOTBAR_Y = 109;
+    private static final int INV_Y       = 90;
+    private static final int HOTBAR_Y    = 148;
 
     private final BlockPos pos;
 
-    /** Server-side constructor (BE may be null on client). */
-    public RecyclingBinMenu(int id, Inventory inv, BlockPos pos, @Nullable RecyclingBinBlockEntity be) {
+    /** Server-side constructor. */
+    public RecyclingBinMenu(
+            int id, Inventory inv, BlockPos pos,
+            @Nullable RecyclingBinBlockEntity be, SimpleContainer transferContainer) {
         super(Registration.RECYCLING_BIN_MENU.get(), id);
         this.pos = pos;
 
@@ -38,13 +55,29 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
             }
         });
 
-        // Player inventory (slots 1–27)
+        // Slot 1: fluid input — accepts any item with IFluidHandlerItem
+        addSlot(new Slot(transferContainer, 0, FLUID_IN_X, FLUID_IN_Y) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return stack.getCapability(Capabilities.FluidHandler.ITEM) != null;
+            }
+        });
+
+        // Slot 2: output-only — player takes the result, cannot place
+        addSlot(new Slot(transferContainer, 1, FLUID_OUT_X, FLUID_OUT_Y) {
+            @Override
+            public boolean mayPlace(ItemStack stack) {
+                return false;
+            }
+        });
+
+        // Player inventory (slots 3–29)
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 addSlot(new Slot(inv, col + row * 9 + 9, INV_START_X + col * 18, INV_Y + row * 18));
             }
         }
-        // Hotbar (slots 28–36)
+        // Hotbar (slots 30–38)
         for (int col = 0; col < 9; col++) {
             addSlot(new Slot(inv, col, INV_START_X + col * 18, HOTBAR_Y));
         }
@@ -52,7 +85,7 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
 
     /** Client-side constructor — reads BlockPos from network buffer. */
     public RecyclingBinMenu(int id, Inventory inv, FriendlyByteBuf buf) {
-        this(id, inv, buf.readBlockPos(), null);
+        this(id, inv, buf.readBlockPos(), null, new SimpleContainer(2));
     }
 
     public BlockPos getPos() {
@@ -76,15 +109,35 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
     }
 
     @Override
-    public ItemStack quickMoveStack(Player player, int slotIndex) {
-        if (slotIndex == 0) return ItemStack.EMPTY;
+    public ItemStack quickMoveStack(Player player, int index) {
+        Slot slot = slots.get(index);
+        if (!slot.hasItem()) return ItemStack.EMPTY;
+        ItemStack stack    = slot.getItem();
+        ItemStack original = stack.copy();
 
-        // Player inventory/hotbar → void slot: destroy the item
-        Slot slot = slots.get(slotIndex);
-        if (slot.hasItem()) {
-            slot.set(ItemStack.EMPTY);
+        if (index == 0) {
+            // Void slot: nothing to shift-click out
+            return ItemStack.EMPTY;
+        } else if (index <= 2) {
+            // Fluid slots → player inventory + hotbar
+            if (!moveItemStackTo(stack, 3, 39, false)) return ItemStack.EMPTY;
+        } else if (index < 30) {
+            // Player inventory → try fluid input first, then hotbar
+            if (!moveItemStackTo(stack, 1, 2, false)) {
+                if (!moveItemStackTo(stack, 30, 39, false)) return ItemStack.EMPTY;
+            }
+        } else {
+            // Hotbar → try fluid input first, then player inventory
+            if (!moveItemStackTo(stack, 1, 2, false)) {
+                if (!moveItemStackTo(stack, 3, 30, false)) return ItemStack.EMPTY;
+            }
         }
-        return ItemStack.EMPTY;
+
+        if (stack.isEmpty()) slot.set(ItemStack.EMPTY);
+        else if (stack.getCount() != original.getCount()) slot.setChanged();
+        else return ItemStack.EMPTY;
+
+        return original;
     }
 
     // -------------------------------------------------------------------------

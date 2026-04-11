@@ -95,6 +95,8 @@
   "screen.tremendousstorage.void_excess_on": "Void Excess: ON",
   "screen.tremendousstorage.void_excess_off": "Void Excess: OFF",
   "screen.tremendousstorage.clear_tank_contents": "Clear Contents",
+  "screen.tremendousstorage.fluid_transfer": "Fill / Drain",
+  "screen.tremendousstorage.void_items": "Void Items",
 
   "block.tremendousstorage.network_interface": "Network Interface",
   "block.tremendousstorage.access_terminal": "Access Terminal",

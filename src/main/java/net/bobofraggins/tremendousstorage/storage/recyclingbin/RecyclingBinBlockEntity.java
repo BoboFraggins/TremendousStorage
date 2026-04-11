@@ -8,13 +8,19 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
 public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider {
 
@@ -22,6 +28,12 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
     private static final int MB_PER_ITEM = 10;
 
     private int vibesAmount = 0;
+
+    /**
+     * Two-slot container for the fill/drain pane (slot 0 = input, slot 1 = output).
+     * Changes mark the BE dirty so the contents survive world save.
+     */
+    public final SimpleContainer transferContainer = new SimpleContainer(2);
 
     // -------------------------------------------------------------------------
     // Fluid storage
@@ -66,12 +78,25 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putInt("Vibes", vibesAmount);
+        net.minecraft.nbt.CompoundTag transferTag = new net.minecraft.nbt.CompoundTag();
+        ItemStack in = transferContainer.getItem(0);
+        ItemStack out = transferContainer.getItem(1);
+        if (!in.isEmpty()) transferTag.put("Input", in.save(registries));
+        if (!out.isEmpty()) transferTag.put("Output", out.save(registries));
+        tag.put("Transfer", transferTag);
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         vibesAmount = tag.getInt("Vibes");
+        if (tag.contains("Transfer")) {
+            net.minecraft.nbt.CompoundTag t = tag.getCompound("Transfer");
+            transferContainer.setItem(0, t.contains("Input")
+                    ? ItemStack.parseOptional(registries, t.getCompound("Input")) : ItemStack.EMPTY);
+            transferContainer.setItem(1, t.contains("Output")
+                    ? ItemStack.parseOptional(registries, t.getCompound("Output")) : ItemStack.EMPTY);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -156,6 +181,42 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, RecyclingBinBlockEntity be) {
         be.openersCounter.recheckOpeners(level, pos, state);
+        be.tickFluidTransfer();
+    }
+
+    private void tickFluidTransfer() {
+        ItemStack input = transferContainer.getItem(0);
+        if (input.isEmpty()) return;
+        if (!transferContainer.getItem(1).isEmpty()) return; // output slot occupied
+
+        IFluidHandlerItem handler = input.copy().getCapability(Capabilities.FluidHandler.ITEM);
+        if (handler == null) return;
+
+        FluidStack contained = handler.getFluidInTank(0);
+        FluidStack vibesType = new FluidStack(Registration.HEALING_SALVE_SOURCE.get(), 1);
+
+        if (!contained.isEmpty()) {
+            // Item has fluid → insert Positive Vibes into the recycling bin
+            if (contained.getFluid() != Registration.HEALING_SALVE_SOURCE.get()) return; // wrong fluid
+            int amt = contained.getAmount();
+            int space = FLUID_CAPACITY_MB - vibesAmount;
+            if (space < amt) return; // hold until there is room for the full amount
+            handler.drain(amt, IFluidHandler.FluidAction.EXECUTE);
+            addVibes(amt);
+            transferContainer.setItem(0, ItemStack.EMPTY);
+            transferContainer.setItem(1, handler.getContainer());
+        } else {
+            // Item is empty → fill it with Positive Vibes from the recycling bin
+            if (vibesAmount == 0) return;
+            int canFill = handler.fill(vibesType.copyWithAmount(vibesAmount), IFluidHandler.FluidAction.SIMULATE);
+            if (canFill <= 0) return; // item doesn't accept Positive Vibes
+            // Hold until the bin has enough to fill the container completely
+            if (vibesAmount < canFill) return;
+            extractVibes(canFill, false);
+            handler.fill(new FluidStack(Registration.HEALING_SALVE_SOURCE.get(), canFill), IFluidHandler.FluidAction.EXECUTE);
+            transferContainer.setItem(0, ItemStack.EMPTY);
+            transferContainer.setItem(1, handler.getContainer());
+        }
     }
 
     public static void clientTick(Level level, BlockPos pos, BlockState state, RecyclingBinBlockEntity be) {
@@ -173,6 +234,7 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
 
     public RecyclingBinBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.RECYCLING_BIN_BE_TYPE.get(), pos, state);
+        transferContainer.addListener(c -> setChanged());
     }
 
     @Override
@@ -182,6 +244,6 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
 
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
-        return new RecyclingBinMenu(id, inv, worldPosition, this);
+        return new RecyclingBinMenu(id, inv, worldPosition, this, transferContainer);
     }
 }
