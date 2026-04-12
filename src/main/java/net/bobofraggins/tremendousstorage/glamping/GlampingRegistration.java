@@ -29,31 +29,6 @@ public class GlampingRegistration {
             DeferredRegister.create(Registries.CHUNK_GENERATOR, TremendousStorage.MODID);
 
     // -------------------------------------------------------------------------
-    // Portal block
-    // -------------------------------------------------------------------------
-
-    public static final DeferredBlock<GlampingPortalBlock> GLAMPING_PORTAL = BLOCKS.register(
-            "glamping_portal",
-            () -> new GlampingPortalBlock(BlockBehaviour.Properties.of()
-                    .strength(50.0f, 1200.0f)
-                    .requiresCorrectToolForDrops()
-                    .sound(SoundType.AMETHYST)
-                    .lightLevel(state -> 7)
-                    .noOcclusion()));
-
-    public static final DeferredHolder<Item, BlockItem> GLAMPING_PORTAL_ITEM =
-            ITEMS.registerSimpleBlockItem("glamping_portal", GLAMPING_PORTAL);
-
-    // -------------------------------------------------------------------------
-    // Portal block entity
-    // -------------------------------------------------------------------------
-
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GlampingPortalBlockEntity>>
-            GLAMPING_PORTAL_BE_TYPE = BLOCK_ENTITY_TYPES.register("glamping_portal", () -> BlockEntityType.Builder.of(
-                    GlampingPortalBlockEntity::new, GLAMPING_PORTAL.get())
-            .build(null));
-
-    // -------------------------------------------------------------------------
     // Tent block
     // -------------------------------------------------------------------------
 

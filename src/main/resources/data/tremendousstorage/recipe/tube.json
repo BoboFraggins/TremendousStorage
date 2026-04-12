@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " L ",
+    "LLL",
+    " L "
+  ],
+  "key": {
+    "L": {
+      "item": "tremendousstorage:lazurite_ingot"
+    }
+  },
+  "result": {
+    "id": "tremendousstorage:tube",
+    "count": 16
+  },
+  "category": "misc"
+}

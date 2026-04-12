@@ -20,7 +20,7 @@ import net.minecraft.world.phys.BlockHitResult;
  * A two-block-tall, unbreakable door that teleports the player back to wherever
  * they were when they entered the Glamping Dimension.
  *
- * <p>Placed by {@link GlampingPortalBlock} on the south wall of every new camp.
+ * <p>Placed by {@link TentBlock} on the south wall of every new camp.
  * The upper and lower halves share this single block type, distinguished by the
  * {@link #HALF} property. Clicking either half triggers the teleport.
  */

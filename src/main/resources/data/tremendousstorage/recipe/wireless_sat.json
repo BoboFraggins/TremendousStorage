@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "LEL",
+    "LCL",
+    "LLL"
+  ],
+  "key": {
+    "L": {
+      "item": "tremendousstorage:lazurite_ingot"
+    },
+    "E": {
+      "item": "minecraft:ender_pearl"
+    },
+    "C": {
+      "item": "minecraft:chest"
+    }
+  },
+  "result": {
+    "id": "tremendousstorage:wireless_sat",
+    "count": 1
+  },
+  "category": "misc"
+}

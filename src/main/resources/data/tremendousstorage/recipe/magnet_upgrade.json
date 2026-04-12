@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "R R",
+    "IBI",
+    "III"
+  ],
+  "key": {
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "B": {
+      "item": "tremendousstorage:base_upgrade"
+    }
+  },
+  "result": {
+    "id": "tremendousstorage:magnet_upgrade",
+    "count": 1
+  },
+  "category": "misc"
+}
