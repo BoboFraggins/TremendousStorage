@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.chest;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.shared.network.LocalStorageInteractPacket;
@@ -22,6 +23,7 @@ import net.bobofraggins.tremendousstorage.shared.ui.SortPane;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -42,6 +44,7 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
     private final LocalInventoryPane inventoryPane;
     private final Dialog dialog;
     private final ConfigDrawer configDrawer;
+    private EditBox searchBox;
 
     /** Client-side sort mode; updated optimistically on cycle for snappy UI. */
     private SortMode sortMode = SortMode.AMOUNT;
@@ -95,6 +98,22 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
             }
         }
 
+        // Search box — right-aligned in the title bar.
+        int searchW = 75;
+        searchBox = new EditBox(
+                font,
+                leftPos + imageWidth - 5 - 2 - searchW,
+                topPos + 3,
+                searchW, 10,
+                Component.empty());
+        searchBox.setMaxLength(64);
+        searchBox.setHint(Component.literal("Search..."));
+        searchBox.setResponder(text -> {
+            inventoryPane.setFilter(text.toLowerCase(Locale.ROOT).strip());
+            SearchSync.pushToJei(text);
+        });
+        addRenderableWidget(searchBox);
+
         addRenderableWidget(new PressableIconButton(
                 leftPos + 8,
                 topPos + 6,
@@ -117,7 +136,12 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
     @Override
     protected void containerTick() {
         super.containerTick();
-        inventoryPane.setFilter(SearchSync.getFilter());
+        if (SearchSync.isJeiAvailable()) {
+            String jeiRaw = SearchSync.getRawFilter();
+            if (!jeiRaw.equals(searchBox.getValue())) {
+                searchBox.setValue(jeiRaw);
+            }
+        }
         refreshInventory();
     }
 
@@ -163,6 +187,14 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (searchBox.isFocused()) {
+            if (keyCode == 256) {
+                searchBox.setFocused(false);
+                return true;
+            }
+            searchBox.keyPressed(keyCode, scanCode, modifiers);
+            return true;
+        }
         if (QuickStackClientEvents.QUICK_STACK != null
                 && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)) {
             PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false));

@@ -3,16 +3,13 @@ package net.bobofraggins.tremendousstorage.shared.input;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.minecraft.client.KeyMapping;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyModifier;
 import org.lwjgl.glfw.GLFW;
 
 /** Client-only mod-bus events for terminal keybinds. */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class QuickStackClientEvents {
 
     private QuickStackClientEvents() {}

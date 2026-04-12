@@ -233,15 +233,12 @@ public class LocalInventoryPane implements IDialogPane {
     // Private helpers
     // -------------------------------------------------------------------------
 
-    /** Returns one fewer row when a filter is active (to make room for the filter label). */
     private int visibleRows() {
-        int base = TremendousStorageClientConfig.getVisibleRows();
-        return appliedFilter.isEmpty() ? base : base - 1;
+        return TremendousStorageClientConfig.getVisibleRows();
     }
 
-    /** Top Y of the item grid — shifts down by one slot when a filter label occupies the top row. */
     private int gridStartY() {
-        return appliedFilter.isEmpty() ? GRID_Y : GRID_Y + AccessTerminalLayout.SLOT_SIZE;
+        return GRID_Y;
     }
 
     private void applyFilter() {
@@ -307,23 +304,6 @@ public class LocalInventoryPane implements IDialogPane {
     private void drawGrid(GuiGraphics graphics, Font font) {
         int rows = visibleRows();
         int startY = gridStartY();
-
-        // Filter label at the top row when a search filter is active
-        if (!appliedFilter.isEmpty()) {
-            graphics.fill(
-                    GRID_X,
-                    GRID_Y,
-                    GRID_X + AccessTerminalLayout.NETWORK_W,
-                    GRID_Y + AccessTerminalLayout.SLOT_SIZE,
-                    0xFF1C1C1C);
-            String label = "Filtered: " + appliedFilter;
-            int maxW = AccessTerminalLayout.NETWORK_W - 4;
-            if (font.width(label) > maxW) {
-                label = font.plainSubstrByWidth(label, maxW - font.width("...")) + "...";
-            }
-            int labelY = GRID_Y + (AccessTerminalLayout.SLOT_SIZE - font.lineHeight) / 2;
-            graphics.drawString(font, label, GRID_X + 2, labelY, 0xFFCCCCCC, false);
-        }
 
         for (int row = 0; row < rows; row++) {
             graphics.blit(

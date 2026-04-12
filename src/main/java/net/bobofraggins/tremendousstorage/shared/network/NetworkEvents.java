@@ -2,12 +2,10 @@ package net.bobofraggins.tremendousstorage.shared.network;
 
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 /** Registers all server-bound network payloads for TremendousStorage. */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.MOD)
 public final class NetworkEvents {
 
     private NetworkEvents() {}

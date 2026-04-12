@@ -18,7 +18,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
 
 /**
@@ -38,7 +37,6 @@ import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
  *
  * <p>Only applies to mobs that spawned naturally or from spawners — not to egg/command spawns.
  */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.GAME)
 public final class LazuriteEquipmentHandler {
 
     private LazuriteEquipmentHandler() {}

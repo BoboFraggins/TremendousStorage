@@ -2,10 +2,8 @@ package net.bobofraggins.tremendousstorage.external.mobgrindinutils;
 
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
@@ -15,7 +13,6 @@ import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsE
  * <p>Does nothing when Mob Grinding Utils is loaded — MGU provides its own fluid rendering.
  * Uses the Positive Vibes flow texture recolored to neon green via {@link #getTintColor()}.
  */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class XpFluidClientEvents {
 
     private XpFluidClientEvents() {}

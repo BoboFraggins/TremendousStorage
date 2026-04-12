@@ -8,9 +8,7 @@ import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
 
@@ -21,7 +19,6 @@ import net.neoforged.neoforge.client.event.RegisterItemDecorationsEvent;
  * <p>The block has a tint-index-0 overlay layer in its model. The color returned here
  * determines the accent square color shown on the block's sides and front.
  */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class StorageClientEvents {
 
     private StorageClientEvents() {}

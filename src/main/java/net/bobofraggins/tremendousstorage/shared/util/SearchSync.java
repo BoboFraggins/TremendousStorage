@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.shared.util;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -12,22 +13,55 @@ import net.minecraft.world.item.TooltipFlag;
 /**
  * Singleton bridge between the optional JEI search bar and TremendousStorage's inventory panes.
  *
- * <p>When JEI is present, the JEI plugin sets a provider that returns the current filter text.
- * When JEI is absent (or before it initialises), the provider returns an empty string so all
- * items are shown normally.
+ * <p>When JEI is present, the JEI plugin registers both a provider (JEI→TS) and a setter
+ * (TS→JEI) so the two search bars stay in sync.  When JEI is absent, the TS EditBox is the
+ * sole filter source and the JEI methods are no-ops.
  *
- * <p>Only {@code TremendousStorageJeiPlugin} should call {@link #setProvider}; all other code uses
- * {@link #getFilter} and {@link #matches}.
+ * <p>Only {@code TremendousStorageJeiPlugin} should call {@link #setProvider} /
+ * {@link #setJeiSetter}; all other code uses {@link #getFilter}, {@link #matches},
+ * {@link #getRawFilter}, and {@link #pushToJei}.
  */
 public final class SearchSync {
 
     private static Supplier<String> provider = () -> "";
+    private static Consumer<String> jeiSetter = null;
+    private static boolean jeiAvailable = false;
 
     private SearchSync() {}
 
     /** Called by the JEI plugin when the JEI runtime becomes available or is torn down. */
     public static void setProvider(Supplier<String> p) {
         provider = (p != null) ? p : () -> "";
+        jeiAvailable = (p != null);
+    }
+
+    /** Called by the JEI plugin to register the setter that pushes text into the JEI search bar. */
+    public static void setJeiSetter(Consumer<String> setter) {
+        jeiSetter = setter;
+    }
+
+    /** Returns {@code true} when JEI is loaded and its search provider is active. */
+    public static boolean isJeiAvailable() {
+        return jeiAvailable;
+    }
+
+    /**
+     * Returns the current JEI filter text exactly as typed (no lowercase / strip), or {@code ""}
+     * when JEI is absent.  Use this to drive a TS search {@link net.minecraft.client.gui.components.EditBox}
+     * so that it stays in sync with the JEI search bar.
+     */
+    public static String getRawFilter() {
+        return provider.get();
+    }
+
+    /**
+     * Pushes {@code text} into the JEI ingredient filter.  No-op when JEI is absent.
+     * Call this from the TS search EditBox responder so typing in TS also updates JEI.
+     */
+    public static void pushToJei(String text) {
+        if (jeiSetter != null) {
+            jeiSetter.accept(text);
+        }
     }
 
     /**

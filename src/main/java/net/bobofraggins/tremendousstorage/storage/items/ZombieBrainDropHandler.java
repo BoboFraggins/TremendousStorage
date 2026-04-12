@@ -8,7 +8,6 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 
 /**
@@ -16,7 +15,6 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
  *
  * <p>Zombie covers ZombieVillager, Husk, Drowned, and all other Zombie subclasses.
  */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.GAME)
 public final class ZombieBrainDropHandler {
 
     private ZombieBrainDropHandler() {}

@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.backpack;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.bobofraggins.tremendousstorage.shared.network.SetBackpackPriorityPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetBackpackSortModePacket;
@@ -18,6 +19,7 @@ import net.bobofraggins.tremendousstorage.shared.ui.SortPane;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -39,6 +41,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
     private final LocalInventoryPane inventoryPane;
     private final Dialog dialog;
     private final ConfigDrawer configDrawer;
+    private EditBox searchBox;
 
     /** Client-side sort mode; updated optimistically on cycle for snappy UI. */
     private SortMode sortMode = SortMode.AMOUNT;
@@ -78,6 +81,22 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
         BackpackContents contents = getCurrentContents();
         sortMode = contents.sortMode();
 
+        // Search box — right-aligned in the title bar.
+        int searchW = 75;
+        searchBox = new EditBox(
+                font,
+                leftPos + imageWidth - 5 - 2 - searchW,
+                topPos + 3,
+                searchW, 10,
+                Component.empty());
+        searchBox.setMaxLength(64);
+        searchBox.setHint(Component.literal("Search..."));
+        searchBox.setResponder(text -> {
+            inventoryPane.setFilter(text.toLowerCase(Locale.ROOT).strip());
+            SearchSync.pushToJei(text);
+        });
+        addRenderableWidget(searchBox);
+
         addRenderableWidget(new PressableIconButton(
                 leftPos + 8,
                 topPos + 6,
@@ -91,7 +110,12 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
     @Override
     protected void containerTick() {
         super.containerTick();
-        inventoryPane.setFilter(SearchSync.getFilter());
+        if (SearchSync.isJeiAvailable()) {
+            String jeiRaw = SearchSync.getRawFilter();
+            if (!jeiRaw.equals(searchBox.getValue())) {
+                searchBox.setValue(jeiRaw);
+            }
+        }
         refreshInventory();
     }
 
@@ -163,6 +187,19 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
                     .reversed()
                     .thenComparing(i -> stacks.get(i).getHoverName().getString());
         };
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (searchBox.isFocused()) {
+            if (keyCode == 256) {
+                searchBox.setFocused(false);
+                return true;
+            }
+            searchBox.keyPressed(keyCode, scanCode, modifiers);
+            return true;
+        }
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override

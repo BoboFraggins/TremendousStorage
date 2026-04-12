@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.accessterminal;
 
 import java.util.List;
+import java.util.Locale;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.shared.network.QuickStackPacket;
@@ -16,6 +17,7 @@ import net.bobofraggins.tremendousstorage.shared.ui.SortPane;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -46,6 +48,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     private final NetworkInventoryPane networkPane;
     private final Dialog dialog;
     private final ConfigDrawer configDrawer;
+    private EditBox searchBox;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -81,6 +84,22 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
                 networkPane.setSortMode(at.getSortMode());
             }
         }
+
+        // Search box — right-aligned in the title bar.
+        int searchW = 75;
+        searchBox = new EditBox(
+                font,
+                leftPos + imageWidth - 5 - 2 - searchW,
+                topPos + 3,
+                searchW, 10,
+                Component.empty());
+        searchBox.setMaxLength(64);
+        searchBox.setHint(Component.literal("Search..."));
+        searchBox.setResponder(text -> {
+            networkPane.setFilter(text.toLowerCase(Locale.ROOT).strip());
+            SearchSync.pushToJei(text);
+        });
+        addRenderableWidget(searchBox);
 
         // Config drawer toggle button in the title bar, left-aligned.
         addRenderableWidget(new PressableIconButton(
@@ -119,7 +138,13 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     @Override
     protected void containerTick() {
         super.containerTick();
-        networkPane.setFilter(SearchSync.getFilter());
+        // Sync JEI → EditBox when JEI is available and its filter differs from ours.
+        if (SearchSync.isJeiAvailable()) {
+            String jeiRaw = SearchSync.getRawFilter();
+            if (!jeiRaw.equals(searchBox.getValue())) {
+                searchBox.setValue(jeiRaw); // triggers responder → updates pane + pushes back to JEI
+            }
+        }
         List<ItemStack> pending = SatContentsPacket.PENDING_STACKS;
         if (pending != null && pending != networkPane.getStacks()) {
             networkPane.setContents(pending, SatContentsPacket.PENDING_COUNTS);
@@ -139,6 +164,14 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (searchBox.isFocused()) {
+            if (keyCode == 256) { // Escape: unfocus the search box without closing the screen
+                searchBox.setFocused(false);
+                return true;
+            }
+            searchBox.keyPressed(keyCode, scanCode, modifiers);
+            return true; // consume all keys while search box is focused
+        }
         if (QuickStackClientEvents.QUICK_STACK != null
                 && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)
                 && menu.hasNetwork()) {

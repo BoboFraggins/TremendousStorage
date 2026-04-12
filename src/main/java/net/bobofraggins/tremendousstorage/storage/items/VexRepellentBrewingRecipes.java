@@ -6,7 +6,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 
 /**
@@ -17,7 +16,6 @@ import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
  *   <li>Extended Vex Repellent (3:00) + Redstone → Long Vex Repellent (8:00)
  * </ol>
  */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.MOD)
 public final class VexRepellentBrewingRecipes {
 
     private VexRepellentBrewingRecipes() {}

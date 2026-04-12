@@ -68,7 +68,7 @@ public class PositiveVibesCauldronCategory implements IRecipeCategory<PositiveVi
             var step = steps.get(i);
             builder.addSlot(step.role(), SLOT_X, SLOT_YS[i])
                     .addItemStack(step.stack())
-                    .addTooltipCallback((slotView, tooltip) -> tooltip.add(step.tooltip()));
+                    .addRichTooltipCallback((slotView, tooltip) -> tooltip.add(step.tooltip()));
         }
     }
 

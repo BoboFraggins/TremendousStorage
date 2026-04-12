@@ -9,15 +9,12 @@ import net.bobofraggins.tremendousstorage.storage.tubeattachments.ExportInterfac
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.ImportInterfaceScreen;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 /** Client-only event subscriber for screen registration. */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class FilingCabinetClientEvents {
 
     private FilingCabinetClientEvents() {}

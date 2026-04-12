@@ -6,7 +6,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 /**
@@ -14,7 +13,6 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
  * The effect is re-applied every 5 ticks so it stays close to full duration while
  * the player remains in the fluid.
  */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.GAME)
 public final class PositiveVibesEffectHandler {
 
     private PositiveVibesEffectHandler() {}

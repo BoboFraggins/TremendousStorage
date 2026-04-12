@@ -120,11 +120,13 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
     @Override
     public void onRuntimeAvailable(IJeiRuntime runtime) {
         SearchSync.setProvider(runtime.getIngredientFilter()::getFilterText);
+        SearchSync.setJeiSetter(runtime.getIngredientFilter()::setFilterText);
     }
 
     @Override
     public void onRuntimeUnavailable() {
         SearchSync.setProvider(null);
+        SearchSync.setJeiSetter(null);
     }
 
     @Override

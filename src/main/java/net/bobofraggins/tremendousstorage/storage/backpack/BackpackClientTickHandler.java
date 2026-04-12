@@ -5,9 +5,7 @@ import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.network.OpenBackpackPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -18,7 +16,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
  * inventory, off-hand, and Curios slots for a Tremendous Backpack and sends
  * {@link OpenBackpackPacket} to the server to open the UI.
  */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
 public final class BackpackClientTickHandler {
 
     private BackpackClientTickHandler() {}

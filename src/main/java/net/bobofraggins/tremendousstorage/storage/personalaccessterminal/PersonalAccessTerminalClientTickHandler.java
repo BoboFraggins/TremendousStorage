@@ -7,9 +7,7 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -20,7 +18,6 @@ import net.neoforged.neoforge.network.PacketDistributor;
  * main inventory and Curios slots for a linked Wireless SAT and sends
  * {@link OpenPersonalAccessTerminalPacket} to the server to open the SAT UI.
  */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
 public final class PersonalAccessTerminalClientTickHandler {
 
     private PersonalAccessTerminalClientTickHandler() {}

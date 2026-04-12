@@ -8,9 +8,7 @@ import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubScreen;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -20,7 +18,6 @@ import net.neoforged.neoforge.client.settings.KeyModifier;
 import org.lwjgl.glfw.GLFW;
 
 /** Client-only mod-bus events for the Personal Access Terminal — keybind, renderer, and screen registration. */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public final class PersonalAccessTerminalClientEvents {
 
     private PersonalAccessTerminalClientEvents() {}

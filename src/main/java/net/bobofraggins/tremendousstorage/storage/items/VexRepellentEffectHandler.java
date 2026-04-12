@@ -7,7 +7,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.List;
@@ -17,7 +16,6 @@ import java.util.List;
  * {@value #VEX_RANGE} blocks of a player bearing the Vex Repellent effect and
  * launches them away at speed {@value #REPEL_SPEED}.
  */
-@EventBusSubscriber(modid = TremendousStorage.MODID, bus = EventBusSubscriber.Bus.GAME)
 public final class VexRepellentEffectHandler {
 
     private VexRepellentEffectHandler() {}
