@@ -1,0 +1,10 @@
+{
+  "type": "tremendousstorage:glamping",
+  "generator": {
+    "type": "tremendousstorage:glamping",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "tremendousstorage:glamping"
+    }
+  }
+}

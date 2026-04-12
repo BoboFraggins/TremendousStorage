@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.shared.register;
 
 import net.bobofraggins.tremendousstorage.canvas.CanvasClientEvents;
 import net.bobofraggins.tremendousstorage.external.mobgrindinutils.XpFluidClientEvents;
+import net.bobofraggins.tremendousstorage.glamping.skyblock.SkyBlockClientEvents;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackClientEvents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackClientTickHandler;
@@ -48,6 +49,7 @@ public final class ClientEventRegistrar {
         modBus.register(PersonalAccessTerminalClientEvents.class);
         modBus.register(PositiveVibesClientEvents.class);
         modBus.register(CanvasClientEvents.class);
+        modBus.register(SkyBlockClientEvents.class);
         modBus.register(XpFluidClientEvents.class);
 
         // ── Game-bus client events (tick handlers, input, etc.) ─────────────────

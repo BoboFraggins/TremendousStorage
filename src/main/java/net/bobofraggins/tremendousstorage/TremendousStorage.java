@@ -7,6 +7,7 @@ import net.bobofraggins.tremendousstorage.external.mekanism.MekanismIntegration;
 import net.bobofraggins.tremendousstorage.external.mobgrindinutils.MobGrindingUtilsIntegration;
 import net.bobofraggins.tremendousstorage.external.productivemetalworks.ProductiveMetalworksIntegration;
 import net.bobofraggins.tremendousstorage.external.structurepoolapi.StructurePoolIntegration;
+import net.bobofraggins.tremendousstorage.glamping.GlampingRegistration;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageClientConfig;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig;
 import net.bobofraggins.tremendousstorage.shared.network.NetworkEvents;
@@ -37,6 +38,7 @@ public class TremendousStorage {
         modContainer.registerConfig(
                 ModConfig.Type.CLIENT, TremendousStorageClientConfig.SPEC, "tremendousstorage-client.toml");
         Registration.register(modEventBus);
+        GlampingRegistration.register(modEventBus);
 
         // ── Mod-bus registrations (both sides) ───────────────────────────────────
         modEventBus.register(NetworkEvents.class);

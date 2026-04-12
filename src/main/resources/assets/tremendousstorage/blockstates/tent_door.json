@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "half=lower": { "model": "tremendousstorage:block/tent_door_lower" },
+    "half=upper": { "model": "tremendousstorage:block/tent_door_upper" }
+  }
+}
