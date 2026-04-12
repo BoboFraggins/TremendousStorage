@@ -1,19 +1,15 @@
 package net.bobofraggins.tremendousstorage.storage.enderfolder;
 
 import com.mojang.serialization.MapCodec;
-import java.security.SecureRandom;
+import net.bobofraggins.tremendousstorage.shared.recipe.AbstractEnderSmithingRecipe;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SmithingRecipe;
-import net.minecraft.world.item.crafting.SmithingRecipeInput;
-import net.minecraft.world.level.Level;
 
 /**
  * Smithing-table recipe: Manila Folder (any tier) + Ender Storage Upgrade →
@@ -25,32 +21,12 @@ import net.minecraft.world.level.Level;
  * of the base-slot folder, exactly like an empty bucket remaining after a water-bucket
  * recipe.
  */
-public class EnderFolderSmithingRecipe implements SmithingRecipe {
+public class EnderFolderSmithingRecipe extends AbstractEnderSmithingRecipe {
 
     public static final MapCodec<EnderFolderSmithingRecipe> CODEC = MapCodec.unit(new EnderFolderSmithingRecipe());
 
     public static final StreamCodec<RegistryFriendlyByteBuf, EnderFolderSmithingRecipe> STREAM_CODEC =
             StreamCodec.unit(new EnderFolderSmithingRecipe());
-
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-
-    /**
-     * Carries the link ID generated in {@link #assemble} so that {@link #getRemainingItems}
-     * can attach the same ID to the second output folder without regenerating it.
-     *
-     * <p>This is safe because crafting calls {@code assemble} then {@code getRemainingItems}
-     * on the same thread without interleaving.
-     */
-    private static final ThreadLocal<long[]> PENDING_LINK = ThreadLocal.withInitial(() -> new long[] {-1L});
-
-    // -------------------------------------------------------------------------
-    // Ingredient predicates
-    // -------------------------------------------------------------------------
-
-    @Override
-    public boolean isTemplateIngredient(ItemStack stack) {
-        return stack.isEmpty();
-    }
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {
@@ -58,60 +34,23 @@ public class EnderFolderSmithingRecipe implements SmithingRecipe {
     }
 
     @Override
-    public boolean isAdditionIngredient(ItemStack stack) {
-        return stack.getItem() == Registration.ENDER_STORAGE_UPGRADE.get();
+    protected boolean isAlreadyEnder(ItemStack stack) {
+        return stack.getItem() instanceof EnderFolderItem;
     }
-
-    // -------------------------------------------------------------------------
-    // Recipe matching
-    // -------------------------------------------------------------------------
 
     @Override
-    public boolean matches(SmithingRecipeInput input, Level level) {
-        return input.template().isEmpty() && isBaseIngredient(input.base()) && isAdditionIngredient(input.addition());
+    protected long getExistingLinkId(ItemStack stack) {
+        return EnderFolderItem.getLinkId(stack);
     }
-
-    // -------------------------------------------------------------------------
-    // Assembly — primary output (first Ender Folder)
-    // -------------------------------------------------------------------------
 
     @Override
-    public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
-        long linkId;
-        if (input.base().getItem() instanceof EnderFolderItem) {
-            linkId = EnderFolderItem.getLinkId(input.base());
-            if (linkId == -1L) linkId = SECURE_RANDOM.nextLong();
-        } else {
-            linkId = SECURE_RANDOM.nextLong();
-        }
-        PENDING_LINK.get()[0] = linkId;
-        return makeEnderFolder(input.base(), linkId);
+    protected ItemStack makeEnderItem(ItemStack base, long linkId) {
+        FolderContents contents = ManillaFolderItem.getContents(base);
+        ItemStack result = new ItemStack(Registration.ENDER_FOLDER.get());
+        result.set(Registration.FOLDER_CONTENTS.get(), contents);
+        EnderFolderItem.setLinkId(result, linkId);
+        return result;
     }
-
-    // -------------------------------------------------------------------------
-    // Remaining items — second Ender Folder replaces the base-slot folder
-    // -------------------------------------------------------------------------
-
-    @Override
-    public NonNullList<ItemStack> getRemainingItems(SmithingRecipeInput input) {
-        // Smithing input slots: 0 = template, 1 = base, 2 = addition
-        NonNullList<ItemStack> remaining = NonNullList.withSize(input.size(), ItemStack.EMPTY);
-
-        long linkId = PENDING_LINK.get()[0];
-        if (linkId == -1L) return remaining;
-        PENDING_LINK.get()[0] = -1L; // consume
-
-        if (input.base().getItem() instanceof EnderFolderItem) {
-            remaining.set(1, input.base().copy());
-        } else {
-            remaining.set(1, makeEnderFolder(input.base(), linkId));
-        }
-        return remaining;
-    }
-
-    // -------------------------------------------------------------------------
-    // Serializer / result
-    // -------------------------------------------------------------------------
 
     @Override
     public ItemStack getResultItem(HolderLookup.Provider registries) {
@@ -121,17 +60,5 @@ public class EnderFolderSmithingRecipe implements SmithingRecipe {
     @Override
     public RecipeSerializer<?> getSerializer() {
         return Registration.ENDER_FOLDER_SMITHING_RECIPE.get();
-    }
-
-    // -------------------------------------------------------------------------
-    // Helper
-    // -------------------------------------------------------------------------
-
-    private static ItemStack makeEnderFolder(ItemStack baseFolder, long linkId) {
-        FolderContents contents = ManillaFolderItem.getContents(baseFolder);
-        ItemStack result = new ItemStack(Registration.ENDER_FOLDER.get());
-        result.set(Registration.FOLDER_CONTENTS.get(), contents);
-        EnderFolderItem.setLinkId(result, linkId);
-        return result;
     }
 }

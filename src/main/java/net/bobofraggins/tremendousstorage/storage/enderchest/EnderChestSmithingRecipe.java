@@ -1,10 +1,8 @@
 package net.bobofraggins.tremendousstorage.storage.enderchest;
 
 import com.mojang.serialization.MapCodec;
-import java.security.SecureRandom;
+import net.bobofraggins.tremendousstorage.shared.recipe.AbstractEnderSmithingRecipe;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -12,9 +10,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SmithingRecipe;
-import net.minecraft.world.item.crafting.SmithingRecipeInput;
-import net.minecraft.world.level.Level;
 
 /**
  * Smithing-table recipe: Tremendous Chest (any tier) + Ender Storage Upgrade →
@@ -24,25 +19,12 @@ import net.minecraft.world.level.Level;
  * input chest to both outputs. The second chest is returned via {@link #getRemainingItems}
  * in place of the base-slot chest, exactly like an empty bucket remaining after a recipe.
  */
-public class EnderChestSmithingRecipe implements SmithingRecipe {
+public class EnderChestSmithingRecipe extends AbstractEnderSmithingRecipe {
 
     public static final MapCodec<EnderChestSmithingRecipe> CODEC = MapCodec.unit(new EnderChestSmithingRecipe());
 
     public static final StreamCodec<RegistryFriendlyByteBuf, EnderChestSmithingRecipe> STREAM_CODEC =
             StreamCodec.unit(new EnderChestSmithingRecipe());
-
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-
-    /**
-     * Thread-local carries the link ID from {@link #assemble} to {@link #getRemainingItems}
-     * so both outputs share the same ID without regenerating it.
-     */
-    private static final ThreadLocal<long[]> PENDING_LINK = ThreadLocal.withInitial(() -> new long[] {-1L});
-
-    @Override
-    public boolean isTemplateIngredient(ItemStack stack) {
-        return stack.isEmpty();
-    }
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {
@@ -51,74 +33,35 @@ public class EnderChestSmithingRecipe implements SmithingRecipe {
     }
 
     @Override
-    public boolean isAdditionIngredient(ItemStack stack) {
-        return stack.getItem() == Registration.ENDER_STORAGE_UPGRADE.get();
+    protected boolean isAlreadyEnder(ItemStack stack) {
+        return stack.getItem() == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get();
     }
 
     @Override
-    public boolean matches(SmithingRecipeInput input, Level level) {
-        return input.template().isEmpty() && isBaseIngredient(input.base()) && isAdditionIngredient(input.addition());
-    }
-
-    @Override
-    public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
-        long linkId;
-        if (input.base().getItem() == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()) {
-            linkId = getExistingLinkId(input.base());
-            if (linkId == -1L) linkId = SECURE_RANDOM.nextLong();
-        } else {
-            linkId = SECURE_RANDOM.nextLong();
-        }
-        PENDING_LINK.get()[0] = linkId;
-        return makeEnderChest(input.base(), linkId);
-    }
-
-    @Override
-    public NonNullList<ItemStack> getRemainingItems(SmithingRecipeInput input) {
-        // Smithing slots: 0 = template, 1 = base, 2 = addition
-        NonNullList<ItemStack> remaining = NonNullList.withSize(input.size(), ItemStack.EMPTY);
-        long linkId = PENDING_LINK.get()[0];
-        if (linkId != -1L) {
-            PENDING_LINK.get()[0] = -1L;
-            if (input.base().getItem() == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()) {
-                remaining.set(1, input.base().copy());
-            } else {
-                remaining.set(1, makeEnderChest(input.base(), linkId));
-            }
-        }
-        return remaining;
-    }
-
-    @Override
-    public ItemStack getResultItem(HolderLookup.Provider registries) {
-        return new ItemStack(Registration.ENDER_TREMENDOUS_CHEST_ITEM.get());
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-        return Registration.ENDER_CHEST_SMITHING_RECIPE.get();
-    }
-
-    // -------------------------------------------------------------------------
-    // Helper
-    // -------------------------------------------------------------------------
-
-    private static long getExistingLinkId(ItemStack stack) {
+    protected long getExistingLinkId(ItemStack stack) {
         CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (existing == null) return -1L;
         CompoundTag tag = existing.copyTag();
         return tag.contains(EnderChestBlockEntity.TAG_LINK_ID) ? tag.getLong(EnderChestBlockEntity.TAG_LINK_ID) : -1L;
     }
 
-    private static ItemStack makeEnderChest(ItemStack baseStack, long linkId) {
+    @Override
+    protected ItemStack makeEnderItem(ItemStack base, long linkId) {
         ItemStack result = new ItemStack(Registration.ENDER_TREMENDOUS_CHEST_ITEM.get());
-
-        // Copy all existing block_entity_data (tier, priority, crafting upgrade, inventory)
-        CustomData existing = baseStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        CustomData existing = base.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putLong(EnderChestBlockEntity.TAG_LINK_ID, linkId);
         result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
-
         return result;
+    }
+
+    @Override
+    public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider registries) {
+        return new ItemStack(Registration.ENDER_TREMENDOUS_CHEST_ITEM.get());
+    }
+
+    @Override
+    public RecipeSerializer<?> getSerializer() {
+        return Registration.ENDER_CHEST_SMITHING_RECIPE.get();
     }
 }

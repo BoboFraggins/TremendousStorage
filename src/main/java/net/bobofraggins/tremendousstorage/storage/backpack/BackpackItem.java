@@ -155,7 +155,7 @@ public class BackpackItem extends BlockItem {
             if (entry == null) return ItemStack.EMPTY;
             ItemStack stack = entry.getStacks().getStackInSlot(slotIndex);
             return stack.getItem() instanceof BackpackItem ? stack : ItemStack.EMPTY;
-        } catch (NoClassDefFoundError | Exception ignored) {
+        } catch (LinkageError ignored) {
             return ItemStack.EMPTY;
         }
     }
@@ -167,7 +167,7 @@ public class BackpackItem extends BlockItem {
             var entry = inv.getCurios().get(slotId);
             if (entry == null) return;
             entry.getStacks().setStackInSlot(slotIndex, stack);
-        } catch (NoClassDefFoundError | Exception ignored) {
+        } catch (LinkageError ignored) {
         }
     }
 

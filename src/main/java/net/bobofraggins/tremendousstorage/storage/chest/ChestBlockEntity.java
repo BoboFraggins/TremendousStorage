@@ -10,10 +10,10 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.KeyCounter;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
+import net.bobofraggins.tremendousstorage.shared.util.PullerUtil;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiCacheHolder;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiLink;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -37,9 +37,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 
 /**
@@ -464,17 +462,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
     // -------------------------------------------------------------------------
 
     private void tickPuller(Level level, BlockPos pos, BlockState state) {
-        Direction facing = state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)
-                ? state.getValue(BlockStateProperties.HORIZONTAL_FACING)
-                : Direction.NORTH;
-        for (int bit = 0; bit < 6; bit++) {
-            if ((pullerSides & (1 << bit)) == 0) continue;
-            Direction worldDir = bitToWorldDir(bit, facing);
-            BlockPos adjacentPos = pos.relative(worldDir);
-            IItemHandler cap = level.getCapability(Capabilities.ItemHandler.BLOCK, adjacentPos, worldDir.getOpposite());
-            if (cap == null) continue;
-            pullFromHandler(cap);
-        }
+        PullerUtil.tickPuller(level, pos, state, pullerSides, this::pullFromHandler);
     }
 
     private void pullFromHandler(IItemHandler handler) {
@@ -488,17 +476,6 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
             if (!extracted.isEmpty()) insert(extracted, extracted.getCount(), false);
             break;
         }
-    }
-
-    private static Direction bitToWorldDir(int bit, Direction facing) {
-        return switch (bit) {
-            case 0 -> Direction.UP;
-            case 1 -> Direction.DOWN;
-            case 2 -> facing.getCounterClockWise();
-            case 3 -> facing.getClockWise();
-            case 4 -> facing;
-            default -> facing.getOpposite();
-        };
     }
 
     // -------------------------------------------------------------------------
