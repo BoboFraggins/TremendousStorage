@@ -3,11 +3,6 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsMenu;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiLink;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -19,13 +14,18 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
 /**
  * Stores a single fluid type. Capacity starts at {@value #BASE_CAPACITY} mB (16 buckets) at
@@ -314,10 +314,16 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
         amount = tag.getLong(TAG_AMOUNT);
         if (tag.contains(TAG_TRANSFER)) {
             net.minecraft.nbt.CompoundTag t = tag.getCompound(TAG_TRANSFER);
-            transferContainer.setItem(0, t.contains("Input")
-                    ? ItemStack.parseOptional(registries, t.getCompound("Input")) : ItemStack.EMPTY);
-            transferContainer.setItem(1, t.contains("Output")
-                    ? ItemStack.parseOptional(registries, t.getCompound("Output")) : ItemStack.EMPTY);
+            transferContainer.setItem(
+                    0,
+                    t.contains("Input")
+                            ? ItemStack.parseOptional(registries, t.getCompound("Input"))
+                            : ItemStack.EMPTY);
+            transferContainer.setItem(
+                    1,
+                    t.contains("Output")
+                            ? ItemStack.parseOptional(registries, t.getCompound("Output"))
+                            : ItemStack.EMPTY);
         }
     }
 

@@ -1,6 +1,5 @@
 package net.bobofraggins.tremendousstorage.storage.tank;
 
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.neoforged.bus.api.SubscribeEvent;

@@ -211,5 +211,4 @@ public final class FolderRecipeExtensions {
             helper.createAndSetOutputs(builder, VanillaTypes.ITEM_STACK, outputs);
         }
     }
-
 }

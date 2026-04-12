@@ -32,14 +32,14 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 public class TankSettingsMenu extends AbstractContainerMenu {
 
     // Fluid-transfer pane slot positions (used by TankSettingsScreen for drawing)
-    public static final int FLUID_IN_X  = 36;
-    public static final int FLUID_IN_Y  = 24;
+    public static final int FLUID_IN_X = 36;
+    public static final int FLUID_IN_Y = 24;
     public static final int FLUID_OUT_X = 36;
     public static final int FLUID_OUT_Y = 56;
 
     private static final int INV_START_X = 8;
-    private static final int INV_Y       = 90;
-    private static final int HOTBAR_Y    = 148;
+    private static final int INV_Y = 90;
+    private static final int HOTBAR_Y = 148;
 
     private final BlockPos pos;
     private final ContainerData data;
@@ -48,7 +48,7 @@ public class TankSettingsMenu extends AbstractContainerMenu {
     public TankSettingsMenu(
             int windowId, Inventory inv, BlockPos pos, ContainerData data, SimpleContainer transferContainer) {
         super(Registration.TANK_SETTINGS_MENU.get(), windowId);
-        this.pos  = pos;
+        this.pos = pos;
         this.data = data;
         addDataSlots(data);
 
@@ -97,7 +97,7 @@ public class TankSettingsMenu extends AbstractContainerMenu {
     public ItemStack quickMoveStack(Player player, int index) {
         Slot slot = slots.get(index);
         if (!slot.hasItem()) return ItemStack.EMPTY;
-        ItemStack stack    = slot.getItem();
+        ItemStack stack = slot.getItem();
         ItemStack original = stack.copy();
 
         if (index < 2) {

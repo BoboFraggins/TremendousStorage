@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.backpack;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,7 +18,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.model.data.ModelData;
@@ -35,8 +35,7 @@ import net.neoforged.neoforge.client.model.data.ModelData;
  * Ender Tremendous Backpack block entity, which extends the chest block entity hierarchy.
  */
 public class BackpackRenderer
-        implements BlockEntityRenderer<ChestBlockEntity>,
-                IBlockEntityRendererExtension<ChestBlockEntity> {
+        implements BlockEntityRenderer<ChestBlockEntity>, IBlockEntityRendererExtension<ChestBlockEntity> {
 
     static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_body"));

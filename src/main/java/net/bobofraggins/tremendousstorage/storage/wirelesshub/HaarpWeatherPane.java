@@ -16,16 +16,16 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class HaarpWeatherPane implements IDialogPane {
 
-    private static final int PANE_HEIGHT  = 68;
-    private static final int HEADER_Y     = 5;
-    private static final int FIRST_ROW_Y  = 18;
-    private static final int ROW_STRIDE   = 11;
-    private static final int RADIO_SIZE   = 7;
-    private static final int RADIO_LEFT   = 20;
-    private static final int LABEL_LEFT   = 32;
+    private static final int PANE_HEIGHT = 68;
+    private static final int HEADER_Y = 5;
+    private static final int FIRST_ROW_Y = 18;
+    private static final int ROW_STRIDE = 11;
+    private static final int RADIO_SIZE = 7;
+    private static final int RADIO_LEFT = 20;
+    private static final int LABEL_LEFT = 32;
 
     /** Active colour for the selected radio indicator. */
-    private static final int COLOR_ACTIVE   = 0xFF00AA00;
+    private static final int COLOR_ACTIVE = 0xFF00AA00;
     /** Inactive colour for unselected radio indicators. */
     private static final int COLOR_INACTIVE = 0xFF737373;
 
@@ -39,6 +39,7 @@ public class HaarpWeatherPane implements IDialogPane {
 
     /** Supplies the current mode ordinal (synced from ContainerData). */
     private final IntSupplier modeSupplier;
+
     private final BlockPosSupplier hubPosSupplier;
 
     @FunctionalInterface
@@ -47,8 +48,8 @@ public class HaarpWeatherPane implements IDialogPane {
     }
 
     public HaarpWeatherPane(IntSupplier modeSupplier, BlockPosSupplier hubPosSupplier) {
-        this.modeSupplier    = modeSupplier;
-        this.hubPosSupplier  = hubPosSupplier;
+        this.modeSupplier = modeSupplier;
+        this.hubPosSupplier = hubPosSupplier;
     }
 
     @Override

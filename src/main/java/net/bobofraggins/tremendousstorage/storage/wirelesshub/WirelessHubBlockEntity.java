@@ -5,8 +5,8 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.networkinterface.NiCacheHolder;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkScanResult;
+import net.bobofraggins.tremendousstorage.storage.networkinterface.NiCacheHolder;
 import net.bobofraggins.tremendousstorage.storage.personalaccessterminal.PersonalAccessTerminalItem;
 import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -127,6 +127,7 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
 
     /** True when this hub is attached to an active network. Synced to client for dish animation. */
     private boolean connected = false;
+
     private int serverTickCounter = 0;
 
     public boolean isConnected() {
@@ -168,25 +169,26 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
      * Positive Vibes from the network and adjusts the weather.
      */
     private void tickWeather(ServerLevel serverLevel) {
-        boolean raining   = serverLevel.isRaining();
+        boolean raining = serverLevel.isRaining();
         boolean thundering = serverLevel.isThundering();
 
-        boolean needsChange = switch (haarpMode) {
-            case NO_RAIN      -> raining;
-            case RAIN         -> !raining || thundering;
-            case THUNDERSTORM -> !thundering;
-            case OFF          -> false;
-        };
+        boolean needsChange =
+                switch (haarpMode) {
+                    case NO_RAIN -> raining;
+                    case RAIN -> !raining || thundering;
+                    case THUNDERSTORM -> !thundering;
+                    case OFF -> false;
+                };
 
         if (!needsChange) return;
 
         if (!tryConsumeVibes(serverLevel)) return;
 
         switch (haarpMode) {
-            case NO_RAIN      -> serverLevel.setWeatherParameters(6000, 0, false, false);
-            case RAIN         -> serverLevel.setWeatherParameters(0, 6000, true, false);
+            case NO_RAIN -> serverLevel.setWeatherParameters(6000, 0, false, false);
+            case RAIN -> serverLevel.setWeatherParameters(0, 6000, true, false);
             case THUNDERSTORM -> serverLevel.setWeatherParameters(0, 6000, true, true);
-            case OFF          -> {} // unreachable
+            case OFF -> {} // unreachable
         }
     }
 
@@ -326,9 +328,18 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
         ContainerData data = new ContainerData() {
-            @Override public int get(int i) { return i == 0 ? haarpMode.ordinal() : 0; }
-            @Override public void set(int i, int v) {}
-            @Override public int getCount() { return 1; }
+            @Override
+            public int get(int i) {
+                return i == 0 ? haarpMode.ordinal() : 0;
+            }
+
+            @Override
+            public void set(int i, int v) {}
+
+            @Override
+            public int getCount() {
+                return 1;
+            }
         };
         return new WirelessHubMenu(id, inv, worldPosition, inventory, haarpUpgrade, data);
     }

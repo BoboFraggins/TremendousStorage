@@ -43,8 +43,6 @@ public class EnderBackpackBlock extends BackpackBlock {
         return createTickerHelper(
                 type,
                 Registration.ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(),
-                level.isClientSide()
-                        ? EnderBackpackBlockEntity::clientTick
-                        : EnderBackpackBlockEntity::serverTick);
+                level.isClientSide() ? EnderBackpackBlockEntity::clientTick : EnderBackpackBlockEntity::serverTick);
     }
 }

@@ -1,6 +1,5 @@
 package net.bobofraggins.tremendousstorage.experiencesyringe;
 
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;

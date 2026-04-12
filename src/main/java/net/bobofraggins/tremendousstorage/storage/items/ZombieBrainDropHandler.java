@@ -1,6 +1,5 @@
 package net.bobofraggins.tremendousstorage.storage.items;
 
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.item.ItemEntity;

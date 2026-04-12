@@ -43,8 +43,7 @@ public class FilingCabinetScreen extends AbstractFilingCabinetScreen<FilingCabin
             PacketDistributor.sendToServer(new SetVoidExcessPacket(menu.getPos(), next));
         }));
         panes.add(new PriorityPane(
-                menu::getPriority,
-                p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
+                menu::getPriority, p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
         if (menu.hasPullerUpgrade()) {
             panes.add(new PullerSidesPane(menu.getPos()));
         }

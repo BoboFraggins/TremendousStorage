@@ -88,8 +88,8 @@ public class BackpackItem extends BlockItem {
      * Opens the backpack UI. Override in subclasses to sync storage or use a different menu type.
      */
     protected void openUi(ServerPlayer player, ItemStack backpackStack, int slotType, int slotIndex, String slotId) {
-        BackpackContents contents = backpackStack.getOrDefault(
-                Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+        BackpackContents contents =
+                backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
         int initialPriority = contents.priority().ordinal();
         int[] priorityHolder = {initialPriority};
         ContainerData data = new ContainerData() {

@@ -5,10 +5,9 @@ import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -104,7 +103,9 @@ public class EnderBackpackBlockEntity extends EnderChestBlockEntity {
         long linkId = getLinkId();
         if (linkId == -1L || level == null || level.isClientSide()) return lastKnownVersion;
         MinecraftServer server = level.getServer();
-        return server == null ? lastKnownVersion : EnderBackpackStorage.get(server).getVersion(linkId);
+        return server == null
+                ? lastKnownVersion
+                : EnderBackpackStorage.get(server).getVersion(linkId);
     }
 
     // -------------------------------------------------------------------------
@@ -132,15 +133,13 @@ public class EnderBackpackBlockEntity extends EnderChestBlockEntity {
     // Tickers
     // -------------------------------------------------------------------------
 
-    public static void serverTick(
-            Level level, BlockPos pos, BlockState state, EnderBackpackBlockEntity be) {
+    public static void serverTick(Level level, BlockPos pos, BlockState state, EnderBackpackBlockEntity be) {
         // Delegate to the chest ticker; it checks needsStorageLoad and calls be.loadFromStorage()
         // which dispatches virtually to our override above.
         EnderChestBlockEntity.serverTick(level, pos, state, be);
     }
 
-    public static void clientTick(
-            Level level, BlockPos pos, BlockState state, EnderBackpackBlockEntity be) {
+    public static void clientTick(Level level, BlockPos pos, BlockState state, EnderBackpackBlockEntity be) {
         ChestBlockEntity.clientTick(level, pos, state, be);
     }
 }

@@ -5,9 +5,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
+import net.bobofraggins.tremendousstorage.shared.network.BackpackInteractPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetBackpackPriorityPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetBackpackSortModePacket;
-import net.bobofraggins.tremendousstorage.shared.network.BackpackInteractPacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
@@ -83,12 +83,8 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
 
         // Search box — right-aligned in the title bar.
         int searchW = 75;
-        searchBox = new EditBox(
-                font,
-                leftPos + imageWidth - 5 - 2 - searchW,
-                topPos + 3,
-                searchW, 10,
-                Component.empty());
+        searchBox =
+                new EditBox(font, leftPos + imageWidth - 5 - 2 - searchW, topPos + 3, searchW, 10, Component.empty());
         searchBox.setMaxLength(64);
         searchBox.setHint(Component.literal("Search..."));
         searchBox.setResponder(text -> {
@@ -155,8 +151,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null) return ItemStack.EMPTY;
 
-        if (menu.getSlotType()
-                == net.bobofraggins.tremendousstorage.shared.network.OpenBackpackPacket.SLOT_CURIOS) {
+        if (menu.getSlotType() == net.bobofraggins.tremendousstorage.shared.network.OpenBackpackPacket.SLOT_CURIOS) {
             try {
                 var inv = mc.player.getCapability(top.theillusivec4.curios.api.CuriosCapability.INVENTORY);
                 if (inv != null) {

@@ -53,30 +53,29 @@ public final class BackpackContents {
                             parseSortMode(sortMode),
                             craftingUpgrade)));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, BackpackContents> STREAM_CODEC =
-            new StreamCodec<>() {
-                private final StreamCodec<RegistryFriendlyByteBuf, List<Entry>> listCodec =
-                        Entry.STREAM_CODEC.apply(ByteBufCodecs.list());
+    public static final StreamCodec<RegistryFriendlyByteBuf, BackpackContents> STREAM_CODEC = new StreamCodec<>() {
+        private final StreamCodec<RegistryFriendlyByteBuf, List<Entry>> listCodec =
+                Entry.STREAM_CODEC.apply(ByteBufCodecs.list());
 
-                @Override
-                public BackpackContents decode(RegistryFriendlyByteBuf buf) {
-                    List<Entry> entries = listCodec.decode(buf);
-                    StorageTier tier = StorageTier.fromId(buf.readUtf());
-                    Priority priority = Priority.fromOrdinal(buf.readVarInt());
-                    SortMode sortMode = parseSortMode(buf.readUtf());
-                    boolean craftingUpgrade = buf.readBoolean();
-                    return new BackpackContents(entries, tier, priority, sortMode, craftingUpgrade);
-                }
+        @Override
+        public BackpackContents decode(RegistryFriendlyByteBuf buf) {
+            List<Entry> entries = listCodec.decode(buf);
+            StorageTier tier = StorageTier.fromId(buf.readUtf());
+            Priority priority = Priority.fromOrdinal(buf.readVarInt());
+            SortMode sortMode = parseSortMode(buf.readUtf());
+            boolean craftingUpgrade = buf.readBoolean();
+            return new BackpackContents(entries, tier, priority, sortMode, craftingUpgrade);
+        }
 
-                @Override
-                public void encode(RegistryFriendlyByteBuf buf, BackpackContents value) {
-                    listCodec.encode(buf, value.entries);
-                    buf.writeUtf(value.tier.getId());
-                    buf.writeVarInt(value.priority.ordinal());
-                    buf.writeUtf(value.sortMode.name());
-                    buf.writeBoolean(value.hasCraftingUpgrade);
-                }
-            };
+        @Override
+        public void encode(RegistryFriendlyByteBuf buf, BackpackContents value) {
+            listCodec.encode(buf, value.entries);
+            buf.writeUtf(value.tier.getId());
+            buf.writeVarInt(value.priority.ordinal());
+            buf.writeUtf(value.sortMode.name());
+            buf.writeBoolean(value.hasCraftingUpgrade);
+        }
+    };
 
     private final List<Entry> entries;
     private final StorageTier tier;
@@ -193,9 +192,7 @@ public final class BackpackContents {
             mutable.set(index, new Entry(e.type(), remaining));
         }
         ItemStack extracted = e.type().copyWithCount((int) toExtract);
-        return new Object[] {
-            extracted, new BackpackContents(mutable, tier, priority, sortMode, hasCraftingUpgrade)
-        };
+        return new Object[] {extracted, new BackpackContents(mutable, tier, priority, sortMode, hasCraftingUpgrade)};
     }
 
     public BackpackContents withTier(StorageTier newTier) {

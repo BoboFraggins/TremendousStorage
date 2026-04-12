@@ -1,7 +1,6 @@
 package net.bobofraggins.tremendousstorage.shared.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.minecraft.client.KeyMapping;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;

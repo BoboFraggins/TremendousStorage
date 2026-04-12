@@ -54,9 +54,9 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     private final boolean hasCraftingUpgrade;
 
     // Slot indices — depend on hasCraftingUpgrade
-    private final int resultSlot;   // -1 when no crafting
-    private final int craftStart;   // -1 when no crafting
-    private final int craftEnd;     // -1 when no crafting
+    private final int resultSlot; // -1 when no crafting
+    private final int craftStart; // -1 when no crafting
+    private final int craftEnd; // -1 when no crafting
     private final int invStart;
     private final int invEnd;
     private final int hotbarStart;
@@ -82,7 +82,8 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     /**
      * Server-side constructor. Uses the default row count (slot positions are unused server-side).
      */
-    public AccessTerminalMenu(int id, Inventory inv, BlockPos satPos, @Nullable BlockPos niPos, boolean hasCraftingUpgrade) {
+    public AccessTerminalMenu(
+            int id, Inventory inv, BlockPos satPos, @Nullable BlockPos niPos, boolean hasCraftingUpgrade) {
         this(id, inv, satPos, niPos, hasCraftingUpgrade, TremendousStorageClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
     }
 

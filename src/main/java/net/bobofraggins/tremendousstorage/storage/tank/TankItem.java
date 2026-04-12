@@ -43,8 +43,7 @@ public class TankItem extends TieredBlockItem {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
         super.appendHoverText(stack, context, lines, flag);
-        TankContents contents =
-                stack.getOrDefault(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
+        TankContents contents = stack.getOrDefault(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
         if (contents.isLocked()) {
             long cap = tierCapacity(stack);
             lines.add(Component.translatable(

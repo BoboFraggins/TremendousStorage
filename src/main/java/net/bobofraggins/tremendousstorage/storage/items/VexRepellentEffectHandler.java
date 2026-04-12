@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.items;
 
-import net.bobofraggins.tremendousstorage.TremendousStorage;
+import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraft.world.entity.player.Player;
@@ -8,8 +8,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-
-import java.util.List;
 
 /**
  * Every {@value #VEX_CHECK_INTERVAL} ticks, finds all Vexes within

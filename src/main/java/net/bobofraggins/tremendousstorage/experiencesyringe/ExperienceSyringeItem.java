@@ -1,5 +1,6 @@
 package net.bobofraggins.tremendousstorage.experiencesyringe;
 
+import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -11,8 +12,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 
-import java.util.List;
-
 public class ExperienceSyringeItem extends Item {
 
     /** XP points stored per bucket of XP fluid (1 bucket = 1 000 mB = 50 XP points). */
@@ -20,9 +19,13 @@ public class ExperienceSyringeItem extends Item {
     /** Total capacity in XP points (32 buckets). */
     public static final int CAPACITY = 32 * XP_PER_BUCKET; // 1 600
     /** Converts XP points to mB for fluid system display (1 XP = 20 mB). */
-    public static int xpToMb(int xp) { return xp * 1000 / XP_PER_BUCKET; }
+    public static int xpToMb(int xp) {
+        return xp * 1000 / XP_PER_BUCKET;
+    }
     /** Converts mB to XP points (truncates). */
-    public static int mbToXp(int mb) { return mb * XP_PER_BUCKET / 1000; }
+    public static int mbToXp(int mb) {
+        return mb * XP_PER_BUCKET / 1000;
+    }
 
     public ExperienceSyringeItem() {
         super(new Properties().stacksTo(1));

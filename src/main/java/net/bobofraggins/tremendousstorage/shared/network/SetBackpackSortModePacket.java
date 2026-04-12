@@ -41,11 +41,11 @@ public record SetBackpackSortModePacket(int slotType, int slotIndex, String slot
     public static void handle(SetBackpackSortModePacket packet, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
-            ItemStack backpackStack = BackpackItem.getBackpackStack(
-                    player, packet.slotType(), packet.slotIndex(), packet.slotId());
+            ItemStack backpackStack =
+                    BackpackItem.getBackpackStack(player, packet.slotType(), packet.slotIndex(), packet.slotId());
             if (backpackStack.isEmpty()) return;
-            BackpackContents current = backpackStack.getOrDefault(
-                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+            BackpackContents current =
+                    backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
             SortMode newMode =
                     SortMode.values()[Math.max(0, Math.min(packet.modeOrdinal(), SortMode.values().length - 1))];
             backpackStack.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), current.withSortMode(newMode));

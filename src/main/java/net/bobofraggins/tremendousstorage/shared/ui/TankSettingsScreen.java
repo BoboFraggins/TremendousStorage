@@ -30,19 +30,19 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu> {
 
-    private static final int BG_WIDTH  = 176;
+    private static final int BG_WIDTH = 176;
     private static final int BG_HEIGHT = 168;
 
     // Right-pane button geometry
     private static final int BTN_X = 92;
     private static final int BTN_W = 78;
     private static final int BTN_H = 20;
-    private static final int VOID_BTN_Y  = 30;
+    private static final int VOID_BTN_Y = 30;
     private static final int CLEAR_BTN_Y = 54;
 
     public TankSettingsScreen(TankSettingsMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth  = BG_WIDTH;
+        this.imageWidth = BG_WIDTH;
         this.imageHeight = BG_HEIGHT;
         this.inventoryLabelY = BG_HEIGHT - 94; // positions "Inventory" label
     }
@@ -111,7 +111,7 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
         g.fill(x + 88, y + 14, x + 89, y + 82, 0xFF555555);
 
         // Fluid-transfer slot backgrounds
-        drawSlot(g, x + TankSettingsMenu.FLUID_IN_X,  y + TankSettingsMenu.FLUID_IN_Y);
+        drawSlot(g, x + TankSettingsMenu.FLUID_IN_X, y + TankSettingsMenu.FLUID_IN_Y);
         drawSlot(g, x + TankSettingsMenu.FLUID_OUT_X, y + TankSettingsMenu.FLUID_OUT_Y);
 
         // Down-arrow between the two slots
@@ -119,13 +119,11 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
 
         // "Fill / Drain" label above the input slot
         Component fillLabel = Component.translatable("screen.tremendousstorage.fluid_transfer");
-        g.drawString(font, fillLabel,
-                x + 44 - font.width(fillLabel) / 2, y + 17, 0x404040, false);
+        g.drawString(font, fillLabel, x + 44 - font.width(fillLabel) / 2, y + 17, 0x404040, false);
 
         // Void-excess label above the toggle button
         Component voidLabel = Component.translatable("screen.tremendousstorage.void_excess_label");
-        g.drawString(font, voidLabel,
-                x + BTN_X + (BTN_W - font.width(voidLabel)) / 2, y + 20, 0x404040, false);
+        g.drawString(font, voidLabel, x + BTN_X + (BTN_W - font.width(voidLabel)) / 2, y + 20, 0x404040, false);
 
         // Player-inventory slot backgrounds
         drawSlotGrid(g, x, y, 8, 90, 9, 3);
@@ -167,10 +165,10 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
         int cx = gapX + 8; // centre of 16 px slot
         int top = gapY + 3;
         // Stem: 2 px wide
-        g.fill(cx - 1, top,     cx + 1, top + 9,  0xFF555555);
+        g.fill(cx - 1, top, cx + 1, top + 9, 0xFF555555);
         // Arrowhead: 3 rows widening to a point
         g.fill(cx - 4, top + 9, cx + 4, top + 11, 0xFF555555); // 8 px
-        g.fill(cx - 2, top + 11,cx + 2, top + 13, 0xFF555555); // 4 px
-        g.fill(cx - 1, top + 13,cx + 1, top + 15, 0xFF555555); // 2 px
+        g.fill(cx - 2, top + 11, cx + 2, top + 13, 0xFF555555); // 4 px
+        g.fill(cx - 1, top + 13, cx + 1, top + 15, 0xFF555555); // 2 px
     }
 }

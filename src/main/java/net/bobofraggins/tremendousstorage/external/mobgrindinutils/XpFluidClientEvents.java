@@ -25,8 +25,8 @@ public final class XpFluidClientEvents {
                 new IClientFluidTypeExtensions() {
                     private static final ResourceLocation STILL = ResourceLocation.fromNamespaceAndPath(
                             TremendousStorage.MODID, "fluid/positive_vibes_still");
-                    private static final ResourceLocation FLOWING = ResourceLocation.fromNamespaceAndPath(
-                            TremendousStorage.MODID, "fluid/positive_vibes_flow");
+                    private static final ResourceLocation FLOWING =
+                            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "fluid/positive_vibes_flow");
 
                     @Override
                     public ResourceLocation getStillTexture() {

@@ -86,9 +86,7 @@ public class TankItemFluidHandler implements IFluidHandlerItem {
         if (toFill <= 0) return 0;
         if (action.execute()) {
             FluidStack newType = c.storedFluid().isEmpty() ? resource.copyWithAmount(1) : c.storedFluid();
-            container.set(
-                    Registration.TANK_CONTENTS.get(),
-                    new TankContents(newType, c.amount() + toFill));
+            container.set(Registration.TANK_CONTENTS.get(), new TankContents(newType, c.amount() + toFill));
         }
         return toFill;
     }
@@ -110,9 +108,7 @@ public class TankItemFluidHandler implements IFluidHandlerItem {
         if (toDrain <= 0) return FluidStack.EMPTY;
         FluidStack result = c.storedFluid().copyWithAmount(toDrain);
         if (action.execute()) {
-            container.set(
-                    Registration.TANK_CONTENTS.get(),
-                    new TankContents(c.storedFluid(), c.amount() - toDrain));
+            container.set(Registration.TANK_CONTENTS.get(), new TankContents(c.storedFluid(), c.amount() - toDrain));
         }
         return result;
     }

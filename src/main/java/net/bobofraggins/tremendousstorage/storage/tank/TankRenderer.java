@@ -37,11 +37,7 @@ public class TankRenderer extends AbstractTankRenderer<TankBlockEntity> {
 
     @Override
     protected void renderFill(
-            TankBlockEntity be,
-            Matrix4f mat,
-            MultiBufferSource bufferSource,
-            int packedLight,
-            int packedOverlay) {
+            TankBlockEntity be, Matrix4f mat, MultiBufferSource bufferSource, int packedLight, int packedOverlay) {
 
         if (!be.isLocked()) return;
 

@@ -25,13 +25,12 @@ public record TankContents(FluidStack storedFluid, long amount) {
                     Codec.LONG.optionalFieldOf("amount", 0L).forGetter(TankContents::amount))
             .apply(instance, TankContents::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, TankContents> STREAM_CODEC =
-            StreamCodec.composite(
-                    FluidStack.OPTIONAL_STREAM_CODEC,
-                    TankContents::storedFluid,
-                    ByteBufCodecs.VAR_LONG,
-                    TankContents::amount,
-                    TankContents::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, TankContents> STREAM_CODEC = StreamCodec.composite(
+            FluidStack.OPTIONAL_STREAM_CODEC,
+            TankContents::storedFluid,
+            ByteBufCodecs.VAR_LONG,
+            TankContents::amount,
+            TankContents::new);
 
     /** True if the tank has no fluid and no lock. */
     public boolean isEmpty() {

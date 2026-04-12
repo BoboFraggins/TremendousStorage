@@ -33,8 +33,7 @@ import net.minecraft.world.item.component.CustomData;
  *   [ender upgrade]         [ender output]
  * </pre>
  */
-public class EnderStorageSmithingCategory
-        implements IRecipeCategory<EnderStorageSmithingCategory.Recipe> {
+public class EnderStorageSmithingCategory implements IRecipeCategory<EnderStorageSmithingCategory.Recipe> {
 
     // -------------------------------------------------------------------------
     // Marker recipe — one entry per item type (chest / backpack)
@@ -42,20 +41,14 @@ public class EnderStorageSmithingCategory
 
     public static final class Recipe {
 
-        public static final Recipe CHEST = new Recipe(
-                "jei.tremendousstorage.ender_chest_smithing",
-                tieredChests(),
-                tieredEnderChests());
+        public static final Recipe CHEST =
+                new Recipe("jei.tremendousstorage.ender_chest_smithing", tieredChests(), tieredEnderChests());
 
-        public static final Recipe BACKPACK = new Recipe(
-                "jei.tremendousstorage.ender_backpack_smithing",
-                tieredBackpacks(),
-                tieredEnderBackpacks());
+        public static final Recipe BACKPACK =
+                new Recipe("jei.tremendousstorage.ender_backpack_smithing", tieredBackpacks(), tieredEnderBackpacks());
 
-        public static final Recipe TANK = new Recipe(
-                "jei.tremendousstorage.ender_tank_smithing",
-                tieredTanks(),
-                tieredEnderTanks());
+        public static final Recipe TANK =
+                new Recipe("jei.tremendousstorage.ender_tank_smithing", tieredTanks(), tieredEnderTanks());
 
         final String titleKey;
         final List<ItemStack> inputs;
@@ -171,8 +164,7 @@ public class EnderStorageSmithingCategory
         builder.addSlot(RecipeIngredientRole.INPUT, INPUT_X, ROW_0_Y)
                 .addIngredients(VanillaTypes.ITEM_STACK, recipe.inputs);
 
-        builder.addSlot(RecipeIngredientRole.INPUT, INPUT_X, ROW_1_Y)
-                .addIngredients(VanillaTypes.ITEM_STACK, upgrades);
+        builder.addSlot(RecipeIngredientRole.INPUT, INPUT_X, ROW_1_Y).addIngredients(VanillaTypes.ITEM_STACK, upgrades);
 
         builder.addSlot(RecipeIngredientRole.OUTPUT, OUTPUT_X, ROW_0_Y)
                 .addIngredients(VanillaTypes.ITEM_STACK, recipe.outputs);
@@ -183,11 +175,7 @@ public class EnderStorageSmithingCategory
 
     @Override
     public void draw(
-            Recipe recipe,
-            IRecipeSlotsView recipeSlotsView,
-            GuiGraphics guiGraphics,
-            double mouseX,
-            double mouseY) {
+            Recipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
         drawRightArrow(guiGraphics, 19, HEIGHT / 2 - 1);
     }
 

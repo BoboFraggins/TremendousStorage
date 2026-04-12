@@ -3,13 +3,13 @@ package net.bobofraggins.tremendousstorage.storage.storageupgrade;
 import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.HaarpUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.InterdimensionalUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.MagnetUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.PullerUpgradeItem;
-import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
-import net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem;
 import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
@@ -69,16 +69,13 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     public boolean matches(SmithingRecipeInput input, Level level) {
         if (!input.template().isEmpty()) return false;
         if (input.addition().getItem() instanceof CraftingUpgradeItem) {
-            return isCraftingUpgradeTarget(input.base().getItem())
-                    && !alreadyHasCraftingUpgrade(input.base());
+            return isCraftingUpgradeTarget(input.base().getItem()) && !alreadyHasCraftingUpgrade(input.base());
         }
         if (input.addition().getItem() instanceof MagnetUpgradeItem) {
-            return isMagnetUpgradeTarget(input.base().getItem())
-                    && !alreadyHasMagnetUpgrade(input.base());
+            return isMagnetUpgradeTarget(input.base().getItem()) && !alreadyHasMagnetUpgrade(input.base());
         }
         if (input.addition().getItem() instanceof PullerUpgradeItem) {
-            return isPullerUpgradeTarget(input.base().getItem())
-                    && !alreadyHasPullerUpgrade(input.base());
+            return isPullerUpgradeTarget(input.base().getItem()) && !alreadyHasPullerUpgrade(input.base());
         }
         if (input.addition().getItem() instanceof InterdimensionalUpgradeItem) {
             return input.base().getItem() == Registration.WIRELESS_HUB_ITEM.get()
@@ -162,8 +159,8 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
 
     private static ItemStack applyCraftingUpgrade(ItemStack blockStack) {
         if (blockStack.getItem() instanceof BackpackItem) {
-            BackpackContents current = blockStack.getOrDefault(
-                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+            BackpackContents current =
+                    blockStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
             ItemStack result = blockStack.copyWithCount(1);
             result.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), current.withCraftingUpgrade());
             return result;
@@ -218,8 +215,7 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     }
 
     private static boolean isPullerUpgradeTarget(Item item) {
-        return item == Registration.TREMENDOUS_CHEST_ITEM.get()
-                || item == Registration.FILING_CABINET_ITEM.get();
+        return item == Registration.TREMENDOUS_CHEST_ITEM.get() || item == Registration.FILING_CABINET_ITEM.get();
     }
 
     private static boolean alreadyHasPullerUpgrade(ItemStack stack) {
@@ -276,7 +272,8 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     }
 
     private static ItemStack upgrade(ItemStack blockStack, StorageUpgradeItem upgradeItem) {
-        if (blockStack.getItem() instanceof EnderFolderItem || blockStack.getItem() == Registration.MANILA_FOLDER.get()) {
+        if (blockStack.getItem() instanceof EnderFolderItem
+                || blockStack.getItem() == Registration.MANILA_FOLDER.get()) {
             FolderContents current = ManillaFolderItem.getContents(blockStack);
             ItemStack result = blockStack.copyWithCount(1);
             result.set(Registration.FOLDER_CONTENTS.get(), current.withTier(upgradeItem.getToTier()));
@@ -284,8 +281,8 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         }
         if (blockStack.getItem() instanceof BackpackItem) {
             // Update BackpackContents (item-form UI) and BLOCK_ENTITY_DATA (placed-block tier).
-            BackpackContents current = blockStack.getOrDefault(
-                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+            BackpackContents current =
+                    blockStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
             CustomData existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
             CompoundTag beTag = existing != null ? existing.copyTag() : new CompoundTag();
             beTag.putString("Tier", upgradeItem.getToTier().getId());

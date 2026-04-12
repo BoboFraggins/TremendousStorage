@@ -17,7 +17,7 @@ import net.minecraft.world.entity.player.Inventory;
  */
 public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> {
 
-    private static final int BG_WIDTH  = 176;
+    private static final int BG_WIDTH = 176;
     private static final int BG_HEIGHT = 166;
 
     private final Dialog dialog;
@@ -31,15 +31,15 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
 
         if (menu.hasHaarpUpgrade()) {
             haarpPane = new HaarpWeatherPane(menu::getHaarpModeOrdinal, menu::getHubPos);
-            IDialogPane topBlank  = Dialog.blankPane(BG_WIDTH, 64);
-            IDialogPane botBlank  = Dialog.blankPane(BG_WIDTH, BG_HEIGHT - 17 - 64 - 5);
+            IDialogPane topBlank = Dialog.blankPane(BG_WIDTH, 64);
+            IDialogPane botBlank = Dialog.blankPane(BG_WIDTH, BG_HEIGHT - 17 - 64 - 5);
             dialog = new Dialog(topBlank, haarpPane, botBlank);
         } else {
             haarpPane = null;
-            dialog    = new Dialog(Dialog.blankPane(BG_WIDTH, BG_HEIGHT - Dialog.TITLE_H - Dialog.BOTTOM_PADDING));
+            dialog = new Dialog(Dialog.blankPane(BG_WIDTH, BG_HEIGHT - Dialog.TITLE_H - Dialog.BOTTOM_PADDING));
         }
 
-        this.imageWidth  = dialog.totalWidth();
+        this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
     }
 
@@ -58,7 +58,7 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
         dialog.render(g, font, title, mouseX, mouseY, partialTick);
 
         // Slot backgrounds — input (left) and output (right)
-        drawSlotBg(g, x + 44,  y + 35);
+        drawSlotBg(g, x + 44, y + 35);
         drawSlotBg(g, x + 120, y + 35);
 
         // Arrow between slots (→)
@@ -72,12 +72,12 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
         // Separator below HAARP section (only if upgrade active)
         if (haarp) {
             int sepY = y + 81 + haarpH;
-            g.fill(x + 4, sepY,     x + BG_WIDTH - 4, sepY + 1, 0xFF555555);
+            g.fill(x + 4, sepY, x + BG_WIDTH - 4, sepY + 1, 0xFF555555);
             g.fill(x + 4, sepY + 1, x + BG_WIDTH - 4, sepY + 2, 0xFFFFFFFF);
         }
 
         // Player inventory slot backgrounds
-        int invY    = y + WirelessHubMenu.INV_Y_BASE    + haarpH;
+        int invY = y + WirelessHubMenu.INV_Y_BASE + haarpH;
         int hotbarY = y + WirelessHubMenu.HOTBAR_Y_BASE + haarpH;
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
@@ -90,15 +90,15 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
 
         // "Unlinked" / "Linked" labels
         Component unlinked = Component.translatable("screen.tremendousstorage.wireless_hub.unlinked");
-        Component linked   = Component.translatable("screen.tremendousstorage.wireless_hub.linked");
+        Component linked = Component.translatable("screen.tremendousstorage.wireless_hub.linked");
         g.drawString(font, unlinked, x + 52 - font.width(unlinked) / 2, y + 55, 0x404040, false);
-        g.drawString(font, linked,   x + 128 - font.width(linked) / 2,  y + 55, 0x006600, false);
+        g.drawString(font, linked, x + 128 - font.width(linked) / 2, y + 55, 0x006600, false);
     }
 
     /** Draws a standard 16×16 inset slot background at the given top-left pixel. */
     private static void drawSlotBg(GuiGraphics g, int x, int y) {
-        g.fill(x - 1, y - 1, x + 16, y,      0xFF373737);
-        g.fill(x - 1, y - 1, x,      y + 16,  0xFF373737);
+        g.fill(x - 1, y - 1, x + 16, y, 0xFF373737);
+        g.fill(x - 1, y - 1, x, y + 16, 0xFF373737);
         g.fill(x - 1, y + 16, x + 17, y + 17, 0xFFFFFFFF);
         g.fill(x + 16, y - 1, x + 17, y + 17, 0xFFFFFFFF);
         g.fill(x, y, x + 16, y + 16, 0xFF8B8B8B);

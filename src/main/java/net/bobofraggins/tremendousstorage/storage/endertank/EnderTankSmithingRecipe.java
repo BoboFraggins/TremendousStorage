@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.endertank;
 
-import java.security.SecureRandom;
 import com.mojang.serialization.MapCodec;
+import java.security.SecureRandom;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
@@ -26,8 +26,7 @@ import net.minecraft.world.level.Level;
  */
 public class EnderTankSmithingRecipe implements SmithingRecipe {
 
-    public static final MapCodec<EnderTankSmithingRecipe> CODEC =
-            MapCodec.unit(new EnderTankSmithingRecipe());
+    public static final MapCodec<EnderTankSmithingRecipe> CODEC = MapCodec.unit(new EnderTankSmithingRecipe());
 
     public static final StreamCodec<RegistryFriendlyByteBuf, EnderTankSmithingRecipe> STREAM_CODEC =
             StreamCodec.unit(new EnderTankSmithingRecipe());
@@ -35,8 +34,7 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     /** Passes the link ID from {@link #assemble} to {@link #getRemainingItems}. */
-    private static final ThreadLocal<long[]> PENDING_LINK =
-            ThreadLocal.withInitial(() -> new long[] {-1L});
+    private static final ThreadLocal<long[]> PENDING_LINK = ThreadLocal.withInitial(() -> new long[] {-1L});
 
     @Override
     public boolean isTemplateIngredient(ItemStack stack) {
@@ -45,8 +43,7 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {
-        return stack.getItem() == Registration.TANK_ITEM.get()
-                || stack.getItem() == Registration.ENDER_TANK_ITEM.get();
+        return stack.getItem() == Registration.TANK_ITEM.get() || stack.getItem() == Registration.ENDER_TANK_ITEM.get();
     }
 
     @Override
@@ -56,9 +53,7 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
 
     @Override
     public boolean matches(SmithingRecipeInput input, Level level) {
-        return input.template().isEmpty()
-                && isBaseIngredient(input.base())
-                && isAdditionIngredient(input.addition());
+        return input.template().isEmpty() && isBaseIngredient(input.base()) && isAdditionIngredient(input.addition());
     }
 
     @Override
@@ -107,9 +102,7 @@ public class EnderTankSmithingRecipe implements SmithingRecipe {
         CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (existing == null) return -1L;
         CompoundTag tag = existing.copyTag();
-        return tag.contains(EnderTankBlockEntity.TAG_LINK_ID)
-                ? tag.getLong(EnderTankBlockEntity.TAG_LINK_ID)
-                : -1L;
+        return tag.contains(EnderTankBlockEntity.TAG_LINK_ID) ? tag.getLong(EnderTankBlockEntity.TAG_LINK_ID) : -1L;
     }
 
     private static ItemStack makeEnderTank(ItemStack baseStack, long linkId) {

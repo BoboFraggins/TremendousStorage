@@ -25,12 +25,12 @@ import net.minecraft.world.entity.player.Inventory;
  */
 public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu> {
 
-    private static final int IMG_WIDTH  = 176;
+    private static final int IMG_WIDTH = 176;
     private static final int IMG_HEIGHT = 168;
 
     public RecyclingBinScreen(RecyclingBinMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        imageWidth  = IMG_WIDTH;
+        imageWidth = IMG_WIDTH;
         imageHeight = IMG_HEIGHT;
         inventoryLabelY = IMG_HEIGHT - 94;
     }
@@ -57,21 +57,19 @@ public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu
 
         // "Void Items" label above the void slot
         Component voidLabel = Component.translatable("screen.tremendousstorage.void_items");
-        g.drawString(font, voidLabel,
-                x + 44 - font.width(voidLabel) / 2, y + 17, 0x404040, false);
+        g.drawString(font, voidLabel, x + 44 - font.width(voidLabel) / 2, y + 17, 0x404040, false);
 
         // Right pane — fluid-transfer slots and arrow
-        drawSlot(g, x + RecyclingBinMenu.FLUID_IN_X,  y + RecyclingBinMenu.FLUID_IN_Y);
+        drawSlot(g, x + RecyclingBinMenu.FLUID_IN_X, y + RecyclingBinMenu.FLUID_IN_Y);
         drawSlot(g, x + RecyclingBinMenu.FLUID_OUT_X, y + RecyclingBinMenu.FLUID_OUT_Y);
         drawDownArrow(g, x + RecyclingBinMenu.FLUID_IN_X, y + RecyclingBinMenu.FLUID_IN_Y + 16);
 
         // "Fill / Drain" label above the input slot
         Component fillLabel = Component.translatable("screen.tremendousstorage.fluid_transfer");
-        g.drawString(font, fillLabel,
-                x + 132 - font.width(fillLabel) / 2, y + 17, 0x404040, false);
+        g.drawString(font, fillLabel, x + 132 - font.width(fillLabel) / 2, y + 17, 0x404040, false);
 
         // Player-inventory slot backgrounds
-        drawSlotGrid(g, x, y, 8, 90,  9, 3);
+        drawSlotGrid(g, x, y, 8, 90, 9, 3);
         drawSlotGrid(g, x, y, 8, 148, 9, 1);
     }
 
@@ -106,10 +104,10 @@ public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu
     }
 
     private static void drawDownArrow(GuiGraphics g, int gapX, int gapY) {
-        int cx  = gapX + 8;
+        int cx = gapX + 8;
         int top = gapY + 3;
-        g.fill(cx - 1, top,      cx + 1, top + 9,  0xFF555555); // stem
-        g.fill(cx - 4, top + 9,  cx + 4, top + 11, 0xFF555555); // 8 px
+        g.fill(cx - 1, top, cx + 1, top + 9, 0xFF555555); // stem
+        g.fill(cx - 4, top + 9, cx + 4, top + 11, 0xFF555555); // 8 px
         g.fill(cx - 2, top + 11, cx + 2, top + 13, 0xFF555555); // 4 px
         g.fill(cx - 1, top + 13, cx + 1, top + 15, 0xFF555555); // 2 px
     }

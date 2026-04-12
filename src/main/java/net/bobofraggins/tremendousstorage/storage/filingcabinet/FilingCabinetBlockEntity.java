@@ -5,6 +5,8 @@ import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBFS;
+import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
+import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiCacheHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -16,8 +18,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
-import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
@@ -29,12 +29,12 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /** Stores up to {@value #SLOT_COUNT} Manila Folder stacks. */
 public class FilingCabinetBlockEntity extends BlockEntity
@@ -50,7 +50,7 @@ public class FilingCabinetBlockEntity extends BlockEntity
     private int pullerSides = 0;
     private int pullerTickCounter = 0;
 
-    private static final int PULL_TICKS  = 4;
+    private static final int PULL_TICKS = 4;
     private static final int PULL_AMOUNT = 4;
 
     @Nullable
@@ -76,15 +76,27 @@ public class FilingCabinetBlockEntity extends BlockEntity
     private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter() {
         @Override
         protected void onOpen(Level level, BlockPos pos, BlockState state) {
-            level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                    SoundEvents.BARREL_OPEN, SoundSource.BLOCKS, 0.5f,
+            level.playSound(
+                    null,
+                    pos.getX() + 0.5,
+                    pos.getY() + 0.5,
+                    pos.getZ() + 0.5,
+                    SoundEvents.BARREL_OPEN,
+                    SoundSource.BLOCKS,
+                    0.5f,
                     level.random.nextFloat() * 0.1f + 0.9f);
         }
 
         @Override
         protected void onClose(Level level, BlockPos pos, BlockState state) {
-            level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                    SoundEvents.BARREL_CLOSE, SoundSource.BLOCKS, 0.5f,
+            level.playSound(
+                    null,
+                    pos.getX() + 0.5,
+                    pos.getY() + 0.5,
+                    pos.getZ() + 0.5,
+                    SoundEvents.BARREL_CLOSE,
+                    SoundSource.BLOCKS,
+                    0.5f,
                     level.random.nextFloat() * 0.1f + 0.9f);
         }
 
@@ -330,8 +342,7 @@ public class FilingCabinetBlockEntity extends BlockEntity
             if ((pullerSides & (1 << bit)) == 0) continue;
             Direction worldDir = bitToWorldDir(bit, facing);
             BlockPos adjacentPos = pos.relative(worldDir);
-            IItemHandler cap = level.getCapability(
-                    Capabilities.ItemHandler.BLOCK, adjacentPos, worldDir.getOpposite());
+            IItemHandler cap = level.getCapability(Capabilities.ItemHandler.BLOCK, adjacentPos, worldDir.getOpposite());
             if (cap == null) continue;
             pullFromHandler(cap);
         }
@@ -365,8 +376,7 @@ public class FilingCabinetBlockEntity extends BlockEntity
 
             if (contents.isEmpty()) {
                 // Lock the folder to this item type and insert
-                FolderContents locked = new FolderContents(
-                        Optional.of(incoming.copyWithCount(1)), 0L, contents.tier());
+                FolderContents locked = new FolderContents(Optional.of(incoming.copyWithCount(1)), 0L, contents.tier());
                 FolderContents.InsertResult result = locked.insert(remaining, locked.getCapacity());
                 long absorbed = remaining - result.remainder();
                 if (absorbed > 0 && !simulate) {
@@ -390,11 +400,11 @@ public class FilingCabinetBlockEntity extends BlockEntity
 
     private static Direction bitToWorldDir(int bit, Direction facing) {
         return switch (bit) {
-            case 0  -> Direction.UP;
-            case 1  -> Direction.DOWN;
-            case 2  -> facing.getCounterClockWise();
-            case 3  -> facing.getClockWise();
-            case 4  -> facing;
+            case 0 -> Direction.UP;
+            case 1 -> Direction.DOWN;
+            case 2 -> facing.getCounterClockWise();
+            case 3 -> facing.getClockWise();
+            case 4 -> facing;
             default -> facing.getOpposite();
         };
     }
@@ -415,7 +425,8 @@ public class FilingCabinetBlockEntity extends BlockEntity
             FolderContents.InsertResult result = contents.insert(remaining, capacity);
             long absorbed = remaining - result.remainder();
             if (absorbed > 0) {
-                notifyFolderContentsChanged(slot, ManillaFolderItem.setContents(folder.copyWithCount(1), result.updated()));
+                notifyFolderContentsChanged(
+                        slot, ManillaFolderItem.setContents(folder.copyWithCount(1), result.updated()));
                 remaining = result.remainder();
             }
         }

@@ -30,15 +30,14 @@ public record OpenBackpackPacket(int slotType, int slotIndex, String slotId) imp
     public static final Type<OpenBackpackPacket> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "open_backpack"));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, OpenBackpackPacket> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.INT,
-                    OpenBackpackPacket::slotType,
-                    ByteBufCodecs.INT,
-                    OpenBackpackPacket::slotIndex,
-                    ByteBufCodecs.STRING_UTF8,
-                    OpenBackpackPacket::slotId,
-                    OpenBackpackPacket::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, OpenBackpackPacket> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.INT,
+            OpenBackpackPacket::slotType,
+            ByteBufCodecs.INT,
+            OpenBackpackPacket::slotIndex,
+            ByteBufCodecs.STRING_UTF8,
+            OpenBackpackPacket::slotId,
+            OpenBackpackPacket::new);
 
     @Override
     public Type<OpenBackpackPacket> type() {

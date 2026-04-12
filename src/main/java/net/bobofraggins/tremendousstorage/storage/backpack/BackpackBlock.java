@@ -92,9 +92,7 @@ public class BackpackBlock extends BaseEntityBlock {
         return createTickerHelper(
                 type,
                 Registration.TREMENDOUS_BACKPACK_BE_TYPE.get(),
-                level.isClientSide()
-                        ? BackpackBlockEntity::clientTick
-                        : BackpackBlockEntity::serverTick);
+                level.isClientSide() ? BackpackBlockEntity::clientTick : BackpackBlockEntity::serverTick);
     }
 
     @Override
@@ -136,7 +134,8 @@ public class BackpackBlock extends BaseEntityBlock {
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity be) {
+            if (level.getBlockEntity(pos)
+                    instanceof net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity be) {
                 be.recheckOpeners(level, pos, state);
             }
         }

@@ -1,7 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.backpack;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
@@ -45,10 +44,8 @@ public final class BackpackClientEvents {
 
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
-        event.registerBlockEntityRenderer(
-                Registration.TREMENDOUS_BACKPACK_BE_TYPE.get(), BackpackRenderer::new);
-        event.registerBlockEntityRenderer(
-                Registration.ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(), BackpackRenderer::new);
+        event.registerBlockEntityRenderer(Registration.TREMENDOUS_BACKPACK_BE_TYPE.get(), BackpackRenderer::new);
+        event.registerBlockEntityRenderer(Registration.ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(), BackpackRenderer::new);
     }
 
     @SubscribeEvent

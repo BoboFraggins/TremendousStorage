@@ -31,19 +31,19 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class PullerSidesPane implements IDialogPane {
 
-    private static final int BIT_TOP    = 0;
+    private static final int BIT_TOP = 0;
     private static final int BIT_BOTTOM = 1;
-    private static final int BIT_LEFT   = 2;
-    private static final int BIT_RIGHT  = 3;
-    private static final int BIT_FRONT  = 4;
-    private static final int BIT_BACK   = 5;
+    private static final int BIT_LEFT = 2;
+    private static final int BIT_RIGHT = 3;
+    private static final int BIT_FRONT = 4;
+    private static final int BIT_BACK = 5;
 
-    private static final int BUTTON_SIZE  = 18;
-    private static final int GRID_W       = 3 * BUTTON_SIZE; // 54
-    private static final int LEFT_MARGIN  = (ConfigDrawer.WIDTH - GRID_W) / 2; // 28
-    private static final int HEADER_Y     = 5;
-    private static final int BUTTONS_Y    = 17; // HEADER_Y + font_height(8) + gap(4)
-    private static final int PANE_HEIGHT  = BUTTONS_Y + GRID_W + 5; // 76
+    private static final int BUTTON_SIZE = 18;
+    private static final int GRID_W = 3 * BUTTON_SIZE; // 54
+    private static final int LEFT_MARGIN = (ConfigDrawer.WIDTH - GRID_W) / 2; // 28
+    private static final int HEADER_Y = 5;
+    private static final int BUTTONS_Y = 17; // HEADER_Y + font_height(8) + gap(4)
+    private static final int PANE_HEIGHT = BUTTONS_Y + GRID_W + 5; // 76
 
     private static final ResourceLocation TEX_ON =
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/puller_button_on");
@@ -135,15 +135,16 @@ public class PullerSidesPane implements IDialogPane {
     }
 
     private ItemStack getAdjacentItem(Direction facing, int bit) {
-        Direction world = switch (bit) {
-            case BIT_TOP    -> Direction.UP;
-            case BIT_BOTTOM -> Direction.DOWN;
-            case BIT_FRONT  -> facing;
-            case BIT_BACK   -> facing.getOpposite();
-            case BIT_LEFT   -> facing.getCounterClockWise();
-            case BIT_RIGHT  -> facing.getClockWise();
-            default         -> Direction.NORTH;
-        };
+        Direction world =
+                switch (bit) {
+                    case BIT_TOP -> Direction.UP;
+                    case BIT_BOTTOM -> Direction.DOWN;
+                    case BIT_FRONT -> facing;
+                    case BIT_BACK -> facing.getOpposite();
+                    case BIT_LEFT -> facing.getCounterClockWise();
+                    case BIT_RIGHT -> facing.getClockWise();
+                    default -> Direction.NORTH;
+                };
         var level = Minecraft.getInstance().level;
         if (level == null) return ItemStack.EMPTY;
         var state = level.getBlockState(pos.relative(world));

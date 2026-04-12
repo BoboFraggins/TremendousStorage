@@ -65,12 +65,13 @@ public class FilingCabinetRenderer implements BlockEntityRenderer<FilingCabinetB
         Direction facing = blockState.getValue(FilingCabinetBlock.FACING);
 
         // The model's default facing is NORTH (front panel at Z=0).
-        float facingYRot = switch (facing) {
-            case SOUTH -> 180f;
-            case EAST -> 270f;
-            case WEST -> 90f;
-            default -> 0f; // NORTH
-        };
+        float facingYRot =
+                switch (facing) {
+                    case SOUTH -> 180f;
+                    case EAST -> 270f;
+                    case WEST -> 90f;
+                    default -> 0f; // NORTH
+                };
 
         RandomSource random = RandomSource.create();
 

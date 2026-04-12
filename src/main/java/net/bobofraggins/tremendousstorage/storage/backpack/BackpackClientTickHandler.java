@@ -1,7 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.backpack;
 
 import javax.annotation.Nullable;
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.network.OpenBackpackPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
@@ -61,8 +60,7 @@ public final class BackpackClientTickHandler {
                     var handler = entry.getValue().getStacks();
                     for (int i = 0; i < handler.getSlots(); i++) {
                         if (isBackpack(handler.getStackInSlot(i))) {
-                            return new OpenBackpackPacket(
-                                    OpenBackpackPacket.SLOT_CURIOS, i, slotId);
+                            return new OpenBackpackPacket(OpenBackpackPacket.SLOT_CURIOS, i, slotId);
                         }
                     }
                 }

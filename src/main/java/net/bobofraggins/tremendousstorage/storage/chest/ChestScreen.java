@@ -70,8 +70,7 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
         this.imageHeight = dialog.totalHeight();
         List<IDialogPane> drawerPanes = new java.util.ArrayList<>();
         drawerPanes.add(new PriorityPane(
-                menu::getPriority,
-                p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
+                menu::getPriority, p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
         drawerPanes.add(new SortPane(() -> sortMode, () -> {
             sortMode = sortMode.next();
             PacketDistributor.sendToServer(new SetSortModePacket(menu.getPos(), sortMode));
@@ -100,12 +99,8 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
 
         // Search box — right-aligned in the title bar.
         int searchW = 75;
-        searchBox = new EditBox(
-                font,
-                leftPos + imageWidth - 5 - 2 - searchW,
-                topPos + 3,
-                searchW, 10,
-                Component.empty());
+        searchBox =
+                new EditBox(font, leftPos + imageWidth - 5 - 2 - searchW, topPos + 3, searchW, 10, Component.empty());
         searchBox.setMaxLength(64);
         searchBox.setHint(Component.literal("Search..."));
         searchBox.setResponder(text -> {

@@ -2,9 +2,9 @@ package net.bobofraggins.tremendousstorage.shared.register;
 
 import com.blakebr0.mysticalagriculture.api.MysticalAgricultureAPI;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
+import net.bobofraggins.tremendousstorage.experiencesyringe.ExperienceSyringeItem;
 import net.bobofraggins.tremendousstorage.external.exdeorum.ExDeorumIntegration;
 import net.bobofraggins.tremendousstorage.external.exnihilosequentia.ExNihiloSequentiaIntegration;
-import net.bobofraggins.tremendousstorage.experiencesyringe.ExperienceSyringeItem;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteBarsBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteOreBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuritePaxelItem;
@@ -18,21 +18,34 @@ import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsMenu;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackBlock;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackMenu;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.BaseUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.HaarpUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.InterdimensionalUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.MagnetUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.PullerUpgradeItem;
-import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackSmithingRecipe;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlock;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestItemHandler;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackBlock;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackItem;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackMenu;
-import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestSmithingRecipe;
+import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackSmithingRecipe;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlock;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestSmithingRecipe;
 import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderSmithingRecipe;
+import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankBlock;
+import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankItem;
+import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankSmithingRecipe;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlock;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetItemHandler;
@@ -54,21 +67,13 @@ import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterf
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceMenu;
 import net.bobofraggins.tremendousstorage.storage.personalaccessterminal.PersonalAccessTerminalItem;
+import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlock;
+import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinFluidHandler;
+import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinItemHandler;
+import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinMenu;
 import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageSmithingUpgradeRecipe;
 import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeItem;
-import net.bobofraggins.tremendousstorage.storage.backpack.BackpackBlock;
-import net.bobofraggins.tremendousstorage.storage.backpack.BackpackBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
-import net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem;
-import net.bobofraggins.tremendousstorage.storage.backpack.BackpackMenu;
-import net.bobofraggins.tremendousstorage.storage.chest.ChestBlock;
-import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.chest.ChestItemHandler;
-import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
-import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankBlock;
-import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankItem;
-import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankSmithingRecipe;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlock;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankContents;
@@ -86,11 +91,6 @@ import net.bobofraggins.tremendousstorage.storage.tubeattachments.StorageInterfa
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.StorageInterfaceMenu;
 import net.bobofraggins.tremendousstorage.storage.whiteout.FolderTapeRecipe;
 import net.bobofraggins.tremendousstorage.storage.whiteout.WhiteoutTapeItem;
-import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlock;
-import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinFluidHandler;
-import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinItemHandler;
-import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinMenu;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlock;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubMenu;
@@ -122,7 +122,6 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -180,12 +179,11 @@ public final class Registration {
                     .networkSynchronized(FolderContents.STREAM_CODEC)
                     .build());
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<TankContents>>
-            TANK_CONTENTS = DATA_COMPONENTS.register(
-                    "tank_contents", () -> DataComponentType.<TankContents>builder()
-                            .persistent(TankContents.CODEC)
-                            .networkSynchronized(TankContents.STREAM_CODEC)
-                            .build());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<TankContents>> TANK_CONTENTS =
+            DATA_COMPONENTS.register("tank_contents", () -> DataComponentType.<TankContents>builder()
+                    .persistent(TankContents.CODEC)
+                    .networkSynchronized(TankContents.STREAM_CODEC)
+                    .build());
 
     /**
      * Data component storing the linked Network Interface {@link BlockPos} in a Wireless SAT item.
@@ -212,9 +210,11 @@ public final class Registration {
      * Wireless Hub that linked a Wireless SAT. Used to look up the hub/NI in the correct server
      * level when the player is in a different dimension.
      */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<net.minecraft.resources.ResourceLocation>>
+    public static final DeferredHolder<
+                    DataComponentType<?>, DataComponentType<net.minecraft.resources.ResourceLocation>>
             WIRELESS_HUB_DIMENSION = DATA_COMPONENTS.register(
-                    "wireless_hub_dimension", () -> DataComponentType.<net.minecraft.resources.ResourceLocation>builder()
+                    "wireless_hub_dimension",
+                    () -> DataComponentType.<net.minecraft.resources.ResourceLocation>builder()
                             .persistent(net.minecraft.resources.ResourceLocation.CODEC)
                             .networkSynchronized(net.minecraft.resources.ResourceLocation.STREAM_CODEC)
                             .build());
@@ -262,21 +262,19 @@ public final class Registration {
                     .build());
 
     /** Data component storing the XP points (= mB of XP fluid) held inside an Experience Syringe. */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>>
-            EXPERIENCE_SYRINGE_STORED_XP = DATA_COMPONENTS.register(
-                    "experience_syringe_stored_xp", () -> DataComponentType.<Integer>builder()
-                            .persistent(com.mojang.serialization.Codec.intRange(0, ExperienceSyringeItem.CAPACITY))
-                            .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_INT)
-                            .build());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> EXPERIENCE_SYRINGE_STORED_XP =
+            DATA_COMPONENTS.register("experience_syringe_stored_xp", () -> DataComponentType.<Integer>builder()
+                    .persistent(com.mojang.serialization.Codec.intRange(0, ExperienceSyringeItem.CAPACITY))
+                    .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_INT)
+                    .build());
 
     /** Data component storing all inventory and settings on a Tremendous Backpack item. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<BackpackContents>>
-            TREMENDOUS_BACKPACK_CONTENTS = DATA_COMPONENTS.register(
-                    "backpack_contents", () -> DataComponentType.<BackpackContents>builder()
+            TREMENDOUS_BACKPACK_CONTENTS =
+                    DATA_COMPONENTS.register("backpack_contents", () -> DataComponentType.<BackpackContents>builder()
                             .persistent(BackpackContents.CODEC)
                             .networkSynchronized(BackpackContents.STREAM_CODEC)
                             .build());
-
 
     // -------------------------------------------------------------------------
     // Blocks + block entities
@@ -305,13 +303,13 @@ public final class Registration {
                     .sound(SoundType.METAL)
                     .noOcclusion()));
 
-    public static final DeferredHolder<Item, BlockItem> TREMENDOUS_CHEST_ITEM = ITEMS.register(
-            "chest", () -> new TieredBlockItem(TREMENDOUS_CHEST.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> TREMENDOUS_CHEST_ITEM =
+            ITEMS.register("chest", () -> new TieredBlockItem(TREMENDOUS_CHEST.get(), new Item.Properties()));
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ChestBlockEntity>>
-            TREMENDOUS_CHEST_BE_TYPE = BLOCK_ENTITY_TYPES.register("chest", () -> BlockEntityType.Builder.of(
-                    ChestBlockEntity::new, TREMENDOUS_CHEST.get())
-            .build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ChestBlockEntity>> TREMENDOUS_CHEST_BE_TYPE =
+            BLOCK_ENTITY_TYPES.register(
+                    "chest", () -> BlockEntityType.Builder.of(ChestBlockEntity::new, TREMENDOUS_CHEST.get())
+                            .build(null));
 
     public static final DeferredBlock<EnderChestBlock> ENDER_TREMENDOUS_CHEST = BLOCKS.register(
             "ender_chest",
@@ -322,12 +320,11 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> ENDER_TREMENDOUS_CHEST_ITEM = ITEMS.register(
-            "ender_chest",
-            () -> new EnderTieredBlockItem(ENDER_TREMENDOUS_CHEST.get(), new Item.Properties()));
+            "ender_chest", () -> new EnderTieredBlockItem(ENDER_TREMENDOUS_CHEST.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderChestBlockEntity>>
-            ENDER_TREMENDOUS_CHEST_BE_TYPE = BLOCK_ENTITY_TYPES.register(
-                    "ender_chest", () -> BlockEntityType.Builder.of(
+            ENDER_TREMENDOUS_CHEST_BE_TYPE =
+                    BLOCK_ENTITY_TYPES.register("ender_chest", () -> BlockEntityType.Builder.of(
                                     EnderChestBlockEntity::new, ENDER_TREMENDOUS_CHEST.get())
                             .build(null));
 
@@ -339,10 +336,9 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BackpackBlockEntity>>
-            TREMENDOUS_BACKPACK_BE_TYPE =
-                    BLOCK_ENTITY_TYPES.register("backpack", () -> BlockEntityType.Builder.of(
-                                    BackpackBlockEntity::new, TREMENDOUS_BACKPACK_BLOCK.get())
-                            .build(null));
+            TREMENDOUS_BACKPACK_BE_TYPE = BLOCK_ENTITY_TYPES.register("backpack", () -> BlockEntityType.Builder.of(
+                    BackpackBlockEntity::new, TREMENDOUS_BACKPACK_BLOCK.get())
+            .build(null));
 
     public static final DeferredBlock<EnderBackpackBlock> ENDER_TREMENDOUS_BACKPACK_BLOCK = BLOCKS.register(
             "ender_backpack",
@@ -352,8 +348,8 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderBackpackBlockEntity>>
-            ENDER_TREMENDOUS_BACKPACK_BE_TYPE = BLOCK_ENTITY_TYPES.register(
-                    "ender_backpack", () -> BlockEntityType.Builder.of(
+            ENDER_TREMENDOUS_BACKPACK_BE_TYPE =
+                    BLOCK_ENTITY_TYPES.register("ender_backpack", () -> BlockEntityType.Builder.of(
                                     EnderBackpackBlockEntity::new, ENDER_TREMENDOUS_BACKPACK_BLOCK.get())
                             .build(null));
 
@@ -401,13 +397,12 @@ public final class Registration {
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.GLASS)));
 
-    public static final DeferredHolder<Item, BlockItem> TANK_ITEM = ITEMS.register(
-            "tank", () -> new TankItem(TANK.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> TANK_ITEM =
+            ITEMS.register("tank", () -> new TankItem(TANK.get(), new Item.Properties()));
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TankBlockEntity>>
-            TANK_BE_TYPE = BLOCK_ENTITY_TYPES.register("tank", () -> BlockEntityType.Builder.of(
-                    TankBlockEntity::new, TANK.get())
-            .build(null));
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TankBlockEntity>> TANK_BE_TYPE =
+            BLOCK_ENTITY_TYPES.register("tank", () -> BlockEntityType.Builder.of(TankBlockEntity::new, TANK.get())
+                    .build(null));
 
     public static final DeferredBlock<EnderTankBlock> ENDER_TANK = BLOCKS.register(
             "ender_tank",
@@ -416,14 +411,12 @@ public final class Registration {
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.GLASS)));
 
-    public static final DeferredHolder<Item, BlockItem> ENDER_TANK_ITEM = ITEMS.register(
-            "ender_tank",
-            () -> new EnderTankItem(ENDER_TANK.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> ENDER_TANK_ITEM =
+            ITEMS.register("ender_tank", () -> new EnderTankItem(ENDER_TANK.get(), new Item.Properties()));
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderTankBlockEntity>>
-            ENDER_TANK_BE_TYPE = BLOCK_ENTITY_TYPES.register(
-                    "ender_tank", () -> BlockEntityType.Builder.of(
-                                    EnderTankBlockEntity::new, ENDER_TANK.get())
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderTankBlockEntity>> ENDER_TANK_BE_TYPE =
+            BLOCK_ENTITY_TYPES.register(
+                    "ender_tank", () -> BlockEntityType.Builder.of(EnderTankBlockEntity::new, ENDER_TANK.get())
                             .build(null));
 
     // -------------------------------------------------------------------------
@@ -442,9 +435,9 @@ public final class Registration {
             ITEMS.registerSimpleBlockItem("recycling_bin", RECYCLING_BIN);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RecyclingBinBlockEntity>>
-            RECYCLING_BIN_BE_TYPE = BLOCK_ENTITY_TYPES.register("recycling_bin", () -> BlockEntityType.Builder.of(
-                    RecyclingBinBlockEntity::new, RECYCLING_BIN.get())
-            .build(null));
+            RECYCLING_BIN_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "recycling_bin", () -> BlockEntityType.Builder.of(RecyclingBinBlockEntity::new, RECYCLING_BIN.get())
+                            .build(null));
 
     // -------------------------------------------------------------------------
     // Lazurite bars
@@ -596,8 +589,7 @@ public final class Registration {
             ITEMS.register("backpack", () -> new BackpackItem(TREMENDOUS_BACKPACK_BLOCK.get()));
 
     public static final DeferredHolder<Item, EnderBackpackItem> ENDER_TREMENDOUS_BACKPACK_ITEM =
-            ITEMS.register("ender_backpack",
-                    () -> new EnderBackpackItem(ENDER_TREMENDOUS_BACKPACK_BLOCK.get()));
+            ITEMS.register("ender_backpack", () -> new EnderBackpackItem(ENDER_TREMENDOUS_BACKPACK_BLOCK.get()));
 
     public static final DeferredHolder<Item, Item> POSITIVE_VIBES_BOTTLE =
             ITEMS.register("positive_vibes_bottle", () -> new Item(new Item.Properties()));
@@ -762,10 +754,8 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<BackpackMenu>> TREMENDOUS_BACKPACK_MENU =
             MENU_TYPES.register("backpack", () -> IMenuTypeExtension.create(BackpackMenu::new));
 
-    public static final DeferredHolder<MenuType<?>, MenuType<EnderBackpackMenu>>
-            ENDER_TREMENDOUS_BACKPACK_MENU = MENU_TYPES.register(
-                    "ender_backpack",
-                    () -> IMenuTypeExtension.create(EnderBackpackMenu::new));
+    public static final DeferredHolder<MenuType<?>, MenuType<EnderBackpackMenu>> ENDER_TREMENDOUS_BACKPACK_MENU =
+            MENU_TYPES.register("ender_backpack", () -> IMenuTypeExtension.create(EnderBackpackMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<RecyclingBinMenu>> RECYCLING_BIN_MENU =
             MENU_TYPES.register("recycling_bin", () -> IMenuTypeExtension.create(RecyclingBinMenu::new));
@@ -1037,9 +1027,7 @@ public final class Registration {
                 FILING_CABINET_BE_TYPE.get(),
                 (be, side) -> new FilingCabinetItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                TREMENDOUS_CHEST_BE_TYPE.get(),
-                (be, side) -> new ChestItemHandler(be));
+                Capabilities.ItemHandler.BLOCK, TREMENDOUS_CHEST_BE_TYPE.get(), (be, side) -> new ChestItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 TREMENDOUS_BACKPACK_BE_TYPE.get(),
@@ -1053,17 +1041,11 @@ public final class Registration {
                 ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(),
                 (be, side) -> new ChestItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
-                TANK_BE_TYPE.get(),
-                (be, side) -> new TankFluidHandler(be));
+                Capabilities.FluidHandler.BLOCK, TANK_BE_TYPE.get(), (be, side) -> new TankFluidHandler(be));
         event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
-                ENDER_TANK_BE_TYPE.get(),
-                (be, side) -> new TankFluidHandler(be));
+                Capabilities.FluidHandler.BLOCK, ENDER_TANK_BE_TYPE.get(), (be, side) -> new TankFluidHandler(be));
         event.registerItem(
-                Capabilities.FluidHandler.ITEM,
-                (stack, ctx) -> new TankItemFluidHandler(stack),
-                TANK_ITEM.get());
+                Capabilities.FluidHandler.ITEM, (stack, ctx) -> new TankItemFluidHandler(stack), TANK_ITEM.get());
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
         event.registerBlockEntity(

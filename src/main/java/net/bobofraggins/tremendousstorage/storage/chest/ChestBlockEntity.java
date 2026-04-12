@@ -27,20 +27,20 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
 /**
  * Stores items in a shared pool across any number of distinct types.
@@ -69,7 +69,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
     private int pullerSides = 0;
     private int pullerTickCounter = 0;
 
-    private static final int PULL_TICKS  = 4;
+    private static final int PULL_TICKS = 4;
     private static final int PULL_AMOUNT = 4;
 
     public long getCapacity() {
@@ -129,8 +129,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
 
         @Override
         protected boolean isOwnContainer(Player player) {
-            return player.containerMenu instanceof ChestMenu m
-                    && m.getPos().equals(worldPosition);
+            return player.containerMenu instanceof ChestMenu m && m.getPos().equals(worldPosition);
         }
     };
 
@@ -391,7 +390,8 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
     protected String buildSuffix(boolean ender) {
         StringBuilder sb = new StringBuilder();
         if (tier != StorageTier.WOOD) {
-            sb.append(Character.toUpperCase(tier.getId().charAt(0))).append(tier.getId().substring(1));
+            sb.append(Character.toUpperCase(tier.getId().charAt(0)))
+                    .append(tier.getId().substring(1));
         }
         if (ender) {
             if (!sb.isEmpty()) sb.append('/');
@@ -471,8 +471,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
             if ((pullerSides & (1 << bit)) == 0) continue;
             Direction worldDir = bitToWorldDir(bit, facing);
             BlockPos adjacentPos = pos.relative(worldDir);
-            IItemHandler cap = level.getCapability(
-                    Capabilities.ItemHandler.BLOCK, adjacentPos, worldDir.getOpposite());
+            IItemHandler cap = level.getCapability(Capabilities.ItemHandler.BLOCK, adjacentPos, worldDir.getOpposite());
             if (cap == null) continue;
             pullFromHandler(cap);
         }
@@ -493,11 +492,11 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
 
     private static Direction bitToWorldDir(int bit, Direction facing) {
         return switch (bit) {
-            case 0  -> Direction.UP;
-            case 1  -> Direction.DOWN;
-            case 2  -> facing.getCounterClockWise();
-            case 3  -> facing.getClockWise();
-            case 4  -> facing;
+            case 0 -> Direction.UP;
+            case 1 -> Direction.DOWN;
+            case 2 -> facing.getCounterClockWise();
+            case 3 -> facing.getClockWise();
+            case 4 -> facing;
             default -> facing.getOpposite();
         };
     }

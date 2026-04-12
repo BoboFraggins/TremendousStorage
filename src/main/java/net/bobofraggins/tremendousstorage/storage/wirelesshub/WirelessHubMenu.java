@@ -33,11 +33,11 @@ import net.neoforged.neoforge.items.SlotItemHandler;
  */
 public class WirelessHubMenu extends AbstractContainerMenu {
 
-    private static final int INPUT_SLOT   = 0;
-    private static final int OUTPUT_SLOT  = 1;
-    private static final int INV_START    = 2;
+    private static final int INPUT_SLOT = 0;
+    private static final int OUTPUT_SLOT = 1;
+    private static final int INV_START = 2;
     private static final int HOTBAR_START = 29;
-    private static final int HOTBAR_END   = 38;
+    private static final int HOTBAR_END = 38;
 
     /** Height of the HAARP weather-control pane. Matches {@link HaarpWeatherPane#preferredHeight()}. */
     public static final int HAARP_SECTION_H = 68;
@@ -53,15 +53,19 @@ public class WirelessHubMenu extends AbstractContainerMenu {
 
     /** Server-side constructor. */
     public WirelessHubMenu(
-            int id, Inventory inv, BlockPos hubPos, IItemHandler hubInventory,
-            boolean haarpUpgrade, ContainerData data) {
+            int id,
+            Inventory inv,
+            BlockPos hubPos,
+            IItemHandler hubInventory,
+            boolean haarpUpgrade,
+            ContainerData data) {
         super(Registration.WIRELESS_HUB_MENU.get(), id);
         this.hubPos = hubPos;
         this.haarpUpgrade = haarpUpgrade;
         this.data = data;
         addDataSlots(data);
 
-        int invY    = haarpUpgrade ? INV_Y_BASE    + HAARP_SECTION_H : INV_Y_BASE;
+        int invY = haarpUpgrade ? INV_Y_BASE + HAARP_SECTION_H : INV_Y_BASE;
         int hotbarY = haarpUpgrade ? HOTBAR_Y_BASE + HAARP_SECTION_H : HOTBAR_Y_BASE;
 
         // Slot 0: input — Wireless SAT only

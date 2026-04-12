@@ -42,11 +42,11 @@ public record SetBackpackPriorityPacket(int slotType, int slotIndex, String slot
     public static void handle(SetBackpackPriorityPacket packet, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
-            ItemStack backpackStack = BackpackItem.getBackpackStack(
-                    player, packet.slotType(), packet.slotIndex(), packet.slotId());
+            ItemStack backpackStack =
+                    BackpackItem.getBackpackStack(player, packet.slotType(), packet.slotIndex(), packet.slotId());
             if (backpackStack.isEmpty()) return;
-            BackpackContents current = backpackStack.getOrDefault(
-                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+            BackpackContents current =
+                    backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
             Priority newPriority = Priority.fromOrdinal(packet.priority());
             backpackStack.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), current.withPriority(newPriority));
             BackpackItem.setBackpackStack(

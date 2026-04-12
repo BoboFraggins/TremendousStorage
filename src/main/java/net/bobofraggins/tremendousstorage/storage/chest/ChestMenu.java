@@ -68,8 +68,20 @@ public class ChestMenu extends AbstractContainerMenu {
 
     /** Server-side constructor with puller upgrade flag. */
     public ChestMenu(
-            int id, Inventory inv, BlockPos pos, ContainerData data, boolean hasCraftingUpgrade, boolean hasPullerUpgrade) {
-        this(id, inv, pos, data, hasCraftingUpgrade, hasPullerUpgrade, TremendousStorageClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
+            int id,
+            Inventory inv,
+            BlockPos pos,
+            ContainerData data,
+            boolean hasCraftingUpgrade,
+            boolean hasPullerUpgrade) {
+        this(
+                id,
+                inv,
+                pos,
+                data,
+                hasCraftingUpgrade,
+                hasPullerUpgrade,
+                TremendousStorageClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
     }
 
     /** Client-side constructor. Reads slot location, crafting flag, and puller flag from the buffer. */
@@ -85,7 +97,13 @@ public class ChestMenu extends AbstractContainerMenu {
     }
 
     private ChestMenu(
-            int id, Inventory inv, BlockPos pos, ContainerData data, boolean hasCraftingUpgrade, boolean hasPullerUpgrade, int rows) {
+            int id,
+            Inventory inv,
+            BlockPos pos,
+            ContainerData data,
+            boolean hasCraftingUpgrade,
+            boolean hasPullerUpgrade,
+            int rows) {
         super(Registration.TREMENDOUS_CHEST_MENU.get(), id);
         this.pos = pos;
         this.data = data;

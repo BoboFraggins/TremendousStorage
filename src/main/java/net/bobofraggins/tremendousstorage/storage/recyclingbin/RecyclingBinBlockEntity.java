@@ -92,10 +92,16 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
         vibesAmount = tag.getInt("Vibes");
         if (tag.contains("Transfer")) {
             net.minecraft.nbt.CompoundTag t = tag.getCompound("Transfer");
-            transferContainer.setItem(0, t.contains("Input")
-                    ? ItemStack.parseOptional(registries, t.getCompound("Input")) : ItemStack.EMPTY);
-            transferContainer.setItem(1, t.contains("Output")
-                    ? ItemStack.parseOptional(registries, t.getCompound("Output")) : ItemStack.EMPTY);
+            transferContainer.setItem(
+                    0,
+                    t.contains("Input")
+                            ? ItemStack.parseOptional(registries, t.getCompound("Input"))
+                            : ItemStack.EMPTY);
+            transferContainer.setItem(
+                    1,
+                    t.contains("Output")
+                            ? ItemStack.parseOptional(registries, t.getCompound("Output"))
+                            : ItemStack.EMPTY);
         }
     }
 
@@ -116,7 +122,9 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
         protected void onOpen(Level level, BlockPos pos, BlockState state) {
             level.playSound(
                     null,
-                    pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                    pos.getX() + 0.5,
+                    pos.getY() + 0.5,
+                    pos.getZ() + 0.5,
                     SoundEvents.CHEST_OPEN,
                     SoundSource.BLOCKS,
                     0.5f,
@@ -127,7 +135,9 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
         protected void onClose(Level level, BlockPos pos, BlockState state) {
             level.playSound(
                     null,
-                    pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                    pos.getX() + 0.5,
+                    pos.getY() + 0.5,
+                    pos.getZ() + 0.5,
                     SoundEvents.CHEST_CLOSE,
                     SoundSource.BLOCKS,
                     0.5f,
@@ -213,7 +223,9 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
             // Hold until the bin has enough to fill the container completely
             if (vibesAmount < canFill) return;
             extractVibes(canFill, false);
-            handler.fill(new FluidStack(Registration.HEALING_SALVE_SOURCE.get(), canFill), IFluidHandler.FluidAction.EXECUTE);
+            handler.fill(
+                    new FluidStack(Registration.HEALING_SALVE_SOURCE.get(), canFill),
+                    IFluidHandler.FluidAction.EXECUTE);
             transferContainer.setItem(0, ItemStack.EMPTY);
             transferContainer.setItem(1, handler.getContainer());
         }

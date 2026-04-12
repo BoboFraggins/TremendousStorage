@@ -1,10 +1,11 @@
 package net.bobofraggins.tremendousstorage.storage.items;
 
+import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -17,8 +18,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
-
-import java.util.List;
 
 /**
  * Drinkable potion that applies the {@link VexRepellentEffect}.

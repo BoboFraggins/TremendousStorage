@@ -41,8 +41,7 @@ public class BackpackWornLayer extends RenderLayer<AbstractClientPlayer, PlayerM
      */
     private static final float Z_EMBED = 0.15f;
 
-    public BackpackWornLayer(
-            RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer) {
+    public BackpackWornLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer) {
         super(renderer);
     }
 

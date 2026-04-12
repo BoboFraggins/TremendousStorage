@@ -1,6 +1,5 @@
 package net.bobofraggins.tremendousstorage.storage.baseupgrade;
 
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEntity;
 import net.minecraft.network.chat.Component;
@@ -33,9 +32,11 @@ public class InterdimensionalUpgradeItem extends Item {
         if (!(be instanceof WirelessHubBlockEntity hub)) return InteractionResult.PASS;
 
         if (hub.getTier() != StorageTier.NETHERITE) {
-            ctx.getPlayer().displayClientMessage(
-                    Component.translatable("item.tremendousstorage.interdimensional_upgrade.requires_netherite"),
-                    true);
+            ctx.getPlayer()
+                    .displayClientMessage(
+                            Component.translatable(
+                                    "item.tremendousstorage.interdimensional_upgrade.requires_netherite"),
+                            true);
             return InteractionResult.FAIL;
         }
 

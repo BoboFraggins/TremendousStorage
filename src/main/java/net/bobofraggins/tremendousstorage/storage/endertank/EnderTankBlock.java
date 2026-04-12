@@ -3,7 +3,6 @@ package net.bobofraggins.tremendousstorage.storage.endertank;
 import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlock;
-import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -35,9 +34,6 @@ public class EnderTankBlock extends TankBlock {
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {
         if (level.isClientSide()) return null;
-        return createTickerHelper(
-                type,
-                Registration.ENDER_TANK_BE_TYPE.get(),
-                EnderTankBlockEntity::serverTick);
+        return createTickerHelper(type, Registration.ENDER_TANK_BE_TYPE.get(), EnderTankBlockEntity::serverTick);
     }
 }

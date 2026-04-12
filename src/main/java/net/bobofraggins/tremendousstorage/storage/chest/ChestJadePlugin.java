@@ -21,8 +21,7 @@ import snownee.jade.api.config.IPluginConfig;
 @WailaPlugin
 public class ChestJadePlugin implements IWailaPlugin {
 
-    static final ResourceLocation CHEST_PROVIDER =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "chest");
+    static final ResourceLocation CHEST_PROVIDER = ResourceLocation.fromNamespaceAndPath("tremendousstorage", "chest");
 
     @Override
     public void register(IWailaCommonRegistration registration) {

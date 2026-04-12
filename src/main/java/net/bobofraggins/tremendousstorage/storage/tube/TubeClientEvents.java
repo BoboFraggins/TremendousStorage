@@ -1,6 +1,5 @@
 package net.bobofraggins.tremendousstorage.storage.tube;
 
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.StorageInterfaceScreen;
 import net.neoforged.bus.api.SubscribeEvent;

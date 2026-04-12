@@ -78,7 +78,8 @@ public class PersonalAccessTerminalItem extends Item {
 
         BlockPos hubPos = stack.get(Registration.WIRELESS_HUB_POS.get());
         ResourceLocation hubDimId = stack.get(Registration.WIRELESS_HUB_DIMENSION.get());
-        boolean hasCraftingUpgrade = Boolean.TRUE.equals(stack.get(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get()));
+        boolean hasCraftingUpgrade =
+                Boolean.TRUE.equals(stack.get(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get()));
         openSatUi((ServerPlayer) player, niPos, hubPos, hubDimId, hasCraftingUpgrade);
         return InteractionResultHolder.success(stack);
     }

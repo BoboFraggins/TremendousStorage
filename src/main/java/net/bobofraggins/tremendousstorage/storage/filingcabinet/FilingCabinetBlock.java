@@ -92,9 +92,7 @@ public class FilingCabinetBlock extends BaseEntityBlock implements NetworkConnec
         return createTickerHelper(
                 type,
                 Registration.FILING_CABINET_BE_TYPE.get(),
-                level.isClientSide()
-                        ? FilingCabinetBlockEntity::clientTick
-                        : FilingCabinetBlockEntity::serverTick);
+                level.isClientSide() ? FilingCabinetBlockEntity::clientTick : FilingCabinetBlockEntity::serverTick);
     }
 
     @Override

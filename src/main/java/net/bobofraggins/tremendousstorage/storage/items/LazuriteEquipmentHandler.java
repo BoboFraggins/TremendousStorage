@@ -1,7 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.items;
 
 import java.util.Set;
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;

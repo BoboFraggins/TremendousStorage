@@ -78,11 +78,10 @@ public class EnderBackpackMenu extends BackpackMenu {
     @Override
     protected void onMenuRemoved(Player player) {
         if (linkId == -1L || !(player instanceof ServerPlayer sp)) return;
-        ItemStack backpackStack =
-                BackpackItem.getBackpackStack(player, getSlotType(), getSlotIndex(), getSlotId());
+        ItemStack backpackStack = BackpackItem.getBackpackStack(player, getSlotType(), getSlotIndex(), getSlotId());
         if (backpackStack.isEmpty()) return;
-        BackpackContents contents = backpackStack.getOrDefault(
-                Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+        BackpackContents contents =
+                backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
         ListTag types = contentsToListTag(contents, sp.level().registryAccess());
         EnderBackpackStorage.get(sp.server).setTypes(linkId, types);
     }
@@ -110,8 +109,7 @@ public class EnderBackpackMenu extends BackpackMenu {
      * Reconstructs a {@link BackpackContents} from a storage {@link ListTag},
      * preserving all settings (tier, priority, sortMode, craftingUpgrade) from {@code base}.
      */
-    static BackpackContents listTagToContents(
-            ListTag list, BackpackContents base, HolderLookup.Provider registries) {
+    static BackpackContents listTagToContents(ListTag list, BackpackContents base, HolderLookup.Provider registries) {
         List<BackpackContents.Entry> entries = new ArrayList<>();
         for (int i = 0; i < list.size(); i++) {
             CompoundTag entry = list.getCompound(i);
@@ -119,7 +117,6 @@ public class EnderBackpackMenu extends BackpackMenu {
             ItemStack.parse(registries, entry.getCompound("Type"))
                     .ifPresent(stack -> entries.add(new BackpackContents.Entry(stack, count)));
         }
-        return new BackpackContents(
-                entries, base.tier(), base.priority(), base.sortMode(), base.hasCraftingUpgrade());
+        return new BackpackContents(entries, base.tier(), base.priority(), base.sortMode(), base.hasCraftingUpgrade());
     }
 }

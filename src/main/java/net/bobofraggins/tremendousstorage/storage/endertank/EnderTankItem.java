@@ -1,7 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.endertank;
 
 import java.util.List;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.tank.TankItem;
 import net.minecraft.core.component.DataComponents;
@@ -33,9 +32,7 @@ public class EnderTankItem extends TankItem {
         if (tier == StorageTier.WOOD) {
             return Component.empty().append(blockName).append(" (Ender)");
         }
-        return Component.empty()
-                .append(blockName)
-                .append(" (" + capitalize(tier.getId()) + "/Ender)");
+        return Component.empty().append(blockName).append(" (" + capitalize(tier.getId()) + "/Ender)");
     }
 
     @Override
@@ -62,9 +59,7 @@ public class EnderTankItem extends TankItem {
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return -1L;
         CompoundTag tag = data.copyTag();
-        return tag.contains(EnderTankBlockEntity.TAG_LINK_ID)
-                ? tag.getLong(EnderTankBlockEntity.TAG_LINK_ID)
-                : -1L;
+        return tag.contains(EnderTankBlockEntity.TAG_LINK_ID) ? tag.getLong(EnderTankBlockEntity.TAG_LINK_ID) : -1L;
     }
 
     private static String capitalize(String s) {

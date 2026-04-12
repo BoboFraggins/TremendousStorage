@@ -1,9 +1,8 @@
 package net.bobofraggins.tremendousstorage.storage.enderchest;
 
-import java.security.SecureRandom;
 import com.mojang.serialization.MapCodec;
+import java.security.SecureRandom;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
@@ -27,8 +26,7 @@ import net.minecraft.world.level.Level;
  */
 public class EnderChestSmithingRecipe implements SmithingRecipe {
 
-    public static final MapCodec<EnderChestSmithingRecipe> CODEC =
-            MapCodec.unit(new EnderChestSmithingRecipe());
+    public static final MapCodec<EnderChestSmithingRecipe> CODEC = MapCodec.unit(new EnderChestSmithingRecipe());
 
     public static final StreamCodec<RegistryFriendlyByteBuf, EnderChestSmithingRecipe> STREAM_CODEC =
             StreamCodec.unit(new EnderChestSmithingRecipe());
@@ -39,8 +37,7 @@ public class EnderChestSmithingRecipe implements SmithingRecipe {
      * Thread-local carries the link ID from {@link #assemble} to {@link #getRemainingItems}
      * so both outputs share the same ID without regenerating it.
      */
-    private static final ThreadLocal<long[]> PENDING_LINK =
-            ThreadLocal.withInitial(() -> new long[] {-1L});
+    private static final ThreadLocal<long[]> PENDING_LINK = ThreadLocal.withInitial(() -> new long[] {-1L});
 
     @Override
     public boolean isTemplateIngredient(ItemStack stack) {
@@ -60,9 +57,7 @@ public class EnderChestSmithingRecipe implements SmithingRecipe {
 
     @Override
     public boolean matches(SmithingRecipeInput input, Level level) {
-        return input.template().isEmpty()
-                && isBaseIngredient(input.base())
-                && isAdditionIngredient(input.addition());
+        return input.template().isEmpty() && isBaseIngredient(input.base()) && isAdditionIngredient(input.addition());
     }
 
     @Override
@@ -112,9 +107,7 @@ public class EnderChestSmithingRecipe implements SmithingRecipe {
         CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (existing == null) return -1L;
         CompoundTag tag = existing.copyTag();
-        return tag.contains(EnderChestBlockEntity.TAG_LINK_ID)
-                ? tag.getLong(EnderChestBlockEntity.TAG_LINK_ID)
-                : -1L;
+        return tag.contains(EnderChestBlockEntity.TAG_LINK_ID) ? tag.getLong(EnderChestBlockEntity.TAG_LINK_ID) : -1L;
     }
 
     private static ItemStack makeEnderChest(ItemStack baseStack, long linkId) {

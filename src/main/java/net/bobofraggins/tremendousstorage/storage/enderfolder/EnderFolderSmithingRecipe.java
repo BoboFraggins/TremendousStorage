@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.enderfolder;
 
-import java.security.SecureRandom;
 import com.mojang.serialization.MapCodec;
+import java.security.SecureRandom;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
@@ -27,8 +27,7 @@ import net.minecraft.world.level.Level;
  */
 public class EnderFolderSmithingRecipe implements SmithingRecipe {
 
-    public static final MapCodec<EnderFolderSmithingRecipe> CODEC =
-            MapCodec.unit(new EnderFolderSmithingRecipe());
+    public static final MapCodec<EnderFolderSmithingRecipe> CODEC = MapCodec.unit(new EnderFolderSmithingRecipe());
 
     public static final StreamCodec<RegistryFriendlyByteBuf, EnderFolderSmithingRecipe> STREAM_CODEC =
             StreamCodec.unit(new EnderFolderSmithingRecipe());
@@ -42,8 +41,7 @@ public class EnderFolderSmithingRecipe implements SmithingRecipe {
      * <p>This is safe because crafting calls {@code assemble} then {@code getRemainingItems}
      * on the same thread without interleaving.
      */
-    private static final ThreadLocal<long[]> PENDING_LINK =
-            ThreadLocal.withInitial(() -> new long[] {-1L});
+    private static final ThreadLocal<long[]> PENDING_LINK = ThreadLocal.withInitial(() -> new long[] {-1L});
 
     // -------------------------------------------------------------------------
     // Ingredient predicates
@@ -70,9 +68,7 @@ public class EnderFolderSmithingRecipe implements SmithingRecipe {
 
     @Override
     public boolean matches(SmithingRecipeInput input, Level level) {
-        return input.template().isEmpty()
-                && isBaseIngredient(input.base())
-                && isAdditionIngredient(input.addition());
+        return input.template().isEmpty() && isBaseIngredient(input.base()) && isAdditionIngredient(input.addition());
     }
 
     // -------------------------------------------------------------------------

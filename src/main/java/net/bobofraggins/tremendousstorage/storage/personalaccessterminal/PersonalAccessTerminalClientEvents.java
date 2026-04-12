@@ -1,7 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.personalaccessterminal;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubRenderer;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubScreen;

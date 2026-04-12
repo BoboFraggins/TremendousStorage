@@ -55,11 +55,11 @@ public record BackpackInteractPacket(
     public static void handle(BackpackInteractPacket packet, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
-            ItemStack backpackStack = BackpackItem.getBackpackStack(
-                    player, packet.slotType(), packet.slotIndex(), packet.slotId());
+            ItemStack backpackStack =
+                    BackpackItem.getBackpackStack(player, packet.slotType(), packet.slotIndex(), packet.slotId());
             if (backpackStack.isEmpty()) return;
-            BackpackContents contents = backpackStack.getOrDefault(
-                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+            BackpackContents contents =
+                    backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
 
             if (packet.typeIndex() == -1) {
                 // Insert player's cursor item into the backpack

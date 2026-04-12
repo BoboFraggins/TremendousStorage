@@ -27,23 +27,26 @@ import net.neoforged.neoforge.capabilities.Capabilities;
  */
 public class RecyclingBinMenu extends AbstractContainerMenu {
 
-    static final int VOID_SLOT_X  = 36;
-    static final int VOID_SLOT_Y  = 32;
-    static final int FLUID_IN_X   = 124;
-    static final int FLUID_IN_Y   = 24;
-    static final int FLUID_OUT_X  = 124;
-    static final int FLUID_OUT_Y  = 56;
+    static final int VOID_SLOT_X = 36;
+    static final int VOID_SLOT_Y = 32;
+    static final int FLUID_IN_X = 124;
+    static final int FLUID_IN_Y = 24;
+    static final int FLUID_OUT_X = 124;
+    static final int FLUID_OUT_Y = 56;
 
     private static final int INV_START_X = 8;
-    private static final int INV_Y       = 90;
-    private static final int HOTBAR_Y    = 148;
+    private static final int INV_Y = 90;
+    private static final int HOTBAR_Y = 148;
 
     private final BlockPos pos;
 
     /** Server-side constructor. */
     public RecyclingBinMenu(
-            int id, Inventory inv, BlockPos pos,
-            @Nullable RecyclingBinBlockEntity be, SimpleContainer transferContainer) {
+            int id,
+            Inventory inv,
+            BlockPos pos,
+            @Nullable RecyclingBinBlockEntity be,
+            SimpleContainer transferContainer) {
         super(Registration.RECYCLING_BIN_MENU.get(), id);
         this.pos = pos;
 
@@ -94,8 +97,7 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return player.distanceToSqr(
-                pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 64.0;
+        return player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) < 64.0;
     }
 
     @Override
@@ -112,7 +114,7 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
     public ItemStack quickMoveStack(Player player, int index) {
         Slot slot = slots.get(index);
         if (!slot.hasItem()) return ItemStack.EMPTY;
-        ItemStack stack    = slot.getItem();
+        ItemStack stack = slot.getItem();
         ItemStack original = stack.copy();
 
         if (index == 0) {
@@ -152,11 +154,30 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
             this.be = be;
         }
 
-        @Override public int getContainerSize() { return 1; }
-        @Override public boolean isEmpty() { return true; }
-        @Override public ItemStack getItem(int slot) { return ItemStack.EMPTY; }
-        @Override public ItemStack removeItem(int slot, int amount) { return ItemStack.EMPTY; }
-        @Override public ItemStack removeItemNoUpdate(int slot) { return ItemStack.EMPTY; }
+        @Override
+        public int getContainerSize() {
+            return 1;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public ItemStack getItem(int slot) {
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public ItemStack removeItem(int slot, int amount) {
+            return ItemStack.EMPTY;
+        }
+
+        @Override
+        public ItemStack removeItemNoUpdate(int slot) {
+            return ItemStack.EMPTY;
+        }
 
         @Override
         public void setItem(int slot, ItemStack stack) {
@@ -166,8 +187,15 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
             // Item is not stored — it's destroyed
         }
 
-        @Override public void setChanged() {}
-        @Override public boolean stillValid(Player player) { return true; }
-        @Override public void clearContent() {}
+        @Override
+        public void setChanged() {}
+
+        @Override
+        public boolean stillValid(Player player) {
+            return true;
+        }
+
+        @Override
+        public void clearContent() {}
     }
 }

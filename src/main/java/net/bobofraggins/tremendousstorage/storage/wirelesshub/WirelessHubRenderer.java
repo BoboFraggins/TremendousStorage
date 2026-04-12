@@ -67,12 +67,13 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
 
         BlockState blockState = be.getBlockState();
         Direction facing = blockState.getValue(WirelessHubBlock.FACING);
-        float facingYRot = switch (facing) {
-            case WEST -> 90f;
-            case NORTH -> 180f;
-            case EAST -> 270f;
-            default -> 0f; // SOUTH
-        };
+        float facingYRot =
+                switch (facing) {
+                    case WEST -> 90f;
+                    case NORTH -> 180f;
+                    case EAST -> 270f;
+                    default -> 0f; // SOUTH
+                };
 
         int color = be.getTier().getColor();
         float r = ((color >> 16) & 0xFF) / 255f;
@@ -84,7 +85,8 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
         // ---- Static base ----
         poseStack.pushPose();
         applyFacingRotation(poseStack, facingYRot);
-        renderModel(consumer, poseStack.last(), baseModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
+        renderModel(
+                consumer, poseStack.last(), baseModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
         poseStack.popPose();
 
         // ---- Spinning dish ----
@@ -96,7 +98,8 @@ public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlock
             poseStack.mulPose(Axis.YP.rotationDegrees(dishAngle));
             poseStack.translate(-PIVOT, -PIVOT, -PIVOT);
         }
-        renderModel(consumer, poseStack.last(), dishModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
+        renderModel(
+                consumer, poseStack.last(), dishModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
         poseStack.popPose();
     }
 

@@ -7,8 +7,8 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
-import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.helpers.IGuiHelper;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
@@ -62,13 +62,15 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
     public void registerRecipes(IRecipeRegistration reg) {
         reg.addRecipes(
                 PositiveVibesCauldronCategory.RECIPE_TYPE,
-                List.of(PositiveVibesCauldronJeiRecipe.obtainedByRecycling(), PositiveVibesCauldronJeiRecipe.healBrain()));
-        reg.addRecipes(
-                EnderFolderSmithingCategory.RECIPE_TYPE,
-                List.of(EnderFolderSmithingCategory.Recipe.INSTANCE));
+                List.of(
+                        PositiveVibesCauldronJeiRecipe.obtainedByRecycling(),
+                        PositiveVibesCauldronJeiRecipe.healBrain()));
+        reg.addRecipes(EnderFolderSmithingCategory.RECIPE_TYPE, List.of(EnderFolderSmithingCategory.Recipe.INSTANCE));
         reg.addRecipes(
                 EnderStorageSmithingCategory.RECIPE_TYPE,
-                List.of(EnderStorageSmithingCategory.Recipe.CHEST, EnderStorageSmithingCategory.Recipe.BACKPACK,
+                List.of(
+                        EnderStorageSmithingCategory.Recipe.CHEST,
+                        EnderStorageSmithingCategory.Recipe.BACKPACK,
                         EnderStorageSmithingCategory.Recipe.TANK));
     }
 
@@ -79,13 +81,10 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
         reg.addRecipeCatalyst(
                 Registration.HEALING_SALVE_CAULDRON_ITEM.get().getDefaultInstance(),
                 PositiveVibesCauldronCategory.RECIPE_TYPE);
+        reg.addRecipeCatalyst(new ItemStack(Items.SMITHING_TABLE), EnderFolderSmithingCategory.RECIPE_TYPE);
         reg.addRecipeCatalyst(
-                new ItemStack(Items.SMITHING_TABLE), EnderFolderSmithingCategory.RECIPE_TYPE);
-        reg.addRecipeCatalyst(
-                Registration.ENDER_STORAGE_UPGRADE.get().getDefaultInstance(),
-                EnderFolderSmithingCategory.RECIPE_TYPE);
-        reg.addRecipeCatalyst(
-                new ItemStack(Items.SMITHING_TABLE), EnderStorageSmithingCategory.RECIPE_TYPE);
+                Registration.ENDER_STORAGE_UPGRADE.get().getDefaultInstance(), EnderFolderSmithingCategory.RECIPE_TYPE);
+        reg.addRecipeCatalyst(new ItemStack(Items.SMITHING_TABLE), EnderStorageSmithingCategory.RECIPE_TYPE);
         reg.addRecipeCatalyst(
                 Registration.ENDER_STORAGE_UPGRADE.get().getDefaultInstance(),
                 EnderStorageSmithingCategory.RECIPE_TYPE);

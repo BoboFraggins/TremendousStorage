@@ -33,8 +33,7 @@ public record OpenPersonalAccessTerminalPacket(
                 public OpenPersonalAccessTerminalPacket decode(RegistryFriendlyByteBuf buf) {
                     BlockPos niPos = BlockPos.STREAM_CODEC.decode(buf);
                     BlockPos hubPos = buf.readBoolean() ? BlockPos.STREAM_CODEC.decode(buf) : null;
-                    ResourceLocation hubDimId = buf.readBoolean()
-                            ? ResourceLocation.STREAM_CODEC.decode(buf) : null;
+                    ResourceLocation hubDimId = buf.readBoolean() ? ResourceLocation.STREAM_CODEC.decode(buf) : null;
                     boolean hasCraftingUpgrade = buf.readBoolean();
                     return new OpenPersonalAccessTerminalPacket(niPos, hubPos, hubDimId, hasCraftingUpgrade);
                 }

@@ -137,8 +137,7 @@ public class EnderTankBlockEntity extends TankBlockEntity {
     // Server tick — first-tick storage load
     // -------------------------------------------------------------------------
 
-    public static void serverTick(
-            Level level, BlockPos pos, BlockState state, EnderTankBlockEntity be) {
+    public static void serverTick(Level level, BlockPos pos, BlockState state, EnderTankBlockEntity be) {
         if (be.needsStorageLoad) {
             be.needsStorageLoad = false;
             be.loadFromStorage();

@@ -1,6 +1,5 @@
 package net.bobofraggins.tremendousstorage.storage.networkinterface;
 
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalScreen;
 import net.minecraft.client.resources.model.ModelResourceLocation;

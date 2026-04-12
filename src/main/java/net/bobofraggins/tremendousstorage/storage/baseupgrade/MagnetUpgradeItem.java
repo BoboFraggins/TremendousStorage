@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.baseupgrade;
 
-import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;

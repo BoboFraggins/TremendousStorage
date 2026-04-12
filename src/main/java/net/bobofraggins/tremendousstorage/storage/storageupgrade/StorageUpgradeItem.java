@@ -1,8 +1,8 @@
 package net.bobofraggins.tremendousstorage.storage.storageupgrade;
 
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
-import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEntity;
 import net.minecraft.world.InteractionResult;

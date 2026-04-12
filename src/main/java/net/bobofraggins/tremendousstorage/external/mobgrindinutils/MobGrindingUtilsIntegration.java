@@ -45,7 +45,8 @@ public final class MobGrindingUtilsIntegration {
 
     public static final DeferredHolder<FluidType, FluidType> XP_FLUID_TYPE = FLUID_TYPES.register(
             "xp_juice",
-            () -> new FluidType(FluidType.Properties.create().density(900).viscosity(1500).temperature(300)));
+            () -> new FluidType(
+                    FluidType.Properties.create().density(900).viscosity(1500).temperature(300)));
 
     public static final DeferredHolder<Fluid, XpFluid.Source> XP_FLUID_SOURCE =
             FLUIDS.register("xp_juice", XpFluid.Source::new);
@@ -68,8 +69,7 @@ public final class MobGrindingUtilsIntegration {
     public static final DeferredHolder<Item, BucketItem> XP_FLUID_BUCKET = ITEMS.register(
             "xp_juice_bucket",
             () -> new BucketItem(
-                    XP_FLUID_SOURCE.get(),
-                    new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
+                    XP_FLUID_SOURCE.get(), new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
 
     /** Shared properties object referenced by {@link XpFluid}. */
     public static final BaseFlowingFluid.Properties XP_FLUID_PROPS = new BaseFlowingFluid.Properties(

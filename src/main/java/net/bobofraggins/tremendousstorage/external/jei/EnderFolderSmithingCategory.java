@@ -104,11 +104,9 @@ public class EnderFolderSmithingCategory implements IRecipeCategory<EnderFolderS
                 .map(EnderFolderSmithingCategory::enderFolder)
                 .toList();
 
-        builder.addSlot(RecipeIngredientRole.INPUT, INPUT_X, ROW_0_Y)
-                .addIngredients(VanillaTypes.ITEM_STACK, folders);
+        builder.addSlot(RecipeIngredientRole.INPUT, INPUT_X, ROW_0_Y).addIngredients(VanillaTypes.ITEM_STACK, folders);
 
-        builder.addSlot(RecipeIngredientRole.INPUT, INPUT_X, ROW_1_Y)
-                .addIngredients(VanillaTypes.ITEM_STACK, upgrades);
+        builder.addSlot(RecipeIngredientRole.INPUT, INPUT_X, ROW_1_Y).addIngredients(VanillaTypes.ITEM_STACK, upgrades);
 
         builder.addSlot(RecipeIngredientRole.OUTPUT, OUTPUT_X, ROW_0_Y)
                 .addIngredients(VanillaTypes.ITEM_STACK, outputs);
@@ -119,11 +117,7 @@ public class EnderFolderSmithingCategory implements IRecipeCategory<EnderFolderS
 
     @Override
     public void draw(
-            Recipe recipe,
-            IRecipeSlotsView recipeSlotsView,
-            GuiGraphics guiGraphics,
-            double mouseX,
-            double mouseY) {
+            Recipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
         // Right-pointing arrow centred vertically between the two input rows
         drawRightArrow(guiGraphics, 19, HEIGHT / 2 - 1);
     }
@@ -132,10 +126,10 @@ public class EnderFolderSmithingCategory implements IRecipeCategory<EnderFolderS
      * Draws a small right-pointing arrow with its tip at {@code (x + 13, cy)}.
      */
     private void drawRightArrow(GuiGraphics g, int x, int cy) {
-        g.fill(x, cy, x + 10, cy + 1, ARROW_COLOR);         // shaft
-        g.fill(x + 8, cy - 2, x + 9, cy + 3, ARROW_COLOR);  // arrowhead col 1
+        g.fill(x, cy, x + 10, cy + 1, ARROW_COLOR); // shaft
+        g.fill(x + 8, cy - 2, x + 9, cy + 3, ARROW_COLOR); // arrowhead col 1
         g.fill(x + 9, cy - 1, x + 10, cy + 2, ARROW_COLOR); // arrowhead col 2
-        g.fill(x + 10, cy, x + 11, cy + 1, ARROW_COLOR);    // tip
+        g.fill(x + 10, cy, x + 11, cy + 1, ARROW_COLOR); // tip
     }
 
     // -------------------------------------------------------------------------

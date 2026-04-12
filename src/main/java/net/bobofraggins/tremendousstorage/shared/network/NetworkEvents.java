@@ -1,6 +1,5 @@
 package net.bobofraggins.tremendousstorage.shared.network;
 
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -58,22 +57,12 @@ public final class NetworkEvents {
                 SatFillCraftingGridPacket.TYPE,
                 SatFillCraftingGridPacket.STREAM_CODEC,
                 SatFillCraftingGridPacket::handle);
+        registrar.playToServer(SetHaarpModePacket.TYPE, SetHaarpModePacket.STREAM_CODEC, SetHaarpModePacket::handle);
         registrar.playToServer(
-                SetHaarpModePacket.TYPE,
-                SetHaarpModePacket.STREAM_CODEC,
-                SetHaarpModePacket::handle);
+                SetPullerSidesPacket.TYPE, SetPullerSidesPacket.STREAM_CODEC, SetPullerSidesPacket::handle);
+        registrar.playToServer(OpenBackpackPacket.TYPE, OpenBackpackPacket.STREAM_CODEC, OpenBackpackPacket::handle);
         registrar.playToServer(
-                SetPullerSidesPacket.TYPE,
-                SetPullerSidesPacket.STREAM_CODEC,
-                SetPullerSidesPacket::handle);
-        registrar.playToServer(
-                OpenBackpackPacket.TYPE,
-                OpenBackpackPacket.STREAM_CODEC,
-                OpenBackpackPacket::handle);
-        registrar.playToServer(
-                BackpackInteractPacket.TYPE,
-                BackpackInteractPacket.STREAM_CODEC,
-                BackpackInteractPacket::handle);
+                BackpackInteractPacket.TYPE, BackpackInteractPacket.STREAM_CODEC, BackpackInteractPacket::handle);
         registrar.playToServer(
                 SetBackpackPriorityPacket.TYPE,
                 SetBackpackPriorityPacket.STREAM_CODEC,

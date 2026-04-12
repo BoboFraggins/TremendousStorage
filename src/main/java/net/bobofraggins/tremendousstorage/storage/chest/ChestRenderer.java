@@ -30,8 +30,7 @@ import net.neoforged.neoforge.client.model.data.ModelData;
  * with the additional pivot animation: z=15/16, y=9/16, rotating around the X axis.
  */
 public class ChestRenderer
-        implements BlockEntityRenderer<ChestBlockEntity>,
-                IBlockEntityRendererExtension<ChestBlockEntity> {
+        implements BlockEntityRenderer<ChestBlockEntity>, IBlockEntityRendererExtension<ChestBlockEntity> {
 
     private static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/chest_body"));

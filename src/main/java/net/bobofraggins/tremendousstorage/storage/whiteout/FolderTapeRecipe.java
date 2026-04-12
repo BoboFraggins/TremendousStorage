@@ -64,8 +64,7 @@ public class FolderTapeRecipe extends CustomRecipe {
 
     /** True if the tank item is locked to a fluid type but has amount == 0. */
     private static boolean isTankLockedEmpty(ItemStack tank) {
-        TankContents contents =
-                tank.getOrDefault(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
+        TankContents contents = tank.getOrDefault(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
         return contents.isLocked() && contents.amount() == 0;
     }
 

@@ -2,13 +2,13 @@ package net.bobofraggins.tremendousstorage.storage.enderchest;
 
 import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.bobofraggins.tremendousstorage.storage.chest.ChestBlock;
 
 /**
  * The Ender Tremendous Chest block.
@@ -43,8 +43,6 @@ public class EnderChestBlock extends ChestBlock {
         return createTickerHelper(
                 type,
                 Registration.ENDER_TREMENDOUS_CHEST_BE_TYPE.get(),
-                level.isClientSide()
-                        ? EnderChestBlockEntity::clientTick
-                        : EnderChestBlockEntity::serverTick);
+                level.isClientSide() ? EnderChestBlockEntity::clientTick : EnderChestBlockEntity::serverTick);
     }
 }

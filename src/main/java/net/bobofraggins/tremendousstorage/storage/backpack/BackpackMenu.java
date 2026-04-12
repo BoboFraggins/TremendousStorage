@@ -9,9 +9,9 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.SimpleContainerData;
@@ -279,8 +279,8 @@ public class BackpackMenu extends AbstractContainerMenu {
             ItemStack backpackStack = BackpackItem.getBackpackStack(player, slotType, slotIndex, slotId);
             if (backpackStack.isEmpty()) return ItemStack.EMPTY;
 
-            BackpackContents current = backpackStack.getOrDefault(
-                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+            BackpackContents current =
+                    backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
             Object[] result = current.withInserted(stack, stack.getCount());
             long remainder = (long) result[0];
             BackpackContents updated = (BackpackContents) result[1];

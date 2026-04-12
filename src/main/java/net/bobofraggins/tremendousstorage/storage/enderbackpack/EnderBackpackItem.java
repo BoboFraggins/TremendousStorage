@@ -40,12 +40,7 @@ public class EnderBackpackItem extends BackpackItem {
     // -------------------------------------------------------------------------
 
     @Override
-    protected void openUi(
-            ServerPlayer player,
-            ItemStack backpackStack,
-            int slotType,
-            int slotIndex,
-            String slotId) {
+    protected void openUi(ServerPlayer player, ItemStack backpackStack, int slotType, int slotIndex, String slotId) {
         Long linkIdObj = backpackStack.get(Registration.ENDER_LINK_ID.get());
         if (linkIdObj == null) {
             // Fall back to block_entity_data if ENDER_LINK_ID component is absent
@@ -62,8 +57,8 @@ public class EnderBackpackItem extends BackpackItem {
         }
         long linkId = linkIdObj;
 
-        BackpackContents contents = backpackStack.getOrDefault(
-                Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+        BackpackContents contents =
+                backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
 
         // Sync FROM storage (or seed storage if this is first open)
         EnderBackpackStorage storage = EnderBackpackStorage.get(player.server);
@@ -86,8 +81,8 @@ public class EnderBackpackItem extends BackpackItem {
             }
         } else {
             // First open — seed storage with current contents and tier
-            ListTag initial = EnderBackpackMenu.contentsToListTag(
-                    contents, player.level().registryAccess());
+            ListTag initial =
+                    EnderBackpackMenu.contentsToListTag(contents, player.level().registryAccess());
             storage.initLink(linkId, initial, contents.tier(), contents.hasCraftingUpgrade());
         }
         // Write the freshened contents back onto the item before opening the menu
@@ -98,15 +93,13 @@ public class EnderBackpackItem extends BackpackItem {
         final long finalLinkId = linkId;
         ContainerData data = new SimpleContainerData(1);
 
-        player.openMenu(
-                new Provider(slotType, slotIndex, slotId, data, craftingUpgrade, finalLinkId),
-                buf -> {
-                    buf.writeInt(slotType);
-                    buf.writeInt(slotIndex);
-                    buf.writeUtf(slotId);
-                    buf.writeBoolean(craftingUpgrade);
-                    buf.writeLong(finalLinkId);
-                });
+        player.openMenu(new Provider(slotType, slotIndex, slotId, data, craftingUpgrade, finalLinkId), buf -> {
+            buf.writeInt(slotType);
+            buf.writeInt(slotIndex);
+            buf.writeUtf(slotId);
+            buf.writeBoolean(craftingUpgrade);
+            buf.writeLong(finalLinkId);
+        });
     }
 
     // -------------------------------------------------------------------------
@@ -135,7 +128,9 @@ public class EnderBackpackItem extends BackpackItem {
 
         @Override
         public net.minecraft.world.inventory.AbstractContainerMenu createMenu(
-                int syncId, net.minecraft.world.entity.player.Inventory inv, net.minecraft.world.entity.player.Player player) {
+                int syncId,
+                net.minecraft.world.entity.player.Inventory inv,
+                net.minecraft.world.entity.player.Player player) {
             return new EnderBackpackMenu(
                     syncId, inv, getSlotType(), getSlotIndex(), getSlotId(), getData(), hasCraftingUpgrade(), linkId);
         }

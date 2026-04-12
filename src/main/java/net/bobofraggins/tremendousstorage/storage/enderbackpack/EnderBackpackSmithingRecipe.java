@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.enderbackpack;
 
-import java.security.SecureRandom;
 import com.mojang.serialization.MapCodec;
+import java.security.SecureRandom;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
@@ -28,16 +28,14 @@ import net.minecraft.world.level.Level;
  */
 public class EnderBackpackSmithingRecipe implements SmithingRecipe {
 
-    public static final MapCodec<EnderBackpackSmithingRecipe> CODEC =
-            MapCodec.unit(new EnderBackpackSmithingRecipe());
+    public static final MapCodec<EnderBackpackSmithingRecipe> CODEC = MapCodec.unit(new EnderBackpackSmithingRecipe());
 
     public static final StreamCodec<RegistryFriendlyByteBuf, EnderBackpackSmithingRecipe> STREAM_CODEC =
             StreamCodec.unit(new EnderBackpackSmithingRecipe());
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    private static final ThreadLocal<long[]> PENDING_LINK =
-            ThreadLocal.withInitial(() -> new long[] {-1L});
+    private static final ThreadLocal<long[]> PENDING_LINK = ThreadLocal.withInitial(() -> new long[] {-1L});
 
     @Override
     public boolean isTemplateIngredient(ItemStack stack) {
@@ -57,9 +55,7 @@ public class EnderBackpackSmithingRecipe implements SmithingRecipe {
 
     @Override
     public boolean matches(SmithingRecipeInput input, Level level) {
-        return input.template().isEmpty()
-                && isBaseIngredient(input.base())
-                && isAdditionIngredient(input.addition());
+        return input.template().isEmpty() && isBaseIngredient(input.base()) && isAdditionIngredient(input.addition());
     }
 
     @Override

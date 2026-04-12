@@ -88,7 +88,8 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide() ? null
+        return level.isClientSide()
+                ? null
                 : createTickerHelper(type, Registration.TANK_BE_TYPE.get(), TankBlockEntity::serverTick);
     }
 
@@ -193,8 +194,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
         if (stack.is(Items.BUCKET)) {
             filling = true;
         } else if (stack.getItem() instanceof TankItem) {
-            TankContents tankContents =
-                    stack.getOrDefault(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
+            TankContents tankContents = stack.getOrDefault(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
             filling = tankContents.amount() == 0;
         } else {
             filling = false;

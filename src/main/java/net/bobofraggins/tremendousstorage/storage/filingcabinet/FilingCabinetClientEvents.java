@@ -1,6 +1,5 @@
 package net.bobofraggins.tremendousstorage.storage.filingcabinet;
 
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.ui.PriorityScreen;
 import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsScreen;

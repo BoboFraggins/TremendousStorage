@@ -22,8 +22,8 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
 
@@ -63,22 +63,22 @@ public class RecyclingBinRenderer
     // Liquid cube geometry — all 6 cubes share the same Y floor/ceiling in the model.
     // Each row: { x0, z0, x1, z1 }  (Y is handled separately)
     private static final float LIQUID_FLOOR = 1f / 16f;
-    private static final float LIQUID_CEIL  = 5f / 16f;
+    private static final float LIQUID_CEIL = 5f / 16f;
     private static final float[][] LIQUID_CUBES = {
-        { 2f/16f, 6f/16f, 5f/16f, 10f/16f },
-        { 1.5f/16f, 7.5f/16f, 2f/16f, 8.5f/16f },
-        { 4.5f/16f, 4.5f/16f, 5.5f/16f, 5f/16f },
-        { 4.5f/16f, 11f/16f, 5.5f/16f, 11.5f/16f },
-        { 3f/16f, 5f/16f, 6f/16f, 6f/16f },
-        { 3f/16f, 10f/16f, 6f/16f, 11f/16f },
+        {2f / 16f, 6f / 16f, 5f / 16f, 10f / 16f},
+        {1.5f / 16f, 7.5f / 16f, 2f / 16f, 8.5f / 16f},
+        {4.5f / 16f, 4.5f / 16f, 5.5f / 16f, 5f / 16f},
+        {4.5f / 16f, 11f / 16f, 5.5f / 16f, 11.5f / 16f},
+        {3f / 16f, 5f / 16f, 6f / 16f, 6f / 16f},
+        {3f / 16f, 10f / 16f, 6f / 16f, 11f / 16f},
     };
 
     private static float facingYRot(Direction facing) {
         return switch (facing) {
             case SOUTH -> 180f;
-            case EAST  -> 270f;
-            case WEST  ->  90f;
-            default    ->   0f;
+            case EAST -> 270f;
+            case WEST -> 90f;
+            default -> 0f;
         };
     }
 
@@ -94,8 +94,8 @@ public class RecyclingBinRenderer
             int packedOverlay) {
 
         Minecraft mc = Minecraft.getInstance();
-        BakedModel bodyModel  = mc.getModelManager().getModel(BODY_MODEL);
-        BakedModel lidModel   = mc.getModelManager().getModel(LID_MODEL);
+        BakedModel bodyModel = mc.getModelManager().getModel(BODY_MODEL);
+        BakedModel lidModel = mc.getModelManager().getModel(LID_MODEL);
         BakedModel pedalModel = mc.getModelManager().getModel(PEDAL_MODEL);
         VertexConsumer solidConsumer = bufferSource.getBuffer(RenderType.solid());
 
@@ -146,11 +146,7 @@ public class RecyclingBinRenderer
     }
 
     private static void renderLiquid(
-            Matrix4f mat,
-            MultiBufferSource bufferSource,
-            float fillFraction,
-            int packedLight,
-            int packedOverlay) {
+            Matrix4f mat, MultiBufferSource bufferSource, float fillFraction, int packedLight, int packedOverlay) {
 
         TextureAtlasSprite sprite = Minecraft.getInstance()
                 .getModelManager()
@@ -160,8 +156,8 @@ public class RecyclingBinRenderer
         IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.HEALING_SALVE_TYPE.get());
         int tint = ext.getTintColor();
         int r = (tint >> 16) & 0xFF;
-        int g = (tint >> 8)  & 0xFF;
-        int b =  tint        & 0xFF;
+        int g = (tint >> 8) & 0xFF;
+        int b = tint & 0xFF;
         int a = (tint >> 24) & 0xFF;
         if (a == 0) a = 255;
 
@@ -175,51 +171,234 @@ public class RecyclingBinRenderer
         for (float[] c : LIQUID_CUBES) {
             float x0 = c[0], z0 = c[1], x1 = c[2], z1 = c[3];
             // Top face (+Y) — the "surface" of the liquid
-            quad(vc, mat, r, g, b, a, packedLight, packedOverlay,
-                    u0, v0, u1, v1,
-                    x0, topY, z0,  x1, topY, z0,  x1, topY, z1,  x0, topY, z1,
-                    0, 1, 0);
+            quad(
+                    vc,
+                    mat,
+                    r,
+                    g,
+                    b,
+                    a,
+                    packedLight,
+                    packedOverlay,
+                    u0,
+                    v0,
+                    u1,
+                    v1,
+                    x0,
+                    topY,
+                    z0,
+                    x1,
+                    topY,
+                    z0,
+                    x1,
+                    topY,
+                    z1,
+                    x0,
+                    topY,
+                    z1,
+                    0,
+                    1,
+                    0);
             // Bottom face (-Y)
-            quad(vc, mat, r, g, b, a, packedLight, packedOverlay,
-                    u0, v0, u1, v1,
-                    x0, LIQUID_FLOOR, z1,  x1, LIQUID_FLOOR, z1,  x1, LIQUID_FLOOR, z0,  x0, LIQUID_FLOOR, z0,
-                    0, -1, 0);
+            quad(
+                    vc,
+                    mat,
+                    r,
+                    g,
+                    b,
+                    a,
+                    packedLight,
+                    packedOverlay,
+                    u0,
+                    v0,
+                    u1,
+                    v1,
+                    x0,
+                    LIQUID_FLOOR,
+                    z1,
+                    x1,
+                    LIQUID_FLOOR,
+                    z1,
+                    x1,
+                    LIQUID_FLOOR,
+                    z0,
+                    x0,
+                    LIQUID_FLOOR,
+                    z0,
+                    0,
+                    -1,
+                    0);
             // North face (-Z)
-            quad(vc, mat, r, g, b, a, packedLight, packedOverlay,
-                    u0, v0, u1, v1,
-                    x1, topY, z0,  x0, topY, z0,  x0, LIQUID_FLOOR, z0,  x1, LIQUID_FLOOR, z0,
-                    0, 0, -1);
+            quad(
+                    vc,
+                    mat,
+                    r,
+                    g,
+                    b,
+                    a,
+                    packedLight,
+                    packedOverlay,
+                    u0,
+                    v0,
+                    u1,
+                    v1,
+                    x1,
+                    topY,
+                    z0,
+                    x0,
+                    topY,
+                    z0,
+                    x0,
+                    LIQUID_FLOOR,
+                    z0,
+                    x1,
+                    LIQUID_FLOOR,
+                    z0,
+                    0,
+                    0,
+                    -1);
             // South face (+Z)
-            quad(vc, mat, r, g, b, a, packedLight, packedOverlay,
-                    u0, v0, u1, v1,
-                    x0, topY, z1,  x1, topY, z1,  x1, LIQUID_FLOOR, z1,  x0, LIQUID_FLOOR, z1,
-                    0, 0, 1);
+            quad(
+                    vc,
+                    mat,
+                    r,
+                    g,
+                    b,
+                    a,
+                    packedLight,
+                    packedOverlay,
+                    u0,
+                    v0,
+                    u1,
+                    v1,
+                    x0,
+                    topY,
+                    z1,
+                    x1,
+                    topY,
+                    z1,
+                    x1,
+                    LIQUID_FLOOR,
+                    z1,
+                    x0,
+                    LIQUID_FLOOR,
+                    z1,
+                    0,
+                    0,
+                    1);
             // West face (-X)
-            quad(vc, mat, r, g, b, a, packedLight, packedOverlay,
-                    u0, v0, u1, v1,
-                    x0, topY, z0,  x0, topY, z1,  x0, LIQUID_FLOOR, z1,  x0, LIQUID_FLOOR, z0,
-                    -1, 0, 0);
+            quad(
+                    vc,
+                    mat,
+                    r,
+                    g,
+                    b,
+                    a,
+                    packedLight,
+                    packedOverlay,
+                    u0,
+                    v0,
+                    u1,
+                    v1,
+                    x0,
+                    topY,
+                    z0,
+                    x0,
+                    topY,
+                    z1,
+                    x0,
+                    LIQUID_FLOOR,
+                    z1,
+                    x0,
+                    LIQUID_FLOOR,
+                    z0,
+                    -1,
+                    0,
+                    0);
             // East face (+X)
-            quad(vc, mat, r, g, b, a, packedLight, packedOverlay,
-                    u0, v0, u1, v1,
-                    x1, topY, z1,  x1, topY, z0,  x1, LIQUID_FLOOR, z0,  x1, LIQUID_FLOOR, z1,
-                    1, 0, 0);
+            quad(
+                    vc,
+                    mat,
+                    r,
+                    g,
+                    b,
+                    a,
+                    packedLight,
+                    packedOverlay,
+                    u0,
+                    v0,
+                    u1,
+                    v1,
+                    x1,
+                    topY,
+                    z1,
+                    x1,
+                    topY,
+                    z0,
+                    x1,
+                    LIQUID_FLOOR,
+                    z0,
+                    x1,
+                    LIQUID_FLOOR,
+                    z1,
+                    1,
+                    0,
+                    0);
         }
     }
 
     private static void quad(
-            VertexConsumer vc, Matrix4f mat,
-            int r, int g, int b, int a, int light, int overlay,
-            float u0, float v0, float u1, float v1,
-            float x0, float y0, float z0,
-            float x1, float y1, float z1,
-            float x2, float y2, float z2,
-            float x3, float y3, float z3,
-            float nx, float ny, float nz) {
-        vc.addVertex(mat, x0, y0, z0).setColor(r, g, b, a).setUv(u0, v0).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
-        vc.addVertex(mat, x1, y1, z1).setColor(r, g, b, a).setUv(u1, v0).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
-        vc.addVertex(mat, x2, y2, z2).setColor(r, g, b, a).setUv(u1, v1).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
-        vc.addVertex(mat, x3, y3, z3).setColor(r, g, b, a).setUv(u0, v1).setOverlay(overlay).setLight(light).setNormal(nx, ny, nz);
+            VertexConsumer vc,
+            Matrix4f mat,
+            int r,
+            int g,
+            int b,
+            int a,
+            int light,
+            int overlay,
+            float u0,
+            float v0,
+            float u1,
+            float v1,
+            float x0,
+            float y0,
+            float z0,
+            float x1,
+            float y1,
+            float z1,
+            float x2,
+            float y2,
+            float z2,
+            float x3,
+            float y3,
+            float z3,
+            float nx,
+            float ny,
+            float nz) {
+        vc.addVertex(mat, x0, y0, z0)
+                .setColor(r, g, b, a)
+                .setUv(u0, v0)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x1, y1, z1)
+                .setColor(r, g, b, a)
+                .setUv(u1, v0)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x2, y2, z2)
+                .setColor(r, g, b, a)
+                .setUv(u1, v1)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
+        vc.addVertex(mat, x3, y3, z3)
+                .setColor(r, g, b, a)
+                .setUv(u0, v1)
+                .setOverlay(overlay)
+                .setLight(light)
+                .setNormal(nx, ny, nz);
     }
 
     private static void applyFacingRotation(PoseStack poseStack, float yRot) {

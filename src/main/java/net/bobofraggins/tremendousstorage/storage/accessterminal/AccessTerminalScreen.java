@@ -87,12 +87,8 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
         // Search box — right-aligned in the title bar.
         int searchW = 75;
-        searchBox = new EditBox(
-                font,
-                leftPos + imageWidth - 5 - 2 - searchW,
-                topPos + 3,
-                searchW, 10,
-                Component.empty());
+        searchBox =
+                new EditBox(font, leftPos + imageWidth - 5 - 2 - searchW, topPos + 3, searchW, 10, Component.empty());
         searchBox.setMaxLength(64);
         searchBox.setHint(Component.literal("Search..."));
         searchBox.setResponder(text -> {

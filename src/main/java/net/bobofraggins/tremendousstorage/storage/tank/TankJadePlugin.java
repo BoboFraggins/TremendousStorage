@@ -22,8 +22,7 @@ import snownee.jade.api.config.IPluginConfig;
 @WailaPlugin
 public class TankJadePlugin implements IWailaPlugin {
 
-    static final ResourceLocation TANK_PROVIDER =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "tank");
+    static final ResourceLocation TANK_PROVIDER = ResourceLocation.fromNamespaceAndPath("tremendousstorage", "tank");
 
     @Override
     public void register(IWailaCommonRegistration registration) {

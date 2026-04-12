@@ -1,7 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.personalaccessterminal;
 
 import javax.annotation.Nullable;
-import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.network.OpenPersonalAccessTerminalPacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.Minecraft;
@@ -76,7 +75,8 @@ public final class PersonalAccessTerminalClientTickHandler {
         if (niPos == null) return null;
         BlockPos hubPos = stack.get(Registration.WIRELESS_HUB_POS.get());
         net.minecraft.resources.ResourceLocation hubDimId = stack.get(Registration.WIRELESS_HUB_DIMENSION.get());
-        boolean hasCraftingUpgrade = Boolean.TRUE.equals(stack.get(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get()));
+        boolean hasCraftingUpgrade =
+                Boolean.TRUE.equals(stack.get(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get()));
         return new OpenPersonalAccessTerminalPacket(niPos, hubPos, hubDimId, hasCraftingUpgrade);
     }
 }
