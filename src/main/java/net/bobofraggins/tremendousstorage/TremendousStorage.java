@@ -7,6 +7,7 @@ import net.bobofraggins.tremendousstorage.external.mekanism.MekanismIntegration;
 import net.bobofraggins.tremendousstorage.external.mobgrindinutils.MobGrindingUtilsIntegration;
 import net.bobofraggins.tremendousstorage.external.productivemetalworks.ProductiveMetalworksIntegration;
 import net.bobofraggins.tremendousstorage.external.structurepoolapi.StructurePoolIntegration;
+import net.bobofraggins.tremendousstorage.glamping.GlampingEvents;
 import net.bobofraggins.tremendousstorage.glamping.GlampingRegistration;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageClientConfig;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig;
@@ -46,6 +47,7 @@ public class TremendousStorage {
         modEventBus.register(ExperienceSyringeEvents.class);
 
         // ── Game-bus registrations (both sides) ──────────────────────────────────
+        NeoForge.EVENT_BUS.register(GlampingEvents.class);
         NeoForge.EVENT_BUS.register(LazuriteEquipmentHandler.class);
         NeoForge.EVENT_BUS.register(VexRepellentEffectHandler.class);
         NeoForge.EVENT_BUS.register(ZombieBrainDropHandler.class);

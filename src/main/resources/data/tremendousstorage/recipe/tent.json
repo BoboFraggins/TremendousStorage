@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " C ",
+    "BFL",
+    "CCC"
+  ],
+  "key": {
+    "C": { "item": "tremendousstorage:canvas_block" },
+    "B": { "tag": "minecraft:beds" },
+    "F": { "item": "minecraft:campfire" },
+    "L": { "item": "minecraft:lantern" }
+  },
+  "result": {
+    "id": "tremendousstorage:tent",
+    "count": 1
+  },
+  "category": "misc"
+}

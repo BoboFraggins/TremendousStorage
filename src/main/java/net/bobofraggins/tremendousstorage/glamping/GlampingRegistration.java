@@ -54,6 +54,23 @@ public class GlampingRegistration {
             .build(null));
 
     // -------------------------------------------------------------------------
+    // Tent block
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<TentBlock> TENT = BLOCKS.register(
+            "tent",
+            () -> new TentBlock(BlockBehaviour.Properties.of()
+                    .strength(0.5f, 0.5f)
+                    .sound(SoundType.WOOL)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<Item, BlockItem> TENT_ITEM = ITEMS.registerSimpleBlockItem("tent", TENT);
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TentBlockEntity>> TENT_BE_TYPE =
+            BLOCK_ENTITY_TYPES.register("tent", () -> BlockEntityType.Builder.of(TentBlockEntity::new, TENT.get())
+                    .build(null));
+
+    // -------------------------------------------------------------------------
     // Sky block
     // -------------------------------------------------------------------------
 
