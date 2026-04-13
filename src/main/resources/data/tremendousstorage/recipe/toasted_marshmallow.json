@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "ingredient": { "item": "tremendousstorage:marshmallow" },
+  "result": {
+    "id": "tremendousstorage:toasted_marshmallow"
+  },
+  "cookingtime": 600,
+  "experience": 0.35
+}

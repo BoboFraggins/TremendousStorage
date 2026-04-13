@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "SSS",
+    "SBS",
+    "SSS"
+  ],
+  "key": {
+    "S": { "item": "minecraft:sugar" },
+    "B": { "item": "tremendousstorage:positive_vibes_bucket" }
+  },
+  "result": {
+    "id": "tremendousstorage:marshmallow",
+    "count": 8
+  },
+  "category": "food"
+}

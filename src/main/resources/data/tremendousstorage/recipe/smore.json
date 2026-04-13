@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    { "item": "tremendousstorage:graham_cracker" },
+    { "item": "tremendousstorage:chocolate_bar" },
+    { "item": "tremendousstorage:toasted_marshmallow" }
+  ],
+  "result": {
+    "id": "tremendousstorage:smore",
+    "count": 4
+  },
+  "category": "food"
+}

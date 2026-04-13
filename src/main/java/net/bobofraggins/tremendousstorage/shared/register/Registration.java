@@ -105,6 +105,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.BlockItem;
@@ -587,6 +588,29 @@ public final class Registration {
 
     public static final DeferredHolder<Item, BrainItem> BRAIN = ITEMS.register("brain", BrainItem::new);
 
+    private static final FoodProperties SNACK_FOOD =
+            new FoodProperties.Builder().nutrition(2).saturationModifier(0.25f).build();
+
+    public static final DeferredHolder<Item, Item> GRAHAM_CRACKER =
+            ITEMS.register("graham_cracker", () -> new Item(new Item.Properties().food(SNACK_FOOD)));
+
+    public static final DeferredHolder<Item, Item> CHOCOLATE_BAR =
+            ITEMS.register("chocolate_bar", () -> new Item(new Item.Properties().food(SNACK_FOOD)));
+
+    public static final DeferredHolder<Item, Item> MARSHMALLOW =
+            ITEMS.register("marshmallow", () -> new Item(new Item.Properties().food(SNACK_FOOD)));
+
+    public static final DeferredHolder<Item, Item> TOASTED_MARSHMALLOW =
+            ITEMS.register("toasted_marshmallow", () -> new Item(new Item.Properties().food(SNACK_FOOD)));
+
+    public static final DeferredHolder<Item, Item> SMORE = ITEMS.register(
+            "smore",
+            () -> new Item(new Item.Properties()
+                    .food(new FoodProperties.Builder()
+                            .nutrition(10)
+                            .saturationModifier(0.25f)
+                            .build())));
+
     public static final DeferredHolder<Item, Item> CANVAS =
             ITEMS.register("canvas", () -> new Item(new Item.Properties()));
 
@@ -993,6 +1017,11 @@ public final class Registration {
                         output.accept(EXPORT_INTERFACE.get());
                         output.accept(ZOMBIE_BRAIN.get());
                         output.accept(BRAIN.get());
+                        output.accept(GRAHAM_CRACKER.get());
+                        output.accept(CHOCOLATE_BAR.get());
+                        output.accept(MARSHMALLOW.get());
+                        output.accept(TOASTED_MARSHMALLOW.get());
+                        output.accept(SMORE.get());
                         output.accept(CANVAS.get());
                         output.accept(CANVAS_BLOCK_ITEM.get());
                         output.accept(TREMENDOUS_BACKPACK.get());
