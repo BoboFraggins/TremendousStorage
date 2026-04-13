@@ -32,34 +32,33 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
     private static final ModelResourceLocation BRIDGE_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_bridge"));
 
-    /** Flywheel rotation pivot in block space (0–1). Centre of flywheel disc at X=3.225, Y=7.6, Z=4.6. */
-    private static final float FW_X = 3.225f / 16f;
+    /** Flywheel rotation pivot — centre of the flywheel disc at X=1.5, Y=7.0, Z=8.0 px. */
+    private static final float FW_X = 1.5f / 16f;
 
-    private static final float FW_Y = 7.6f / 16f;
-    private static final float FW_Z = 4.6f / 16f;
+    private static final float FW_Y = 7.0f / 16f;
+    private static final float FW_Z = 8.0f / 16f;
 
     /**
-     * Max piston retraction in block space (0–1). Piston connector near-face at Z=3.4/16; jacket
-     * inner opening at Z≈7.76/16. Retract up to 4.0/16 leaving small clearance.
+     * Max piston retraction in block space (0–1). Piston slides 4 px into the sheath at peak.
      */
     private static final float MAX_PISTON_RETRACT = 4.0f / 16f;
 
     /**
-     * Flywheel attachment point (centre of the flywheel-side connector's Z=7.55 face) expressed as
-     * an offset relative to the flywheel pivot, in YZ-plane block units (/16).
+     * Flywheel anchor centre offset from the flywheel pivot in the YZ plane.
+     * Anchor centre is at (Y=7.0, Z=11.0), pivot at (Y=7.0, Z=8.0) → dY=0, dZ=+3.
      */
-    private static final float FA_REL_X = (4.8f - 3.225f) / 16f; // 1.575/16
+    private static final float FA_REL_Y = 0.0f; // anchor at same Y as pivot
 
-    private static final float FA_REL_Y = (5.525f - 5.6f) / 16f; // -0.075/16
-    private static final float FA_REL_Z = (7.55f - 4.6f) / 16f; // 2.95/16
+    private static final float FA_REL_Z = 3.0f / 16f; // anchor 3 px ahead of pivot in Z
 
-    /** Bridge model — piston-end face centre in model space. */
-    private static final float BRIDGE_CX = (5.55f + 6.0f) / 2f / 16f; // 5.775/16
+    /** Arm (bridge) model geometry in model space. */
+    private static final float ARM_CX = 4.5f / 16f; // arm centre X  (4.001+4.999)/2
 
-    private static final float BRIDGE_CY = (7.3f + 7.75f) / 2f / 16f; // 7.525/16
-    private static final float BRIDGE_Z0 = 3.15f / 16f; // piston-end Z
-    private static final float BRIDGE_Z1 = 7.65f / 16f; // flywheel-end Z
-    private static final float BRIDGE_REST_LEN = BRIDGE_Z1 - BRIDGE_Z0; // 4.2/16
+    private static final float ARM_CY = 7.0f / 16f; // arm centre Y  (6.501+7.499)/2
+    private static final float ARM_Z0 = 0.5f / 16f; // piston-end Z of arm (≈ 0.499/16)
+    /** Distance in model space from ARM_Z0 to the flywheel-end attachment (Z=11.0 at rest):
+     *  = faZ_rest − ARM_Z0_world = 11.0/16 − 0.5/16 = 10.5/16. Scale = 1 at rest. */
+    private static final float ARM_REST_LEN = 10.5f / 16f;
 
     public StirlingEngineRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -155,36 +154,35 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
                 1f);
         poseStack.popPose();
 
-        // Bridge connector: dynamically repositioned so its two ends stay in contact with the
-        // flywheel-side connector (which rotates) and the piston-side connector (which translates).
+        // Arm connector: dynamically repositioned so its two ends stay in contact with the
+        // flywheel anchor (which rotates) and the piston anchor (which translates).
 
-        // Piston attachment: centre of bridge at its piston-end face, shifted by piston translation.
-        float paX = BRIDGE_CX;
-        float paY = BRIDGE_CY;
-        float paZ = BRIDGE_Z0 + pistonZ;
+        // Piston attachment: arm's piston-end (ARM_Z0) translated with the piston.
+        float paX = ARM_CX;
+        float paY = ARM_CY;
+        float paZ = ARM_Z0 + pistonZ;
 
-        // Flywheel attachment: centre of the flywheel-side connector's Z=7.55 face, rotated with the
-        // flywheel around the flywheel pivot.
+        // Flywheel attachment: anchor centre (dY=0, dZ=+3 from pivot), rotated with the flywheel.
         float faY = FW_Y + FA_REL_Y * cosT - FA_REL_Z * sinT;
         float faZ = FW_Z + FA_REL_Y * sinT + FA_REL_Z * cosT;
 
         float dy = faY - paY;
         float dz = faZ - paZ;
 
-        // Both attachment X values are fixed (flywheel rotates around X axis), so the bridge only
-        // moves in the YZ plane. Ignore dx and rotate purely around the X axis.
+        // Flywheel rotates around the X axis, so both anchor X values are fixed; the arm only
+        // moves in the YZ plane.
         float yzDist = Mth.sqrt(dy * dy + dz * dz);
         if (yzDist > 1e-4f) {
             poseStack.pushPose();
-            // 1. Move local origin to piston attachment (will be the bridge's piston-end pivot).
+            // 1. Move local origin to piston attachment (arm's piston-end pivot).
             poseStack.translate(paX, paY, paZ);
             // 2. Rotate local Z axis in the YZ plane to point toward flywheel attachment.
             float pitch = (float) Math.atan2(-dy, dz);
             poseStack.mulPose(Axis.XP.rotation(pitch));
-            // 3. Scale local Z so bridge spans the YZ distance between the two attachment points.
-            poseStack.scale(1f, 1f, yzDist / BRIDGE_REST_LEN);
-            // 4. Shift bridge model so its piston-end face centre sits at local origin.
-            poseStack.translate(-BRIDGE_CX, -BRIDGE_CY, -BRIDGE_Z0);
+            // 3. Scale local Z so the arm spans the YZ distance between the two attachment points.
+            poseStack.scale(1f, 1f, yzDist / ARM_REST_LEN);
+            // 4. Shift arm model so its piston-end centre sits at local origin.
+            poseStack.translate(-ARM_CX, -ARM_CY, -ARM_Z0);
             renderQuads(
                     consumer,
                     poseStack.last(),
