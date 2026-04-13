@@ -5,6 +5,7 @@ import net.bobofraggins.tremendousstorage.external.mobgrindinutils.XpFluidClient
 import net.bobofraggins.tremendousstorage.glamping.skyblock.SkyBlockClientEvents;
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineClientEvents;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
+import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClientEvents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackClientEvents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackClientTickHandler;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestClientEvents;
@@ -40,6 +41,7 @@ public final class ClientEventRegistrar {
         // ── Mod-bus client events (registration, renderer setup, etc.) ──────────
         modBus.register(StirlingEngineClientEvents.class);
         modBus.register(ChestClientEvents.class);
+        modBus.register(PicnicBasketClientEvents.class);
         modBus.register(BackpackClientEvents.class);
         modBus.register(FilingCabinetClientEvents.class);
         modBus.register(TankClientEvents.class);

@@ -25,7 +25,7 @@ public class CraftingUpgradeItem extends Item {
         BlockEntity be = ctx.getLevel().getBlockEntity(ctx.getClickedPos());
 
         boolean matches = false;
-        if (be instanceof ChestBlockEntity chest && !chest.hasCraftingUpgrade()) {
+        if (be instanceof ChestBlockEntity chest && chest.isUpgradeable() && !chest.hasCraftingUpgrade()) {
             if (!ctx.getLevel().isClientSide()) {
                 chest.setCraftingUpgrade(true);
             }

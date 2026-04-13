@@ -1,0 +1,36 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "tremendousstorage:block/picnic_basket_texture",
+    "texture": "tremendousstorage:block/picnic_basket_texture"
+  },
+  "texture_size": [32, 32],
+  "elements": [
+    {
+      "comment": "right lid inner strip",
+      "from": [7, 6, 5],
+      "to": [8, 7, 11],
+      "faces": {
+        "north": {"uv": [25, 5, 26, 6], "texture": "#texture"},
+        "east":  {"uv": [22, 19, 28, 20], "texture": "#texture"},
+        "south": {"uv": [25, 14, 26, 15], "texture": "#texture"},
+        "west":  {"uv": [0, 23, 6, 24], "texture": "#texture"},
+        "up":    {"uv": [1, 30, 0, 24], "texture": "#texture"},
+        "down":  {"uv": [25, 0, 24, 6], "texture": "#texture"}
+      }
+    },
+    {
+      "comment": "right lid main",
+      "from": [3, 6, 4],
+      "to": [7, 7, 12],
+      "faces": {
+        "north": {"uv": [24, 7, 28, 8], "texture": "#texture"},
+        "east":  {"uv": [20, 20, 28, 21], "texture": "#texture"},
+        "south": {"uv": [24, 13, 28, 14], "texture": "#texture"},
+        "west":  {"uv": [20, 21, 28, 22], "texture": "#texture"},
+        "up":    {"uv": [22, 20, 18, 12], "texture": "#texture"},
+        "down":  {"uv": [24, 0, 20, 8], "texture": "#texture"}
+      }
+    }
+  ]
+}

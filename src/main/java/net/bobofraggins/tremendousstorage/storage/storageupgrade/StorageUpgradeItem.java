@@ -40,7 +40,7 @@ public class StorageUpgradeItem extends Item {
         BlockEntity be = ctx.getLevel().getBlockEntity(ctx.getClickedPos());
 
         boolean matches = false;
-        if (be instanceof ChestBlockEntity bulk && bulk.getTier() == from) {
+        if (be instanceof ChestBlockEntity bulk && bulk.isUpgradeable() && bulk.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 bulk.setTier(to);
             }

@@ -356,6 +356,11 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
     // Priority
     // -------------------------------------------------------------------------
 
+    /** Returns {@code true} if this block entity accepts upgrade items. Subclasses may override to opt out. */
+    public boolean isUpgradeable() {
+        return true;
+    }
+
     public Priority getPriority() {
         return priority;
     }

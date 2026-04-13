@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "tremendousstorage:block/picnic_basket_particle" },
+    "facing=south": { "model": "tremendousstorage:block/picnic_basket_particle", "y": 180 },
+    "facing=east":  { "model": "tremendousstorage:block/picnic_basket_particle", "y": 90 },
+    "facing=west":  { "model": "tremendousstorage:block/picnic_basket_particle", "y": 270 }
+  }
+}

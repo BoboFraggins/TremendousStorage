@@ -359,6 +359,23 @@ public final class Registration {
                                     EnderBackpackBlockEntity::new, ENDER_TREMENDOUS_BACKPACK_BLOCK.get())
                             .build(null));
 
+    public static final DeferredBlock<net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlock>
+            PICNIC_BASKET_BLOCK = BLOCKS.register(
+                    "picnic_basket",
+                    () -> new net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlock(
+                            BlockBehaviour.Properties.of()
+                                    .strength(1.0f, 10.0f)
+                                    .sound(SoundType.WOOD)
+                                    .noOcclusion()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockEntity>>
+            PICNIC_BASKET_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "picnic_basket",
+                    () -> BlockEntityType.Builder.of(
+                                    net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockEntity::new,
+                                    PICNIC_BASKET_BLOCK.get())
+                            .build(null));
+
     // -------------------------------------------------------------------------
     // Storage upgrade items
     // -------------------------------------------------------------------------
@@ -613,6 +630,9 @@ public final class Registration {
 
     public static final DeferredHolder<Item, Item> CANVAS =
             ITEMS.register("canvas", () -> new Item(new Item.Properties()));
+
+    public static final DeferredHolder<Item, BlockItem> PICNIC_BASKET_ITEM =
+            ITEMS.register("picnic_basket", () -> new BlockItem(PICNIC_BASKET_BLOCK.get(), new Item.Properties()));
 
     public static final DeferredHolder<Item, BackpackItem> TREMENDOUS_BACKPACK =
             ITEMS.register("backpack", () -> new BackpackItem(TREMENDOUS_BACKPACK_BLOCK.get()));
@@ -1024,6 +1044,7 @@ public final class Registration {
                         output.accept(SMORE.get());
                         output.accept(CANVAS.get());
                         output.accept(CANVAS_BLOCK_ITEM.get());
+                        output.accept(PICNIC_BASKET_ITEM.get());
                         output.accept(TREMENDOUS_BACKPACK.get());
                         output.accept(ENDER_TREMENDOUS_BACKPACK_ITEM.get());
                         output.accept(HEALING_SALVE_BUCKET.get());
@@ -1087,6 +1108,10 @@ public final class Registration {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 TREMENDOUS_BACKPACK_BE_TYPE.get(),
+                (be, side) -> new ChestItemHandler(be));
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                PICNIC_BASKET_BE_TYPE.get(),
                 (be, side) -> new ChestItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,

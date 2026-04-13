@@ -26,7 +26,7 @@ public class MagnetUpgradeItem extends Item {
         BlockEntity be = ctx.getLevel().getBlockEntity(ctx.getClickedPos());
 
         boolean matches = false;
-        if (be instanceof ChestBlockEntity chest && !chest.hasMagnetUpgrade()) {
+        if (be instanceof ChestBlockEntity chest && chest.isUpgradeable() && !chest.hasMagnetUpgrade()) {
             if (!ctx.getLevel().isClientSide()) {
                 chest.setMagnetUpgrade(true);
             }
