@@ -13,6 +13,7 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
+import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
@@ -20,6 +21,8 @@ import net.bobofraggins.tremendousstorage.storage.tank.TankItemAdapter;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.bobofraggins.tremendousstorage.storage.tube.TubeBlock;
 import net.bobofraggins.tremendousstorage.storage.tube.TubeBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tubeattachments.AttachmentType;
+import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -46,6 +49,13 @@ public final class NetworkInterfaceBFS {
 
     private record HandlerEntry(IItemHandler handler, Priority priority) {}
 
+    /** FE/t cost per attached SAT. */
+    private static final int SAT_COST = 5;
+    /** FE/t cost per Wireless Hub. */
+    private static final int HUB_COST = 25;
+    /** FE/t cost per tube attachment (any type). */
+    private static final int ATTACHMENT_COST = 1;
+
     /**
      * Scans the full network reachable from the Network Interface at {@code niPos}.
      *
@@ -63,6 +73,8 @@ public final class NetworkInterfaceBFS {
         int tubeCount = 0;
         List<String> storageKeys = new ArrayList<>(); // ordered by discovery
         int otherNiCount = 0;
+        // Power accounting
+        int fePerTick = NetworkInterfaceBlockEntity.NI_COST; // base NI cost
 
         // Single shared queue for the whole scan
         Deque<BlockPos> queue = new ArrayDeque<>();
@@ -76,9 +88,18 @@ public final class NetworkInterfaceBFS {
                 queue.add(neighborPos);
             } else if (neighborState.getBlock() instanceof NetworkConnector && collectedStorage.add(neighborPos)) {
                 processNeighbor(level, neighborPos, neighborState, niPos, niDir, null, handlerEntries, storageKeys);
+                // Count power cost for SAT/Wireless Hub directly adjacent to NI
+                if (neighborState.getBlock() instanceof AccessTerminalBlock) {
+                    fePerTick += SAT_COST;
+                } else {
+                    BlockEntity adjBE = level.getBlockEntity(neighborPos);
+                    if (adjBE instanceof WirelessHubBlockEntity) {
+                        fePerTick += HUB_COST;
+                    }
+                }
                 // Bridge through the connector cluster to adjacent tubes of any color
                 if (visitedConnectors.add(neighborPos)) {
-                    bridgeConnectorCluster(
+                    fePerTick += bridgeConnectorCluster(
                             level,
                             neighborPos,
                             niPos,
@@ -103,6 +124,15 @@ public final class NetworkInterfaceBFS {
 
             TubeBlockEntity tubeBE = level.getBlockEntity(pos) instanceof TubeBlockEntity tbe ? tbe : null;
 
+            // Count tube attachment power cost
+            if (tubeBE != null) {
+                for (int i = 0; i < 6; i++) {
+                    if (tubeBE.getAttachmentType(i) != AttachmentType.NONE) {
+                        fePerTick += ATTACHMENT_COST;
+                    }
+                }
+            }
+
             for (Direction dir : Direction.values()) {
                 if (!state.getValue(TubeBlock.DIR_PROPS[dir.ordinal()])) continue;
 
@@ -122,10 +152,20 @@ public final class NetworkInterfaceBFS {
                         otherNiCount++;
                     }
 
+                    // Count SAT and Wireless Hub power cost
+                    if (adjState.getBlock() instanceof AccessTerminalBlock) {
+                        fePerTick += SAT_COST;
+                    } else {
+                        BlockEntity adjBE = adjPos.equals(niPos) ? null : level.getBlockEntity(adjPos);
+                        if (adjBE instanceof WirelessHubBlockEntity) {
+                            fePerTick += HUB_COST;
+                        }
+                    }
+
                     // If this neighbor is a NetworkConnector, bridge through it into
                     // adjacent tubes and connectors of any color
                     if (adjState.getBlock() instanceof NetworkConnector && visitedConnectors.add(adjPos)) {
-                        bridgeConnectorCluster(
+                        fePerTick += bridgeConnectorCluster(
                                 level,
                                 adjPos,
                                 niPos,
@@ -180,6 +220,7 @@ public final class NetworkInterfaceBFS {
                 Collections.unmodifiableNavigableMap(insertBuckets),
                 List.copyOf(blockList),
                 otherNiCount == 0,
+                fePerTick,
                 Set.copyOf(visitedTubes));
     }
 
@@ -191,11 +232,11 @@ public final class NetworkInterfaceBFS {
      * Flood-fills through all directly-adjacent {@link NetworkConnector} blocks reachable from
      * {@code startConnector} without going through tubes. Enqueues any adjacent {@link TubeBlock}s
      * into {@code tubeQueue} and processes each newly-discovered connector via
-     * {@link #processNeighbor}.
+     * {@link #processNeighbor}. Returns the additional FE/t cost for the discovered connectors.
      *
      * <p>{@code startConnector} must already be in {@code visitedConnectors} before calling.
      */
-    private static void bridgeConnectorCluster(
+    private static int bridgeConnectorCluster(
             ServerLevel level,
             BlockPos startConnector,
             BlockPos niPos,
@@ -205,6 +246,7 @@ public final class NetworkInterfaceBFS {
             List<HandlerEntry> handlerEntries,
             List<String> storageKeys,
             Deque<BlockPos> tubeQueue) {
+        int feCost = 0;
         Deque<BlockPos> pending = new ArrayDeque<>();
         pending.add(startConnector);
         while (!pending.isEmpty()) {
@@ -216,12 +258,19 @@ public final class NetworkInterfaceBFS {
                     tubeQueue.add(adj);
                 } else if (adjState.getBlock() instanceof NetworkConnector && collectedStorage.add(adj)) {
                     processNeighbor(level, adj, adjState, niPos, dir, null, handlerEntries, storageKeys);
+                    if (adjState.getBlock() instanceof AccessTerminalBlock) {
+                        feCost += SAT_COST;
+                    } else {
+                        BlockEntity adjBE = level.getBlockEntity(adj);
+                        if (adjBE instanceof WirelessHubBlockEntity) feCost += HUB_COST;
+                    }
                     if (visitedConnectors.add(adj)) {
                         pending.add(adj);
                     }
                 }
             }
         }
+        return feCost;
     }
 
     private static void processNeighbor(

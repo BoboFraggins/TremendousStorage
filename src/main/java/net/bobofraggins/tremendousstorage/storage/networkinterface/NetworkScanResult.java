@@ -15,6 +15,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  *     insert)
  * @param blockList human-readable entries for the UI block list
  * @param isValid {@code true} if exactly one Network Interface is present on the network
+ * @param totalFePerTick total FE/t consumed by all components in this network
  * @param tubePositions all tube block positions visited during the BFS scan (unmodifiable)
  */
 public record NetworkScanResult(
@@ -22,4 +23,5 @@ public record NetworkScanResult(
         NavigableMap<Integer, List<IItemHandler>> insertBuckets,
         List<AttachedEntry> blockList,
         boolean isValid,
+        int totalFePerTick,
         Set<BlockPos> tubePositions) {}

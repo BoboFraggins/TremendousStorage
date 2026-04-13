@@ -63,9 +63,14 @@ import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderExtractRec
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderStorageRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
+import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlock;
+import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlockEntity;
+import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineEnergyHandler;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceMenu;
+import net.bobofraggins.tremendousstorage.storage.networkinterface.NiEnergyHandler;
+import net.bobofraggins.tremendousstorage.storage.tube.TubeEnergyHandler;
 import net.bobofraggins.tremendousstorage.storage.personalaccessterminal.PersonalAccessTerminalItem;
 import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlock;
 import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlockEntity;
@@ -629,6 +634,28 @@ public final class Registration {
             ITEMS.registerSimpleBlockItem("positive_vibes_cauldron", HEALING_SALVE_CAULDRON);
 
     // -------------------------------------------------------------------------
+    // Stirling Engine block + block entity
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<StirlingEngineBlock> STIRLING_ENGINE = BLOCKS.register(
+            "stirling_engine",
+            () -> new StirlingEngineBlock(BlockBehaviour.Properties.of()
+                    .strength(3f, 1000f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)
+                    .noOcclusion()
+                    .lightLevel(state -> 7)));
+
+    public static final DeferredHolder<Item, BlockItem> STIRLING_ENGINE_ITEM = ITEMS.register(
+            "stirling_engine", () -> new TieredBlockItem(STIRLING_ENGINE.get(), new Item.Properties()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StirlingEngineBlockEntity>>
+            STIRLING_ENGINE_BE_TYPE =
+                    BLOCK_ENTITY_TYPES.register("stirling_engine", () -> BlockEntityType.Builder.of(
+                                    StirlingEngineBlockEntity::new, STIRLING_ENGINE.get())
+                            .build(null));
+
+    // -------------------------------------------------------------------------
     // Network Interface block + block entity
     // -------------------------------------------------------------------------
 
@@ -957,6 +984,7 @@ public final class Registration {
                                 output.accept(lazurite.getEssenceItem());
                             }
                         }
+                        output.accept(STIRLING_ENGINE_ITEM.get());
                         output.accept(NETWORK_INTERFACE_ITEM.get());
                         output.accept(STORAGE_ACCESS_TERMINAL_ITEM.get());
                         output.accept(WIRELESS_HUB_ITEM.get());
@@ -1049,7 +1077,13 @@ public final class Registration {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
         event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> new TubeEnergyHandler(be));
+        event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getItemHandler());
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> new NiEnergyHandler(be));
+        event.registerBlockEntity(
+                Capabilities.EnergyStorage.BLOCK, STIRLING_ENGINE_BE_TYPE.get(), (be, side) -> new StirlingEngineEnergyHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 RECYCLING_BIN_BE_TYPE.get(),

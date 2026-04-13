@@ -34,8 +34,23 @@ import net.neoforged.neoforge.items.IItemHandler;
  *
  * <p>Exposes an {@link IItemHandler} capability via {@link NiItemHandler}: insertion uses
  * the highest-priority storage first; extraction drains the lowest-priority storage first.
+ *
+ * <p><b>Power system:</b> The Network Interface stores FE energy and drains it each server
+ * tick proportional to network demand (NI itself, connected SATs, Wireless Hubs, and tube
+ * attachments). When the energy buffer runs out the network becomes inactive and most
+ * functionality stops working. Energy can be supplied by:
+ * <ul>
+ *   <li>The Stirling Engine block (pushes energy into adjacent IEnergyStorage)
+ *   <li>Any energy pipe adjacent to the NI or any tube in the network — tubes expose the
+ *       NI's energy buffer as a shared capability
+ * </ul>
  */
 public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProvider {
+
+    // ---- Power constants ----
+    public static final int MAX_ENERGY = 100_000;
+    /** FE/t consumed by this NI itself. */
+    public static final int NI_COST = 5;
 
     /** Lazily built; {@code null} = stale (topology changed). */
     private NetworkScanResult cachedScan = null;
@@ -55,6 +70,11 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     private long cacheRevision = 0;
 
     private StorageTier tier = StorageTier.WOOD;
+    private int energyStored = 0;
+    /** Whether the network had enough power last tick. Synced to clients. */
+    private boolean powered = false;
+    /** Total FE/t consumed by the network, computed during scan. Synced to clients. */
+    private int totalConsumption = 0;
 
     public NetworkInterfaceBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.NETWORK_INTERFACE_BE_TYPE.get(), pos, state);
@@ -187,12 +207,101 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         return 1 << tier.ordinal();
     }
 
+    // -------------------------------------------------------------------------
+    // Power system
+    // -------------------------------------------------------------------------
+
+    /** Returns how much energy is stored in the NI's buffer. */
+    public int getEnergyStored() {
+        return energyStored;
+    }
+
+    /** Returns the max energy capacity. */
+    public int getMaxEnergy() {
+        return MAX_ENERGY;
+    }
+
+    /**
+     * Returns true if the network is currently powered (had enough energy last tick).
+     * Returns true when not enough data is available (graceful before first tick).
+     */
+    public boolean isPowered() {
+        return powered;
+    }
+
+    /** Total FE/t consumed by all network components. */
+    public int getTotalConsumption() {
+        return totalConsumption;
+    }
+
+    /**
+     * Extracts energy from the NI's buffer for distribution to adjacent machines via tube
+     * attachments. Returns the amount actually extracted.
+     */
+    public int extractEnergyForDistribution(int maxExtract, boolean simulate) {
+        int available = Math.min(maxExtract, energyStored);
+        if (!simulate && available > 0) {
+            energyStored -= available;
+            super.setChanged();
+            if (level != null) {
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
+        }
+        return available;
+    }
+
+    /**
+     * Receives energy into the NI's buffer. Called by external energy sources
+     * (Stirling Engine push, energy pipe injection, etc.).
+     * Returns the amount actually accepted.
+     */
+    public int receiveEnergy(int maxReceive, boolean simulate) {
+        int space = MAX_ENERGY - energyStored;
+        int accepted = Math.min(maxReceive, space);
+        if (!simulate && accepted > 0) {
+            energyStored += accepted;
+            super.setChanged();
+            if (level != null) {
+                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+            }
+        }
+        return accepted;
+    }
+
     /**
      * Called each server tick by {@link NetworkInterfaceBlock#getTicker()}.
-     * Rebuilds the aggregate item cache if contents have changed.
+     * Drains energy for all active network components. If insufficient energy is present,
+     * sets {@code powered = false} (the network becomes inactive).
      */
     public void serverTick() {
         if (level == null || level.isClientSide()) return;
+
+        NetworkScanResult scan = getScan();
+        if (scan == null || !scan.isValid()) {
+            // No valid network — still count base NI cost but mark unpowered
+            int cost = NI_COST;
+            boolean wasPowered = powered;
+            powered = energyStored >= cost;
+            if (powered) energyStored -= cost;
+            totalConsumption = cost;
+            if (powered != wasPowered) setChanged();
+            return;
+        }
+
+        int cost = scan.totalFePerTick();
+        boolean wasPowered = powered;
+        boolean nowPowered = energyStored >= cost;
+        if (nowPowered) {
+            energyStored -= cost;
+        }
+        powered = nowPowered;
+        totalConsumption = cost;
+
+        if (powered != wasPowered) {
+            setChanged();
+        }
+
+        // Rebuild aggregate item cache if contents changed
         if (contentsDirty) {
             rebuildCache();
         }
@@ -273,12 +382,16 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
         tag.putString("Tier", tier.getId());
+        tag.putInt("EnergyStored", energyStored);
+        tag.putBoolean("Powered", powered);
     }
 
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         tier = StorageTier.fromId(tag.getString("Tier"));
+        energyStored = tag.getInt("EnergyStored");
+        powered = tag.getBoolean("Powered");
     }
 
     // -------------------------------------------------------------------------
