@@ -9,6 +9,9 @@ import net.bobofraggins.tremendousstorage.lazurite.LazuriteBarsBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteOreBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuritePaxelItem;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteTier;
+import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlock;
+import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlockEntity;
+import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineEnergyHandler;
 import net.bobofraggins.tremendousstorage.shared.loot.LootModifiers;
 import net.bobofraggins.tremendousstorage.shared.storage.EnderTieredBlockItem;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
@@ -63,14 +66,10 @@ import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderExtractRec
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderStorageRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
-import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlock;
-import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlockEntity;
-import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineEnergyHandler;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceMenu;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiEnergyHandler;
-import net.bobofraggins.tremendousstorage.storage.tube.TubeEnergyHandler;
 import net.bobofraggins.tremendousstorage.storage.personalaccessterminal.PersonalAccessTerminalItem;
 import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlock;
 import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlockEntity;
@@ -87,6 +86,7 @@ import net.bobofraggins.tremendousstorage.storage.tank.TankItem;
 import net.bobofraggins.tremendousstorage.storage.tank.TankItemFluidHandler;
 import net.bobofraggins.tremendousstorage.storage.tube.TubeBlock;
 import net.bobofraggins.tremendousstorage.storage.tube.TubeBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tube.TubeEnergyHandler;
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.ExportInterfaceItem;
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.ExportInterfaceMenu;
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.ImportInterfaceItem;
@@ -646,14 +646,13 @@ public final class Registration {
                     .noOcclusion()
                     .lightLevel(state -> 7)));
 
-    public static final DeferredHolder<Item, BlockItem> STIRLING_ENGINE_ITEM = ITEMS.register(
-            "stirling_engine", () -> new TieredBlockItem(STIRLING_ENGINE.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> STIRLING_ENGINE_ITEM =
+            ITEMS.register("stirling_engine", () -> new TieredBlockItem(STIRLING_ENGINE.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StirlingEngineBlockEntity>>
-            STIRLING_ENGINE_BE_TYPE =
-                    BLOCK_ENTITY_TYPES.register("stirling_engine", () -> BlockEntityType.Builder.of(
-                                    StirlingEngineBlockEntity::new, STIRLING_ENGINE.get())
-                            .build(null));
+            STIRLING_ENGINE_BE_TYPE = BLOCK_ENTITY_TYPES.register("stirling_engine", () -> BlockEntityType.Builder.of(
+                    StirlingEngineBlockEntity::new, STIRLING_ENGINE.get())
+            .build(null));
 
     // -------------------------------------------------------------------------
     // Network Interface block + block entity
@@ -1081,9 +1080,13 @@ public final class Registration {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getItemHandler());
         event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> new NiEnergyHandler(be));
+                Capabilities.EnergyStorage.BLOCK,
+                NETWORK_INTERFACE_BE_TYPE.get(),
+                (be, side) -> new NiEnergyHandler(be));
         event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK, STIRLING_ENGINE_BE_TYPE.get(), (be, side) -> new StirlingEngineEnergyHandler(be));
+                Capabilities.EnergyStorage.BLOCK,
+                STIRLING_ENGINE_BE_TYPE.get(),
+                (be, side) -> new StirlingEngineEnergyHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 RECYCLING_BIN_BE_TYPE.get(),
