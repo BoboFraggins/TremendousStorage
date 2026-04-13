@@ -2,10 +2,10 @@ package net.bobofraggins.tremendousstorage.shared.register;
 
 import net.bobofraggins.tremendousstorage.canvas.CanvasClientEvents;
 import net.bobofraggins.tremendousstorage.external.mobgrindinutils.XpFluidClientEvents;
+import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClientEvents;
 import net.bobofraggins.tremendousstorage.glamping.skyblock.SkyBlockClientEvents;
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineClientEvents;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
-import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClientEvents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackClientEvents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackClientTickHandler;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestClientEvents;

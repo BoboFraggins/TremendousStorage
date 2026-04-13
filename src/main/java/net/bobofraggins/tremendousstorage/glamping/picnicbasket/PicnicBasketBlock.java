@@ -92,9 +92,7 @@ public class PicnicBasketBlock extends BaseEntityBlock {
         return createTickerHelper(
                 type,
                 Registration.PICNIC_BASKET_BE_TYPE.get(),
-                level.isClientSide()
-                        ? PicnicBasketBlockEntity::clientTick
-                        : PicnicBasketBlockEntity::serverTick);
+                level.isClientSide() ? PicnicBasketBlockEntity::clientTick : PicnicBasketBlockEntity::serverTick);
     }
 
     @Override

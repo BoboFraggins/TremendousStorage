@@ -368,13 +368,13 @@ public final class Registration {
                                     .sound(SoundType.WOOD)
                                     .noOcclusion()));
 
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockEntity>>
-            PICNIC_BASKET_BE_TYPE = BLOCK_ENTITY_TYPES.register(
-                    "picnic_basket",
-                    () -> BlockEntityType.Builder.of(
-                                    net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockEntity::new,
-                                    PICNIC_BASKET_BLOCK.get())
-                            .build(null));
+    public static final DeferredHolder<
+                    BlockEntityType<?>,
+                    BlockEntityType<net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockEntity>>
+            PICNIC_BASKET_BE_TYPE = BLOCK_ENTITY_TYPES.register("picnic_basket", () -> BlockEntityType.Builder.of(
+                    net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockEntity::new,
+                    PICNIC_BASKET_BLOCK.get())
+            .build(null));
 
     // -------------------------------------------------------------------------
     // Storage upgrade items
@@ -1110,9 +1110,7 @@ public final class Registration {
                 TREMENDOUS_BACKPACK_BE_TYPE.get(),
                 (be, side) -> new ChestItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                PICNIC_BASKET_BE_TYPE.get(),
-                (be, side) -> new ChestItemHandler(be));
+                Capabilities.ItemHandler.BLOCK, PICNIC_BASKET_BE_TYPE.get(), (be, side) -> new ChestItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 ENDER_TREMENDOUS_CHEST_BE_TYPE.get(),
