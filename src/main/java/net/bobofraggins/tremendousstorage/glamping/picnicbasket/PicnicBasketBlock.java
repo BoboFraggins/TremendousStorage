@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
@@ -35,7 +36,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * plays chest sounds, and animates its two split lids. Contents are saved to the
  * dropped item when broken and restored when placed from an item carrying NBT.
  */
-public class PicnicBasketBlock extends BaseEntityBlock {
+public class PicnicBasketBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<PicnicBasketBlock> CODEC = simpleCodec(PicnicBasketBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
