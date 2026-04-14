@@ -9,6 +9,7 @@ import net.bobofraggins.tremendousstorage.external.productivemetalworks.Producti
 import net.bobofraggins.tremendousstorage.external.structurepoolapi.StructurePoolIntegration;
 import net.bobofraggins.tremendousstorage.glamping.GlampingEvents;
 import net.bobofraggins.tremendousstorage.glamping.GlampingRegistration;
+import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketMagnetHandler;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageClientConfig;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig;
 import net.bobofraggins.tremendousstorage.shared.network.NetworkEvents;
@@ -48,6 +49,7 @@ public class TremendousStorage {
 
         // ── Game-bus registrations (both sides) ──────────────────────────────────
         NeoForge.EVENT_BUS.register(GlampingEvents.class);
+        NeoForge.EVENT_BUS.register(PicnicBasketMagnetHandler.class);
         NeoForge.EVENT_BUS.register(LazuriteEquipmentHandler.class);
         NeoForge.EVENT_BUS.register(VexRepellentEffectHandler.class);
         NeoForge.EVENT_BUS.register(ZombieBrainDropHandler.class);

@@ -49,6 +49,11 @@ public class EnderPicnicBasketBlockEntity extends EnderChestBlockEntity {
         return false;
     }
 
+    @Override
+    protected boolean magnetAccepts(ItemStack stack) {
+        return acceptsItem(stack);
+    }
+
     // -------------------------------------------------------------------------
     // Storage routing — uses EnderPicnicBasketStorage instead of EnderChestStorage
     // -------------------------------------------------------------------------

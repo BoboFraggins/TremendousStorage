@@ -177,8 +177,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
                 if (entity.isRemoved()) continue;
                 ItemStack stack = entity.getItem();
                 if (stack.isEmpty()) continue;
-                StorageKey key = StorageKey.of(stack);
-                if (!be.contains(key)) continue;
+                if (!be.magnetAccepts(stack)) continue;
                 long remainder = be.insert(stack, stack.getCount(), false);
                 if (remainder <= 0) {
                     entity.discard();
@@ -223,6 +222,16 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
      */
     public boolean acceptsItem(ItemStack stack) {
         return !stack.isEmpty();
+    }
+
+    /**
+     * Returns true if the block-magnet should absorb this item entity.
+     *
+     * <p>Default: only items whose type is already stored (prevents the magnet from acting as a
+     * vacuum for unrelated items). Subclasses may override — picnic baskets accept any food.
+     */
+    protected boolean magnetAccepts(ItemStack stack) {
+        return contains(StorageKey.of(stack));
     }
 
     // -------------------------------------------------------------------------
