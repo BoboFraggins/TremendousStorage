@@ -216,11 +216,12 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
     // -------------------------------------------------------------------------
 
     /**
-     * Returns true if the stack qualifies for storage in the Tremendous Chest.
+     * Returns true if the stack qualifies for storage in this container.
      *
      * <p>Accepts any non-empty item regardless of damage, stack size, or component data.
+     * Subclasses may override to restrict accepted items.
      */
-    public static boolean accepts(ItemStack stack) {
+    public boolean acceptsItem(ItemStack stack) {
         return !stack.isEmpty();
     }
 
@@ -277,7 +278,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
      * @return number of items that could NOT be inserted (the remainder).
      */
     public long insert(ItemStack type, long amount, boolean simulate) {
-        if (amount <= 0 || !accepts(type)) return amount;
+        if (amount <= 0 || !acceptsItem(type)) return amount;
 
         long space = getCapacity() - cachedTotalCount;
         if (space <= 0) return amount;

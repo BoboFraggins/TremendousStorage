@@ -47,7 +47,7 @@ public class ChestItemHandler implements IItemHandler, IKeyCounterContributor, I
 
     @Override
     public boolean isItemValid(int slot, ItemStack stack) {
-        return ChestBlockEntity.accepts(stack);
+        return be.acceptsItem(stack);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class ChestItemHandler implements IItemHandler, IKeyCounterContributor, I
 
     @Override
     public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (!ChestBlockEntity.accepts(stack)) return stack;
+        if (!be.acceptsItem(stack)) return stack;
 
         long remainder = be.insert(stack, stack.getCount(), simulate);
         if (remainder == stack.getCount()) return stack;

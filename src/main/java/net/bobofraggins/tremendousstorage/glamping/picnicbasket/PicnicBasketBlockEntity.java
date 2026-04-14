@@ -4,12 +4,14 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -29,6 +31,11 @@ public class PicnicBasketBlockEntity extends ChestBlockEntity {
     @Override
     public Component getDisplayName() {
         return Component.translatable("block.tremendousstorage.picnic_basket");
+    }
+
+    @Override
+    public boolean acceptsItem(ItemStack stack) {
+        return !stack.isEmpty() && stack.has(DataComponents.FOOD);
     }
 
     @Override
