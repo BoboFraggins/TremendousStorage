@@ -5,6 +5,9 @@ import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.experiencesyringe.ExperienceSyringeItem;
 import net.bobofraggins.tremendousstorage.external.exdeorum.ExDeorumIntegration;
 import net.bobofraggins.tremendousstorage.external.exnihilosequentia.ExNihiloSequentiaIntegration;
+import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlock;
+import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlockEntity;
+import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketSmithingRecipe;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteBarsBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteOreBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuritePaxelItem;
@@ -634,6 +637,22 @@ public final class Registration {
     public static final DeferredHolder<Item, BlockItem> PICNIC_BASKET_ITEM =
             ITEMS.register("picnic_basket", () -> new BlockItem(PICNIC_BASKET_BLOCK.get(), new Item.Properties()));
 
+    public static final DeferredBlock<EnderPicnicBasketBlock> ENDER_PICNIC_BASKET_BLOCK = BLOCKS.register(
+            "ender_picnic_basket",
+            () -> new EnderPicnicBasketBlock(BlockBehaviour.Properties.of()
+                    .strength(1.0f, 10.0f)
+                    .sound(SoundType.WOOD)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<Item, BlockItem> ENDER_PICNIC_BASKET_ITEM = ITEMS.register(
+            "ender_picnic_basket", () -> new BlockItem(ENDER_PICNIC_BASKET_BLOCK.get(), new Item.Properties()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderPicnicBasketBlockEntity>>
+            ENDER_PICNIC_BASKET_BE_TYPE =
+                    BLOCK_ENTITY_TYPES.register("ender_picnic_basket", () -> BlockEntityType.Builder.of(
+                                    EnderPicnicBasketBlockEntity::new, ENDER_PICNIC_BASKET_BLOCK.get())
+                            .build(null));
+
     public static final DeferredHolder<Item, BackpackItem> TREMENDOUS_BACKPACK =
             ITEMS.register("backpack", () -> new BackpackItem(TREMENDOUS_BACKPACK_BLOCK.get()));
 
@@ -968,6 +987,22 @@ public final class Registration {
                         }
                     });
 
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderPicnicBasketSmithingRecipe>>
+            ENDER_PICNIC_BASKET_SMITHING_RECIPE =
+                    RECIPE_SERIALIZERS.register("ender_picnic_basket_smithing", () -> new RecipeSerializer<>() {
+                        @Override
+                        public com.mojang.serialization.MapCodec<EnderPicnicBasketSmithingRecipe> codec() {
+                            return EnderPicnicBasketSmithingRecipe.CODEC;
+                        }
+
+                        @Override
+                        public net.minecraft.network.codec.StreamCodec<
+                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderPicnicBasketSmithingRecipe>
+                                streamCodec() {
+                            return EnderPicnicBasketSmithingRecipe.STREAM_CODEC;
+                        }
+                    });
+
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StorageSmithingUpgradeRecipe>>
             STORAGE_SMITHING_UPGRADE_RECIPE =
                     RECIPE_SERIALIZERS.register("storage_smithing_upgrade", () -> new RecipeSerializer<>() {
@@ -1045,6 +1080,7 @@ public final class Registration {
                         output.accept(CANVAS.get());
                         output.accept(CANVAS_BLOCK_ITEM.get());
                         output.accept(PICNIC_BASKET_ITEM.get());
+                        output.accept(ENDER_PICNIC_BASKET_ITEM.get());
                         output.accept(TREMENDOUS_BACKPACK.get());
                         output.accept(ENDER_TREMENDOUS_BACKPACK_ITEM.get());
                         output.accept(HEALING_SALVE_BUCKET.get());
@@ -1111,6 +1147,10 @@ public final class Registration {
                 (be, side) -> new ChestItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, PICNIC_BASKET_BE_TYPE.get(), (be, side) -> new ChestItemHandler(be));
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ENDER_PICNIC_BASKET_BE_TYPE.get(),
+                (be, side) -> new ChestItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 ENDER_TREMENDOUS_CHEST_BE_TYPE.get(),

@@ -15,6 +15,7 @@ public final class PicnicBasketClientEvents {
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(Registration.PICNIC_BASKET_BE_TYPE.get(), PicnicBasketRenderer::new);
+        event.registerBlockEntityRenderer(Registration.ENDER_PICNIC_BASKET_BE_TYPE.get(), PicnicBasketRenderer::new);
     }
 
     @SubscribeEvent
