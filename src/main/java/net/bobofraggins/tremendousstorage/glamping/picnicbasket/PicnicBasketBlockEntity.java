@@ -1,5 +1,6 @@
 package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 
+import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
@@ -10,7 +11,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -26,6 +26,7 @@ public class PicnicBasketBlockEntity extends ChestBlockEntity {
 
     public PicnicBasketBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.PICNIC_BASKET_BE_TYPE.get(), pos, state);
+        setPriority(Priority.HIGH);
     }
 
     @Override
@@ -45,7 +46,20 @@ public class PicnicBasketBlockEntity extends ChestBlockEntity {
 
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
-        ContainerData data = new SimpleContainerData(1);
+        ContainerData data = new ContainerData() {
+            @Override
+            public int get(int index) {
+                return index == 0 ? getPriority().ordinal() : 0;
+            }
+
+            @Override
+            public void set(int index, int value) {}
+
+            @Override
+            public int getCount() {
+                return 1;
+            }
+        };
         return new ChestMenu(id, inv, worldPosition, data, false);
     }
 
