@@ -6,6 +6,7 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 public class TremendousStorageConfig {
 
     public static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.BooleanValue BONUS_CHEST_LOOT_ENABLED;
     public static final ModConfigSpec.BooleanValue STIRLING_ENGINE_ENABLED;
     public static final ModConfigSpec.DoubleValue TIER_UPGRADE_POWER_MULT;
     public static final ModConfigSpec.DoubleValue HAARP_UPGRADE_POWER_MULT;
@@ -13,6 +14,11 @@ public class TremendousStorageConfig {
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+        builder.push("loot");
+        BONUS_CHEST_LOOT_ENABLED = builder.comment(
+                        "Add a Picnic Basket and s'mores to the spawn bonus chest. Default: true.")
+                .define("bonusChestLootEnabled", true);
+        builder.pop();
         builder.push("power");
         STIRLING_ENGINE_ENABLED = builder.comment(
                         "Enable the Stirling Engine block (heat-to-RF generator). Default: true.")

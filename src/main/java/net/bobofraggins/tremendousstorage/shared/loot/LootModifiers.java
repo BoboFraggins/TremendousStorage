@@ -31,6 +31,9 @@ public class LootModifiers {
     public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<AnyChestModifier>>
             ANY_CHEST_SECRETS = GLM_SERIALIZERS.register("any_chest_secrets", () -> AnyChestModifier.CODEC);
 
+    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<SpawnBonusChestModifier>>
+            SPAWN_BONUS_CHEST = GLM_SERIALIZERS.register("spawn_bonus_chest", () -> SpawnBonusChestModifier.CODEC);
+
     public static void register(IEventBus modBus) {
         GLM_SERIALIZERS.register(modBus);
     }
