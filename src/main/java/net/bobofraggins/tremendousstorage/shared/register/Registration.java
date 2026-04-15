@@ -5,6 +5,7 @@ import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.experiencesyringe.ExperienceSyringeItem;
 import net.bobofraggins.tremendousstorage.external.exdeorum.ExDeorumIntegration;
 import net.bobofraggins.tremendousstorage.external.exnihilosequentia.ExNihiloSequentiaIntegration;
+import net.bobofraggins.tremendousstorage.glamping.GlampingRegistration;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlock;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlockEntity;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketSmithingRecipe;
@@ -1088,6 +1089,7 @@ public final class Registration {
                         output.accept(SMORE.get());
                         output.accept(CANVAS.get());
                         output.accept(CANVAS_BLOCK_ITEM.get());
+                        output.accept(GlampingRegistration.TENT_ITEM.get());
                         output.accept(PICNIC_BASKET_ITEM.get());
                         output.accept(ENDER_PICNIC_BASKET_ITEM.get());
                         output.accept(TREMENDOUS_BACKPACK.get());
