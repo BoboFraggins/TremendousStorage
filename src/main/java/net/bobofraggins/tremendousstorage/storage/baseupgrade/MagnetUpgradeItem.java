@@ -1,7 +1,5 @@
 package net.bobofraggins.tremendousstorage.storage.baseupgrade;
 
-import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlockEntity;
-import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.minecraft.world.InteractionResult;
@@ -31,16 +29,6 @@ public class MagnetUpgradeItem extends Item {
         if (be instanceof ChestBlockEntity chest && chest.isUpgradeable() && !chest.hasMagnetUpgrade()) {
             if (!ctx.getLevel().isClientSide()) {
                 chest.setMagnetUpgrade(true);
-            }
-            matches = true;
-        } else if (be instanceof EnderPicnicBasketBlockEntity basket && !basket.hasMagnetUpgrade()) {
-            if (!ctx.getLevel().isClientSide()) {
-                basket.setMagnetUpgrade(true);
-            }
-            matches = true;
-        } else if (be instanceof PicnicBasketBlockEntity basket && !basket.hasMagnetUpgrade()) {
-            if (!ctx.getLevel().isClientSide()) {
-                basket.setMagnetUpgrade(true);
             }
             matches = true;
         } else if (be instanceof FilingCabinetBlockEntity cabinet && !cabinet.hasMagnetUpgrade()) {

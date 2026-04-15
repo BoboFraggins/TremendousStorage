@@ -41,11 +41,6 @@ public class PicnicBasketBlockEntity extends ChestBlockEntity {
     }
 
     @Override
-    protected boolean magnetAccepts(ItemStack stack) {
-        return acceptsItem(stack);
-    }
-
-    @Override
     public boolean isUpgradeable() {
         return false;
     }
