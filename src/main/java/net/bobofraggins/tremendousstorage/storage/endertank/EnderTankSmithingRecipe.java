@@ -21,10 +21,12 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  */
 public class EnderTankSmithingRecipe extends AbstractEnderSmithingRecipe {
 
-    public static final MapCodec<EnderTankSmithingRecipe> CODEC = MapCodec.unit(new EnderTankSmithingRecipe());
+    private static final EnderTankSmithingRecipe INSTANCE = new EnderTankSmithingRecipe();
+
+    public static final MapCodec<EnderTankSmithingRecipe> CODEC = MapCodec.unit(INSTANCE);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, EnderTankSmithingRecipe> STREAM_CODEC =
-            StreamCodec.unit(new EnderTankSmithingRecipe());
+            StreamCodec.unit(INSTANCE);
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {

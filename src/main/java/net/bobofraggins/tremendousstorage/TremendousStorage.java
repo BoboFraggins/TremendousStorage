@@ -44,7 +44,7 @@ public class TremendousStorage {
 
         // ── Mod-bus registrations (both sides) ───────────────────────────────────
         modEventBus.register(NetworkEvents.class);
-        modEventBus.register(VexRepellentBrewingRecipes.class);
+        NeoForge.EVENT_BUS.register(VexRepellentBrewingRecipes.class);
         modEventBus.register(ExperienceSyringeEvents.class);
 
         // ── Game-bus registrations (both sides) ──────────────────────────────────

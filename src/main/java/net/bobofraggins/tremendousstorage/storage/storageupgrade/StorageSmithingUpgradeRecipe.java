@@ -36,11 +36,12 @@ import net.minecraft.world.level.Level;
  */
 public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
 
-    public static final MapCodec<StorageSmithingUpgradeRecipe> CODEC =
-            MapCodec.unit(new StorageSmithingUpgradeRecipe());
+    private static final StorageSmithingUpgradeRecipe INSTANCE = new StorageSmithingUpgradeRecipe();
+
+    public static final MapCodec<StorageSmithingUpgradeRecipe> CODEC = MapCodec.unit(INSTANCE);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, StorageSmithingUpgradeRecipe> STREAM_CODEC =
-            StreamCodec.unit(new StorageSmithingUpgradeRecipe());
+            StreamCodec.unit(INSTANCE);
 
     @Override
     public boolean isTemplateIngredient(ItemStack stack) {
@@ -141,8 +142,7 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         return item == Registration.TREMENDOUS_CHEST_ITEM.get()
                 || item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
                 || item instanceof BackpackItem // covers both ender and regular backpack
-                || item == Registration.STORAGE_ACCESS_TERMINAL_ITEM.get()
-                || item == Registration.WIRELESS_SAT.get();
+                || item == Registration.STORAGE_ACCESS_TERMINAL_ITEM.get();
     }
 
     private static boolean alreadyHasCraftingUpgrade(ItemStack stack) {
@@ -197,6 +197,8 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         return item == Registration.TREMENDOUS_CHEST_ITEM.get()
                 || item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
                 || item instanceof BackpackItem
+                || item == Registration.TANK_ITEM.get()
+                || item == Registration.ENDER_TANK_ITEM.get()
                 || item == Registration.FILING_CABINET_ITEM.get();
     }
 
@@ -215,7 +217,14 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     }
 
     private static boolean isPullerUpgradeTarget(Item item) {
-        return item == Registration.TREMENDOUS_CHEST_ITEM.get() || item == Registration.FILING_CABINET_ITEM.get();
+        return item == Registration.TREMENDOUS_CHEST_ITEM.get()
+                || item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
+                || item instanceof BackpackItem
+                || item == Registration.TANK_ITEM.get()
+                || item == Registration.ENDER_TANK_ITEM.get()
+                || item == Registration.PICNIC_BASKET_ITEM.get()
+                || item == Registration.ENDER_PICNIC_BASKET_ITEM.get()
+                || item == Registration.FILING_CABINET_ITEM.get();
     }
 
     private static boolean alreadyHasPullerUpgrade(ItemStack stack) {

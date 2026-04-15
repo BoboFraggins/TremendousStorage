@@ -1,10 +1,6 @@
 package net.bobofraggins.tremendousstorage.glamping.skyblock;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -16,24 +12,14 @@ public class SkyBlockClientEvents {
 
     @SubscribeEvent
     public static void registerRenderTypes(RegisterNamedRenderTypesEvent event) {
-        // Writes only to the depth buffer.  The sky/void background that the engine
-        // renders before terrain shows through at these pixels; the depth value prevents
-        // any geometry behind the block from appearing.
-        RenderType depthOnly = RenderType.create(
-                "tremendousstorage:sky_block",
-                DefaultVertexFormat.BLOCK,
-                VertexFormat.Mode.QUADS,
-                2097152,
-                false,
-                false,
-                RenderType.CompositeState.builder()
-                        .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getRendertypeSolidShader))
-                        .setTextureState(RenderStateShard.BLOCK_SHEET_MIPPED)
-                        .setWriteMaskState(RenderStateShard.DEPTH_WRITE)
-                        .setLightmapState(RenderStateShard.LIGHTMAP)
-                        .createCompositeState(true));
-
+        // NeoForge 21.1.224+ requires the block render type to be a chunk buffer layer.
+        // The original depth-only render type is no longer allowed here; cutout is the
+        // closest standard type (transparent texture pixels will be discarded).
+        ResourceLocation skyBlockTexture =
+                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "textures/block/sky_block.png");
         event.register(
-                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "sky_block"), depthOnly, depthOnly);
+                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "sky_block"),
+                RenderType.cutout(),
+                RenderType.entityCutout(skyBlockTexture));
     }
 }

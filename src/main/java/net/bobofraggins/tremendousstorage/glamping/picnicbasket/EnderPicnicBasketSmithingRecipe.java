@@ -21,11 +21,12 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  */
 public class EnderPicnicBasketSmithingRecipe extends AbstractEnderSmithingRecipe {
 
-    public static final MapCodec<EnderPicnicBasketSmithingRecipe> CODEC =
-            MapCodec.unit(new EnderPicnicBasketSmithingRecipe());
+    private static final EnderPicnicBasketSmithingRecipe INSTANCE = new EnderPicnicBasketSmithingRecipe();
+
+    public static final MapCodec<EnderPicnicBasketSmithingRecipe> CODEC = MapCodec.unit(INSTANCE);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, EnderPicnicBasketSmithingRecipe> STREAM_CODEC =
-            StreamCodec.unit(new EnderPicnicBasketSmithingRecipe());
+            StreamCodec.unit(INSTANCE);
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {

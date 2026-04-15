@@ -23,10 +23,12 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
  */
 public class EnderBackpackSmithingRecipe extends AbstractEnderSmithingRecipe {
 
-    public static final MapCodec<EnderBackpackSmithingRecipe> CODEC = MapCodec.unit(new EnderBackpackSmithingRecipe());
+    private static final EnderBackpackSmithingRecipe INSTANCE = new EnderBackpackSmithingRecipe();
+
+    public static final MapCodec<EnderBackpackSmithingRecipe> CODEC = MapCodec.unit(INSTANCE);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, EnderBackpackSmithingRecipe> STREAM_CODEC =
-            StreamCodec.unit(new EnderBackpackSmithingRecipe());
+            StreamCodec.unit(INSTANCE);
 
     @Override
     public boolean isBaseIngredient(ItemStack stack) {
@@ -77,6 +79,21 @@ public class EnderBackpackSmithingRecipe extends AbstractEnderSmithingRecipe {
     @Override
     public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider registries) {
         return new ItemStack(Registration.ENDER_TREMENDOUS_BACKPACK_ITEM.get());
+    }
+
+    @Override
+    protected ItemStack makeSecondEnderItem(ItemStack second) {
+        // Strip instance upgrade flags from BLOCK_ENTITY_DATA (crafting, magnet, puller).
+        second = super.makeSecondEnderItem(second);
+        // Also strip from the BackpackContents item component, which mirrors the crafting flag.
+        BackpackContents contents = second.get(Registration.TREMENDOUS_BACKPACK_CONTENTS.get());
+        if (contents != null && contents.hasCraftingUpgrade()) {
+            second.set(
+                    Registration.TREMENDOUS_BACKPACK_CONTENTS.get(),
+                    new BackpackContents(
+                            contents.entries(), contents.tier(), contents.priority(), contents.sortMode(), false));
+        }
+        return second;
     }
 
     @Override
