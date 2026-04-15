@@ -110,7 +110,8 @@ public class EnderPicnicBasketBlockEntity extends EnderChestBlockEntity {
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.tremendousstorage.ender_picnic_basket");
+        Component base = Component.translatable("block.tremendousstorage.ender_picnic_basket");
+        return base.copy().append(Component.literal(buildSuffix(false)));
     }
 
     @Override

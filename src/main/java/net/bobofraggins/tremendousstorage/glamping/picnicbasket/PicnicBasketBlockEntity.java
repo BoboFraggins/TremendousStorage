@@ -31,7 +31,8 @@ public class PicnicBasketBlockEntity extends ChestBlockEntity {
 
     @Override
     public Component getDisplayName() {
-        return Component.translatable("block.tremendousstorage.picnic_basket");
+        Component base = Component.translatable("block.tremendousstorage.picnic_basket");
+        return base.copy().append(Component.literal(buildSuffix(false)));
     }
 
     @Override
