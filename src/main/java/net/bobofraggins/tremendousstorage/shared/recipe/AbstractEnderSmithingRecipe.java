@@ -4,7 +4,10 @@ import java.security.SecureRandom;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.level.Level;
@@ -73,9 +76,31 @@ public abstract class AbstractEnderSmithingRecipe implements SmithingRecipe {
         long linkId = PENDING_LINK.get()[0];
         if (linkId != -1L) {
             PENDING_LINK.get()[0] = -1L;
-            remaining.set(1, isAlreadyEnder(input.base()) ? input.base().copy() : makeEnderItem(input.base(), linkId));
+            ItemStack second = isAlreadyEnder(input.base()) ? input.base().copy() : makeEnderItem(input.base(), linkId);
+            remaining.set(1, makeSecondEnderItem(second));
         }
         return remaining;
+    }
+
+    /**
+     * Post-processes the second linked item before it is returned to the player.
+     *
+     * <p>Instance-specific upgrades (crafting, magnet, puller) are stripped so only the
+     * item that was actually upgraded retains them. Tier is left intact because it is a
+     * shared property that applies to both linked instances.
+     *
+     * <p>Subclasses may override to handle additional item-form components (e.g. BackpackContents).
+     */
+    protected ItemStack makeSecondEnderItem(ItemStack second) {
+        CustomData data = second.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data == null) return second;
+        CompoundTag tag = data.copyTag();
+        tag.remove("CraftingUpgrade");
+        tag.remove("MagnetUpgrade");
+        tag.remove("PullerUpgrade");
+        tag.remove("PullerSides");
+        second.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        return second;
     }
 
     // -------------------------------------------------------------------------

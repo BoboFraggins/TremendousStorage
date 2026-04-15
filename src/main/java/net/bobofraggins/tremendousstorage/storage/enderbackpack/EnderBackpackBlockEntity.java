@@ -50,16 +50,6 @@ public class EnderBackpackBlockEntity extends EnderChestBlockEntity {
     }
 
     @Override
-    protected void syncCraftingUpgradeToStorage() {
-        long linkId = getLinkId();
-        if (linkId == -1L || level == null || level.isClientSide()) return;
-        MinecraftServer server = level.getServer();
-        if (server != null) {
-            EnderBackpackStorage.get(server).setCraftingUpgrade(linkId);
-        }
-    }
-
-    @Override
     protected void loadFromStorage() {
         long linkId = getLinkId();
         if (linkId == -1L || level == null || level.isClientSide()) return;
@@ -75,14 +65,8 @@ public class EnderBackpackBlockEntity extends EnderChestBlockEntity {
             } else {
                 setTierSilent(storageTier); // apply without re-syncing to storage
             }
-            // Crafting upgrade: OR logic — once any linked copy has it, all get it.
-            if (storage.hasCraftingUpgrade(linkId)) {
-                super.setCraftingUpgrade(true); // silent; storage already has it
-            } else if (hasCraftingUpgrade()) {
-                storage.setCraftingUpgrade(linkId); // push local upgrade to storage
-            }
         } else {
-            storage.initLink(linkId, saveTypes(level.registryAccess()), getTier(), hasCraftingUpgrade());
+            storage.initLink(linkId, saveTypes(level.registryAccess()), getTier());
         }
         lastKnownVersion = storage.getVersion(linkId);
     }

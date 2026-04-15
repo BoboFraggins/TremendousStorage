@@ -1,19 +1,20 @@
 package net.bobofraggins.tremendousstorage.storage.baseupgrade;
 
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
- * Upgrade item that grants a puller ability to Tremendous Chests and Filing Cabinets.
+ * Upgrade item that grants a puller ability to Tremendous Chests, Tremendous Backpacks,
+ * Picnic Baskets, Tremendous Tanks, and Filing Cabinets (and their Ender variants).
  *
  * <p>Right-clicking on a supported block applies the upgrade, consuming the item.
  * Once upgraded, the block's config UI shows six side-toggle buttons to configure
- * which faces the puller should pull items from.
+ * which faces the puller should pull from.
  */
 public class PullerUpgradeItem extends Item {
 
@@ -23,20 +24,20 @@ public class PullerUpgradeItem extends Item {
 
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
-        var block = ctx.getLevel().getBlockState(ctx.getClickedPos()).getBlock();
         BlockEntity be = ctx.getLevel().getBlockEntity(ctx.getClickedPos());
 
         boolean matches = false;
-        if (block == Registration.TREMENDOUS_CHEST.get()
-                && be instanceof ChestBlockEntity chest
-                && !chest.hasPullerUpgrade()) {
+        if (be instanceof ChestBlockEntity chest && !chest.hasPullerUpgrade()) {
             if (!ctx.getLevel().isClientSide()) {
                 chest.setPullerUpgrade(true);
             }
             matches = true;
-        } else if (block == Registration.FILING_CABINET.get()
-                && be instanceof FilingCabinetBlockEntity cabinet
-                && !cabinet.hasPullerUpgrade()) {
+        } else if (be instanceof TankBlockEntity tank && !tank.hasPullerUpgrade()) {
+            if (!ctx.getLevel().isClientSide()) {
+                tank.setPullerUpgrade(true);
+            }
+            matches = true;
+        } else if (be instanceof FilingCabinetBlockEntity cabinet && !cabinet.hasPullerUpgrade()) {
             if (!ctx.getLevel().isClientSide()) {
                 cabinet.setPullerUpgrade(true);
             }

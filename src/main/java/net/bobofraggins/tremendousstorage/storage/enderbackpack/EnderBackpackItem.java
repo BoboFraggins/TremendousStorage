@@ -73,17 +73,11 @@ public class EnderBackpackItem extends BackpackItem {
             } else if (storageTier.ordinal() > contents.tier().ordinal()) {
                 contents = contents.withTier(storageTier);
             }
-            // Crafting upgrade: OR logic — once any linked copy has it, all get it.
-            if (storage.hasCraftingUpgrade(linkId)) {
-                contents = contents.withCraftingUpgrade();
-            } else if (contents.hasCraftingUpgrade()) {
-                storage.setCraftingUpgrade(linkId);
-            }
         } else {
             // First open — seed storage with current contents and tier
             ListTag initial =
                     EnderBackpackMenu.contentsToListTag(contents, player.level().registryAccess());
-            storage.initLink(linkId, initial, contents.tier(), contents.hasCraftingUpgrade());
+            storage.initLink(linkId, initial, contents.tier());
         }
         // Write the freshened contents back onto the item before opening the menu
         backpackStack.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), contents);

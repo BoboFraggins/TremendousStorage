@@ -74,7 +74,7 @@ public class PicnicBasketBlockEntity extends ChestBlockEntity {
                 return 1;
             }
         };
-        return new ChestMenu(id, inv, worldPosition, data, false);
+        return new ChestMenu(id, inv, worldPosition, data, false, hasPullerUpgrade());
     }
 
     // -------------------------------------------------------------------------

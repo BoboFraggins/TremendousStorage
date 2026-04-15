@@ -3,8 +3,10 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsMenu;
+import net.bobofraggins.tremendousstorage.shared.util.PullerUtil;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiLink;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
@@ -15,6 +17,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -22,6 +25,8 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -58,6 +63,15 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
     private long amount = 0L;
     private boolean voidExcess = false;
     private StorageTier tier = StorageTier.WOOD;
+
+    private boolean hasPullerUpgrade = false;
+    private boolean hasMagnetUpgrade = false;
+    private int pullerSides = 0;
+    private int pullerTickCounter = 0;
+
+    private static final int PULL_TICKS = 4;
+    /** mB pulled per tick per side when the puller upgrade is active. */
+    private static final long PULL_AMOUNT_MB = 4_000L;
 
     public TankBlockEntity(BlockPos pos, BlockState state) {
         this(Registration.TANK_BE_TYPE.get(), pos, state);
@@ -205,6 +219,101 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
             net.minecraft.world.level.block.state.BlockState state,
             TankBlockEntity be) {
         be.tickFluidTransfer();
+        if (be.hasPullerUpgrade && be.pullerSides != 0 && ++be.pullerTickCounter >= PULL_TICKS) {
+            be.pullerTickCounter = 0;
+            be.tickFluidPuller(level, pos, state);
+        }
+        if (be.hasMagnetUpgrade) {
+            be.tickFluidMagnet(level, pos);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Puller / magnet tick
+    // -------------------------------------------------------------------------
+
+    private void tickFluidPuller(net.minecraft.world.level.Level level, BlockPos pos, BlockState state) {
+        Direction facing = state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)
+                ? state.getValue(BlockStateProperties.HORIZONTAL_FACING)
+                : Direction.NORTH;
+        for (int bit = 0; bit < 6; bit++) {
+            if ((pullerSides & (1 << bit)) == 0) continue;
+            Direction worldDir = PullerUtil.bitToWorldDir(bit, facing);
+            BlockPos adjacentPos = pos.relative(worldDir);
+            IFluidHandler handler =
+                    level.getCapability(Capabilities.FluidHandler.BLOCK, adjacentPos, worldDir.getOpposite());
+            if (handler == null) continue;
+            for (int t = 0; t < handler.getTanks(); t++) {
+                FluidStack fluid = handler.getFluidInTank(t);
+                if (fluid.isEmpty()) continue;
+                if (!storedFluid.isEmpty() && !FluidStack.isSameFluidSameComponents(storedFluid, fluid)) continue;
+                long space = getCapacity() - amount;
+                if (space <= 0) return;
+                int toPull = (int) Math.min(PULL_AMOUNT_MB, Math.min(space, Integer.MAX_VALUE));
+                FluidStack drained = handler.drain(fluid.copyWithAmount(toPull), IFluidHandler.FluidAction.EXECUTE);
+                if (!drained.isEmpty()) {
+                    insert(drained, drained.getAmount(), false);
+                }
+                break; // one tank per side per tick
+            }
+        }
+    }
+
+    private void tickFluidMagnet(net.minecraft.world.level.Level level, BlockPos pos) {
+        AABB searchArea = new AABB(pos).inflate(3);
+        for (ItemEntity entity : level.getEntitiesOfClass(ItemEntity.class, searchArea)) {
+            if (entity.isRemoved()) continue;
+            if (getCapacity() - amount <= 0) break;
+            ItemStack stack = entity.getItem();
+            if (stack.isEmpty()) continue;
+            IFluidHandlerItem handler = stack.copy().getCapability(Capabilities.FluidHandler.ITEM);
+            if (handler == null) continue;
+            FluidStack contained = handler.getFluidInTank(0);
+            if (contained.isEmpty()) continue;
+            if (!storedFluid.isEmpty() && !FluidStack.isSameFluidSameComponents(storedFluid, contained)) continue;
+            long space = getCapacity() - amount;
+            int toDrain = (int) Math.min(contained.getAmount(), Math.min(space, Integer.MAX_VALUE));
+            FluidStack drained = handler.drain(toDrain, IFluidHandler.FluidAction.EXECUTE);
+            if (drained.isEmpty()) continue;
+            insert(drained, drained.getAmount(), false);
+            ItemStack remainder = handler.getContainer();
+            if (remainder.isEmpty()) {
+                entity.discard();
+            } else {
+                entity.setItem(remainder);
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Puller / magnet accessors
+    // -------------------------------------------------------------------------
+
+    public boolean hasPullerUpgrade() {
+        return hasPullerUpgrade;
+    }
+
+    public void setPullerUpgrade(boolean value) {
+        hasPullerUpgrade = value;
+        setChanged();
+    }
+
+    public int getPullerSides() {
+        return pullerSides;
+    }
+
+    public void setPullerSides(int mask) {
+        pullerSides = mask;
+        setChanged();
+    }
+
+    public boolean hasMagnetUpgrade() {
+        return hasMagnetUpgrade;
+    }
+
+    public void setMagnetUpgrade(boolean value) {
+        hasMagnetUpgrade = value;
+        setChanged();
     }
 
     private void tickFluidTransfer() {
@@ -290,6 +399,11 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
         tag.putLong(TAG_AMOUNT, amount);
         tag.putBoolean(TAG_VOID_EXCESS, voidExcess);
         tag.putString(TAG_TIER, tier.getId());
+        if (hasMagnetUpgrade) tag.putBoolean("MagnetUpgrade", true);
+        if (hasPullerUpgrade) {
+            tag.putBoolean("PullerUpgrade", true);
+            tag.putInt("PullerSides", pullerSides);
+        }
         net.minecraft.nbt.CompoundTag transferTag = new net.minecraft.nbt.CompoundTag();
         ItemStack in = transferContainer.getItem(0);
         ItemStack out = transferContainer.getItem(1);
@@ -303,6 +417,9 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
         super.loadAdditional(tag, registries);
         voidExcess = tag.getBoolean(TAG_VOID_EXCESS);
         tier = StorageTier.fromId(tag.getString(TAG_TIER));
+        hasMagnetUpgrade = tag.getBoolean("MagnetUpgrade");
+        hasPullerUpgrade = tag.getBoolean("PullerUpgrade");
+        pullerSides = tag.getInt("PullerSides");
         if (tag.contains(TAG_FLUID)) {
             storedFluid = FluidStack.parseOptional(registries, tag.getCompound(TAG_FLUID));
             if (!storedFluid.isEmpty()) {

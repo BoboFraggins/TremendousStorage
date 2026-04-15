@@ -26,7 +26,6 @@ public class EnderChestStorage extends SavedData {
     private final Map<Long, ListTag> inventories = new HashMap<>();
     private final Map<Long, Long> versions = new HashMap<>();
     private final Map<Long, StorageTier> tiers = new HashMap<>();
-    private final Map<Long, Boolean> craftingUpgrades = new HashMap<>();
 
     // -------------------------------------------------------------------------
     // Static access
@@ -62,17 +61,6 @@ public class EnderChestStorage extends SavedData {
         return tiers.getOrDefault(linkId, StorageTier.WOOD);
     }
 
-    public boolean hasCraftingUpgrade(long linkId) {
-        return craftingUpgrades.getOrDefault(linkId, false);
-    }
-
-    /** Marks the link as having a crafting upgrade, bumps the version, and marks dirty. */
-    public void setCraftingUpgrade(long linkId) {
-        craftingUpgrades.put(linkId, true);
-        versions.merge(linkId, 1L, Long::sum);
-        setDirty();
-    }
-
     /**
      * Stores the tier for the given link ID, bumps the version counter, and marks dirty.
      * All linked block entities will pick up the new tier on their next version check.
@@ -96,11 +84,10 @@ public class EnderChestStorage extends SavedData {
      * Initialises a new link entry with the given inventory. Does nothing if the link ID is
      * already registered (i.e. the second chest is being placed after the first was already used).
      */
-    public void initLink(long linkId, ListTag types, StorageTier tier, boolean craftingUpgrade) {
+    public void initLink(long linkId, ListTag types, StorageTier tier) {
         if (!inventories.containsKey(linkId)) {
             inventories.put(linkId, types);
             tiers.put(linkId, tier);
-            if (craftingUpgrade) craftingUpgrades.put(linkId, true);
             setDirty();
         }
     }
@@ -120,9 +107,7 @@ public class EnderChestStorage extends SavedData {
             if (entry.contains("Tier")) {
                 storage.tiers.put(linkId, StorageTier.fromId(entry.getString("Tier")));
             }
-            if (entry.getBoolean("CraftingUpgrade")) {
-                storage.craftingUpgrades.put(linkId, true);
-            }
+            // CraftingUpgrade was previously shared; it is now per-instance so we ignore it here.
         }
         return storage;
     }
@@ -138,9 +123,6 @@ public class EnderChestStorage extends SavedData {
             StorageTier tier = tiers.getOrDefault(linkId, StorageTier.WOOD);
             if (tier != StorageTier.WOOD) {
                 e.putString("Tier", tier.getId());
-            }
-            if (craftingUpgrades.getOrDefault(linkId, false)) {
-                e.putBoolean("CraftingUpgrade", true);
             }
             links.add(e);
         }

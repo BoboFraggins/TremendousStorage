@@ -77,24 +77,6 @@ public class EnderChestBlockEntity extends ChestBlockEntity {
     }
 
     /**
-     * Propagates a crafting upgrade to shared storage so all linked block entities pick it up.
-     * Subclasses override this to route to the correct storage backend.
-     */
-    protected void syncCraftingUpgradeToStorage() {
-        if (linkId == -1L || level == null || level.isClientSide()) return;
-        MinecraftServer server = level.getServer();
-        if (server != null) {
-            getStorage(server).setCraftingUpgrade(linkId);
-        }
-    }
-
-    @Override
-    public void setCraftingUpgrade(boolean value) {
-        super.setCraftingUpgrade(value);
-        if (value) syncCraftingUpgradeToStorage();
-    }
-
-    /**
      * Writes the tier to the shared storage backend, bumping the version so all linked
      * block entities pick it up on their next tick. Subclasses override this to route to
      * the correct storage (e.g. {@link net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackStorage}).
@@ -130,15 +112,9 @@ public class EnderChestBlockEntity extends ChestBlockEntity {
             } else {
                 setTierSilent(storageTier); // apply without re-syncing to storage
             }
-            // Crafting upgrade: OR logic — once any linked copy has it, all get it.
-            if (storage.hasCraftingUpgrade(linkId)) {
-                super.setCraftingUpgrade(true); // silent; storage already has it
-            } else if (hasCraftingUpgrade()) {
-                storage.setCraftingUpgrade(linkId); // push local upgrade to storage
-            }
         } else {
             // First chest of this pair to be placed — seed the storage with our inventory and tier.
-            storage.initLink(linkId, saveTypes(level.registryAccess()), getTier(), hasCraftingUpgrade());
+            storage.initLink(linkId, saveTypes(level.registryAccess()), getTier());
         }
         lastKnownVersion = storage.getVersion(linkId);
     }

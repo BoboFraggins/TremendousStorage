@@ -107,11 +107,6 @@ public class EnderPicnicBasketBlockEntity extends EnderChestBlockEntity {
         // no-op: picnic basket has no tiers
     }
 
-    @Override
-    protected void syncCraftingUpgradeToStorage() {
-        // no-op: picnic basket has no crafting upgrade
-    }
-
     // -------------------------------------------------------------------------
     // Menu / display
     // -------------------------------------------------------------------------
@@ -139,7 +134,7 @@ public class EnderPicnicBasketBlockEntity extends EnderChestBlockEntity {
                 return 1;
             }
         };
-        return new ChestMenu(id, inv, worldPosition, data, false);
+        return new ChestMenu(id, inv, worldPosition, data, false, hasPullerUpgrade());
     }
 
     // -------------------------------------------------------------------------

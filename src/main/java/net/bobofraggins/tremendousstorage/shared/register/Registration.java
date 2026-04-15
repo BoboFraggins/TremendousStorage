@@ -30,6 +30,7 @@ import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackMenu;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.BaseUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.EnderStorageUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.HaarpUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.InterdimensionalUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.MagnetUpgradeItem;
@@ -883,8 +884,8 @@ public final class Registration {
     public static final DeferredHolder<Item, BaseUpgradeItem> CRAFTING_UPGRADE =
             ITEMS.register("crafting_upgrade", BaseUpgradeItem::new);
 
-    public static final DeferredHolder<Item, BaseUpgradeItem> ENDER_STORAGE_UPGRADE =
-            ITEMS.register("ender_storage_upgrade", BaseUpgradeItem::new);
+    public static final DeferredHolder<Item, EnderStorageUpgradeItem> ENDER_STORAGE_UPGRADE =
+            ITEMS.register("ender_storage_upgrade", EnderStorageUpgradeItem::new);
 
     public static final DeferredHolder<Item, MagnetUpgradeItem> MAGNET_UPGRADE =
             ITEMS.register("magnet_upgrade", MagnetUpgradeItem::new);

@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.baseupgrade;
 
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
@@ -9,11 +10,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
  * Upgrade item that grants a magnet ability to Tremendous Chests, Tremendous Backpacks
- * (placed), and Filing Cabinets.
+ * (placed), Tremendous Tanks, and Filing Cabinets (and their Ender variants).
  *
  * <p>Right-clicking on a supported block applies the upgrade, consuming the item.
- * Once upgraded, the block scans a 3-block radius every server tick for {@link net.minecraft.world.entity.item.ItemEntity}
- * instances whose item type is already stored in the inventory, absorbing them automatically.
+ * For item-storage blocks, the magnet scans a 3-block radius each tick for matching item entities.
+ * For tanks, it scans for item entities containing matching fluid and drains them.
  */
 public class MagnetUpgradeItem extends Item {
 
@@ -29,6 +30,11 @@ public class MagnetUpgradeItem extends Item {
         if (be instanceof ChestBlockEntity chest && chest.isUpgradeable() && !chest.hasMagnetUpgrade()) {
             if (!ctx.getLevel().isClientSide()) {
                 chest.setMagnetUpgrade(true);
+            }
+            matches = true;
+        } else if (be instanceof TankBlockEntity tank && !tank.hasMagnetUpgrade()) {
+            if (!ctx.getLevel().isClientSide()) {
+                tank.setMagnetUpgrade(true);
             }
             matches = true;
         } else if (be instanceof FilingCabinetBlockEntity cabinet && !cabinet.hasMagnetUpgrade()) {

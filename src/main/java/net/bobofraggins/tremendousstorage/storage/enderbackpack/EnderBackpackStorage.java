@@ -25,7 +25,6 @@ public class EnderBackpackStorage extends SavedData {
     private final Map<Long, ListTag> inventories = new HashMap<>();
     private final Map<Long, Long> versions = new HashMap<>();
     private final Map<Long, StorageTier> tiers = new HashMap<>();
-    private final Map<Long, Boolean> craftingUpgrades = new HashMap<>();
 
     public static EnderBackpackStorage get(MinecraftServer server) {
         DimensionDataStorage storage = server.overworld().getDataStorage();
@@ -50,17 +49,6 @@ public class EnderBackpackStorage extends SavedData {
         return tiers.getOrDefault(linkId, StorageTier.WOOD);
     }
 
-    public boolean hasCraftingUpgrade(long linkId) {
-        return craftingUpgrades.getOrDefault(linkId, false);
-    }
-
-    /** Marks the link as having a crafting upgrade, bumps the version, and marks dirty. */
-    public void setCraftingUpgrade(long linkId) {
-        craftingUpgrades.put(linkId, true);
-        versions.merge(linkId, 1L, Long::sum);
-        setDirty();
-    }
-
     public void setTier(long linkId, StorageTier tier) {
         tiers.put(linkId, tier);
         versions.merge(linkId, 1L, Long::sum);
@@ -73,11 +61,10 @@ public class EnderBackpackStorage extends SavedData {
         setDirty();
     }
 
-    public void initLink(long linkId, ListTag types, StorageTier tier, boolean craftingUpgrade) {
+    public void initLink(long linkId, ListTag types, StorageTier tier) {
         if (!inventories.containsKey(linkId)) {
             inventories.put(linkId, types);
             tiers.put(linkId, tier);
-            if (craftingUpgrade) craftingUpgrades.put(linkId, true);
             setDirty();
         }
     }
@@ -93,9 +80,7 @@ public class EnderBackpackStorage extends SavedData {
             if (entry.contains("Tier")) {
                 storage.tiers.put(linkId, StorageTier.fromId(entry.getString("Tier")));
             }
-            if (entry.getBoolean("CraftingUpgrade")) {
-                storage.craftingUpgrades.put(linkId, true);
-            }
+            // CraftingUpgrade was previously shared; it is now per-instance so we ignore it here.
         }
         return storage;
     }
@@ -111,9 +96,6 @@ public class EnderBackpackStorage extends SavedData {
             StorageTier tier = tiers.getOrDefault(linkId, StorageTier.WOOD);
             if (tier != StorageTier.WOOD) {
                 e.putString("Tier", tier.getId());
-            }
-            if (craftingUpgrades.getOrDefault(linkId, false)) {
-                e.putBoolean("CraftingUpgrade", true);
             }
             links.add(e);
         }
