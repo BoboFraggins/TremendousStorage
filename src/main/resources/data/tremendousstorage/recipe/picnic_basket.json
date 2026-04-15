@@ -1,23 +1,26 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "IBI",
+    "LAL",
     "BCB",
-    "IBI"
+    "LAL"
   ],
   "key": {
-    "I": {
+    "L": {
       "item": "tremendousstorage:lazurite_bars"
     },
+    "A": {
+      "item": "minecraft:apple"
+    },
     "B": {
-      "item": "tremendousstorage:lazurite_ingot"
+      "item": "minecraft:bread"
     },
     "C": {
       "item": "minecraft:chest"
     }
   },
   "result": {
-    "id": "tremendousstorage:chest",
+    "id": "tremendousstorage:picnic_basket",
     "count": 1
   },
   "category": "misc"
