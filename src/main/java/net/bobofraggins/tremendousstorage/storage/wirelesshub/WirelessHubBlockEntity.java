@@ -54,6 +54,9 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     // Tier & range
     // -------------------------------------------------------------------------
 
+    /** Base FE/t cost at WOOD tier (no upgrades). */
+    public static final int BASE_FE_PER_TICK = 25;
+
     private StorageTier tier = StorageTier.WOOD;
 
     public StorageTier getTier() {
@@ -63,6 +66,29 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     public void setTier(StorageTier tier) {
         this.tier = tier;
         setChanged();
+    }
+
+    /**
+     * Returns this hub's actual FE/t cost, scaled by tier and any installed upgrades.
+     * Each tier above WOOD multiplies by
+     * {@link net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig#TIER_UPGRADE_POWER_MULT};
+     * the HAARP and Interdimensional upgrades each add their own configured multiplier.
+     */
+    public int getFePerTick() {
+        double mult = Math.pow(
+                net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig.TIER_UPGRADE_POWER_MULT.get(),
+                tier.ordinal());
+        if (haarpUpgrade) {
+            mult *=
+                    net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig.HAARP_UPGRADE_POWER_MULT
+                            .get();
+        }
+        if (interdimensionalUpgrade) {
+            mult *=
+                    net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig.INTERDIMENSIONAL_POWER_MULT
+                            .get();
+        }
+        return (int) Math.round(BASE_FE_PER_TICK * mult);
     }
 
     /**

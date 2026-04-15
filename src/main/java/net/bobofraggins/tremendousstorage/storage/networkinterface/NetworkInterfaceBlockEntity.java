@@ -202,6 +202,18 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         setChanged();
     }
 
+    /**
+     * Returns this NI's actual FE/t cost, scaled by the configured tier multiplier.
+     * WOOD = {@link #NI_COST}; each tier above WOOD multiplies by
+     * {@link net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig#TIER_UPGRADE_POWER_MULT}.
+     */
+    public int getBaseFePerTick() {
+        double mult = Math.pow(
+                net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig.TIER_UPGRADE_POWER_MULT.get(),
+                tier.ordinal());
+        return (int) Math.round(NI_COST * mult);
+    }
+
     /** Items transferred per import/export operation (1 at WOOD, doubles each tier). */
     public int getAttachmentTransferAmount() {
         return 1 << tier.ordinal();
@@ -279,7 +291,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         NetworkScanResult scan = getScan();
         if (scan == null || !scan.isValid()) {
             // No valid network — still count base NI cost but mark unpowered
-            int cost = NI_COST;
+            int cost = getBaseFePerTick();
             boolean wasPowered = powered;
             powered = energyStored >= cost;
             if (powered) energyStored -= cost;

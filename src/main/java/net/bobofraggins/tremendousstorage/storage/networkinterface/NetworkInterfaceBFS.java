@@ -49,10 +49,8 @@ public final class NetworkInterfaceBFS {
 
     private record HandlerEntry(IItemHandler handler, Priority priority) {}
 
-    /** FE/t cost per attached SAT. */
+    /** FE/t cost per attached SAT (flat; SATs have no tier upgrades). */
     private static final int SAT_COST = 5;
-    /** FE/t cost per Wireless Hub. */
-    private static final int HUB_COST = 25;
     /** FE/t cost per tube attachment (any type). */
     private static final int ATTACHMENT_COST = 1;
 
@@ -73,8 +71,11 @@ public final class NetworkInterfaceBFS {
         int tubeCount = 0;
         List<String> storageKeys = new ArrayList<>(); // ordered by discovery
         int otherNiCount = 0;
-        // Power accounting
-        int fePerTick = NetworkInterfaceBlockEntity.NI_COST; // base NI cost
+        // Power accounting — NI base cost scales with its tier
+        BlockEntity niBE = level.getBlockEntity(niPos);
+        int fePerTick = niBE instanceof NetworkInterfaceBlockEntity niBlockEntity
+                ? niBlockEntity.getBaseFePerTick()
+                : NetworkInterfaceBlockEntity.NI_COST;
 
         // Single shared queue for the whole scan
         Deque<BlockPos> queue = new ArrayDeque<>();
@@ -93,8 +94,8 @@ public final class NetworkInterfaceBFS {
                     fePerTick += SAT_COST;
                 } else {
                     BlockEntity adjBE = level.getBlockEntity(neighborPos);
-                    if (adjBE instanceof WirelessHubBlockEntity) {
-                        fePerTick += HUB_COST;
+                    if (adjBE instanceof WirelessHubBlockEntity hub) {
+                        fePerTick += hub.getFePerTick();
                     }
                 }
                 // Bridge through the connector cluster to adjacent tubes of any color
@@ -157,8 +158,8 @@ public final class NetworkInterfaceBFS {
                         fePerTick += SAT_COST;
                     } else {
                         BlockEntity adjBE = adjPos.equals(niPos) ? null : level.getBlockEntity(adjPos);
-                        if (adjBE instanceof WirelessHubBlockEntity) {
-                            fePerTick += HUB_COST;
+                        if (adjBE instanceof WirelessHubBlockEntity hub) {
+                            fePerTick += hub.getFePerTick();
                         }
                     }
 
@@ -262,7 +263,7 @@ public final class NetworkInterfaceBFS {
                         feCost += SAT_COST;
                     } else {
                         BlockEntity adjBE = level.getBlockEntity(adj);
-                        if (adjBE instanceof WirelessHubBlockEntity) feCost += HUB_COST;
+                        if (adjBE instanceof WirelessHubBlockEntity hub) feCost += hub.getFePerTick();
                     }
                     if (visitedConnectors.add(adj)) {
                         pending.add(adj);
