@@ -1,3 +1,6 @@
 {
-  "parent": "tremendousstorage:block/canvas_block"
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "tremendousstorage:block/canvas/interior"
+  }
 }
