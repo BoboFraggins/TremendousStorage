@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.register;
 import net.bobofraggins.tremendousstorage.canvas.CanvasClientEvents;
 import net.bobofraggins.tremendousstorage.external.mobgrindinutils.XpFluidClientEvents;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClientEvents;
+import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClientTickHandler;
 import net.bobofraggins.tremendousstorage.glamping.skyblock.SkyBlockClientEvents;
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineClientEvents;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
@@ -58,6 +59,7 @@ public final class ClientEventRegistrar {
 
         // ── Game-bus client events (tick handlers, input, etc.) ─────────────────
         NeoForge.EVENT_BUS.register(BackpackClientTickHandler.class);
+        NeoForge.EVENT_BUS.register(PicnicBasketClientTickHandler.class);
         NeoForge.EVENT_BUS.register(PersonalAccessTerminalClientTickHandler.class);
     }
 }

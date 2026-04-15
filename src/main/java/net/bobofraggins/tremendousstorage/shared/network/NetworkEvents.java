@@ -19,6 +19,18 @@ public final class NetworkEvents {
                 net.bobofraggins.tremendousstorage.glamping.picnicbasket.SetAutoFeedPacket.STREAM_CODEC,
                 net.bobofraggins.tremendousstorage.glamping.picnicbasket.SetAutoFeedPacket::handle);
         registrar.playToServer(
+                net.bobofraggins.tremendousstorage.glamping.picnicbasket.OpenPicnicBasketPacket.TYPE,
+                net.bobofraggins.tremendousstorage.glamping.picnicbasket.OpenPicnicBasketPacket.STREAM_CODEC,
+                net.bobofraggins.tremendousstorage.glamping.picnicbasket.OpenPicnicBasketPacket::handle);
+        registrar.playToServer(
+                net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketItemInteractPacket.TYPE,
+                net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketItemInteractPacket.STREAM_CODEC,
+                net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketItemInteractPacket::handle);
+        registrar.playToServer(
+                net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketItemAutoFeedPacket.TYPE,
+                net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketItemAutoFeedPacket.STREAM_CODEC,
+                net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketItemAutoFeedPacket::handle);
+        registrar.playToServer(
                 ClearTankContentsPacket.TYPE, ClearTankContentsPacket.STREAM_CODEC, ClearTankContentsPacket::handle);
         registrar.playToServer(
                 SetStorageInterfacePriorityPacket.TYPE,

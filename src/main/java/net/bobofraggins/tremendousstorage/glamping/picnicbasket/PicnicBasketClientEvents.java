@@ -1,16 +1,42 @@
 package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.minecraft.client.KeyMapping;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.settings.KeyConflictContext;
+import net.neoforged.neoforge.client.settings.KeyModifier;
 
-/** Client-only mod-bus events for the Picnic Basket — BESR and model registration. */
+/** Client-only mod-bus events for the Picnic Basket — keybind, screen, BESR, and model registration. */
 public final class PicnicBasketClientEvents {
 
     private PicnicBasketClientEvents() {}
+
+    /** Keybind to open the Picnic Basket UI. Default: unbound. */
+    public static KeyMapping OPEN_PICNIC_BASKET;
+
+    @SubscribeEvent
+    public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
+        OPEN_PICNIC_BASKET = new KeyMapping(
+                "key.tremendousstorage.open_picnic_basket",
+                KeyConflictContext.IN_GAME,
+                KeyModifier.NONE,
+                InputConstants.Type.KEYSYM,
+                InputConstants.UNKNOWN.getValue(),
+                "key.categories.tremendousstorage");
+        event.register(OPEN_PICNIC_BASKET);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterScreens(RegisterMenuScreensEvent event) {
+        event.register(Registration.PICNIC_BASKET_ITEM_MENU.get(), PicnicBasketItemScreen::new);
+    }
 
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {

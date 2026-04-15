@@ -849,6 +849,14 @@ public final class Registration {
     public static final DeferredHolder<MenuType<?>, MenuType<RecyclingBinMenu>> RECYCLING_BIN_MENU =
             MENU_TYPES.register("recycling_bin", () -> IMenuTypeExtension.create(RecyclingBinMenu::new));
 
+    public static final DeferredHolder<
+                    MenuType<?>,
+                    MenuType<net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketItemMenu>>
+            PICNIC_BASKET_ITEM_MENU = MENU_TYPES.register(
+                    "picnic_basket_item",
+                    () -> IMenuTypeExtension.create(
+                            net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketItemMenu::new));
+
     // -------------------------------------------------------------------------
     // Items — storage interface / import interface / export interface
     // -------------------------------------------------------------------------
