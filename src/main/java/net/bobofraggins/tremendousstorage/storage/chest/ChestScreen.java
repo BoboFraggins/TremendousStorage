@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import net.bobofraggins.tremendousstorage.glamping.picnicbasket.AutoFeedPane;
+import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlockEntity;
+import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockEntity;
+import net.bobofraggins.tremendousstorage.glamping.picnicbasket.SetAutoFeedPacket;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.shared.network.LocalStorageInteractPacket;
@@ -77,6 +81,25 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
         }));
         if (menu.hasPullerUpgrade()) {
             drawerPanes.add(new PullerSidesPane(menu.getPos()));
+        }
+        if (Minecraft.getInstance().level != null) {
+            BlockEntity picnicBe = Minecraft.getInstance().level.getBlockEntity(menu.getPos());
+            if (picnicBe instanceof PicnicBasketBlockEntity || picnicBe instanceof EnderPicnicBasketBlockEntity) {
+                drawerPanes.add(new AutoFeedPane(
+                        () -> {
+                            BlockEntity b = Minecraft.getInstance().level.getBlockEntity(menu.getPos());
+                            if (b instanceof PicnicBasketBlockEntity pb) return pb.isAutoFeed();
+                            if (b instanceof EnderPicnicBasketBlockEntity eb) return eb.isAutoFeed();
+                            return true;
+                        },
+                        () -> {
+                            BlockEntity b = Minecraft.getInstance().level.getBlockEntity(menu.getPos());
+                            boolean current = true;
+                            if (b instanceof PicnicBasketBlockEntity pb) current = pb.isAutoFeed();
+                            else if (b instanceof EnderPicnicBasketBlockEntity eb) current = eb.isAutoFeed();
+                            PacketDistributor.sendToServer(new SetAutoFeedPacket(menu.getPos(), !current));
+                        }));
+            }
         }
         configDrawer = new ConfigDrawer(drawerPanes.toArray(IDialogPane[]::new));
     }

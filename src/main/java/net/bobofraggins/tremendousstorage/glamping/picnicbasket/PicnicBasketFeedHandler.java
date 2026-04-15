@@ -94,6 +94,8 @@ public class PicnicBasketFeedHandler {
         if (existing == null) return;
 
         CompoundTag beTag = existing.copyTag();
+        // Default true: feed unless explicitly disabled
+        if (beTag.contains("AutoFeed") && !beTag.getBoolean("AutoFeed")) return;
         ListTag types = beTag.getList("Types", Tag.TAG_COMPOUND);
         if (types.isEmpty()) return;
 

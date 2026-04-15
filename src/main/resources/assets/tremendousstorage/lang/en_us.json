@@ -204,6 +204,7 @@
 
   "item.tremendousstorage.puller_upgrade": "Puller Upgrade",
   "screen.tremendousstorage.puller_upgrade_label": "Puller Sides",
+  "screen.tremendousstorage.auto_feed_label": "Auto-feed When Hungry",
 
   "item.tremendousstorage.interdimensional_upgrade": "Interdimensional Upgrade",
   "item.tremendousstorage.interdimensional_upgrade.requires_netherite": "Wireless Hub must be Netherite tier",

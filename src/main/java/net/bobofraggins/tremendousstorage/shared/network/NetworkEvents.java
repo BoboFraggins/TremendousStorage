@@ -15,6 +15,10 @@ public final class NetworkEvents {
         registrar.playToServer(SetPriorityPacket.TYPE, SetPriorityPacket.STREAM_CODEC, SetPriorityPacket::handle);
         registrar.playToServer(SetVoidExcessPacket.TYPE, SetVoidExcessPacket.STREAM_CODEC, SetVoidExcessPacket::handle);
         registrar.playToServer(
+                net.bobofraggins.tremendousstorage.glamping.picnicbasket.SetAutoFeedPacket.TYPE,
+                net.bobofraggins.tremendousstorage.glamping.picnicbasket.SetAutoFeedPacket.STREAM_CODEC,
+                net.bobofraggins.tremendousstorage.glamping.picnicbasket.SetAutoFeedPacket::handle);
+        registrar.playToServer(
                 ClearTankContentsPacket.TYPE, ClearTankContentsPacket.STREAM_CODEC, ClearTankContentsPacket::handle);
         registrar.playToServer(
                 SetStorageInterfacePriorityPacket.TYPE,

@@ -6,7 +6,9 @@ import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Inventory;
@@ -25,6 +27,17 @@ import net.minecraft.world.level.block.state.BlockState;
  * edible ones only (matching {@link PicnicBasketBlockEntity}).
  */
 public class EnderPicnicBasketBlockEntity extends EnderChestBlockEntity {
+
+    private boolean autoFeed = true;
+
+    public boolean isAutoFeed() {
+        return autoFeed;
+    }
+
+    public void setAutoFeed(boolean value) {
+        autoFeed = value;
+        setChanged();
+    }
 
     public EnderPicnicBasketBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.ENDER_PICNIC_BASKET_BE_TYPE.get(), pos, state);
@@ -127,6 +140,22 @@ public class EnderPicnicBasketBlockEntity extends EnderChestBlockEntity {
             }
         };
         return new ChestMenu(id, inv, worldPosition, data, false);
+    }
+
+    // -------------------------------------------------------------------------
+    // NBT
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        tag.putBoolean("AutoFeed", autoFeed);
+    }
+
+    @Override
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        autoFeed = !tag.contains("AutoFeed") || tag.getBoolean("AutoFeed");
     }
 
     // -------------------------------------------------------------------------

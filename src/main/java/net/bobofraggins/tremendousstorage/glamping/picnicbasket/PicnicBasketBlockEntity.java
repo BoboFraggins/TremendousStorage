@@ -5,7 +5,9 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -23,6 +25,17 @@ import net.minecraft.world.level.block.state.BlockState;
  * differences are the block entity type and display name.
  */
 public class PicnicBasketBlockEntity extends ChestBlockEntity {
+
+    private boolean autoFeed = true;
+
+    public boolean isAutoFeed() {
+        return autoFeed;
+    }
+
+    public void setAutoFeed(boolean value) {
+        autoFeed = value;
+        setChanged();
+    }
 
     public PicnicBasketBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.PICNIC_BASKET_BE_TYPE.get(), pos, state);
@@ -62,6 +75,22 @@ public class PicnicBasketBlockEntity extends ChestBlockEntity {
             }
         };
         return new ChestMenu(id, inv, worldPosition, data, false);
+    }
+
+    // -------------------------------------------------------------------------
+    // NBT
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
+        tag.putBoolean("AutoFeed", autoFeed);
+    }
+
+    @Override
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
+        autoFeed = !tag.contains("AutoFeed") || tag.getBoolean("AutoFeed");
     }
 
     // -------------------------------------------------------------------------
