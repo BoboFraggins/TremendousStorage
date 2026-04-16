@@ -151,7 +151,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         } else {
             this.craftSlots = null;
             this.resultSlots = null;
-            playerInvY = networkPaneBottom + 4;
+            playerInvY = networkPaneBottom;
 
             this.resultSlot = -1;
             this.craftStart = -1;

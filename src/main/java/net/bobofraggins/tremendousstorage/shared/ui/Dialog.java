@@ -61,7 +61,7 @@ public class Dialog {
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_right.png");
 
     /** Height of the title bar area; panes are positioned below this. */
-    public static final int TITLE_H = 20;
+    public static final int TITLE_H = 17;
 
     /** Size of each corner square and the fixed dimension of each edge texture. */
     private static final int CORNER = 5;
