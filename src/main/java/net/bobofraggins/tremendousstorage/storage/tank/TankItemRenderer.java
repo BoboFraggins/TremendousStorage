@@ -83,9 +83,8 @@ public class TankItemRenderer extends BlockEntityWithoutLevelRenderer {
         FluidStack fluid = contents.storedFluid();
         IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fluid.getFluid());
 
-        TextureAtlasSprite sprite = mc.getModelManager()
-                .getAtlas(InventoryMenu.BLOCK_ATLAS)
-                .getSprite(ext.getStillTexture(fluid));
+        TextureAtlasSprite sprite =
+                mc.getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(ext.getStillTexture(fluid));
 
         int tint = ext.getTintColor(fluid);
         int fr = (tint >> 16) & 0xFF;
@@ -106,11 +105,20 @@ public class TankItemRenderer extends BlockEntityWithoutLevelRenderer {
         TankRenderer.renderOctagonalPrism(
                 vc,
                 poseStack.last().pose(),
-                fr, fg, fb, fa,
+                fr,
+                fg,
+                fb,
+                fa,
                 fluidLight,
                 packedOverlay,
-                uLeft, vTop, uRight, vBottom,
-                sprite.getU0(), sprite.getU1(), sprite.getV0(), sprite.getV1(),
+                uLeft,
+                vTop,
+                uRight,
+                vBottom,
+                sprite.getU0(),
+                sprite.getU1(),
+                sprite.getV0(),
+                sprite.getV1(),
                 fillTop);
     }
 }

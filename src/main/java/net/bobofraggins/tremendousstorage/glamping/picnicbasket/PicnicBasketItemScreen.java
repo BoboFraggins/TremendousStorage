@@ -215,10 +215,10 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
         int bw = searchBox.getWidth() + 4;
         int bh = searchBox.getHeight() + 4;
         int c = 0xFF373737;
-        graphics.fill(bx,          by,          bx + bw,     by + 2,      c);
-        graphics.fill(bx,          by + bh - 2, bx + bw,     by + bh,     c);
-        graphics.fill(bx,          by + 2,      bx + 2,      by + bh - 2, c);
-        graphics.fill(bx + bw - 2, by + 2,      bx + bw,     by + bh - 2, c);
+        graphics.fill(bx, by, bx + bw, by + 2, c);
+        graphics.fill(bx, by + bh - 2, bx + bw, by + bh, c);
+        graphics.fill(bx, by + 2, bx + 2, by + bh - 2, c);
+        graphics.fill(bx + bw - 2, by + 2, bx + bw, by + bh - 2, c);
     }
 
     @Override

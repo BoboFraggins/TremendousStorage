@@ -105,7 +105,8 @@ public class ConfigDrawer {
         graphics.enableScissor(visibleLeft, drawerTop, dialogX - TAB_W + 1, drawerTop + drawerH);
 
         // Body fill — extend 1 px right to cover the tab's left border pixel
-        graphics.fill(drawerX + CORNER, drawerTop + CORNER, dialogX - TAB_W + 1, drawerTop + drawerH - CORNER, COLOR_BODY);
+        graphics.fill(
+                drawerX + CORNER, drawerTop + CORNER, dialogX - TAB_W + 1, drawerTop + drawerH - CORNER, COLOR_BODY);
 
         // Top-left corner + top edge
         graphics.blit(TEX_CORNER_TL, drawerX, drawerTop, 0, 0, CORNER, CORNER, CORNER, CORNER);
