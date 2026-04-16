@@ -711,8 +711,8 @@ public final class Registration {
                     .noOcclusion()
                     .lightLevel(state -> 7)));
 
-    public static final DeferredHolder<Item, BlockItem> STIRLING_ENGINE_ITEM =
-            ITEMS.register("stirling_engine", () -> new TieredBlockItem(STIRLING_ENGINE.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> STIRLING_ENGINE_ITEM = ITEMS.register(
+            "stirling_engine", () -> new TieredBlockItem(STIRLING_ENGINE.get(), new Item.Properties().fireResistant()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StirlingEngineBlockEntity>>
             STIRLING_ENGINE_BE_TYPE = BLOCK_ENTITY_TYPES.register("stirling_engine", () -> BlockEntityType.Builder.of(
