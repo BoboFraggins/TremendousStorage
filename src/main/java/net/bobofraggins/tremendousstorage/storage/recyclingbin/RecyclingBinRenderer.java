@@ -97,7 +97,7 @@ public class RecyclingBinRenderer
         BakedModel bodyModel = mc.getModelManager().getModel(BODY_MODEL);
         BakedModel lidModel = mc.getModelManager().getModel(LID_MODEL);
         BakedModel pedalModel = mc.getModelManager().getModel(PEDAL_MODEL);
-        VertexConsumer solidConsumer = bufferSource.getBuffer(RenderType.solid());
+        VertexConsumer solidConsumer = bufferSource.getBuffer(RenderType.cutout());
 
         Level level = be.getLevel();
         if (level != null) {
@@ -418,13 +418,13 @@ public class RecyclingBinRenderer
             RandomSource random) {
         for (Direction dir : Direction.values()) {
             random.setSeed(42L);
-            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.solid())) {
+            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.cutout())) {
                 float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
                 consumer.putBulkData(pose, quad, shade, shade, shade, 1f, packedLight, packedOverlay);
             }
         }
         random.setSeed(42L);
-        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.solid())) {
+        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.cutout())) {
             Direction dir = quad.getDirection();
             float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
             consumer.putBulkData(pose, quad, shade, shade, shade, 1f, packedLight, packedOverlay);
