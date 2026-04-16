@@ -145,7 +145,7 @@ public class RecyclingBinRenderer
         }
     }
 
-    private static void renderLiquid(
+    static void renderLiquid(
             Matrix4f mat, MultiBufferSource bufferSource, float fillFraction, int packedLight, int packedOverlay) {
 
         TextureAtlasSprite sprite = Minecraft.getInstance()

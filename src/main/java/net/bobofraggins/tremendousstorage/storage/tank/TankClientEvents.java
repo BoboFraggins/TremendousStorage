@@ -7,6 +7,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 
 /** Client-side event subscriber that registers the Tank's block entity renderer. */
 public final class TankClientEvents {
@@ -17,6 +19,17 @@ public final class TankClientEvents {
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(Registration.TANK_BE_TYPE.get(), TankRenderer::new);
         event.registerBlockEntityRenderer(Registration.ENDER_TANK_BE_TYPE.get(), TankRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
+        IClientItemExtensions extensions = new IClientItemExtensions() {
+            @Override
+            public net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer getCustomRenderer() {
+                return TankItemRenderer.getInstance();
+            }
+        };
+        event.registerItem(extensions, Registration.TANK_ITEM.get(), Registration.ENDER_TANK_ITEM.get());
     }
 
     @SubscribeEvent

@@ -73,7 +73,7 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
 
         int searchW = 75;
         searchBox =
-                new EditBox(font, leftPos + imageWidth - 5 - 2 - searchW, topPos + 3, searchW, 10, Component.empty());
+                new EditBox(font, leftPos + imageWidth - 5 - 2 - searchW, topPos + 4, searchW, 12, Component.empty());
         searchBox.setMaxLength(64);
         searchBox.setHint(Component.literal("Search..."));
         searchBox.setResponder(text -> {
@@ -83,8 +83,8 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
         addRenderableWidget(searchBox);
 
         addRenderableWidget(new PressableIconButton(
-                leftPos + 8,
-                topPos + 6,
+                leftPos - ConfigDrawer.TAB_W + 4,
+                topPos + 3,
                 16,
                 16,
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config"),
@@ -206,6 +206,19 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
+        drawSearchBorder(graphics);
+    }
+
+    private void drawSearchBorder(GuiGraphics graphics) {
+        int bx = searchBox.getX() - 2;
+        int by = searchBox.getY() - 2;
+        int bw = searchBox.getWidth() + 4;
+        int bh = searchBox.getHeight() + 4;
+        int c = 0xFF373737;
+        graphics.fill(bx,          by,          bx + bw,     by + 2,      c);
+        graphics.fill(bx,          by + bh - 2, bx + bw,     by + bh,     c);
+        graphics.fill(bx,          by + 2,      bx + 2,      by + bh - 2, c);
+        graphics.fill(bx + bw - 2, by + 2,      bx + bw,     by + bh - 2, c);
     }
 
     @Override

@@ -61,7 +61,7 @@ public class Dialog {
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_right.png");
 
     /** Height of the title bar area; panes are positioned below this. */
-    public static final int TITLE_H = 17;
+    public static final int TITLE_H = 20;
 
     /** Size of each corner square and the fixed dimension of each edge texture. */
     private static final int CORNER = 5;
@@ -192,8 +192,8 @@ public class Dialog {
         }
         graphics.blit(TEX_CORNER_BR, x + width - CORNER, bodyBot - CORNER, 0, 0, CORNER, CORNER, CORNER, CORNER);
 
-        // ── Title centred in title bar ────────────────────────────────────────
-        graphics.drawString(font, title, x + (width - font.width(title)) / 2, y + 5, 0x404040, false);
+        // ── Title left-aligned in title bar ──────────────────────────────────
+        graphics.drawString(font, title, x + 8, y + 6, 0x404040, false);
 
         // Render each pane translated to its local origin
         for (int i = 0; i < panes.size(); i++) {

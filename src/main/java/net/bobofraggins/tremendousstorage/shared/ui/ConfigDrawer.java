@@ -16,8 +16,14 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class ConfigDrawer {
 
-    /** Width of the drawer in pixels. */
+    /** Width of the drawer in pixels (does not include the tab). */
     public static final int WIDTH = 110;
+
+    /** Width of the toggle-button tab that always protrudes from the dialog's left edge. */
+    public static final int TAB_W = 24;
+
+    /** Height of the toggle-button tab. Just tall enough for a 16×16 button with 3 px padding. */
+    public static final int TAB_H = 22;
 
     private static final long ANIM_MS = 200L;
     private static final int CORNER = 5;
@@ -84,20 +90,22 @@ public class ConfigDrawer {
      * behind the dialog's left border.
      */
     public void render(GuiGraphics graphics, Font font, int mouseX, int mouseY, float partialTick) {
+        renderTab(graphics);
+
         float p = getProgress(System.currentTimeMillis());
         if (p <= 0.001f) return;
 
-        int drawerX = dialogX - WIDTH;
+        int drawerX = dialogX - TAB_W - WIDTH;
         int drawerTop = dialogY + 10;
         int drawerH = dialogH - 20;
 
         // Scissor to the currently-visible portion (slides open from right to left).
-        // Right boundary extends 1 px into the dialog border to eliminate the seam.
-        int visibleLeft = dialogX - Math.round(WIDTH * p);
-        graphics.enableScissor(visibleLeft, drawerTop, dialogX + 1, drawerTop + drawerH);
+        // Right boundary extends 1 px into the tab's left edge to eliminate the seam.
+        int visibleLeft = dialogX - TAB_W - Math.round(WIDTH * p);
+        graphics.enableScissor(visibleLeft, drawerTop, dialogX - TAB_W + 1, drawerTop + drawerH);
 
-        // Body fill — extend 1 px right to cover the dialog's left border pixel
-        graphics.fill(drawerX + CORNER, drawerTop + CORNER, dialogX + 1, drawerTop + drawerH - CORNER, COLOR_BODY);
+        // Body fill — extend 1 px right to cover the tab's left border pixel
+        graphics.fill(drawerX + CORNER, drawerTop + CORNER, dialogX - TAB_W + 1, drawerTop + drawerH - CORNER, COLOR_BODY);
 
         // Top-left corner + top edge
         graphics.blit(TEX_CORNER_TL, drawerX, drawerTop, 0, 0, CORNER, CORNER, CORNER, CORNER);
@@ -133,6 +141,38 @@ public class ConfigDrawer {
         graphics.disableScissor();
     }
 
+    /** Renders the permanent tab that protrudes from the dialog's left edge. */
+    private void renderTab(GuiGraphics graphics) {
+        int tabX = dialogX - TAB_W;
+        int tabY = dialogY;
+        int midH = TAB_H - 2 * CORNER;
+
+        // Fill — extend 1 px right to cover the dialog's left border pixel for a clean seam
+        graphics.fill(tabX + CORNER, tabY + CORNER, dialogX + 1, tabY + TAB_H - CORNER, COLOR_BODY);
+
+        // Top-left corner
+        graphics.blit(TEX_CORNER_TL, tabX, tabY, 0, 0, CORNER, CORNER, CORNER, CORNER);
+
+        // Top edge (from after corner to dialog's left edge)
+        for (int px = 0; px < TAB_W - CORNER; px++) {
+            graphics.blit(TEX_EDGE_TOP, tabX + CORNER + px, tabY, 0, 0, 1, CORNER, 1, CORNER);
+        }
+
+        // Left edge
+        for (int py = 0; py < midH; py++) {
+            graphics.blit(TEX_EDGE_LEFT, tabX, tabY + CORNER + py, 0, 0, CORNER, 1, CORNER, 1);
+        }
+
+        // Bottom-left corner
+        graphics.blit(TEX_CORNER_BL, tabX, tabY + TAB_H - CORNER, 0, 0, CORNER, CORNER, CORNER, CORNER);
+
+        // Bottom edge
+        for (int px = 0; px < TAB_W - CORNER; px++) {
+            graphics.blit(TEX_EDGE_BOTTOM, tabX + CORNER + px, tabY + TAB_H - CORNER, 0, 0, 1, CORNER, 1, CORNER);
+        }
+        // No right border — abuts the main dialog
+    }
+
     /**
      * Routes a mouse click into the drawer. Only accepts clicks when the drawer is fully open.
      *
@@ -141,8 +181,8 @@ public class ConfigDrawer {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (getProgress(System.currentTimeMillis()) < 0.99f) return false;
 
-        int drawerX = dialogX - WIDTH;
-        if (mouseX < drawerX || mouseX >= dialogX) return false;
+        int drawerX = dialogX - TAB_W - WIDTH;
+        if (mouseX < drawerX || mouseX >= dialogX - TAB_W) return false;
         if (mouseY < dialogY + 10 || mouseY >= dialogY + dialogH - 10) return false;
 
         for (int i = 0; i < panes.size(); i++) {

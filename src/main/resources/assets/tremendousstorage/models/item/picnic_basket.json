@@ -1,5 +1,5 @@
 {
-  "parent": "tremendousstorage:block/picnic_basket_body",
+  "parent": "tremendousstorage:block/picnic_basket_combined",
   "display": {
     "gui": {
       "rotation": [30, 225, 0],

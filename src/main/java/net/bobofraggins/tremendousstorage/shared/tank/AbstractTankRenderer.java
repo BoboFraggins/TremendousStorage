@@ -28,9 +28,9 @@ public abstract class AbstractTankRenderer<T extends BlockEntity> implements Blo
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/lazurite_block");
 
     // Fluid/fill interior bounds (inside the glass jar)
-    protected static final float FLUID_FLOOR = 3f / 16f;
-    protected static final float FLUID_CEIL = 13f / 16f;
-    protected static final float FLUID_H = FLUID_CEIL - FLUID_FLOOR;
+    public static final float FLUID_FLOOR = 3f / 16f;
+    public static final float FLUID_CEIL = 13f / 16f;
+    public static final float FLUID_H = FLUID_CEIL - FLUID_FLOOR;
 
     // Tube connector stub dimensions
     private static final float STUB_D = 2f / 16f;
