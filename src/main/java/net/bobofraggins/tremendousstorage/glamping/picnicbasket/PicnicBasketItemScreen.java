@@ -7,7 +7,6 @@ import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.LocalInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
-import net.bobofraggins.tremendousstorage.shared.ui.PressableIconButton;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,7 +17,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -81,15 +79,6 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
             SearchSync.pushToJei(text);
         });
         addRenderableWidget(searchBox);
-
-        addRenderableWidget(new PressableIconButton(
-                leftPos - ConfigDrawer.TAB_W + 4,
-                topPos + 3,
-                16,
-                16,
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config"),
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config_focused"),
-                () -> configDrawer.toggle()));
     }
 
     @Override

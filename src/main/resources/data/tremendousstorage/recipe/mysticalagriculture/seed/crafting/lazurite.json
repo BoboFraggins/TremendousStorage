@@ -1,0 +1,44 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "mysticalagriculture:seed_crafting_recipes_enabled"
+    },
+    {
+      "type": "mysticalagriculture:crop_enabled",
+      "crop": "tremendousstorage:lazurite"
+    },
+    {
+      "type": "mysticalagriculture:crop_has_material",
+      "crop": "tremendousstorage:lazurite"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "mysticalagriculture:seeds",
+  "key": {
+    "E": {
+      "type": "mysticalagriculture:crop_component",
+      "component": "essence",
+      "crop": "tremendousstorage:lazurite"
+    },
+    "M": {
+      "type": "mysticalagriculture:crop_component",
+      "component": "material",
+      "crop": "tremendousstorage:lazurite"
+    },
+    "S": {
+      "type": "mysticalagriculture:crop_component",
+      "component": "seed",
+      "crop": "tremendousstorage:lazurite"
+    }
+  },
+  "pattern": [
+    "MEM",
+    "ESE",
+    "MEM"
+  ],
+  "result": {
+    "count": 1,
+    "id": "tremendousstorage:lazurite_seeds"
+  }
+}

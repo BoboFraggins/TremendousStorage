@@ -95,15 +95,6 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
         });
         addRenderableWidget(searchBox);
 
-        addRenderableWidget(new PressableIconButton(
-                leftPos - ConfigDrawer.TAB_W + 4,
-                topPos + 3,
-                16,
-                16,
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config"),
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config_focused"),
-                () -> configDrawer.toggle()));
-
         // Quick Stack button — above the player inventory pane (pane index 3)
         addRenderableWidget(new PressableIconButton(
                 leftPos + dialog.totalWidth() - 26,

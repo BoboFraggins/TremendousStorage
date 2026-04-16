@@ -30,6 +30,12 @@ public class ConfigDrawer {
     private static final int CONTENT_PAD = 5;
     private static final int COLOR_BODY = 0xFFC6C6C6;
 
+    private static final ResourceLocation BUTTON_NORMAL =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config");
+
+    private static final ResourceLocation BUTTON_HOVER =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config_focused");
+
     // 9-slice textures shared with Dialog (left/top/bottom only — right side abuts the dialog)
     private static final ResourceLocation TEX_CORNER_TL =
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_tl.png");
@@ -44,6 +50,12 @@ public class ConfigDrawer {
 
     private final List<IDialogPane> panes;
     private final int[] paneYOffsets;
+
+    /**
+     * When true (the default), the tab renders the config toggle icon and handles its own clicks.
+     * Set to false for screens that place the toggle button elsewhere (e.g. inside the dialog).
+     */
+    private boolean showTabButton = true;
 
     private boolean open = false;
     private float animFrom = 0f;
@@ -78,6 +90,14 @@ public class ConfigDrawer {
         this.dialogH = dialogH;
     }
 
+    /**
+     * Disables the built-in tab button rendering and click handling. Call this when the host screen
+     * places its own toggle button elsewhere (e.g. inside the main dialog title bar).
+     */
+    public void withoutTabButton() {
+        showTabButton = false;
+    }
+
     /** Toggles the drawer open or closed, starting a smooth animation from the current progress. */
     public void toggle() {
         animFrom = getProgress(System.currentTimeMillis());
@@ -90,7 +110,7 @@ public class ConfigDrawer {
      * behind the dialog's left border.
      */
     public void render(GuiGraphics graphics, Font font, int mouseX, int mouseY, float partialTick) {
-        renderTab(graphics);
+        renderTab(graphics, mouseX, mouseY);
 
         float p = getProgress(System.currentTimeMillis());
         if (p <= 0.001f) return;
@@ -142,13 +162,17 @@ public class ConfigDrawer {
         graphics.disableScissor();
     }
 
-    /** Renders the permanent tab that protrudes from the dialog's left edge. */
-    private void renderTab(GuiGraphics graphics) {
-        int tabX = dialogX - TAB_W;
+    /**
+     * Renders the permanent tab that protrudes from the dialog's left edge.
+     * Shifted 1 px right of the pure flush position so the dialog renders on top of the tab's
+     * right edge, giving a "tucked under" appearance.
+     */
+    private void renderTab(GuiGraphics graphics, int mouseX, int mouseY) {
+        int tabX = dialogX - TAB_W + 1;
         int tabY = dialogY;
         int midH = TAB_H - 2 * CORNER;
 
-        // Fill — extend 1 px right to cover the dialog's left border pixel for a clean seam
+        // Fill — extend 1 px right so the dialog border covers the seam
         graphics.fill(tabX + CORNER, tabY + CORNER, dialogX + 1, tabY + TAB_H - CORNER, COLOR_BODY);
 
         // Top-left corner
@@ -172,14 +196,28 @@ public class ConfigDrawer {
             graphics.blit(TEX_EDGE_BOTTOM, tabX + CORNER + px, tabY + TAB_H - CORNER, 0, 0, 1, CORNER, 1, CORNER);
         }
         // No right border — abuts the main dialog
+
+        if (showTabButton) {
+            boolean hovered = mouseX >= tabX && mouseX < dialogX && mouseY >= tabY && mouseY < tabY + TAB_H;
+            graphics.blitSprite(hovered ? BUTTON_HOVER : BUTTON_NORMAL, tabX + 4, tabY + 3, 16, 16);
+        }
     }
 
     /**
-     * Routes a mouse click into the drawer. Only accepts clicks when the drawer is fully open.
+     * Routes a mouse click into the drawer. Also handles clicks on the toggle tab when
+     * {@link #showTabButton} is true.
      *
      * @return {@code true} if consumed
      */
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (showTabButton) {
+            int tabX = dialogX - TAB_W + 1;
+            if (mouseX >= tabX && mouseX < dialogX && mouseY >= dialogY && mouseY < dialogY + TAB_H) {
+                toggle();
+                return true;
+            }
+        }
+
         if (getProgress(System.currentTimeMillis()) < 0.99f) return false;
 
         int drawerX = dialogX - TAB_W - WIDTH;

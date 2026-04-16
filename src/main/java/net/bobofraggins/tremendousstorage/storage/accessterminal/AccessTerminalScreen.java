@@ -97,16 +97,6 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         });
         addRenderableWidget(searchBox);
 
-        // Config drawer toggle button — sits in the tab that protrudes from the dialog's left edge.
-        addRenderableWidget(new PressableIconButton(
-                leftPos - ConfigDrawer.TAB_W + 4,
-                topPos + 3,
-                16,
-                16,
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config"),
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config_focused"),
-                configDrawer::toggle));
-
         // Quick stack button above the player inventory, right-aligned.
         // Pane index: network(0), [crafting(1),] playerInv(last)
         int playerInvPaneIndex = menu.hasCraftingUpgrade() ? 2 : 1;

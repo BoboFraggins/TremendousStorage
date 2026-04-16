@@ -41,6 +41,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         super(menu, inv, title);
         this.playerInvY = playerInvY;
         this.configDrawer = configDrawer;
+        configDrawer.withoutTabButton();
         dialog = new Dialog(Dialog.blankPane(BG_WIDTH, bgHeight - Dialog.TITLE_H - Dialog.BOTTOM_PADDING));
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();

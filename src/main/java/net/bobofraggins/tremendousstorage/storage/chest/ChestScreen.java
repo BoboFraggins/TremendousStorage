@@ -133,15 +133,6 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
         addRenderableWidget(searchBox);
 
         addRenderableWidget(new PressableIconButton(
-                leftPos - ConfigDrawer.TAB_W + 4,
-                topPos + 3,
-                16,
-                16,
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config"),
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config_focused"),
-                () -> configDrawer.toggle()));
-
-        addRenderableWidget(new PressableIconButton(
                 leftPos + dialog.totalWidth() - 26,
                 dialog.getPaneAbsY(3) - 20,
                 16,

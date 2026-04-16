@@ -1,4 +1,10 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "mysticalagriculture:crop_enabled",
+      "crop": "tremendousstorage:lazurite"
+    }
+  ],
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     { "item": "tremendousstorage:lazurite_essence" },
