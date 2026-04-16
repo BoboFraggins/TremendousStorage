@@ -5,7 +5,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
+import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.shared.network.BackpackInteractPacket;
+import net.bobofraggins.tremendousstorage.shared.network.BackpackQuickStackPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetBackpackPriorityPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetBackpackSortModePacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
@@ -101,6 +103,17 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config"),
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config_focused"),
                 () -> configDrawer.toggle()));
+
+        // Quick Stack button — above the player inventory pane (pane index 3)
+        addRenderableWidget(new PressableIconButton(
+                leftPos + dialog.totalWidth() - 26,
+                dialog.getPaneAbsY(3) - 20,
+                16,
+                16,
+                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack"),
+                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack_focused"),
+                () -> PacketDistributor.sendToServer(
+                        new BackpackQuickStackPacket(menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId()))));
     }
 
     @Override
@@ -192,6 +205,12 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
                 return true;
             }
             searchBox.keyPressed(keyCode, scanCode, modifiers);
+            return true;
+        }
+        if (QuickStackClientEvents.QUICK_STACK != null
+                && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)) {
+            PacketDistributor.sendToServer(
+                    new BackpackQuickStackPacket(menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId()));
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);

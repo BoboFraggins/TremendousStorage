@@ -87,5 +87,7 @@ public final class NetworkEvents {
                 SetBackpackSortModePacket.TYPE,
                 SetBackpackSortModePacket.STREAM_CODEC,
                 SetBackpackSortModePacket::handle);
+        registrar.playToServer(
+                BackpackQuickStackPacket.TYPE, BackpackQuickStackPacket.STREAM_CODEC, BackpackQuickStackPacket::handle);
     }
 }
