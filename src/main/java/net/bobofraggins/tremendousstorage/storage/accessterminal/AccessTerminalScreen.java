@@ -101,6 +101,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
             SearchSync.pushToJei(text);
         });
         addRenderableWidget(searchBox);
+        searchBox.setValue(SearchSync.getRawFilter());
 
         // Quick stack button above the player inventory, right-aligned.
         // Pane index: network(0), [crafting(1),] playerInv(last)

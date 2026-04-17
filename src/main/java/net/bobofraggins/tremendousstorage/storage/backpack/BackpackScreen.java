@@ -94,6 +94,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
             SearchSync.pushToJei(text);
         });
         addRenderableWidget(searchBox);
+        searchBox.setValue(SearchSync.getRawFilter());
 
         // Quick Stack button — above the player inventory pane (pane index 3)
         addRenderableWidget(new PressableIconButton(

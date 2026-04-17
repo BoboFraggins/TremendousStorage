@@ -131,6 +131,7 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
             SearchSync.pushToJei(text);
         });
         addRenderableWidget(searchBox);
+        searchBox.setValue(SearchSync.getRawFilter());
 
         addRenderableWidget(new PressableIconButton(
                 leftPos + dialog.totalWidth() - 26,
