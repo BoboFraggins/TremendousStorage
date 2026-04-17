@@ -50,6 +50,10 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     private final ConfigDrawer configDrawer;
     private EditBox searchBox;
 
+    // Visual bounding box of the search field (used for border drawing and hint text).
+    private int searchBx, searchBy, searchBw, searchBh;
+    private static final int SEARCH_MARGIN = 3;
+
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
@@ -60,12 +64,13 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         if (menu.hasCraftingUpgrade()) {
             dialog = new Dialog(
                     networkPane,
-                    new CraftingGridPane(),
-                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
-                    new PlayerInventoryPane());
+                    new CraftingGridPane(AccessTerminalLayout.CRAFTING_GRID_X, AccessTerminalLayout.CRAFTING_RESULT_X),
+                    new PlayerInventoryPane(AccessTerminalLayout.PLAYER_INV_X));
         } else {
-            dialog =
-                    new Dialog(networkPane, Dialog.blankPane(PlayerInventoryPane.WIDTH, 20), new PlayerInventoryPane());
+            dialog = new Dialog(
+                    networkPane,
+                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
+                    new PlayerInventoryPane(AccessTerminalLayout.PLAYER_INV_X));
         }
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
@@ -92,23 +97,43 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
         // Search box — right-aligned in the title bar.
         int searchW = 75;
-        searchBox =
-                new EditBox(font, leftPos + imageWidth - 5 - 2 - searchW, topPos + 4, searchW, 12, Component.empty());
+        searchBx = leftPos + imageWidth - 5 - 2 - searchW;
+        searchBy = topPos + 4;
+        searchBw = searchW;
+        searchBh = 12;
+        int textH = font.lineHeight;
+        searchBox = new EditBox(
+                font,
+                searchBx + SEARCH_MARGIN,
+                searchBy + (searchBh - textH) / 2,
+                searchBw - SEARCH_MARGIN,
+                textH,
+                Component.empty());
         searchBox.setMaxLength(64);
-        searchBox.setHint(Component.literal("Search..."));
+        searchBox.setBordered(false);
+        searchBox.setTextColor(0xFFFFFFFF);
         searchBox.setResponder(text -> {
             networkPane.setFilter(text.toLowerCase(Locale.ROOT).strip());
             SearchSync.pushToJei(text);
         });
         addRenderableWidget(searchBox);
-        searchBox.setValue(SearchSync.getRawFilter());
+        String existingFilter = SearchSync.getRawFilter();
+        searchBox.setValue(existingFilter);
+        if (!existingFilter.isEmpty()) {
+            // Select all so the user immediately sees there is an active filter and can clear it.
+            searchBox.setFocused(true);
+            searchBox.setHighlightPos(0);
+        }
 
-        // Quick stack button above the player inventory, right-aligned.
-        // Pane index: network(0), [crafting(1),] playerInv(last)
-        int playerInvPaneIndex = menu.hasCraftingUpgrade() ? 3 : 2;
+        // Quick stack button: 4 px above and horizontally centered on the top-right player inv slot.
+        int buttonX = leftPos
+                + AccessTerminalLayout.PLAYER_INV_X
+                + 8 * AccessTerminalLayout.SLOT_SIZE
+                + (AccessTerminalLayout.SLOT_SIZE - 16) / 2;
+        int buttonY = dialog.getPaneAbsY(2) - 20;
         addRenderableWidget(new PressableIconButton(
-                leftPos + dialog.totalWidth() - 26,
-                dialog.getPaneAbsY(playerInvPaneIndex) - 20,
+                buttonX,
+                buttonY,
                 16,
                 16,
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack"),
@@ -228,15 +253,23 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     }
 
     private void drawSearchBorder(GuiGraphics graphics) {
-        int bx = searchBox.getX() - 2;
-        int by = searchBox.getY() - 2;
-        int bw = searchBox.getWidth() + 4;
-        int bh = searchBox.getHeight() + 4;
-        int c = 0xFF373737;
-        graphics.fill(bx, by, bx + bw, by + 2, c);
-        graphics.fill(bx, by + bh - 2, bx + bw, by + bh, c);
-        graphics.fill(bx, by + 2, bx + 2, by + bh - 2, c);
-        graphics.fill(bx + bw - 2, by + 2, bx + bw, by + bh - 2, c);
+        // Background
+        graphics.fill(searchBx, searchBy, searchBx + searchBw, searchBy + searchBh, 0xFF8B8B8B);
+
+        // Shadow: top and left edges (recessed look)
+        graphics.fill(searchBx - 1, searchBy - 1, searchBx + searchBw + 1, searchBy, 0xFF555555);
+        graphics.fill(searchBx - 1, searchBy, searchBx, searchBy + searchBh + 1, 0xFF555555);
+
+        // Highlight: bottom and right edges
+        graphics.fill(searchBx, searchBy + searchBh, searchBx + searchBw + 1, searchBy + searchBh + 1, 0xFFFFFFFF);
+        graphics.fill(searchBx + searchBw, searchBy, searchBx + searchBw + 1, searchBy + searchBh, 0xFFFFFFFF);
+
+        // Hint text — drawn manually so it respects the margin and vertical centering
+        if (searchBox.getValue().isEmpty() && !searchBox.isFocused()) {
+            int hintX = searchBx + SEARCH_MARGIN;
+            int hintY = searchBy + (searchBh - font.lineHeight) / 2 + 1;
+            graphics.drawString(font, "Search...", hintX, hintY, 0xFFAAAAAA, false);
+        }
     }
 
     @Override

@@ -39,14 +39,10 @@ public class NetworkInventoryPane implements IDialogPane {
     private static final ResourceLocation BG_TEXTURE =
             ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
 
-    private static final ResourceLocation THUMB_TOP =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/scrollbar_thumb_top.png");
-    private static final ResourceLocation THUMB_MID =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/scrollbar_thumb_mid.png");
-    private static final ResourceLocation THUMB_BOT =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/scrollbar_thumb_bot.png");
-
-    private static final int THUMB_CAP = 4;
+    private static final ResourceLocation SCROLLER =
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller");
+    private static final ResourceLocation SCROLLER_DISABLED =
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller_disabled");
 
     // Pane-local coordinates derived from AccessTerminalLayout
     /** Local Y of the grid top edge (= NETWORK_Y - TITLE_H = 1). */
@@ -436,7 +432,7 @@ public class NetworkInventoryPane implements IDialogPane {
         int startY = gridStartY();
         int barH = visibleRows() * AccessTerminalLayout.SLOT_SIZE;
         return localX >= SCROLLBAR_X
-                && localX < SCROLLBAR_X + AccessTerminalLayout.SCROLLBAR_W
+                && localX < AccessTerminalLayout.BG_WIDTH
                 && localY >= startY
                 && localY < startY + barH;
     }
@@ -448,8 +444,10 @@ public class NetworkInventoryPane implements IDialogPane {
                 (stacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
         int maxScroll = Math.max(0, totalRows - rows);
         if (maxScroll == 0) return;
-        double ratio = (localY - gridStartY()) / (double) barH;
-        scrollOffset = (int) Math.round(ratio * maxScroll);
+        float scrollFraction = ((float) localY - gridStartY() - AccessTerminalLayout.SCROLLER_H / 2.0f)
+                / (barH - AccessTerminalLayout.SCROLLER_H);
+        scrollFraction = Math.max(0f, Math.min(1f, scrollFraction));
+        scrollOffset = Math.round(scrollFraction * maxScroll);
         clampScroll();
     }
 
@@ -508,34 +506,42 @@ public class NetworkInventoryPane implements IDialogPane {
         int rows = visibleRows();
         int barY = gridStartY();
         int barH = rows * AccessTerminalLayout.SLOT_SIZE;
-        int W = AccessTerminalLayout.SCROLLBAR_W;
 
-        // Left separator
+        // Left separator (1 px dark line matching vanilla panel dividers)
         graphics.fill(SCROLLBAR_X - 1, barY, SCROLLBAR_X, barY + barH, 0xFF555555);
 
-        // Track
-        graphics.fill(SCROLLBAR_X, barY, SCROLLBAR_X + W, barY + barH, 0xFF8B8B8B);
+        // Track background
+        int trackX = AccessTerminalLayout.SCROLLBAR_TRACK_X;
+        int trackW = AccessTerminalLayout.SCROLLBAR_W;
+        graphics.fill(trackX, barY, trackX + trackW, barY + barH, 0xFF8B8B8B);
+        // Inner bevel: sunken 3D effect
+        graphics.fill(trackX, barY, trackX + trackW, barY + 1, 0xFF555555); // top shadow
+        graphics.fill(trackX, barY, trackX + 1, barY + barH, 0xFF555555); // left shadow
+        graphics.fill(trackX, barY + barH - 1, trackX + trackW, barY + barH, 0xFFFFFFFF); // bottom highlight
+        graphics.fill(trackX + trackW - 1, barY, trackX + trackW, barY + barH, 0xFFFFFFFF); // right highlight
 
-        // Thumb geometry
         int totalRows = !hasContents
                 ? 1
                 : Math.max(
                         (stacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
-        int thumbH = Math.max(THUMB_CAP * 2, barH * rows / totalRows);
-        int maxScroll = Math.max(1, totalRows - rows);
-        int thumbY = barY + (barH - thumbH) * scrollOffset / maxScroll;
-        if (totalRows <= rows) {
+        boolean canScroll = totalRows > rows;
+
+        // Vanilla sprite: 12×15 thumb, 1 px inset to centre within 14 px track
+        int thumbX = trackX + 1;
+        int thumbY;
+        if (!canScroll) {
             thumbY = barY;
-            thumbH = barH;
+        } else {
+            int maxScroll = totalRows - rows;
+            float scrollFraction = scrollOffset / (float) maxScroll;
+            thumbY = barY + (int) ((barH - AccessTerminalLayout.SCROLLER_H) * scrollFraction);
         }
 
-        // 3-slice thumb: top cap / tiled mid / bottom cap
-        graphics.blit(THUMB_TOP, SCROLLBAR_X, thumbY, 0, 0, W, THUMB_CAP, W, THUMB_CAP);
-        int midY = thumbY + THUMB_CAP;
-        int midH = thumbH - THUMB_CAP * 2;
-        for (int i = 0; i < midH; i++) {
-            graphics.blit(THUMB_MID, SCROLLBAR_X, midY + i, 0, 0, W, 1, W, 1);
-        }
-        graphics.blit(THUMB_BOT, SCROLLBAR_X, thumbY + thumbH - THUMB_CAP, 0, 0, W, THUMB_CAP, W, THUMB_CAP);
+        graphics.blitSprite(
+                canScroll ? SCROLLER : SCROLLER_DISABLED,
+                thumbX,
+                thumbY,
+                AccessTerminalLayout.SCROLLER_W,
+                AccessTerminalLayout.SCROLLER_H);
     }
 }

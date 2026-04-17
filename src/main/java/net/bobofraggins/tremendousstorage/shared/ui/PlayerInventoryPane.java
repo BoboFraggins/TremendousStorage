@@ -20,12 +20,12 @@ public class PlayerInventoryPane implements IDialogPane {
     private static final int COLS = 9;
     private static final int INV_ROWS = 3;
 
-    // Pane-local origins — all offsets live here
-    private static final int INV_X = 8;
     private static final int INV_Y = 0;
-    private static final int HOTBAR_X = 8;
     private static final int HOTBAR_GAP = 4;
-    private static final int HOTBAR_Y = INV_ROWS * SLOT_SIZE + HOTBAR_GAP; // 58
+
+    private final int invX;
+    private final int hotbarX;
+    private final int hotbarY;
 
     // Slot border colours
     private static final int DARK = 0xFF373737;
@@ -36,7 +36,17 @@ public class PlayerInventoryPane implements IDialogPane {
     public static final int WIDTH = 176;
 
     /** Height covering 3 inventory rows + gap + hotbar row + bottom gap. */
-    public static final int HEIGHT = HOTBAR_Y + SLOT_SIZE + HOTBAR_GAP; // 80
+    public static final int HEIGHT = INV_ROWS * SLOT_SIZE + HOTBAR_GAP + SLOT_SIZE + HOTBAR_GAP; // 80
+
+    public PlayerInventoryPane() {
+        this(8);
+    }
+
+    public PlayerInventoryPane(int leftMargin) {
+        this.invX = leftMargin;
+        this.hotbarX = leftMargin;
+        this.hotbarY = INV_ROWS * SLOT_SIZE + HOTBAR_GAP;
+    }
 
     @Override
     public int preferredWidth() {
@@ -54,13 +64,13 @@ public class PlayerInventoryPane implements IDialogPane {
         // 3×9 main inventory rows
         for (int row = 0; row < INV_ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
-                drawSlotBg(graphics, INV_X + col * SLOT_SIZE, INV_Y + row * SLOT_SIZE);
+                drawSlotBg(graphics, invX + col * SLOT_SIZE, INV_Y + row * SLOT_SIZE);
             }
         }
 
         // 1×9 hotbar row
         for (int col = 0; col < COLS; col++) {
-            drawSlotBg(graphics, HOTBAR_X + col * SLOT_SIZE, HOTBAR_Y);
+            drawSlotBg(graphics, hotbarX + col * SLOT_SIZE, hotbarY);
         }
     }
 

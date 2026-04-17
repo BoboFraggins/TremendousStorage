@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "tremendousstorage:backpack"
+    "tremendousstorage:backpack",
+    "tremendousstorage:ender_backpack"
   ]
 }

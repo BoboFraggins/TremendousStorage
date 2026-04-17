@@ -127,7 +127,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             this.resultSlots = new ResultContainer();
 
             int craftingY = networkPaneBottom;
-            playerInvY = craftingY + (AccessTerminalLayout.PLAYER_INV_Y - AccessTerminalLayout.CRAFTING_Y) + 20;
+            playerInvY = craftingY + (AccessTerminalLayout.PLAYER_INV_Y - AccessTerminalLayout.CRAFTING_Y);
 
             this.resultSlot = 0;
             this.craftStart = 1;

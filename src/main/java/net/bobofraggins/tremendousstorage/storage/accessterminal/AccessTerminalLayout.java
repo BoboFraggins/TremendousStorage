@@ -6,7 +6,7 @@ public final class AccessTerminalLayout {
     private AccessTerminalLayout() {}
 
     public static final int SLOT_SIZE = 18;
-    public static final int BG_WIDTH = 184;
+    public static final int BG_WIDTH = 195;
     public static final int TITLE_H = 17;
 
     private static final int GAP = 4;
@@ -19,14 +19,26 @@ public final class AccessTerminalLayout {
     public static final int NETWORK_Y = TITLE_H + 1; // 18
     public static final int NETWORK_W = NETWORK_COLS * SLOT_SIZE; // 162
     public static final int NETWORK_H = NETWORK_VISIBLE_ROWS * SLOT_SIZE; // 72
-    public static final int SCROLLBAR_W = 8;
+
+    /** Left edge of the scrollbar area (right of the network grid). */
     public static final int SCROLLBAR_X = NETWORK_X + NETWORK_W; // 170
+
+    /** Width of the scrollbar track (matches vanilla creative inventory). */
+    public static final int SCROLLBAR_W = 14;
+
+    /** Left edge of the track (1 px right of the separator line). */
+    public static final int SCROLLBAR_TRACK_X = SCROLLBAR_X + 1; // 171
+
+    /** Pixel dimensions of the vanilla scroller thumb sprite. */
+    public static final int SCROLLER_W = 12;
+
+    public static final int SCROLLER_H = 15;
 
     // ── Crafting section ──────────────────────────────────────────────────────
 
     public static final int CRAFTING_Y = NETWORK_Y + NETWORK_H + GAP; // 94
-    public static final int CRAFTING_GRID_X = 30;
-    public static final int CRAFTING_RESULT_X = 120;
+    public static final int CRAFTING_GRID_X = 33;
+    public static final int CRAFTING_RESULT_X = 123;
     public static final int CRAFTING_RESULT_Y = CRAFTING_Y + SLOT_SIZE; // 112
     public static final int CRAFTING_ROWS = 3;
     public static final int CRAFTING_H = CRAFTING_ROWS * SLOT_SIZE; // 54
@@ -36,19 +48,19 @@ public final class AccessTerminalLayout {
     public static final int ARROW_SRC_Y = 30;
     public static final int ARROW_W = 31;
     public static final int ARROW_H = 22;
-    // Horizontally centred between grid right edge (84) and result slot left (120)
+    // Horizontally centred between grid right edge and result slot left
     public static final int ARROW_X =
-            (CRAFTING_GRID_X + CRAFTING_ROWS * SLOT_SIZE + CRAFTING_RESULT_X - ARROW_W + 4) / 2; // 86
+            (CRAFTING_GRID_X + CRAFTING_ROWS * SLOT_SIZE + CRAFTING_RESULT_X - ARROW_W + 4) / 2; // 91
 
     // ── Player inventory ──────────────────────────────────────────────────────
 
-    public static final int PLAYER_INV_X = 8;
+    public static final int PLAYER_INV_X = 10;
     public static final int PLAYER_INV_Y = CRAFTING_Y + CRAFTING_H + GAP; // 152
     public static final int PLAYER_INV_ROWS = 3;
 
     // ── Hotbar ────────────────────────────────────────────────────────────────
 
-    public static final int HOTBAR_X = 8;
+    public static final int HOTBAR_X = 10;
     public static final int HOTBAR_Y = PLAYER_INV_Y + PLAYER_INV_ROWS * SLOT_SIZE + GAP; // 210
 
     // ── Full panel ────────────────────────────────────────────────────────────

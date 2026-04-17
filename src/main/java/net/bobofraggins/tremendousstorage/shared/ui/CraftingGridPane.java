@@ -16,8 +16,6 @@ public class CraftingGridPane implements IDialogPane {
             ResourceLocation.withDefaultNamespace("textures/gui/container/crafting_table.png");
 
     public static final int SLOT_SIZE = 18;
-    public static final int CRAFTING_GRID_X = 30;
-    public static final int CRAFTING_RESULT_X = 120;
     public static final int CRAFTING_ROWS = 3;
 
     /** Height of this pane: 3 rows of slots + 4 px gap before player inventory. */
@@ -28,8 +26,6 @@ public class CraftingGridPane implements IDialogPane {
     private static final int ARROW_SRC_Y = 30;
     private static final int ARROW_W = 31;
     private static final int ARROW_H = 22;
-    private static final int ARROW_X =
-            (CRAFTING_GRID_X + CRAFTING_ROWS * SLOT_SIZE + CRAFTING_RESULT_X - ARROW_W + 4) / 2;
     private static final int ARROW_LOCAL_Y = (CRAFTING_ROWS * SLOT_SIZE - ARROW_H) / 2 - 3;
 
     // Result slot background blitted from crafting_table.png
@@ -39,6 +35,20 @@ public class CraftingGridPane implements IDialogPane {
     private static final int RESULT_BG_OFFSET = 5;
     /** Pane-local Y of the result slot (centred vertically on the 3-row grid). */
     public static final int RESULT_LOCAL_Y = SLOT_SIZE;
+
+    private final int craftingGridX;
+    private final int resultX;
+    private final int arrowX;
+
+    public CraftingGridPane() {
+        this(30, 120);
+    }
+
+    public CraftingGridPane(int craftingGridX, int resultX) {
+        this.craftingGridX = craftingGridX;
+        this.resultX = resultX;
+        this.arrowX = (craftingGridX + CRAFTING_ROWS * SLOT_SIZE + resultX - ARROW_W + 4) / 2;
+    }
 
     @Override
     public int preferredWidth() {
@@ -56,17 +66,17 @@ public class CraftingGridPane implements IDialogPane {
         // 3×3 crafting grid slot backgrounds
         for (int row = 0; row < CRAFTING_ROWS; row++) {
             for (int col = 0; col < CRAFTING_ROWS; col++) {
-                drawSlotBg(graphics, CRAFTING_GRID_X + col * SLOT_SIZE, row * SLOT_SIZE);
+                drawSlotBg(graphics, craftingGridX + col * SLOT_SIZE, row * SLOT_SIZE);
             }
         }
 
         // Arrow
-        graphics.blit(CRAFTING_TEXTURE, ARROW_X, ARROW_LOCAL_Y, ARROW_SRC_X, ARROW_SRC_Y, ARROW_W, ARROW_H);
+        graphics.blit(CRAFTING_TEXTURE, arrowX, ARROW_LOCAL_Y, ARROW_SRC_X, ARROW_SRC_Y, ARROW_W, ARROW_H);
 
         // Result slot background
         graphics.blit(
                 CRAFTING_TEXTURE,
-                CRAFTING_RESULT_X - RESULT_BG_OFFSET,
+                resultX - RESULT_BG_OFFSET,
                 RESULT_LOCAL_Y - RESULT_BG_OFFSET,
                 RESULT_BG_SRC_X,
                 RESULT_BG_SRC_Y,
