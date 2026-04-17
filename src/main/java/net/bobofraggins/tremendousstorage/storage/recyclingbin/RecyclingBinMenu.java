@@ -210,8 +210,13 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
                 be.onItemsDestroyed(stack.getCount());
                 Level level = be.getLevel();
                 if (level != null && !level.isClientSide()) {
-                    level.playSound(null, be.getBlockPos(),
-                            SoundEvents.ITEM_BREAK, SoundSource.BLOCKS, 1.0f, 0.9f + level.random.nextFloat() * 0.2f);
+                    level.playSound(
+                            null,
+                            be.getBlockPos(),
+                            SoundEvents.ITEM_BREAK,
+                            SoundSource.BLOCKS,
+                            1.0f,
+                            0.9f + level.random.nextFloat() * 0.2f);
                 }
             }
             // Item is not stored — it's destroyed

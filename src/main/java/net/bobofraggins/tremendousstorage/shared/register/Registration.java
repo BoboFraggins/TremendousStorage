@@ -637,8 +637,8 @@ public final class Registration {
     public static final DeferredHolder<Item, Item> CANVAS =
             ITEMS.register("canvas", () -> new Item(new Item.Properties()));
 
-    public static final DeferredHolder<Item, BlockItem> PICNIC_BASKET_ITEM =
-            ITEMS.register("picnic_basket", () -> new TieredBlockItem(PICNIC_BASKET_BLOCK.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> PICNIC_BASKET_ITEM = ITEMS.register(
+            "picnic_basket", () -> new TieredBlockItem(PICNIC_BASKET_BLOCK.get(), new Item.Properties()));
 
     public static final DeferredBlock<EnderPicnicBasketBlock> ENDER_PICNIC_BASKET_BLOCK = BLOCKS.register(
             "ender_picnic_basket",
@@ -755,8 +755,7 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> STORAGE_ACCESS_TERMINAL_ITEM = ITEMS.register(
-            "storage_access_terminal",
-            () -> new TieredBlockItem(STORAGE_ACCESS_TERMINAL.get(), new Item.Properties()));
+            "storage_access_terminal", () -> new TieredBlockItem(STORAGE_ACCESS_TERMINAL.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<AccessTerminalBlockEntity>>
             STORAGE_ACCESS_TERMINAL_BE_TYPE =

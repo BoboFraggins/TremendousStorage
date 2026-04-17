@@ -53,12 +53,30 @@ public class TieredBlockItem extends BlockItem {
         }
         StringBuilder sb = new StringBuilder();
         if (tier != StorageTier.WOOD) sb.append(capitalize(tier.getId()));
-        if (ender) { if (!sb.isEmpty()) sb.append('/'); sb.append("Ender"); }
-        if (crafting) { if (!sb.isEmpty()) sb.append('/'); sb.append("Crafting"); }
-        if (magnet) { if (!sb.isEmpty()) sb.append('/'); sb.append("Magnet"); }
-        if (puller) { if (!sb.isEmpty()) sb.append('/'); sb.append("Puller"); }
-        if (haarp) { if (!sb.isEmpty()) sb.append('/'); sb.append("Haarp"); }
-        if (interdimensional) { if (!sb.isEmpty()) sb.append('/'); sb.append("Interdimensional"); }
+        if (ender) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Ender");
+        }
+        if (crafting) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Crafting");
+        }
+        if (magnet) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Magnet");
+        }
+        if (puller) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Puller");
+        }
+        if (haarp) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Haarp");
+        }
+        if (interdimensional) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Interdimensional");
+        }
         return sb.isEmpty() ? "" : " (" + sb + ")";
     }
 

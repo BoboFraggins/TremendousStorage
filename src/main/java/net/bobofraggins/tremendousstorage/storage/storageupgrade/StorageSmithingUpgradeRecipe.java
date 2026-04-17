@@ -106,8 +106,7 @@ public class StorageSmithingUpgradeRecipe implements CraftingRecipe {
                     && isNetheriteTierItem(base);
         }
         if (addition.getItem() instanceof HaarpUpgradeItem) {
-            return base.getItem() == Registration.WIRELESS_HUB.get().asItem()
-                    && !alreadyHasHaarpUpgrade(base);
+            return base.getItem() == Registration.WIRELESS_HUB.get().asItem() && !alreadyHasHaarpUpgrade(base);
         }
         if (!isStorageBlock(base.getItem())) return false;
         if (!(addition.getItem() instanceof StorageUpgradeItem upgradeItem)) return false;

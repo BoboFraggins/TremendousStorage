@@ -1,7 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 
 /**

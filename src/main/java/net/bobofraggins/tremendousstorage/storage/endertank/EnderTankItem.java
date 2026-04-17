@@ -49,5 +49,4 @@ public class EnderTankItem extends TankItem {
         CompoundTag tag = data.copyTag();
         return tag.contains(EnderTankBlockEntity.TAG_LINK_ID) ? tag.getLong(EnderTankBlockEntity.TAG_LINK_ID) : -1L;
     }
-
 }

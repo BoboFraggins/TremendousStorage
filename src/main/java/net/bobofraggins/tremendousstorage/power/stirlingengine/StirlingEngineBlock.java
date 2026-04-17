@@ -2,10 +2,10 @@ package net.bobofraggins.tremendousstorage.power.stirlingengine;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
+import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;

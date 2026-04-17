@@ -64,10 +64,8 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
                     Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
                     new PlayerInventoryPane());
         } else {
-            dialog = new Dialog(
-                    networkPane,
-                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
-                    new PlayerInventoryPane());
+            dialog =
+                    new Dialog(networkPane, Dialog.blankPane(PlayerInventoryPane.WIDTH, 20), new PlayerInventoryPane());
         }
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
