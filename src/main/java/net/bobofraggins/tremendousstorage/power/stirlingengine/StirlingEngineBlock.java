@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 /** A heat-powered energy generator that converts heat from blocks below into RF. */
-public class StirlingEngineBlock extends BaseEntityBlock {
+public class StirlingEngineBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<StirlingEngineBlock> CODEC = simpleCodec(StirlingEngineBlock::new);
 

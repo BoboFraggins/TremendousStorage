@@ -1,0 +1,23 @@
+{
+  "type": "amendments:cauldron",
+  "group": "",
+  "input_fluid": {
+    "id": "tremendousstorage:positive_vibes",
+    "count": 3
+  },
+  "input_items": [
+    {"item": "tremendousstorage:zombie_brain"}
+  ],
+  "output_item": {
+    "id": "tremendousstorage:brain",
+    "count": 1
+  },
+  "fluid_amount_difference": -3,
+  "require_boiling": false,
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "amendments"
+    }
+  ]
+}

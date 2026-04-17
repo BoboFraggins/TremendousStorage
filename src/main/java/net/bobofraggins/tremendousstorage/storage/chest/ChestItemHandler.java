@@ -37,7 +37,9 @@ public class ChestItemHandler implements IItemHandler, IKeyCounterContributor, I
 
     @Override
     public int getSlots() {
-        return be.typeCount();
+        // Always expose at least one slot so hoppers can insert into an empty chest.
+        // insertItem ignores the slot index, so slot 0 is always valid for insertion.
+        return Math.max(1, be.typeCount());
     }
 
     @Override

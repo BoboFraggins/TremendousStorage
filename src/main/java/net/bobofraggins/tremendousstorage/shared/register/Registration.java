@@ -31,6 +31,7 @@ import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackMenu;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.BaseUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.EnderStorageUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.HaarpUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.InterdimensionalUpgradeItem;
@@ -299,7 +300,7 @@ public final class Registration {
                     .sound(SoundType.WOOD)));
 
     public static final DeferredHolder<Item, BlockItem> FILING_CABINET_ITEM =
-            ITEMS.registerSimpleBlockItem("filing_cabinet", FILING_CABINET);
+            ITEMS.register("filing_cabinet", () -> new TieredBlockItem(FILING_CABINET.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FilingCabinetBlockEntity>>
             FILING_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register("filing_cabinet", () -> BlockEntityType.Builder.of(
@@ -637,7 +638,7 @@ public final class Registration {
             ITEMS.register("canvas", () -> new Item(new Item.Properties()));
 
     public static final DeferredHolder<Item, BlockItem> PICNIC_BASKET_ITEM =
-            ITEMS.register("picnic_basket", () -> new BlockItem(PICNIC_BASKET_BLOCK.get(), new Item.Properties()));
+            ITEMS.register("picnic_basket", () -> new TieredBlockItem(PICNIC_BASKET_BLOCK.get(), new Item.Properties()));
 
     public static final DeferredBlock<EnderPicnicBasketBlock> ENDER_PICNIC_BASKET_BLOCK = BLOCKS.register(
             "ender_picnic_basket",
@@ -647,7 +648,7 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> ENDER_PICNIC_BASKET_ITEM = ITEMS.register(
-            "ender_picnic_basket", () -> new BlockItem(ENDER_PICNIC_BASKET_BLOCK.get(), new Item.Properties()));
+            "ender_picnic_basket", () -> new TieredBlockItem(ENDER_PICNIC_BASKET_BLOCK.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderPicnicBasketBlockEntity>>
             ENDER_PICNIC_BASKET_BE_TYPE =
@@ -753,8 +754,9 @@ public final class Registration {
                     .sound(SoundType.WOOD)
                     .noOcclusion()));
 
-    public static final DeferredHolder<Item, BlockItem> STORAGE_ACCESS_TERMINAL_ITEM =
-            ITEMS.registerSimpleBlockItem("storage_access_terminal", STORAGE_ACCESS_TERMINAL);
+    public static final DeferredHolder<Item, BlockItem> STORAGE_ACCESS_TERMINAL_ITEM = ITEMS.register(
+            "storage_access_terminal",
+            () -> new TieredBlockItem(STORAGE_ACCESS_TERMINAL.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<AccessTerminalBlockEntity>>
             STORAGE_ACCESS_TERMINAL_BE_TYPE =
@@ -776,7 +778,7 @@ public final class Registration {
                     .lightLevel(state -> 14)));
 
     public static final DeferredHolder<Item, BlockItem> WIRELESS_HUB_ITEM =
-            ITEMS.registerSimpleBlockItem("wireless_hub", WIRELESS_HUB);
+            ITEMS.register("wireless_hub", () -> new TieredBlockItem(WIRELESS_HUB.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WirelessHubBlockEntity>>
             WIRELESS_HUB_BE_TYPE = BLOCK_ENTITY_TYPES.register(
@@ -882,8 +884,8 @@ public final class Registration {
     public static final DeferredHolder<Item, BaseUpgradeItem> BASE_UPGRADE =
             ITEMS.register("base_upgrade", BaseUpgradeItem::new);
 
-    public static final DeferredHolder<Item, BaseUpgradeItem> CRAFTING_UPGRADE =
-            ITEMS.register("crafting_upgrade", BaseUpgradeItem::new);
+    public static final DeferredHolder<Item, CraftingUpgradeItem> CRAFTING_UPGRADE =
+            ITEMS.register("crafting_upgrade", CraftingUpgradeItem::new);
 
     public static final DeferredHolder<Item, EnderStorageUpgradeItem> ENDER_STORAGE_UPGRADE =
             ITEMS.register("ender_storage_upgrade", EnderStorageUpgradeItem::new);

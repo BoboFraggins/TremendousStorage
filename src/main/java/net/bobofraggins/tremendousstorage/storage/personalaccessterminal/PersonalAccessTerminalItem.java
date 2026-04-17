@@ -40,6 +40,13 @@ public class PersonalAccessTerminalItem extends Item {
         return "item.tremendousstorage.personal_access_terminal";
     }
 
+    @Override
+    public Component getName(ItemStack stack) {
+        Component base = super.getName(stack);
+        boolean hasCrafting = Boolean.TRUE.equals(stack.get(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get()));
+        return hasCrafting ? Component.empty().append(base).append(" (Crafting)") : base;
+    }
+
     // -------------------------------------------------------------------------
     // Tooltip
     // -------------------------------------------------------------------------

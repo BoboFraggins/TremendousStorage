@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 
 /**
@@ -28,6 +29,19 @@ public class RecyclingBinItemHandler implements IItemHandler {
     @Override
     public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
         if (stack.isEmpty()) return ItemStack.EMPTY;
+        if (RecyclingBinMenu.isEmptyFluidContainer(stack)) {
+            // Route to the fluid input slot if it's empty
+            if (be.transferContainer.getItem(0).isEmpty()) {
+                if (!simulate) {
+                    ItemStack toPlace = stack.copyWithCount(1);
+                    be.transferContainer.setItem(0, toPlace);
+                }
+                ItemStack remainder = stack.copy();
+                remainder.shrink(1);
+                return remainder.isEmpty() ? ItemStack.EMPTY : remainder;
+            }
+            // Fluid input occupied — void it
+        }
         if (!simulate) {
             be.onItemsDestroyed(stack.getCount());
         }

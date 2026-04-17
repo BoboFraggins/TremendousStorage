@@ -133,3 +133,17 @@ modId="roughlyenoughitems"
 type="optional"
 ordering="AFTER"
 side="CLIENT"
+
+[[dependencies.${mod_id}]]
+modId="amendments"
+type="optional"
+versionRange="[2,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="moonlight"
+type="optional"
+versionRange="[2,)"
+ordering="NONE"
+side="BOTH"

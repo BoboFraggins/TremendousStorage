@@ -8,22 +8,22 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.crafting.SmithingRecipe;
-import net.minecraft.world.item.crafting.SmithingRecipeInput;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.level.Level;
 
 /**
- * Base class for the four Ender smithing recipes (Chest, Tank, Folder, Backpack).
+ * Base class for the Ender crafting recipes (Chest, Tank, Folder, Backpack, Picnic Basket).
  *
- * <p>Handles shared boilerplate: the template/addition ingredient predicates, the
- * {@link #matches} implementation, the thread-local link-ID hand-off between
- * {@link #assemble} and {@link #getRemainingItems}, and the shared {@link SecureRandom}
- * instance.
+ * <p>Shapeless 2-ingredient crafting recipe: any base storage item + Ender Storage Upgrade →
+ * two linked ender items. The second linked item is returned via {@link #getRemainingItems}
+ * in place of the consumed base ingredient, so the player ends up with both copies.
  *
  * <p>Subclasses provide only the item-type-specific logic: which base items are accepted,
  * how to read an existing link ID, and how to build the ender output item.
  */
-public abstract class AbstractEnderSmithingRecipe implements SmithingRecipe {
+public abstract class AbstractEnderSmithingRecipe implements CraftingRecipe {
 
     protected static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
@@ -34,50 +34,62 @@ public abstract class AbstractEnderSmithingRecipe implements SmithingRecipe {
      */
     private static final ThreadLocal<long[]> PENDING_LINK = ThreadLocal.withInitial(() -> new long[] {-1L});
 
-    // -------------------------------------------------------------------------
-    // Shared ingredient predicates
-    // -------------------------------------------------------------------------
-
     @Override
-    public boolean isTemplateIngredient(ItemStack stack) {
-        return stack.isEmpty();
+    public CraftingBookCategory category() {
+        return CraftingBookCategory.MISC;
     }
 
     @Override
-    public boolean isAdditionIngredient(ItemStack stack) {
-        return stack.getItem() == Registration.ENDER_STORAGE_UPGRADE.get();
+    public boolean isSpecial() {
+        return true;
     }
 
     @Override
-    public boolean matches(SmithingRecipeInput input, Level level) {
-        return input.template().isEmpty() && isBaseIngredient(input.base()) && isAdditionIngredient(input.addition());
+    public boolean canCraftInDimensions(int width, int height) {
+        return width * height >= 2;
     }
 
-    // -------------------------------------------------------------------------
-    // Shared assembly skeleton
-    // -------------------------------------------------------------------------
+    @Override
+    public boolean matches(CraftingInput input, Level level) {
+        ItemStack base = ItemStack.EMPTY;
+        ItemStack addition = ItemStack.EMPTY;
+        for (int i = 0; i < input.size(); i++) {
+            ItemStack s = input.getItem(i);
+            if (s.isEmpty()) continue;
+            if (base.isEmpty() && isBaseIngredient(s)) {
+                base = s;
+            } else if (addition.isEmpty() && s.getItem() == Registration.ENDER_STORAGE_UPGRADE.get()) {
+                addition = s;
+            } else {
+                return false;
+            }
+        }
+        return !base.isEmpty() && !addition.isEmpty();
+    }
 
     @Override
-    public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
+    public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
+        ItemStack base = findBase(input);
         long linkId;
-        if (isAlreadyEnder(input.base())) {
-            linkId = getExistingLinkId(input.base());
+        if (isAlreadyEnder(base)) {
+            linkId = getExistingLinkId(base);
             if (linkId == -1L) linkId = SECURE_RANDOM.nextLong();
         } else {
             linkId = SECURE_RANDOM.nextLong();
         }
         PENDING_LINK.get()[0] = linkId;
-        return makeEnderItem(input.base(), linkId);
+        return makeEnderItem(base, linkId);
     }
 
     @Override
-    public NonNullList<ItemStack> getRemainingItems(SmithingRecipeInput input) {
+    public NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
         NonNullList<ItemStack> remaining = NonNullList.withSize(input.size(), ItemStack.EMPTY);
         long linkId = PENDING_LINK.get()[0];
         if (linkId != -1L) {
             PENDING_LINK.get()[0] = -1L;
-            ItemStack second = isAlreadyEnder(input.base()) ? input.base().copy() : makeEnderItem(input.base(), linkId);
-            remaining.set(1, makeSecondEnderItem(second));
+            ItemStack base = findBase(input);
+            ItemStack second = isAlreadyEnder(base) ? base.copy() : makeEnderItem(base, linkId);
+            remaining.set(findBaseSlot(input), makeSecondEnderItem(second));
         }
         return remaining;
     }
@@ -104,8 +116,31 @@ public abstract class AbstractEnderSmithingRecipe implements SmithingRecipe {
     }
 
     // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private ItemStack findBase(CraftingInput input) {
+        for (int i = 0; i < input.size(); i++) {
+            ItemStack s = input.getItem(i);
+            if (!s.isEmpty() && isBaseIngredient(s)) return s;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private int findBaseSlot(CraftingInput input) {
+        for (int i = 0; i < input.size(); i++) {
+            ItemStack s = input.getItem(i);
+            if (!s.isEmpty() && isBaseIngredient(s)) return i;
+        }
+        return 0;
+    }
+
+    // -------------------------------------------------------------------------
     // Abstract: per-item-type logic
     // -------------------------------------------------------------------------
+
+    /** Returns {@code true} if {@code stack} is a valid base ingredient for this recipe. */
+    public abstract boolean isBaseIngredient(ItemStack stack);
 
     /** Returns {@code true} if {@code stack} is already an ender-linked version of this item. */
     protected abstract boolean isAlreadyEnder(ItemStack stack);

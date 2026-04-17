@@ -9,14 +9,14 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Block;
 
 /**
- * A {@link BlockItem} that appends the storage tier name to the item's display name for any tier
- * above {@link StorageTier#WOOD}.
+ * A {@link BlockItem} that appends the storage tier and any applied upgrades to the item's
+ * display name whenever at least one upgrade is present.
  *
- * <p>The tier is read from the item stack's {@code minecraft:block_entity_data} component (saved
- * there when the block is broken via {@code BlockEntity.saveToItem}).
+ * <p>The tier and upgrade flags are read from the item stack's {@code minecraft:block_entity_data}
+ * component (saved there when the block is broken via {@code BlockEntity.saveToItem}).
  *
- * <p>Example: a Diamond-tier Bulk Storage Container shows as "Bulk Storage Container (Diamond)".
- * A Wood-tier block shows the unmodified translation.
+ * <p>Example: a Diamond-tier chest with Crafting upgrade shows as
+ * "Tremendous Chest (Diamond/Crafting)".
  */
 public class TieredBlockItem extends BlockItem {
 
@@ -27,20 +27,42 @@ public class TieredBlockItem extends BlockItem {
     @Override
     public Component getName(ItemStack stack) {
         Component base = super.getName(stack);
-        StorageTier tier = tierFromStack(stack);
-        if (tier == StorageTier.WOOD) return base;
-        String suffix = " (" + capitalize(tier.getId()) + ")";
-        return Component.empty().append(base).append(suffix);
+        String suffix = buildBedSuffix(stack, false);
+        return suffix.isEmpty() ? base : Component.empty().append(base).append(suffix);
     }
 
-    private static StorageTier tierFromStack(ItemStack stack) {
+    /**
+     * Builds the upgrade suffix (e.g. {@code " (Diamond/Crafting/Magnet)"}) from the stack's
+     * {@code block_entity_data} component. Pass {@code ender=true} for Ender-variant items to
+     * inject "Ender" after the tier in the suffix.
+     *
+     * <p>Returns an empty string when no upgrades are present (Wood tier, no flags set).
+     */
+    public static String buildBedSuffix(ItemStack stack, boolean ender) {
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        if (data == null) return StorageTier.WOOD;
-        CompoundTag tag = data.copyTag();
-        return StorageTier.fromId(tag.getString("Tier"));
+        StorageTier tier = StorageTier.WOOD;
+        boolean crafting = false, magnet = false, puller = false, haarp = false, interdimensional = false;
+        if (data != null) {
+            CompoundTag tag = data.copyTag();
+            tier = StorageTier.fromId(tag.getString("Tier"));
+            crafting = tag.getBoolean("CraftingUpgrade");
+            magnet = tag.getBoolean("MagnetUpgrade");
+            puller = tag.getBoolean("PullerUpgrade");
+            haarp = tag.getBoolean("HaarpUpgrade");
+            interdimensional = tag.getBoolean("InterdimensionalUpgrade");
+        }
+        StringBuilder sb = new StringBuilder();
+        if (tier != StorageTier.WOOD) sb.append(capitalize(tier.getId()));
+        if (ender) { if (!sb.isEmpty()) sb.append('/'); sb.append("Ender"); }
+        if (crafting) { if (!sb.isEmpty()) sb.append('/'); sb.append("Crafting"); }
+        if (magnet) { if (!sb.isEmpty()) sb.append('/'); sb.append("Magnet"); }
+        if (puller) { if (!sb.isEmpty()) sb.append('/'); sb.append("Puller"); }
+        if (haarp) { if (!sb.isEmpty()) sb.append('/'); sb.append("Haarp"); }
+        if (interdimensional) { if (!sb.isEmpty()) sb.append('/'); sb.append("Interdimensional"); }
+        return sb.isEmpty() ? "" : " (" + sb + ")";
     }
 
-    private static String capitalize(String s) {
+    public static String capitalize(String s) {
         if (s.isEmpty()) return s;
         return Character.toUpperCase(s.charAt(0)) + s.substring(1);
     }

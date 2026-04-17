@@ -40,8 +40,7 @@ public class FolderExtractionSlot extends Slot {
         if (contents == null || contents.count() == 0 || contents.storedItem().isEmpty()) {
             return ItemStack.EMPTY;
         }
-        long count = Math.min(contents.count(), contents.storedItem().get().getMaxStackSize());
-        return contents.storedItem().get().copyWithCount((int) count);
+        return contents.storedItem().get().copyWithCount((int) Math.min(Integer.MAX_VALUE, contents.count()));
     }
 
     @Override
@@ -64,7 +63,8 @@ public class FolderExtractionSlot extends Slot {
         if (contents == null || contents.count() == 0 || contents.storedItem().isEmpty()) {
             return ItemStack.EMPTY;
         }
-        FolderContents.ExtractResult result = contents.extract(amount);
+        int capped = Math.min(amount, contents.storedItem().get().getMaxStackSize());
+        FolderContents.ExtractResult result = contents.extract(capped);
         if (result.extracted() == 0) return ItemStack.EMPTY;
         writeFolderContents(result.updated());
         return contents.storedItem().get().copyWithCount((int) result.extracted());

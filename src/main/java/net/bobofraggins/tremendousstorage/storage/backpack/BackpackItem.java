@@ -3,7 +3,11 @@ package net.bobofraggins.tremendousstorage.storage.backpack;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.network.OpenBackpackPacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
+import net.bobofraggins.tremendousstorage.shared.storage.TieredBlockItem;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -34,6 +38,34 @@ public class BackpackItem extends BlockItem {
 
     public BackpackItem(Block block) {
         super(block, new Item.Properties().stacksTo(1));
+    }
+
+    @Override
+    public Component getName(ItemStack stack) {
+        Component base = super.getName(stack);
+        BackpackContents contents =
+                stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+        StringBuilder sb = new StringBuilder();
+        StorageTier tier = contents.tier();
+        if (tier != StorageTier.WOOD) sb.append(TieredBlockItem.capitalize(tier.getId()));
+        if (contents.hasCraftingUpgrade()) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Crafting");
+        }
+        // Magnet and Puller are stored in BLOCK_ENTITY_DATA (not BackpackContents)
+        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data != null) {
+            var tag = data.copyTag();
+            if (tag.getBoolean("MagnetUpgrade")) {
+                if (!sb.isEmpty()) sb.append('/');
+                sb.append("Magnet");
+            }
+            if (tag.getBoolean("PullerUpgrade")) {
+                if (!sb.isEmpty()) sb.append('/');
+                sb.append("Puller");
+            }
+        }
+        return sb.isEmpty() ? base : Component.empty().append(base).append(" (" + sb + ")");
     }
 
     // -------------------------------------------------------------------------

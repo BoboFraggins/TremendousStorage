@@ -23,6 +23,7 @@ package net.bobofraggins.tremendousstorage.storage.tube;
  *   <li>{@link net.bobofraggins.tremendousstorage.storage.tank.TankBlock}
  *   <li>{@link net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlock}
  *   <li>{@link net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlock}
+ *   <li>{@link net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlock}
  * </ul>
  */
 public interface NetworkConnector {}

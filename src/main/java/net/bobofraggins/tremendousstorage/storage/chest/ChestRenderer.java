@@ -65,7 +65,7 @@ public class ChestRenderer
 
         Level level = be.getLevel();
         if (level != null) {
-            packedLight = LevelRenderer.getLightColor(level, be.getBlockPos());
+            packedLight = LevelRenderer.getLightColor(level, be.getBlockPos().above());
         }
 
         BlockState blockState = be.getBlockState();

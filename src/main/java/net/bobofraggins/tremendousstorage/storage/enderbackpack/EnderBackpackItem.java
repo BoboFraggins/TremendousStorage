@@ -27,15 +27,6 @@ public class EnderBackpackItem extends BackpackItem {
     }
 
     // -------------------------------------------------------------------------
-    // Display name
-    // -------------------------------------------------------------------------
-
-    @Override
-    public Component getName(ItemStack stack) {
-        return Component.translatable("item.tremendousstorage.ender_backpack");
-    }
-
-    // -------------------------------------------------------------------------
     // openUi — sync from storage before opening
     // -------------------------------------------------------------------------
 

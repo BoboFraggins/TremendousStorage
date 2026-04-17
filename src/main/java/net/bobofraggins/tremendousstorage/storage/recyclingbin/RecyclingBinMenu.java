@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -11,7 +13,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
 /**
  * Menu for the Recycling Bin.
@@ -110,6 +114,15 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
         }
     }
 
+    static boolean isEmptyFluidContainer(ItemStack stack) {
+        IFluidHandlerItem handler = stack.getCapability(Capabilities.FluidHandler.ITEM);
+        if (handler == null) return false;
+        for (int i = 0; i < handler.getTanks(); i++) {
+            if (!handler.getFluidInTank(i).isEmpty()) return false;
+        }
+        return true;
+    }
+
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         Slot slot = slots.get(index);
@@ -124,14 +137,26 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
             // Fluid slots → player inventory + hotbar
             if (!moveItemStackTo(stack, 3, 39, false)) return ItemStack.EMPTY;
         } else if (index < 30) {
-            // Player inventory → try fluid input first, then hotbar
-            if (!moveItemStackTo(stack, 1, 2, false)) {
-                if (!moveItemStackTo(stack, 30, 39, false)) return ItemStack.EMPTY;
+            // Player inventory → empty containers to fluid input, everything else to void
+            if (isEmptyFluidContainer(stack)) {
+                if (!moveItemStackTo(stack, 1, 2, false)) {
+                    if (!moveItemStackTo(stack, 30, 39, false)) return ItemStack.EMPTY;
+                }
+            } else {
+                if (!moveItemStackTo(stack, 0, 1, false)) {
+                    if (!moveItemStackTo(stack, 30, 39, false)) return ItemStack.EMPTY;
+                }
             }
         } else {
-            // Hotbar → try fluid input first, then player inventory
-            if (!moveItemStackTo(stack, 1, 2, false)) {
-                if (!moveItemStackTo(stack, 3, 30, false)) return ItemStack.EMPTY;
+            // Hotbar → empty containers to fluid input, everything else to void
+            if (isEmptyFluidContainer(stack)) {
+                if (!moveItemStackTo(stack, 1, 2, false)) {
+                    if (!moveItemStackTo(stack, 3, 30, false)) return ItemStack.EMPTY;
+                }
+            } else {
+                if (!moveItemStackTo(stack, 0, 1, false)) {
+                    if (!moveItemStackTo(stack, 3, 30, false)) return ItemStack.EMPTY;
+                }
             }
         }
 
@@ -183,6 +208,11 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
         public void setItem(int slot, ItemStack stack) {
             if (!stack.isEmpty() && be != null) {
                 be.onItemsDestroyed(stack.getCount());
+                Level level = be.getLevel();
+                if (level != null && !level.isClientSide()) {
+                    level.playSound(null, be.getBlockPos(),
+                            SoundEvents.ITEM_BREAK, SoundSource.BLOCKS, 1.0f, 0.9f + level.random.nextFloat() * 0.2f);
+                }
             }
             // Item is not stored — it's destroyed
         }

@@ -73,11 +73,14 @@ public class TankItem extends TieredBlockItem {
     @Override
     public InteractionResult useOn(UseOnContext context) {
         Level level = context.getLevel();
-        if (level.isClientSide()) return InteractionResult.SUCCESS;
-        Player player = context.getPlayer();
-        if (player == null) return InteractionResult.PASS;
-        boolean success = FluidUtil.interactWithFluidHandler(
-                player, context.getHand(), level, context.getClickedPos(), context.getClickedFace());
-        return success ? InteractionResult.SUCCESS : InteractionResult.PASS;
+        if (!level.isClientSide()) {
+            Player player = context.getPlayer();
+            if (player != null) {
+                boolean success = FluidUtil.interactWithFluidHandler(
+                        player, context.getHand(), level, context.getClickedPos(), context.getClickedFace());
+                if (success) return InteractionResult.SUCCESS;
+            }
+        }
+        return super.useOn(context);
     }
 }

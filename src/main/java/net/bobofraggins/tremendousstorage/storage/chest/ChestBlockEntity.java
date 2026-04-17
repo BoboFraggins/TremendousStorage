@@ -399,7 +399,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
         return base.copy().append(Component.literal(buildSuffix(false)));
     }
 
-    /** Builds the " (Tier/Ender/Magnetized)" suffix string. Pass {@code ender=true} for ender variants. */
+    /** Builds the " (Tier/Ender/Crafting/Magnet/Puller)" suffix. Pass {@code ender=true} for ender variants. */
     protected String buildSuffix(boolean ender) {
         StringBuilder sb = new StringBuilder();
         if (tier != StorageTier.WOOD) {
@@ -410,9 +410,17 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
             if (!sb.isEmpty()) sb.append('/');
             sb.append("Ender");
         }
+        if (hasCraftingUpgrade) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Crafting");
+        }
         if (hasMagnetUpgrade) {
             if (!sb.isEmpty()) sb.append('/');
-            sb.append("Magnetized");
+            sb.append("Magnet");
+        }
+        if (hasPullerUpgrade) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Puller");
         }
         return sb.isEmpty() ? "" : " (" + sb + ")";
     }

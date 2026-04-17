@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.storageupgrade;
 
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
+import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
@@ -58,6 +59,11 @@ public class StorageUpgradeItem extends Item {
         } else if (be instanceof WirelessHubBlockEntity hub && hub.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 hub.setTier(to);
+            }
+            matches = true;
+        } else if (be instanceof StirlingEngineBlockEntity engine && engine.getTier() == from) {
+            if (!ctx.getLevel().isClientSide()) {
+                engine.setTier(to);
             }
             matches = true;
         }

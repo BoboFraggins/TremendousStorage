@@ -1,0 +1,18 @@
+{
+  "containers": [
+    {
+      "filled": ["tremendousstorage:positive_vibes_bucket"],
+      "fill_sound": "minecraft:item.bucket.fill",
+      "empty_sound": "minecraft:item.bucket.empty",
+      "empty": "minecraft:bucket",
+      "capacity": "BUCKET"
+    }
+  ],
+  "equivalent_fluids": [
+    "tremendousstorage:positive_vibes"
+  ],
+  "flowing_texture": "tremendousstorage:fluid/positive_vibes_flow",
+  "still_texture": "tremendousstorage:fluid/positive_vibes_still",
+  "tint_method": "no_tint",
+  "translation_key": "fluid.tremendousstorage.positive_vibes"
+}

@@ -108,8 +108,7 @@ public class FilingCabinetItemHandler implements IItemHandler, IKeyCounterContri
         FolderContents contents = getContents(folder);
         if (contents.isEmpty() || contents.count() == 0) return ItemStack.EMPTY;
         ItemStack stored = contents.storedItem().get();
-        int visible = (int) Math.min(stored.getMaxStackSize(), contents.count());
-        return stored.copyWithCount(visible);
+        return stored.copyWithCount((int) Math.min(Integer.MAX_VALUE, contents.count()));
     }
 
     // -------------------------------------------------------------------------

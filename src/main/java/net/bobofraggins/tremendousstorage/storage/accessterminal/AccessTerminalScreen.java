@@ -58,9 +58,16 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         super(menu, inv, title);
         networkPane = new NetworkInventoryPane(menu);
         if (menu.hasCraftingUpgrade()) {
-            dialog = new Dialog(networkPane, new CraftingGridPane(), new PlayerInventoryPane());
+            dialog = new Dialog(
+                    networkPane,
+                    new CraftingGridPane(),
+                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
+                    new PlayerInventoryPane());
         } else {
-            dialog = new Dialog(networkPane, new PlayerInventoryPane());
+            dialog = new Dialog(
+                    networkPane,
+                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
+                    new PlayerInventoryPane());
         }
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
@@ -99,7 +106,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
         // Quick stack button above the player inventory, right-aligned.
         // Pane index: network(0), [crafting(1),] playerInv(last)
-        int playerInvPaneIndex = menu.hasCraftingUpgrade() ? 2 : 1;
+        int playerInvPaneIndex = menu.hasCraftingUpgrade() ? 3 : 2;
         addRenderableWidget(new PressableIconButton(
                 leftPos + dialog.totalWidth() - 26,
                 dialog.getPaneAbsY(playerInvPaneIndex) - 20,

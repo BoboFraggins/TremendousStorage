@@ -21,9 +21,10 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SmithingRecipe;
-import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.level.Level;
 
 /**
@@ -34,7 +35,7 @@ import net.minecraft.world.level.Level;
  * the upgrade item. A single recipe JSON covers every tier/block combination; all
  * matching logic is in Java.
  */
-public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
+public class StorageSmithingUpgradeRecipe implements CraftingRecipe {
 
     private static final StorageSmithingUpgradeRecipe INSTANCE = new StorageSmithingUpgradeRecipe();
 
@@ -44,20 +45,28 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
             StreamCodec.unit(INSTANCE);
 
     @Override
-    public boolean isTemplateIngredient(ItemStack stack) {
-        return stack.isEmpty();
+    public CraftingBookCategory category() {
+        return CraftingBookCategory.MISC;
     }
 
     @Override
-    public boolean isBaseIngredient(ItemStack stack) {
+    public boolean isSpecial() {
+        return true;
+    }
+
+    @Override
+    public boolean canCraftInDimensions(int width, int height) {
+        return width * height >= 2;
+    }
+
+    private static boolean isBaseIngredient(ItemStack stack) {
         return isStorageBlock(stack.getItem())
                 || isCraftingUpgradeTarget(stack.getItem())
                 || isMagnetUpgradeTarget(stack.getItem())
                 || isPullerUpgradeTarget(stack.getItem());
     }
 
-    @Override
-    public boolean isAdditionIngredient(ItemStack stack) {
+    private static boolean isAdditionIngredient(ItemStack stack) {
         return stack.getItem() instanceof StorageUpgradeItem
                 || stack.getItem() instanceof CraftingUpgradeItem
                 || stack.getItem() instanceof MagnetUpgradeItem
@@ -67,49 +76,70 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
     }
 
     @Override
-    public boolean matches(SmithingRecipeInput input, Level level) {
-        if (!input.template().isEmpty()) return false;
-        if (input.addition().getItem() instanceof CraftingUpgradeItem) {
-            return isCraftingUpgradeTarget(input.base().getItem()) && !alreadyHasCraftingUpgrade(input.base());
+    public boolean matches(CraftingInput input, Level level) {
+        ItemStack base = ItemStack.EMPTY;
+        ItemStack addition = ItemStack.EMPTY;
+        for (int i = 0; i < input.size(); i++) {
+            ItemStack s = input.getItem(i);
+            if (s.isEmpty()) continue;
+            if (base.isEmpty() && isBaseIngredient(s)) {
+                base = s;
+            } else if (addition.isEmpty() && isAdditionIngredient(s)) {
+                addition = s;
+            } else {
+                return false;
+            }
         }
-        if (input.addition().getItem() instanceof MagnetUpgradeItem) {
-            return isMagnetUpgradeTarget(input.base().getItem()) && !alreadyHasMagnetUpgrade(input.base());
+        if (base.isEmpty() || addition.isEmpty()) return false;
+        if (addition.getItem() instanceof CraftingUpgradeItem) {
+            return isCraftingUpgradeTarget(base.getItem()) && !alreadyHasCraftingUpgrade(base);
         }
-        if (input.addition().getItem() instanceof PullerUpgradeItem) {
-            return isPullerUpgradeTarget(input.base().getItem()) && !alreadyHasPullerUpgrade(input.base());
+        if (addition.getItem() instanceof MagnetUpgradeItem) {
+            return isMagnetUpgradeTarget(base.getItem()) && !alreadyHasMagnetUpgrade(base);
         }
-        if (input.addition().getItem() instanceof InterdimensionalUpgradeItem) {
-            return input.base().getItem() == Registration.WIRELESS_HUB_ITEM.get()
-                    && !alreadyHasInterdimensionalUpgrade(input.base())
-                    && isNetheriteTierItem(input.base());
+        if (addition.getItem() instanceof PullerUpgradeItem) {
+            return isPullerUpgradeTarget(base.getItem()) && !alreadyHasPullerUpgrade(base);
         }
-        if (input.addition().getItem() instanceof HaarpUpgradeItem) {
-            return input.base().getItem() == Registration.WIRELESS_HUB.get().asItem()
-                    && !alreadyHasHaarpUpgrade(input.base());
+        if (addition.getItem() instanceof InterdimensionalUpgradeItem) {
+            return base.getItem() == Registration.WIRELESS_HUB_ITEM.get()
+                    && !alreadyHasInterdimensionalUpgrade(base)
+                    && isNetheriteTierItem(base);
         }
-        if (!isStorageBlock(input.base().getItem())) return false;
-        if (!(input.addition().getItem() instanceof StorageUpgradeItem upgradeItem)) return false;
-        return tierFromStack(input.base()) == upgradeItem.getFromTier();
+        if (addition.getItem() instanceof HaarpUpgradeItem) {
+            return base.getItem() == Registration.WIRELESS_HUB.get().asItem()
+                    && !alreadyHasHaarpUpgrade(base);
+        }
+        if (!isStorageBlock(base.getItem())) return false;
+        if (!(addition.getItem() instanceof StorageUpgradeItem upgradeItem)) return false;
+        return tierFromStack(base) == upgradeItem.getFromTier();
     }
 
     @Override
-    public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider registries) {
-        if (input.addition().getItem() instanceof CraftingUpgradeItem) {
-            return applyCraftingUpgrade(input.base());
+    public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
+        ItemStack base = ItemStack.EMPTY;
+        ItemStack addition = ItemStack.EMPTY;
+        for (int i = 0; i < input.size(); i++) {
+            ItemStack s = input.getItem(i);
+            if (s.isEmpty()) continue;
+            if (base.isEmpty() && isBaseIngredient(s)) base = s;
+            else if (addition.isEmpty() && isAdditionIngredient(s)) addition = s;
         }
-        if (input.addition().getItem() instanceof MagnetUpgradeItem) {
-            return applyMagnetUpgrade(input.base());
+        if (addition.getItem() instanceof CraftingUpgradeItem) {
+            return applyCraftingUpgrade(base);
         }
-        if (input.addition().getItem() instanceof PullerUpgradeItem) {
-            return applyPullerUpgrade(input.base());
+        if (addition.getItem() instanceof MagnetUpgradeItem) {
+            return applyMagnetUpgrade(base);
         }
-        if (input.addition().getItem() instanceof InterdimensionalUpgradeItem) {
-            return applyInterdimensionalUpgrade(input.base());
+        if (addition.getItem() instanceof PullerUpgradeItem) {
+            return applyPullerUpgrade(base);
         }
-        if (input.addition().getItem() instanceof HaarpUpgradeItem) {
-            return applyHaarpUpgrade(input.base());
+        if (addition.getItem() instanceof InterdimensionalUpgradeItem) {
+            return applyInterdimensionalUpgrade(base);
         }
-        return upgrade(input.base(), (StorageUpgradeItem) input.addition().getItem());
+        if (addition.getItem() instanceof HaarpUpgradeItem) {
+            return applyHaarpUpgrade(base);
+        }
+        return upgrade(base, (StorageUpgradeItem) addition.getItem());
     }
 
     @Override
@@ -142,7 +172,8 @@ public class StorageSmithingUpgradeRecipe implements SmithingRecipe {
         return item == Registration.TREMENDOUS_CHEST_ITEM.get()
                 || item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
                 || item instanceof BackpackItem // covers both ender and regular backpack
-                || item == Registration.STORAGE_ACCESS_TERMINAL_ITEM.get();
+                || item == Registration.STORAGE_ACCESS_TERMINAL_ITEM.get()
+                || item == Registration.WIRELESS_SAT.get();
     }
 
     private static boolean alreadyHasCraftingUpgrade(ItemStack stack) {
