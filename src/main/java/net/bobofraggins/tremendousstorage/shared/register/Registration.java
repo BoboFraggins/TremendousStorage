@@ -829,7 +829,8 @@ public final class Registration {
             MENU_TYPES.register("network_interface", () -> IMenuTypeExtension.create(NetworkInterfaceMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<AccessTerminalMenu>> STORAGE_ACCESS_TERMINAL_MENU =
-            MENU_TYPES.register("storage_access_terminal", () -> IMenuTypeExtension.create(AccessTerminalMenu::new));
+            MENU_TYPES.register(
+                    "storage_access_terminal", () -> IMenuTypeExtension.create(AccessTerminalMenu::fromNetwork));
 
     public static final DeferredHolder<MenuType<?>, MenuType<WirelessHubMenu>> WIRELESS_HUB_MENU =
             MENU_TYPES.register("wireless_hub", () -> IMenuTypeExtension.create(WirelessHubMenu::new));

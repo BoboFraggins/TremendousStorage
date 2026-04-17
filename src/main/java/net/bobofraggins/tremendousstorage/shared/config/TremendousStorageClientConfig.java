@@ -9,15 +9,6 @@ public class TremendousStorageClientConfig {
     public static final ModConfigSpec SPEC;
 
     // -------------------------------------------------------------------------
-    // Inventory grid rows by GUI scale
-    // -------------------------------------------------------------------------
-
-    public static final ModConfigSpec.IntValue ROWS_SCALE_1;
-    public static final ModConfigSpec.IntValue ROWS_SCALE_2;
-    public static final ModConfigSpec.IntValue ROWS_SCALE_3;
-    public static final ModConfigSpec.IntValue ROWS_SCALE_4_PLUS;
-
-    // -------------------------------------------------------------------------
     // Network grid sort mode
     // -------------------------------------------------------------------------
 
@@ -25,14 +16,6 @@ public class TremendousStorageClientConfig {
 
     static {
         ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
-
-        builder.comment("Number of item grid rows shown in storage screens, by GUI scale.")
-                .push("inventory_rows");
-        ROWS_SCALE_1 = builder.comment("Rows at GUI scale 1.").defineInRange("scale1", 20, 1, 50);
-        ROWS_SCALE_2 = builder.comment("Rows at GUI scale 2.").defineInRange("scale2", 15, 1, 50);
-        ROWS_SCALE_3 = builder.comment("Rows at GUI scale 3.").defineInRange("scale3", 10, 1, 50);
-        ROWS_SCALE_4_PLUS = builder.comment("Rows at GUI scale 4 and above.").defineInRange("scale4plus", 4, 1, 50);
-        builder.pop();
 
         SORT_MODE = builder.comment("Sort mode for the network item grid. One of: AMOUNT, NAME, MOD.")
                 .define("sort_mode", SortMode.AMOUNT.name());
@@ -52,22 +35,48 @@ public class TremendousStorageClientConfig {
         SORT_MODE.set(mode.name());
     }
 
+    // -------------------------------------------------------------------------
+    // Inventory grid row computation
+    // -------------------------------------------------------------------------
+
+    private static final int MARGIN = 50;
+    private static final int MIN_ROWS = 2;
+    private static final int MAX_ROWS = 20;
+    private static final int SLOT_SIZE = 18;
+
+    // Fixed dialog overhead in pixels, not counting network grid rows:
+    //   Dialog.TITLE_H(17) + network non-row portion(5) + blank pane(20)
+    //   + PlayerInventoryPane.HEIGHT(80) + Dialog.BOTTOM_PADDING(5) = 127
+    // Add CraftingGridPane.HEIGHT(58) when the crafting upgrade is installed.
+    private static final int FIXED_HEIGHT_BASE = 127;
+    private static final int CRAFTING_GRID_HEIGHT = 58;
+
     /**
-     * Returns the configured number of inventory rows for the current GUI scale.
+     * Computes the number of network grid rows that fit within the current window with a
+     * {@value #MARGIN}px margin above and below. Accounts for the extra height consumed by the
+     * crafting grid pane when a crafting upgrade is installed.
      *
-     * <p>Must only be called from the client thread (reads {@link Minecraft#getInstance()}).
+     * <p>Must only be called from the client thread.
      */
-    public static int getVisibleRows() {
-        int scale = (int) Minecraft.getInstance().getWindow().getGuiScale();
-        if (scale <= 1) return ROWS_SCALE_1.get();
-        if (scale == 2) return ROWS_SCALE_2.get();
-        if (scale == 3) return ROWS_SCALE_3.get();
-        return ROWS_SCALE_4_PLUS.get();
+    public static int computeVisibleRows(boolean hasCraftingUpgrade) {
+        int screenH = Minecraft.getInstance().getWindow().getGuiScaledHeight();
+        int fixed = FIXED_HEIGHT_BASE + (hasCraftingUpgrade ? CRAFTING_GRID_HEIGHT : 0);
+        int rows = (screenH - 2 * MARGIN - fixed) / SLOT_SIZE;
+        return Math.max(MIN_ROWS, Math.min(MAX_ROWS, rows));
     }
 
     /**
-     * Safe to call from shared (client + server) code. Returns the configured row count on the
-     * client and the scale-4+ default on the server (slot positions are unused server-side).
+     * Returns the number of visible rows for screens that do not have a crafting grid.
+     *
+     * <p>Must only be called from the client thread.
+     */
+    public static int getVisibleRows() {
+        return computeVisibleRows(false);
+    }
+
+    /**
+     * Safe to call from shared (client + server) code. Returns the computed row count on the
+     * client and the server default on the server (slot positions are unused server-side).
      */
     public static int getVisibleRowsSafe() {
         if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {
@@ -76,6 +85,6 @@ public class TremendousStorageClientConfig {
         return ROWS_SCALE_4_PLUS_DEFAULT;
     }
 
-    /** Compile-time default used on the server (must match {@link #ROWS_SCALE_4_PLUS} default). */
+    /** Compile-time default used on the server side for slot registration. */
     public static final int ROWS_SCALE_4_PLUS_DEFAULT = 4;
 }

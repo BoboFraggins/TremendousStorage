@@ -6,7 +6,7 @@ public final class AccessTerminalLayout {
     private AccessTerminalLayout() {}
 
     public static final int SLOT_SIZE = 18;
-    public static final int BG_WIDTH = 182;
+    public static final int BG_WIDTH = 184;
     public static final int TITLE_H = 17;
 
     private static final int GAP = 4;
@@ -19,7 +19,7 @@ public final class AccessTerminalLayout {
     public static final int NETWORK_Y = TITLE_H + 1; // 18
     public static final int NETWORK_W = NETWORK_COLS * SLOT_SIZE; // 162
     public static final int NETWORK_H = NETWORK_VISIBLE_ROWS * SLOT_SIZE; // 72
-    public static final int SCROLLBAR_W = 6;
+    public static final int SCROLLBAR_W = 8;
     public static final int SCROLLBAR_X = NETWORK_X + NETWORK_W; // 170
 
     // ── Crafting section ──────────────────────────────────────────────────────

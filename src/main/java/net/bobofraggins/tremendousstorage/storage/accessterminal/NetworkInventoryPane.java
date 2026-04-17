@@ -39,6 +39,15 @@ public class NetworkInventoryPane implements IDialogPane {
     private static final ResourceLocation BG_TEXTURE =
             ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
 
+    private static final ResourceLocation THUMB_TOP =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/scrollbar_thumb_top.png");
+    private static final ResourceLocation THUMB_MID =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/scrollbar_thumb_mid.png");
+    private static final ResourceLocation THUMB_BOT =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/scrollbar_thumb_bot.png");
+
+    private static final int THUMB_CAP = 4;
+
     // Pane-local coordinates derived from AccessTerminalLayout
     /** Local Y of the grid top edge (= NETWORK_Y - TITLE_H = 1). */
     private static final int GRID_Y = AccessTerminalLayout.NETWORK_Y - AccessTerminalLayout.TITLE_H;
@@ -95,10 +104,9 @@ public class NetworkInventoryPane implements IDialogPane {
         return AccessTerminalLayout.BG_WIDTH;
     }
 
-    /** GRID_Y(1) + rows*SLOT_SIZE + bottom_gap(4) — driven by client config. */
     @Override
     public int preferredHeight() {
-        return TremendousStorageClientConfig.getVisibleRows() * AccessTerminalLayout.SLOT_SIZE + 5;
+        return visibleRows() * AccessTerminalLayout.SLOT_SIZE + 5;
     }
 
     @Override
@@ -386,7 +394,7 @@ public class NetworkInventoryPane implements IDialogPane {
     }
 
     private int visibleRows() {
-        return TremendousStorageClientConfig.getVisibleRows();
+        return TremendousStorageClientConfig.computeVisibleRows(menu.hasCraftingUpgrade());
     }
 
     private int gridStartY() {
@@ -500,25 +508,34 @@ public class NetworkInventoryPane implements IDialogPane {
         int rows = visibleRows();
         int barY = gridStartY();
         int barH = rows * AccessTerminalLayout.SLOT_SIZE;
+        int W = AccessTerminalLayout.SCROLLBAR_W;
 
-        // Left border
+        // Left separator
         graphics.fill(SCROLLBAR_X - 1, barY, SCROLLBAR_X, barY + barH, 0xFF555555);
 
         // Track
-        graphics.fill(SCROLLBAR_X, barY, SCROLLBAR_X + AccessTerminalLayout.SCROLLBAR_W, barY + barH, 0x40000000);
+        graphics.fill(SCROLLBAR_X, barY, SCROLLBAR_X + W, barY + barH, 0xFF8B8B8B);
 
-        // Thumb
+        // Thumb geometry
         int totalRows = !hasContents
                 ? 1
                 : Math.max(
                         (stacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
-        int thumbH = Math.max(8, barH * rows / totalRows);
+        int thumbH = Math.max(THUMB_CAP * 2, barH * rows / totalRows);
         int maxScroll = Math.max(1, totalRows - rows);
         int thumbY = barY + (barH - thumbH) * scrollOffset / maxScroll;
         if (totalRows <= rows) {
             thumbY = barY;
             thumbH = barH;
         }
-        graphics.fill(SCROLLBAR_X, thumbY, SCROLLBAR_X + AccessTerminalLayout.SCROLLBAR_W, thumbY + thumbH, 0xC0FFFFFF);
+
+        // 3-slice thumb: top cap / tiled mid / bottom cap
+        graphics.blit(THUMB_TOP, SCROLLBAR_X, thumbY, 0, 0, W, THUMB_CAP, W, THUMB_CAP);
+        int midY = thumbY + THUMB_CAP;
+        int midH = thumbH - THUMB_CAP * 2;
+        for (int i = 0; i < midH; i++) {
+            graphics.blit(THUMB_MID, SCROLLBAR_X, midY + i, 0, 0, W, 1, W, 1);
+        }
+        graphics.blit(THUMB_BOT, SCROLLBAR_X, thumbY + thumbH - THUMB_CAP, 0, 0, W, THUMB_CAP, W, THUMB_CAP);
     }
 }

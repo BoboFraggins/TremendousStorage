@@ -87,15 +87,18 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         this(id, inv, satPos, niPos, hasCraftingUpgrade, TremendousStorageClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
     }
 
-    /** Client-side constructor. Reads the configured row count for the current GUI scale. */
-    public AccessTerminalMenu(int id, Inventory inv, FriendlyByteBuf buf) {
-        this(
+    /** Client-side factory. Decodes the buf then computes rows from the current screen height. */
+    public static AccessTerminalMenu fromNetwork(int id, Inventory inv, FriendlyByteBuf buf) {
+        BlockPos satPos = buf.readBlockPos();
+        BlockPos niPos = buf.readBoolean() ? buf.readBlockPos() : null;
+        boolean hasCraftingUpgrade = buf.readBoolean();
+        return new AccessTerminalMenu(
                 id,
                 inv,
-                buf.readBlockPos(),
-                buf.readBoolean() ? buf.readBlockPos() : null,
-                buf.readBoolean(),
-                TremendousStorageClientConfig.getVisibleRowsSafe());
+                satPos,
+                niPos,
+                hasCraftingUpgrade,
+                TremendousStorageClientConfig.computeVisibleRows(hasCraftingUpgrade));
     }
 
     /**
