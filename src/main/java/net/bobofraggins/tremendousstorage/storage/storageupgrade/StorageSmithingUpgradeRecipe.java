@@ -319,15 +319,20 @@ public class StorageSmithingUpgradeRecipe implements CraftingRecipe {
             return result;
         }
         if (blockStack.getItem() instanceof BackpackItem) {
-            // Update BackpackContents (item-form UI) and BLOCK_ENTITY_DATA (placed-block tier).
+            // Update BackpackContents (item-form tier/contents).
+            // Only update BLOCK_ENTITY_DATA when it already exists (backpack was placed as a block);
+            // a fresh unplaced backpack has no block entity data and setting a bare {Tier:...} tag
+            // (without the required "id" field) causes ItemStack serialization to crash.
             BackpackContents current =
                     blockStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
-            CustomData existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
-            CompoundTag beTag = existing != null ? existing.copyTag() : new CompoundTag();
-            beTag.putString("Tier", upgradeItem.getToTier().getId());
             ItemStack result = blockStack.copyWithCount(1);
             result.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), current.withTier(upgradeItem.getToTier()));
-            result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(beTag));
+            CustomData existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
+            if (existing != null) {
+                CompoundTag beTag = existing.copyTag();
+                beTag.putString("Tier", upgradeItem.getToTier().getId());
+                result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(beTag));
+            }
             return result;
         }
         // Chest, tank, NI, and WirelessHub: update "Tier" in BLOCK_ENTITY_DATA (preserving LinkId and other data)
