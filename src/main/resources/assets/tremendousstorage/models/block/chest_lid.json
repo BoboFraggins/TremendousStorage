@@ -4,8 +4,8 @@
     "texture": "tremendousstorage:block/chest_texture"
   },
   "texture_size": [
-    64,
-    64
+    128,
+    128
   ],
   "elements": [
     {
