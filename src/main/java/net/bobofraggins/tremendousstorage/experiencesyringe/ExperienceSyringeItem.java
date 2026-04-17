@@ -47,16 +47,20 @@ public class ExperienceSyringeItem extends Item {
         int stored = stack.getOrDefault(Registration.EXPERIENCE_SYRINGE_STORED_XP, 0);
 
         if (player.isShiftKeyDown()) {
-            // Deposit: take the XP the player has accumulated in their current level.
-            int progressXp = (int) (player.experienceProgress * player.getXpNeededForNextLevel());
+            // Deposit: extract current-level progress, or a full level if at a boundary.
+            int progressXp = Math.round(player.experienceProgress * player.getXpNeededForNextLevel());
+            if (progressXp == 0 && player.experienceLevel > 0) {
+                // At an exact level boundary — extract the full previous level's worth of XP.
+                progressXp = xpNeededForLevel(player.experienceLevel - 1);
+            }
             int toStore = Math.min(progressXp, CAPACITY - stored);
             if (toStore > 0) {
                 player.giveExperiencePoints(-toStore);
                 stack.set(Registration.EXPERIENCE_SYRINGE_STORED_XP, stored + toStore);
             }
         } else {
-            // Withdraw: give the player enough XP to reach their next level.
-            int progressXp = (int) (player.experienceProgress * player.getXpNeededForNextLevel());
+            // Withdraw: give the player exactly enough XP to reach their next whole level.
+            int progressXp = Math.round(player.experienceProgress * player.getXpNeededForNextLevel());
             int neededForNext = player.getXpNeededForNextLevel() - progressXp;
             int toGive = Math.min(neededForNext, stored);
             if (toGive > 0) {
@@ -66,6 +70,13 @@ public class ExperienceSyringeItem extends Item {
         }
 
         return InteractionResultHolder.success(stack);
+    }
+
+    /** XP required to advance from {@code level} to {@code level + 1}, matching vanilla formula. */
+    private static int xpNeededForLevel(int level) {
+        if (level >= 30) return 112 + (level - 30) * 9;
+        if (level >= 16) return 37 + (level - 16) * 5;
+        return 7 + level * 2;
     }
 
     @Override
