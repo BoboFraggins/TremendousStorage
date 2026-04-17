@@ -33,11 +33,21 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
 
     public static final int FOLDER_SLOTS = 8;
 
-    /** X position of the folder slots relative to {@code leftPos}. */
-    public static final int FOLDER_X = 68;
+    /** Number of rows in each of the two columns. */
+    public static final int ROWS_PER_COLUMN = FOLDER_SLOTS / 2;
 
-    /** X position of the extraction slots relative to {@code leftPos}. */
-    public static final int EXTRACTION_X = 90;
+    /** X positions for the left column (folder + extraction). */
+    public static final int FOLDER_X_LEFT = 46;
+
+    public static final int EXTRACTION_X_LEFT = 68;
+
+    /** X position of the 2 px vertical rule that separates the two columns. */
+    public static final int COLUMN_RULE_X = 87;
+
+    /** X positions for the right column (folder + extraction). */
+    public static final int FOLDER_X_RIGHT = 91;
+
+    public static final int EXTRACTION_X_RIGHT = 113;
 
     /** Y position of the first folder/extraction row relative to {@code topPos}. */
     public static final int FOLDER_Y_START = 36;
@@ -55,8 +65,8 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
     }
 
     /**
-     * Adds the 8 folder slots (vertical single column at {@link #FOLDER_X}),
-     * paired extraction slots (at {@link #EXTRACTION_X}), and the player inventory/hotbar.
+     * Adds the 8 folder slots (two columns of 4 rows each), paired extraction slots, and the
+     * player inventory/hotbar. Slots 0–3 are in the left column; slots 4–7 in the right column.
      *
      * @param folderContainer the container backing the folder slots
      * @param playerInv       the player's inventory
@@ -64,10 +74,12 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
      * @param hotbarY         top-y of the hotbar row (relative to topPos)
      */
     protected void addAllSlots(Container folderContainer, Inventory playerInv, int invY, int hotbarY) {
-        // Slots 0-7: folder slots (vertical, 8 rows × 1 col)
+        // Slots 0-7: folder slots — left column (0-3) then right column (4-7)
         Slot[] folderSlots = new Slot[FOLDER_SLOTS];
         for (int i = 0; i < FOLDER_SLOTS; i++) {
-            Slot s = addSlot(new Slot(folderContainer, i, FOLDER_X, FOLDER_Y_START + i * 18) {
+            int col = i < ROWS_PER_COLUMN ? FOLDER_X_LEFT : FOLDER_X_RIGHT;
+            int row = i % ROWS_PER_COLUMN;
+            Slot s = addSlot(new Slot(folderContainer, i, col, FOLDER_Y_START + row * 18) {
                 @Override
                 public boolean mayPlace(ItemStack stack) {
                     return stack.getItem() instanceof ManillaFolderItem;
@@ -81,21 +93,23 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
             folderSlots[i] = s;
         }
 
-        // Slots 8-15: extraction slots (read-only view of each folder's contents)
+        // Slots 8-15: extraction slots — left column (8-11) then right column (12-15)
         for (int i = 0; i < FOLDER_SLOTS; i++) {
-            addSlot(new FolderExtractionSlot(folderSlots[i], EXTRACTION_X, FOLDER_Y_START + i * 18));
+            int col = i < ROWS_PER_COLUMN ? EXTRACTION_X_LEFT : EXTRACTION_X_RIGHT;
+            int row = i % ROWS_PER_COLUMN;
+            addSlot(new FolderExtractionSlot(folderSlots[i], col, FOLDER_Y_START + row * 18));
         }
 
-        // Slots 16-42: player main inventory
+        // Slots 16-42: player main inventory (centred: (176-162)/2 = 7 px)
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, invY + row * 18));
+                addSlot(new Slot(playerInv, col + row * 9 + 9, 7 + col * 18, invY + row * 18));
             }
         }
 
         // Slots 43-51: hotbar
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(playerInv, col, 8 + col * 18, hotbarY));
+            addSlot(new Slot(playerInv, col, 7 + col * 18, hotbarY));
         }
     }
 

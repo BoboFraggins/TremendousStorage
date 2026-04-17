@@ -57,12 +57,12 @@ public class PicnicBasketItemMenu extends AbstractContainerMenu {
         // Player main inventory (slots 9-35)
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(playerInv, col + row * 9 + 9, 8 + col * 18, playerInvY + row * 18));
+                addSlot(new Slot(playerInv, col + row * 9 + 9, 20 + col * 18, playerInvY + row * 18));
             }
         }
         // Player hotbar (slots 0-8)
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(playerInv, col, 8 + col * 18, hotbarY));
+            addSlot(new Slot(playerInv, col, 20 + col * 18, hotbarY));
         }
     }
 

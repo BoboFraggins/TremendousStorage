@@ -55,7 +55,7 @@ public class FilingCabinetMenu extends AbstractFilingCabinetMenu {
             }
         };
 
-        addAllSlots(be, playerInv, 214, 272);
+        addAllSlots(be, playerInv, 142, 200);
         addDataSlots(data);
     }
 
@@ -67,7 +67,7 @@ public class FilingCabinetMenu extends AbstractFilingCabinetMenu {
         this.be = null;
         this.data = new SimpleContainerData(2);
 
-        addAllSlots(new SimpleContainer(FOLDER_SLOTS), playerInv, 214, 272);
+        addAllSlots(new SimpleContainer(FOLDER_SLOTS), playerInv, 142, 200);
         addDataSlots(data);
     }
 

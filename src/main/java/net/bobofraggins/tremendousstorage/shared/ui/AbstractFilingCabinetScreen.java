@@ -28,7 +28,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
 
     protected static final int BG_WIDTH = 176;
 
-    private static final PlayerInventoryPane PLAYER_INV_PANE = new PlayerInventoryPane();
+    private static final PlayerInventoryPane PLAYER_INV_PANE = new PlayerInventoryPane(7);
 
     /** Y position of the player inventory rows (relative to topPos), set by subclass. */
     private final int playerInvY;
@@ -105,12 +105,24 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
 
-        // Folder slots and extraction slots — 8 vertical rows, two columns
-        for (int i = 0; i < AbstractFilingCabinetMenu.FOLDER_SLOTS; i++) {
-            int sy = y + AbstractFilingCabinetMenu.FOLDER_Y_START + i * 18;
-            drawSlotBackground(graphics, x + AbstractFilingCabinetMenu.FOLDER_X, sy, 16, 16);
-            drawSlotBackground(graphics, x + AbstractFilingCabinetMenu.EXTRACTION_X, sy, 16, 16);
+        // Folder and extraction slots — two columns of 4 rows each
+        for (int row = 0; row < AbstractFilingCabinetMenu.ROWS_PER_COLUMN; row++) {
+            int sy = y + AbstractFilingCabinetMenu.FOLDER_Y_START + row * 18;
+            drawSlotBackground(graphics, x + AbstractFilingCabinetMenu.FOLDER_X_LEFT, sy, 16, 16);
+            drawSlotBackground(graphics, x + AbstractFilingCabinetMenu.EXTRACTION_X_LEFT, sy, 16, 16);
+            drawSlotBackground(graphics, x + AbstractFilingCabinetMenu.FOLDER_X_RIGHT, sy, 16, 16);
+            drawSlotBackground(graphics, x + AbstractFilingCabinetMenu.EXTRACTION_X_RIGHT, sy, 16, 16);
         }
+
+        // Vertical rule between the two columns
+        int ruleTop = y + AbstractFilingCabinetMenu.FOLDER_Y_START;
+        int ruleBottom = ruleTop + AbstractFilingCabinetMenu.ROWS_PER_COLUMN * 18;
+        graphics.fill(
+                x + AbstractFilingCabinetMenu.COLUMN_RULE_X,
+                ruleTop,
+                x + AbstractFilingCabinetMenu.COLUMN_RULE_X + 2,
+                ruleBottom,
+                0xFF555555);
 
         // Player inventory slot backgrounds
         graphics.pose().pushPose();

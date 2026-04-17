@@ -444,8 +444,8 @@ public class NetworkInventoryPane implements IDialogPane {
                 (stacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
         int maxScroll = Math.max(0, totalRows - rows);
         if (maxScroll == 0) return;
-        float scrollFraction = ((float) localY - gridStartY() - AccessTerminalLayout.SCROLLER_H / 2.0f)
-                / (barH - AccessTerminalLayout.SCROLLER_H);
+        float scrollFraction = ((float) localY - gridStartY() - 1 - AccessTerminalLayout.SCROLLER_H / 2.0f)
+                / (barH - 2 - AccessTerminalLayout.SCROLLER_H);
         scrollFraction = Math.max(0f, Math.min(1f, scrollFraction));
         scrollOffset = Math.round(scrollFraction * maxScroll);
         clampScroll();
@@ -530,11 +530,11 @@ public class NetworkInventoryPane implements IDialogPane {
         int thumbX = trackX + 1;
         int thumbY;
         if (!canScroll) {
-            thumbY = barY;
+            thumbY = barY + 1;
         } else {
             int maxScroll = totalRows - rows;
             float scrollFraction = scrollOffset / (float) maxScroll;
-            thumbY = barY + (int) ((barH - AccessTerminalLayout.SCROLLER_H) * scrollFraction);
+            thumbY = barY + 1 + (int) ((barH - 2 - AccessTerminalLayout.SCROLLER_H) * scrollFraction);
         }
 
         graphics.blitSprite(

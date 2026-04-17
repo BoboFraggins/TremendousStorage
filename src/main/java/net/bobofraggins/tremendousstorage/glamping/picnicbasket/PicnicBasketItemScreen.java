@@ -7,10 +7,10 @@ import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.LocalInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
+import net.bobofraggins.tremendousstorage.shared.ui.SearchBoxWidget;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -34,7 +34,7 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
     private final LocalInventoryPane inventoryPane;
     private final Dialog dialog;
     private final ConfigDrawer configDrawer;
-    private EditBox searchBox;
+    private SearchBoxWidget searchBox;
 
     public PicnicBasketItemScreen(PicnicBasketItemMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -69,16 +69,13 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
                 (idx, amount, toCursor) -> PacketDistributor.sendToServer(new PicnicBasketItemInteractPacket(
                         menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), idx, amount, toCursor)));
 
-        int searchW = 75;
-        searchBox =
-                new EditBox(font, leftPos + imageWidth - 5 - 2 - searchW, topPos + 4, searchW, 12, Component.empty());
-        searchBox.setMaxLength(64);
-        searchBox.setHint(Component.literal("Search..."));
-        searchBox.setResponder(text -> {
+        searchBox = new SearchBoxWidget(font, leftPos, topPos, imageWidth);
+        searchBox.getEditBox().setResponder(text -> {
             inventoryPane.setFilter(text.toLowerCase(Locale.ROOT).strip());
             SearchSync.pushToJei(text);
         });
-        addRenderableWidget(searchBox);
+        addRenderableWidget(searchBox.getEditBox());
+        searchBox.initFilter(SearchSync.getRawFilter());
     }
 
     @Override
@@ -142,12 +139,12 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (searchBox.isFocused()) {
+        if (searchBox.getEditBox().isFocused()) {
             if (keyCode == 256) {
-                searchBox.setFocused(false);
+                searchBox.getEditBox().setFocused(false);
                 return true;
             }
-            searchBox.keyPressed(keyCode, scanCode, modifiers);
+            searchBox.getEditBox().keyPressed(keyCode, scanCode, modifiers);
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -195,19 +192,7 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
-        drawSearchBorder(graphics);
-    }
-
-    private void drawSearchBorder(GuiGraphics graphics) {
-        int bx = searchBox.getX() - 2;
-        int by = searchBox.getY() - 2;
-        int bw = searchBox.getWidth() + 4;
-        int bh = searchBox.getHeight() + 4;
-        int c = 0xFF373737;
-        graphics.fill(bx, by, bx + bw, by + 2, c);
-        graphics.fill(bx, by + bh - 2, bx + bw, by + bh, c);
-        graphics.fill(bx, by + 2, bx + 2, by + bh - 2, c);
-        graphics.fill(bx + bw - 2, by + 2, bx + bw, by + bh - 2, c);
+        searchBox.render(graphics, font);
     }
 
     @Override

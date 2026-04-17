@@ -31,13 +31,14 @@ import net.neoforged.neoforge.capabilities.Capabilities;
  */
 public class TankSettingsMenu extends AbstractContainerMenu {
 
-    // Fluid-transfer pane slot positions (used by TankSettingsScreen for drawing)
-    public static final int FLUID_IN_X = 36;
-    public static final int FLUID_IN_Y = 24;
-    public static final int FLUID_OUT_X = 36;
-    public static final int FLUID_OUT_Y = 56;
+    // Fluid-transfer slot positions — centred horizontally in the 176 px panel: (176-16)/2 = 80
+    public static final int FLUID_IN_X = 80;
+    public static final int FLUID_IN_Y = 20;
+    public static final int FLUID_OUT_X = 80;
+    public static final int FLUID_OUT_Y = 62;
 
-    private static final int INV_START_X = 8;
+    // Player-inventory slot positions — centred in 176 px: (176-162)/2 = 7
+    public static final int INV_START_X = 7;
     private static final int INV_Y = 90;
     private static final int HOTBAR_Y = 148;
 

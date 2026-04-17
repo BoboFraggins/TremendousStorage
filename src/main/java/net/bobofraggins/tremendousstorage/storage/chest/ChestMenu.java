@@ -146,12 +146,12 @@ public class ChestMenu extends AbstractContainerMenu {
         // Player main inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(inv, col + row * 9 + 9, 8 + col * 18, playerInvY + row * 18));
+                addSlot(new Slot(inv, col + row * 9 + 9, 20 + col * 18, playerInvY + row * 18));
             }
         }
         // Player hotbar
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(inv, col, 8 + col * 18, hotbarY));
+            addSlot(new Slot(inv, col, 20 + col * 18, hotbarY));
         }
 
         addDataSlots(data);

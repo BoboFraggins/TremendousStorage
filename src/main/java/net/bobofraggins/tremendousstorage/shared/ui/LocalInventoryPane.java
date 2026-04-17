@@ -48,6 +48,11 @@ public class LocalInventoryPane implements IDialogPane {
     private static final ResourceLocation BG_TEXTURE =
             ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
 
+    private static final ResourceLocation SCROLLER =
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller");
+    private static final ResourceLocation SCROLLER_DISABLED =
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller_disabled");
+
     private static final int GRID_X = AccessTerminalLayout.NETWORK_X;
     private static final int GRID_Y = AccessTerminalLayout.NETWORK_Y - AccessTerminalLayout.TITLE_H; // 1
     private static final int SCROLLBAR_X = AccessTerminalLayout.SCROLLBAR_X;
@@ -276,7 +281,7 @@ public class LocalInventoryPane implements IDialogPane {
         int startY = gridStartY();
         int barH = visibleRows() * AccessTerminalLayout.SLOT_SIZE;
         return localX >= SCROLLBAR_X
-                && localX < SCROLLBAR_X + AccessTerminalLayout.SCROLLBAR_W
+                && localX < AccessTerminalLayout.BG_WIDTH
                 && localY >= startY
                 && localY < startY + barH;
     }
@@ -289,8 +294,10 @@ public class LocalInventoryPane implements IDialogPane {
                 (displayStacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
         int maxScroll = Math.max(0, totalRows - rows);
         if (maxScroll == 0) return;
-        double ratio = (localY - gridStartY()) / (double) barH;
-        scrollOffset = (int) Math.round(ratio * maxScroll);
+        float scrollFraction = ((float) localY - gridStartY() - 1 - AccessTerminalLayout.SCROLLER_H / 2.0f)
+                / (barH - 2 - AccessTerminalLayout.SCROLLER_H);
+        scrollFraction = Math.max(0f, Math.min(1f, scrollFraction));
+        scrollOffset = Math.round(scrollFraction * maxScroll);
         clampScroll();
     }
 
@@ -341,20 +348,37 @@ public class LocalInventoryPane implements IDialogPane {
         int barY = gridStartY();
         int barH = rows * AccessTerminalLayout.SLOT_SIZE;
 
-        // Left border
+        // Left separator
         graphics.fill(SCROLLBAR_X - 1, barY, SCROLLBAR_X, barY + barH, 0xFF555555);
 
-        graphics.fill(SCROLLBAR_X, barY, SCROLLBAR_X + AccessTerminalLayout.SCROLLBAR_W, barY + barH, 0x40000000);
+        // Track background with inner bevel
+        int trackX = AccessTerminalLayout.SCROLLBAR_TRACK_X;
+        int trackW = AccessTerminalLayout.SCROLLBAR_W;
+        graphics.fill(trackX, barY, trackX + trackW, barY + barH, 0xFF8B8B8B);
+        graphics.fill(trackX, barY, trackX + trackW, barY + 1, 0xFF555555);
+        graphics.fill(trackX, barY, trackX + 1, barY + barH, 0xFF555555);
+        graphics.fill(trackX, barY + barH - 1, trackX + trackW, barY + barH, 0xFFFFFFFF);
+        graphics.fill(trackX + trackW - 1, barY, trackX + trackW, barY + barH, 0xFFFFFFFF);
 
         int totalRows = Math.max(
                 (displayStacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
-        int thumbH = Math.max(8, barH * rows / totalRows);
-        int maxScroll = Math.max(1, totalRows - rows);
-        int thumbY = barY + (barH - thumbH) * scrollOffset / maxScroll;
-        if (totalRows <= rows) {
-            thumbY = barY;
-            thumbH = barH;
+        boolean canScroll = totalRows > rows;
+
+        int thumbX = trackX + 1;
+        int thumbY;
+        if (!canScroll) {
+            thumbY = barY + 1;
+        } else {
+            int maxScroll = totalRows - rows;
+            float scrollFraction = scrollOffset / (float) maxScroll;
+            thumbY = barY + 1 + (int) ((barH - 2 - AccessTerminalLayout.SCROLLER_H) * scrollFraction);
         }
-        graphics.fill(SCROLLBAR_X, thumbY, SCROLLBAR_X + AccessTerminalLayout.SCROLLBAR_W, thumbY + thumbH, 0xC0FFFFFF);
+
+        graphics.blitSprite(
+                canScroll ? SCROLLER : SCROLLER_DISABLED,
+                thumbX,
+                thumbY,
+                AccessTerminalLayout.SCROLLER_W,
+                AccessTerminalLayout.SCROLLER_H);
     }
 }

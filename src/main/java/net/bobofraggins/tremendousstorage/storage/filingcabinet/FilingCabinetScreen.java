@@ -28,8 +28,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class FilingCabinetScreen extends AbstractFilingCabinetScreen<FilingCabinetMenu> {
 
-    private static final int BG_HEIGHT = 300;
-    private static final int PLAYER_INV_Y = 214;
+    private static final int BG_HEIGHT = 228;
+    private static final int PLAYER_INV_Y = 142;
 
     public FilingCabinetScreen(FilingCabinetMenu menu, Inventory inv, Component title) {
         super(menu, inv, title, BG_HEIGHT, PLAYER_INV_Y, buildConfigDrawer(menu));

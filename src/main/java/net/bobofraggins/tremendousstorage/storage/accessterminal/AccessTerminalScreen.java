@@ -13,11 +13,11 @@ import net.bobofraggins.tremendousstorage.shared.ui.CraftingGridPane;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PressableIconButton;
+import net.bobofraggins.tremendousstorage.shared.ui.SearchBoxWidget;
 import net.bobofraggins.tremendousstorage.shared.ui.SortPane;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -48,11 +48,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     private final NetworkInventoryPane networkPane;
     private final Dialog dialog;
     private final ConfigDrawer configDrawer;
-    private EditBox searchBox;
-
-    // Visual bounding box of the search field (used for border drawing and hint text).
-    private int searchBx, searchBy, searchBw, searchBh;
-    private static final int SEARCH_MARGIN = 3;
+    private SearchBoxWidget searchBox;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -96,34 +92,13 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         }
 
         // Search box — right-aligned in the title bar.
-        int searchW = 75;
-        searchBx = leftPos + imageWidth - 5 - 2 - searchW;
-        searchBy = topPos + 4;
-        searchBw = searchW;
-        searchBh = 12;
-        int textH = font.lineHeight;
-        searchBox = new EditBox(
-                font,
-                searchBx + SEARCH_MARGIN,
-                searchBy + (searchBh - textH) / 2,
-                searchBw - SEARCH_MARGIN,
-                textH,
-                Component.empty());
-        searchBox.setMaxLength(64);
-        searchBox.setBordered(false);
-        searchBox.setTextColor(0xFFFFFFFF);
-        searchBox.setResponder(text -> {
+        searchBox = new SearchBoxWidget(font, leftPos, topPos, imageWidth);
+        searchBox.getEditBox().setResponder(text -> {
             networkPane.setFilter(text.toLowerCase(Locale.ROOT).strip());
             SearchSync.pushToJei(text);
         });
-        addRenderableWidget(searchBox);
-        String existingFilter = SearchSync.getRawFilter();
-        searchBox.setValue(existingFilter);
-        if (!existingFilter.isEmpty()) {
-            // Select all so the user immediately sees there is an active filter and can clear it.
-            searchBox.setFocused(true);
-            searchBox.setHighlightPos(0);
-        }
+        addRenderableWidget(searchBox.getEditBox());
+        searchBox.initFilter(SearchSync.getRawFilter());
 
         // Quick stack button: 4 px above and horizontally centered on the top-right player inv slot.
         int buttonX = leftPos
@@ -159,7 +134,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         if (SearchSync.isJeiAvailable()) {
             String jeiRaw = SearchSync.getRawFilter();
             if (!jeiRaw.equals(searchBox.getValue())) {
-                searchBox.setValue(jeiRaw); // triggers responder → updates pane + pushes back to JEI
+                searchBox.setValue(jeiRaw);
             }
         }
         List<ItemStack> pending = SatContentsPacket.PENDING_STACKS;
@@ -181,13 +156,13 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (searchBox.isFocused()) {
-            if (keyCode == 256) { // Escape: unfocus the search box without closing the screen
-                searchBox.setFocused(false);
+        if (searchBox.getEditBox().isFocused()) {
+            if (keyCode == 256) {
+                searchBox.getEditBox().setFocused(false);
                 return true;
             }
-            searchBox.keyPressed(keyCode, scanCode, modifiers);
-            return true; // consume all keys while search box is focused
+            searchBox.getEditBox().keyPressed(keyCode, scanCode, modifiers);
+            return true;
         }
         if (QuickStackClientEvents.QUICK_STACK != null
                 && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)
@@ -249,27 +224,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
-        drawSearchBorder(graphics);
-    }
-
-    private void drawSearchBorder(GuiGraphics graphics) {
-        // Background
-        graphics.fill(searchBx, searchBy, searchBx + searchBw, searchBy + searchBh, 0xFF8B8B8B);
-
-        // Shadow: top and left edges (recessed look)
-        graphics.fill(searchBx - 1, searchBy - 1, searchBx + searchBw + 1, searchBy, 0xFF555555);
-        graphics.fill(searchBx - 1, searchBy, searchBx, searchBy + searchBh + 1, 0xFF555555);
-
-        // Highlight: bottom and right edges
-        graphics.fill(searchBx, searchBy + searchBh, searchBx + searchBw + 1, searchBy + searchBh + 1, 0xFFFFFFFF);
-        graphics.fill(searchBx + searchBw, searchBy, searchBx + searchBw + 1, searchBy + searchBh, 0xFFFFFFFF);
-
-        // Hint text — drawn manually so it respects the margin and vertical centering
-        if (searchBox.getValue().isEmpty() && !searchBox.isFocused()) {
-            int hintX = searchBx + SEARCH_MARGIN;
-            int hintY = searchBy + (searchBh - font.lineHeight) / 2 + 1;
-            graphics.drawString(font, "Search...", hintX, hintY, 0xFFAAAAAA, false);
-        }
+        searchBox.render(graphics, font);
     }
 
     @Override

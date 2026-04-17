@@ -39,7 +39,7 @@ public class PlayerInventoryPane implements IDialogPane {
     public static final int HEIGHT = INV_ROWS * SLOT_SIZE + HOTBAR_GAP + SLOT_SIZE + HOTBAR_GAP; // 80
 
     public PlayerInventoryPane() {
-        this(8);
+        this(20);
     }
 
     public PlayerInventoryPane(int leftMargin) {
