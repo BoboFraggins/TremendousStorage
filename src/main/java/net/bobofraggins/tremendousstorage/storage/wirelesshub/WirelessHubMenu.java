@@ -69,10 +69,10 @@ public class WirelessHubMenu extends AbstractContainerMenu {
         int hotbarY = haarpUpgrade ? HOTBAR_Y_BASE + HAARP_SECTION_H : HOTBAR_Y_BASE;
 
         // Slot 0: input — Wireless SAT only
-        addSlot(new SlotItemHandler(hubInventory, 0, 44, 35));
+        addSlot(new SlotItemHandler(hubInventory, 0, 80, 20));
 
         // Slot 1: output — read-only for player (item placed by block entity)
-        addSlot(new SlotItemHandler(hubInventory, 1, 120, 35) {
+        addSlot(new SlotItemHandler(hubInventory, 1, 80, 62) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false; // player cannot put items here
@@ -82,13 +82,13 @@ public class WirelessHubMenu extends AbstractContainerMenu {
         // Player main inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(inv, col + row * 9 + 9, 8 + col * 18, invY + row * 18));
+                addSlot(new Slot(inv, col + row * 9 + 9, 7 + col * 18, invY + row * 18));
             }
         }
 
         // Player hotbar
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(inv, col, 8 + col * 18, hotbarY));
+            addSlot(new Slot(inv, col, 7 + col * 18, hotbarY));
         }
     }
 

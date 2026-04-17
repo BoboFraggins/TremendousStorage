@@ -37,17 +37,17 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
     public static final int ROWS_PER_COLUMN = FOLDER_SLOTS / 2;
 
     /** X positions for the left column (folder + extraction). */
-    public static final int FOLDER_X_LEFT = 46;
+    public static final int FOLDER_X_LEFT = 39;
 
-    public static final int EXTRACTION_X_LEFT = 68;
+    public static final int EXTRACTION_X_LEFT = 61;
 
     /** X position of the 2 px vertical rule that separates the two columns. */
     public static final int COLUMN_RULE_X = 87;
 
     /** X positions for the right column (folder + extraction). */
-    public static final int FOLDER_X_RIGHT = 91;
+    public static final int FOLDER_X_RIGHT = 99;
 
-    public static final int EXTRACTION_X_RIGHT = 113;
+    public static final int EXTRACTION_X_RIGHT = 121;
 
     /** Y position of the first folder/extraction row relative to {@code topPos}. */
     public static final int FOLDER_Y_START = 36;

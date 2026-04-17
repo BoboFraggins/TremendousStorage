@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.wirelesshub;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.IDialogPane;
+import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
@@ -20,7 +21,13 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
     private static final int BG_WIDTH = 176;
     private static final int BG_HEIGHT = 166;
 
+    // Slot positions — same as Tank settings for visual consistency
+    private static final int SLOT_X = 80;
+    private static final int INPUT_Y = 20;
+    private static final int OUTPUT_Y = 62;
+
     private final Dialog dialog;
+    private final PlayerInventoryPane playerInvPane = new PlayerInventoryPane(7);
 
     /** Non-null only when the HAARP upgrade is active; handles weather-mode radio button clicks. */
     @Nullable
@@ -57,13 +64,19 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
 
         dialog.render(g, font, title, mouseX, mouseY, partialTick);
 
-        // Slot backgrounds — input (left) and output (right)
-        drawSlotBg(g, x + 44, y + 35);
-        drawSlotBg(g, x + 120, y + 35);
+        // Slot backgrounds — input (top) and output (bottom), centred like the Tank
+        drawSlot(g, x + SLOT_X, y + INPUT_Y);
+        drawSlot(g, x + SLOT_X, y + OUTPUT_Y);
 
-        // Arrow between slots (→)
-        g.fill(x + 66, y + 42, x + 106, y + 46, 0xFF888888); // shaft
-        g.fill(x + 106, y + 40, x + 108, y + 48, 0xFF888888); // arrowhead
+        // Down-arrow between the two slots
+        drawDownArrow(g, x + SLOT_X, y + INPUT_Y + 16);
+
+        // "Unlinked" / "Linked" labels — to the right of each slot, vertically centred
+        Component unlinked = Component.translatable("screen.tremendousstorage.wireless_hub.unlinked");
+        Component linked = Component.translatable("screen.tremendousstorage.wireless_hub.linked");
+        int labelX = x + SLOT_X + 18;
+        g.drawString(font, unlinked, labelX, y + INPUT_Y + (16 - font.lineHeight) / 2, 0x404040, false);
+        g.drawString(font, linked, labelX, y + OUTPUT_Y + (16 - font.lineHeight) / 2, 0x006600, false);
 
         // Separator above HAARP section (or above player inventory if no HAARP)
         g.fill(x + 4, y + 81, x + BG_WIDTH - 4, y + 82, 0xFF555555);
@@ -77,31 +90,28 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
         }
 
         // Player inventory slot backgrounds
-        int invY = y + WirelessHubMenu.INV_Y_BASE + haarpH;
-        int hotbarY = y + WirelessHubMenu.HOTBAR_Y_BASE + haarpH;
-        for (int row = 0; row < 3; row++) {
-            for (int col = 0; col < 9; col++) {
-                drawSlotBg(g, x + 8 + col * 18, invY + row * 18);
-            }
-        }
-        for (int col = 0; col < 9; col++) {
-            drawSlotBg(g, x + 8 + col * 18, hotbarY);
-        }
-
-        // "Unlinked" / "Linked" labels
-        Component unlinked = Component.translatable("screen.tremendousstorage.wireless_hub.unlinked");
-        Component linked = Component.translatable("screen.tremendousstorage.wireless_hub.linked");
-        g.drawString(font, unlinked, x + 52 - font.width(unlinked) / 2, y + 55, 0x404040, false);
-        g.drawString(font, linked, x + 128 - font.width(linked) / 2, y + 55, 0x006600, false);
+        int invPaneY = WirelessHubMenu.INV_Y_BASE + haarpH;
+        g.pose().pushPose();
+        g.pose().translate(x, y + invPaneY, 0);
+        playerInvPane.render(g, font, BG_WIDTH, mouseX - x, mouseY - (y + invPaneY), partialTick);
+        g.pose().popPose();
     }
 
-    /** Draws a standard 16×16 inset slot background at the given top-left pixel. */
-    private static void drawSlotBg(GuiGraphics g, int x, int y) {
-        g.fill(x - 1, y - 1, x + 16, y, 0xFF373737);
-        g.fill(x - 1, y - 1, x, y + 16, 0xFF373737);
-        g.fill(x - 1, y + 16, x + 17, y + 17, 0xFFFFFFFF);
-        g.fill(x + 16, y - 1, x + 17, y + 17, 0xFFFFFFFF);
-        g.fill(x, y, x + 16, y + 16, 0xFF8B8B8B);
+    private static void drawSlot(GuiGraphics g, int sx, int sy) {
+        g.fill(sx, sy, sx + 16, sy + 1, 0xFF373737); // top
+        g.fill(sx, sy + 1, sx + 1, sy + 16, 0xFF373737); // left
+        g.fill(sx, sy + 16, sx + 17, sy + 17, 0xFFFFFFFF); // bottom
+        g.fill(sx + 16, sy, sx + 17, sy + 16, 0xFFFFFFFF); // right
+        g.fill(sx + 1, sy + 1, sx + 16, sy + 16, 0xFF8B8B8B); // interior
+    }
+
+    private static void drawDownArrow(GuiGraphics g, int gapX, int gapY) {
+        int cx = gapX + 8;
+        int top = gapY + 3;
+        g.fill(cx - 1, top, cx + 1, top + 9, 0xFF555555); // stem
+        g.fill(cx - 4, top + 9, cx + 4, top + 11, 0xFF555555); // arrowhead row 1
+        g.fill(cx - 2, top + 11, cx + 2, top + 13, 0xFF555555); // arrowhead row 2
+        g.fill(cx - 1, top + 13, cx + 1, top + 15, 0xFF555555); // arrowhead row 3
     }
 
     @Override

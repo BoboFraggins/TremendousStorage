@@ -331,10 +331,18 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
             if (!storedFluid.isEmpty() && !FluidStack.isSameFluidSameComponents(storedFluid, contained)) return;
             int fluidAmt = contained.getAmount();
             long space = getCapacity() - amount;
-            // Hold until tank can accept the full amount (unless it voids excess)
-            if (space < fluidAmt && !voidExcess) return;
-            handler.drain(fluidAmt, IFluidHandler.FluidAction.EXECUTE);
-            insert(contained, fluidAmt, false);
+            // Attempt up to the available space (or the full amount when voiding excess).
+            int toDrain = voidExcess ? fluidAmt : (int) Math.min(fluidAmt, space);
+            if (toDrain <= 0) return;
+            // Simulate to verify the item can actually release this amount.
+            // All-or-nothing handlers (e.g. buckets) will return more than we asked for when
+            // doing a partial request — in that case block until the tank has enough space.
+            FluidStack simDrained = handler.drain(toDrain, IFluidHandler.FluidAction.SIMULATE);
+            if (simDrained.isEmpty()) return;
+            if (!voidExcess && simDrained.getAmount() > space) return;
+            FluidStack drained = handler.drain(simDrained.getAmount(), IFluidHandler.FluidAction.EXECUTE);
+            if (drained.isEmpty()) return;
+            insert(drained, drained.getAmount(), false);
             transferContainer.setItem(0, ItemStack.EMPTY);
             transferContainer.setItem(1, handler.getContainer());
         } else {

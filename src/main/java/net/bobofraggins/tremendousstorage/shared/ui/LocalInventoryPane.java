@@ -348,9 +348,6 @@ public class LocalInventoryPane implements IDialogPane {
         int barY = gridStartY();
         int barH = rows * AccessTerminalLayout.SLOT_SIZE;
 
-        // Left separator
-        graphics.fill(SCROLLBAR_X - 1, barY, SCROLLBAR_X, barY + barH, 0xFF555555);
-
         // Track background with inner bevel
         int trackX = AccessTerminalLayout.SCROLLBAR_TRACK_X;
         int trackW = AccessTerminalLayout.SCROLLBAR_W;

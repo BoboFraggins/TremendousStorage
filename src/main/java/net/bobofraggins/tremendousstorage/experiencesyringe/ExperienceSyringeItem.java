@@ -4,6 +4,8 @@ import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -22,9 +24,9 @@ public class ExperienceSyringeItem extends Item {
     public static int xpToMb(int xp) {
         return xp * 1000 / XP_PER_BUCKET;
     }
-    /** Converts mB to XP points (truncates). */
+    /** Converts mB to XP points, clamped to {@link #CAPACITY} to avoid integer overflow on large inputs. */
     public static int mbToXp(int mb) {
-        return mb * XP_PER_BUCKET / 1000;
+        return (int) Math.min((long) mb * XP_PER_BUCKET / 1000, CAPACITY);
     }
 
     public ExperienceSyringeItem() {
@@ -57,6 +59,15 @@ public class ExperienceSyringeItem extends Item {
             if (toStore > 0) {
                 player.giveExperiencePoints(-toStore);
                 stack.set(Registration.EXPERIENCE_SYRINGE_STORED_XP, stored + toStore);
+                level.playSound(
+                        null,
+                        player.getX(),
+                        player.getY(),
+                        player.getZ(),
+                        SoundEvents.EXPERIENCE_ORB_PICKUP,
+                        SoundSource.PLAYERS,
+                        0.1f,
+                        0.5f + level.random.nextFloat() * 0.1f);
             }
         } else {
             // Withdraw: give the player exactly enough XP to reach their next whole level.
@@ -66,6 +77,15 @@ public class ExperienceSyringeItem extends Item {
             if (toGive > 0) {
                 player.giveExperiencePoints(toGive);
                 stack.set(Registration.EXPERIENCE_SYRINGE_STORED_XP, stored - toGive);
+                level.playSound(
+                        null,
+                        player.getX(),
+                        player.getY(),
+                        player.getZ(),
+                        SoundEvents.EXPERIENCE_ORB_PICKUP,
+                        SoundSource.PLAYERS,
+                        0.1f,
+                        0.5f + level.random.nextFloat() * 0.1f);
             }
         }
 

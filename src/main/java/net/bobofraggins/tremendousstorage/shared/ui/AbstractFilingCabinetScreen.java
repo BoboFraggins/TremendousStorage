@@ -41,7 +41,6 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         super(menu, inv, title);
         this.playerInvY = playerInvY;
         this.configDrawer = configDrawer;
-        configDrawer.withoutTabButton();
         dialog = new Dialog(Dialog.blankPane(BG_WIDTH, bgHeight - Dialog.TITLE_H - Dialog.BOTTOM_PADDING));
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
@@ -52,16 +51,6 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         super.init();
         dialog.init(leftPos, topPos);
         configDrawer.init(leftPos, topPos, imageHeight);
-
-        // Config toggle button in the top-left of the title bar
-        addRenderableWidget(new PressableIconButton(
-                leftPos + 8,
-                topPos + 6,
-                16,
-                16,
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config"),
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config_focused"),
-                () -> configDrawer.toggle()));
 
         // Quick stack button above the player inventory, right-aligned
         addRenderableWidget(new PressableIconButton(
