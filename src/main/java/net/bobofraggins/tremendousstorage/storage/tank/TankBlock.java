@@ -141,6 +141,8 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
             Player player,
             InteractionHand hand,
             BlockHitResult hit) {
+        if (stack.getItem() instanceof net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeItem)
+            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
 
         // --- Bottle handling (250 mB per bottle) ---

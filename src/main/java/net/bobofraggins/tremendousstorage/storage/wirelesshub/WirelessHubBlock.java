@@ -2,11 +2,15 @@ package net.bobofraggins.tremendousstorage.storage.wirelesshub;
 
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
+import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -78,6 +82,19 @@ public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnecto
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof WirelessHubBlockEntity be) {
             be.setChanged();
         }
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hit) {
+        if (stack.getItem() instanceof StorageUpgradeItem) return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        return super.useItemOn(stack, state, level, pos, player, hand, hit);
     }
 
     @Override

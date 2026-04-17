@@ -3,11 +3,14 @@ package net.bobofraggins.tremendousstorage.storage.chest;
 import com.mojang.serialization.MapCodec;
 import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.bobofraggins.tremendousstorage.storage.tube.TubeBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -151,6 +154,19 @@ public class ChestBlock extends BaseEntityBlock implements NetworkConnector {
                 be.setChanged();
             }
         }
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(
+            ItemStack stack,
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Player player,
+            InteractionHand hand,
+            BlockHitResult hit) {
+        if (stack.getItem() instanceof StorageUpgradeItem) return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        return super.useItemOn(stack, state, level, pos, player, hand, hit);
     }
 
     @Override
