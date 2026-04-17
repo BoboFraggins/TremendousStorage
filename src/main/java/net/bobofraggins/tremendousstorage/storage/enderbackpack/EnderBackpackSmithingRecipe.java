@@ -9,6 +9,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -68,7 +69,7 @@ public class EnderBackpackSmithingRecipe extends AbstractEnderSmithingRecipe {
             if (contents.hasCraftingUpgrade()) tag.putBoolean("CraftingUpgrade", true);
         }
         tag.putLong(EnderChestBlockEntity.TAG_LINK_ID, linkId);
-        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        BlockItem.setBlockEntityData(result, Registration.ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(), tag);
 
         // Set link ID as a standalone component for fast access in item-form openUi
         result.set(Registration.ENDER_LINK_ID.get(), linkId);

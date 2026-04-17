@@ -7,6 +7,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -52,7 +53,7 @@ public class EnderTankSmithingRecipe extends AbstractEnderSmithingRecipe {
         CustomData existing = base.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putLong(EnderTankBlockEntity.TAG_LINK_ID, linkId);
-        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        BlockItem.setBlockEntityData(result, Registration.ENDER_TANK_BE_TYPE.get(), tag);
         var contents = base.get(Registration.TANK_CONTENTS.get());
         if (contents != null) result.set(Registration.TANK_CONTENTS.get(), contents);
         return result;

@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.storageupgrade;
 
 import com.mojang.serialization.MapCodec;
+import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
@@ -18,6 +19,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -26,6 +28,7 @@ import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 /**
  * Smithing-table recipe: storage block item (any tier) + matching Storage Upgrade →
@@ -205,7 +208,7 @@ public class StorageSmithingUpgradeRecipe implements CraftingRecipe {
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putBoolean("CraftingUpgrade", true);
         ItemStack result = blockStack.copyWithCount(1);
-        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        applyBeData(result, tag);
         return result;
     }
 
@@ -219,7 +222,7 @@ public class StorageSmithingUpgradeRecipe implements CraftingRecipe {
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putBoolean("HaarpUpgrade", true);
         ItemStack result = hubStack.copyWithCount(1);
-        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        applyBeData(result, tag);
         return result;
     }
 
@@ -242,7 +245,7 @@ public class StorageSmithingUpgradeRecipe implements CraftingRecipe {
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putBoolean("MagnetUpgrade", true);
         ItemStack result = stack.copyWithCount(1);
-        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        applyBeData(result, tag);
         return result;
     }
 
@@ -267,7 +270,7 @@ public class StorageSmithingUpgradeRecipe implements CraftingRecipe {
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putBoolean("PullerUpgrade", true);
         ItemStack result = stack.copyWithCount(1);
-        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        applyBeData(result, tag);
         return result;
     }
 
@@ -287,8 +290,48 @@ public class StorageSmithingUpgradeRecipe implements CraftingRecipe {
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putBoolean("InterdimensionalUpgrade", true);
         ItemStack result = stack.copyWithCount(1);
-        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        applyBeData(result, tag);
         return result;
+    }
+
+    /**
+     * Returns the {@link BlockEntityType} for items that back a block entity, so that
+     * {@link BlockItem#setBlockEntityData} can stamp the required {@code "id"} field.
+     * Returns {@code null} for items that manage their data via other components (folders,
+     * backpack contents) and never need a bare block-entity tag.
+     */
+    @Nullable
+    private static BlockEntityType<?> beTypeForItem(Item item) {
+        if (item == Registration.TREMENDOUS_CHEST_ITEM.get()) return Registration.TREMENDOUS_CHEST_BE_TYPE.get();
+        if (item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get())
+            return Registration.ENDER_TREMENDOUS_CHEST_BE_TYPE.get();
+        if (item == Registration.TANK_ITEM.get()) return Registration.TANK_BE_TYPE.get();
+        if (item == Registration.ENDER_TANK_ITEM.get()) return Registration.ENDER_TANK_BE_TYPE.get();
+        if (item == Registration.NETWORK_INTERFACE_ITEM.get()) return Registration.NETWORK_INTERFACE_BE_TYPE.get();
+        if (item == Registration.WIRELESS_HUB_ITEM.get()) return Registration.WIRELESS_HUB_BE_TYPE.get();
+        if (item == Registration.FILING_CABINET_ITEM.get()) return Registration.FILING_CABINET_BE_TYPE.get();
+        if (item == Registration.PICNIC_BASKET_ITEM.get()) return Registration.PICNIC_BASKET_BE_TYPE.get();
+        if (item == Registration.ENDER_PICNIC_BASKET_ITEM.get()) return Registration.ENDER_PICNIC_BASKET_BE_TYPE.get();
+        if (item == Registration.STORAGE_ACCESS_TERMINAL_ITEM.get())
+            return Registration.STORAGE_ACCESS_TERMINAL_BE_TYPE.get();
+        if (item == Registration.ENDER_TREMENDOUS_BACKPACK_ITEM.get())
+            return Registration.ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get();
+        if (item instanceof BackpackItem) return Registration.TREMENDOUS_BACKPACK_BE_TYPE.get();
+        return null;
+    }
+
+    /**
+     * Sets {@code BLOCK_ENTITY_DATA} on {@code stack}, ensuring the required {@code "id"} field
+     * is always present. Uses {@link BlockItem#setBlockEntityData} when the item has a known
+     * block-entity type; falls back to raw {@link CustomData} otherwise.
+     */
+    private static void applyBeData(ItemStack stack, CompoundTag tag) {
+        BlockEntityType<?> beType = beTypeForItem(stack.getItem());
+        if (beType != null) {
+            BlockItem.setBlockEntityData(stack, beType, tag);
+        } else {
+            stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        }
     }
 
     private static StorageTier tierFromStack(ItemStack stack) {
@@ -331,7 +374,7 @@ public class StorageSmithingUpgradeRecipe implements CraftingRecipe {
             if (existing != null) {
                 CompoundTag beTag = existing.copyTag();
                 beTag.putString("Tier", upgradeItem.getToTier().getId());
-                result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(beTag));
+                applyBeData(result, beTag);
             }
             return result;
         }
@@ -340,7 +383,7 @@ public class StorageSmithingUpgradeRecipe implements CraftingRecipe {
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putString("Tier", upgradeItem.getToTier().getId());
         ItemStack result = blockStack.copyWithCount(1);
-        result.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        applyBeData(result, tag);
         return result;
     }
 }
