@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -263,5 +264,11 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
                 }
             }
         }
+
+        // Place a two-block-tall tent door centered on the south wall (z = size-1).
+        BlockPos doorBase = origin.offset(size / 2, 0, size - 1);
+        BlockState doorState = GlampingRegistration.TENT_DOOR.get().defaultBlockState();
+        level.setBlock(doorBase, doorState.setValue(TentDoorBlock.HALF, DoubleBlockHalf.LOWER), 3);
+        level.setBlock(doorBase.above(), doorState.setValue(TentDoorBlock.HALF, DoubleBlockHalf.UPPER), 3);
     }
 }

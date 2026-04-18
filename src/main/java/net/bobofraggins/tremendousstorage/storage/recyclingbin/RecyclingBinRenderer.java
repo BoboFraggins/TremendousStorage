@@ -166,13 +166,19 @@ public class RecyclingBinRenderer
         float u0 = sprite.getU0(), u1 = sprite.getU1();
         float v0 = sprite.getV0(), v1 = sprite.getV1();
 
-        VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
+        // Top faces use a culling render type — winding must be CCW from above (NW→SW→SE→NE)
+        // so the geometric normal points up and the face is visible looking down into the bin.
+        VertexConsumer vcCull = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
+        // Side faces use a non-culling render type to avoid z-fighting from shared interior
+        // faces between adjacent cubes — each face is emitted once, visible from either side.
+        VertexConsumer vcNoCull = bufferSource.getBuffer(RenderType.translucent());
 
         for (float[] c : LIQUID_CUBES) {
             float x0 = c[0], z0 = c[1], x1 = c[2], z1 = c[3];
-            // Top face (+Y) — the "surface" of the liquid
+
+            // Top face — CCW from above so normal faces +Y (visible looking down into bin).
             quad(
-                    vc,
+                    vcCull,
                     mat,
                     r,
                     g,
@@ -187,50 +193,23 @@ public class RecyclingBinRenderer
                     x0,
                     topY,
                     z0,
-                    x1,
-                    topY,
-                    z0,
-                    x1,
-                    topY,
-                    z1,
                     x0,
                     topY,
                     z1,
+                    x1,
+                    topY,
+                    z1,
+                    x1,
+                    topY,
+                    z0,
                     0,
                     1,
                     0);
-            // Bottom face (-Y)
+
+            // Side faces — rendered without culling so interior shared faces don't z-fight.
+            // North (-Z)
             quad(
-                    vc,
-                    mat,
-                    r,
-                    g,
-                    b,
-                    a,
-                    packedLight,
-                    packedOverlay,
-                    u0,
-                    v0,
-                    u1,
-                    v1,
-                    x0,
-                    LIQUID_FLOOR,
-                    z1,
-                    x1,
-                    LIQUID_FLOOR,
-                    z1,
-                    x1,
-                    LIQUID_FLOOR,
-                    z0,
-                    x0,
-                    LIQUID_FLOOR,
-                    z0,
-                    0,
-                    -1,
-                    0);
-            // North face (-Z)
-            quad(
-                    vc,
+                    vcNoCull,
                     mat,
                     r,
                     g,
@@ -257,9 +236,9 @@ public class RecyclingBinRenderer
                     0,
                     0,
                     -1);
-            // South face (+Z)
+            // South (+Z)
             quad(
-                    vc,
+                    vcNoCull,
                     mat,
                     r,
                     g,
@@ -286,9 +265,9 @@ public class RecyclingBinRenderer
                     0,
                     0,
                     1);
-            // West face (-X)
+            // West (-X)
             quad(
-                    vc,
+                    vcNoCull,
                     mat,
                     r,
                     g,
@@ -315,9 +294,9 @@ public class RecyclingBinRenderer
                     -1,
                     0,
                     0);
-            // East face (+X)
+            // East (+X)
             quad(
-                    vc,
+                    vcNoCull,
                     mat,
                     r,
                     g,

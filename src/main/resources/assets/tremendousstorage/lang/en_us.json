@@ -138,6 +138,8 @@
   "item.tremendousstorage.smore": "S'more",
   "fluid_type.tremendousstorage.positive_vibes": "Positive Vibes",
   "item.tremendousstorage.positive_vibes_bucket": "Positive Vibes Bucket",
+  "fluid_type.tremendousstorage.xp_juice": "XP Juice",
+  "item.tremendousstorage.xp_juice_bucket": "XP Juice Bucket",
   "jei.tremendousstorage.ender_folder_smithing": "Ender Folder",
   "jei.tremendousstorage.ender_storage_smithing": "Ender Storage",
   "jei.tremendousstorage.ender_chest_smithing": "Ender Chest",
@@ -183,6 +185,11 @@
 
   "block.tremendousstorage.picnic_basket": "Picnic Basket",
   "item.tremendousstorage.picnic_basket": "Picnic Basket",
+  "block.tremendousstorage.ender_picnic_basket": "Ender Picnic Basket",
+  "item.tremendousstorage.ender_picnic_basket": "Ender Picnic Basket",
+
+  "block.tremendousstorage.tent": "Tent",
+  "item.tremendousstorage.tent": "Tent",
 
   "block.tremendousstorage.backpack": "Backpack",
   "item.tremendousstorage.backpack": "Backpack",
@@ -192,6 +199,8 @@
   "key.tremendousstorage.open_picnic_basket": "Open Picnic Basket",
 
   "item.tremendousstorage.base_upgrade": "Base Upgrade",
+  "item.tremendousstorage.crafting_upgrade": "Crafting Upgrade",
+  "item.tremendousstorage.magnet_upgrade": "Magnet Upgrade",
 
   "block.tremendousstorage.recycling_bin": "Recycling Bin",
   "screen.tremendousstorage.recycling_bin": "Recycling Bin",
