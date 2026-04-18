@@ -1,7 +1,6 @@
 package net.bobofraggins.tremendousstorage.external.mobgrindinutils;
 
 import net.bobofraggins.tremendousstorage.TremendousStorage;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -14,7 +13,6 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import net.neoforged.neoforge.fluids.FluidType;
@@ -79,16 +77,7 @@ public final class MobGrindingUtilsIntegration {
             .levelDecreasePerBlock(1)
             .tickRate(20);
 
-    /**
-     * Returns the XP fluid to use: Mob Grinding Utils' {@code fluid_xp} when loaded, or our own
-     * {@code xp_juice} source fluid otherwise.
-     */
     public static Fluid getXpFluid() {
-        if (ModList.get().isLoaded("mob_grinding_utils")) {
-            return BuiltInRegistries.FLUID
-                    .getOptional(ResourceLocation.fromNamespaceAndPath("mob_grinding_utils", "fluid_xp"))
-                    .orElse(XP_FLUID_SOURCE.get());
-        }
         return XP_FLUID_SOURCE.get();
     }
 
