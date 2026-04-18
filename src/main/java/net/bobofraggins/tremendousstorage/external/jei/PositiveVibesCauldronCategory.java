@@ -16,7 +16,7 @@ import net.minecraft.network.chat.Component;
  *
  * <p>Displays a vertical guide showing four items top-to-bottom with downward arrows between
  * them. Handles two recipes: making Positive Vibes (Glistering Melon → Water Cauldron → Healing
- * Salve Cauldron → Bucket) and healing a Zombie Brain (Zombie Brain → Positive Vibes Bucket →
+ * Positive Vibe Cauldron → Bucket) and healing a Zombie Brain (Zombie Brain → Positive Vibes Bucket →
  * Cauldron → Brain).
  */
 public class PositiveVibesCauldronCategory implements IRecipeCategory<PositiveVibesCauldronJeiRecipe> {

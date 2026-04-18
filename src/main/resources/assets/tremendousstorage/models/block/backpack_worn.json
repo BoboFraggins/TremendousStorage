@@ -1,0 +1,10 @@
+{
+  "parent": "tremendousstorage:block/backpack_combined",
+  "display": {
+    "tremendousstorage:worn": {
+      "rotation": [0, 0, 0],
+      "translation": [0, 0, 0],
+      "scale": [0.5, 0.5, 0.5]
+    }
+  }
+}

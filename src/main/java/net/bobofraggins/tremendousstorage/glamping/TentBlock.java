@@ -119,8 +119,8 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
 
     @Override
     public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        if (state.getValue(PART) != BedPart.FOOT) return List.of();
         List<ItemStack> drops = super.getDrops(state, params);
-        if (state.getValue(PART) != BedPart.FOOT) return drops;
         BlockEntity be = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
         if (!(be instanceof TentBlockEntity tentBE) || tentBE.getTentName() == null) return drops;
         for (ItemStack drop : drops) {

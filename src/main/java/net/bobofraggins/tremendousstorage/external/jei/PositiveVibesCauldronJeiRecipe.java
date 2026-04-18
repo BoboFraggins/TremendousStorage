@@ -12,7 +12,7 @@ import net.minecraft.world.item.Items;
  *
  * <p>Each instance holds four {@link Step}s shown top-to-bottom in
  * {@link PositiveVibesCauldronCategory}. Instances are created lazily (in
- * {@link #makeSalve()} / {@link #healBrain()}) so that item registry objects are
+ * {{@link #healBrain()}) so that item registry objects are
  * guaranteed to be populated by the time JEI calls {@code registerRecipes}.
  */
 public final class PositiveVibesCauldronJeiRecipe {

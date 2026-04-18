@@ -3,11 +3,11 @@ package net.bobofraggins.tremendousstorage.storage.backpack;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
@@ -57,11 +57,14 @@ public final class BackpackClientEvents {
     }
 
     @SubscribeEvent
-    public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
-        for (PlayerSkin.Model skin : event.getSkins()) {
-            if (event.getSkin(skin) instanceof PlayerRenderer pr) {
-                pr.addLayer(new BackpackWornLayer(pr));
-            }
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        if (!ModList.get().isLoaded("curios")) return;
+        try {
+            top.theillusivec4.curios.api.client.CuriosRendererRegistry.register(
+                    Registration.TREMENDOUS_BACKPACK.get(), BackpackCurioRenderer::new);
+            top.theillusivec4.curios.api.client.CuriosRendererRegistry.register(
+                    Registration.ENDER_TREMENDOUS_BACKPACK_ITEM.get(), BackpackCurioRenderer::new);
+        } catch (NoClassDefFoundError ignored) {
         }
     }
 }

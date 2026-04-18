@@ -9,6 +9,7 @@ displayName="${mod_name}"
 description='''
 TremendousStorage - A smart storage mod for Minecraft.
 '''
+enumExtensions="META-INF/enumextensions.json"
 
 [[dependencies.${mod_id}]]
 modId="neoforge"
