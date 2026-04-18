@@ -153,7 +153,7 @@ public class RecyclingBinRenderer
                 .getAtlas(InventoryMenu.BLOCK_ATLAS)
                 .getSprite(FLOWING_TEXTURE);
 
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.HEALING_SALVE_TYPE.get());
+        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.POSITIVE_VIBES_TYPE.get());
         int tint = ext.getTintColor();
         int r = (tint >> 16) & 0xFF;
         int g = (tint >> 8) & 0xFF;

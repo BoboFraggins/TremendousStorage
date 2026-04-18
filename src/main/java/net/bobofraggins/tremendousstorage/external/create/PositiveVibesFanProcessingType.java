@@ -32,7 +32,7 @@ public class PositiveVibesFanProcessingType implements FanProcessingType {
 
     @Override
     public boolean isValidAt(Level level, BlockPos pos) {
-        return level.getFluidState(pos).getFluidType() == Registration.HEALING_SALVE_TYPE.get();
+        return level.getFluidState(pos).getFluidType() == Registration.POSITIVE_VIBES_TYPE.get();
     }
 
     @Override

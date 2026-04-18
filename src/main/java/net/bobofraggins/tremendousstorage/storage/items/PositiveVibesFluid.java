@@ -16,14 +16,14 @@ public final class PositiveVibesFluid {
     /** The still (source) variant of the Positive Vibes fluid. */
     public static class Source extends BaseFlowingFluid.Source {
         public Source() {
-            super(Registration.HEALING_SALVE_FLUID_PROPS);
+            super(Registration.POSITIVE_VIBES_FLUID_PROPS);
         }
     }
 
     /** The flowing variant of the Positive Vibes fluid. */
     public static class Flowing extends BaseFlowingFluid.Flowing {
         public Flowing() {
-            super(Registration.HEALING_SALVE_FLUID_PROPS);
+            super(Registration.POSITIVE_VIBES_FLUID_PROPS);
         }
     }
 }

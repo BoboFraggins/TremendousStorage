@@ -79,7 +79,7 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
         reg.addRecipeCatalyst(
                 Registration.STORAGE_ACCESS_TERMINAL_ITEM.get().getDefaultInstance(), RecipeTypes.CRAFTING);
         reg.addRecipeCatalyst(
-                Registration.HEALING_SALVE_CAULDRON_ITEM.get().getDefaultInstance(),
+                Registration.POSITIVE_VIBES_CAULDRON_ITEM.get().getDefaultInstance(),
                 PositiveVibesCauldronCategory.RECIPE_TYPE);
         reg.addRecipeCatalyst(new ItemStack(Items.CRAFTING_TABLE), EnderFolderSmithingCategory.RECIPE_TYPE);
         reg.addRecipeCatalyst(

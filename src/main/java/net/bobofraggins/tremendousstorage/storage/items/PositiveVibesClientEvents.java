@@ -31,6 +31,6 @@ public final class PositiveVibesClientEvents {
                         return FLOWING;
                     }
                 },
-                Registration.HEALING_SALVE_TYPE.get());
+                Registration.POSITIVE_VIBES_TYPE.get());
     }
 }

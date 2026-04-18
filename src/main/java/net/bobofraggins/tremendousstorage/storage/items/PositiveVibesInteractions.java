@@ -38,7 +38,7 @@ public final class PositiveVibesInteractions {
         CAULDRON_INTERACTIONS.map().put(Items.BUCKET, (state, level, pos, player, hand, stack) -> {
             if (!level.isClientSide) {
                 stack.shrink(1);
-                player.addItem(new ItemStack(Registration.HEALING_SALVE_BUCKET.get()));
+                player.addItem(new ItemStack(Registration.POSITIVE_VIBES_BUCKET.get()));
                 level.setBlockAndUpdate(pos, Blocks.CAULDRON.defaultBlockState());
                 level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
             }

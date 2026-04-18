@@ -33,7 +33,7 @@ public final class PositiveVibesCauldronJeiRecipe {
     /** Positive Vibes: obtained by recycling items in the Recycling Bin. */
     public static PositiveVibesCauldronJeiRecipe obtainedByRecycling() {
         return new PositiveVibesCauldronJeiRecipe(List.of(new Step(
-                new ItemStack(Registration.HEALING_SALVE_BUCKET.get()),
+                new ItemStack(Registration.POSITIVE_VIBES_BUCKET.get()),
                 RecipeIngredientRole.OUTPUT,
                 Component.translatable("jei.tremendousstorage.positive_vibes.obtained_by_recycling"))));
     }
@@ -46,7 +46,7 @@ public final class PositiveVibesCauldronJeiRecipe {
                         RecipeIngredientRole.INPUT,
                         Component.translatable("jei.tremendousstorage.positive_vibes_cauldron.step.heal.zombie_brain")),
                 new Step(
-                        new ItemStack(Registration.HEALING_SALVE_BUCKET.get()),
+                        new ItemStack(Registration.POSITIVE_VIBES_BUCKET.get()),
                         RecipeIngredientRole.CATALYST,
                         Component.translatable("jei.tremendousstorage.positive_vibes_cauldron.step.heal.salve_bucket")),
                 new Step(

@@ -2,6 +2,9 @@ package net.bobofraggins.tremendousstorage.experiencesyringe;
 
 import net.bobofraggins.tremendousstorage.external.mobgrindinutils.MobGrindingUtilsIntegration;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
@@ -20,6 +23,9 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
  * silently discarded mid-transfer.
  */
 public class ExperienceSyringeFluidHandler implements IFluidHandlerItem {
+
+    private static final TagKey<Fluid> EXPERIENCE_FLUID_TAG =
+            TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath("c", "experience"));
 
     private final ItemStack container;
 
@@ -53,8 +59,7 @@ public class ExperienceSyringeFluidHandler implements IFluidHandlerItem {
 
     @Override
     public boolean isFluidValid(int tank, FluidStack stack) {
-        Fluid xpFluid = MobGrindingUtilsIntegration.getXpFluid();
-        return xpFluid != Fluids.EMPTY && stack.getFluid() == xpFluid;
+        return !stack.isEmpty() && stack.getFluid().builtInRegistryHolder().is(EXPERIENCE_FLUID_TAG);
     }
 
     @Override

@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class PositiveVibesCauldronBlock extends AbstractCauldronBlock {
 
     public static final MapCodec<PositiveVibesCauldronBlock> CODEC =
-            MapCodec.unit(Registration.HEALING_SALVE_CAULDRON::get);
+            MapCodec.unit(Registration.POSITIVE_VIBES_CAULDRON::get);
 
     public PositiveVibesCauldronBlock(Properties props) {
         super(props, PositiveVibesInteractions.CAULDRON_INTERACTIONS);

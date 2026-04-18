@@ -34,7 +34,7 @@ public class AnyChestModifier extends LootModifier {
         RandomSource rng = context.getRandom();
         if (rng.nextFloat() < 0.03f) {
             Item[] pool = {
-                Registration.BRAIN.get(), Registration.ZOMBIE_BRAIN.get(), Registration.HEALING_SALVE_BUCKET.get()
+                Registration.BRAIN.get(), Registration.ZOMBIE_BRAIN.get(), Registration.POSITIVE_VIBES_BUCKET.get()
             };
             generatedLoot.add(new ItemStack(pool[rng.nextInt(pool.length)]));
         }

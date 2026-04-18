@@ -582,21 +582,21 @@ public final class Registration {
     // Positive Vibes fluid type + fluids + fluid block + cauldron + items
     // -------------------------------------------------------------------------
 
-    public static final DeferredHolder<FluidType, FluidType> HEALING_SALVE_TYPE = FLUID_TYPE_REGISTER.register(
+    public static final DeferredHolder<FluidType, FluidType> POSITIVE_VIBES_TYPE = FLUID_TYPE_REGISTER.register(
             "positive_vibes",
             () -> new FluidType(
                     FluidType.Properties.create().density(2000).viscosity(6000).temperature(320)));
 
     public static final DeferredHolder<net.minecraft.world.level.material.Fluid, PositiveVibesFluid.Source>
-            HEALING_SALVE_SOURCE = FLUID_REGISTER.register("positive_vibes", PositiveVibesFluid.Source::new);
+            POSITIVE_VIBES_SOURCE = FLUID_REGISTER.register("positive_vibes", PositiveVibesFluid.Source::new);
 
     public static final DeferredHolder<net.minecraft.world.level.material.Fluid, PositiveVibesFluid.Flowing>
-            HEALING_SALVE_FLOWING = FLUID_REGISTER.register("positive_vibes_flowing", PositiveVibesFluid.Flowing::new);
+            POSITIVE_VIBES_FLOWING = FLUID_REGISTER.register("positive_vibes_flowing", PositiveVibesFluid.Flowing::new);
 
-    public static final DeferredBlock<PositiveVibesBlock> HEALING_SALVE_BLOCK = BLOCKS.register(
+    public static final DeferredBlock<PositiveVibesBlock> POSITIVE_VIBES_BLOCK = BLOCKS.register(
             "positive_vibes",
             () -> new PositiveVibesBlock(
-                    HEALING_SALVE_SOURCE.get(),
+                    POSITIVE_VIBES_SOURCE.get(),
                     BlockBehaviour.Properties.of()
                             .noCollission()
                             .strength(100f)
@@ -674,30 +674,30 @@ public final class Registration {
     public static final DeferredHolder<Item, VexRepellentPotionItem> VEX_REPELLENT_POTION_LONG =
             ITEMS.register("vex_repellent_potion_long", () -> new VexRepellentPotionItem(8 * 60 * 20));
 
-    public static final DeferredHolder<Item, BucketItem> HEALING_SALVE_BUCKET = ITEMS.register(
+    public static final DeferredHolder<Item, BucketItem> POSITIVE_VIBES_BUCKET = ITEMS.register(
             "positive_vibes_bucket",
             () -> new BucketItem(
-                    HEALING_SALVE_SOURCE.get(),
+                    POSITIVE_VIBES_SOURCE.get(),
                     new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
 
     /** Shared properties object for the Positive Vibes Source + Flowing fluids. */
-    public static final BaseFlowingFluid.Properties HEALING_SALVE_FLUID_PROPS = new BaseFlowingFluid.Properties(
-                    HEALING_SALVE_TYPE, () -> HEALING_SALVE_SOURCE.get(), () -> HEALING_SALVE_FLOWING.get())
-            .bucket(() -> HEALING_SALVE_BUCKET.get())
-            .block(() -> HEALING_SALVE_BLOCK.get())
+    public static final BaseFlowingFluid.Properties POSITIVE_VIBES_FLUID_PROPS = new BaseFlowingFluid.Properties(
+                    POSITIVE_VIBES_TYPE, () -> POSITIVE_VIBES_SOURCE.get(), () -> POSITIVE_VIBES_FLOWING.get())
+            .bucket(() -> POSITIVE_VIBES_BUCKET.get())
+            .block(() -> POSITIVE_VIBES_BLOCK.get())
             .slopeFindDistance(2)
             .levelDecreasePerBlock(1)
             .tickRate(30);
 
-    public static final DeferredBlock<PositiveVibesCauldronBlock> HEALING_SALVE_CAULDRON = BLOCKS.register(
+    public static final DeferredBlock<PositiveVibesCauldronBlock> POSITIVE_VIBES_CAULDRON = BLOCKS.register(
             "positive_vibes_cauldron",
             () -> new PositiveVibesCauldronBlock(BlockBehaviour.Properties.of()
                     .strength(2f)
                     .sound(SoundType.METAL)
                     .noOcclusion()));
 
-    public static final DeferredHolder<Item, BlockItem> HEALING_SALVE_CAULDRON_ITEM =
-            ITEMS.registerSimpleBlockItem("positive_vibes_cauldron", HEALING_SALVE_CAULDRON);
+    public static final DeferredHolder<Item, BlockItem> POSITIVE_VIBES_CAULDRON_ITEM =
+            ITEMS.registerSimpleBlockItem("positive_vibes_cauldron", POSITIVE_VIBES_CAULDRON);
 
     // -------------------------------------------------------------------------
     // Stirling Engine block + block entity
@@ -1096,7 +1096,7 @@ public final class Registration {
                         output.accept(ENDER_PICNIC_BASKET_ITEM.get());
                         output.accept(TREMENDOUS_BACKPACK.get());
                         output.accept(ENDER_TREMENDOUS_BACKPACK_ITEM.get());
-                        output.accept(HEALING_SALVE_BUCKET.get());
+                        output.accept(POSITIVE_VIBES_BUCKET.get());
                         output.accept(POSITIVE_VIBES_BOTTLE.get());
                         output.accept(VEX_REPELLENT_POTION.get());
                         output.accept(VEX_REPELLENT_POTION_EXTENDED.get());

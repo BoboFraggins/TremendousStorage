@@ -92,7 +92,7 @@ public final class MobGrindingUtilsIntegration {
         return XP_FLUID_SOURCE.get();
     }
 
-    /** Called from {@link TremendousStorage} only when Mob Grinding Utils is not loaded. */
+    /** Called unconditionally from {@link TremendousStorage} so XP Juice is always available. */
     public static void register(IEventBus modBus) {
         FLUID_TYPES.register(modBus);
         FLUIDS.register(modBus);

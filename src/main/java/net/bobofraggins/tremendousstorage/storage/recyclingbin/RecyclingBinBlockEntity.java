@@ -228,11 +228,11 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
         if (handler == null) return;
 
         FluidStack contained = handler.getFluidInTank(0);
-        FluidStack vibesType = new FluidStack(Registration.HEALING_SALVE_SOURCE.get(), 1);
+        FluidStack vibesType = new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), 1);
 
         if (!contained.isEmpty()) {
             // Item has fluid → insert Positive Vibes into the recycling bin
-            if (contained.getFluid() != Registration.HEALING_SALVE_SOURCE.get()) return; // wrong fluid
+            if (contained.getFluid() != Registration.POSITIVE_VIBES_SOURCE.get()) return; // wrong fluid
             int amt = contained.getAmount();
             int space = FLUID_CAPACITY_MB - vibesAmount;
             if (space < amt) return; // hold until there is room for the full amount
@@ -249,7 +249,7 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
             if (vibesAmount < canFill) return;
             extractVibes(canFill, false);
             handler.fill(
-                    new FluidStack(Registration.HEALING_SALVE_SOURCE.get(), canFill),
+                    new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), canFill),
                     IFluidHandler.FluidAction.EXECUTE);
             transferContainer.setItem(0, ItemStack.EMPTY);
             transferContainer.setItem(1, handler.getContainer());

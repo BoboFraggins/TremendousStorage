@@ -26,7 +26,7 @@ public class RecyclingBinFluidHandler implements IFluidHandler {
     public FluidStack getFluidInTank(int tank) {
         int amount = be.getVibesAmount();
         if (amount == 0) return FluidStack.EMPTY;
-        return new FluidStack(Registration.HEALING_SALVE_SOURCE.get(), amount);
+        return new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), amount);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class RecyclingBinFluidHandler implements IFluidHandler {
 
     @Override
     public boolean isFluidValid(int tank, FluidStack stack) {
-        return !stack.isEmpty() && stack.getFluid() == Registration.HEALING_SALVE_SOURCE.get();
+        return !stack.isEmpty() && stack.getFluid() == Registration.POSITIVE_VIBES_SOURCE.get();
     }
 
     @Override
@@ -61,6 +61,6 @@ public class RecyclingBinFluidHandler implements IFluidHandler {
     public FluidStack drain(int maxDrain, FluidAction action) {
         int drained = be.extractVibes(maxDrain, action.simulate());
         if (drained == 0) return FluidStack.EMPTY;
-        return new FluidStack(Registration.HEALING_SALVE_SOURCE.get(), drained);
+        return new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), drained);
     }
 }

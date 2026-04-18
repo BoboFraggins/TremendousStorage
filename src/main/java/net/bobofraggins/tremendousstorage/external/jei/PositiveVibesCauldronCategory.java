@@ -33,7 +33,7 @@ public class PositiveVibesCauldronCategory implements IRecipeCategory<PositiveVi
     private final IDrawable icon;
 
     public PositiveVibesCauldronCategory(IGuiHelper helper) {
-        icon = helper.createDrawableItemLike(Registration.HEALING_SALVE_CAULDRON_ITEM.get());
+        icon = helper.createDrawableItemLike(Registration.POSITIVE_VIBES_CAULDRON_ITEM.get());
     }
 
     @Override

@@ -2,13 +2,17 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
+import net.bobofraggins.tremendousstorage.external.mobgrindinutils.MobGrindingUtilsIntegration;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
@@ -32,6 +36,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -119,6 +124,8 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
     }
 
     private static final int BOTTLE_MB = 250;
+    private static final TagKey<Fluid> EXPERIENCE_FLUID_TAG =
+            TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath("c", "experience"));
 
     /**
      * Right-click with a fluid container item (bucket or glass bottle) to fill/drain the tank.
@@ -154,8 +161,10 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
                 ItemStack result;
                 if (simulated.getFluid() == Fluids.WATER) {
                     result = PotionContents.createItemStack(Items.POTION, Potions.WATER);
-                } else if (simulated.getFluid() == Registration.HEALING_SALVE_SOURCE.get()) {
+                } else if (simulated.getFluid() == Registration.POSITIVE_VIBES_SOURCE.get()) {
                     result = new ItemStack(Registration.POSITIVE_VIBES_BOTTLE.get());
+                } else if (simulated.getFluid().builtInRegistryHolder().is(EXPERIENCE_FLUID_TAG)) {
+                    result = new ItemStack(Items.EXPERIENCE_BOTTLE);
                 } else {
                     return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
                 }
@@ -181,6 +190,27 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
                     level.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
                     return ItemInteractionResult.SUCCESS;
                 }
+            }
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+
+        if (stack.is(Items.EXPERIENCE_BOTTLE)) {
+            if (!(level.getBlockEntity(pos) instanceof TankBlockEntity be))
+                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            // Use the tank's locked experience fluid if present, otherwise the default XP fluid.
+            FluidStack locked = be.getStoredFluid();
+            Fluid xpFluid = (!locked.isEmpty()
+                            && locked.getFluid().builtInRegistryHolder().is(EXPERIENCE_FLUID_TAG))
+                    ? locked.getFluid()
+                    : MobGrindingUtilsIntegration.getXpFluid();
+            FluidStack xp = new FluidStack(xpFluid, BOTTLE_MB);
+            long inserted = be.insert(xp, BOTTLE_MB, true);
+            if (inserted >= BOTTLE_MB) {
+                be.insert(xp, BOTTLE_MB, false);
+                player.setItemInHand(
+                        hand, ItemUtils.createFilledResult(stack, player, new ItemStack(Items.GLASS_BOTTLE)));
+                level.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
+                return ItemInteractionResult.SUCCESS;
             }
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
