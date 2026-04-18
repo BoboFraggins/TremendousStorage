@@ -12,7 +12,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModList;
@@ -27,9 +26,9 @@ import net.neoforged.neoforge.registries.NeoForgeRegistries;
 /**
  * Handles XP fluid integration.
  *
- * <p>When Mob Grinding Utils is present its {@code mob_grinding_utils:mob_essence} fluid is used
- * directly. When it is absent, this integration registers a fallback "XP Juice" fluid under the
- * TremendousStorage namespace. Client-side rendering is handled by {@link XpFluidClientEvents}.
+ * <p>When Mob Grinding Utils is present its {@code mob_grinding_utils:fluid_xp} fluid is used
+ * directly. The XP Juice fallback fluid is always registered; it activates when MGU is absent or
+ * does not expose {@code fluid_xp}. Client-side rendering is handled by {@link XpFluidClientEvents}.
  */
 public final class MobGrindingUtilsIntegration {
 
@@ -81,14 +80,14 @@ public final class MobGrindingUtilsIntegration {
             .tickRate(20);
 
     /**
-     * Returns the XP fluid to use: Mob Grinding Utils' {@code mob_essence} when loaded, or our own
+     * Returns the XP fluid to use: Mob Grinding Utils' {@code fluid_xp} when loaded, or our own
      * {@code xp_juice} source fluid otherwise.
      */
     public static Fluid getXpFluid() {
         if (ModList.get().isLoaded("mob_grinding_utils")) {
             return BuiltInRegistries.FLUID
-                    .getOptional(ResourceLocation.fromNamespaceAndPath("mob_grinding_utils", "mob_essence"))
-                    .orElse(Fluids.EMPTY);
+                    .getOptional(ResourceLocation.fromNamespaceAndPath("mob_grinding_utils", "fluid_xp"))
+                    .orElse(XP_FLUID_SOURCE.get());
         }
         return XP_FLUID_SOURCE.get();
     }

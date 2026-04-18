@@ -60,9 +60,7 @@ public class TremendousStorage {
             ClientEventRegistrar.register(modEventBus);
         }
 
-        if (!ModList.get().isLoaded("mob_grinding_utils")) {
-            MobGrindingUtilsIntegration.register(modEventBus);
-        }
+        MobGrindingUtilsIntegration.register(modEventBus);
         if (ModList.get().isLoaded("productivemetalworks")) {
             ProductiveMetalworksIntegration.register(modEventBus);
         }

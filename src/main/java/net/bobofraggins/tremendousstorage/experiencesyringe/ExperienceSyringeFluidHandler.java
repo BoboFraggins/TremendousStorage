@@ -12,7 +12,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
  * Exposes the Experience Syringe as an {@link IFluidHandlerItem}.
  *
  * <p>The syringe stores XP as integer points internally. This handler presents that storage
- * as the active XP fluid (Mob Grinding Utils' mob_essence when loaded, our own xp_juice
+ * as the active XP fluid (Mob Grinding Utils' fluid_xp when loaded, our own xp_juice
  * otherwise), converting between XP points and mB at the ratio defined in
  * {@link ExperienceSyringeItem} (1 XP = 20 mB, 1 bucket = 50 XP).
  *
