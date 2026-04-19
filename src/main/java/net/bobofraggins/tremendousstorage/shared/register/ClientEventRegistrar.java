@@ -10,6 +10,7 @@ import net.bobofraggins.tremendousstorage.storage.backpack.BackpackClientEvents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackClientTickHandler;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestClientEvents;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetClientEvents;
+import net.bobofraggins.tremendousstorage.storage.honey.HoneyClientEvents;
 import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesClientEvents;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceClientEvents;
 import net.bobofraggins.tremendousstorage.storage.personalaccessterminal.PersonalAccessTerminalClientEvents;
@@ -51,6 +52,7 @@ public final class ClientEventRegistrar {
         modBus.register(RecyclingBinClientEvents.class);
         modBus.register(QuickStackClientEvents.class);
         modBus.register(PersonalAccessTerminalClientEvents.class);
+        modBus.register(HoneyClientEvents.class);
         modBus.register(PositiveVibesClientEvents.class);
         modBus.register(SkyBlockClientEvents.class);
         modBus.register(XpFluidClientEvents.class);

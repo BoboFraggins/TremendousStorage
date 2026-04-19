@@ -26,6 +26,7 @@ import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEn
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -68,6 +69,7 @@ public final class NetworkInterfaceBFS {
         // Connector blocks whose outgoing tube faces have already been enqueued
         Set<BlockPos> visitedConnectors = new HashSet<>();
         List<HandlerEntry> handlerEntries = new ArrayList<>();
+        List<TankBlockEntity> tanks = new ArrayList<>();
         int tubeCount = 0;
         List<String> storageKeys = new ArrayList<>(); // ordered by discovery
         int otherNiCount = 0;
@@ -76,6 +78,10 @@ public final class NetworkInterfaceBFS {
         int fePerTick = niBE instanceof NetworkInterfaceBlockEntity niBlockEntity
                 ? niBlockEntity.getBaseFePerTick()
                 : NetworkInterfaceBlockEntity.NI_COST;
+
+        // Add the NI itself to the device list (processNeighbor skips NIs to prevent recursion)
+        String niKey = blockListKey(niBE);
+        if (niKey != null) storageKeys.add(niKey);
 
         // Single shared queue for the whole scan
         Deque<BlockPos> queue = new ArrayDeque<>();
@@ -88,7 +94,8 @@ public final class NetworkInterfaceBFS {
             if (neighborState.getBlock() instanceof TubeBlock) {
                 queue.add(neighborPos);
             } else if (neighborState.getBlock() instanceof NetworkConnector && collectedStorage.add(neighborPos)) {
-                processNeighbor(level, neighborPos, neighborState, niPos, niDir, null, handlerEntries, storageKeys);
+                processNeighbor(
+                        level, neighborPos, neighborState, niPos, niDir, null, handlerEntries, tanks, storageKeys);
                 // Count power cost for SAT/Wireless Hub directly adjacent to NI
                 if (neighborState.getBlock() instanceof AccessTerminalBlock) {
                     fePerTick += SAT_COST;
@@ -108,6 +115,7 @@ public final class NetworkInterfaceBFS {
                             visitedConnectors,
                             collectedStorage,
                             handlerEntries,
+                            tanks,
                             storageKeys,
                             queue);
                 }
@@ -146,7 +154,7 @@ public final class NetworkInterfaceBFS {
                     }
                 } else if (collectedStorage.add(adjPos)) {
                     // First time we see this non-tube block
-                    processNeighbor(level, adjPos, adjState, niPos, dir, tubeBE, handlerEntries, storageKeys);
+                    processNeighbor(level, adjPos, adjState, niPos, dir, tubeBE, handlerEntries, tanks, storageKeys);
 
                     // Check if it's another NI
                     if (adjState.getBlock() instanceof NetworkInterfaceBlock && !adjPos.equals(niPos)) {
@@ -174,6 +182,7 @@ public final class NetworkInterfaceBFS {
                                 visitedConnectors,
                                 collectedStorage,
                                 handlerEntries,
+                                tanks,
                                 storageKeys,
                                 queue);
                     }
@@ -198,19 +207,14 @@ public final class NetworkInterfaceBFS {
             insertBuckets.put(entry.getKey(), List.copyOf(entry.getValue()));
         }
 
-        // Build UI block list: storage blocks first, then tubes
+        // Build UI block list: storage blocks sorted alphabetically, then tubes
         List<AttachedEntry> blockList = new ArrayList<>();
-        // Aggregate duplicate storage keys
         Map<String, Integer> storageCounts = new HashMap<>();
         for (String key : storageKeys) storageCounts.merge(key, 1, Integer::sum);
-        // Defined display order for storage types
-        List<String> storageOrder = List.of(
-                "block.tremendousstorage.filing_cabinet",
-                "block.tremendousstorage.chest",
-                "block.tremendousstorage.tank");
-        for (String key : storageOrder) {
-            int count = storageCounts.getOrDefault(key, 0);
-            if (count > 0) blockList.add(new AttachedEntry(key, count));
+        List<String> sortedKeys = new ArrayList<>(storageCounts.keySet());
+        Collections.sort(sortedKeys);
+        for (String key : sortedKeys) {
+            blockList.add(new AttachedEntry(key, storageCounts.get(key)));
         }
         if (tubeCount > 0) {
             blockList.add(new AttachedEntry("block.tremendousstorage.tube", tubeCount));
@@ -222,7 +226,8 @@ public final class NetworkInterfaceBFS {
                 List.copyOf(blockList),
                 otherNiCount == 0,
                 fePerTick,
-                Set.copyOf(visitedTubes));
+                Set.copyOf(visitedTubes),
+                List.copyOf(tanks));
     }
 
     // -------------------------------------------------------------------------
@@ -245,6 +250,7 @@ public final class NetworkInterfaceBFS {
             Set<BlockPos> visitedConnectors,
             Set<BlockPos> collectedStorage,
             List<HandlerEntry> handlerEntries,
+            List<TankBlockEntity> tanks,
             List<String> storageKeys,
             Deque<BlockPos> tubeQueue) {
         int feCost = 0;
@@ -258,7 +264,7 @@ public final class NetworkInterfaceBFS {
                 if (!visitedTubes.contains(adj) && adjState.getBlock() instanceof TubeBlock) {
                     tubeQueue.add(adj);
                 } else if (adjState.getBlock() instanceof NetworkConnector && collectedStorage.add(adj)) {
-                    processNeighbor(level, adj, adjState, niPos, dir, null, handlerEntries, storageKeys);
+                    processNeighbor(level, adj, adjState, niPos, dir, null, handlerEntries, tanks, storageKeys);
                     if (adjState.getBlock() instanceof AccessTerminalBlock) {
                         feCost += SAT_COST;
                     } else {
@@ -282,6 +288,7 @@ public final class NetworkInterfaceBFS {
             Direction tubeDir,
             TubeBlockEntity tubeBE,
             List<HandlerEntry> handlerEntries,
+            List<TankBlockEntity> tanks,
             List<String> storageKeys) {
 
         // Fetch block entity once and reuse for both priority resolution and UI key lookup
@@ -298,6 +305,7 @@ public final class NetworkInterfaceBFS {
             handlerEntries.add(new HandlerEntry(handler, priority));
         } else if (neighborBE instanceof TankBlockEntity tank) {
             handlerEntries.add(new HandlerEntry(new TankItemAdapter(tank), Priority.NORMAL));
+            tanks.add(tank);
         }
 
         // Record block type for UI list
@@ -305,11 +313,10 @@ public final class NetworkInterfaceBFS {
         if (key != null) storageKeys.add(key);
     }
 
-    /** Returns the translation key for the UI list, or {@code null} if the block should be hidden. */
+    /** Returns the display name for the UI list, or {@code null} if the block should be hidden. */
     private static String blockListKey(BlockEntity be) {
-        if (be instanceof FilingCabinetBlockEntity) return "block.tremendousstorage.filing_cabinet";
-        if (be instanceof ChestBlockEntity) return "block.tremendousstorage.chest";
-        if (be instanceof TankBlockEntity) return "block.tremendousstorage.tank";
+        if (be instanceof NetworkListable nl) return nl.getNetworkName();
+        if (be instanceof MenuProvider mp) return mp.getDisplayName().getString();
         return null;
     }
 

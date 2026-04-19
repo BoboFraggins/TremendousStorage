@@ -7,6 +7,7 @@ import net.bobofraggins.tremendousstorage.shared.storage.KeyCounter;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.tank.TankItemAdapter;
+import net.bobofraggins.tremendousstorage.storage.tube.TubeBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -45,7 +46,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  *       NI's energy buffer as a shared capability
  * </ul>
  */
-public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProvider {
+public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProvider, NetworkListable {
 
     // ---- Power constants ----
     public static final int MAX_ENERGY = 100_000;
@@ -56,6 +57,8 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     private NetworkScanResult cachedScan = null;
     /** Lazily built alongside {@link #cachedScan}; {@code null} = stale. */
     private NiItemHandler cachedHandler = null;
+    /** Lazily built alongside {@link #cachedScan}; {@code null} = stale. */
+    private NiFluidHandler cachedFluidHandler = null;
     /** Re-entrancy guard: true while a BFS scan is in progress. */
     private boolean scanning = false;
     /**
@@ -98,6 +101,13 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
             } finally {
                 scanning = false;
             }
+            // Push NI tier to all connected tubes so their renderer can tint by tier.
+            ServerLevel sl = (ServerLevel) level;
+            for (BlockPos tubePos : cachedScan.tubePositions()) {
+                if (sl.getBlockEntity(tubePos) instanceof TubeBlockEntity tube) {
+                    tube.setNetworkTier(tier);
+                }
+            }
         }
         return cachedScan;
     }
@@ -122,6 +132,14 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
             cachedHandler = new NiItemHandler(cachedScan.insertOrder(), cachedScan.insertBuckets());
         }
         return cachedHandler;
+    }
+
+    public NiFluidHandler getNiFluidHandler() {
+        if (getScan() == null) return null;
+        if (cachedFluidHandler == null) {
+            cachedFluidHandler = new NiFluidHandler(cachedScan.tanks());
+        }
+        return cachedFluidHandler;
     }
 
     // -------------------------------------------------------------------------
@@ -327,6 +345,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     public void setChanged() {
         cachedScan = null; // invalidate before capability notification fires
         cachedHandler = null;
+        cachedFluidHandler = null;
         cachedAvailableStacks = null; // topology change — full rebuild needed
         super.setChanged();
         if (level != null) {
@@ -357,11 +376,17 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
 
     @Override
     public Component getDisplayName() {
-        Component base = Component.translatable("screen.tremendousstorage.network_interface");
+        return Component.translatable("screen.tremendousstorage.network_interface");
+    }
+
+    @Override
+    public String getNetworkName() {
+        String base = Component.translatable("screen.tremendousstorage.network_interface")
+                .getString();
         if (tier == StorageTier.WOOD) return base;
         String label =
                 Character.toUpperCase(tier.getId().charAt(0)) + tier.getId().substring(1);
-        return base.copy().append(Component.literal(" (" + label + ")"));
+        return base + " (" + label + ")";
     }
 
     @Override

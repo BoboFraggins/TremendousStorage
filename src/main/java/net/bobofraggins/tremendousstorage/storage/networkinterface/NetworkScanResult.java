@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.networkinterface;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.Set;
+import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -17,6 +18,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  * @param isValid {@code true} if exactly one Network Interface is present on the network
  * @param totalFePerTick total FE/t consumed by all components in this network
  * @param tubePositions all tube block positions visited during the BFS scan (unmodifiable)
+ * @param tanks all tank block entities reachable in the network, in discovery order
  */
 public record NetworkScanResult(
         List<IItemHandler> insertOrder,
@@ -24,4 +26,5 @@ public record NetworkScanResult(
         List<AttachedEntry> blockList,
         boolean isValid,
         int totalFePerTick,
-        Set<BlockPos> tubePositions) {}
+        Set<BlockPos> tubePositions,
+        List<TankBlockEntity> tanks) {}

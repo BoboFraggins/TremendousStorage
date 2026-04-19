@@ -4,6 +4,7 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsMenu;
 import net.bobofraggins.tremendousstorage.shared.util.PullerUtil;
+import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkListable;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiLink;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -44,7 +45,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
  * The stored fluid type ({@code storedFluid} with amount=1) is held as a type key; the
  * actual quantity is tracked separately as a {@code long} to support large capacities.
  */
-public class TankBlockEntity extends BlockEntity implements MenuProvider {
+public class TankBlockEntity extends BlockEntity implements MenuProvider, NetworkListable {
 
     /** Capacity at {@link StorageTier#WOOD} (16 buckets). Each tier multiplies by 4. */
     public static final long BASE_CAPACITY = 16_000L;
@@ -367,6 +368,32 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider {
     @Override
     public Component getDisplayName() {
         return Component.translatable("block.tremendousstorage.tank");
+    }
+
+    @Override
+    public String getNetworkName() {
+        return Component.translatable("block.tremendousstorage.tank").getString() + buildSuffix(false);
+    }
+
+    protected String buildSuffix(boolean ender) {
+        StringBuilder sb = new StringBuilder();
+        if (tier != StorageTier.WOOD) {
+            sb.append(Character.toUpperCase(tier.getId().charAt(0)))
+                    .append(tier.getId().substring(1));
+        }
+        if (ender) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Ender");
+        }
+        if (hasMagnetUpgrade) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Magnet");
+        }
+        if (hasPullerUpgrade) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Puller");
+        }
+        return sb.isEmpty() ? "" : " (" + sb + ")";
     }
 
     @Override

@@ -171,8 +171,12 @@ public class EnderChestBlockEntity extends ChestBlockEntity {
 
     @Override
     public Component getDisplayName() {
-        Component base = Component.translatable("block.tremendousstorage.chest");
-        return base.copy().append(Component.literal(buildSuffix(true)));
+        return Component.translatable("block.tremendousstorage.chest");
+    }
+
+    @Override
+    public String getNetworkName() {
+        return Component.translatable("block.tremendousstorage.chest").getString() + buildSuffix(true);
     }
 
     // -------------------------------------------------------------------------

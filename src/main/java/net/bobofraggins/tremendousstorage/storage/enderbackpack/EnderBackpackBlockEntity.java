@@ -98,8 +98,12 @@ public class EnderBackpackBlockEntity extends EnderChestBlockEntity {
 
     @Override
     public Component getDisplayName() {
-        Component base = Component.translatable("block.tremendousstorage.backpack");
-        return base.copy().append(Component.literal(buildSuffix(true)));
+        return Component.translatable("block.tremendousstorage.backpack");
+    }
+
+    @Override
+    public String getNetworkName() {
+        return Component.translatable("block.tremendousstorage.backpack").getString() + buildSuffix(true);
     }
 
     // -------------------------------------------------------------------------

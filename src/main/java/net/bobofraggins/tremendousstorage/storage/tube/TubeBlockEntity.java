@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.tube;
 
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.AttachmentType;
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.InterfaceFilterContents;
 import net.minecraft.core.BlockPos;
@@ -62,6 +63,26 @@ public class TubeBlockEntity extends BlockEntity {
      * Only valid on the server side.
      */
     private NetworkItemHandler networkCache = null;
+
+    /** Tier of the connected Network Interface, pushed by the NI after each scan. Synced to client for rendering. */
+    private StorageTier networkTier = StorageTier.WOOD;
+
+    public StorageTier getNetworkTier() {
+        return networkTier;
+    }
+
+    /**
+     * Called by the Network Interface after a scan to propagate its tier for rendering.
+     * Does not clear the network cache or notify neighbors.
+     */
+    public void setNetworkTier(StorageTier tier) {
+        if (networkTier == tier) return;
+        networkTier = tier;
+        super.setChanged();
+        if (level != null && !level.isClientSide()) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 2);
+        }
+    }
 
     public TubeBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.TUBE_BE_TYPE.get(), pos, state);
@@ -387,6 +408,8 @@ public class TubeBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.saveAdditional(tag, registries);
 
+        tag.putString("NetworkTier", networkTier.getId());
+
         // Attachment types as byte[6]
         byte[] types = new byte[6];
         for (int i = 0; i < 6; i++) types[i] = (byte) attachmentType[i].ordinal();
@@ -423,6 +446,8 @@ public class TubeBlockEntity extends BlockEntity {
     @Override
     public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
+
+        if (tag.contains("NetworkTier")) networkTier = StorageTier.fromId(tag.getString("NetworkTier"));
 
         // Attachment types
         if (tag.contains("AttachmentTypes")) {

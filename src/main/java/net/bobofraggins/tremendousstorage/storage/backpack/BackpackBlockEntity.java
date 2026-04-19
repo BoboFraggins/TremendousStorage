@@ -30,8 +30,12 @@ public class BackpackBlockEntity extends ChestBlockEntity {
 
     @Override
     public Component getDisplayName() {
-        Component base = Component.translatable("block.tremendousstorage.backpack");
-        return base.copy().append(Component.literal(buildSuffix(false)));
+        return Component.translatable("block.tremendousstorage.backpack");
+    }
+
+    @Override
+    public String getNetworkName() {
+        return Component.translatable("block.tremendousstorage.backpack").getString() + buildSuffix(false);
     }
 
     @Override

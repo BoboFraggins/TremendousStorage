@@ -6,6 +6,7 @@ import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,6 +38,16 @@ public class EnderTankBlockEntity extends TankBlockEntity {
 
     public EnderTankBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.ENDER_TANK_BE_TYPE.get(), pos, state);
+    }
+
+    @Override
+    public Component getDisplayName() {
+        return Component.translatable("block.tremendousstorage.tank");
+    }
+
+    @Override
+    public String getNetworkName() {
+        return Component.translatable("block.tremendousstorage.tank").getString() + buildSuffix(true);
     }
 
     // -------------------------------------------------------------------------

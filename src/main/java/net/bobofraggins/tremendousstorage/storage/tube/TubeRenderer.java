@@ -105,9 +105,10 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
         BlockState state = be.getBlockState();
         if (!(state.getBlock() instanceof TubeBlock)) return;
 
-        int r = 255;
-        int g = 255;
-        int b = 255;
+        int argb = be.getNetworkTier().getColor();
+        int r = (argb >> 16) & 0xFF;
+        int g = (argb >> 8) & 0xFF;
+        int b = argb & 0xFF;
 
         var atlas = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS);
         TextureAtlasSprite sprite = atlas.getSprite(TUBE_TEXTURE);

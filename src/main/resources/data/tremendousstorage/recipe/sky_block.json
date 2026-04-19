@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GGG",
+    "GPG",
+    "GGG"
+  ],
+  "key": {
+    "G": { "item": "minecraft:glass" },
+    "P": { "item": "tremendousstorage:positive_vibes_bucket" }
+  },
+  "result": {
+    "id": "tremendousstorage:sky_block",
+    "count": 8
+  },
+  "category": "misc"
+}

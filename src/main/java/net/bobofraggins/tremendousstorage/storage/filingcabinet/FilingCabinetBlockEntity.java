@@ -8,6 +8,7 @@ import net.bobofraggins.tremendousstorage.shared.util.PullerUtil;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
+import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkListable;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiCacheHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
@@ -36,7 +37,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 
 /** Stores up to {@value #SLOT_COUNT} Manila Folder stacks. */
 public class FilingCabinetBlockEntity extends BlockEntity
-        implements net.minecraft.world.Container, MenuProvider, NiCacheHolder {
+        implements net.minecraft.world.Container, MenuProvider, NiCacheHolder, NetworkListable {
 
     public static final int SLOT_COUNT = 8;
 
@@ -417,9 +418,20 @@ public class FilingCabinetBlockEntity extends BlockEntity
 
     @Override
     public Component getDisplayName() {
-        Component base = Component.translatable("block.tremendousstorage.filing_cabinet");
-        if (!hasMagnetUpgrade) return base;
-        return base.copy().append(Component.literal(" (Magnetized)"));
+        return Component.translatable("block.tremendousstorage.filing_cabinet");
+    }
+
+    @Override
+    public String getNetworkName() {
+        StringBuilder sb = new StringBuilder();
+        if (hasMagnetUpgrade) sb.append("Magnet");
+        if (hasPullerUpgrade) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Puller");
+        }
+        String base =
+                Component.translatable("block.tremendousstorage.filing_cabinet").getString();
+        return sb.isEmpty() ? base : base + " (" + sb + ")";
     }
 
     @Override

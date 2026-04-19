@@ -126,6 +126,8 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
     private static final int BOTTLE_MB = 250;
     private static final TagKey<Fluid> EXPERIENCE_FLUID_TAG =
             TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath("c", "experience"));
+    private static final TagKey<Fluid> HONEY_FLUID_TAG =
+            TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath("c", "honey"));
 
     /**
      * Right-click with a fluid container item (bucket or glass bottle) to fill/drain the tank.
@@ -165,6 +167,8 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
                     result = new ItemStack(Registration.POSITIVE_VIBES_BOTTLE.get());
                 } else if (simulated.getFluid().builtInRegistryHolder().is(EXPERIENCE_FLUID_TAG)) {
                     result = new ItemStack(Items.EXPERIENCE_BOTTLE);
+                } else if (simulated.getFluid().builtInRegistryHolder().is(HONEY_FLUID_TAG)) {
+                    result = new ItemStack(Items.HONEY_BOTTLE);
                 } else {
                     return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
                 }
@@ -207,6 +211,25 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
             long inserted = be.insert(xp, BOTTLE_MB, true);
             if (inserted >= BOTTLE_MB) {
                 be.insert(xp, BOTTLE_MB, false);
+                player.setItemInHand(
+                        hand, ItemUtils.createFilledResult(stack, player, new ItemStack(Items.GLASS_BOTTLE)));
+                level.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
+                return ItemInteractionResult.SUCCESS;
+            }
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+
+        if (stack.is(Items.HONEY_BOTTLE)) {
+            if (!(level.getBlockEntity(pos) instanceof TankBlockEntity be))
+                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            // Require the tank to already hold a honey fluid so we know which one to use.
+            FluidStack stored = be.getStoredFluid();
+            if (stored.isEmpty() || !stored.getFluid().builtInRegistryHolder().is(HONEY_FLUID_TAG))
+                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            FluidStack honey = new FluidStack(stored.getFluid(), BOTTLE_MB);
+            long inserted = be.insert(honey, BOTTLE_MB, true);
+            if (inserted >= BOTTLE_MB) {
+                be.insert(honey, BOTTLE_MB, false);
                 player.setItemInHand(
                         hand, ItemUtils.createFilledResult(stack, player, new ItemStack(Items.GLASS_BOTTLE)));
                 level.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);

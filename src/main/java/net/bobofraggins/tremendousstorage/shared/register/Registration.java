@@ -59,6 +59,8 @@ import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlo
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetItemHandler;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetMenu;
+import net.bobofraggins.tremendousstorage.storage.honey.HoneyBlock;
+import net.bobofraggins.tremendousstorage.storage.honey.HoneyFluid;
 import net.bobofraggins.tremendousstorage.storage.items.BrainItem;
 import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesBlock;
 import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesCauldronBlock;
@@ -579,6 +581,47 @@ public final class Registration {
             ITEMS.register("lazurite_paxel", () -> new LazuritePaxelItem(new Item.Properties()));
 
     // -------------------------------------------------------------------------
+    // Honey fluid type + fluids + fluid block + bucket
+    // -------------------------------------------------------------------------
+
+    public static final DeferredHolder<FluidType, FluidType> HONEY_TYPE = FLUID_TYPE_REGISTER.register(
+            "honey",
+            () -> new FluidType(
+                    FluidType.Properties.create().density(1400).viscosity(4000).temperature(300)));
+
+    public static final DeferredHolder<net.minecraft.world.level.material.Fluid, HoneyFluid.Source> HONEY_SOURCE =
+            FLUID_REGISTER.register("honey", HoneyFluid.Source::new);
+
+    public static final DeferredHolder<net.minecraft.world.level.material.Fluid, HoneyFluid.Flowing> HONEY_FLOWING =
+            FLUID_REGISTER.register("honey_flowing", HoneyFluid.Flowing::new);
+
+    public static final DeferredBlock<HoneyBlock> HONEY_FLUID_BLOCK = BLOCKS.register(
+            "honey_fluid",
+            () -> new HoneyBlock(
+                    HONEY_SOURCE.get(),
+                    BlockBehaviour.Properties.of()
+                            .noCollission()
+                            .strength(100f)
+                            .noLootTable()
+                            .liquid()
+                            .replaceable()
+                            .pushReaction(PushReaction.DESTROY)));
+
+    public static final DeferredHolder<Item, BucketItem> HONEY_FLUID_BUCKET = ITEMS.register(
+            "honey_fluid_bucket",
+            () -> new BucketItem(
+                    HONEY_SOURCE.get(), new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    /** Shared properties object for the Honey Source + Flowing fluids. */
+    public static final BaseFlowingFluid.Properties HONEY_FLUID_PROPS = new BaseFlowingFluid.Properties(
+                    HONEY_TYPE, () -> HONEY_SOURCE.get(), () -> HONEY_FLOWING.get())
+            .bucket(() -> HONEY_FLUID_BUCKET.get())
+            .block(() -> HONEY_FLUID_BLOCK.get())
+            .slopeFindDistance(2)
+            .levelDecreasePerBlock(2)
+            .tickRate(40);
+
+    // -------------------------------------------------------------------------
     // Positive Vibes fluid type + fluids + fluid block + cauldron + items
     // -------------------------------------------------------------------------
 
@@ -1096,6 +1139,7 @@ public final class Registration {
                         output.accept(ENDER_PICNIC_BASKET_ITEM.get());
                         output.accept(TREMENDOUS_BACKPACK.get());
                         output.accept(ENDER_TREMENDOUS_BACKPACK_ITEM.get());
+                        output.accept(HONEY_FLUID_BUCKET.get());
                         output.accept(POSITIVE_VIBES_BUCKET.get());
                         output.accept(POSITIVE_VIBES_BOTTLE.get());
                         output.accept(VEX_REPELLENT_POTION.get());
@@ -1184,6 +1228,8 @@ public final class Registration {
                 Capabilities.EnergyStorage.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> new TubeEnergyHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getItemHandler());
+        event.registerBlockEntity(
+                Capabilities.FluidHandler.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getNiFluidHandler());
         event.registerBlockEntity(
                 Capabilities.EnergyStorage.BLOCK,
                 NETWORK_INTERFACE_BE_TYPE.get(),

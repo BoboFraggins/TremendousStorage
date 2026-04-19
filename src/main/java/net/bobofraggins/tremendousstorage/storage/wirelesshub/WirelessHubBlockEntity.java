@@ -5,6 +5,7 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkListable;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkScanResult;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiCacheHolder;
 import net.bobofraggins.tremendousstorage.storage.personalaccessterminal.PersonalAccessTerminalItem;
@@ -48,7 +49,7 @@ import net.neoforged.neoforge.items.ItemStackHandler;
  * UI. Every 60 ticks the hub checks if weather matches the desired mode; if not, it consumes
  * 1 bucket of Positive Vibes from the nearest connected Recycling Bin and adjusts the weather.
  */
-public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder {
+public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder, NetworkListable {
 
     // -------------------------------------------------------------------------
     // Tier & range
@@ -349,6 +350,26 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     @Override
     public Component getDisplayName() {
         return Component.translatable("screen.tremendousstorage.wireless_hub");
+    }
+
+    @Override
+    public String getNetworkName() {
+        StringBuilder sb = new StringBuilder();
+        if (tier != StorageTier.WOOD) {
+            sb.append(Character.toUpperCase(tier.getId().charAt(0)))
+                    .append(tier.getId().substring(1));
+        }
+        if (hasHaarpUpgrade()) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Haarp");
+        }
+        if (hasInterdimensionalUpgrade()) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Interdimensional");
+        }
+        String base =
+                Component.translatable("screen.tremendousstorage.wireless_hub").getString();
+        return sb.isEmpty() ? base : base + " (" + sb + ")";
     }
 
     @Override

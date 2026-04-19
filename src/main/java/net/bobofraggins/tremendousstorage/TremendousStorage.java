@@ -6,7 +6,6 @@ import net.bobofraggins.tremendousstorage.external.create.CreateIntegration;
 import net.bobofraggins.tremendousstorage.external.mekanism.MekanismIntegration;
 import net.bobofraggins.tremendousstorage.external.mobgrindinutils.MobGrindingUtilsIntegration;
 import net.bobofraggins.tremendousstorage.external.productivemetalworks.ProductiveMetalworksIntegration;
-import net.bobofraggins.tremendousstorage.external.structurepoolapi.StructurePoolIntegration;
 import net.bobofraggins.tremendousstorage.glamping.GlampingEvents;
 import net.bobofraggins.tremendousstorage.glamping.GlampingRegistration;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketFeedHandler;
@@ -63,9 +62,6 @@ public class TremendousStorage {
         MobGrindingUtilsIntegration.register(modEventBus);
         if (ModList.get().isLoaded("productivemetalworks")) {
             ProductiveMetalworksIntegration.register(modEventBus);
-        }
-        if (ModList.get().isLoaded("structure_pool_api")) {
-            StructurePoolIntegration.register();
         }
         if (ModList.get().isLoaded("create")) {
             CreateIntegration.register(modEventBus);

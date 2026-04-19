@@ -11,6 +11,7 @@ import net.bobofraggins.tremendousstorage.shared.storage.KeyCounter;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.util.PullerUtil;
+import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkListable;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiCacheHolder;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiLink;
 import net.minecraft.core.BlockPos;
@@ -52,7 +53,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  * <p>No player-facing UI — all interaction is via the {@link ChestItemHandler}
  * {@code IItemHandler} capability.
  */
-public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder {
+public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder, NetworkListable {
 
     // O(1) lookup by key; orderedKeys provides stable index-based access
     private final Object2LongOpenHashMap<StorageKey> items = new Object2LongOpenHashMap<>();
@@ -395,8 +396,12 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
 
     @Override
     public Component getDisplayName() {
-        Component base = Component.translatable("block.tremendousstorage.chest");
-        return base.copy().append(Component.literal(buildSuffix(false)));
+        return Component.translatable("block.tremendousstorage.chest");
+    }
+
+    @Override
+    public String getNetworkName() {
+        return Component.translatable("block.tremendousstorage.chest").getString() + buildSuffix(false);
     }
 
     /** Builds the " (Tier/Ender/Crafting/Magnet/Puller)" suffix. Pass {@code ender=true} for ender variants. */

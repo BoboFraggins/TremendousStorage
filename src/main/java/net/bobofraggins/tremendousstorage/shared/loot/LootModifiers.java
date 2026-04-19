@@ -13,18 +13,6 @@ public class LootModifiers {
     private static final DeferredRegister<MapCodec<? extends IGlobalLootModifier>> GLM_SERIALIZERS =
             DeferredRegister.create(NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, TremendousStorage.MODID);
 
-    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<VillageCartographerModifier>>
-            VILLAGE_CARTOGRAPHER_FOLDERS =
-                    GLM_SERIALIZERS.register("village_cartographer_folders", () -> VillageCartographerModifier.CODEC);
-
-    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<VillageWeaponsmithModifier>>
-            VILLAGE_WEAPONSMITH_SWORD =
-                    GLM_SERIALIZERS.register("village_weaponsmith_sword", () -> VillageWeaponsmithModifier.CODEC);
-
-    public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<VillageToolsmithModifier>>
-            VILLAGE_TOOLSMITH_TOOL =
-                    GLM_SERIALIZERS.register("village_toolsmith_tool", () -> VillageToolsmithModifier.CODEC);
-
     public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<EndCityModifier>> END_CITY =
             GLM_SERIALIZERS.register("end_city", () -> EndCityModifier.CODEC);
 
