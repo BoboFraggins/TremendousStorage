@@ -78,6 +78,8 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     private boolean powered = false;
     /** Total FE/t consumed by the network, computed during scan. Synced to clients. */
     private int totalConsumption = 0;
+    /** Incremented each time the topology scan is invalidated; synced via ContainerData. */
+    private int scanDirtyCounter = 0;
 
     public NetworkInterfaceBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.NETWORK_INTERFACE_BE_TYPE.get(), pos, state);
@@ -341,8 +343,13 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     // setChanged
     // -------------------------------------------------------------------------
 
+    public int getScanDirtyCounter() {
+        return scanDirtyCounter;
+    }
+
     @Override
     public void setChanged() {
+        scanDirtyCounter++;
         cachedScan = null; // invalidate before capability notification fires
         cachedHandler = null;
         cachedFluidHandler = null;
@@ -396,6 +403,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
             public int get(int index) {
                 return switch (index) {
                     case 0 -> (isNetworkValid() ? 1 : 0);
+                    case 1 -> scanDirtyCounter & 0x7FFF;
                     default -> 0;
                 };
             }
@@ -405,7 +413,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
 
             @Override
             public int getCount() {
-                return 1;
+                return 2;
             }
         };
         return new NetworkInterfaceMenu(id, inv, worldPosition, data);

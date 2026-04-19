@@ -681,7 +681,9 @@ public final class Registration {
             ITEMS.register("canvas", () -> new Item(new Item.Properties()));
 
     public static final DeferredHolder<Item, BlockItem> PICNIC_BASKET_ITEM = ITEMS.register(
-            "picnic_basket", () -> new TieredBlockItem(PICNIC_BASKET_BLOCK.get(), new Item.Properties()));
+            "picnic_basket",
+            () -> new net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockItem(
+                    PICNIC_BASKET_BLOCK.get(), "item.tremendousstorage.picnic_basket.tooltip"));
 
     public static final DeferredBlock<EnderPicnicBasketBlock> ENDER_PICNIC_BASKET_BLOCK = BLOCKS.register(
             "ender_picnic_basket",
@@ -691,7 +693,9 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> ENDER_PICNIC_BASKET_ITEM = ITEMS.register(
-            "ender_picnic_basket", () -> new TieredBlockItem(ENDER_PICNIC_BASKET_BLOCK.get(), new Item.Properties()));
+            "ender_picnic_basket",
+            () -> new net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockItem(
+                    ENDER_PICNIC_BASKET_BLOCK.get(), "item.tremendousstorage.ender_picnic_basket.tooltip"));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderPicnicBasketBlockEntity>>
             ENDER_PICNIC_BASKET_BE_TYPE =

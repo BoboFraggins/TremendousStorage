@@ -9,6 +9,7 @@ import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -35,10 +36,22 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
     private static final int ROW_HEIGHT = 12;
     private static final int LIST_Y_START = 30;
 
+    private static final int SCROLLBAR_W = 14;
+    private static final int SCROLLBAR_TRACK_X = BG_WIDTH - SCROLLBAR_W - 4; // 158
+    private static final int SCROLLER_W = 12;
+    private static final int SCROLLER_H = 15;
+
+    private static final ResourceLocation SCROLLER =
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller");
+    private static final ResourceLocation SCROLLER_DISABLED =
+            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller_disabled");
+
     private final Dialog dialog;
 
     private List<String> entries = List.of();
     private int scrollOffset = 0;
+    private int lastScanDirtyCounter = -1;
+    private boolean draggingScrollbar = false;
 
     public NetworkInterfaceScreen(NetworkInterfaceMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -57,6 +70,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         NetworkContentsPacket.PENDING = List.of();
         entries = List.of();
         scrollOffset = 0;
+        lastScanDirtyCounter = menu.getScanDirtyCounter();
     }
 
     // -------------------------------------------------------------------------
@@ -66,6 +80,12 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
     @Override
     protected void containerTick() {
         super.containerTick();
+        int counter = menu.getScanDirtyCounter();
+        if (counter != lastScanDirtyCounter) {
+            lastScanDirtyCounter = counter;
+            PacketDistributor.sendToServer(new RequestNetworkContentsPacket(menu.getPos()));
+            NetworkContentsPacket.PENDING = List.of();
+        }
         List<String> pending = NetworkContentsPacket.PENDING;
         if (!pending.isEmpty() && pending != entries) {
             entries = pending;
@@ -75,7 +95,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
     }
 
     // -------------------------------------------------------------------------
-    // Scroll
+    // Input
     // -------------------------------------------------------------------------
 
     @Override
@@ -90,10 +110,58 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
     }
 
     @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0 && isInScrollbar(mouseX, mouseY)) {
+            draggingScrollbar = true;
+            scrollToY(mouseY);
+            return true;
+        }
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (draggingScrollbar) {
+            scrollToY(mouseY);
+            return true;
+        }
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (draggingScrollbar) {
+            draggingScrollbar = false;
+            return true;
+        }
+        return super.mouseReleased(mouseX, mouseY, button);
+    }
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         scrollOffset -= (int) Math.signum(scrollY);
         clampScroll();
         return true;
+    }
+
+    private boolean isInScrollbar(double absX, double absY) {
+        int trackX = leftPos + SCROLLBAR_TRACK_X;
+        int trackY = topPos + LIST_Y_START;
+        return absX >= trackX
+                && absX < trackX + SCROLLBAR_W
+                && absY >= trackY
+                && absY < trackY + VISIBLE_ROWS * ROW_HEIGHT;
+    }
+
+    private void scrollToY(double absY) {
+        int trackY = topPos + LIST_Y_START;
+        int trackH = VISIBLE_ROWS * ROW_HEIGHT;
+        int maxScroll = Math.max(0, entries.size() - VISIBLE_ROWS);
+        if (maxScroll == 0) return;
+        float frac = ((float) absY - trackY - 1 - SCROLLER_H / 2.0f) / (trackH - 2 - SCROLLER_H);
+        frac = Math.max(0f, Math.min(1f, frac));
+        scrollOffset = Math.round(frac * maxScroll);
+        clampScroll();
     }
 
     private void clampScroll() {
@@ -130,9 +198,9 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         // List area separator
         graphics.fill(x + 4, y + LIST_Y_START - 2, x + BG_WIDTH - 4, y + LIST_Y_START - 1, 0x80555555);
 
-        // Draw list rows
+        // Draw list rows (scissored to avoid rendering under the scrollbar track)
         int listAreaBottom = y + LIST_Y_START + VISIBLE_ROWS * ROW_HEIGHT;
-        graphics.enableScissor(x + 4, y + LIST_Y_START, x + BG_WIDTH - 4, listAreaBottom);
+        graphics.enableScissor(x + 4, y + LIST_Y_START, x + SCROLLBAR_TRACK_X - 1, listAreaBottom);
 
         for (int i = 0; i < VISIBLE_ROWS; i++) {
             int idx = i + scrollOffset;
@@ -164,21 +232,28 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
                     font, emptyMsg, x + (BG_WIDTH - font.width(emptyMsg)) / 2, y + LIST_Y_START + 4, 0x808080, false);
         }
 
-        // Scroll bar (always shown)
-        int barX = x + BG_WIDTH - 8;
-        int barY = y + LIST_Y_START;
-        int barH = VISIBLE_ROWS * ROW_HEIGHT;
-        graphics.fill(barX, barY, barX + 4, barY + barH, 0x40000000);
+        // Scrollbar track: sunken 3D bevel matching the network inventory pane
+        int trackX = x + SCROLLBAR_TRACK_X;
+        int trackY = y + LIST_Y_START;
+        int trackH = VISIBLE_ROWS * ROW_HEIGHT;
+        graphics.fill(trackX, trackY, trackX + SCROLLBAR_W, trackY + trackH, 0xFF8B8B8B);
+        graphics.fill(trackX, trackY, trackX + SCROLLBAR_W, trackY + 1, 0xFF555555);
+        graphics.fill(trackX, trackY, trackX + 1, trackY + trackH, 0xFF555555);
+        graphics.fill(trackX, trackY + trackH - 1, trackX + SCROLLBAR_W, trackY + trackH, 0xFFFFFFFF);
+        graphics.fill(trackX + SCROLLBAR_W - 1, trackY, trackX + SCROLLBAR_W, trackY + trackH, 0xFFFFFFFF);
 
-        int total = Math.max(entries.size(), 1);
-        int thumbH = Math.max(8, barH * VISIBLE_ROWS / total);
-        int maxScroll = Math.max(1, total - VISIBLE_ROWS);
-        int thumbY = barY + (barH - thumbH) * scrollOffset / maxScroll;
-        if (entries.size() <= VISIBLE_ROWS) {
-            thumbY = barY;
-            thumbH = barH;
+        // Scrollbar thumb
+        boolean canScroll = entries.size() > VISIBLE_ROWS;
+        int thumbX = trackX + 1;
+        int thumbY;
+        if (!canScroll) {
+            thumbY = trackY + 1;
+        } else {
+            int maxScroll = entries.size() - VISIBLE_ROWS;
+            float frac = scrollOffset / (float) maxScroll;
+            thumbY = trackY + 1 + (int) ((trackH - 2 - SCROLLER_H) * frac);
         }
-        graphics.fill(barX, thumbY, barX + 4, thumbY + thumbH, 0xC0FFFFFF);
+        graphics.blitSprite(canScroll ? SCROLLER : SCROLLER_DISABLED, thumbX, thumbY, SCROLLER_W, SCROLLER_H);
     }
 
     @Override

@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 import net.bobofraggins.tremendousstorage.shared.network.SetPullerSidesPacket;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -121,6 +122,7 @@ public class PullerSidesPane implements IDialogPane {
         var be = level.getBlockEntity(pos);
         if (be instanceof ChestBlockEntity chest) return chest.getPullerSides();
         if (be instanceof FilingCabinetBlockEntity fc) return fc.getPullerSides();
+        if (be instanceof TankBlockEntity tank) return tank.getPullerSides();
         return 0;
     }
 

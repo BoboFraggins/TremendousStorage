@@ -44,13 +44,26 @@ public class TankSettingsMenu extends AbstractContainerMenu {
 
     private final BlockPos pos;
     private final ContainerData data;
+    private final boolean hasPullerUpgrade;
 
     /** Server-side constructor, called from the block's {@code useWithoutItem}. */
     public TankSettingsMenu(
             int windowId, Inventory inv, BlockPos pos, ContainerData data, SimpleContainer transferContainer) {
+        this(windowId, inv, pos, data, transferContainer, false);
+    }
+
+    /** Server-side constructor with puller upgrade flag. */
+    public TankSettingsMenu(
+            int windowId,
+            Inventory inv,
+            BlockPos pos,
+            ContainerData data,
+            SimpleContainer transferContainer,
+            boolean hasPullerUpgrade) {
         super(Registration.TANK_SETTINGS_MENU.get(), windowId);
         this.pos = pos;
         this.data = data;
+        this.hasPullerUpgrade = hasPullerUpgrade;
         addDataSlots(data);
 
         // Slot 0: fluid input — accepts any item with IFluidHandlerItem
@@ -81,9 +94,9 @@ public class TankSettingsMenu extends AbstractContainerMenu {
         }
     }
 
-    /** Client-side constructor — reads BlockPos from network buffer. */
+    /** Client-side constructor — reads BlockPos and puller flag from network buffer. */
     public TankSettingsMenu(int windowId, Inventory inv, FriendlyByteBuf buf) {
-        this(windowId, inv, buf.readBlockPos(), new SimpleContainerData(1), new SimpleContainer(2));
+        this(windowId, inv, buf.readBlockPos(), new SimpleContainerData(1), new SimpleContainer(2), buf.readBoolean());
     }
 
     public BlockPos getPos() {
@@ -92,6 +105,10 @@ public class TankSettingsMenu extends AbstractContainerMenu {
 
     public boolean isVoidExcess() {
         return data.get(0) == 1;
+    }
+
+    public boolean hasPullerUpgrade() {
+        return hasPullerUpgrade;
     }
 
     @Override

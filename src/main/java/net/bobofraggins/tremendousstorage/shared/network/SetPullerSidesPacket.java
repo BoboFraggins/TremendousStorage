@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.network;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -42,6 +43,7 @@ public record SetPullerSidesPacket(BlockPos pos, int sidesMask) implements Custo
             BlockEntity be = player.level().getBlockEntity(packet.pos());
             if (be instanceof ChestBlockEntity chest) chest.setPullerSides(packet.sidesMask());
             else if (be instanceof FilingCabinetBlockEntity fc) fc.setPullerSides(packet.sidesMask());
+            else if (be instanceof TankBlockEntity tank) tank.setPullerSides(packet.sidesMask());
         });
     }
 }

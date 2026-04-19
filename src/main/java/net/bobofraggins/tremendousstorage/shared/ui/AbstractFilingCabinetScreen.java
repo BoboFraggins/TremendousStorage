@@ -122,7 +122,8 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
 
     /**
      * Renders each slot; extraction slots that are locked-but-empty get a dimmed ghost icon
-     * instead of a normal (empty) slot render.
+     * instead of a normal (empty) slot render. Slots with counts over 999 use abbreviated
+     * labels (e.g. "16k", "1.5M") to keep the text readable within the slot bounds.
      */
     @Override
     protected void renderSlot(GuiGraphics graphics, Slot slot) {
@@ -135,9 +136,33 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
                 // Dark overlay to distinguish ghost from a real item
                 graphics.fill(sx, sy, sx + 16, sy + 16, 0x80000000);
             }
-        } else {
-            super.renderSlot(graphics, slot);
+            return;
         }
+
+        if (!slot.hasItem() || slot.getItem().getCount() <= 999) {
+            super.renderSlot(graphics, slot);
+            return;
+        }
+
+        // Large count — render item and abbreviated count, then hover highlight
+        ItemStack stack = slot.getItem();
+        int sx = leftPos + slot.x;
+        int sy = topPos + slot.y;
+        graphics.renderItem(stack, sx, sy);
+        graphics.renderItemDecorations(font, stack, sx, sy, abbreviateCount(stack.getCount()));
+        if (hoveredSlot == slot) {
+            renderSlotHighlight(graphics, sx, sy, 0);
+        }
+    }
+
+    /** Formats a large count as a compact string: 16050 → "16k", 1500 → "1.5k", 2M → "2M". */
+    private static String abbreviateCount(int count) {
+        if (count >= 1_000_000) {
+            int tenths = count / 100_000;
+            return (tenths % 10 == 0 ? tenths / 10 : tenths / 10 + "." + tenths % 10) + "M";
+        }
+        int tenths = count / 100;
+        return (tenths % 10 == 0 ? tenths / 10 : tenths / 10 + "." + tenths % 10) + "k";
     }
 
     @Override

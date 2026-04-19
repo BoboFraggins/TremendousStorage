@@ -26,6 +26,7 @@
   "item.tremendousstorage.diamond_to_emerald_storage_upgrade": "Diamond to Emerald Storage Upgrade",
   "item.tremendousstorage.emerald_to_netherite_storage_upgrade": "Emerald to Netherite Storage Upgrade",
   "item.tremendousstorage.ender_storage_upgrade": "Ender Upgrade",
+  "item.tremendousstorage.ender_storage_upgrade.tooltip": "Turn Storage Items into Ender Versions",
   "block.tremendousstorage.tank": "Tank",
 
   "item.tremendousstorage.lazurite_ore_chunk": "Lazurite Ore Chunk",
@@ -102,6 +103,7 @@
   "screen.tremendousstorage.void_items": "Void Items",
 
   "item.tremendousstorage.haarp_upgrade": "H.A.A.R.P. Upgrade",
+  "item.tremendousstorage.haarp_upgrade.tooltip": "Upgrades Wireless Hub to Control Weather",
 
   "screen.tremendousstorage.haarp.weather_mode": "Weather Mode",
   "screen.tremendousstorage.haarp.off": "Off",
@@ -188,8 +190,10 @@
 
   "block.tremendousstorage.picnic_basket": "Picnic Basket",
   "item.tremendousstorage.picnic_basket": "Picnic Basket",
+  "item.tremendousstorage.picnic_basket.tooltip": "Stores and Auto-feeds Food",
   "block.tremendousstorage.ender_picnic_basket": "Ender Picnic Basket",
   "item.tremendousstorage.ender_picnic_basket": "Ender Picnic Basket",
+  "item.tremendousstorage.ender_picnic_basket.tooltip": "Stores and Auto-feeds Food",
 
   "block.tremendousstorage.tent": "Tent",
   "item.tremendousstorage.tent": "Tent",
@@ -204,6 +208,7 @@
   "item.tremendousstorage.base_upgrade": "Base Upgrade",
   "item.tremendousstorage.crafting_upgrade": "Crafting Upgrade",
   "item.tremendousstorage.magnet_upgrade": "Magnet Upgrade",
+  "item.tremendousstorage.magnet_upgrade.tooltip": "Collect Nearby Matching Items",
 
   "block.tremendousstorage.recycling_bin": "Recycling Bin",
   "screen.tremendousstorage.recycling_bin": "Recycling Bin",

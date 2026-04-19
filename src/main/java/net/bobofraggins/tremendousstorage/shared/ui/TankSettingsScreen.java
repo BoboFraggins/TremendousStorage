@@ -45,12 +45,16 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
 
         playerInvPane = new PlayerInventoryPane(TankSettingsMenu.INV_START_X);
 
-        configDrawer = new ConfigDrawer(
-                new VoidExcessPane(
-                        menu::isVoidExcess,
-                        () -> PacketDistributor.sendToServer(
-                                new SetVoidExcessPacket(menu.getPos(), !menu.isVoidExcess()))),
-                new ClearTankPane(() -> PacketDistributor.sendToServer(new ClearTankContentsPacket(menu.getPos()))));
+        VoidExcessPane voidPane = new VoidExcessPane(
+                menu::isVoidExcess,
+                () -> PacketDistributor.sendToServer(new SetVoidExcessPacket(menu.getPos(), !menu.isVoidExcess())));
+        ClearTankPane clearPane =
+                new ClearTankPane(() -> PacketDistributor.sendToServer(new ClearTankContentsPacket(menu.getPos())));
+        if (menu.hasPullerUpgrade()) {
+            configDrawer = new ConfigDrawer(voidPane, clearPane, new PullerSidesPane(menu.getPos()));
+        } else {
+            configDrawer = new ConfigDrawer(voidPane, clearPane);
+        }
     }
 
     @Override

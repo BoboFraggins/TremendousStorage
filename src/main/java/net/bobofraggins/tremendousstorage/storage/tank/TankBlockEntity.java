@@ -412,7 +412,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
                 return 1;
             }
         };
-        return new TankSettingsMenu(id, inv, worldPosition, data, transferContainer);
+        return new TankSettingsMenu(id, inv, worldPosition, data, transferContainer, hasPullerUpgrade);
     }
 
     // -------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.external.jade;
 
-import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -10,8 +10,8 @@ import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IServerDataProvider;
 
 /**
- * Syncs the storage tier from a tiered block entity to the client so
- * {@link StorageTierJadeComponentProvider} can append it to the block name in the Jade HUD.
+ * Syncs the storage tier and upgrade flags from a tiered block entity to the client so
+ * {@link StorageTierJadeComponentProvider} can append them to the block name in the Jade HUD.
  */
 public enum StorageTierJadeDataProvider implements IServerDataProvider<BlockAccessor> {
     INSTANCE;
@@ -25,15 +25,19 @@ public enum StorageTierJadeDataProvider implements IServerDataProvider<BlockAcce
 
     @Override
     public void appendServerData(CompoundTag data, BlockAccessor accessor) {
-        StorageTier tier = getTier(accessor.getBlockEntity());
-        if (tier != null) {
-            data.putString("StorageTier", tier.getId());
+        BlockEntity be = accessor.getBlockEntity();
+        if (be instanceof ChestBlockEntity chest) {
+            data.putString("StorageTier", chest.getTier().getId());
+            if (chest.hasCraftingUpgrade()) data.putBoolean("CraftingUpgrade", true);
+            if (chest.hasMagnetUpgrade()) data.putBoolean("MagnetUpgrade", true);
+            if (chest.hasPullerUpgrade()) data.putBoolean("PullerUpgrade", true);
+        } else if (be instanceof TankBlockEntity tank) {
+            data.putString("StorageTier", tank.getTier().getId());
+            if (tank.hasMagnetUpgrade()) data.putBoolean("MagnetUpgrade", true);
+            if (tank.hasPullerUpgrade()) data.putBoolean("PullerUpgrade", true);
+        } else if (be instanceof FilingCabinetBlockEntity fc) {
+            if (fc.hasMagnetUpgrade()) data.putBoolean("MagnetUpgrade", true);
+            if (fc.hasPullerUpgrade()) data.putBoolean("PullerUpgrade", true);
         }
-    }
-
-    static StorageTier getTier(BlockEntity be) {
-        if (be instanceof ChestBlockEntity b) return b.getTier();
-        if (be instanceof TankBlockEntity f) return f.getTier();
-        return null;
     }
 }

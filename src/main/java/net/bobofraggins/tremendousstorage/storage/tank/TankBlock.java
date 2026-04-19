@@ -273,7 +273,10 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (!(level.getBlockEntity(pos) instanceof TankBlockEntity be)) return InteractionResult.FAIL;
-        player.openMenu(be, buf -> buf.writeBlockPos(pos));
+        player.openMenu(be, buf -> {
+            buf.writeBlockPos(pos);
+            buf.writeBoolean(be.hasPullerUpgrade());
+        });
         return InteractionResult.SUCCESS;
     }
 }

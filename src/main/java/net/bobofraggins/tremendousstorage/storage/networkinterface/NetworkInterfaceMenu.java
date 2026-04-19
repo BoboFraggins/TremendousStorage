@@ -33,7 +33,7 @@ public class NetworkInterfaceMenu extends AbstractContainerMenu {
 
     /** Client-side constructor — reads {@link BlockPos} from the network buffer. */
     public NetworkInterfaceMenu(int windowId, Inventory inv, FriendlyByteBuf buf) {
-        this(windowId, inv, buf.readBlockPos(), new SimpleContainerData(1));
+        this(windowId, inv, buf.readBlockPos(), new SimpleContainerData(2));
     }
 
     public BlockPos getPos() {
@@ -43,6 +43,11 @@ public class NetworkInterfaceMenu extends AbstractContainerMenu {
     /** Returns {@code true} if the connected network is valid (exactly one NI). */
     public boolean isNetworkValid() {
         return data.get(0) == 1;
+    }
+
+    /** Returns the scan-dirty counter; increments server-side each time the topology changes. */
+    public int getScanDirtyCounter() {
+        return data.get(1);
     }
 
     @Override
