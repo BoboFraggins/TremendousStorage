@@ -2,13 +2,16 @@ package net.bobofraggins.tremendousstorage.glamping;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,6 +34,8 @@ import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -180,9 +185,11 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
             // If already claimed the space already exists — just land there.
         }
 
-        double tx = campOrigin.getX() + GlampingDimension.CAMP_SIZE / 2.0;
+        // Land the player centered in the block directly inside the tent door.
+        // Door is at camp-relative (size/2, 0, size-1); one block inside is (size/2, 0, size-2).
+        double tx = campOrigin.getX() + GlampingDimension.CAMP_SIZE / 2 + 0.5;
         double ty = campOrigin.getY();
-        double tz = campOrigin.getZ() + GlampingDimension.CAMP_SIZE / 2.0;
+        double tz = campOrigin.getZ() + GlampingDimension.CAMP_SIZE - 2 + 0.5;
         serverPlayer.teleportTo(glampingLevel, tx, ty, tz, Set.of(), serverPlayer.getYRot(), serverPlayer.getXRot());
 
         return InteractionResult.SUCCESS;
@@ -255,20 +262,46 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
                 slotZ * GlampingDimension.CAMP_SPACING);
     }
 
-    private static void carveSpace(ServerLevel level, BlockPos origin) {
-        int size = GlampingDimension.CAMP_SIZE;
-        for (int dx = 0; dx < size; dx++) {
-            for (int dy = 0; dy < size; dy++) {
-                for (int dz = 0; dz < size; dz++) {
-                    level.setBlock(origin.offset(dx, dy, dz), Blocks.AIR.defaultBlockState(), 3);
+    private static final ResourceLocation CAMP_STRUCTURE =
+            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "glamping_camp");
+
+    /**
+     * The structure's (0,0,0) corner is offset from campOrigin by this amount so that the
+     * template tent door aligns with the camp's expected door position.
+     *
+     * <p>Template door is at relative position (12,16,31) within the 25×32×32 structure.
+     * Camp door is placed at campOrigin.offset(8, 0, 15), so structure origin =
+     * campOrigin.offset(8-12, 0-16, 15-31) = campOrigin.offset(-4, -16, -16).
+     */
+    private static final BlockPos STRUCTURE_OFFSET = new BlockPos(-4, -16, -16);
+
+    private static void carveSpace(ServerLevel level, BlockPos campOrigin) {
+        Optional<StructureTemplate> template = level.getStructureManager().get(CAMP_STRUCTURE);
+        if (template.isPresent()) {
+            BlockPos structureOrigin = campOrigin.offset(STRUCTURE_OFFSET);
+            template.get()
+                    .placeInWorld(
+                            level,
+                            structureOrigin,
+                            structureOrigin,
+                            new StructurePlaceSettings(),
+                            level.getRandom(),
+                            Block.UPDATE_ALL);
+        } else {
+            // Fallback: carve a plain 16×16×16 space with a tent door.
+            int size = GlampingDimension.CAMP_SIZE;
+            for (int dx = 0; dx < size; dx++) {
+                for (int dy = 0; dy < size; dy++) {
+                    for (int dz = 0; dz < size; dz++) {
+                        level.setBlock(campOrigin.offset(dx, dy, dz), Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+                    }
                 }
             }
+            BlockPos doorBase = campOrigin.offset(size / 2, 0, size - 1);
+            BlockState doorState = GlampingRegistration.TENT_DOOR.get().defaultBlockState();
+            level.setBlock(doorBase, doorState.setValue(TentDoorBlock.HALF, DoubleBlockHalf.LOWER), Block.UPDATE_ALL);
+            level.setBlock(
+                    doorBase.above(), doorState.setValue(TentDoorBlock.HALF, DoubleBlockHalf.UPPER), Block.UPDATE_ALL);
         }
-
-        // Place a two-block-tall tent door centered on the south wall (z = size-1).
-        BlockPos doorBase = origin.offset(size / 2, 0, size - 1);
-        BlockState doorState = GlampingRegistration.TENT_DOOR.get().defaultBlockState();
-        level.setBlock(doorBase, doorState.setValue(TentDoorBlock.HALF, DoubleBlockHalf.LOWER), 3);
-        level.setBlock(doorBase.above(), doorState.setValue(TentDoorBlock.HALF, DoubleBlockHalf.UPPER), 3);
     }
 }

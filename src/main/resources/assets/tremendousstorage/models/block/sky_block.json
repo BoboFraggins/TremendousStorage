@@ -1,7 +1,3 @@
 {
-  "render_type": "tremendousstorage:sky_block",
-  "parent": "minecraft:block/cube_all",
-  "textures": {
-    "all": "tremendousstorage:block/sky_block"
-  }
+  "elements": []
 }

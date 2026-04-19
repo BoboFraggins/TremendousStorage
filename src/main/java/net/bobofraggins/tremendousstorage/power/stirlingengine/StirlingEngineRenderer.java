@@ -99,7 +99,8 @@ public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngin
         float sinT = Mth.sin(theta);
 
         // Piston translation: sinusoidal retract toward the jacket once per cycle.
-        float pistonZ = MAX_PISTON_RETRACT * (1f - Mth.cos(Mth.TWO_PI * t)) / 2f;
+        // Starts retracted (pistonZ = MAX at t=0), extends to 0 at t=0.5, returns at t=1.
+        float pistonZ = MAX_PISTON_RETRACT * (1f + cosT) / 2f;
 
         // Static body (base plate + cylinder + jacket trim)
         poseStack.pushPose();

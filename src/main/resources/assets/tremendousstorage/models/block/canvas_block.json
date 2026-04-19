@@ -1,22 +1,6 @@
 {
-  "loader": "tremendousstorage:canvas",
+  "parent": "minecraft:block/cube_all",
   "textures": {
-    "particle":  "tremendousstorage:block/canvas/interior",
-    "interior":  "tremendousstorage:block/canvas/interior",
-    "u":         "tremendousstorage:block/canvas/u",
-    "d":         "tremendousstorage:block/canvas/d",
-    "l":         "tremendousstorage:block/canvas/l",
-    "r":         "tremendousstorage:block/canvas/r",
-    "u_d":       "tremendousstorage:block/canvas/u_d",
-    "u_l":       "tremendousstorage:block/canvas/u_l",
-    "u_r":       "tremendousstorage:block/canvas/u_r",
-    "d_l":       "tremendousstorage:block/canvas/d_l",
-    "d_r":       "tremendousstorage:block/canvas/d_r",
-    "l_r":       "tremendousstorage:block/canvas/l_r",
-    "u_d_l":     "tremendousstorage:block/canvas/u_d_l",
-    "u_d_r":     "tremendousstorage:block/canvas/u_d_r",
-    "u_l_r":     "tremendousstorage:block/canvas/u_l_r",
-    "d_l_r":     "tremendousstorage:block/canvas/d_l_r",
-    "u_d_l_r":   "tremendousstorage:block/canvas/u_d_l_r"
+    "all": "tremendousstorage:block/canvas_block"
   }
 }
