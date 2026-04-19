@@ -4,12 +4,14 @@ import java.util.List;
 import java.util.Locale;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
+import net.bobofraggins.tremendousstorage.shared.network.CycleRecipePacket;
 import net.bobofraggins.tremendousstorage.shared.network.QuickStackPacket;
 import net.bobofraggins.tremendousstorage.shared.network.RequestSatContentsPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SatContentsPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetSortModePacket;
 import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
 import net.bobofraggins.tremendousstorage.shared.ui.CraftingGridPane;
+import net.bobofraggins.tremendousstorage.shared.ui.CycleArrowButton;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PressableIconButton;
@@ -114,6 +116,34 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack"),
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack_focused"),
                 () -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getNiPos(), true))));
+
+        if (menu.hasCraftingUpgrade()) {
+            // Up/down arrows above and below the crafting arrow for recipe cycling.
+            // Arrow occupies local y [ARROW_LOCAL_Y .. ARROW_LOCAL_Y + ARROW_H] within pane 1.
+            int craftingPaneAbsY = dialog.getPaneAbsY(1);
+            int arrowLocalY = CraftingGridPane.ARROW_LOCAL_Y; // 13
+            int arrowH = AccessTerminalLayout.ARROW_H; // 22
+            int paneH = CraftingGridPane.HEIGHT; // 58
+            int btnW = 9, btnH = 6;
+            int btnX = leftPos + AccessTerminalLayout.ARROW_X + (AccessTerminalLayout.ARROW_W - btnW) / 2;
+            int upBtnY = craftingPaneAbsY + (arrowLocalY - btnH) / 2;
+            int downBtnY = craftingPaneAbsY + arrowLocalY + arrowH + (paneH - arrowLocalY - arrowH - btnH) / 2;
+
+            addRenderableWidget(new CycleArrowButton(
+                    btnX,
+                    upBtnY,
+                    btnW,
+                    btnH,
+                    true,
+                    () -> PacketDistributor.sendToServer(new CycleRecipePacket(menu.getSatPos(), -1))));
+            addRenderableWidget(new CycleArrowButton(
+                    btnX,
+                    downBtnY,
+                    btnW,
+                    btnH,
+                    false,
+                    () -> PacketDistributor.sendToServer(new CycleRecipePacket(menu.getSatPos(), +1))));
+        }
 
         if (menu.hasNetwork()) {
             PacketDistributor.sendToServer(new RequestSatContentsPacket(menu.getNiPos()));

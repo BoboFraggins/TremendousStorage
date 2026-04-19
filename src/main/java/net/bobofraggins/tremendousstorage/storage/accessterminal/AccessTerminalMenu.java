@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.accessterminal;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageClientConfig;
 import net.bobofraggins.tremendousstorage.shared.network.RequestSatContentsPacket;
@@ -10,6 +11,7 @@ import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterf
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -66,6 +68,13 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     private final ResultContainer resultSlots;
     private final ContainerLevelAccess access;
     private final Player player;
+
+    // Recipe disambiguation — server-side only
+    private List<RecipeHolder<CraftingRecipe>> matchingRecipes = new ArrayList<>();
+    private int selectedRecipeIndex = 0;
+
+    @Nullable
+    private ResourceLocation pendingPinRecipeId = null;
 
     private final BlockPos satPos;
 
@@ -207,23 +216,56 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     @Override
     public void slotsChanged(net.minecraft.world.Container inventory) {
         if (!hasCraftingUpgrade) return;
-        access.execute((level, pos) -> slotChangedCraftingGrid(this, level, player, craftSlots, resultSlots));
+        access.execute((level, pos) -> updateCraftingResult(level));
     }
 
-    private static void slotChangedCraftingGrid(
-            AbstractContainerMenu menu,
-            Level level,
-            Player player,
-            CraftingContainer craftSlots,
-            ResultContainer resultSlots) {
+    /**
+     * Collects all crafting recipes that match the current grid, selects the right one
+     * (preserving the cycle index when the recipe list is unchanged, or pinning to a
+     * specific recipe when one was requested via {@link #setPendingPinRecipeId}), then
+     * pushes the result stack to the client.
+     */
+    private void updateCraftingResult(Level level) {
+        if (level.isClientSide) return;
+        CraftingInput input = craftSlots.asCraftInput();
+
+        List<RecipeHolder<CraftingRecipe>> newMatches =
+                level.getServer().getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
+                        .filter(h -> h.value().matches(input, level))
+                        .toList();
+
+        if (!recipeListsEqual(matchingRecipes, newMatches)) {
+            matchingRecipes = newMatches;
+            if (pendingPinRecipeId != null) {
+                selectedRecipeIndex = 0;
+                for (int i = 0; i < newMatches.size(); i++) {
+                    if (newMatches.get(i).id().equals(pendingPinRecipeId)) {
+                        selectedRecipeIndex = i;
+                        break;
+                    }
+                }
+                pendingPinRecipeId = null;
+            } else {
+                selectedRecipeIndex = 0;
+            }
+        } else {
+            matchingRecipes = newMatches;
+            if (!matchingRecipes.isEmpty()) {
+                selectedRecipeIndex = Math.max(0, Math.min(selectedRecipeIndex, matchingRecipes.size() - 1));
+            }
+        }
+
+        updateResultSlot(level);
+    }
+
+    /** Assembles the result from the currently selected recipe and sends it to the client. */
+    private void updateResultSlot(Level level) {
         if (level.isClientSide) return;
         CraftingInput input = craftSlots.asCraftInput();
         ServerPlayer serverPlayer = (ServerPlayer) player;
         ItemStack result = ItemStack.EMPTY;
-        Optional<RecipeHolder<CraftingRecipe>> optional =
-                level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
-        if (optional.isPresent()) {
-            RecipeHolder<CraftingRecipe> holder = optional.get();
+        if (!matchingRecipes.isEmpty()) {
+            RecipeHolder<CraftingRecipe> holder = matchingRecipes.get(selectedRecipeIndex);
             if (resultSlots.setRecipeUsed(level, serverPlayer, holder)) {
                 ItemStack assembled = holder.value().assemble(input, level.registryAccess());
                 if (assembled.isItemEnabled(level.enabledFeatures())) {
@@ -232,9 +274,37 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             }
         }
         resultSlots.setItem(0, result);
-        menu.setRemoteSlot(0, result);
+        setRemoteSlot(0, result);
         serverPlayer.connection.send(new net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket(
-                menu.containerId, menu.incrementStateId(), 0, result));
+                containerId, incrementStateId(), 0, result));
+    }
+
+    private static boolean recipeListsEqual(
+            List<RecipeHolder<CraftingRecipe>> a, List<RecipeHolder<CraftingRecipe>> b) {
+        if (a.size() != b.size()) return false;
+        for (int i = 0; i < a.size(); i++) {
+            if (!a.get(i).id().equals(b.get(i).id())) return false;
+        }
+        return true;
+    }
+
+    /**
+     * Cycles the selected recipe by {@code direction} (+1 = next, -1 = previous), wrapping
+     * around. Called by {@link net.bobofraggins.tremendousstorage.shared.network.CycleRecipePacket}.
+     */
+    public void handleCycleRecipe(int direction) {
+        if (matchingRecipes.isEmpty()) return;
+        selectedRecipeIndex = (selectedRecipeIndex + direction + matchingRecipes.size()) % matchingRecipes.size();
+        access.execute((level, pos) -> updateResultSlot(level));
+    }
+
+    /**
+     * Pins a specific recipe to be selected on the next {@link #updateCraftingResult} call.
+     * Used by JEI/EMI/REI transfer handlers so the chosen recipe survives the
+     * {@link #slotsChanged} that fires after the grid is filled.
+     */
+    public void setPendingPinRecipeId(ResourceLocation id) {
+        pendingPinRecipeId = id;
     }
 
     @Override

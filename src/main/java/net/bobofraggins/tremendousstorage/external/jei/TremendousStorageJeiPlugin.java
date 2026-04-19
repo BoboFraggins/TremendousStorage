@@ -19,7 +19,6 @@ import mezz.jei.api.runtime.IJeiRuntime;
 import net.bobofraggins.tremendousstorage.shared.network.SetImportExportFilterPacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
-import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderExtractRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderStorageRecipe;
@@ -102,14 +101,7 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipeTransferHandlers(IRecipeTransferRegistration reg) {
-        reg.addRecipeTransferHandler(
-                AccessTerminalMenu.class,
-                Registration.STORAGE_ACCESS_TERMINAL_MENU.get(),
-                RecipeTypes.CRAFTING,
-                1,
-                9,
-                10,
-                36);
+        reg.addRecipeTransferHandler(new TerminalJeiRecipeHandler(reg.getTransferHelper()), RecipeTypes.CRAFTING);
     }
 
     /**

@@ -48,7 +48,10 @@ public record SatFillCraftingGridPacket(BlockPos satPos, ResourceLocation recipe
                     .getRecipeManager()
                     .byKey(packet.recipeId())
                     .filter(h -> h.value() instanceof CraftingRecipe)
-                    .ifPresent(h -> menu.fillCraftingGridFromNetwork(serverLevel, (CraftingRecipe) h.value()));
+                    .ifPresent(h -> {
+                        menu.setPendingPinRecipeId(packet.recipeId());
+                        menu.fillCraftingGridFromNetwork(serverLevel, (CraftingRecipe) h.value());
+                    });
         });
     }
 }

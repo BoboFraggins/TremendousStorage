@@ -26,7 +26,8 @@ public class CraftingGridPane implements IDialogPane {
     private static final int ARROW_SRC_Y = 30;
     private static final int ARROW_W = 31;
     private static final int ARROW_H = 22;
-    private static final int ARROW_LOCAL_Y = (CRAFTING_ROWS * SLOT_SIZE - ARROW_H) / 2 - 3;
+    /** Pane-local Y of the top of the arrow sprite. */
+    public static final int ARROW_LOCAL_Y = (CRAFTING_ROWS * SLOT_SIZE - ARROW_H) / 2 - 3;
 
     // Result slot background blitted from crafting_table.png
     private static final int RESULT_BG_SRC_X = 119;

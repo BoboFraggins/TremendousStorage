@@ -73,6 +73,7 @@ public final class NetworkEvents {
                 SatFillCraftingGridPacket.TYPE,
                 SatFillCraftingGridPacket.STREAM_CODEC,
                 SatFillCraftingGridPacket::handle);
+        registrar.playToServer(CycleRecipePacket.TYPE, CycleRecipePacket.STREAM_CODEC, CycleRecipePacket::handle);
         registrar.playToServer(SetHaarpModePacket.TYPE, SetHaarpModePacket.STREAM_CODEC, SetHaarpModePacket::handle);
         registrar.playToServer(
                 SetPullerSidesPacket.TYPE, SetPullerSidesPacket.STREAM_CODEC, SetPullerSidesPacket::handle);
