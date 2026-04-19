@@ -32,6 +32,8 @@ import org.joml.Matrix4f;
  */
 public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterfaceBlockEntity> {
 
+    // Glass extends to y=16, so interior height is taller than the standard tank.
+    private static final float NI_FLUID_H = 1.0f - FLUID_FLOOR;
     private static final float FILL_FRAC = 0.9f;
 
     public NetworkInterfaceRenderer(BlockEntityRendererProvider.Context ctx) {}
@@ -60,7 +62,7 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         if (fa == 0) fa = 160;
         fa /= 2;
 
-        float fillTop = FLUID_FLOOR + FILL_FRAC * FLUID_H;
+        float fillTop = FLUID_FLOOR + FILL_FRAC * NI_FLUID_H;
 
         VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
 
