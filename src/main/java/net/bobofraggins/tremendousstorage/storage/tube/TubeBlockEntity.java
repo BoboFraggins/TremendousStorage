@@ -64,6 +64,13 @@ public class TubeBlockEntity extends BlockEntity {
      */
     private NetworkItemHandler networkCache = null;
 
+    /**
+     * Set when this tube's connectivity or attachments change so the Network Interface can
+     * detect the change on its next 5-tick poll and trigger a rescan. Cleared by the NI
+     * after each successful scan.
+     */
+    private boolean networkDirty = false;
+
     /** Tier of the connected Network Interface, pushed by the NI after each scan. Synced to client for rendering. */
     private StorageTier networkTier = StorageTier.WOOD;
 
@@ -75,6 +82,18 @@ public class TubeBlockEntity extends BlockEntity {
      * Called by the Network Interface after a scan to propagate its tier for rendering.
      * Does not clear the network cache or notify neighbors.
      */
+    public boolean isNetworkDirty() {
+        return networkDirty;
+    }
+
+    public void markNetworkDirty() {
+        networkDirty = true;
+    }
+
+    public void clearNetworkDirty() {
+        networkDirty = false;
+    }
+
     public void setNetworkTier(StorageTier tier) {
         if (networkTier == tier) return;
         networkTier = tier;
@@ -113,6 +132,7 @@ public class TubeBlockEntity extends BlockEntity {
             level.setBlockAndUpdate(worldPosition, corrected);
         }
         setChanged();
+        networkDirty = true;
     }
 
     // -------------------------------------------------------------------------
@@ -298,6 +318,7 @@ public class TubeBlockEntity extends BlockEntity {
             filterMode[faceIndex] = false;
             for (int s = 0; s < 9; s++) filterSlots[faceIndex][s] = ItemStack.EMPTY;
         }
+        networkDirty = true;
         setChanged();
         // Invalidate neighbors so their stale cached network views are discarded.
         if (level != null) {

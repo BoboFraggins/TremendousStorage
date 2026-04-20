@@ -11,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -29,6 +30,12 @@ public class StorageInterfaceMenu extends AbstractContainerMenu {
     private final int faceIndex;
     private final ContainerData data;
 
+    // Player inventory slot Y offsets (matching PlayerInventoryPane with default leftMargin=20).
+    // PriorityPane height=35 sits below Dialog.TITLE_H=17, so PlayerInventoryPane starts at y=52.
+    private static final int INV_X = 20;
+    private static final int INV_Y = 52;
+    private static final int HOTBAR_Y = INV_Y + 3 * 18 + 4; // 110
+
     /** Server-side constructor. */
     public StorageInterfaceMenu(int windowId, Inventory inv, BlockPos pos, int faceIndex, ContainerData data) {
         super(Registration.STORAGE_INTERFACE_MENU.get(), windowId);
@@ -36,6 +43,18 @@ public class StorageInterfaceMenu extends AbstractContainerMenu {
         this.faceIndex = faceIndex;
         this.data = data;
         addDataSlots(data);
+        addPlayerInventory(inv);
+    }
+
+    private void addPlayerInventory(Inventory inv) {
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 9; col++) {
+                addSlot(new Slot(inv, col + row * 9 + 9, INV_X + col * 18, INV_Y + row * 18));
+            }
+        }
+        for (int col = 0; col < 9; col++) {
+            addSlot(new Slot(inv, col, INV_X + col * 18, HOTBAR_Y));
+        }
     }
 
     /** Client-side constructor — reads pos and face from the network buffer. */

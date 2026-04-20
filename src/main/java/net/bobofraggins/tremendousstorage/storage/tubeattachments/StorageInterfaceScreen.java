@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.tubeattachments;
 
 import net.bobofraggins.tremendousstorage.shared.network.SetStorageInterfacePriorityPacket;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
+import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PriorityPane;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -25,7 +26,7 @@ public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInter
                 menu::getPriority,
                 p -> PacketDistributor.sendToServer(
                         new SetStorageInterfacePriorityPacket(menu.getPos(), menu.getFaceIndex(), p)));
-        dialog = new Dialog(priorityPane);
+        dialog = new Dialog(priorityPane, new PlayerInventoryPane());
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
     }

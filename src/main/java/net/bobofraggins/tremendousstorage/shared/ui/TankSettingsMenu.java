@@ -38,9 +38,10 @@ public class TankSettingsMenu extends AbstractContainerMenu {
     public static final int FLUID_OUT_Y = 62;
 
     // Player-inventory slot positions — centred in 176 px: (176-162)/2 = 7
+    // Y values match PlayerInventoryPane starting at Dialog.TITLE_H(17) + settings pane(66) = 83.
     public static final int INV_START_X = 7;
-    private static final int INV_Y = 90;
-    private static final int HOTBAR_Y = 148;
+    private static final int INV_Y = 83;
+    private static final int HOTBAR_Y = 141;
 
     private final BlockPos pos;
     private final ContainerData data;

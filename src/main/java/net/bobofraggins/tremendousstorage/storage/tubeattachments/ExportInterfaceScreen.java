@@ -2,6 +2,8 @@ package net.bobofraggins.tremendousstorage.storage.tubeattachments;
 
 import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.network.SetImportExportFilterPacket;
+import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
+import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -18,29 +20,32 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfaceMenu> {
 
-    private static final int BG_WIDTH = 176;
-    private static final int BG_HEIGHT = 116;
-
-    private static final int GRID_X = (BG_WIDTH - 3 * 18) / 2;
-    private static final int GRID_Y = 30;
+    private static final int FILTER_PANE_W = 176;
+    private static final int FILTER_PANE_H = 102;
+    private static final int GRID_X = (FILTER_PANE_W - 3 * 18) / 2; // 61
+    private static final int GRID_SCREEN_DY = Dialog.TITLE_H + 16; // 33
     private static final int SLOT_SIZE = 18;
-    private static final int MODE_BTN_Y = 88;
+    private static final int LABEL_SCREEN_DY = Dialog.TITLE_H + 4; // 21
+    private static final int BTN_SCREEN_DY = Dialog.TITLE_H + 76; // 93
     private static final int MODE_BTN_W = 120;
     private static final int MODE_BTN_H = 20;
 
+    private final Dialog dialog;
     private Button modeButton;
 
     public ExportInterfaceScreen(ExportInterfaceMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth = BG_WIDTH;
-        this.imageHeight = BG_HEIGHT;
+        dialog = new Dialog(Dialog.blankPane(FILTER_PANE_W, FILTER_PANE_H), new PlayerInventoryPane());
+        this.imageWidth = dialog.totalWidth();
+        this.imageHeight = dialog.totalHeight();
     }
 
     @Override
     protected void init() {
         super.init();
-        int btnX = leftPos + (BG_WIDTH - MODE_BTN_W) / 2;
-        int btnY = topPos + MODE_BTN_Y;
+        dialog.init(leftPos, topPos);
+        int btnX = leftPos + (FILTER_PANE_W - MODE_BTN_W) / 2;
+        int btnY = topPos + BTN_SCREEN_DY;
         modeButton = addRenderableWidget(Button.builder(
                         modeLabel(),
                         btn -> PacketDistributor.sendToServer(new SetImportExportFilterPacket(
@@ -70,16 +75,21 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
 
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.fill(leftPos, topPos, leftPos + BG_WIDTH, topPos + BG_HEIGHT, 0xC0101010);
+        dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
 
         Component filterLabel = Component.translatable("screen.tremendousstorage.filter_label");
         graphics.drawString(
-                font, filterLabel, leftPos + (BG_WIDTH - font.width(filterLabel)) / 2, topPos + 20, 0xAAAAAA, false);
+                font,
+                filterLabel,
+                leftPos + (FILTER_PANE_W - font.width(filterLabel)) / 2,
+                topPos + LABEL_SCREEN_DY,
+                0xAAAAAA,
+                false);
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
                 int sx = leftPos + GRID_X + col * SLOT_SIZE;
-                int sy = topPos + GRID_Y + row * SLOT_SIZE;
+                int sy = topPos + GRID_SCREEN_DY + row * SLOT_SIZE;
                 int slotIndex = row * 3 + col;
 
                 graphics.fill(sx, sy, sx + SLOT_SIZE, sy + SLOT_SIZE, 0xFF303030);
@@ -95,7 +105,7 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
 
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 6, 0xFFFFFF, false);
+        // Title is drawn by Dialog.
     }
 
     @Override
@@ -103,10 +113,9 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
                 int sx = leftPos + GRID_X + col * SLOT_SIZE + 1;
-                int sy = topPos + GRID_Y + row * SLOT_SIZE + 1;
+                int sy = topPos + GRID_SCREEN_DY + row * SLOT_SIZE + 1;
                 if (mouseX >= sx && mouseX < sx + SLOT_SIZE - 2 && mouseY >= sy && mouseY < sy + SLOT_SIZE - 2) {
-                    int slotIndex = row * 3 + col;
-                    handleGhostSlotClick(slotIndex);
+                    handleGhostSlotClick(row * 3 + col);
                     return true;
                 }
             }
@@ -133,7 +142,7 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
     }
 
     public int getGhostSlotY(int slotIndex) {
-        return topPos + GRID_Y + (slotIndex / 3) * SLOT_SIZE + 1;
+        return topPos + GRID_SCREEN_DY + (slotIndex / 3) * SLOT_SIZE + 1;
     }
 
     public static int getGhostSlotInnerSize() {

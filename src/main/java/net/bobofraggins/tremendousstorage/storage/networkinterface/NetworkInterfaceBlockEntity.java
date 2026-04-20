@@ -80,6 +80,8 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     private int totalConsumption = 0;
     /** Incremented each time the topology scan is invalidated; synced via ContainerData. */
     private int scanDirtyCounter = 0;
+    /** Counter used to throttle the 5-tick dirty-flag poll. */
+    private int pollTickCount = 0;
 
     public NetworkInterfaceBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.NETWORK_INTERFACE_BE_TYPE.get(), pos, state);
@@ -103,11 +105,12 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
             } finally {
                 scanning = false;
             }
-            // Push NI tier to all connected tubes so their renderer can tint by tier.
+            // Push NI tier to all connected tubes and clear their dirty flags.
             ServerLevel sl = (ServerLevel) level;
             for (BlockPos tubePos : cachedScan.tubePositions()) {
                 if (sl.getBlockEntity(tubePos) instanceof TubeBlockEntity tube) {
                     tube.setNetworkTier(tier);
+                    tube.clearNetworkDirty();
                 }
             }
         }
@@ -333,10 +336,33 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
             setChanged();
         }
 
+        // Every 5 ticks: poll connected tubes for topology or content changes.
+        if (++pollTickCount % 5 == 0 && cachedScan != null) {
+            pollTubes((ServerLevel) level);
+        }
+
         // Rebuild aggregate item cache if contents changed
         if (contentsDirty) {
             rebuildCache();
         }
+    }
+
+    /**
+     * Checks all tubes in the current scan for dirty flags set by neighbor-changes or
+     * attachment-changes. If any tube is dirty, triggers a full topology rescan.
+     * Also marks contents dirty so external-inventory item counts stay fresh.
+     */
+    private void pollTubes(ServerLevel sl) {
+        for (BlockPos tubePos : cachedScan.tubePositions()) {
+            if (sl.getBlockEntity(tubePos) instanceof TubeBlockEntity tube && tube.isNetworkDirty()) {
+                setChanged(); // nulls cachedScan; next getScan() rebuilds and clears dirty flags
+                return;
+            }
+        }
+        // Even when topology is unchanged, external inventories adjacent to storage-interface
+        // attachments don't push change notifications, so we mark contents dirty here so the
+        // terminal's item counts stay current.
+        markContentsDirty();
     }
 
     // -------------------------------------------------------------------------

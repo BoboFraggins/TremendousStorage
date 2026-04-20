@@ -199,12 +199,9 @@ public class TubeBlock extends BaseEntityBlock {
             if (!updated.equals(state)) {
                 level.setBlockAndUpdate(pos, updated);
             }
-            // Clear the network cache when any neighbor changes (storage block added/removed,
-            // or priority changed via sendBlockUpdated flags=3 from adjacent storage BEs).
-            // Always propagate so the update reaches the Network Interface even through
-            // already-invalidated tubes.
             if (level.getBlockEntity(pos) instanceof TubeBlockEntity be) {
                 be.setChanged();
+                be.markNetworkDirty();
             }
         }
     }
