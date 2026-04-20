@@ -2,14 +2,12 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 
 import net.bobofraggins.tremendousstorage.shared.network.ClearTankContentsPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetVoidExcessPacket;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.tank.ClearTankPane;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
@@ -17,36 +15,45 @@ import net.neoforged.neoforge.network.PacketDistributor;
  *
  * <p>Layout (176 × 168 px):
  * <pre>
- *   ┌─ 0 ──────────────────────────── 176 ─┐
- *   │  Title bar                          14│
- *   ├──────────────────────────────────────┤
- *   │            [Input]                  │  y=20
- *   │              ↓                      │
- *   │            [Output]                 │  y=62  (slots centered at x=80)
- *   ├──────────────────────────────────────┤  y=82
- *   │  Player inventory (3 rows + hotbar) │
- *   └──────────────────────────────────────┘  168
+ *   ┌─ Dialog title bar (17 px) ───────────┐
+ *   │  Title                               │
+ *   ├──────────────────────────────────────┤  y=17
+ *   │            [Input]                   │  y=20
+ *   │              ↓                       │
+ *   │            [Output]                  │  y=62
+ *   ├──────────────────────────────────────┤  y=83
+ *   │  Player inventory (3 rows + hotbar)  │
+ *   └──────────────────────────────────────┘  y=168
  * </pre>
  *
  * <p>Void Excess and Clear Contents live in the slide-out {@link ConfigDrawer}.
  */
 public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu> {
 
-    private static final int BG_WIDTH = 176;
-    private static final int BG_HEIGHT = 168;
-    private static final int TITLE_BAR_H = 14;
-    private static final int SETTINGS_H = 82;
-    private static final int INV_PANE_Y = 90;
+    private static final ResourceLocation GHOST_BUCKET =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/bucket.png");
+    private static final ResourceLocation GHOST_BOTTLE =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/glass_bottle.png");
+    private static final ResourceLocation GHOST_SYRINGE =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/experience_syringe.png");
 
+    /** Height of the settings pane (fluid slots + arrow). 17 + 66 + 80 + 5 = 168 total. */
+    private static final int SETTINGS_PANE_H = 66;
+
+    /** Y of the separator line between settings and player inventory (screen-relative). */
+    private static final int SEPARATOR_DY = Dialog.TITLE_H + SETTINGS_PANE_H; // 83
+
+    private final Dialog dialog;
     private final ConfigDrawer configDrawer;
-    private final PlayerInventoryPane playerInvPane;
 
     public TankSettingsScreen(TankSettingsMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        this.imageWidth = BG_WIDTH;
-        this.imageHeight = BG_HEIGHT;
 
-        playerInvPane = new PlayerInventoryPane(TankSettingsMenu.INV_START_X);
+        dialog = new Dialog(
+                Dialog.blankPane(PlayerInventoryPane.WIDTH, SETTINGS_PANE_H),
+                new PlayerInventoryPane(TankSettingsMenu.INV_START_X));
+        this.imageWidth = dialog.totalWidth();
+        this.imageHeight = dialog.totalHeight();
 
         VoidExcessPane voidPane = new VoidExcessPane(
                 menu::isVoidExcess,
@@ -63,6 +70,7 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
     @Override
     protected void init() {
         super.init();
+        dialog.init(leftPos, topPos);
         configDrawer.init(leftPos, topPos, imageHeight);
     }
 
@@ -78,17 +86,13 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
         // Drawer renders behind the main panel
         configDrawer.render(g, font, mouseX, mouseY, partialTick);
 
+        dialog.render(g, font, title, mouseX, mouseY, partialTick);
+
         int x = leftPos;
         int y = topPos;
 
-        // Full background
-        g.fill(x, y, x + BG_WIDTH, y + BG_HEIGHT, 0xFFC6C6C6);
-
-        // Title-bar separator
-        g.fill(x, y + TITLE_BAR_H, x + BG_WIDTH, y + TITLE_BAR_H + 1, 0xFF555555);
-
-        // Settings / player-inventory separator
-        g.fill(x, y + SETTINGS_H, x + BG_WIDTH, y + SETTINGS_H + 1, 0xFF555555);
+        // Separator between settings area and player inventory
+        g.fill(x, y + SEPARATOR_DY, x + imageWidth, y + SEPARATOR_DY + 1, 0xFF555555);
 
         // Fluid-transfer slot backgrounds (centered)
         drawSlot(g, x + TankSettingsMenu.FLUID_IN_X, y + TankSettingsMenu.FLUID_IN_Y);
@@ -97,31 +101,24 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
         // Ghost item hint in input slot when empty — cycles bucket → bottle → syringe
         if (menu.getSlot(0).getItem().isEmpty()) {
             int phase = (int) ((System.currentTimeMillis() / 1500) % 3);
-            ItemStack ghost =
+            ResourceLocation ghostTex =
                     switch (phase) {
-                        case 0 -> new ItemStack(Items.BUCKET);
-                        case 1 -> new ItemStack(Items.GLASS_BOTTLE);
-                        default -> new ItemStack(Registration.EXPERIENCE_SYRINGE.get());
+                        case 0 -> GHOST_BUCKET;
+                        case 1 -> GHOST_BOTTLE;
+                        default -> GHOST_SYRINGE;
                     };
             int gx = x + TankSettingsMenu.FLUID_IN_X;
             int gy = y + TankSettingsMenu.FLUID_IN_Y;
-            g.renderItem(ghost, gx, gy);
-            g.fill(gx, gy, gx + 16, gy + 16, 0x80808080);
+            g.blit(ghostTex, gx, gy, 0, 0, 16, 16, 16, 16);
         }
 
         // Down-arrow between the two slots
         drawDownArrow(g, x + TankSettingsMenu.FLUID_IN_X, y + TankSettingsMenu.FLUID_IN_Y + 16);
-
-        // Player-inventory slot backgrounds
-        g.pose().pushPose();
-        g.pose().translate(x, y + INV_PANE_Y, 0);
-        playerInvPane.render(g, font, BG_WIDTH, mouseX - x, mouseY - (y + INV_PANE_Y), partialTick);
-        g.pose().popPose();
     }
 
     @Override
     protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
-        g.drawString(font, title, (BG_WIDTH - font.width(title)) / 2, 4, 0x404040, false);
+        // Title is drawn by Dialog.
     }
 
     @Override

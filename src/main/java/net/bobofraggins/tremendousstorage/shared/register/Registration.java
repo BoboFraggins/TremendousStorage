@@ -1091,27 +1091,74 @@ public final class Registration {
                     .title(Component.translatable("itemGroup.tremendousstorage"))
                     .icon(() -> STORAGE_ACCESS_TERMINAL_ITEM.get().getDefaultInstance())
                     .displayItems((params, output) -> {
-                        output.accept(LAZURITE_BARS_ITEM.get());
+                        output.accept(CANVAS.get());
+                        output.accept(CANVAS_BLOCK_ITEM.get());
+                        output.accept(GlampingRegistration.TENT_ITEM.get());
+                        output.accept(TREMENDOUS_BACKPACK.get());
+                        output.accept(PICNIC_BASKET_ITEM.get());
                         output.accept(LAZURITE_ORE_ITEM.get());
                         output.accept(LAZURITE_DEEPSLATE_ORE_ITEM.get());
                         output.accept(RAW_LAZURITE.get());
-                        output.accept(LAZURITE_NUGGET.get());
                         output.accept(LAZURITE_INGOT.get());
+                        output.accept(LAZURITE_NUGGET.get());
                         output.accept(LAZURITE_BLOCK_ITEM.get());
+                        output.accept(FILING_CABINET_ITEM.get());
+                        output.accept(TREMENDOUS_CHEST_ITEM.get());
+                        output.accept(TANK_ITEM.get());
+
+                        output.accept(MANILA_FOLDER.get());
+                        output.accept(WHITEOUT_TAPE.get());
+                        output.accept(STIRLING_ENGINE_ITEM.get());
+                        output.accept(ZOMBIE_BRAIN.get());
+                        output.accept(BRAIN.get());
+                        output.accept(NETWORK_INTERFACE_ITEM.get());
+                        output.accept(STORAGE_ACCESS_TERMINAL_ITEM.get());
+                        output.accept(WIRELESS_HUB_ITEM.get());
+
+                        output.accept(TUBE_ITEM.get());
+                        output.accept(STORAGE_INTERFACE.get());
+                        output.accept(IMPORT_INTERFACE.get());
+                        output.accept(EXPORT_INTERFACE.get());
+
+                        output.accept(WIRELESS_SAT.get());
+                        output.accept(EXPERIENCE_SYRINGE.get());
+                        output.accept(RECYCLING_BIN_ITEM.get());
+                        output.accept(BASE_UPGRADE.get());
+                        output.accept(CRAFTING_UPGRADE.get());
+                        output.accept(ENDER_STORAGE_UPGRADE.get());
+                        output.accept(ENDER_TREMENDOUS_BACKPACK_ITEM.get());
+                        output.accept(ENDER_PICNIC_BASKET_ITEM.get());
+                        output.accept(ENDER_TREMENDOUS_CHEST_ITEM.get());
+                        for (DeferredHolder<Item, StorageUpgradeItem> upgrade : STORAGE_UPGRADES) {
+                            output.accept(upgrade.get());
+                        }
+                        output.accept(ENDER_TANK_ITEM.get());
+                        output.accept(ENDER_FOLDER.get());
+                        output.accept(MAGNET_UPGRADE.get());
+                        output.accept(HAARP_UPGRADE.get());
+                        output.accept(PULLER_UPGRADE.get());
+                        output.accept(INTERDIMENSIONAL_UPGRADE.get());
+
                         output.accept(LAZURITE_PICKAXE.get());
                         output.accept(LAZURITE_AXE.get());
                         output.accept(LAZURITE_SHOVEL.get());
                         output.accept(LAZURITE_SWORD.get());
                         output.accept(LAZURITE_HOE.get());
                         output.accept(LAZURITE_PAXEL.get());
-                        output.accept(FILING_CABINET_ITEM.get());
-                        output.accept(TREMENDOUS_CHEST_ITEM.get());
-                        output.accept(ENDER_TREMENDOUS_CHEST_ITEM.get());
-                        for (DeferredHolder<Item, StorageUpgradeItem> upgrade : STORAGE_UPGRADES) {
-                            output.accept(upgrade.get());
-                        }
-                        output.accept(TANK_ITEM.get());
-                        output.accept(ENDER_TANK_ITEM.get());
+                        output.accept(LAZURITE_BARS_ITEM.get());
+
+                        output.accept(GRAHAM_CRACKER.get());
+                        output.accept(CHOCOLATE_BAR.get());
+                        output.accept(MARSHMALLOW.get());
+                        output.accept(TOASTED_MARSHMALLOW.get());
+                        output.accept(SMORE.get());
+                        output.accept(HONEY_FLUID_BUCKET.get());
+                        output.accept(POSITIVE_VIBES_BUCKET.get());
+                        output.accept(POSITIVE_VIBES_BOTTLE.get());
+                        output.accept(VEX_REPELLENT_POTION.get());
+                        output.accept(VEX_REPELLENT_POTION_EXTENDED.get());
+                        output.accept(VEX_REPELLENT_POTION_LONG.get());
+
                         if (ModList.get().isLoaded("mysticalagriculture")) {
                             var lazurite = MysticalAgricultureAPI.getCropRegistry()
                                     .getCropById(
@@ -1121,47 +1168,6 @@ public final class Registration {
                                 output.accept(lazurite.getEssenceItem());
                             }
                         }
-                        output.accept(STIRLING_ENGINE_ITEM.get());
-                        output.accept(NETWORK_INTERFACE_ITEM.get());
-                        output.accept(STORAGE_ACCESS_TERMINAL_ITEM.get());
-                        output.accept(WIRELESS_HUB_ITEM.get());
-                        output.accept(WIRELESS_SAT.get());
-                        output.accept(STORAGE_INTERFACE.get());
-                        output.accept(IMPORT_INTERFACE.get());
-                        output.accept(EXPORT_INTERFACE.get());
-                        output.accept(ZOMBIE_BRAIN.get());
-                        output.accept(BRAIN.get());
-                        output.accept(GRAHAM_CRACKER.get());
-                        output.accept(CHOCOLATE_BAR.get());
-                        output.accept(MARSHMALLOW.get());
-                        output.accept(TOASTED_MARSHMALLOW.get());
-                        output.accept(SMORE.get());
-                        output.accept(CANVAS.get());
-                        output.accept(CANVAS_BLOCK_ITEM.get());
-                        output.accept(GlampingRegistration.TENT_ITEM.get());
-                        output.accept(PICNIC_BASKET_ITEM.get());
-                        output.accept(ENDER_PICNIC_BASKET_ITEM.get());
-                        output.accept(TREMENDOUS_BACKPACK.get());
-                        output.accept(ENDER_TREMENDOUS_BACKPACK_ITEM.get());
-                        output.accept(HONEY_FLUID_BUCKET.get());
-                        output.accept(POSITIVE_VIBES_BUCKET.get());
-                        output.accept(POSITIVE_VIBES_BOTTLE.get());
-                        output.accept(VEX_REPELLENT_POTION.get());
-                        output.accept(VEX_REPELLENT_POTION_EXTENDED.get());
-                        output.accept(VEX_REPELLENT_POTION_LONG.get());
-                        output.accept(TUBE_ITEM.get());
-                        output.accept(MANILA_FOLDER.get());
-                        output.accept(ENDER_FOLDER.get());
-                        output.accept(WHITEOUT_TAPE.get());
-                        output.accept(BASE_UPGRADE.get());
-                        output.accept(CRAFTING_UPGRADE.get());
-                        output.accept(ENDER_STORAGE_UPGRADE.get());
-                        output.accept(MAGNET_UPGRADE.get());
-                        output.accept(HAARP_UPGRADE.get());
-                        output.accept(PULLER_UPGRADE.get());
-                        output.accept(INTERDIMENSIONAL_UPGRADE.get());
-                        output.accept(EXPERIENCE_SYRINGE.get());
-                        output.accept(RECYCLING_BIN_ITEM.get());
                     })
                     .build());
 
