@@ -69,7 +69,7 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     private static final float A_MIN = C_MIN; // Arm cross-section min (same as core)
     private static final float A_MAX = C_MAX; // Arm cross-section max
     // Arms stop just short of the block face to avoid Z-fighting with the neighbour's face
-    private static final float A_FACE_LO = EPS;
+    private static final float A_FACE_LO = 2 * EPS;
     private static final float A_FACE_HI = 1f - 2 * EPS;
 
     // One pixel in block-unit space (1/16)
@@ -86,9 +86,9 @@ public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
     private static final float SHADE_NORTH_SOUTH = 0.80f;
     private static final float SHADE_EAST_WEST = 0.60f;
 
-    // Dark steel trim color (#2A313A)
-    private static final int TRIM_R = 42;
-    private static final int TRIM_G = 49;
+    // Dark steel trim color (#262E3A)
+    private static final int TRIM_R = 38;
+    private static final int TRIM_G = 46;
     private static final int TRIM_B = 58;
 
     public TubeRenderer(BlockEntityRendererProvider.Context ctx) {}

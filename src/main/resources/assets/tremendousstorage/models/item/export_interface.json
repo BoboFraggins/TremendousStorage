@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "tremendousstorage:item/export_interface"
+    "layer0": "tremendousstorage:block/attachment_export"
   }
 }
