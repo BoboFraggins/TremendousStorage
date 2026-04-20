@@ -181,24 +181,21 @@ public class TubeBlockEntity extends BlockEntity {
             ItemStack[] filter,
             boolean rejectMode,
             int transferAmount) {
+        int remaining = transferAmount;
         int slots = source.getSlots();
-        for (int s = 0; s < slots; s++) {
+        for (int s = 0; s < slots && remaining > 0; s++) {
             ItemStack inSlot = source.getStackInSlot(s);
             if (inSlot.isEmpty()) continue;
             if (!passesFilter(inSlot, filter, rejectMode)) continue;
 
-            int toMove = Math.min(inSlot.getCount(), transferAmount);
-            // Simulate extract
-            ItemStack extracted = source.extractItem(s, toMove, true);
+            ItemStack extracted = source.extractItem(s, Math.min(inSlot.getCount(), remaining), true);
             if (extracted.isEmpty()) continue;
-            // Simulate insert into network
             ItemStack remainder = network.insertItem(0, extracted, true);
             int canInsert = extracted.getCount() - remainder.getCount();
             if (canInsert <= 0) continue;
-            // Execute
-            ItemStack actualExtract = source.extractItem(s, canInsert, false);
-            network.insertItem(0, actualExtract, false);
-            return; // one slot per tick cycle
+            source.extractItem(s, canInsert, false);
+            network.insertItem(0, extracted.copyWithCount(canInsert), false);
+            remaining -= canInsert;
         }
     }
 
@@ -208,24 +205,21 @@ public class TubeBlockEntity extends BlockEntity {
      */
     private static void doExport(
             NetworkItemHandler network, IItemHandler dest, ItemStack[] filter, boolean rejectMode, int transferAmount) {
+        int remaining = transferAmount;
         int slots = network.getSlots();
-        for (int s = 0; s < slots; s++) {
+        for (int s = 0; s < slots && remaining > 0; s++) {
             ItemStack inSlot = network.getStackInSlot(s);
             if (inSlot.isEmpty()) continue;
             if (!passesFilter(inSlot, filter, rejectMode)) continue;
 
-            int toMove = Math.min(inSlot.getCount(), transferAmount);
-            // Simulate extract from network
-            ItemStack extracted = network.extractItem(s, toMove, true);
+            ItemStack extracted = network.extractItem(s, Math.min(inSlot.getCount(), remaining), true);
             if (extracted.isEmpty()) continue;
-            // Simulate insert into destination
             ItemStack remainder = tryInsertAll(dest, extracted, true);
             int canInsert = extracted.getCount() - remainder.getCount();
-            if (canInsert <= 0) continue;
-            // Execute
-            ItemStack actualExtract = network.extractItem(s, canInsert, false);
-            tryInsertAll(dest, actualExtract, false);
-            return; // one slot per tick cycle
+            if (canInsert <= 0) break; // destination full
+            network.extractItem(s, canInsert, false);
+            tryInsertAll(dest, extracted.copyWithCount(canInsert), false);
+            remaining -= canInsert;
         }
     }
 

@@ -363,10 +363,20 @@ public class TubeBlock extends BaseEntityBlock {
             case IMPORT_INTERFACE -> player.openMenu(new ImportInterfaceMenu.Provider(be, pos, fi), buf -> {
                 buf.writeBlockPos(pos);
                 buf.writeByte(fi);
+                net.minecraft.network.RegistryFriendlyByteBuf regBuf =
+                        (net.minecraft.network.RegistryFriendlyByteBuf) buf;
+                for (int s = 0; s < 9; s++) {
+                    ItemStack.OPTIONAL_STREAM_CODEC.encode(regBuf, be.getFilterSlot(fi, s));
+                }
             });
             case EXPORT_INTERFACE -> player.openMenu(new ExportInterfaceMenu.Provider(be, pos, fi), buf -> {
                 buf.writeBlockPos(pos);
                 buf.writeByte(fi);
+                net.minecraft.network.RegistryFriendlyByteBuf regBuf =
+                        (net.minecraft.network.RegistryFriendlyByteBuf) buf;
+                for (int s = 0; s < 9; s++) {
+                    ItemStack.OPTIONAL_STREAM_CODEC.encode(regBuf, be.getFilterSlot(fi, s));
+                }
             });
             default -> {
                 return InteractionResult.PASS;

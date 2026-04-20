@@ -35,7 +35,8 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
 
     public ExportInterfaceScreen(ExportInterfaceMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
-        dialog = new Dialog(Dialog.blankPane(FILTER_PANE_W, FILTER_PANE_H), new PlayerInventoryPane());
+        dialog = new Dialog(
+                Dialog.blankPane(FILTER_PANE_W, FILTER_PANE_H), new PlayerInventoryPane(ExportInterfaceMenu.INV_X));
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
     }

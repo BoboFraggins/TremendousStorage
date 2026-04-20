@@ -33,9 +33,9 @@ public class ImportInterfaceMenu extends AbstractContainerMenu {
 
     private boolean rejectMode;
 
-    // Player inventory slot Y offsets (matching PlayerInventoryPane with default leftMargin=20).
+    // Player inventory slot offsets — leftMargin=7 keeps 9 columns inside the 176 px dialog.
     // blankPane(176, 102) sits below Dialog.TITLE_H=17, so PlayerInventoryPane starts at y=119.
-    private static final int INV_X = 20;
+    static final int INV_X = 7;
     private static final int INV_Y = 119;
     private static final int HOTBAR_Y = INV_Y + 3 * 18 + 4; // 177
 
@@ -61,9 +61,13 @@ public class ImportInterfaceMenu extends AbstractContainerMenu {
         }
     }
 
-    /** Client-side constructor — reads pos and face from the network buffer. */
+    /** Client-side constructor — reads pos, face, and initial filter slots from the network buffer. */
     public ImportInterfaceMenu(int windowId, Inventory inv, FriendlyByteBuf buf) {
         this(windowId, inv, buf.readBlockPos(), buf.readByte() & 0xFF, new SimpleContainerData(1));
+        net.minecraft.network.RegistryFriendlyByteBuf regBuf = (net.minecraft.network.RegistryFriendlyByteBuf) buf;
+        for (int s = 0; s < 9; s++) {
+            filterSlots[s] = ItemStack.OPTIONAL_STREAM_CODEC.decode(regBuf);
+        }
     }
 
     public BlockPos getPos() {
