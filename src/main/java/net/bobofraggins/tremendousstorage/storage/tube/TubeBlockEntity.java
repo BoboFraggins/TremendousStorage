@@ -112,6 +112,7 @@ public class TubeBlockEntity extends BlockEntity {
         if (!corrected.equals(current)) {
             level.setBlockAndUpdate(worldPosition, corrected);
         }
+        setChanged();
     }
 
     // -------------------------------------------------------------------------

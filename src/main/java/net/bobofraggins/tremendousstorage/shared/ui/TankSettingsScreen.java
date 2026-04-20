@@ -2,11 +2,14 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 
 import net.bobofraggins.tremendousstorage.shared.network.ClearTankContentsPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetVoidExcessPacket;
+import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.tank.ClearTankPane;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
@@ -90,6 +93,21 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
         // Fluid-transfer slot backgrounds (centered)
         drawSlot(g, x + TankSettingsMenu.FLUID_IN_X, y + TankSettingsMenu.FLUID_IN_Y);
         drawSlot(g, x + TankSettingsMenu.FLUID_OUT_X, y + TankSettingsMenu.FLUID_OUT_Y);
+
+        // Ghost item hint in input slot when empty — cycles bucket → bottle → syringe
+        if (menu.getSlot(0).getItem().isEmpty()) {
+            int phase = (int) ((System.currentTimeMillis() / 1500) % 3);
+            ItemStack ghost =
+                    switch (phase) {
+                        case 0 -> new ItemStack(Items.BUCKET);
+                        case 1 -> new ItemStack(Items.GLASS_BOTTLE);
+                        default -> new ItemStack(Registration.EXPERIENCE_SYRINGE.get());
+                    };
+            int gx = x + TankSettingsMenu.FLUID_IN_X;
+            int gy = y + TankSettingsMenu.FLUID_IN_Y;
+            g.renderItem(ghost, gx, gy);
+            g.fill(gx, gy, gx + 16, gy + 16, 0x80808080);
+        }
 
         // Down-arrow between the two slots
         drawDownArrow(g, x + TankSettingsMenu.FLUID_IN_X, y + TankSettingsMenu.FLUID_IN_Y + 16);
