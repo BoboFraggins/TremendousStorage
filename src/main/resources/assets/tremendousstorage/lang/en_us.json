@@ -26,7 +26,6 @@
   "item.tremendousstorage.diamond_to_emerald_storage_upgrade": "Diamond to Emerald Storage Upgrade",
   "item.tremendousstorage.emerald_to_netherite_storage_upgrade": "Emerald to Netherite Storage Upgrade",
   "item.tremendousstorage.ender_storage_upgrade": "Ender Upgrade",
-  "item.tremendousstorage.ender_storage_upgrade.tooltip": "Turn Storage Items into Ender Versions",
   "block.tremendousstorage.tank": "Tank",
 
   "item.tremendousstorage.lazurite_ore_chunk": "Lazurite Ore Chunk",
@@ -103,7 +102,6 @@
   "screen.tremendousstorage.void_items": "Void Items",
 
   "item.tremendousstorage.haarp_upgrade": "H.A.A.R.P. Upgrade",
-  "item.tremendousstorage.haarp_upgrade.tooltip": "Upgrades Wireless Hub to Control Weather",
 
   "screen.tremendousstorage.haarp.weather_mode": "Weather Mode",
   "screen.tremendousstorage.haarp.off": "Off",
@@ -138,13 +136,8 @@
   "item.tremendousstorage.marshmallow": "Marshmallow",
   "item.tremendousstorage.toasted_marshmallow": "Toasted Marshmallow",
   "item.tremendousstorage.smore": "S'more",
-  "fluid_type.tremendousstorage.honey": "Honey",
-  "item.tremendousstorage.honey_fluid_bucket": "Honey Bucket",
-  "block.tremendousstorage.honey_fluid": "Honey",
   "fluid_type.tremendousstorage.positive_vibes": "Positive Vibes",
   "item.tremendousstorage.positive_vibes_bucket": "Positive Vibes Bucket",
-  "fluid_type.tremendousstorage.xp_juice": "XP Juice",
-  "item.tremendousstorage.xp_juice_bucket": "XP Juice Bucket",
   "jei.tremendousstorage.ender_folder_smithing": "Ender Folder",
   "jei.tremendousstorage.ender_storage_smithing": "Ender Storage",
   "jei.tremendousstorage.ender_chest_smithing": "Ender Chest",
@@ -190,13 +183,8 @@
 
   "block.tremendousstorage.picnic_basket": "Picnic Basket",
   "item.tremendousstorage.picnic_basket": "Picnic Basket",
-  "item.tremendousstorage.picnic_basket.tooltip": "Stores and Auto-feeds Food",
   "block.tremendousstorage.ender_picnic_basket": "Ender Picnic Basket",
   "item.tremendousstorage.ender_picnic_basket": "Ender Picnic Basket",
-  "item.tremendousstorage.ender_picnic_basket.tooltip": "Stores and Auto-feeds Food",
-
-  "block.tremendousstorage.tent": "Tent",
-  "item.tremendousstorage.tent": "Tent",
 
   "block.tremendousstorage.backpack": "Backpack",
   "item.tremendousstorage.backpack": "Backpack",
@@ -206,9 +194,6 @@
   "key.tremendousstorage.open_picnic_basket": "Open Picnic Basket",
 
   "item.tremendousstorage.base_upgrade": "Base Upgrade",
-  "item.tremendousstorage.crafting_upgrade": "Crafting Upgrade",
-  "item.tremendousstorage.magnet_upgrade": "Magnet Upgrade",
-  "item.tremendousstorage.magnet_upgrade.tooltip": "Collect Nearby Matching Items",
 
   "block.tremendousstorage.recycling_bin": "Recycling Bin",
   "screen.tremendousstorage.recycling_bin": "Recycling Bin",
