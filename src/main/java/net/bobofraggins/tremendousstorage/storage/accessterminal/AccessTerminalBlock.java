@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.accessterminal;
 
 import com.mojang.serialization.MapCodec;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
@@ -8,6 +9,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -20,6 +23,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
 
 /**
@@ -115,6 +120,20 @@ public class AccessTerminalBlock extends BaseEntityBlock implements NetworkConne
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {
         return level.isClientSide ? null : (lvl, pos, st, be) -> ((AccessTerminalBlockEntity) be).serverTick();
+    }
+
+    @Override
+    public List<ItemStack> getDrops(BlockState state, LootParams.Builder params) {
+        List<ItemStack> drops = super.getDrops(state, params);
+        BlockEntity be = params.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+        if (be instanceof AccessTerminalBlockEntity terminal) {
+            for (ItemStack drop : drops) {
+                if (drop.getItem() instanceof BlockItem) {
+                    terminal.saveToItem(drop, params.getLevel().registryAccess());
+                }
+            }
+        }
+        return drops;
     }
 
     @Override
