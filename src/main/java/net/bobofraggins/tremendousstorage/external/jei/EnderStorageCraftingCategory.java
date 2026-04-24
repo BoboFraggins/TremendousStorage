@@ -21,7 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 
 /**
- * JEI recipe category for the Ender Chest and Ender Backpack smithing recipes.
+ * JEI recipe category for the Ender Chest and Ender Backpack crafting recipes.
  *
  * <p>Each {@link Recipe} carries a display title and a pair of per-tier item lists so
  * the single category can represent both the chest and backpack recipes, with cycling
@@ -33,7 +33,7 @@ import net.minecraft.world.item.component.CustomData;
  *   [ender upgrade]         [ender output]
  * </pre>
  */
-public class EnderStorageSmithingCategory implements IRecipeCategory<EnderStorageSmithingCategory.Recipe> {
+public class EnderStorageCraftingCategory implements IRecipeCategory<EnderStorageCraftingCategory.Recipe> {
 
     // -------------------------------------------------------------------------
     // Marker recipe — one entry per item type (chest / backpack)
@@ -42,13 +42,13 @@ public class EnderStorageSmithingCategory implements IRecipeCategory<EnderStorag
     public static final class Recipe {
 
         public static final Recipe CHEST =
-                new Recipe("jei.tremendousstorage.ender_chest_smithing", tieredChests(), tieredEnderChests());
+                new Recipe("jei.tremendousstorage.ender_chest_crafting", tieredChests(), tieredEnderChests());
 
         public static final Recipe BACKPACK =
-                new Recipe("jei.tremendousstorage.ender_backpack_smithing", tieredBackpacks(), tieredEnderBackpacks());
+                new Recipe("jei.tremendousstorage.ender_backpack_crafting", tieredBackpacks(), tieredEnderBackpacks());
 
         public static final Recipe TANK =
-                new Recipe("jei.tremendousstorage.ender_tank_smithing", tieredTanks(), tieredEnderTanks());
+                new Recipe("jei.tremendousstorage.ender_tank_crafting", tieredTanks(), tieredEnderTanks());
 
         final String titleKey;
         final List<ItemStack> inputs;
@@ -114,7 +114,7 @@ public class EnderStorageSmithingCategory implements IRecipeCategory<EnderStorag
     // -------------------------------------------------------------------------
 
     public static final RecipeType<Recipe> RECIPE_TYPE =
-            RecipeType.create("tremendousstorage", "ender_storage_smithing", Recipe.class);
+            RecipeType.create("tremendousstorage", "ender_storage_crafting", Recipe.class);
 
     private static final int INPUT_X = 0;
     private static final int OUTPUT_X = 42;
@@ -126,7 +126,7 @@ public class EnderStorageSmithingCategory implements IRecipeCategory<EnderStorag
 
     private final IDrawable icon;
 
-    public EnderStorageSmithingCategory(IGuiHelper helper) {
+    public EnderStorageCraftingCategory(IGuiHelper helper) {
         icon = helper.createDrawableItemLike(Registration.ENDER_STORAGE_UPGRADE.get());
     }
 
@@ -137,7 +137,7 @@ public class EnderStorageSmithingCategory implements IRecipeCategory<EnderStorag
 
     @Override
     public Component getTitle() {
-        return Component.translatable("jei.tremendousstorage.ender_storage_smithing");
+        return Component.translatable("jei.tremendousstorage.ender_storage_crafting");
     }
 
     @Override

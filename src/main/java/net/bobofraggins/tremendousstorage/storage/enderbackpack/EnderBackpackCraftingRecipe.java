@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.enderbackpack;
 
 import com.mojang.serialization.MapCodec;
-import net.bobofraggins.tremendousstorage.shared.recipe.AbstractEnderSmithingRecipe;
+import net.bobofraggins.tremendousstorage.shared.recipe.AbstractEnderCraftingRecipe;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
@@ -15,20 +15,20 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
 /**
- * Smithing-table recipe: Tremendous Backpack (any tier) + Ender Storage Upgrade →
+ * Crafting recipe: Tremendous Backpack (any tier) + Ender Storage Upgrade →
  * two linked Ender Tremendous Backpacks sharing a freshly generated 64-bit {@code linkId}.
  *
  * <p>All data (tier, priority, sort mode, crafting-upgrade flag, inventory) is copied from the
  * input backpack to both outputs via the {@link BackpackContents} data component.
  * The second backpack is returned via {@link #getRemainingItems} in the base slot.
  */
-public class EnderBackpackSmithingRecipe extends AbstractEnderSmithingRecipe {
+public class EnderBackpackCraftingRecipe extends AbstractEnderCraftingRecipe {
 
-    private static final EnderBackpackSmithingRecipe INSTANCE = new EnderBackpackSmithingRecipe();
+    private static final EnderBackpackCraftingRecipe INSTANCE = new EnderBackpackCraftingRecipe();
 
-    public static final MapCodec<EnderBackpackSmithingRecipe> CODEC = MapCodec.unit(INSTANCE);
+    public static final MapCodec<EnderBackpackCraftingRecipe> CODEC = MapCodec.unit(INSTANCE);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, EnderBackpackSmithingRecipe> STREAM_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, EnderBackpackCraftingRecipe> STREAM_CODEC =
             StreamCodec.unit(INSTANCE);
 
     @Override
@@ -99,6 +99,6 @@ public class EnderBackpackSmithingRecipe extends AbstractEnderSmithingRecipe {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return Registration.ENDER_BACKPACK_SMITHING_RECIPE.get();
+        return Registration.ENDER_BACKPACK_CRAFTING_RECIPE.get();
     }
 }

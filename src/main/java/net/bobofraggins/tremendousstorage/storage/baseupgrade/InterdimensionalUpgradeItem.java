@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  * Upgrade item that grants interdimensional Personal Access Terminal connectivity to a Wireless Hub.
  *
  * <p>Can only be applied to a Netherite-tier hub (infinite-range tier). Right-clicking on a
- * supported block applies the upgrade, consuming the item. Via smithing table, the hub item
+ * supported block applies the upgrade, consuming the item. Via crafting table, the hub item
  * must likewise already be Netherite tier.
  *
  * <p>Once upgraded, the PAT can open the network UI from any dimension, not just the one the

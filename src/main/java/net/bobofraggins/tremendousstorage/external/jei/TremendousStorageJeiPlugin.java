@@ -53,8 +53,8 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
         IGuiHelper guiHelper = reg.getJeiHelpers().getGuiHelper();
         reg.addRecipeCategories(
                 new PositiveVibesCauldronCategory(guiHelper),
-                new EnderFolderSmithingCategory(guiHelper),
-                new EnderStorageSmithingCategory(guiHelper));
+                new EnderFolderCraftingCategory(guiHelper),
+                new EnderStorageCraftingCategory(guiHelper));
     }
 
     @Override
@@ -64,13 +64,13 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
                 List.of(
                         PositiveVibesCauldronJeiRecipe.obtainedByRecycling(),
                         PositiveVibesCauldronJeiRecipe.healBrain()));
-        reg.addRecipes(EnderFolderSmithingCategory.RECIPE_TYPE, List.of(EnderFolderSmithingCategory.Recipe.INSTANCE));
+        reg.addRecipes(EnderFolderCraftingCategory.RECIPE_TYPE, List.of(EnderFolderCraftingCategory.Recipe.INSTANCE));
         reg.addRecipes(
-                EnderStorageSmithingCategory.RECIPE_TYPE,
+                EnderStorageCraftingCategory.RECIPE_TYPE,
                 List.of(
-                        EnderStorageSmithingCategory.Recipe.CHEST,
-                        EnderStorageSmithingCategory.Recipe.BACKPACK,
-                        EnderStorageSmithingCategory.Recipe.TANK));
+                        EnderStorageCraftingCategory.Recipe.CHEST,
+                        EnderStorageCraftingCategory.Recipe.BACKPACK,
+                        EnderStorageCraftingCategory.Recipe.TANK));
     }
 
     @Override
@@ -80,13 +80,13 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
         reg.addRecipeCatalyst(
                 Registration.POSITIVE_VIBES_CAULDRON_ITEM.get().getDefaultInstance(),
                 PositiveVibesCauldronCategory.RECIPE_TYPE);
-        reg.addRecipeCatalyst(new ItemStack(Items.CRAFTING_TABLE), EnderFolderSmithingCategory.RECIPE_TYPE);
+        reg.addRecipeCatalyst(new ItemStack(Items.CRAFTING_TABLE), EnderFolderCraftingCategory.RECIPE_TYPE);
         reg.addRecipeCatalyst(
-                Registration.ENDER_STORAGE_UPGRADE.get().getDefaultInstance(), EnderFolderSmithingCategory.RECIPE_TYPE);
-        reg.addRecipeCatalyst(new ItemStack(Items.CRAFTING_TABLE), EnderStorageSmithingCategory.RECIPE_TYPE);
+                Registration.ENDER_STORAGE_UPGRADE.get().getDefaultInstance(), EnderFolderCraftingCategory.RECIPE_TYPE);
+        reg.addRecipeCatalyst(new ItemStack(Items.CRAFTING_TABLE), EnderStorageCraftingCategory.RECIPE_TYPE);
         reg.addRecipeCatalyst(
                 Registration.ENDER_STORAGE_UPGRADE.get().getDefaultInstance(),
-                EnderStorageSmithingCategory.RECIPE_TYPE);
+                EnderStorageCraftingCategory.RECIPE_TYPE);
     }
 
     @Override

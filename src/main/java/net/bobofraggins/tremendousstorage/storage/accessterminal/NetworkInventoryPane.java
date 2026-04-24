@@ -1,10 +1,12 @@
 package net.bobofraggins.tremendousstorage.storage.accessterminal;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
@@ -14,14 +16,22 @@ import net.bobofraggins.tremendousstorage.shared.network.SatInsertPacket;
 import net.bobofraggins.tremendousstorage.shared.ui.IDialogPane;
 import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.joml.Matrix4f;
 
 /**
  * Dialog pane that renders the scrollable network item grid and its scrollbar.
@@ -486,20 +496,76 @@ public class NetworkInventoryPane implements IDialogPane {
                 int sx = GRID_X + col * AccessTerminalLayout.SLOT_SIZE + 1;
                 int sy = startY + row * AccessTerminalLayout.SLOT_SIZE + 1;
 
-                graphics.renderItem(stack, sx, sy);
-                if (count == 0) {
-                    // Ghost entry: item is no longer in the network. Show a red "0".
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(0, 0, 200);
-                    String zeroStr = "0";
-                    graphics.drawString(font, zeroStr, sx + 19 - font.width(zeroStr), sy + 9, 0xFFFF5555, true);
-                    graphics.pose().popPose();
+                boolean fluid = !isFluid.isEmpty() && idx < isFluid.size() && isFluid.get(idx);
+                if (fluid) {
+                    renderFluidIcon(graphics, stack, sx, sy);
                 } else {
-                    String countStr = count > 1 ? CountFormat.format(count) : null;
-                    graphics.renderItemDecorations(font, stack, sx, sy, countStr);
+                    graphics.renderItem(stack, sx, sy);
+                }
+
+                if (count == 0) {
+                    renderSizeLabel(graphics, font, sx, sy, "0", 0xFF5555);
+                } else {
+                    String label = fluid ? formatFluidCount(count) : count > 1 ? CountFormat.format(count) : null;
+                    if (label != null) renderSizeLabel(graphics, font, sx, sy, label, 0xFFFFFF);
                 }
             }
         }
+    }
+
+    private static void renderFluidIcon(GuiGraphics graphics, ItemStack bucketStack, int x, int y) {
+        Optional<FluidStack> fluidOpt = FluidUtil.getFluidContained(bucketStack);
+        if (fluidOpt.isEmpty()) {
+            graphics.renderItem(bucketStack, x, y);
+            return;
+        }
+        FluidStack fluid = fluidOpt.get();
+        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fluid.getFluid());
+        ResourceLocation stillTex = ext.getStillTexture(fluid);
+        TextureAtlasSprite sprite = Minecraft.getInstance()
+                .getModelManager()
+                .getAtlas(InventoryMenu.BLOCK_ATLAS)
+                .getSprite(stillTex);
+        int tint = ext.getTintColor(fluid);
+        float r = ((tint >> 16) & 0xFF) / 255f;
+        float g = ((tint >> 8) & 0xFF) / 255f;
+        float b = (tint & 0xFF) / 255f;
+        float a = ((tint >> 24) & 0xFF) / 255f;
+        if (a == 0f) a = 1f;
+        graphics.blit(x, y, 0, 16, 16, sprite, r, g, b, a);
+    }
+
+    /** Renders a count label at 0.666 scale in the bottom-right corner of a 16×16 slot. */
+    private static void renderSizeLabel(GuiGraphics graphics, Font font, float x, float y, String text, int color) {
+        float scale = 0.666f;
+        float scaleInv = 1f / scale;
+        float offset = -1f;
+
+        graphics.pose().pushPose();
+        graphics.pose().translate(0f, 0f, 200f);
+        graphics.pose().scale(scale, scale, scale);
+        Matrix4f mat = graphics.pose().last().pose();
+
+        float textX = (x + offset + 16f + 2f - font.width(text) * scale) * scaleInv;
+        float textY = (y + offset + 16f + 5f - 5f * scale) * scaleInv;
+
+        MultiBufferSource.BufferSource buffers =
+                Minecraft.getInstance().renderBuffers().bufferSource();
+        RenderSystem.disableBlend();
+        font.drawInBatch(
+                text, textX + 1f, textY + 1f, 0x414141, false, mat, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
+        font.drawInBatch(text, textX, textY, color, false, mat, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
+        buffers.endBatch();
+        RenderSystem.enableBlend();
+
+        graphics.pose().popPose();
+    }
+
+    /** Formats a fluid amount (in mB) for the slot label. */
+    private static String formatFluidCount(long mB) {
+        if (mB <= 0) return null;
+        if (mB < 1000) return String.valueOf(mB);
+        return CountFormat.format(mB / 1000) + "B";
     }
 
     private void drawScrollbar(GuiGraphics graphics) {

@@ -31,20 +31,20 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
 /**
- * Smithing-table recipe: storage block item (any tier) + matching Storage Upgrade →
+ * Crafting recipe: storage block item (any tier) + matching Storage Upgrade →
  * same block item at the next tier, with all stored contents preserved.
  *
  * <p>Template slot is left empty. Base slot holds the storage block; addition slot holds
  * the upgrade item. A single recipe JSON covers every tier/block combination; all
  * matching logic is in Java.
  */
-public class StorageSmithingUpgradeRecipe implements CraftingRecipe {
+public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
 
-    private static final StorageSmithingUpgradeRecipe INSTANCE = new StorageSmithingUpgradeRecipe();
+    private static final StorageUpgradeCraftingRecipe INSTANCE = new StorageUpgradeCraftingRecipe();
 
-    public static final MapCodec<StorageSmithingUpgradeRecipe> CODEC = MapCodec.unit(INSTANCE);
+    public static final MapCodec<StorageUpgradeCraftingRecipe> CODEC = MapCodec.unit(INSTANCE);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, StorageSmithingUpgradeRecipe> STREAM_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, StorageUpgradeCraftingRecipe> STREAM_CODEC =
             StreamCodec.unit(INSTANCE);
 
     @Override
@@ -151,7 +151,7 @@ public class StorageSmithingUpgradeRecipe implements CraftingRecipe {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return Registration.STORAGE_SMITHING_UPGRADE_RECIPE.get();
+        return Registration.STORAGE_UPGRADE_CRAFTING_RECIPE.get();
     }
 
     // -------------------------------------------------------------------------

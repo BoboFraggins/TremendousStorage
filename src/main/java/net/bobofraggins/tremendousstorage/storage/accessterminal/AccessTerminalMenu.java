@@ -320,6 +320,15 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         return AccessTerminalBlock.isStillValid(player.level(), satPos);
     }
 
+    /**
+     * Returns the {@link Level} in which the Network Interface lives.
+     * Subclasses may override to redirect lookups to a different dimension
+     * (e.g. the Wireless SAT when the player is cross-dimension).
+     */
+    protected Level getNiLevel(Player player) {
+        return player.level();
+    }
+
     // -------------------------------------------------------------------------
     // Shift-click: between result/crafting/inventory; network insert via packet
     // -------------------------------------------------------------------------
@@ -358,7 +367,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         } else if (index >= invStart && index < hotbarEnd) {
             // Shift-click player slot: try network first, then swap between inv/hotbar
             if (hasNetwork() && !player.level().isClientSide()) {
-                if (player.level().getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni) {
+                if (getNiLevel(player).getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni) {
                     IItemHandler handler = ni.getItemHandler();
                     if (handler != null) {
                         ItemStack remainder = handler.insertItem(0, stack, false);
@@ -414,7 +423,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
      */
     private void refillCraftGridFromNetwork(Player player, ItemStack[] gridSnapshot) {
         if (!hasCraftingUpgrade || !hasNetwork() || player.level().isClientSide()) return;
-        if (!(player.level().getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
+        if (!(getNiLevel(player).getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
         IItemHandler handler = ni.getItemHandler();
         if (handler == null) return;
 
@@ -543,7 +552,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     public void broadcastChanges() {
         super.broadcastChanges();
         if (!hasNetwork() || player.level().isClientSide()) return;
-        if (!(player.level().getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
+        if (!(getNiLevel(player).getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
         if (!(player instanceof ServerPlayer sp)) return;
 
         long rev = ni.getCacheRevision();

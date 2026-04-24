@@ -112,8 +112,7 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
                 int sy = topPos + GRID_SCREEN_DY + row * SLOT_SIZE;
                 int slotIndex = row * 3 + col;
 
-                graphics.fill(sx, sy, sx + SLOT_SIZE, sy + SLOT_SIZE, 0xFF303030);
-                graphics.fill(sx + 1, sy + 1, sx + SLOT_SIZE - 1, sy + SLOT_SIZE - 1, 0xFF1A1A1A);
+                drawSlot(graphics, sx, sy);
 
                 ItemStack stack = menu.getFilterSlot(slotIndex);
                 if (!stack.isEmpty()) {
@@ -159,6 +158,14 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
             PacketDistributor.sendToServer(
                     new SetImportExportFilterPacket(menu.getPos(), menu.getFaceIndex(), slotIndex, ghost));
         }
+    }
+
+    private static void drawSlot(GuiGraphics g, int sx, int sy) {
+        g.fill(sx, sy, sx + 16, sy + 1, 0xFF373737); // top
+        g.fill(sx, sy + 1, sx + 1, sy + 16, 0xFF373737); // left
+        g.fill(sx, sy + 16, sx + 17, sy + 17, 0xFFFFFFFF); // bottom
+        g.fill(sx + 16, sy, sx + 17, sy + 16, 0xFFFFFFFF); // right
+        g.fill(sx + 1, sy + 1, sx + 16, sy + 16, 0xFF8B8B8B); // interior
     }
 
     // -------------------------------------------------------------------------

@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.enderchest;
 
 import com.mojang.serialization.MapCodec;
-import net.bobofraggins.tremendousstorage.shared.recipe.AbstractEnderSmithingRecipe;
+import net.bobofraggins.tremendousstorage.shared.recipe.AbstractEnderCraftingRecipe;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -13,20 +13,20 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
 /**
- * Smithing-table recipe: Tremendous Chest (any tier) + Ender Storage Upgrade →
+ * Crafting recipe: Tremendous Chest (any tier) + Ender Storage Upgrade →
  * two linked Ender Tremendous Chests sharing a freshly generated 64-bit {@code linkId}.
  *
  * <p>All NBT data (tier, priority, crafting-upgrade flag, inventory) is copied from the
  * input chest to both outputs. The second chest is returned via {@link #getRemainingItems}
  * in place of the base-slot chest, exactly like an empty bucket remaining after a recipe.
  */
-public class EnderChestSmithingRecipe extends AbstractEnderSmithingRecipe {
+public class EnderChestCraftingRecipe extends AbstractEnderCraftingRecipe {
 
-    private static final EnderChestSmithingRecipe INSTANCE = new EnderChestSmithingRecipe();
+    private static final EnderChestCraftingRecipe INSTANCE = new EnderChestCraftingRecipe();
 
-    public static final MapCodec<EnderChestSmithingRecipe> CODEC = MapCodec.unit(INSTANCE);
+    public static final MapCodec<EnderChestCraftingRecipe> CODEC = MapCodec.unit(INSTANCE);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, EnderChestSmithingRecipe> STREAM_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, EnderChestCraftingRecipe> STREAM_CODEC =
             StreamCodec.unit(INSTANCE);
 
     @Override
@@ -65,6 +65,6 @@ public class EnderChestSmithingRecipe extends AbstractEnderSmithingRecipe {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return Registration.ENDER_CHEST_SMITHING_RECIPE.get();
+        return Registration.ENDER_CHEST_CRAFTING_RECIPE.get();
     }
 }

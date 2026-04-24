@@ -56,8 +56,8 @@ public class EnderFolderItem extends ManillaFolderItem {
      * Returns the live shared {@link FolderContents} for this Ender Folder from the server
      * storage. Falls back to the item's component if the server is unavailable (client-side).
      *
-     * <p>If the item's tier is higher than what is recorded in storage (e.g. after a smithing
-     * tier upgrade), the storage entry is promoted and the upgrade is propagated to all other
+     * <p>If the item's tier is higher than what is recorded in storage (e.g. after a tier
+     * upgrade), the storage entry is promoted and the upgrade is propagated to all other
      * linked Ender Folder items in loaded inventories.
      */
     public static FolderContents getLiveContents(ItemStack stack, MinecraftServer server) {
@@ -68,7 +68,7 @@ public class EnderFolderItem extends ManillaFolderItem {
         FolderContents live = storage.getContents(linkId);
         FolderContents itemContents = ManillaFolderItem.getContents(stack);
         if (itemContents.tier().ordinal() > live.tier().ordinal()) {
-            // Item has a higher tier — this happens after a smithing tier upgrade.
+            // Item has a higher tier — this happens after a tier upgrade.
             // Promote the storage entry and propagate to all linked items.
             FolderContents promoted = live.withTier(itemContents.tier());
             storage.setContents(linkId, promoted);
@@ -102,7 +102,7 @@ public class EnderFolderItem extends ManillaFolderItem {
      * Syncs the item's component from the authoritative server storage.
      * Call this when loading an Ender Folder from disk (e.g. player login, chunk load).
      *
-     * <p>If the item's tier is higher than what is in storage (e.g. after a smithing tier
+     * <p>If the item's tier is higher than what is in storage (e.g. after a tier
      * upgrade), the storage is promoted and the upgrade propagates to all linked items.
      */
     public static void syncFromStorage(ItemStack stack, MinecraftServer server) {

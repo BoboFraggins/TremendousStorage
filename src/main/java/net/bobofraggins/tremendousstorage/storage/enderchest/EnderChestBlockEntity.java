@@ -103,7 +103,7 @@ public class EnderChestBlockEntity extends ChestBlockEntity {
         EnderChestStorage storage = getStorage(server);
         if (storage.hasLink(linkId)) {
             loadTypes(storage.getTypes(linkId), level.registryAccess());
-            // Sync tier: if this BE has a higher tier (e.g. just placed after smithing upgrade),
+            // Sync tier: if this BE has a higher tier (e.g. just placed after a tier upgrade),
             // push that new tier to storage so all linked copies update.
             StorageTier storageTier = storage.getTier(linkId);
             StorageTier localTier = getTier();

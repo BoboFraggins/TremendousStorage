@@ -5,6 +5,7 @@ import net.bobofraggins.tremendousstorage.shared.storage.KeyCounter;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
@@ -14,8 +15,7 @@ import org.jetbrains.annotations.NotNull;
  * containing filled buckets, so the SAT can display and extract fluid as bucket-form items.
  *
  * <p>The adapter presents at most one slot. The slot is absent ({@link #getSlots()} == 0) when
- * the tank holds less than 1 000 mB. When present, the stack is the appropriate filled bucket
- * with count == min(bucketCount, bucketItem.maxStackSize).
+ * the tank is empty. When present, the stack is the appropriate filled bucket with count == 1.
  *
  * <p>Insertion is always refused — fluids are inserted via the normal {@code IFluidHandler}
  * capability, not through the SAT item path.
@@ -29,31 +29,22 @@ public class TankItemAdapter implements IItemHandler, IKeyCounterContributor {
     }
 
     // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
-
-    private long bucketCount() {
-        return tank.getAmount() / 1000;
-    }
-
-    // -------------------------------------------------------------------------
     // IItemHandler
     // -------------------------------------------------------------------------
 
     @Override
     public int getSlots() {
-        return bucketCount() > 0 ? 1 : 0;
+        if (tank.getAmount() <= 0) return 0;
+        Item bucket = tank.getStoredFluid().getFluid().getBucket();
+        return bucket == Items.AIR ? 0 : 1;
     }
 
     @Override
     public @NotNull ItemStack getStackInSlot(int slot) {
-        if (slot != 0) return ItemStack.EMPTY;
-        long count = bucketCount();
-        if (count == 0) return ItemStack.EMPTY;
+        if (slot != 0 || tank.getAmount() <= 0) return ItemStack.EMPTY;
         Item bucketItem = tank.getStoredFluid().getFluid().getBucket();
-        ItemStack prototype = new ItemStack(bucketItem);
-        int displayCount = (int) Math.min(count, prototype.getMaxStackSize());
-        return prototype.copyWithCount(displayCount);
+        if (bucketItem == Items.AIR) return ItemStack.EMPTY;
+        return new ItemStack(bucketItem);
     }
 
     @Override
@@ -69,7 +60,7 @@ public class TankItemAdapter implements IItemHandler, IKeyCounterContributor {
     @Override
     public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
         if (slot != 0) return ItemStack.EMPTY;
-        long buckets = bucketCount();
+        long buckets = tank.getAmount() / 1000;
         if (buckets == 0) return ItemStack.EMPTY;
 
         int toExtract = (int) Math.min(amount, buckets);
@@ -96,9 +87,10 @@ public class TankItemAdapter implements IItemHandler, IKeyCounterContributor {
 
     @Override
     public void contributeToKeyCounter(KeyCounter kc) {
-        long count = bucketCount();
-        if (count == 0) return;
+        long amount = tank.getAmount();
+        if (amount <= 0) return;
         Item bucketItem = tank.getStoredFluid().getFluid().getBucket();
-        kc.add(StorageKey.of(new ItemStack(bucketItem)), count);
+        if (bucketItem == Items.AIR) return;
+        kc.add(StorageKey.of(new ItemStack(bucketItem)), amount);
     }
 }

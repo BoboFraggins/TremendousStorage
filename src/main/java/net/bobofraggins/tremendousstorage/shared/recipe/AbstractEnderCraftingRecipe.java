@@ -23,7 +23,7 @@ import net.minecraft.world.level.Level;
  * <p>Subclasses provide only the item-type-specific logic: which base items are accepted,
  * how to read an existing link ID, and how to build the ender output item.
  */
-public abstract class AbstractEnderSmithingRecipe implements CraftingRecipe {
+public abstract class AbstractEnderCraftingRecipe implements CraftingRecipe {
 
     protected static final SecureRandom SECURE_RANDOM = new SecureRandom();
 

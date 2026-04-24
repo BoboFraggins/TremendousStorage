@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.LocalInventoryPane;
@@ -11,6 +12,7 @@ import net.bobofraggins.tremendousstorage.shared.ui.SearchBoxWidget;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -18,6 +20,8 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -35,6 +39,9 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
     private final Dialog dialog;
     private final ConfigDrawer configDrawer;
     private SearchBoxWidget searchBox;
+
+    @Nullable
+    private Slot shiftDragSlot;
 
     public PicnicBasketItemScreen(PicnicBasketItemMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -152,6 +159,7 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        shiftDragSlot = null;
         if (configDrawer.mouseClicked(mouseX, mouseY, button)) return true;
         if (dialog.mouseClicked(mouseX, mouseY, button)) return true;
         return super.mouseClicked(mouseX, mouseY, button);
@@ -166,11 +174,19 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (dialog.mouseDragged(mouseX, mouseY, button, dragX, dragY)) return true;
+        if (button == 0 && Screen.hasShiftDown() && menu.getCarried().isEmpty()) {
+            Slot slot = hoveredSlot;
+            if (slot != null && slot != shiftDragSlot && slot.hasItem()) {
+                shiftDragSlot = slot;
+                slotClicked(slot, slot.index, 0, ClickType.QUICK_MOVE);
+            }
+        }
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        shiftDragSlot = null;
         if (dialog.mouseReleased(mouseX, mouseY, button)) return true;
         return super.mouseReleased(mouseX, mouseY, button);
     }

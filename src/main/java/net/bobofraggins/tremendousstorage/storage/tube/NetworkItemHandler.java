@@ -110,8 +110,7 @@ public class NetworkItemHandler implements IItemHandler {
      * Inserts {@code stack} into the network. The {@code slot} parameter is ignored;
      * handlers are tried in priority order (highest first) until the stack is fully consumed.
      *
-     * <p>This matches AE2/RS network insertion semantics: the network decides which physical
-     * storage to fill, not the caller.
+     * <p>The network decides which physical storage to fill, not the caller.
      */
     @Override
     public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {

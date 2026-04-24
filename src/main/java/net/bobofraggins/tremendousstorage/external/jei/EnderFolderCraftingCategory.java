@@ -21,7 +21,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * JEI recipe category for the Ender Folder smithing recipe.
+ * JEI recipe category for the Ender Folder crafting recipe.
  *
  * <p>Displays a two-input (folder + Ender Storage Upgrade), two-output (pair of linked
  * Ender Folders) layout to convey that both folders are produced together. Cycles through
@@ -33,7 +33,7 @@ import net.minecraft.world.item.ItemStack;
  *   [ender storage upgrade] [ender folder]
  * </pre>
  */
-public class EnderFolderSmithingCategory implements IRecipeCategory<EnderFolderSmithingCategory.Recipe> {
+public class EnderFolderCraftingCategory implements IRecipeCategory<EnderFolderCraftingCategory.Recipe> {
 
     /**
      * Marker recipe object. There is only one logical recipe (all tiers cycle in the
@@ -46,7 +46,7 @@ public class EnderFolderSmithingCategory implements IRecipeCategory<EnderFolderS
     }
 
     public static final RecipeType<Recipe> RECIPE_TYPE =
-            RecipeType.create("tremendousstorage", "ender_folder_smithing", Recipe.class);
+            RecipeType.create("tremendousstorage", "ender_folder_crafting", Recipe.class);
 
     // Layout constants
     private static final int INPUT_X = 0;
@@ -59,7 +59,7 @@ public class EnderFolderSmithingCategory implements IRecipeCategory<EnderFolderS
 
     private final IDrawable icon;
 
-    public EnderFolderSmithingCategory(IGuiHelper helper) {
+    public EnderFolderCraftingCategory(IGuiHelper helper) {
         icon = helper.createDrawableItemLike(Registration.ENDER_STORAGE_UPGRADE.get());
     }
 
@@ -70,7 +70,7 @@ public class EnderFolderSmithingCategory implements IRecipeCategory<EnderFolderS
 
     @Override
     public Component getTitle() {
-        return Component.translatable("jei.tremendousstorage.ender_folder_smithing");
+        return Component.translatable("jei.tremendousstorage.ender_folder_crafting");
     }
 
     @Override
@@ -93,7 +93,7 @@ public class EnderFolderSmithingCategory implements IRecipeCategory<EnderFolderS
         StorageTier[] tiers = StorageTier.values();
 
         List<ItemStack> folders = Arrays.stream(tiers)
-                .map(EnderFolderSmithingCategory::unlockedFolder)
+                .map(EnderFolderCraftingCategory::unlockedFolder)
                 .toList();
 
         List<ItemStack> upgrades = Arrays.stream(tiers)
@@ -101,7 +101,7 @@ public class EnderFolderSmithingCategory implements IRecipeCategory<EnderFolderS
                 .toList();
 
         List<ItemStack> outputs = Arrays.stream(tiers)
-                .map(EnderFolderSmithingCategory::enderFolder)
+                .map(EnderFolderCraftingCategory::enderFolder)
                 .toList();
 
         builder.addSlot(RecipeIngredientRole.INPUT, INPUT_X, ROW_0_Y).addIngredients(VanillaTypes.ITEM_STACK, folders);

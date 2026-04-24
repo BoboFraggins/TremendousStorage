@@ -12,6 +12,7 @@ import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlock;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.tubeattachments.AttachmentType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -77,12 +78,19 @@ public final class TubeNetwork {
                         queue.add(neighborPos);
                     }
                 } else if (collectedStorage.add(neighborPos)) {
-                    // Non-tube neighbor seen for the first time: collect its IItemHandler
-                    IItemHandler handler =
-                            level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, dir.getOpposite());
-                    if (handler != null) {
-                        Priority priority = resolvePriority(level, neighborPos, tubeBE, dir.ordinal());
-                        entries.add(new HandlerEntry(handler, priority));
+                    // Non-tube neighbor seen for the first time.
+                    // Only include it as network storage when the face has a Storage Interface
+                    // (or no attachment). Import/Export interfaces own their neighbor exclusively
+                    // for pull/push operations and must not expose it as a network storage target.
+                    AttachmentType faceAttachment =
+                            tubeBE != null ? tubeBE.getAttachmentType(dir.ordinal()) : AttachmentType.NONE;
+                    if (faceAttachment == AttachmentType.NONE || faceAttachment == AttachmentType.STORAGE_INTERFACE) {
+                        IItemHandler handler =
+                                level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, dir.getOpposite());
+                        if (handler != null) {
+                            Priority priority = resolvePriority(level, neighborPos, tubeBE, dir.ordinal());
+                            entries.add(new HandlerEntry(handler, priority));
+                        }
                     }
 
                     // Track the connected NI for energy routing

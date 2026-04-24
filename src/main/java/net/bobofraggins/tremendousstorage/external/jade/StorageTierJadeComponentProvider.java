@@ -29,14 +29,22 @@ public enum StorageTierJadeComponentProvider implements IComponentProvider<Block
 
         StorageTier tier =
                 data.contains("StorageTier") ? StorageTier.fromId(data.getString("StorageTier")) : StorageTier.WOOD;
+        boolean ender = data.getBoolean("Ender");
         boolean crafting = data.getBoolean("CraftingUpgrade");
         boolean magnet = data.getBoolean("MagnetUpgrade");
         boolean puller = data.getBoolean("PullerUpgrade");
+        boolean haarp = data.getBoolean("HaarpUpgrade");
+        boolean interdimensional = data.getBoolean("InterdimensionalUpgrade");
 
-        if (tier == StorageTier.WOOD && !crafting && !magnet && !puller) return;
+        if (tier == StorageTier.WOOD && !ender && !crafting && !magnet && !puller && !haarp && !interdimensional)
+            return;
 
         StringBuilder sb = new StringBuilder();
         if (tier != StorageTier.WOOD) sb.append(TieredBlockItem.capitalize(tier.getId()));
+        if (ender) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Ender");
+        }
         if (crafting) {
             if (!sb.isEmpty()) sb.append('/');
             sb.append("Crafting");
@@ -48,6 +56,14 @@ public enum StorageTierJadeComponentProvider implements IComponentProvider<Block
         if (puller) {
             if (!sb.isEmpty()) sb.append('/');
             sb.append("Puller");
+        }
+        if (haarp) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Haarp");
+        }
+        if (interdimensional) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Interdimensional");
         }
 
         Component baseName = Component.translatable(accessor.getBlock().getDescriptionId());

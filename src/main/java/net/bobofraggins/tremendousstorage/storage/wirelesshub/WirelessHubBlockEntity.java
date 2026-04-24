@@ -1,5 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.wirelesshub;
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
@@ -9,7 +11,6 @@ import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkListab
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkScanResult;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiCacheHolder;
 import net.bobofraggins.tremendousstorage.storage.personalaccessterminal.PersonalAccessTerminalItem;
-import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -27,6 +28,9 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
@@ -45,9 +49,9 @@ import net.neoforged.neoforge.items.ItemStackHandler;
  * <p>Accepts {@link StorageTier} upgrades (right-click with a StorageUpgradeItem). Each tier
  * doubles the wireless range; default (WOOD) is 16 blocks, NETHERITE is infinite.
  *
- * <p>With the HAARP Upgrade applied (item or smithing table), adds a weather-control panel to the
+ * <p>With the HAARP Upgrade applied (item or crafting table), adds a weather-control panel to the
  * UI. Every 60 ticks the hub checks if weather matches the desired mode; if not, it consumes
- * 1 bucket of Positive Vibes from the nearest connected Recycling Bin and adjusts the weather.
+ * 1 bucket of Positive Vibes from any fluid container on the network and adjusts the weather.
  */
 public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder, NetworkListable {
 
@@ -220,8 +224,9 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     }
 
     /**
-     * Searches the network for a Recycling Bin with enough Positive Vibes and drains
-     * {@link #VIBES_COST_MB} mB from it.
+     * Searches the network for any fluid container with enough Positive Vibes and drains
+     * {@link #VIBES_COST_MB} mB from it. Checks all positions adjacent to the NI and to
+     * every tube in the network via the {@link Capabilities.FluidHandler#BLOCK} capability.
      *
      * @return true if the fluid was successfully consumed
      */
@@ -234,19 +239,29 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         NetworkScanResult scan = ni.getScan();
         if (scan == null) return false;
 
-        // Check NI position neighbours and all tube-adjacent positions
-        for (BlockPos candidate : scan.tubePositions()) {
+        FluidStack wanted = new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), VIBES_COST_MB);
+        Set<BlockPos> checked = new HashSet<>();
+
+        // Check positions adjacent to the NI itself and to each tube
+        for (Direction dir : Direction.values()) {
+            BlockPos neighbor = niPos.relative(dir);
+            if (checked.add(neighbor) && drainVibes(serverLevel, neighbor, wanted)) return true;
+        }
+        for (BlockPos tube : scan.tubePositions()) {
             for (Direction dir : Direction.values()) {
-                BlockPos neighbor = candidate.relative(dir);
-                if (serverLevel.getBlockEntity(neighbor) instanceof RecyclingBinBlockEntity rb) {
-                    if (rb.extractVibes(VIBES_COST_MB, true) >= VIBES_COST_MB) {
-                        rb.extractVibes(VIBES_COST_MB, false);
-                        return true;
-                    }
-                }
+                BlockPos neighbor = tube.relative(dir);
+                if (checked.add(neighbor) && drainVibes(serverLevel, neighbor, wanted)) return true;
             }
         }
         return false;
+    }
+
+    private static boolean drainVibes(ServerLevel level, BlockPos pos, FluidStack wanted) {
+        IFluidHandler fh = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, null);
+        if (fh == null) return false;
+        if (fh.drain(wanted, IFluidHandler.FluidAction.SIMULATE).getAmount() < wanted.getAmount()) return false;
+        fh.drain(wanted, IFluidHandler.FluidAction.EXECUTE);
+        return true;
     }
 
     // -------------------------------------------------------------------------

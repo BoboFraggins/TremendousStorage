@@ -83,7 +83,7 @@ public class EnderTankBlockEntity extends TankBlockEntity {
             FluidStack type = storage.getStoredFluid(linkId);
             long amount = storage.getAmount(linkId);
             forceSetFluidState(type, amount);
-            // Sync tier: push higher tier to storage (handles smithing upgrade), or take storage tier
+            // Sync tier: push higher tier to storage (handles tier upgrades), or take storage tier
             StorageTier storageTier = storage.getTier(linkId);
             StorageTier localTier = getTier();
             if (localTier.ordinal() > storageTier.ordinal()) {

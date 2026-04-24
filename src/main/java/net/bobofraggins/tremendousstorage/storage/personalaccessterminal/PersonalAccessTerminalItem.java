@@ -147,7 +147,7 @@ public class PersonalAccessTerminalItem extends Item {
 
         // Use the NI position as both satPos and niPos — the client-side constructor reads
         // satPos first, then optionally niPos. PersonalAccessTerminalMenu.stillValid ignores satPos.
-        player.openMenu(new PersonalAccessTerminalMenu.Provider(niPos, hasCraftingUpgrade), buf -> {
+        player.openMenu(new PersonalAccessTerminalMenu.Provider(niPos, hasCraftingUpgrade, hubDimensionId), buf -> {
             buf.writeBlockPos(niPos); // satPos (ignored by PersonalAccessTerminalMenu.stillValid)
             buf.writeBoolean(true); // hasNiPos = true
             buf.writeBlockPos(niPos); // niPos

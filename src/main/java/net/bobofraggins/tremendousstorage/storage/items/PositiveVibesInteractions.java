@@ -34,7 +34,21 @@ public final class PositiveVibesInteractions {
     /** Registers all cauldron interactions. Call once during common setup. */
     public static void register() {
 
-        // 1. Positive Vibes cauldron + empty bucket → Positive Vibes Bucket
+        // 1. Empty cauldron + Positive Vibes Bucket → Positive Vibes cauldron
+        CauldronInteraction.EMPTY
+                .map()
+                .put(Registration.POSITIVE_VIBES_BUCKET.get(), (state, level, pos, player, hand, stack) -> {
+                    if (!level.isClientSide) {
+                        stack.shrink(1);
+                        player.addItem(new ItemStack(Items.BUCKET));
+                        level.setBlockAndUpdate(
+                                pos, Registration.POSITIVE_VIBES_CAULDRON.get().defaultBlockState());
+                        level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
+                    }
+                    return ItemInteractionResult.sidedSuccess(level.isClientSide);
+                });
+
+        // 2. Positive Vibes cauldron + empty bucket → Positive Vibes Bucket
         CAULDRON_INTERACTIONS.map().put(Items.BUCKET, (state, level, pos, player, hand, stack) -> {
             if (!level.isClientSide) {
                 stack.shrink(1);

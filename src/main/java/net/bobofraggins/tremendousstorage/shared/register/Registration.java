@@ -8,7 +8,7 @@ import net.bobofraggins.tremendousstorage.external.exnihilosequentia.ExNihiloSeq
 import net.bobofraggins.tremendousstorage.glamping.GlampingRegistration;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlock;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlockEntity;
-import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketSmithingRecipe;
+import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketCraftingRecipe;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteBarsBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteOreBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuritePaxelItem;
@@ -43,18 +43,18 @@ import net.bobofraggins.tremendousstorage.storage.chest.ChestItemHandler;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackBlock;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackCraftingRecipe;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackItem;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackMenu;
-import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackSmithingRecipe;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlock;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestSmithingRecipe;
+import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestCraftingRecipe;
+import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderCraftingRecipe;
 import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
-import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderSmithingRecipe;
 import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankBlock;
 import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankCraftingRecipe;
 import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankItem;
-import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankSmithingRecipe;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlock;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetItemHandler;
@@ -84,7 +84,7 @@ import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinBlock
 import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinFluidHandler;
 import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinItemHandler;
 import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinMenu;
-import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageSmithingUpgradeRecipe;
+import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeCraftingRecipe;
 import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlock;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
@@ -982,99 +982,99 @@ public final class Registration {
             RECIPE_SERIALIZERS.register(
                     "folder_tape", () -> new SimpleCraftingRecipeSerializer<>(FolderTapeRecipe::new));
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderChestSmithingRecipe>>
-            ENDER_CHEST_SMITHING_RECIPE =
-                    RECIPE_SERIALIZERS.register("ender_chest_smithing", () -> new RecipeSerializer<>() {
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderChestCraftingRecipe>>
+            ENDER_CHEST_CRAFTING_RECIPE =
+                    RECIPE_SERIALIZERS.register("ender_chest_crafting", () -> new RecipeSerializer<>() {
                         @Override
-                        public com.mojang.serialization.MapCodec<EnderChestSmithingRecipe> codec() {
-                            return EnderChestSmithingRecipe.CODEC;
+                        public com.mojang.serialization.MapCodec<EnderChestCraftingRecipe> codec() {
+                            return EnderChestCraftingRecipe.CODEC;
                         }
 
                         @Override
                         public net.minecraft.network.codec.StreamCodec<
-                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderChestSmithingRecipe>
+                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderChestCraftingRecipe>
                                 streamCodec() {
-                            return EnderChestSmithingRecipe.STREAM_CODEC;
+                            return EnderChestCraftingRecipe.STREAM_CODEC;
                         }
                     });
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderBackpackSmithingRecipe>>
-            ENDER_BACKPACK_SMITHING_RECIPE =
-                    RECIPE_SERIALIZERS.register("ender_backpack_smithing", () -> new RecipeSerializer<>() {
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderBackpackCraftingRecipe>>
+            ENDER_BACKPACK_CRAFTING_RECIPE =
+                    RECIPE_SERIALIZERS.register("ender_backpack_crafting", () -> new RecipeSerializer<>() {
                         @Override
-                        public com.mojang.serialization.MapCodec<EnderBackpackSmithingRecipe> codec() {
-                            return EnderBackpackSmithingRecipe.CODEC;
+                        public com.mojang.serialization.MapCodec<EnderBackpackCraftingRecipe> codec() {
+                            return EnderBackpackCraftingRecipe.CODEC;
                         }
 
                         @Override
                         public net.minecraft.network.codec.StreamCodec<
-                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderBackpackSmithingRecipe>
+                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderBackpackCraftingRecipe>
                                 streamCodec() {
-                            return EnderBackpackSmithingRecipe.STREAM_CODEC;
+                            return EnderBackpackCraftingRecipe.STREAM_CODEC;
                         }
                     });
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderFolderSmithingRecipe>>
-            ENDER_FOLDER_SMITHING_RECIPE =
-                    RECIPE_SERIALIZERS.register("ender_folder_smithing", () -> new RecipeSerializer<>() {
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderFolderCraftingRecipe>>
+            ENDER_FOLDER_CRAFTING_RECIPE =
+                    RECIPE_SERIALIZERS.register("ender_folder_crafting", () -> new RecipeSerializer<>() {
                         @Override
-                        public com.mojang.serialization.MapCodec<EnderFolderSmithingRecipe> codec() {
-                            return EnderFolderSmithingRecipe.CODEC;
+                        public com.mojang.serialization.MapCodec<EnderFolderCraftingRecipe> codec() {
+                            return EnderFolderCraftingRecipe.CODEC;
                         }
 
                         @Override
                         public net.minecraft.network.codec.StreamCodec<
-                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderFolderSmithingRecipe>
+                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderFolderCraftingRecipe>
                                 streamCodec() {
-                            return EnderFolderSmithingRecipe.STREAM_CODEC;
+                            return EnderFolderCraftingRecipe.STREAM_CODEC;
                         }
                     });
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderTankSmithingRecipe>>
-            ENDER_TANK_SMITHING_RECIPE =
-                    RECIPE_SERIALIZERS.register("ender_tank_smithing", () -> new RecipeSerializer<>() {
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderTankCraftingRecipe>>
+            ENDER_TANK_CRAFTING_RECIPE =
+                    RECIPE_SERIALIZERS.register("ender_tank_crafting", () -> new RecipeSerializer<>() {
                         @Override
-                        public com.mojang.serialization.MapCodec<EnderTankSmithingRecipe> codec() {
-                            return EnderTankSmithingRecipe.CODEC;
+                        public com.mojang.serialization.MapCodec<EnderTankCraftingRecipe> codec() {
+                            return EnderTankCraftingRecipe.CODEC;
                         }
 
                         @Override
                         public net.minecraft.network.codec.StreamCodec<
-                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderTankSmithingRecipe>
+                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderTankCraftingRecipe>
                                 streamCodec() {
-                            return EnderTankSmithingRecipe.STREAM_CODEC;
+                            return EnderTankCraftingRecipe.STREAM_CODEC;
                         }
                     });
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderPicnicBasketSmithingRecipe>>
-            ENDER_PICNIC_BASKET_SMITHING_RECIPE =
-                    RECIPE_SERIALIZERS.register("ender_picnic_basket_smithing", () -> new RecipeSerializer<>() {
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderPicnicBasketCraftingRecipe>>
+            ENDER_PICNIC_BASKET_CRAFTING_RECIPE =
+                    RECIPE_SERIALIZERS.register("ender_picnic_basket_crafting", () -> new RecipeSerializer<>() {
                         @Override
-                        public com.mojang.serialization.MapCodec<EnderPicnicBasketSmithingRecipe> codec() {
-                            return EnderPicnicBasketSmithingRecipe.CODEC;
+                        public com.mojang.serialization.MapCodec<EnderPicnicBasketCraftingRecipe> codec() {
+                            return EnderPicnicBasketCraftingRecipe.CODEC;
                         }
 
                         @Override
                         public net.minecraft.network.codec.StreamCodec<
-                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderPicnicBasketSmithingRecipe>
+                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderPicnicBasketCraftingRecipe>
                                 streamCodec() {
-                            return EnderPicnicBasketSmithingRecipe.STREAM_CODEC;
+                            return EnderPicnicBasketCraftingRecipe.STREAM_CODEC;
                         }
                     });
 
-    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StorageSmithingUpgradeRecipe>>
-            STORAGE_SMITHING_UPGRADE_RECIPE =
-                    RECIPE_SERIALIZERS.register("storage_smithing_upgrade", () -> new RecipeSerializer<>() {
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StorageUpgradeCraftingRecipe>>
+            STORAGE_UPGRADE_CRAFTING_RECIPE =
+                    RECIPE_SERIALIZERS.register("storage_upgrade_crafting", () -> new RecipeSerializer<>() {
                         @Override
-                        public com.mojang.serialization.MapCodec<StorageSmithingUpgradeRecipe> codec() {
-                            return StorageSmithingUpgradeRecipe.CODEC;
+                        public com.mojang.serialization.MapCodec<StorageUpgradeCraftingRecipe> codec() {
+                            return StorageUpgradeCraftingRecipe.CODEC;
                         }
 
                         @Override
                         public net.minecraft.network.codec.StreamCodec<
-                                        net.minecraft.network.RegistryFriendlyByteBuf, StorageSmithingUpgradeRecipe>
+                                        net.minecraft.network.RegistryFriendlyByteBuf, StorageUpgradeCraftingRecipe>
                                 streamCodec() {
-                            return StorageSmithingUpgradeRecipe.STREAM_CODEC;
+                            return StorageUpgradeCraftingRecipe.STREAM_CODEC;
                         }
                     });
 

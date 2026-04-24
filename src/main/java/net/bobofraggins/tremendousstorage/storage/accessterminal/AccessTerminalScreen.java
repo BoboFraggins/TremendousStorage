@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.accessterminal;
 
 import java.util.List;
 import java.util.Locale;
+import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.shared.network.CycleRecipePacket;
@@ -20,10 +21,13 @@ import net.bobofraggins.tremendousstorage.shared.ui.SortPane;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -51,6 +55,9 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     private final Dialog dialog;
     private final ConfigDrawer configDrawer;
     private SearchBoxWidget searchBox;
+
+    @Nullable
+    private Slot shiftDragSlot;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -209,6 +216,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        shiftDragSlot = null;
         if (configDrawer.mouseClicked(mouseX, mouseY, button)) return true;
         if (dialog.mouseClicked(mouseX, mouseY, button)) return true;
         return super.mouseClicked(mouseX, mouseY, button);
@@ -223,11 +231,19 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (dialog.mouseDragged(mouseX, mouseY, button, dragX, dragY)) return true;
+        if (button == 0 && Screen.hasShiftDown() && menu.getCarried().isEmpty()) {
+            Slot slot = hoveredSlot;
+            if (slot != null && slot != shiftDragSlot && slot.hasItem()) {
+                shiftDragSlot = slot;
+                slotClicked(slot, slot.index, 0, ClickType.QUICK_MOVE);
+            }
+        }
         return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        shiftDragSlot = null;
         if (dialog.mouseReleased(mouseX, mouseY, button)) return true;
         return super.mouseReleased(mouseX, mouseY, button);
     }

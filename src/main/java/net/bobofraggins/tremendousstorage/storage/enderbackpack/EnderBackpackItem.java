@@ -57,7 +57,7 @@ public class EnderBackpackItem extends BackpackItem {
             ListTag saved = storage.getTypes(linkId);
             contents = EnderBackpackMenu.listTagToContents(
                     saved, contents, player.level().registryAccess());
-            // Tier-max: if item has higher tier (e.g., after smithing upgrade) push to storage
+            // Tier-max: if item has higher tier (e.g., after a tier upgrade) push to storage
             net.bobofraggins.tremendousstorage.shared.storage.StorageTier storageTier = storage.getTier(linkId);
             if (contents.tier().ordinal() > storageTier.ordinal()) {
                 storage.setTier(linkId, contents.tier());

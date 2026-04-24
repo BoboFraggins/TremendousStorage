@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 
 import com.mojang.serialization.MapCodec;
-import net.bobofraggins.tremendousstorage.shared.recipe.AbstractEnderSmithingRecipe;
+import net.bobofraggins.tremendousstorage.shared.recipe.AbstractEnderCraftingRecipe;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
 import net.minecraft.core.component.DataComponents;
@@ -14,19 +14,19 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
 /**
- * Smithing-table recipe: Picnic Basket + Ender Storage Upgrade → two linked Ender Picnic Baskets
+ * Crafting recipe: Picnic Basket + Ender Storage Upgrade → two linked Ender Picnic Baskets
  * sharing a freshly generated 64-bit {@code linkId}.
  *
  * <p>Re-applying the upgrade to an existing Ender Picnic Basket preserves the existing link ID,
  * producing a second basket linked to the same shared inventory.
  */
-public class EnderPicnicBasketSmithingRecipe extends AbstractEnderSmithingRecipe {
+public class EnderPicnicBasketCraftingRecipe extends AbstractEnderCraftingRecipe {
 
-    private static final EnderPicnicBasketSmithingRecipe INSTANCE = new EnderPicnicBasketSmithingRecipe();
+    private static final EnderPicnicBasketCraftingRecipe INSTANCE = new EnderPicnicBasketCraftingRecipe();
 
-    public static final MapCodec<EnderPicnicBasketSmithingRecipe> CODEC = MapCodec.unit(INSTANCE);
+    public static final MapCodec<EnderPicnicBasketCraftingRecipe> CODEC = MapCodec.unit(INSTANCE);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, EnderPicnicBasketSmithingRecipe> STREAM_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, EnderPicnicBasketCraftingRecipe> STREAM_CODEC =
             StreamCodec.unit(INSTANCE);
 
     @Override
@@ -65,6 +65,6 @@ public class EnderPicnicBasketSmithingRecipe extends AbstractEnderSmithingRecipe
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return Registration.ENDER_PICNIC_BASKET_SMITHING_RECIPE.get();
+        return Registration.ENDER_PICNIC_BASKET_CRAFTING_RECIPE.get();
     }
 }

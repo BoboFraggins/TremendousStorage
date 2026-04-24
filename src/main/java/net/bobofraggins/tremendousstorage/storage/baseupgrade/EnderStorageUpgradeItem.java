@@ -35,7 +35,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  * their shared inventories stay in sync.
  *
  * <p>Supported targets: Tremendous Chest, Tremendous Backpack, Picnic Basket, Tremendous Tank.
- * Manila Folder and Wireless SAT have no block form and are handled via smithing table only.
+ * Manila Folder and Wireless SAT have no block form and are handled via crafting table only.
  */
 public class EnderStorageUpgradeItem extends BaseUpgradeItem {
 

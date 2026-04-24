@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.endertank;
 
 import com.mojang.serialization.MapCodec;
-import net.bobofraggins.tremendousstorage.shared.recipe.AbstractEnderSmithingRecipe;
+import net.bobofraggins.tremendousstorage.shared.recipe.AbstractEnderCraftingRecipe;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -13,20 +13,20 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
 /**
- * Smithing-table recipe: Tremendous Tank (any tier) + Ender Storage Upgrade →
+ * Crafting recipe: Tremendous Tank (any tier) + Ender Storage Upgrade →
  * two linked Ender Tremendous Tanks sharing a freshly generated 64-bit {@code linkId}.
  *
  * <p>The BED (tier, voidExcess) and the {@link Registration#TANK_CONTENTS} component
  * are copied from the input tank to both outputs. The second tank is returned via
- * {@link #getRemainingItems} in the base slot, as with vanilla smithing remainder items.
+ * {@link #getRemainingItems} in the base slot, as with vanilla crafting remainder items.
  */
-public class EnderTankSmithingRecipe extends AbstractEnderSmithingRecipe {
+public class EnderTankCraftingRecipe extends AbstractEnderCraftingRecipe {
 
-    private static final EnderTankSmithingRecipe INSTANCE = new EnderTankSmithingRecipe();
+    private static final EnderTankCraftingRecipe INSTANCE = new EnderTankCraftingRecipe();
 
-    public static final MapCodec<EnderTankSmithingRecipe> CODEC = MapCodec.unit(INSTANCE);
+    public static final MapCodec<EnderTankCraftingRecipe> CODEC = MapCodec.unit(INSTANCE);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, EnderTankSmithingRecipe> STREAM_CODEC =
+    public static final StreamCodec<RegistryFriendlyByteBuf, EnderTankCraftingRecipe> STREAM_CODEC =
             StreamCodec.unit(INSTANCE);
 
     @Override
@@ -66,6 +66,6 @@ public class EnderTankSmithingRecipe extends AbstractEnderSmithingRecipe {
 
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return Registration.ENDER_TANK_SMITHING_RECIPE.get();
+        return Registration.ENDER_TANK_CRAFTING_RECIPE.get();
     }
 }
