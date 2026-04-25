@@ -18,6 +18,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -53,21 +54,9 @@ public class TankItemRenderer extends BlockEntityWithoutLevelRenderer {
             int packedLight,
             int packedOverlay) {
 
-        // Render the glass jar model (pink placeholder pixels are now transparent).
         Minecraft mc = Minecraft.getInstance();
-        mc.getBlockRenderer()
-                .renderSingleBlock(
-                        Registration.TANK.get().defaultBlockState(),
-                        poseStack,
-                        bufferSource,
-                        packedLight,
-                        packedOverlay);
 
-        // Render fluid fill only when the item actually contains fluid.
-        TankContents contents = stack.get(Registration.TANK_CONTENTS.get());
-        if (contents == null || contents.isEmpty()) return;
-
-        // Derive capacity from the stored tier (falls back to WOOD if absent).
+        // Read tier from item NBT so the correct tier texture is shown.
         StorageTier tier = StorageTier.WOOD;
         var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (customData != null) {
@@ -76,6 +65,13 @@ public class TankItemRenderer extends BlockEntityWithoutLevelRenderer {
                 tier = StorageTier.fromId(tag.getString("Tier"));
             }
         }
+
+        BlockState renderState = Registration.TANK.get().defaultBlockState().setValue(TankBlock.TIER_PROP, tier);
+        mc.getBlockRenderer().renderSingleBlock(renderState, poseStack, bufferSource, packedLight, packedOverlay);
+
+        // Render fluid fill only when the item actually contains fluid.
+        TankContents contents = stack.get(Registration.TANK_CONTENTS.get());
+        if (contents == null || contents.isEmpty()) return;
         long capacity = tier.getScaledCapacity(TankBlockEntity.BASE_CAPACITY);
         float fillFrac = Math.max(0.01f, (float) contents.amount() / capacity);
 

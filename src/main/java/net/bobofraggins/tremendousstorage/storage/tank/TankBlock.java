@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import net.bobofraggins.tremendousstorage.external.mobgrindinutils.MobGrindingUtilsIntegration;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -36,6 +37,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -64,10 +66,14 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
     public static final MapCodec<TankBlock> CODEC = simpleCodec(TankBlock::new);
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<StorageTier> TIER_PROP = EnumProperty.create("tier", StorageTier.class);
 
     public TankBlock(Properties props) {
         super(props);
-        registerDefaultState(stateDefinition.any().setValue(FACING, net.minecraft.core.Direction.NORTH));
+        registerDefaultState(stateDefinition
+                .any()
+                .setValue(FACING, net.minecraft.core.Direction.NORTH)
+                .setValue(TIER_PROP, StorageTier.WOOD));
     }
 
     @Override
@@ -77,7 +83,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, TIER_PROP);
     }
 
     @Override
@@ -100,7 +106,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return RenderShape.MODEL;
     }
 
     @Override

@@ -3,15 +3,12 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.bobofraggins.tremendousstorage.shared.tank.AbstractTankRenderer;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.util.Mth;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -49,25 +46,7 @@ public class TankRenderer extends AbstractTankRenderer<TankBlockEntity> {
             packedLight = LevelRenderer.getLightColor(level, be.getBlockPos());
         }
 
-        Minecraft mc = Minecraft.getInstance();
-        int tierColor = be.getTier().getColor();
-        float tr = ((tierColor >> 16) & 0xFF) / 255f;
-        float tg = ((tierColor >> 8) & 0xFF) / 255f;
-        float tb = (tierColor & 0xFF) / 255f;
-
         poseStack.pushPose();
-        renderModelWithTint(
-                bufferSource.getBuffer(RenderType.cutout()),
-                poseStack.last(),
-                mc.getModelManager().getBlockModelShaper().getBlockModel(be.getBlockState()),
-                be.getBlockState(),
-                level,
-                packedLight,
-                packedOverlay,
-                RandomSource.create(),
-                tr,
-                tg,
-                tb);
         renderFill(be, poseStack.last().pose(), bufferSource, packedLight, packedOverlay);
         poseStack.popPose();
     }

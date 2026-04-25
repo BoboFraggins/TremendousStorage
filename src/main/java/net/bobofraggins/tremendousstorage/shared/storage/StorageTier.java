@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.storage;
 import javax.annotation.Nullable;
 
 /** Material tiers for upgradeable storage blocks. */
-public enum StorageTier {
+public enum StorageTier implements net.minecraft.util.StringRepresentable {
     WOOD("wood", 4_096L, 0xC8A855),
     COPPER("copper", 16_384L, 0xC07645),
     IRON("iron", 65_536L, 0xCFCFCF),
@@ -31,6 +31,11 @@ public enum StorageTier {
                     (buf, tier) -> buf.writeUtf(tier.getId()), buf -> fromId(buf.readUtf()));
 
     public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getSerializedName() {
         return id;
     }
 

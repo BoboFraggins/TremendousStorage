@@ -5,20 +5,15 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.bobofraggins.tremendousstorage.storage.tube.TubeBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import org.joml.Matrix4f;
 
 /**
@@ -230,53 +225,6 @@ public abstract class AbstractTankRenderer<T extends BlockEntity> implements Blo
             quad(
                     vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1,
                     1, 0, 0);
-    }
-
-    /**
-     * Renders all quads of a baked model with per-face directional shading and optional tint.
-     * Faces with tintIndex >= 0 are multiplied by (r, g, b); all others use neutral shading.
-     */
-    public static void renderModelWithTint(
-            VertexConsumer consumer,
-            PoseStack.Pose pose,
-            BakedModel model,
-            BlockState blockState,
-            Level level,
-            int packedLight,
-            int packedOverlay,
-            RandomSource random,
-            float r,
-            float g,
-            float b) {
-        for (Direction dir : Direction.values()) {
-            random.setSeed(42L);
-            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.cutout())) {
-                float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
-                float qr, qg, qb;
-                if (quad.getTintIndex() >= 0) {
-                    qr = r * shade;
-                    qg = g * shade;
-                    qb = b * shade;
-                } else {
-                    qr = qg = qb = shade;
-                }
-                consumer.putBulkData(pose, quad, qr, qg, qb, 1f, packedLight, packedOverlay);
-            }
-        }
-        random.setSeed(42L);
-        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.cutout())) {
-            Direction dir = quad.getDirection();
-            float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
-            float qr, qg, qb;
-            if (quad.getTintIndex() >= 0) {
-                qr = r * shade;
-                qg = g * shade;
-                qb = b * shade;
-            } else {
-                qr = qg = qb = shade;
-            }
-            consumer.putBulkData(pose, quad, qr, qg, qb, 1f, packedLight, packedOverlay);
-        }
     }
 
     /**

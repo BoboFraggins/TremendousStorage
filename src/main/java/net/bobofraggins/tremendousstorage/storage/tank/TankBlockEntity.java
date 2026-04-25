@@ -112,6 +112,21 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     public void setTier(StorageTier tier) {
         this.tier = tier;
         setChanged();
+        syncTierBlockState(tier);
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        syncTierBlockState(tier);
+    }
+
+    private void syncTierBlockState(StorageTier t) {
+        if (level == null || level.isClientSide) return;
+        net.minecraft.world.level.block.state.BlockState state = level.getBlockState(worldPosition);
+        if (state.hasProperty(TankBlock.TIER_PROP) && state.getValue(TankBlock.TIER_PROP) != t) {
+            level.setBlock(worldPosition, state.setValue(TankBlock.TIER_PROP, t), 2);
+        }
     }
 
     public boolean isVoidExcess() {

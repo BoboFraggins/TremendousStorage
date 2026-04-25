@@ -445,7 +445,8 @@ public final class Registration {
             () -> new TankBlock(BlockBehaviour.Properties.of()
                     .strength(3.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
-                    .sound(SoundType.GLASS)));
+                    .sound(SoundType.GLASS)
+                    .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> TANK_ITEM =
             ITEMS.register("tank", () -> new TankItem(TANK.get(), new Item.Properties()));
@@ -459,7 +460,8 @@ public final class Registration {
             () -> new EnderTankBlock(BlockBehaviour.Properties.of()
                     .strength(3.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
-                    .sound(SoundType.GLASS)));
+                    .sound(SoundType.GLASS)
+                    .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> ENDER_TANK_ITEM =
             ITEMS.register("ender_tank", () -> new EnderTankItem(ENDER_TANK.get(), new Item.Properties()));

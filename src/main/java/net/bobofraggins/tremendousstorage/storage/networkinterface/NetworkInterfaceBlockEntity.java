@@ -223,6 +223,22 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     public void setTier(StorageTier tier) {
         this.tier = tier;
         setChanged();
+        syncTierBlockState(tier);
+    }
+
+    @Override
+    public void onLoad() {
+        super.onLoad();
+        syncTierBlockState(tier);
+    }
+
+    private void syncTierBlockState(StorageTier t) {
+        if (level == null || level.isClientSide) return;
+        net.minecraft.world.level.block.state.BlockState state = level.getBlockState(worldPosition);
+        if (state.hasProperty(NetworkInterfaceBlock.TIER_PROP)
+                && state.getValue(NetworkInterfaceBlock.TIER_PROP) != t) {
+            level.setBlock(worldPosition, state.setValue(NetworkInterfaceBlock.TIER_PROP, t), 2);
+        }
     }
 
     /**

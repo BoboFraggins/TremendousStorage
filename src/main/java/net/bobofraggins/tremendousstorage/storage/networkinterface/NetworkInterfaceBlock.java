@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.networkinterface;
 import com.mojang.serialization.MapCodec;
 import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
@@ -25,6 +26,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -35,6 +37,7 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<StorageTier> TIER_PROP = EnumProperty.create("tier", StorageTier.class);
 
     public static final MapCodec<NetworkInterfaceBlock> CODEC = simpleCodec(NetworkInterfaceBlock::new);
 
@@ -45,13 +48,14 @@ public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkCon
 
     public NetworkInterfaceBlock(Properties props) {
         super(props);
-        registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
+        registerDefaultState(
+                stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(TIER_PROP, StorageTier.WOOD));
     }
 
     @Override
     protected void createBlockStateDefinition(
             StateDefinition.Builder<net.minecraft.world.level.block.Block, BlockState> builder) {
-        builder.add(FACING);
+        builder.add(FACING, TIER_PROP);
     }
 
     @Override
@@ -75,7 +79,7 @@ public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkCon
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return RenderShape.MODEL;
     }
 
     @Override
