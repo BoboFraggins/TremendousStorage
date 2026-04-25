@@ -1,5 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.armorycabinet;
 
+import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -129,6 +130,7 @@ public class ArmoryCabinetBlockEntity extends ChestBlockEntity {
 
     public ArmoryCabinetBlockEntity(BlockPos pos, BlockState state) {
         super(Registration.ARMORY_CABINET_BE_TYPE.get(), pos, state);
+        setPriority(Priority.HIGH);
     }
 
     // -------------------------------------------------------------------------
@@ -140,6 +142,11 @@ public class ArmoryCabinetBlockEntity extends ChestBlockEntity {
         if (stack.isEmpty()) return false;
         if (stack.getMaxDamage() > 0) return true;
         return stack.is(TAG_TOOLS) || stack.is(TAG_WEAPONS) || stack.is(TAG_ARMOR);
+    }
+
+    @Override
+    public long getCapacity() {
+        return 1_024L;
     }
 
     @Override

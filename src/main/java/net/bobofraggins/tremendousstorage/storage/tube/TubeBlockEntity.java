@@ -27,11 +27,13 @@ import net.neoforged.neoforge.items.IItemHandler;
  *
  * <p>Each face may have a Storage Interface, Import Interface, or Export Interface
  * attachment. Storage Interfaces carry a {@link Priority} value for network routing.
- * Import/Export Interfaces carry a 9-slot ghost-item filter and an Accept/Reject mode.
+ * Import/Export Interfaces carry a 9-slot ghost-item filter.
  *
  * <p>Import Interfaces pull items from adjacent external inventories into the network.
+ * An empty import filter passes all items; a non-empty filter passes only matching items.
  * Export Interfaces push items from the network into adjacent external inventories.
- * Both operate every 20 ticks, transferring up to 64 items per operation.
+ * An empty export filter blocks all items; a non-empty filter passes only matching items.
+ * Both operate every 10 ticks.
  */
 public class TubeBlockEntity extends BlockEntity {
 
@@ -48,9 +50,6 @@ public class TubeBlockEntity extends BlockEntity {
         Priority.NORMAL, Priority.NORMAL, Priority.NORMAL,
         Priority.NORMAL, Priority.NORMAL, Priority.NORMAL
     };
-
-    /** Filter mode for each Import/Export Interface (false = Accept, true = Reject). */
-    private final boolean[] filterMode = new boolean[6];
 
     /** Ghost-item filter slots for each Import/Export Interface (9 slots per face). */
     private final ItemStack[][] filterSlots = new ItemStack[6][9];
@@ -163,9 +162,9 @@ public class TubeBlockEntity extends BlockEntity {
                         network.getNetworkInterface();
                 int transferAmount = (ni != null) ? ni.getAttachmentTransferAmount() : 1;
                 if (type == AttachmentType.IMPORT_INTERFACE) {
-                    doImport(neighbor, network, be.filterSlots[i], be.filterMode[i], transferAmount);
+                    doImport(neighbor, network, be.filterSlots[i], transferAmount);
                 } else {
-                    doExport(network, neighbor, be.filterSlots[i], be.filterMode[i], transferAmount);
+                    doExport(network, neighbor, be.filterSlots[i], transferAmount);
                 }
             }
         }
@@ -174,19 +173,16 @@ public class TubeBlockEntity extends BlockEntity {
     /**
      * Pulls items from the external {@code source} inventory into the {@code network}.
      * Scans source slots in order; transfers the first passing stack, up to {@code transferAmount}.
+     * Empty filter passes all items.
      */
     private static void doImport(
-            IItemHandler source,
-            NetworkItemHandler network,
-            ItemStack[] filter,
-            boolean rejectMode,
-            int transferAmount) {
+            IItemHandler source, NetworkItemHandler network, ItemStack[] filter, int transferAmount) {
         int remaining = transferAmount;
         int slots = source.getSlots();
         for (int s = 0; s < slots && remaining > 0; s++) {
             ItemStack inSlot = source.getStackInSlot(s);
             if (inSlot.isEmpty()) continue;
-            if (!passesFilter(inSlot, filter, rejectMode)) continue;
+            if (!passesFilter(inSlot, filter, true)) continue;
 
             ItemStack extracted = source.extractItem(s, Math.min(inSlot.getCount(), remaining), true);
             if (extracted.isEmpty()) continue;
@@ -202,15 +198,16 @@ public class TubeBlockEntity extends BlockEntity {
     /**
      * Pulls items from the {@code network} and pushes them into the external {@code dest} inventory.
      * Scans network slots in order; transfers the first passing stack, up to {@code transferAmount}.
+     * Empty filter blocks all items.
      */
     private static void doExport(
-            NetworkItemHandler network, IItemHandler dest, ItemStack[] filter, boolean rejectMode, int transferAmount) {
+            NetworkItemHandler network, IItemHandler dest, ItemStack[] filter, int transferAmount) {
         int remaining = transferAmount;
         int slots = network.getSlots();
         for (int s = 0; s < slots && remaining > 0; s++) {
             ItemStack inSlot = network.getStackInSlot(s);
             if (inSlot.isEmpty()) continue;
-            if (!passesFilter(inSlot, filter, rejectMode)) continue;
+            if (!passesFilter(inSlot, filter, false)) continue;
 
             ItemStack extracted = network.extractItem(s, Math.min(inSlot.getCount(), remaining), true);
             if (extracted.isEmpty()) continue;
@@ -239,26 +236,19 @@ public class TubeBlockEntity extends BlockEntity {
     /**
      * Returns true if {@code candidate} should be transferred given the filter.
      *
-     * <p>Empty Accept filter → accept all. Empty Reject filter → reject all.
+     * <p>If all filter slots are empty, returns {@code emptyMatchesAll} (true for importers,
+     * false for exporters). Otherwise returns true only if the candidate matches a filter slot.
      * Match is by item type only ({@link ItemStack#isSameItem}).
      */
-    static boolean passesFilter(ItemStack candidate, ItemStack[] filter, boolean rejectMode) {
+    static boolean passesFilter(ItemStack candidate, ItemStack[] filter, boolean emptyMatchesAll) {
         boolean anyFilter = false;
         for (ItemStack f : filter) {
             if (!f.isEmpty()) {
                 anyFilter = true;
-                break;
+                if (ItemStack.isSameItem(f, candidate)) return true;
             }
         }
-        if (!anyFilter) return !rejectMode;
-        boolean inList = false;
-        for (ItemStack f : filter) {
-            if (!f.isEmpty() && ItemStack.isSameItem(f, candidate)) {
-                inList = true;
-                break;
-            }
-        }
-        return rejectMode ? !inList : inList;
+        return !anyFilter && emptyMatchesAll;
     }
 
     // -------------------------------------------------------------------------
@@ -309,7 +299,6 @@ public class TubeBlockEntity extends BlockEntity {
         attachmentType[faceIndex] = type;
         if (type == AttachmentType.NONE) {
             attachmentPriority[faceIndex] = Priority.NORMAL;
-            filterMode[faceIndex] = false;
             for (int s = 0; s < 9; s++) filterSlots[faceIndex][s] = ItemStack.EMPTY;
         }
         networkDirty = true;
@@ -351,17 +340,6 @@ public class TubeBlockEntity extends BlockEntity {
     // Accessors — filter
     // -------------------------------------------------------------------------
 
-    public boolean getFilterMode(int faceIndex) {
-        if (faceIndex < 0 || faceIndex >= 6) return false;
-        return filterMode[faceIndex];
-    }
-
-    public void setFilterMode(int faceIndex, boolean rejectMode) {
-        if (faceIndex < 0 || faceIndex >= 6) return;
-        filterMode[faceIndex] = rejectMode;
-        setChanged();
-    }
-
     public ItemStack getFilterSlot(int faceIndex, int slot) {
         if (faceIndex < 0 || faceIndex >= 6 || slot < 0 || slot >= 9) return ItemStack.EMPTY;
         return filterSlots[faceIndex][slot];
@@ -379,7 +357,6 @@ public class TubeBlockEntity extends BlockEntity {
      */
     public void loadFilterFromContents(int faceIndex, InterfaceFilterContents contents) {
         if (faceIndex < 0 || faceIndex >= 6) return;
-        filterMode[faceIndex] = contents.rejectMode();
         java.util.List<ItemStack> src = contents.slots();
         for (int s = 0; s < 9; s++) {
             filterSlots[faceIndex][s] =
@@ -399,7 +376,7 @@ public class TubeBlockEntity extends BlockEntity {
             list.add(
                     filterSlots[faceIndex][s].isEmpty() ? ItemStack.EMPTY : filterSlots[faceIndex][s].copyWithCount(1));
         }
-        return new InterfaceFilterContents(list, filterMode[faceIndex]);
+        return new InterfaceFilterContents(list);
     }
 
     // -------------------------------------------------------------------------
@@ -435,13 +412,6 @@ public class TubeBlockEntity extends BlockEntity {
         byte[] prios = new byte[6];
         for (int i = 0; i < 6; i++) prios[i] = (byte) attachmentPriority[i].ordinal();
         tag.putByteArray("AttachmentPriorities", prios);
-
-        // Filter modes packed into one byte (bit i = filterMode[i])
-        int modeMask = 0;
-        for (int i = 0; i < 6; i++) {
-            if (filterMode[i]) modeMask |= (1 << i);
-        }
-        tag.putByte("FilterMode", (byte) modeMask);
 
         // Filter slots: outer ListTag of 6 inner ListTags, each with 9 CompoundTags
         ListTag outerList = new ListTag();
@@ -484,12 +454,6 @@ public class TubeBlockEntity extends BlockEntity {
         byte[] prios = tag.getByteArray("AttachmentPriorities");
         for (int i = 0; i < 6; i++) {
             attachmentPriority[i] = (i < prios.length) ? Priority.fromOrdinal(prios[i] & 0xFF) : Priority.NORMAL;
-        }
-
-        // Filter modes
-        int modeMask = tag.getByte("FilterMode") & 0xFF;
-        for (int i = 0; i < 6; i++) {
-            filterMode[i] = (modeMask & (1 << i)) != 0;
         }
 
         // Filter slots

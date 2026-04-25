@@ -5,7 +5,6 @@ import net.bobofraggins.tremendousstorage.shared.network.SetImportExportFilterPa
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -21,17 +20,13 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfaceMenu> {
 
     private static final int FILTER_PANE_W = 176;
-    private static final int FILTER_PANE_H = 102;
+    private static final int FILTER_PANE_H = 76;
     private static final int GRID_X = (FILTER_PANE_W - 3 * 18) / 2; // 61
     private static final int GRID_SCREEN_DY = Dialog.TITLE_H + 16; // 33
     private static final int SLOT_SIZE = 18;
     private static final int LABEL_SCREEN_DY = Dialog.TITLE_H + 4; // 21
-    private static final int BTN_SCREEN_DY = Dialog.TITLE_H + 76; // 93
-    private static final int MODE_BTN_W = 120;
-    private static final int MODE_BTN_H = 20;
 
     private final Dialog dialog;
-    private Button modeButton;
 
     public ExportInterfaceScreen(ExportInterfaceMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -45,26 +40,6 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
     protected void init() {
         super.init();
         dialog.init(leftPos, topPos);
-        int btnX = leftPos + (FILTER_PANE_W - MODE_BTN_W) / 2;
-        int btnY = topPos + BTN_SCREEN_DY;
-        modeButton = addRenderableWidget(Button.builder(
-                        modeLabel(),
-                        btn -> PacketDistributor.sendToServer(new SetImportExportFilterPacket(
-                                menu.getPos(), menu.getFaceIndex(), -1, ItemStack.EMPTY)))
-                .bounds(btnX, btnY, MODE_BTN_W, MODE_BTN_H)
-                .build());
-    }
-
-    private Component modeLabel() {
-        return menu.isRejectMode()
-                ? Component.translatable("screen.tremendousstorage.filter_reject")
-                : Component.translatable("screen.tremendousstorage.filter_accept");
-    }
-
-    @Override
-    protected void containerTick() {
-        super.containerTick();
-        if (modeButton != null) modeButton.setMessage(modeLabel());
     }
 
     @Override
@@ -157,8 +132,7 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
         return SLOT_SIZE - 2;
     }
 
-    public void applySync(List<ItemStack> slots, boolean rejectMode) {
-        menu.applySync(slots, rejectMode);
-        if (modeButton != null) modeButton.setMessage(modeLabel());
+    public void applySync(List<ItemStack> slots) {
+        menu.applySync(slots);
     }
 }

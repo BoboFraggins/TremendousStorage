@@ -1124,10 +1124,10 @@ public final class Registration {
                         output.accept(LAZURITE_INGOT.get());
                         output.accept(LAZURITE_NUGGET.get());
                         output.accept(LAZURITE_BLOCK_ITEM.get());
-                        output.accept(ARMORY_CABINET_ITEM.get());
-                        output.accept(FILING_CABINET_ITEM.get());
                         output.accept(TREMENDOUS_CHEST_ITEM.get());
                         output.accept(TANK_ITEM.get());
+                        output.accept(ARMORY_CABINET_ITEM.get());
+                        output.accept(FILING_CABINET_ITEM.get());
 
                         output.accept(MANILA_FOLDER.get());
                         output.accept(WHITEOUT_TAPE.get());

@@ -57,6 +57,12 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     private SearchBoxWidget searchBox;
 
     @Nullable
+    private CycleArrowButton upArrow;
+
+    @Nullable
+    private CycleArrowButton downArrow;
+
+    @Nullable
     private Slot shiftDragSlot;
 
     // -------------------------------------------------------------------------
@@ -136,14 +142,14 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
             int upBtnY = craftingPaneAbsY + (arrowLocalY - btnH) / 2;
             int downBtnY = craftingPaneAbsY + arrowLocalY + arrowH + (paneH - arrowLocalY - arrowH - btnH) / 2;
 
-            addRenderableWidget(new CycleArrowButton(
+            upArrow = addRenderableWidget(new CycleArrowButton(
                     btnX,
                     upBtnY,
                     btnW,
                     btnH,
                     true,
                     () -> PacketDistributor.sendToServer(new CycleRecipePacket(menu.getSatPos(), -1))));
-            addRenderableWidget(new CycleArrowButton(
+            downArrow = addRenderableWidget(new CycleArrowButton(
                     btnX,
                     downBtnY,
                     btnW,
@@ -167,6 +173,11 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     @Override
     protected void containerTick() {
         super.containerTick();
+        if (upArrow != null) {
+            boolean show = menu.getMatchingRecipeCount() > 1;
+            upArrow.visible = show;
+            downArrow.visible = show;
+        }
         // Sync JEI → EditBox when JEI is available and its filter differs from ours.
         if (SearchSync.isJeiAvailable()) {
             String jeiRaw = SearchSync.getRawFilter();

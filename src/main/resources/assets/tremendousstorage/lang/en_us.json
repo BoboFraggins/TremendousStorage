@@ -72,8 +72,6 @@
   "screen.tremendousstorage.import_interface": "Import Interface",
   "screen.tremendousstorage.export_interface": "Export Interface",
   "screen.tremendousstorage.filter_label": "Filter:",
-  "screen.tremendousstorage.filter_accept": "Mode: Accept",
-  "screen.tremendousstorage.filter_reject": "Mode: Reject",
   "item.tremendousstorage.tank.tooltip": "%1$s / %2$s mB %3$s",
   "screen.tremendousstorage.void_excess_label": "Void Excess:",
   "screen.tremendousstorage.void_excess_on": "Void Excess: ON",

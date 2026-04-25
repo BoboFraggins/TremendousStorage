@@ -13,12 +13,10 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
- * Server-bound packet: update a single filter slot or toggle the filter mode of an
- * Import Interface or Export Interface attachment on a Tube face.
+ * Server-bound packet: update a single filter slot of an Import Interface or Export Interface
+ * attachment on a Tube face.
  *
- * <p>When {@code slotIndex == -1}, the packet toggles the filter mode (Accept ↔ Reject).
- * Otherwise, {@code ghostItem} is stored in the given filter slot
- * ({@code ItemStack.EMPTY} clears the slot).
+ * <p>{@code ghostItem} is stored in the given filter slot ({@code ItemStack.EMPTY} clears the slot).
  */
 public record SetImportExportFilterPacket(BlockPos pos, int faceIndex, int slotIndex, ItemStack ghostItem)
         implements CustomPacketPayload {
@@ -47,13 +45,7 @@ public record SetImportExportFilterPacket(BlockPos pos, int faceIndex, int slotI
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
             if (!(player.level().getBlockEntity(packet.pos()) instanceof TubeBlockEntity be)) return;
-            int face = packet.faceIndex();
-            if (packet.slotIndex() == -1) {
-                // Toggle mode
-                be.setFilterMode(face, !be.getFilterMode(face));
-            } else {
-                be.setFilterSlot(face, packet.slotIndex(), packet.ghostItem());
-            }
+            be.setFilterSlot(packet.faceIndex(), packet.slotIndex(), packet.ghostItem());
         });
     }
 }

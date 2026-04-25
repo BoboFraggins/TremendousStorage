@@ -1,5 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.armorycabinet;
 
+import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageClientConfig;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -33,15 +34,18 @@ public class ArmoryCabinetMenu extends AbstractContainerMenu {
         this.pos = pos;
         this.data = data;
 
+        int playerInvY = 49 + TremendousStorageClientConfig.getVisibleRowsSafe() * 18;
+        int hotbarY = playerInvY + 58;
+
         // Player main inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(inv, col + row * 9 + 9, 20 + col * 18, 84 + row * 18));
+                addSlot(new Slot(inv, col + row * 9 + 9, 20 + col * 18, playerInvY + row * 18));
             }
         }
         // Player hotbar
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(inv, col, 20 + col * 18, 142));
+            addSlot(new Slot(inv, col, 20 + col * 18, hotbarY));
         }
 
         addDataSlots(data);
@@ -67,6 +71,7 @@ public class ArmoryCabinetMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
+        if (player.level().isClientSide()) return ItemStack.EMPTY;
         Slot slot = slots.get(index);
         if (slot == null || !slot.hasItem()) return ItemStack.EMPTY;
 

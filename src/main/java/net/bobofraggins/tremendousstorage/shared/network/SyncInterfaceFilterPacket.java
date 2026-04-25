@@ -22,7 +22,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  *
  * <p>Sent after {@link SetImportExportFilterPacket} is processed on the server.
  */
-public record SyncInterfaceFilterPacket(BlockPos pos, int faceIndex, List<ItemStack> filterSlots, boolean rejectMode)
+public record SyncInterfaceFilterPacket(BlockPos pos, int faceIndex, List<ItemStack> filterSlots)
         implements CustomPacketPayload {
 
     public static final Type<SyncInterfaceFilterPacket> TYPE =
@@ -36,8 +36,6 @@ public record SyncInterfaceFilterPacket(BlockPos pos, int faceIndex, List<ItemSt
                     SyncInterfaceFilterPacket::faceIndex,
                     ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list(9)),
                     SyncInterfaceFilterPacket::filterSlots,
-                    ByteBufCodecs.BOOL,
-                    SyncInterfaceFilterPacket::rejectMode,
                     SyncInterfaceFilterPacket::new);
 
     @Override
@@ -51,11 +49,11 @@ public record SyncInterfaceFilterPacket(BlockPos pos, int faceIndex, List<ItemSt
             if (current instanceof ImportInterfaceScreen s
                     && s.getMenu().getPos().equals(packet.pos())
                     && s.getMenu().getFaceIndex() == packet.faceIndex()) {
-                s.applySync(packet.filterSlots(), packet.rejectMode());
+                s.applySync(packet.filterSlots());
             } else if (current instanceof ExportInterfaceScreen s
                     && s.getMenu().getPos().equals(packet.pos())
                     && s.getMenu().getFaceIndex() == packet.faceIndex()) {
-                s.applySync(packet.filterSlots(), packet.rejectMode());
+                s.applySync(packet.filterSlots());
             }
         });
     }

@@ -18,10 +18,12 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.ResultSlot;
+import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -72,6 +74,9 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     // Recipe disambiguation — server-side only
     private List<RecipeHolder<CraftingRecipe>> matchingRecipes = new ArrayList<>();
     private int selectedRecipeIndex = 0;
+
+    // Synced to client: number of recipes matching the current grid
+    private final ContainerData recipeData = new SimpleContainerData(1);
 
     @Nullable
     private ResourceLocation pendingPinRecipeId = null;
@@ -160,6 +165,8 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                             craftingY + row * S));
                 }
             }
+
+            addDataSlots(recipeData);
         } else {
             this.craftSlots = null;
             this.resultSlots = null;
@@ -209,6 +216,10 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         return hasCraftingUpgrade;
     }
 
+    public int getMatchingRecipeCount() {
+        return recipeData.get(0);
+    }
+
     // -------------------------------------------------------------------------
     // Crafting
     // -------------------------------------------------------------------------
@@ -255,6 +266,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             }
         }
 
+        recipeData.set(0, matchingRecipes.size());
         updateResultSlot(level);
     }
 
@@ -335,6 +347,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
+        if (player.level().isClientSide()) return ItemStack.EMPTY;
         ItemStack copy = ItemStack.EMPTY;
         Slot slot = slots.get(index);
         if (slot == null || !slot.hasItem()) return copy;
