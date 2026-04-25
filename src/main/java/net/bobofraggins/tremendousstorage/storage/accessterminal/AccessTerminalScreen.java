@@ -281,6 +281,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
+        configDrawer.renderTab(graphics, mouseX, mouseY);
         searchBox.render(graphics, font);
     }
 

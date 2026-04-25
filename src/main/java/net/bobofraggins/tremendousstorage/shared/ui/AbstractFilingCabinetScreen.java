@@ -118,6 +118,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         // Drawer renders first so the dialog's left border appears on top of it
         configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
+        configDrawer.renderTab(graphics, mouseX, mouseY);
 
         // Folder and extraction slots — two columns of 4 rows each
         for (int row = 0; row < AbstractFilingCabinetMenu.ROWS_PER_COLUMN; row++) {

@@ -109,13 +109,12 @@ public class ConfigDrawer {
     }
 
     /**
-     * Renders the drawer. Must be called <em>before</em> the main dialog so the drawer appears
-     * behind the dialog's left border.
+     * Renders only the drawer body (not the tab). Call this <em>before</em> the main dialog.
+     * Follow with {@link #renderTab} <em>after</em> the main dialog so the tab appears on top.
      */
     public void render(GuiGraphics graphics, Font font, int mouseX, int mouseY, float partialTick) {
         float p = getProgress(System.currentTimeMillis());
         if (p <= 0.001f) {
-            renderTab(graphics, mouseX, mouseY, p);
             return;
         }
 
@@ -163,21 +162,20 @@ public class ConfigDrawer {
         }
 
         graphics.disableScissor();
-
-        // Tab renders last so it appears on top of the drawer body.
-        renderTab(graphics, mouseX, mouseY, p);
     }
 
     /**
-     * Renders the permanent tab that protrudes from the dialog's left edge.
-     * Shifted 1 px right of the pure flush position so the dialog renders on top of the tab's
-     * right edge, giving a "tucked under" appearance. An extra 2 px are added to the slide
-     * distance when open so the tab visually separates from the drawer body.
+     * Renders the tab that protrudes from the dialog's left edge. Call this <em>after</em> the
+     * main dialog so the tab appears on top of both the drawer body and the dialog background.
      */
+    public void renderTab(GuiGraphics graphics, int mouseX, int mouseY) {
+        renderTab(graphics, mouseX, mouseY, getProgress(System.currentTimeMillis()));
+    }
+
     private void renderTab(GuiGraphics graphics, int mouseX, int mouseY, float p) {
         // Tab slides left with the drawer: closed → left of dialog; open → left of drawer body.
         // The extra 2 px (animated via p) shifts the tab slightly left of the drawer edge when open.
-        int tabX = dialogX - TAB_W + 3 - Math.round((WIDTH + TAB_W + 2) * p);
+        int tabX = dialogX - TAB_W + 5 - Math.round((WIDTH + TAB_W + 2) * p);
         int tabY = dialogY + 10;
         int midH = TAB_H - 2 * CORNER;
 
@@ -220,7 +218,7 @@ public class ConfigDrawer {
      */
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (showTabButton) {
-            int tabX = dialogX - TAB_W + 3 - Math.round((WIDTH + TAB_W + 2) * getProgress(System.currentTimeMillis()));
+            int tabX = dialogX - TAB_W + 5 - Math.round((WIDTH + TAB_W + 2) * getProgress(System.currentTimeMillis()));
             if (mouseX >= tabX && mouseX < tabX + TAB_W && mouseY >= dialogY + 10 && mouseY < dialogY + 10 + TAB_H) {
                 toggle();
                 return true;
