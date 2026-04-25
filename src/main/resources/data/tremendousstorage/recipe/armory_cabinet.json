@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "BIB",
+    "SVP",
+    "BCB"
+  ],
+  "key": {
+    "B": {
+      "item": "tremendousstorage:lazurite_bars"
+    },
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "S": {
+      "item": "minecraft:iron_sword"
+    },
+    "V": {
+      "tag": "c:chests"
+    },
+    "P": {
+      "item": "minecraft:iron_pickaxe"
+    },
+    "C": {
+      "item": "minecraft:copper_ingot"
+    }
+  },
+  "result": {
+    "id": "tremendousstorage:armory_cabinet",
+    "count": 1
+  },
+  "category": "misc"
+}
