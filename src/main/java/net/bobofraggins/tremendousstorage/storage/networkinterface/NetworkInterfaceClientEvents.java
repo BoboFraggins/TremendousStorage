@@ -1,11 +1,9 @@
 package net.bobofraggins.tremendousstorage.storage.networkinterface;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalScreen;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 
 /** Client-only event subscriber for Network Interface rendering and screen registration. */
@@ -16,19 +14,6 @@ public final class NetworkInterfaceClientEvents {
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(Registration.NETWORK_INTERFACE_BE_TYPE.get(), NetworkInterfaceRenderer::new);
-    }
-
-    @SubscribeEvent
-    public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event) {
-        event.register(
-                (state, level, pos, tintIndex) -> {
-                    if (tintIndex != 0 || level == null || pos == null) return -1;
-                    if (level.getBlockEntity(pos) instanceof NetworkInterfaceBlockEntity be) {
-                        return be.getTier().getColor();
-                    }
-                    return StorageTier.WOOD.getColor();
-                },
-                Registration.NETWORK_INTERFACE.get());
     }
 
     @SubscribeEvent

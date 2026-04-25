@@ -100,8 +100,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        // MODEL renders the block model (base slab + glass jar); BESR handles fluid fill + stubs.
-        return RenderShape.MODEL;
+        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     @Override

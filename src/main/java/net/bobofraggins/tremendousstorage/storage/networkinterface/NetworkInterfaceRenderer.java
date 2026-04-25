@@ -10,10 +10,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -60,6 +62,7 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         int fb = tint & 0xFF;
         int fa = (tint >> 24) & 0xFF;
         if (fa == 0) fa = 160;
+        fa /= 2;
 
         float fillTop = TankRenderer.TANK_FLUID_FLOOR + FILL_FRAC * TankRenderer.TANK_FLUID_H;
         float vB = Mth.lerp(FILL_FRAC, fluidSprite.getV0(), fluidSprite.getV1());
@@ -102,7 +105,25 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
             packedLight = LevelRenderer.getLightColor(level, be.getBlockPos());
         }
 
+        Minecraft mc = Minecraft.getInstance();
+        int tierColor = be.getTier().getColor();
+        float tr = ((tierColor >> 16) & 0xFF) / 255f;
+        float tg = ((tierColor >> 8) & 0xFF) / 255f;
+        float tb = (tierColor & 0xFF) / 255f;
+
         poseStack.pushPose();
+        renderModelWithTint(
+                bufferSource.getBuffer(RenderType.cutout()),
+                poseStack.last(),
+                mc.getModelManager().getBlockModelShaper().getBlockModel(be.getBlockState()),
+                be.getBlockState(),
+                level,
+                packedLight,
+                packedOverlay,
+                RandomSource.create(),
+                tr,
+                tg,
+                tb);
         renderFill(be, poseStack.last().pose(), bufferSource, packedLight, packedOverlay);
         poseStack.popPose();
 

@@ -49,18 +49,4 @@ public final class TankClientEvents {
                 Registration.TANK_ITEM.get(),
                 Registration.ENDER_TANK_ITEM.get());
     }
-
-    @SubscribeEvent
-    public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event) {
-        event.register(
-                (state, level, pos, tintIndex) -> {
-                    if (tintIndex != 0 || level == null || pos == null) return -1;
-                    if (level.getBlockEntity(pos) instanceof TankBlockEntity be) {
-                        return be.getTier().getColor();
-                    }
-                    return StorageTier.WOOD.getColor();
-                },
-                Registration.TANK.get(),
-                Registration.ENDER_TANK.get());
-    }
 }

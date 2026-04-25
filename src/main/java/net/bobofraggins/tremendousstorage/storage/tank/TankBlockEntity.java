@@ -11,7 +11,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -530,33 +529,5 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     @Override
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
-    }
-
-    @Override
-    public void onDataPacket(
-            Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider lookupProvider) {
-        super.onDataPacket(net, pkt, lookupProvider);
-        markSectionDirtyForTint();
-    }
-
-    @Override
-    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
-        super.handleUpdateTag(tag, registries);
-        markSectionDirtyForTint();
-    }
-
-    private void markSectionDirtyForTint() {
-        if (level != null && level.isClientSide) {
-            requestModelDataUpdate();
-            net.minecraft.client.Minecraft.getInstance()
-                    .levelRenderer
-                    .setBlocksDirty(
-                            worldPosition.getX(),
-                            worldPosition.getY(),
-                            worldPosition.getZ(),
-                            worldPosition.getX(),
-                            worldPosition.getY(),
-                            worldPosition.getZ());
-        }
     }
 }
