@@ -16,9 +16,18 @@ import org.joml.Matrix4f;
  * Renders the Tank's dynamic content: fluid fill level and tube-connector stubs.
  *
  * <p>The static shell is rendered by the block model ({@code models/block/tank.json}).
- * This BESR handles the translucent octagonal-prism fill and lazurite connector stubs.
+ * This BESR handles the translucent cube fill and lazurite connector stubs.
  */
 public class TankRenderer extends AbstractTankRenderer<TankBlockEntity> {
+
+    // Fluid interior bounds matching the fluid-guide element in the tank bbmodel [1,1,1]→[15,15,15]
+    static final float TANK_FLUID_FLOOR = 1f / 16f;
+    static final float TANK_FLUID_CEIL = 15f / 16f;
+    static final float TANK_FLUID_H = TANK_FLUID_CEIL - TANK_FLUID_FLOOR;
+    private static final float TANK_X0 = 1f / 16f;
+    private static final float TANK_X1 = 15f / 16f;
+    private static final float TANK_Z0 = 1f / 16f;
+    private static final float TANK_Z1 = 15f / 16f;
 
     public TankRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -44,7 +53,7 @@ public class TankRenderer extends AbstractTankRenderer<TankBlockEntity> {
         FluidStack fluid = be.getStoredFluid();
 
         float fillFrac = Math.max(0.01f, (float) be.getAmount() / be.getCapacity());
-        float fillTop = FLUID_FLOOR + fillFrac * FLUID_H;
+        float fillTop = TANK_FLUID_FLOOR + fillFrac * TANK_FLUID_H;
 
         IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fluid.getFluid());
         var fluidSprite = sprite(ext.getStillTexture(fluid));
@@ -60,34 +69,147 @@ public class TankRenderer extends AbstractTankRenderer<TankBlockEntity> {
 
         VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
 
-        float uLeft = fluidSprite.getU0();
-        float uRight = fluidSprite.getU1();
-        float vTop = fluidSprite.getV0();
-        float vBottom = Mth.lerp(fillFrac, fluidSprite.getV0(), fluidSprite.getV1());
+        float uL = fluidSprite.getU0(), uR = fluidSprite.getU1();
+        float vT = fluidSprite.getV0();
+        float vB = Mth.lerp(fillFrac, fluidSprite.getV0(), fluidSprite.getV1());
 
-        float uT0 = fluidSprite.getU0();
-        float uT1 = fluidSprite.getU1();
-        float vT0 = fluidSprite.getV0();
-        float vT1 = fluidSprite.getV1();
+        renderCubeFill(vc, mat, fr, fg, fb, fa, fluidLight, packedOverlay, uL, vT, uR, vB, fillTop);
+    }
 
-        renderOctagonalPrism(
+    static void renderCubeFill(
+            VertexConsumer vc,
+            Matrix4f mat,
+            int r,
+            int g,
+            int b,
+            int a,
+            int light,
+            int overlay,
+            float uL,
+            float vT,
+            float uR,
+            float vB,
+            float fillTop) {
+        // North (-Z)
+        quadFluid(
                 vc,
                 mat,
-                fr,
-                fg,
-                fb,
-                fa,
-                fluidLight,
-                packedOverlay,
-                uLeft,
-                vTop,
-                uRight,
-                vBottom,
-                uT0,
-                uT1,
-                vT0,
-                vT1,
-                fillTop);
+                r,
+                g,
+                b,
+                a,
+                light,
+                overlay,
+                uL,
+                vT,
+                uR,
+                vB,
+                TANK_X1,
+                TANK_FLUID_FLOOR,
+                TANK_Z0,
+                TANK_X0,
+                TANK_FLUID_FLOOR,
+                TANK_Z0,
+                TANK_X0,
+                fillTop,
+                TANK_Z0,
+                TANK_X1,
+                fillTop,
+                TANK_Z0,
+                0,
+                0,
+                -1);
+        // South (+Z)
+        quadFluid(
+                vc,
+                mat,
+                r,
+                g,
+                b,
+                a,
+                light,
+                overlay,
+                uL,
+                vT,
+                uR,
+                vB,
+                TANK_X0,
+                TANK_FLUID_FLOOR,
+                TANK_Z1,
+                TANK_X1,
+                TANK_FLUID_FLOOR,
+                TANK_Z1,
+                TANK_X1,
+                fillTop,
+                TANK_Z1,
+                TANK_X0,
+                fillTop,
+                TANK_Z1,
+                0,
+                0,
+                1);
+        // West (-X)
+        quadFluid(
+                vc,
+                mat,
+                r,
+                g,
+                b,
+                a,
+                light,
+                overlay,
+                uL,
+                vT,
+                uR,
+                vB,
+                TANK_X0,
+                TANK_FLUID_FLOOR,
+                TANK_Z0,
+                TANK_X0,
+                TANK_FLUID_FLOOR,
+                TANK_Z1,
+                TANK_X0,
+                fillTop,
+                TANK_Z1,
+                TANK_X0,
+                fillTop,
+                TANK_Z0,
+                -1,
+                0,
+                0);
+        // East (+X)
+        quadFluid(
+                vc,
+                mat,
+                r,
+                g,
+                b,
+                a,
+                light,
+                overlay,
+                uL,
+                vT,
+                uR,
+                vB,
+                TANK_X1,
+                TANK_FLUID_FLOOR,
+                TANK_Z1,
+                TANK_X1,
+                TANK_FLUID_FLOOR,
+                TANK_Z0,
+                TANK_X1,
+                fillTop,
+                TANK_Z0,
+                TANK_X1,
+                fillTop,
+                TANK_Z1,
+                1,
+                0,
+                0);
+        // Top face — CCW from above: NW → SW → SE → NE
+        quadFluid(
+                vc, mat, r, g, b, a, light, overlay, uL, vT, uR, vB, TANK_X0, fillTop, TANK_Z0, TANK_X0, fillTop,
+                TANK_Z1, TANK_X1, fillTop, TANK_Z1, TANK_X1, fillTop, TANK_Z0, 0, 1, 0);
     }
 
     public static void renderOctagonalPrism(

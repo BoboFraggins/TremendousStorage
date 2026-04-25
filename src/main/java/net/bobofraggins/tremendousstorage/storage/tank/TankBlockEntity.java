@@ -530,4 +530,11 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
+        super.handleUpdateTag(tag, registries);
+        // Force a chunk re-bake on the client so the block colour provider re-reads the new tier.
+        requestModelDataUpdate();
+    }
 }

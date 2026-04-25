@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
-import net.bobofraggins.tremendousstorage.shared.tank.AbstractTankRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -95,30 +94,13 @@ public class TankItemRenderer extends BlockEntityWithoutLevelRenderer {
 
         int fluidLight = fluid.getFluidType().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
 
-        float fillTop = AbstractTankRenderer.FLUID_FLOOR + fillFrac * AbstractTankRenderer.FLUID_H;
-        float uLeft = sprite.getU0();
-        float uRight = sprite.getU1();
-        float vTop = sprite.getV0();
-        float vBottom = Mth.lerp(fillFrac, sprite.getV0(), sprite.getV1());
+        float fillTop = TankRenderer.TANK_FLUID_FLOOR + fillFrac * TankRenderer.TANK_FLUID_H;
+        float uL = sprite.getU0(), uR = sprite.getU1();
+        float vT = sprite.getV0();
+        float vB = Mth.lerp(fillFrac, sprite.getV0(), sprite.getV1());
 
         VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
-        TankRenderer.renderOctagonalPrism(
-                vc,
-                poseStack.last().pose(),
-                fr,
-                fg,
-                fb,
-                fa,
-                fluidLight,
-                packedOverlay,
-                uLeft,
-                vTop,
-                uRight,
-                vBottom,
-                sprite.getU0(),
-                sprite.getU1(),
-                sprite.getV0(),
-                sprite.getV1(),
-                fillTop);
+        TankRenderer.renderCubeFill(
+                vc, poseStack.last().pose(), fr, fg, fb, fa, fluidLight, packedOverlay, uL, vT, uR, vB, fillTop);
     }
 }
