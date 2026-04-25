@@ -2,8 +2,6 @@ package net.bobofraggins.tremendousstorage.glamping;
 
 import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
-import net.bobofraggins.tremendousstorage.glamping.skyblock.SkyBlock;
-import net.bobofraggins.tremendousstorage.glamping.skyblock.SkyBlockEntity;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
@@ -45,25 +43,6 @@ public class GlampingRegistration {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TentBlockEntity>> TENT_BE_TYPE =
             BLOCK_ENTITY_TYPES.register("tent", () -> BlockEntityType.Builder.of(TentBlockEntity::new, TENT.get())
                     .build(null));
-
-    // -------------------------------------------------------------------------
-    // Sky block
-    // -------------------------------------------------------------------------
-
-    public static final DeferredBlock<SkyBlock> SKY_BLOCK = BLOCKS.register(
-            "sky_block",
-            () -> new SkyBlock(BlockBehaviour.Properties.of()
-                    .strength(0.5f, 0.5f)
-                    .requiresCorrectToolForDrops()
-                    .sound(SoundType.GLASS)));
-
-    public static final DeferredHolder<Item, BlockItem> SKY_BLOCK_ITEM =
-            ITEMS.registerSimpleBlockItem("sky_block", SKY_BLOCK);
-
-    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SkyBlockEntity>> SKY_BLOCK_BE_TYPE =
-            BLOCK_ENTITY_TYPES.register(
-                    "sky_block", () -> BlockEntityType.Builder.of(SkyBlockEntity::new, SKY_BLOCK.get())
-                            .build(null));
 
     // -------------------------------------------------------------------------
     // Tent door block

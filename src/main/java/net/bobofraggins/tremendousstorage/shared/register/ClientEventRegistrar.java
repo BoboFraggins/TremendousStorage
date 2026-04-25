@@ -3,7 +3,6 @@ package net.bobofraggins.tremendousstorage.shared.register;
 import net.bobofraggins.tremendousstorage.external.mobgrindinutils.XpFluidClientEvents;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClientEvents;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClientTickHandler;
-import net.bobofraggins.tremendousstorage.glamping.skyblock.SkyBlockClientEvents;
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineClientEvents;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.storage.armorycabinet.ArmoryCabinetClientEvents;
@@ -56,7 +55,6 @@ public final class ClientEventRegistrar {
         modBus.register(PersonalAccessTerminalClientEvents.class);
         modBus.register(HoneyClientEvents.class);
         modBus.register(PositiveVibesClientEvents.class);
-        modBus.register(SkyBlockClientEvents.class);
         modBus.register(XpFluidClientEvents.class);
 
         // ── Game-bus client events (tick handlers, input, etc.) ─────────────────
