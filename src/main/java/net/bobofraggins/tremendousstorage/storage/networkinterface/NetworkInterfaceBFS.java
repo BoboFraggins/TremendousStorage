@@ -298,6 +298,15 @@ public final class NetworkInterfaceBFS {
         // scan, causing infinite recursion. NIs are connectors/bridges only, not storage.
         if (neighborBE instanceof NetworkInterfaceBlockEntity) return;
 
+        // Only expose this neighbor as network storage if the tube face has no attachment or
+        // a StorageInterface. ImportInterface and ExportInterface own their neighbor for
+        // pull/push operations exclusively and must not be used as generic insert targets.
+        AttachmentType faceAttachment =
+                tubeBE != null ? tubeBE.getAttachmentType(tubeDir.ordinal()) : AttachmentType.NONE;
+        if (faceAttachment != AttachmentType.NONE && faceAttachment != AttachmentType.STORAGE_INTERFACE) {
+            return;
+        }
+
         // Resolve IItemHandler capability
         IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, adjPos, tubeDir.getOpposite());
         if (handler != null) {

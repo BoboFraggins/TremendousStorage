@@ -166,19 +166,14 @@ public class RecyclingBinRenderer
         float u0 = sprite.getU0(), u1 = sprite.getU1();
         float v0 = sprite.getV0(), v1 = sprite.getV1();
 
-        // Top faces use a culling render type — winding must be CCW from above (NW→SW→SE→NE)
-        // so the geometric normal points up and the face is visible looking down into the bin.
-        VertexConsumer vcCull = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
-        // Side faces use a non-culling render type to avoid z-fighting from shared interior
-        // faces between adjacent cubes — each face is emitted once, visible from either side.
-        VertexConsumer vcNoCull = bufferSource.getBuffer(RenderType.translucent());
+        VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
 
         for (float[] c : LIQUID_CUBES) {
             float x0 = c[0], z0 = c[1], x1 = c[2], z1 = c[3];
 
             // Top face — CCW from above so normal faces +Y (visible looking down into bin).
             quad(
-                    vcCull,
+                    vc,
                     mat,
                     r,
                     g,
@@ -206,10 +201,10 @@ public class RecyclingBinRenderer
                     1,
                     0);
 
-            // Side faces — rendered without culling so interior shared faces don't z-fight.
+            // Side faces
             // North (-Z)
             quad(
-                    vcNoCull,
+                    vc,
                     mat,
                     r,
                     g,
@@ -238,7 +233,7 @@ public class RecyclingBinRenderer
                     -1);
             // South (+Z)
             quad(
-                    vcNoCull,
+                    vc,
                     mat,
                     r,
                     g,
@@ -267,7 +262,7 @@ public class RecyclingBinRenderer
                     1);
             // West (-X)
             quad(
-                    vcNoCull,
+                    vc,
                     mat,
                     r,
                     g,
@@ -296,7 +291,7 @@ public class RecyclingBinRenderer
                     0);
             // East (+X)
             quad(
-                    vcNoCull,
+                    vc,
                     mat,
                     r,
                     g,

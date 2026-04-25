@@ -1,7 +1,9 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageClientConfig;
 import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
@@ -90,6 +92,12 @@ public class LocalInventoryPane implements IDialogPane {
     private int scrollOffset = 0;
     private boolean draggingScrollbar = false;
 
+    /**
+     * Original server-side indices already extracted in the current shift-drag session.
+     * Cleared on mouseReleased and at the start of each new mouseClicked.
+     */
+    private final Set<Integer> shiftDragVisited = new HashSet<>();
+
     @Nullable
     private GridClickHandler clickHandler;
 
@@ -170,6 +178,7 @@ public class LocalInventoryPane implements IDialogPane {
 
     @Override
     public boolean mouseClicked(double localX, double localY, int button) {
+        shiftDragVisited.clear();
         if (isInScrollbar(localX, localY)) {
             draggingScrollbar = true;
             scrollToY(localY);
@@ -198,6 +207,7 @@ public class LocalInventoryPane implements IDialogPane {
             int originalIdx = (baseToOriginal != null) ? baseToOriginal[allStacksIdx] : allStacksIdx;
             if (Screen.hasShiftDown()) {
                 clickHandler.onClick(originalIdx, (int) Math.min(count, maxStack), false);
+                shiftDragVisited.add(originalIdx);
             } else {
                 int amount = (button == 1) ? (int) Math.max(1, (count + 1) / 2) : (int) Math.min(count, maxStack);
                 clickHandler.onClick(originalIdx, amount, true);
@@ -222,11 +232,34 @@ public class LocalInventoryPane implements IDialogPane {
             scrollToY(localY);
             return true;
         }
+        var mc = Minecraft.getInstance();
+        if (button == 0
+                && Screen.hasShiftDown()
+                && clickHandler != null
+                && mc.player != null
+                && mc.player.containerMenu.getCarried().isEmpty()) {
+            if (isInGrid(localX, localY)) {
+                int col = (int) ((localX - GRID_X) / AccessTerminalLayout.SLOT_SIZE);
+                int row = (int) ((localY - gridStartY()) / AccessTerminalLayout.SLOT_SIZE);
+                int displayedIdx = (row + scrollOffset) * AccessTerminalLayout.NETWORK_COLS + col;
+                if (displayedIdx >= 0 && displayedIdx < displayStacks.size()) {
+                    long count = displayCounts.get(displayedIdx);
+                    int maxStack = displayStacks.get(displayedIdx).getMaxStackSize();
+                    int allStacksIdx = (toOriginal != null) ? toOriginal[displayedIdx] : displayedIdx;
+                    int originalIdx = (baseToOriginal != null) ? baseToOriginal[allStacksIdx] : allStacksIdx;
+                    if (count > 0 && shiftDragVisited.add(originalIdx)) {
+                        clickHandler.onClick(originalIdx, (int) Math.min(count, maxStack), false);
+                    }
+                }
+                return true;
+            }
+        }
         return false;
     }
 
     @Override
     public boolean mouseReleased(double localX, double localY, int button) {
+        shiftDragVisited.clear();
         if (draggingScrollbar) {
             draggingScrollbar = false;
             return true;

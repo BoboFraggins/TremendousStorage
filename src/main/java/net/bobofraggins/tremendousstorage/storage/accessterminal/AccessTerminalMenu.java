@@ -376,7 +376,9 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                         // Refresh the client's network grid
                         KeyCounter inventory = ni.getCachedInventory();
                         if (inventory != null && player instanceof ServerPlayer sp) {
-                            PacketDistributor.sendToPlayer(sp, RequestSatContentsPacket.buildContentsPacket(inventory));
+                            PacketDistributor.sendToPlayer(
+                                    sp,
+                                    RequestSatContentsPacket.buildContentsPacket(inventory, ni.getFluidStorageKeys()));
                         }
                         return copy;
                     }
@@ -559,7 +561,8 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         if (rev != lastSentRevision) {
             KeyCounter inventory = ni.getCachedInventory();
             if (inventory != null) {
-                PacketDistributor.sendToPlayer(sp, RequestSatContentsPacket.buildContentsPacket(inventory));
+                PacketDistributor.sendToPlayer(
+                        sp, RequestSatContentsPacket.buildContentsPacket(inventory, ni.getFluidStorageKeys()));
                 lastSentRevision = rev;
             }
         }

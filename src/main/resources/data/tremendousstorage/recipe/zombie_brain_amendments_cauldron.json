@@ -1,16 +1,15 @@
 {
-  "type": "amendments:cauldron",
+  "type": "amendments:cauldron_crafting",
   "group": "",
   "input_fluid": {
-    "id": "tremendousstorage:positive_vibes",
-    "count": 3
+    "id": "tremendousstorage:positive_vibes"
   },
   "input_items": [
     {"item": "tremendousstorage:zombie_brain"}
   ],
   "output_item": {
     "id": "tremendousstorage:brain",
-    "count": 1
+    "Count": 1
   },
   "fluid_amount_difference": -3,
   "require_boiling": false,

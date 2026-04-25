@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -94,6 +95,12 @@ public class NetworkInventoryPane implements IDialogPane {
     private int scrollOffset = 0;
     private boolean draggingScrollbar = false;
 
+    /**
+     * Item hashes (by item+components) already extracted in the current shift-drag session.
+     * Cleared on mouseReleased and at the start of each new mouseClicked.
+     */
+    private final Set<Integer> shiftDragVisited = new HashSet<>();
+
     /** False until the first server response arrives. */
     private boolean hasContents = false;
 
@@ -124,6 +131,7 @@ public class NetworkInventoryPane implements IDialogPane {
 
     @Override
     public boolean mouseClicked(double localX, double localY, int button) {
+        shiftDragVisited.clear();
         if (isInScrollbar(localX, localY)) {
             draggingScrollbar = true;
             scrollToY(localY);
@@ -167,6 +175,7 @@ public class NetworkInventoryPane implements IDialogPane {
                     int amount = (int) Math.min(totalCount, maxStack);
                     PacketDistributor.sendToServer(
                             new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, false));
+                    shiftDragVisited.add(ItemStack.hashItemAndComponents(target));
                 } else {
                     int amount = (button == 1)
                             ? (int) Math.max(1, (totalCount + 1) / 2)
@@ -195,11 +204,35 @@ public class NetworkInventoryPane implements IDialogPane {
             scrollToY(localY);
             return true;
         }
+        if (button == 0
+                && Screen.hasShiftDown()
+                && hasContents
+                && menu.hasNetwork()
+                && menu.getCarried().isEmpty()) {
+            if (isInGrid(localX, localY)) {
+                int col = (int) ((localX - GRID_X) / AccessTerminalLayout.SLOT_SIZE);
+                int row = (int) ((localY - gridStartY()) / AccessTerminalLayout.SLOT_SIZE);
+                int idx = (row + scrollOffset) * AccessTerminalLayout.NETWORK_COLS + col;
+                if (idx >= 0 && idx < stacks.size()) {
+                    ItemStack target = stacks.get(idx);
+                    long totalCount = counts.get(idx);
+                    boolean isFluidSlot = !isFluid.isEmpty() && idx < isFluid.size() && isFluid.get(idx);
+                    int key = ItemStack.hashItemAndComponents(target);
+                    if (totalCount > 0 && !isFluidSlot && shiftDragVisited.add(key)) {
+                        int amount = (int) Math.min(totalCount, target.getMaxStackSize());
+                        PacketDistributor.sendToServer(
+                                new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, false));
+                    }
+                }
+                return true;
+            }
+        }
         return false;
     }
 
     @Override
     public boolean mouseReleased(double localX, double localY, int button) {
+        shiftDragVisited.clear();
         if (draggingScrollbar) {
             draggingScrollbar = false;
             return true;
@@ -547,7 +580,7 @@ public class NetworkInventoryPane implements IDialogPane {
         Matrix4f mat = graphics.pose().last().pose();
 
         float textX = (x + offset + 16f + 2f - font.width(text) * scale) * scaleInv;
-        float textY = (y + offset + 16f + 5f - 5f * scale) * scaleInv;
+        float textY = (y + offset + 10f) * scaleInv;
 
         MultiBufferSource.BufferSource buffers =
                 Minecraft.getInstance().renderBuffers().bufferSource();
