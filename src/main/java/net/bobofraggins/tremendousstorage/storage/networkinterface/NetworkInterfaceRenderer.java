@@ -7,6 +7,8 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.tank.AbstractTankRenderer;
 import net.bobofraggins.tremendousstorage.storage.tank.TankRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -14,7 +16,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -23,23 +25,21 @@ import org.joml.Matrix4f;
 /**
  * Renders the Network Interface block as a fluid tank containing an animated floating brain.
  *
- * <p>The static tank shell (octagonal cage) is rendered by the block model
- * ({@code models/block/network_interface.json}). This BESR handles:
+ * <p>The static tank shell is rendered by the block model (which now inherits from
+ * {@code models/block/tank.json}). This BESR handles:
  * <ul>
- *   <li>Water fill at 90% (octagonal prism, translucent)
+ *   <li>Positive Vibes fill at 95% (cube, translucent)
  *   <li>Animated floating Brain item (bobbing, facing matches placement direction)
  * </ul>
  */
 public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterfaceBlockEntity> {
 
-    // Glass extends to y=16, so interior height is taller than the standard tank.
-    private static final float NI_FLUID_H = 1.0f - FLUID_FLOOR;
-    private static final float FILL_FRAC = 0.9f;
+    private static final float FILL_FRAC = 0.95f;
 
     public NetworkInterfaceRenderer(BlockEntityRendererProvider.Context ctx) {}
 
     // -------------------------------------------------------------------------
-    // Fill — water at 90%
+    // Fill — Positive Vibes at 95%
     // -------------------------------------------------------------------------
 
     @Override
@@ -50,39 +50,37 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
             int packedLight,
             int packedOverlay) {
 
-        FluidStack water = new FluidStack(Fluids.WATER, 1000);
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Fluids.WATER);
-        var fluidSprite = sprite(ext.getStillTexture(water));
+        FluidStack vibes = new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), 1000);
+        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.POSITIVE_VIBES_TYPE.get());
+        var fluidSprite = sprite(ext.getStillTexture(vibes));
 
-        int tint = ext.getTintColor(water);
+        int tint = ext.getTintColor(vibes);
         int fr = (tint >> 16) & 0xFF;
         int fg = (tint >> 8) & 0xFF;
         int fb = tint & 0xFF;
         int fa = (tint >> 24) & 0xFF;
         if (fa == 0) fa = 160;
-        fa /= 2;
 
-        float fillTop = FLUID_FLOOR + FILL_FRAC * NI_FLUID_H;
+        float fillTop = TankRenderer.TANK_FLUID_FLOOR + FILL_FRAC * TankRenderer.TANK_FLUID_H;
+        float vB = Mth.lerp(FILL_FRAC, fluidSprite.getV0(), fluidSprite.getV1());
+
+        int fluidLight =
+                Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
 
         VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
-
-        TankRenderer.renderOctagonalPrism(
+        TankRenderer.renderCubeFill(
                 vc,
                 mat,
                 fr,
                 fg,
                 fb,
                 fa,
-                packedLight,
+                fluidLight,
                 packedOverlay,
                 fluidSprite.getU0(),
                 fluidSprite.getV0(),
                 fluidSprite.getU1(),
-                Mth.lerp(FILL_FRAC, fluidSprite.getV0(), fluidSprite.getV1()),
-                fluidSprite.getU0(),
-                fluidSprite.getU1(),
-                fluidSprite.getV0(),
-                fluidSprite.getV1(),
+                vB,
                 fillTop);
     }
 
@@ -99,14 +97,18 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
             int packedLight,
             int packedOverlay) {
 
-        // Render fill only (skip AbstractTankRenderer's tube-stub logic).
+        Level level = be.getLevel();
+        if (level != null) {
+            packedLight = LevelRenderer.getLightColor(level, be.getBlockPos());
+        }
+
         poseStack.pushPose();
         renderFill(be, poseStack.last().pose(), bufferSource, packedLight, packedOverlay);
         poseStack.popPose();
 
-        if (be.getLevel() == null) return;
+        if (level == null) return;
 
-        double time = (be.getLevel().getGameTime() + partialTick) / 20.0;
+        double time = (level.getGameTime() + partialTick) / 20.0;
         float bob = (float) Math.sin(time * Math.PI * 0.25) * 0.04f;
         float rotY = (float) ((time * 10.0) % 360.0);
 
@@ -117,7 +119,7 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         poseStack.mulPose(Axis.XP.rotationDegrees(3f));
 
         ItemStack brainStack = new ItemStack(Registration.BRAIN.get());
-        BakedModel model = Minecraft.getInstance().getItemRenderer().getModel(brainStack, be.getLevel(), null, 0);
+        BakedModel model = Minecraft.getInstance().getItemRenderer().getModel(brainStack, level, null, 0);
         Minecraft.getInstance()
                 .getItemRenderer()
                 .render(

@@ -1,1 +1,1 @@
-{ "parent": "tremendousstorage:block/tank" }
+{ "parent": "minecraft:builtin/entity" }

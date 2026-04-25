@@ -3,11 +3,13 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.bobofraggins.tremendousstorage.shared.tank.AbstractTankRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
@@ -21,9 +23,9 @@ import org.joml.Matrix4f;
 public class TankRenderer extends AbstractTankRenderer<TankBlockEntity> {
 
     // Fluid interior bounds matching the fluid-guide element in the tank bbmodel [1,1,1]→[15,15,15]
-    static final float TANK_FLUID_FLOOR = 1f / 16f;
-    static final float TANK_FLUID_CEIL = 15f / 16f;
-    static final float TANK_FLUID_H = TANK_FLUID_CEIL - TANK_FLUID_FLOOR;
+    public static final float TANK_FLUID_FLOOR = 1f / 16f;
+    public static final float TANK_FLUID_CEIL = 15f / 16f;
+    public static final float TANK_FLUID_H = TANK_FLUID_CEIL - TANK_FLUID_FLOOR;
     private static final float TANK_X0 = 1f / 16f;
     private static final float TANK_X1 = 15f / 16f;
     private static final float TANK_Z0 = 1f / 16f;
@@ -39,6 +41,10 @@ public class TankRenderer extends AbstractTankRenderer<TankBlockEntity> {
             MultiBufferSource bufferSource,
             int packedLight,
             int packedOverlay) {
+        Level level = be.getLevel();
+        if (level != null) {
+            packedLight = LevelRenderer.getLightColor(level, be.getBlockPos());
+        }
         poseStack.pushPose();
         renderFill(be, poseStack.last().pose(), bufferSource, packedLight, packedOverlay);
         poseStack.popPose();
@@ -76,7 +82,7 @@ public class TankRenderer extends AbstractTankRenderer<TankBlockEntity> {
         renderCubeFill(vc, mat, fr, fg, fb, fa, fluidLight, packedOverlay, uL, vT, uR, vB, fillTop);
     }
 
-    static void renderCubeFill(
+    public static void renderCubeFill(
             VertexConsumer vc,
             Matrix4f mat,
             int r,
