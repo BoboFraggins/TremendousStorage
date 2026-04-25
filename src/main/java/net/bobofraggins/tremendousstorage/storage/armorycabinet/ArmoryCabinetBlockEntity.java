@@ -14,7 +14,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -170,7 +169,20 @@ public class ArmoryCabinetBlockEntity extends ChestBlockEntity {
 
     @Override
     public AbstractContainerMenu createMenu(int id, Inventory inv, Player player) {
-        ContainerData data = new SimpleContainerData(1);
+        ContainerData data = new ContainerData() {
+            @Override
+            public int get(int index) {
+                return index == 0 ? getPriority().ordinal() : 0;
+            }
+
+            @Override
+            public void set(int index, int value) {}
+
+            @Override
+            public int getCount() {
+                return 1;
+            }
+        };
         return new ArmoryCabinetMenu(id, inv, worldPosition, data);
     }
 }

@@ -59,7 +59,7 @@ public class ExportInterfaceScreen extends AbstractContainerScreen<ExportInterfa
                 filterLabel,
                 leftPos + (FILTER_PANE_W - font.width(filterLabel)) / 2,
                 topPos + LABEL_SCREEN_DY,
-                0xAAAAAA,
+                0x404040,
                 false);
 
         for (int row = 0; row < 3; row++) {

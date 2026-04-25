@@ -71,7 +71,6 @@ public class ArmoryCabinetMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        if (player.level().isClientSide()) return ItemStack.EMPTY;
         Slot slot = slots.get(index);
         if (slot == null || !slot.hasItem()) return ItemStack.EMPTY;
 
@@ -79,6 +78,7 @@ public class ArmoryCabinetMenu extends AbstractContainerMenu {
         ItemStack original = stack.copy();
 
         if (index >= 0 && index < 36) {
+            if (player.level().isClientSide()) return ItemStack.EMPTY;
             BlockEntity be = player.level().getBlockEntity(pos);
             if (be instanceof ChestBlockEntity bulk) {
                 long remainder = bulk.insert(stack, stack.getCount(), false);

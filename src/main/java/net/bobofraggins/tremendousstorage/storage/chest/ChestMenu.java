@@ -238,7 +238,6 @@ public class ChestMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        if (player.level().isClientSide()) return ItemStack.EMPTY;
         Slot slot = slots.get(index);
         if (slot == null || !slot.hasItem()) return ItemStack.EMPTY;
 
@@ -259,7 +258,9 @@ public class ChestMenu extends AbstractContainerMenu {
             // Craft grid → inventory
             if (!moveItemStackTo(stack, invStart, hotbarEnd, false)) return ItemStack.EMPTY;
         } else if (index >= invStart && index < hotbarEnd) {
-            // Player slot → bulk storage
+            // Player slot → bulk storage. Skip client prediction: client can't replicate
+            // server-side bulk insertion, which would cause a flicker.
+            if (player.level().isClientSide()) return ItemStack.EMPTY;
             BlockEntity be = player.level().getBlockEntity(pos);
             if (be instanceof ChestBlockEntity bulk) {
                 long remainder = bulk.insert(stack, stack.getCount(), false);

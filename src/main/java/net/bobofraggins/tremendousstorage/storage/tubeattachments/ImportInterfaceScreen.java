@@ -74,7 +74,7 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
                 filterLabel,
                 leftPos + (FILTER_PANE_W - font.width(filterLabel)) / 2,
                 topPos + LABEL_SCREEN_DY,
-                0xAAAAAA,
+                0x404040,
                 false);
 
         // Ghost slot backgrounds and item icons

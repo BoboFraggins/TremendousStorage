@@ -347,7 +347,6 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        if (player.level().isClientSide()) return ItemStack.EMPTY;
         ItemStack copy = ItemStack.EMPTY;
         Slot slot = slots.get(index);
         if (slot == null || !slot.hasItem()) return copy;
@@ -378,7 +377,10 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
 
             return copy;
         } else if (index >= invStart && index < hotbarEnd) {
-            // Shift-click player slot: try network first, then swap between inv/hotbar
+            // Shift-click player slot: try network first, then swap between inv/hotbar.
+            // Skip client-side prediction when network is present — server inserts into network,
+            // but client would predict a vanilla inv↔hotbar swap, causing a flicker.
+            if (hasNetwork() && player.level().isClientSide()) return ItemStack.EMPTY;
             if (hasNetwork() && !player.level().isClientSide()) {
                 if (getNiLevel(player).getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni) {
                     IItemHandler handler = ni.getItemHandler();

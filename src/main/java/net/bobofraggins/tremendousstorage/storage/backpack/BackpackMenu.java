@@ -255,7 +255,6 @@ public class BackpackMenu extends AbstractContainerMenu {
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        if (player.level().isClientSide()) return ItemStack.EMPTY;
         Slot slot = slots.get(index);
         if (slot == null || !slot.hasItem()) return ItemStack.EMPTY;
 
@@ -276,7 +275,9 @@ public class BackpackMenu extends AbstractContainerMenu {
             // Craft grid → inventory
             if (!moveItemStackTo(stack, invStart, hotbarEnd, false)) return ItemStack.EMPTY;
         } else if (index >= invStart && index < hotbarEnd) {
-            // Player slot → backpack
+            // Player slot → backpack. Skip client prediction: client can't reliably replicate
+            // item-data-component insertion, which would cause a flicker.
+            if (player.level().isClientSide()) return ItemStack.EMPTY;
             ItemStack backpackStack = BackpackItem.getBackpackStack(player, slotType, slotIndex, slotId);
             if (backpackStack.isEmpty()) return ItemStack.EMPTY;
 
