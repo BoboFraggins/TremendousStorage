@@ -33,7 +33,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * from the network via the NI's item handler, and places them in the player's inventory.
  * Sends back an updated {@link SatContentsPacket} after the operation.
  *
- * <p>For fluid-backed slots (detected via {@link NiItemHandler#isFluidSlot}), an empty bucket
+ * <p>For fluid-backed slots (detected via {@link NiItemHandler.SlotView#isFluid}), an empty bucket
  * must be present in the player's cursor; one empty bucket is consumed per filled bucket
  * extracted.
  */
@@ -75,38 +75,46 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount, boo
             IItemHandler handler = ni.getItemHandler();
             if (handler == null) return;
 
-            NiItemHandler niHandler = (handler instanceof NiItemHandler nhi) ? nhi : null;
-
             ItemStack carried = player.containerMenu.getCarried();
             int remaining = packet.amount();
             ItemStack result = ItemStack.EMPTY;
             boolean anyFluidExtracted = false;
 
-            for (int s = 0; s < handler.getSlots() && remaining > 0; s++) {
-                ItemStack inSlot = handler.getStackInSlot(s);
-                if (inSlot.isEmpty() || !ItemStack.isSameItemSameComponents(inSlot, packet.target())) continue;
+            // Use direct slot iteration when available to avoid O(H) resolveSlot per slot.
+            Iterable<?> slotSource = handler instanceof NiItemHandler nhi ? nhi.slots() : null;
 
-                boolean isFluid = niHandler != null && niHandler.isFluidSlot(s);
-                if (isFluid) {
-                    // Fluid slot: require and consume empty bucket(s) from cursor
-                    if (carried.isEmpty() || !carried.is(Items.BUCKET)) break;
-                    int bucketsAvailable = carried.getCount();
-                    int toExtract = Math.min(remaining, bucketsAvailable);
-                    ItemStack extracted = handler.extractItem(s, toExtract, false);
-                    if (extracted.isEmpty()) continue;
-                    // Consume empty buckets equal to the number extracted
-                    carried.shrink(extracted.getCount());
-                    if (carried.isEmpty()) {
-                        player.containerMenu.setCarried(ItemStack.EMPTY);
+            if (slotSource != null) {
+                for (Object obj : slotSource) {
+                    if (remaining <= 0) break;
+                    NiItemHandler.SlotView view = (NiItemHandler.SlotView) obj;
+                    ItemStack inSlot = view.handler().getStackInSlot(view.localSlot());
+                    if (inSlot.isEmpty() || !ItemStack.isSameItemSameComponents(inSlot, packet.target())) continue;
+
+                    if (view.isFluid()) {
+                        if (carried.isEmpty() || !carried.is(Items.BUCKET)) break;
+                        int toExtract = Math.min(remaining, carried.getCount());
+                        ItemStack extracted = view.handler().extractItem(view.localSlot(), toExtract, false);
+                        if (extracted.isEmpty()) continue;
+                        carried.shrink(extracted.getCount());
+                        if (carried.isEmpty()) player.containerMenu.setCarried(ItemStack.EMPTY);
+                        else player.containerMenu.setCarried(carried);
+                        remaining -= extracted.getCount();
+                        if (result.isEmpty()) result = extracted;
+                        else result.grow(extracted.getCount());
+                        anyFluidExtracted = true;
                     } else {
-                        player.containerMenu.setCarried(carried);
+                        int toExtract = Math.min(remaining, inSlot.getCount());
+                        ItemStack extracted = view.handler().extractItem(view.localSlot(), toExtract, false);
+                        if (extracted.isEmpty()) continue;
+                        remaining -= extracted.getCount();
+                        if (result.isEmpty()) result = extracted;
+                        else result.grow(extracted.getCount());
                     }
-                    remaining -= extracted.getCount();
-                    if (result.isEmpty()) result = extracted;
-                    else result.grow(extracted.getCount());
-                    anyFluidExtracted = true;
-                } else {
-                    // Regular item slot: extract normally
+                }
+            } else {
+                for (int s = 0; s < handler.getSlots() && remaining > 0; s++) {
+                    ItemStack inSlot = handler.getStackInSlot(s);
+                    if (inSlot.isEmpty() || !ItemStack.isSameItemSameComponents(inSlot, packet.target())) continue;
                     int toExtract = Math.min(remaining, inSlot.getCount());
                     ItemStack extracted = handler.extractItem(s, toExtract, false);
                     if (extracted.isEmpty()) continue;

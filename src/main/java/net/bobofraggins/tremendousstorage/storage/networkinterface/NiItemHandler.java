@@ -1,7 +1,9 @@
 package net.bobofraggins.tremendousstorage.storage.networkinterface;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.NavigableMap;
+import java.util.NoSuchElementException;
 import javax.annotation.Nonnull;
 import net.bobofraggins.tremendousstorage.shared.storage.IPreferredStorage;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
@@ -24,6 +26,10 @@ import net.neoforged.neoforge.items.IItemHandler;
  * (e.g. Chest) report different slot counts as items are inserted or
  * removed. Caching slot counts at construction time would cause newly-inserted items to
  * be invisible until the next full network re-scan.
+ *
+ * <p>For bulk slot iteration (e.g. during extract scans), prefer {@link #slots()} over
+ * repeated flat-index calls: each flat-index call is O(H) due to linear slot resolution,
+ * whereas {@link #slots()} amortises that to O(1) per slot.
  */
 public class NiItemHandler implements IItemHandler {
 
@@ -40,6 +46,53 @@ public class NiItemHandler implements IItemHandler {
     // -------------------------------------------------------------------------
 
     private record SlotRef(IItemHandler handler, int localSlot) {}
+
+    /** A resolved slot: direct references to the underlying handler and its local index. */
+    public record SlotView(IItemHandler handler, int localSlot) {
+        public boolean isFluid() {
+            return handler instanceof TankItemAdapter;
+        }
+    }
+
+    /**
+     * Iterates all slots in insert order, yielding a {@link SlotView} per slot.
+     * Each view holds a direct reference to the underlying handler and local slot index,
+     * so all per-slot operations ({@code getStackInSlot}, {@code extractItem}, etc.) are O(1)
+     * rather than the O(H) cost of going through flat-index {@link #resolveSlot}.
+     */
+    public Iterable<SlotView> slots() {
+        return () -> new Iterator<>() {
+            private int hi = 0;
+            private int ls = 0;
+            private int curSlots =
+                    insertOrder.isEmpty() ? 0 : insertOrder.get(0).getSlots();
+
+            private void skipEmpty() {
+                while (hi < insertOrder.size() && ls >= curSlots) {
+                    hi++;
+                    ls = 0;
+                    curSlots = hi < insertOrder.size() ? insertOrder.get(hi).getSlots() : 0;
+                }
+            }
+
+            {
+                skipEmpty();
+            }
+
+            @Override
+            public boolean hasNext() {
+                return hi < insertOrder.size();
+            }
+
+            @Override
+            public SlotView next() {
+                if (!hasNext()) throw new NoSuchElementException();
+                SlotView view = new SlotView(insertOrder.get(hi), ls++);
+                skipEmpty();
+                return view;
+            }
+        };
+    }
 
     /**
      * Maps a flat slot index to a handler + local slot by walking the handler list.
@@ -64,8 +117,7 @@ public class NiItemHandler implements IItemHandler {
 
     /**
      * Returns {@code true} if the given global slot index maps to a {@link TankItemAdapter}.
-     * Used by {@link net.bobofraggins.tremendousstorage.shared.network.SatExtractPacket} to enforce
-     * the empty-bucket requirement before extracting fluid.
+     * Prefer {@link SlotView#isFluid()} when iterating via {@link #slots()} to avoid per-slot O(H) cost.
      */
     public boolean isFluidSlot(int globalSlot) {
         SlotRef ref = resolveSlot(globalSlot, insertOrder);
