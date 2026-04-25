@@ -41,6 +41,7 @@ public class PriorityPane implements IDialogPane {
 
     private final IntSupplier priorityGetter;
     private final IntConsumer prioritySetter;
+    private int lastRenderedWidth = ConfigDrawer.WIDTH;
 
     public PriorityPane(IntSupplier priorityGetter, IntConsumer prioritySetter) {
         this.priorityGetter = priorityGetter;
@@ -64,6 +65,7 @@ public class PriorityPane implements IDialogPane {
     @Override
     public void render(
             GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
+        lastRenderedWidth = width;
         int selected = priorityGetter.getAsInt();
         int rowX = (width - ROW_W) / 2;
         int downBtnX = rowX;
@@ -97,7 +99,7 @@ public class PriorityPane implements IDialogPane {
     public boolean mouseClicked(double localX, double localY, int button) {
         if (button != 0) return false;
         int selected = priorityGetter.getAsInt();
-        int rowX = (preferredWidth() - ROW_W) / 2;
+        int rowX = (lastRenderedWidth - ROW_W) / 2;
         int downBtnX = rowX;
         int upBtnX = rowX + BTN_W + GAP + LBL_W + GAP;
 

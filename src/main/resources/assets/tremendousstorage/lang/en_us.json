@@ -171,5 +171,17 @@
   "item.tremendousstorage.interdimensional_upgrade.requires_netherite": "Wireless Hub must be Netherite tier",
   "item.tremendousstorage.personal_access_terminal.hub_out_of_range": "Wireless Hub is not reachable from this dimension",
   "block.tremendousstorage.armory_cabinet": "Armory Cabinet",
-  "screen.tremendousstorage.armory_cabinet": "Armory Cabinet"
+  "screen.tremendousstorage.armory_cabinet": "Armory Cabinet",
+  "fluid_type.tremendousstorage.honey": "Honey",
+  "item.tremendousstorage.honey_fluid_bucket": "Honey Bucket",
+  "fluid_type.tremendousstorage.xp_juice": "XP Juice",
+  "item.tremendousstorage.xp_juice_bucket": "XP Juice Bucket",
+  "item.tremendousstorage.magnet_upgrade": "Magnet Upgrade",
+  "item.tremendousstorage.magnet_upgrade.tooltip": "Attracts nearby matching items and fluids into this storage.",
+  "item.tremendousstorage.ender_storage_upgrade.tooltip": "Right-click a supported block to convert it into its linked Ender variant.",
+  "item.tremendousstorage.crafting_upgrade": "Crafting Upgrade",
+  "block.tremendousstorage.tent": "Tent",
+  "block.tremendousstorage.tent_door": "Tent Door",
+  "item.tremendousstorage.picnic_basket.tooltip": "Automatically feeds the player when hungry.",
+  "item.tremendousstorage.ender_picnic_basket.tooltip": "Automatically feeds the player when hungry. Links to a shared inventory."
 }
