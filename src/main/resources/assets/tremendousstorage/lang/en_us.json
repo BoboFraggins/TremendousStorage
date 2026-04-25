@@ -80,6 +80,7 @@
   "screen.tremendousstorage.fluid_transfer": "Fill / Drain",
   "screen.tremendousstorage.void_items": "Void Items",
   "item.tremendousstorage.haarp_upgrade": "H.A.A.R.P. Upgrade",
+  "item.tremendousstorage.haarp_upgrade.tooltip": "Controls local weather patterns.",
   "screen.tremendousstorage.haarp.weather_mode": "Weather Mode",
   "screen.tremendousstorage.haarp.off": "Off",
   "screen.tremendousstorage.haarp.no_rain": "No Rain",

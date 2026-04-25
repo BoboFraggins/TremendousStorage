@@ -73,6 +73,17 @@ public class RecyclingBinRenderer
         {3f / 16f, 10f / 16f, 6f / 16f, 11f / 16f},
     };
 
+    // Per-cube bitmask of pink (exterior) faces from the bbmodel — indexed by Direction.ordinal()
+    // DOWN=0, UP=1, NORTH=2, SOUTH=3, WEST=4, EAST=5
+    private static final int[] LIQUID_PINK_FACES = {
+        (1 << 1) | (1 << 5), // cube 0 (542adec7): up, east
+        (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4), // cube 1 (269c750f): up, north, south, west
+        (1 << 1) | (1 << 2) | (1 << 4) | (1 << 5), // cube 2 (21ae416c): up, north, west, east
+        (1 << 1) | (1 << 3) | (1 << 4) | (1 << 5), // cube 3 (1f89c213): up, south, west, east
+        (1 << 1) | (1 << 4) | (1 << 5), // cube 4 (2e208553): up, west, east
+        (1 << 1) | (1 << 4) | (1 << 5), // cube 5 (80997daa): up, west, east
+    };
+
     private static float facingYRot(Direction facing) {
         return switch (facing) {
             case SOUTH -> 180f;
@@ -162,162 +173,165 @@ public class RecyclingBinRenderer
         if (a == 0) a = 255;
 
         float topY = LIQUID_FLOOR + (LIQUID_CEIL - LIQUID_FLOOR) * fillFraction;
-
         float u0 = sprite.getU0(), u1 = sprite.getU1();
         float v0 = sprite.getV0(), v1 = sprite.getV1();
-
         VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
 
-        for (float[] c : LIQUID_CUBES) {
+        for (int i = 0; i < LIQUID_CUBES.length; i++) {
+            float[] c = LIQUID_CUBES[i];
+            int pink = LIQUID_PINK_FACES[i];
             float x0 = c[0], z0 = c[1], x1 = c[2], z1 = c[3];
 
-            // Top face — CCW from above so normal faces +Y (visible looking down into bin).
-            quad(
-                    vc,
-                    mat,
-                    r,
-                    g,
-                    b,
-                    a,
-                    packedLight,
-                    packedOverlay,
-                    u0,
-                    v0,
-                    u1,
-                    v1,
-                    x0,
-                    topY,
-                    z0,
-                    x0,
-                    topY,
-                    z1,
-                    x1,
-                    topY,
-                    z1,
-                    x1,
-                    topY,
-                    z0,
-                    0,
-                    1,
-                    0);
-
-            // Side faces
-            // North (-Z)
-            quad(
-                    vc,
-                    mat,
-                    r,
-                    g,
-                    b,
-                    a,
-                    packedLight,
-                    packedOverlay,
-                    u0,
-                    v0,
-                    u1,
-                    v1,
-                    x1,
-                    topY,
-                    z0,
-                    x0,
-                    topY,
-                    z0,
-                    x0,
-                    LIQUID_FLOOR,
-                    z0,
-                    x1,
-                    LIQUID_FLOOR,
-                    z0,
-                    0,
-                    0,
-                    -1);
-            // South (+Z)
-            quad(
-                    vc,
-                    mat,
-                    r,
-                    g,
-                    b,
-                    a,
-                    packedLight,
-                    packedOverlay,
-                    u0,
-                    v0,
-                    u1,
-                    v1,
-                    x0,
-                    topY,
-                    z1,
-                    x1,
-                    topY,
-                    z1,
-                    x1,
-                    LIQUID_FLOOR,
-                    z1,
-                    x0,
-                    LIQUID_FLOOR,
-                    z1,
-                    0,
-                    0,
-                    1);
-            // West (-X)
-            quad(
-                    vc,
-                    mat,
-                    r,
-                    g,
-                    b,
-                    a,
-                    packedLight,
-                    packedOverlay,
-                    u0,
-                    v0,
-                    u1,
-                    v1,
-                    x0,
-                    topY,
-                    z0,
-                    x0,
-                    topY,
-                    z1,
-                    x0,
-                    LIQUID_FLOOR,
-                    z1,
-                    x0,
-                    LIQUID_FLOOR,
-                    z0,
-                    -1,
-                    0,
-                    0);
-            // East (+X)
-            quad(
-                    vc,
-                    mat,
-                    r,
-                    g,
-                    b,
-                    a,
-                    packedLight,
-                    packedOverlay,
-                    u0,
-                    v0,
-                    u1,
-                    v1,
-                    x1,
-                    topY,
-                    z1,
-                    x1,
-                    topY,
-                    z0,
-                    x1,
-                    LIQUID_FLOOR,
-                    z0,
-                    x1,
-                    LIQUID_FLOOR,
-                    z1,
-                    1,
-                    0,
-                    0);
+            if ((pink & (1 << 1)) != 0) {
+                quad(
+                        vc,
+                        mat,
+                        r,
+                        g,
+                        b,
+                        a,
+                        packedLight,
+                        packedOverlay,
+                        u0,
+                        v0,
+                        u1,
+                        v1,
+                        x0,
+                        topY,
+                        z0,
+                        x0,
+                        topY,
+                        z1,
+                        x1,
+                        topY,
+                        z1,
+                        x1,
+                        topY,
+                        z0,
+                        0,
+                        1,
+                        0);
+            }
+            if ((pink & (1 << 2)) != 0) {
+                quad(
+                        vc,
+                        mat,
+                        r,
+                        g,
+                        b,
+                        a,
+                        packedLight,
+                        packedOverlay,
+                        u0,
+                        v0,
+                        u1,
+                        v1,
+                        x1,
+                        topY,
+                        z0,
+                        x0,
+                        topY,
+                        z0,
+                        x0,
+                        LIQUID_FLOOR,
+                        z0,
+                        x1,
+                        LIQUID_FLOOR,
+                        z0,
+                        0,
+                        0,
+                        -1);
+            }
+            if ((pink & (1 << 3)) != 0) {
+                quad(
+                        vc,
+                        mat,
+                        r,
+                        g,
+                        b,
+                        a,
+                        packedLight,
+                        packedOverlay,
+                        u0,
+                        v0,
+                        u1,
+                        v1,
+                        x0,
+                        topY,
+                        z1,
+                        x1,
+                        topY,
+                        z1,
+                        x1,
+                        LIQUID_FLOOR,
+                        z1,
+                        x0,
+                        LIQUID_FLOOR,
+                        z1,
+                        0,
+                        0,
+                        1);
+            }
+            if ((pink & (1 << 4)) != 0) {
+                quad(
+                        vc,
+                        mat,
+                        r,
+                        g,
+                        b,
+                        a,
+                        packedLight,
+                        packedOverlay,
+                        u0,
+                        v0,
+                        u1,
+                        v1,
+                        x0,
+                        topY,
+                        z0,
+                        x0,
+                        topY,
+                        z1,
+                        x0,
+                        LIQUID_FLOOR,
+                        z1,
+                        x0,
+                        LIQUID_FLOOR,
+                        z0,
+                        -1,
+                        0,
+                        0);
+            }
+            if ((pink & (1 << 5)) != 0) {
+                quad(
+                        vc,
+                        mat,
+                        r,
+                        g,
+                        b,
+                        a,
+                        packedLight,
+                        packedOverlay,
+                        u0,
+                        v0,
+                        u1,
+                        v1,
+                        x1,
+                        topY,
+                        z1,
+                        x1,
+                        topY,
+                        z0,
+                        x1,
+                        LIQUID_FLOOR,
+                        z0,
+                        x1,
+                        LIQUID_FLOOR,
+                        z1,
+                        1,
+                        0,
+                        0);
+            }
         }
     }
 
