@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,half=lower": { "model": "tremendousstorage:block/armory_cabinet" },
+    "facing=south,half=lower": { "model": "tremendousstorage:block/armory_cabinet", "y": 180 },
+    "facing=west,half=lower":  { "model": "tremendousstorage:block/armory_cabinet", "y": 270 },
+    "facing=east,half=lower":  { "model": "tremendousstorage:block/armory_cabinet", "y": 90 },
+    "facing=north,half=upper": { "model": "tremendousstorage:block/armory_cabinet" },
+    "facing=south,half=upper": { "model": "tremendousstorage:block/armory_cabinet", "y": 180 },
+    "facing=west,half=upper":  { "model": "tremendousstorage:block/armory_cabinet", "y": 270 },
+    "facing=east,half=upper":  { "model": "tremendousstorage:block/armory_cabinet", "y": 90 }
+  }
+}

@@ -25,6 +25,9 @@ import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsMenu;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
+import net.bobofraggins.tremendousstorage.storage.armorycabinet.ArmoryCabinetBlock;
+import net.bobofraggins.tremendousstorage.storage.armorycabinet.ArmoryCabinetBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.armorycabinet.ArmoryCabinetMenu;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackBlock;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
@@ -293,6 +296,22 @@ public final class Registration {
     // -------------------------------------------------------------------------
     // Blocks + block entities
     // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<ArmoryCabinetBlock> ARMORY_CABINET = BLOCKS.register(
+            "armory_cabinet",
+            () -> new ArmoryCabinetBlock(BlockBehaviour.Properties.of()
+                    .strength(5.0f, 1000.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.METAL)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<Item, BlockItem> ARMORY_CABINET_ITEM =
+            ITEMS.register("armory_cabinet", () -> new BlockItem(ARMORY_CABINET.get(), new Item.Properties()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ArmoryCabinetBlockEntity>>
+            ARMORY_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register("armory_cabinet", () -> BlockEntityType.Builder.of(
+                    ArmoryCabinetBlockEntity::new, ARMORY_CABINET.get())
+            .build(null));
 
     public static final DeferredBlock<FilingCabinetBlock> FILING_CABINET = BLOCKS.register(
             "filing_cabinet",
@@ -860,6 +879,9 @@ public final class Registration {
     // Menu types
     // -------------------------------------------------------------------------
 
+    public static final DeferredHolder<MenuType<?>, MenuType<ArmoryCabinetMenu>> ARMORY_CABINET_MENU =
+            MENU_TYPES.register("armory_cabinet", () -> IMenuTypeExtension.create(ArmoryCabinetMenu::new));
+
     public static final DeferredHolder<MenuType<?>, MenuType<FilingCabinetMenu>> FILING_CABINET_MENU =
             MENU_TYPES.register("filing_cabinet", () -> IMenuTypeExtension.create(FilingCabinetMenu::new));
 
@@ -1102,6 +1124,7 @@ public final class Registration {
                         output.accept(LAZURITE_INGOT.get());
                         output.accept(LAZURITE_NUGGET.get());
                         output.accept(LAZURITE_BLOCK_ITEM.get());
+                        output.accept(ARMORY_CABINET_ITEM.get());
                         output.accept(FILING_CABINET_ITEM.get());
                         output.accept(TREMENDOUS_CHEST_ITEM.get());
                         output.accept(TANK_ITEM.get());
@@ -1202,6 +1225,10 @@ public final class Registration {
     }
 
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                ARMORY_CABINET_BE_TYPE.get(),
+                (be, side) -> new net.bobofraggins.tremendousstorage.storage.chest.ChestItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 FILING_CABINET_BE_TYPE.get(),

@@ -1,0 +1,76 @@
+{
+  "textures": {
+    "0": "tremendousstorage:block/armory_cabinet_texture",
+    "particle": "tremendousstorage:block/armory_cabinet_texture"
+  },
+  "elements": [
+    {
+      "from": [
+        5,
+        0,
+        3
+      ],
+      "to": [
+        6,
+        20,
+        4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5.5,
+            5.25,
+            5.625,
+            7.75
+          ],
+          "texture": "#0"
+        },
+        "east": {
+          "uv": [
+            5.625,
+            5.25,
+            5.75,
+            7.75
+          ],
+          "texture": "#0"
+        },
+        "south": {
+          "uv": [
+            5.75,
+            5.25,
+            5.875,
+            7.75
+          ],
+          "texture": "#0"
+        },
+        "west": {
+          "uv": [
+            5.875,
+            5.25,
+            6.0,
+            7.75
+          ],
+          "texture": "#0"
+        },
+        "up": {
+          "uv": [
+            7.375,
+            2.375,
+            7.25,
+            2.25
+          ],
+          "texture": "#0"
+        },
+        "down": {
+          "uv": [
+            7.375,
+            2.375,
+            7.25,
+            2.5
+          ],
+          "texture": "#0"
+        }
+      }
+    }
+  ]
+}

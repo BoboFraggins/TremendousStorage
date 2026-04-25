@@ -6,6 +6,7 @@ import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClie
 import net.bobofraggins.tremendousstorage.glamping.skyblock.SkyBlockClientEvents;
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineClientEvents;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
+import net.bobofraggins.tremendousstorage.storage.armorycabinet.ArmoryCabinetClientEvents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackClientEvents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackClientTickHandler;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestClientEvents;
@@ -41,6 +42,7 @@ public final class ClientEventRegistrar {
     public static void register(IEventBus modBus) {
         // ── Mod-bus client events (registration, renderer setup, etc.) ──────────
         modBus.register(StirlingEngineClientEvents.class);
+        modBus.register(ArmoryCabinetClientEvents.class);
         modBus.register(ChestClientEvents.class);
         modBus.register(PicnicBasketClientEvents.class);
         modBus.register(BackpackClientEvents.class);
