@@ -177,7 +177,7 @@ public class ConfigDrawer {
     private void renderTab(GuiGraphics graphics, int mouseX, int mouseY, float p) {
         // Tab slides left with the drawer: closed → left of dialog; open → left of drawer body.
         // The extra 2 px (animated via p) shifts the tab slightly left of the drawer edge when open.
-        int tabX = dialogX - TAB_W + 1 - Math.round((WIDTH + TAB_W + 2) * p);
+        int tabX = dialogX - TAB_W + 3 - Math.round((WIDTH + TAB_W + 2) * p);
         int tabY = dialogY + 10;
         int midH = TAB_H - 2 * CORNER;
 
@@ -220,7 +220,7 @@ public class ConfigDrawer {
      */
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (showTabButton) {
-            int tabX = dialogX - TAB_W + 1 - Math.round((WIDTH + TAB_W + 2) * getProgress(System.currentTimeMillis()));
+            int tabX = dialogX - TAB_W + 3 - Math.round((WIDTH + TAB_W + 2) * getProgress(System.currentTimeMillis()));
             if (mouseX >= tabX && mouseX < tabX + TAB_W && mouseY >= dialogY + 10 && mouseY < dialogY + 10 + TAB_H) {
                 toggle();
                 return true;
