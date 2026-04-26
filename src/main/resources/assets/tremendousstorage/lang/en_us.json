@@ -73,6 +73,8 @@
   "screen.tremendousstorage.export_interface": "Export Interface",
   "screen.tremendousstorage.filter_label": "Filter:",
   "item.tremendousstorage.tank.tooltip": "%1$s / %2$s mB %3$s",
+  "item.tremendousstorage.tank.mode_block": "Block Mode",
+  "item.tremendousstorage.tank.mode_bucket": "Bucket Mode",
   "screen.tremendousstorage.void_excess_label": "Void Excess:",
   "screen.tremendousstorage.void_excess_on": "Void Excess: ON",
   "screen.tremendousstorage.void_excess_off": "Void Excess: OFF",

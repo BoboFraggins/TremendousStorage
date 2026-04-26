@@ -8,21 +8,29 @@ import net.minecraft.network.codec.StreamCodec;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
- * Data component storing the fluid type and amount inside a Tank block item.
+ * Data component storing the fluid type, amount, and interaction mode for a Tank block item.
  *
  * <p>Stored on the block item so that the loot table {@code copy_components} function preserves
  * state when the tank is broken, and so Whiteout Tape can clear it in the crafting grid.
  *
  * <p>The {@code storedFluid} uses {@link FluidStack#OPTIONAL_CODEC} — EMPTY encodes as absent
  * so an unlocked tank serializes cleanly. {@code amount} is stored as a separate long.
+ *
+ * <p>{@code bucketMode} is item-only state: when true, right-clicking a fluid source picks up
+ * fluid or places fluid from the tank instead of placing the tank as a block.
  */
-public record TankContents(FluidStack storedFluid, long amount) {
+public record TankContents(FluidStack storedFluid, long amount, boolean bucketMode) {
 
-    public static final TankContents EMPTY = new TankContents(FluidStack.EMPTY, 0);
+    public TankContents(FluidStack storedFluid, long amount) {
+        this(storedFluid, amount, false);
+    }
+
+    public static final TankContents EMPTY = new TankContents(FluidStack.EMPTY, 0, false);
 
     public static final Codec<TankContents> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                     FluidStack.OPTIONAL_CODEC.fieldOf("fluid").forGetter(TankContents::storedFluid),
-                    Codec.LONG.optionalFieldOf("amount", 0L).forGetter(TankContents::amount))
+                    Codec.LONG.optionalFieldOf("amount", 0L).forGetter(TankContents::amount),
+                    Codec.BOOL.optionalFieldOf("bucket_mode", false).forGetter(TankContents::bucketMode))
             .apply(instance, TankContents::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, TankContents> STREAM_CODEC = StreamCodec.composite(
@@ -30,6 +38,8 @@ public record TankContents(FluidStack storedFluid, long amount) {
             TankContents::storedFluid,
             ByteBufCodecs.VAR_LONG,
             TankContents::amount,
+            ByteBufCodecs.BOOL,
+            TankContents::bucketMode,
             TankContents::new);
 
     /** True if the tank has no fluid and no lock. */
