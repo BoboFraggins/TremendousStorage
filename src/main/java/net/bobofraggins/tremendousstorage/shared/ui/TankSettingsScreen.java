@@ -37,11 +37,8 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
     private static final ResourceLocation GHOST_SYRINGE =
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/experience_syringe.png");
 
-    /** Height of the settings pane (fluid slots + arrow). 17 + 66 + 80 + 5 = 168 total. */
-    private static final int SETTINGS_PANE_H = 66;
-
-    /** Y of the separator line between settings and player inventory (screen-relative). */
-    private static final int SEPARATOR_DY = Dialog.TITLE_H + SETTINGS_PANE_H; // 83
+    /** Height of the settings pane (fluid slots + arrow + 5 px margin). 17 + 71 + 80 + 5 = 173 total. */
+    private static final int SETTINGS_PANE_H = 71;
 
     private final Dialog dialog;
     private final ConfigDrawer configDrawer;
@@ -91,9 +88,6 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
         int x = leftPos;
         int y = topPos;
 
-        // Separator between settings area and player inventory
-        g.fill(x, y + SEPARATOR_DY, x + imageWidth, y + SEPARATOR_DY + 1, 0xFF555555);
-
         // Fluid-transfer slot backgrounds (centered)
         drawSlot(g, x + TankSettingsMenu.FLUID_IN_X, y + TankSettingsMenu.FLUID_IN_Y);
         drawSlot(g, x + TankSettingsMenu.FLUID_OUT_X, y + TankSettingsMenu.FLUID_OUT_Y);
@@ -113,7 +107,7 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
         }
 
         // Down-arrow between the two slots
-        drawDownArrow(g, x + TankSettingsMenu.FLUID_IN_X, y + TankSettingsMenu.FLUID_IN_Y + 16);
+        drawDownArrow(g, x + TankSettingsMenu.FLUID_IN_X, y + TankSettingsMenu.FLUID_IN_Y + 18);
     }
 
     @Override

@@ -28,6 +28,8 @@ public class ConfigDrawer {
     private static final long ANIM_MS = 200L;
     private static final int CORNER = 5;
     private static final int CONTENT_PAD = 5;
+    private static final int VERT_PAD = 12;
+    private static final int SIDE_PAD = 12;
     private static final int COLOR_BODY = 0xFFC6C6C6;
 
     private static final ResourceLocation BUTTON_NORMAL =
@@ -75,12 +77,13 @@ public class ConfigDrawer {
     public ConfigDrawer(IDialogPane... panes) {
         this.panes = List.of(panes);
         this.paneYOffsets = new int[panes.length];
-        int y = CONTENT_PAD;
+        int y = VERT_PAD;
         for (int i = 0; i < panes.length; i++) {
             paneYOffsets[i] = y;
-            y += panes[i].preferredHeight() + CONTENT_PAD;
+            y += panes[i].preferredHeight();
+            if (i < panes.length - 1) y += CONTENT_PAD;
         }
-        this.contentHeight = y;
+        this.contentHeight = y + VERT_PAD;
     }
 
     /**
@@ -119,7 +122,7 @@ public class ConfigDrawer {
         }
 
         int drawerX = dialogX - TAB_W - WIDTH;
-        int drawerTop = dialogY + 10;
+        int drawerTop = dialogY + 15;
         int drawerH = contentHeight + 2 * CORNER;
 
         // Scissor to the currently-visible portion (slides open from right to left).
@@ -152,11 +155,11 @@ public class ConfigDrawer {
 
         // Pane content — offset by top inset
         for (int i = 0; i < panes.size(); i++) {
-            int paneAbsY = dialogY + 10 + paneYOffsets[i];
-            int localMouseX = mouseX - drawerX;
+            int paneAbsY = dialogY + 15 + paneYOffsets[i];
+            int localMouseX = mouseX - drawerX - SIDE_PAD;
             int localMouseY = mouseY - paneAbsY;
             graphics.pose().pushPose();
-            graphics.pose().translate(drawerX, paneAbsY, 0);
+            graphics.pose().translate(drawerX + SIDE_PAD, paneAbsY, 0);
             panes.get(i).render(graphics, font, WIDTH, localMouseX, localMouseY, partialTick);
             graphics.pose().popPose();
         }
@@ -176,7 +179,7 @@ public class ConfigDrawer {
         // Tab slides left with the drawer: closed → left of dialog; open → left of drawer body.
         // The extra 2 px (animated via p) shifts the tab slightly left of the drawer edge when open.
         int tabX = dialogX - TAB_W + 5 - Math.round((WIDTH + TAB_W + 2) * p);
-        int tabY = dialogY + 10;
+        int tabY = dialogY + 15;
         int midH = TAB_H - 2 * CORNER;
 
         // Fill — right edge is the natural tab boundary; dialog/drawer renders on top of the seam.
@@ -219,7 +222,7 @@ public class ConfigDrawer {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (showTabButton) {
             int tabX = dialogX - TAB_W + 5 - Math.round((WIDTH + TAB_W + 2) * getProgress(System.currentTimeMillis()));
-            if (mouseX >= tabX && mouseX < tabX + TAB_W && mouseY >= dialogY + 10 && mouseY < dialogY + 10 + TAB_H) {
+            if (mouseX >= tabX && mouseX < tabX + TAB_W && mouseY >= dialogY + 15 && mouseY < dialogY + 15 + TAB_H) {
                 toggle();
                 return true;
             }
@@ -228,16 +231,16 @@ public class ConfigDrawer {
         if (getProgress(System.currentTimeMillis()) < 0.99f) return false;
 
         int drawerX = dialogX - TAB_W - WIDTH;
-        int drawerTop = dialogY + 10;
+        int drawerTop = dialogY + 15;
         int drawerH = contentHeight + 2 * CORNER;
         if (mouseX < drawerX || mouseX >= dialogX) return false;
         if (mouseY < drawerTop || mouseY >= drawerTop + drawerH) return false;
 
         for (int i = 0; i < panes.size(); i++) {
-            int paneAbsY = dialogY + 10 + paneYOffsets[i];
+            int paneAbsY = dialogY + 15 + paneYOffsets[i];
             int paneH = panes.get(i).preferredHeight();
             if (mouseY >= paneAbsY && mouseY < paneAbsY + paneH) {
-                return panes.get(i).mouseClicked(mouseX - drawerX, mouseY - paneAbsY, button);
+                return panes.get(i).mouseClicked(mouseX - drawerX - SIDE_PAD, mouseY - paneAbsY, button);
             }
         }
         return false;

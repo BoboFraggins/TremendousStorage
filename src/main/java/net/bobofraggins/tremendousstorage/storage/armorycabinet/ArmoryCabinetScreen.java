@@ -59,8 +59,8 @@ public class ArmoryCabinetScreen extends AbstractContainerScreen<ArmoryCabinetMe
         configDrawer = new ConfigDrawer(new IDialogPane[] {
             new PriorityPane(
                     menu::getPriority, p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))),
-            new SortPane(() -> sortMode, () -> {
-                sortMode = sortMode.next();
+            new SortPane(() -> sortMode, newMode -> {
+                sortMode = newMode;
                 PacketDistributor.sendToServer(new SetSortModePacket(menu.getPos(), sortMode));
             })
         });

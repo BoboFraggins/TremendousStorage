@@ -26,4 +26,9 @@ public enum SortMode {
         SortMode[] values = values();
         return values[(ordinal() + 1) % values.length];
     }
+
+    public SortMode prev() {
+        SortMode[] values = values();
+        return values[(ordinal() + values.length - 1) % values.length];
+    }
 }

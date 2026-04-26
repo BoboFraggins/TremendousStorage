@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -26,18 +27,18 @@ public class PriorityPane implements IDialogPane {
     /** Total width of [▼][gap][label][gap][▲] row. */
     private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W; // 92
 
-    private static final ResourceLocation BTN_DOWN =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_down.png");
-    private static final ResourceLocation BTN_DOWN_FOCUSED =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_down_focused.png");
-    private static final ResourceLocation BTN_DOWN_DISABLED =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_down_disabled.png");
-    private static final ResourceLocation BTN_UP =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_up.png");
-    private static final ResourceLocation BTN_UP_FOCUSED =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_up_focused.png");
-    private static final ResourceLocation BTN_UP_DISABLED =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_up_disabled.png");
+    private static final ResourceLocation BTN_LEFT =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left.png");
+    private static final ResourceLocation BTN_LEFT_FOCUSED =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left_focused.png");
+    private static final ResourceLocation BTN_LEFT_DISABLED =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left_disabled.png");
+    private static final ResourceLocation BTN_RIGHT =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right.png");
+    private static final ResourceLocation BTN_RIGHT_FOCUSED =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right_focused.png");
+    private static final ResourceLocation BTN_RIGHT_DISABLED =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right_disabled.png");
 
     private final IntSupplier priorityGetter;
     private final IntConsumer prioritySetter;
@@ -72,16 +73,18 @@ public class PriorityPane implements IDialogPane {
         int upBtnX = rowX + BTN_W + GAP + LBL_W + GAP;
         int lblX = rowX + BTN_W + GAP;
 
-        Component priorityLabel = Component.translatable("screen.tremendousstorage.priority_label");
+        Component priorityLabel = Component.translatable("screen.tremendousstorage.priority_label")
+                .withStyle(ChatFormatting.BOLD);
         graphics.drawString(font, priorityLabel, (width - font.width(priorityLabel)) / 2, LABEL_Y, 0x404040, false);
 
         boolean canDown = selected > 0;
         boolean canUp = selected < Priority.VALUES.length - 1;
         ResourceLocation downTex = !canDown
-                ? BTN_DOWN_DISABLED
-                : (isInButton(localMouseX, localMouseY, downBtnX) ? BTN_DOWN_FOCUSED : BTN_DOWN);
-        ResourceLocation upTex =
-                !canUp ? BTN_UP_DISABLED : (isInButton(localMouseX, localMouseY, upBtnX) ? BTN_UP_FOCUSED : BTN_UP);
+                ? BTN_LEFT_DISABLED
+                : (isInButton(localMouseX, localMouseY, downBtnX) ? BTN_LEFT_FOCUSED : BTN_LEFT);
+        ResourceLocation upTex = !canUp
+                ? BTN_RIGHT_DISABLED
+                : (isInButton(localMouseX, localMouseY, upBtnX) ? BTN_RIGHT_FOCUSED : BTN_RIGHT);
         graphics.blit(downTex, downBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
         graphics.blit(upTex, upBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
 

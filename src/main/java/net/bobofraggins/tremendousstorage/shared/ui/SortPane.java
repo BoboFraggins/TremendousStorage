@@ -1,42 +1,48 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 /**
- * Config-drawer pane that displays the current sort mode and advances it on click.
+ * Config-drawer pane that displays the current sort mode with left/right navigation buttons.
  *
- * <p>Layout adapts to the {@code width} passed to {@link #render}, matching the style of
- * {@link PriorityPane}. Constructed with a supplier that reads the current mode (from the
- * block entity) and a {@link Runnable} that the caller uses to cycle the mode and send the
- * appropriate network packet.
+ * <p>Wraps around (no disabled state). Layout matches {@link PriorityPane}: label row on top,
+ * [◄] [value label] [►] row below.
  */
 public class SortPane implements IDialogPane {
 
-    private static final int PANE_HEIGHT = 28;
+    private static final int PANE_HEIGHT = 35;
     private static final int LABEL_Y = 3;
-    private static final int BTN_Y = 14;
-    private static final int BTN_H = 14;
-    /** Button width — slightly narrower than the drawer so there is padding on each side. */
-    private static final int BTN_W = 90;
+    private static final int ROW_Y = 14;
+    private static final int BTN_W = 16;
+    private static final int BTN_H = 16;
+    private static final int LBL_W = 56;
+    private static final int GAP = 2;
+    private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W; // 92
 
-    private static final int COLOR_BTN = 0xFFC6C6C6;
-    private static final int COLOR_BTN_HOVER = 0xFFB0B0B0;
+    private static final ResourceLocation BTN_LEFT =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left.png");
+    private static final ResourceLocation BTN_LEFT_FOCUSED =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left_focused.png");
+    private static final ResourceLocation BTN_RIGHT =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right.png");
+    private static final ResourceLocation BTN_RIGHT_FOCUSED =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right_focused.png");
 
-    private final Supplier<SortMode> modeSupplier;
-    private final Runnable onCycle;
+    private final Supplier<SortMode> getter;
+    private final Consumer<SortMode> setter;
+    private int lastRenderedWidth = ConfigDrawer.WIDTH;
 
-    public SortPane(Supplier<SortMode> modeSupplier, Runnable onCycle) {
-        this.modeSupplier = modeSupplier;
-        this.onCycle = onCycle;
+    public SortPane(Supplier<SortMode> getter, Consumer<SortMode> setter) {
+        this.getter = getter;
+        this.setter = setter;
     }
-
-    // -------------------------------------------------------------------------
-    // IDialogPane
-    // -------------------------------------------------------------------------
 
     @Override
     public int preferredWidth() {
@@ -51,37 +57,48 @@ public class SortPane implements IDialogPane {
     @Override
     public void render(
             GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
-        SortMode mode = modeSupplier.get();
-        int btnX = (width - BTN_W) / 2;
+        lastRenderedWidth = width;
+        int rowX = (width - ROW_W) / 2;
+        int leftBtnX = rowX;
+        int rightBtnX = rowX + BTN_W + GAP + LBL_W + GAP;
+        int lblX = rowX + BTN_W + GAP;
 
-        Component label = Component.translatable("screen.tremendousstorage.sort_label");
+        Component label =
+                Component.translatable("screen.tremendousstorage.sort_label").withStyle(ChatFormatting.BOLD);
         graphics.drawString(font, label, (width - font.width(label)) / 2, LABEL_Y, 0x404040, false);
 
-        boolean hovered = isInButton(localMouseX, localMouseY, btnX);
-        graphics.fill(btnX, BTN_Y, btnX + BTN_W, BTN_Y + BTN_H, hovered ? COLOR_BTN_HOVER : COLOR_BTN);
+        ResourceLocation leftTex = isInButton(localMouseX, localMouseY, leftBtnX) ? BTN_LEFT_FOCUSED : BTN_LEFT;
+        ResourceLocation rightTex = isInButton(localMouseX, localMouseY, rightBtnX) ? BTN_RIGHT_FOCUSED : BTN_RIGHT;
+        graphics.blit(leftTex, leftBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
+        graphics.blit(rightTex, rightBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
 
-        String btnText = mode.displayName() + " \u25b6";
-        int textX = btnX + (BTN_W - font.width(btnText)) / 2;
-        int textY = BTN_Y + (BTN_H - font.lineHeight) / 2;
-        graphics.drawString(font, btnText, textX, textY, 0x404040, false);
+        graphics.fill(lblX, ROW_Y, lblX + LBL_W, ROW_Y + BTN_H, 0xFFC6C6C6);
+
+        String name = getter.get().displayName();
+        int nameX = lblX + (LBL_W - font.width(name)) / 2;
+        int nameY = ROW_Y + (BTN_H - 8) / 2;
+        graphics.drawString(font, name, nameX, nameY, 0x404040, false);
     }
 
     @Override
     public boolean mouseClicked(double localX, double localY, int button) {
         if (button != 0) return false;
-        int btnX = (preferredWidth() - BTN_W) / 2;
-        if (isInButton(localX, localY, btnX)) {
-            onCycle.run();
+        int rowX = (lastRenderedWidth - ROW_W) / 2;
+        int leftBtnX = rowX;
+        int rightBtnX = rowX + BTN_W + GAP + LBL_W + GAP;
+
+        if (isInButton(localX, localY, leftBtnX)) {
+            setter.accept(getter.get().prev());
+            return true;
+        }
+        if (isInButton(localX, localY, rightBtnX)) {
+            setter.accept(getter.get().next());
             return true;
         }
         return false;
     }
 
-    // -------------------------------------------------------------------------
-    // Private helpers
-    // -------------------------------------------------------------------------
-
     private static boolean isInButton(double lx, double ly, int btnX) {
-        return lx >= btnX && lx < btnX + BTN_W && ly >= BTN_Y && ly < BTN_Y + BTN_H;
+        return lx >= btnX && lx < btnX + BTN_W && ly >= ROW_Y && ly < ROW_Y + BTN_H;
     }
 }

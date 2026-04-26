@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.wirelesshub;
 import java.util.function.IntSupplier;
 import net.bobofraggins.tremendousstorage.shared.network.SetHaarpModePacket;
 import net.bobofraggins.tremendousstorage.shared.ui.IDialogPane;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -67,7 +68,8 @@ public class HaarpWeatherPane implements IDialogPane {
         int currentOrdinal = modeSupplier.getAsInt();
 
         // Header
-        Component header = Component.translatable("screen.tremendousstorage.haarp.weather_mode");
+        Component header = Component.translatable("screen.tremendousstorage.haarp.weather_mode")
+                .withStyle(ChatFormatting.BOLD);
         g.drawString(font, header, (width - font.width(header)) / 2, HEADER_Y, 0x404040, false);
 
         // Radio rows

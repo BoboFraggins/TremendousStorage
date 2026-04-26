@@ -34,11 +34,11 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
     static final int VOID_SLOT_X = 36;
     static final int VOID_SLOT_Y = 32;
     static final int FLUID_IN_X = 124;
-    static final int FLUID_IN_Y = 24;
+    static final int FLUID_IN_Y = 30;
     static final int FLUID_OUT_X = 124;
-    static final int FLUID_OUT_Y = 56;
+    static final int FLUID_OUT_Y = 65;
 
-    private static final int INV_START_X = 8;
+    static final int INV_START_X = 8;
     private static final int INV_Y = 90;
     private static final int HOTBAR_Y = 148;
 

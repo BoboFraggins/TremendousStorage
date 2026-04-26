@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
 import java.util.function.BooleanSupplier;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -47,7 +48,8 @@ public class VoidExcessPane implements IDialogPane {
     @Override
     public void render(
             GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
-        Component label = Component.translatable("screen.tremendousstorage.void_excess_label");
+        Component label = Component.translatable("screen.tremendousstorage.void_excess_label")
+                .withStyle(ChatFormatting.BOLD);
         graphics.drawString(font, label, (width - font.width(label)) / 2, LABEL_Y, 0x404040, false);
 
         int toggleX = (width - TOGGLE_W) / 2;

@@ -82,9 +82,9 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
         List<IDialogPane> drawerPanes = new java.util.ArrayList<>();
         drawerPanes.add(new PriorityPane(
                 menu::getPriority, p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
-        drawerPanes.add(new SortPane(() -> sortMode, () -> {
-            sortMode = sortMode.next();
-            PacketDistributor.sendToServer(new SetSortModePacket(menu.getPos(), sortMode));
+        drawerPanes.add(new SortPane(() -> sortMode, newMode -> {
+            sortMode = newMode;
+            PacketDistributor.sendToServer(new SetSortModePacket(menu.getPos(), newMode));
         }));
         if (menu.hasPullerUpgrade()) {
             drawerPanes.add(new PullerSidesPane(menu.getPos()));

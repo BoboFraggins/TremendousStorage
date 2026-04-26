@@ -70,8 +70,8 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
                         menu::getPriority,
                         p -> PacketDistributor.sendToServer(new SetBackpackPriorityPacket(
                                 menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), p))),
-                new SortPane(() -> sortMode, () -> {
-                    sortMode = sortMode.next();
+                new SortPane(() -> sortMode, newMode -> {
+                    sortMode = newMode;
                     PacketDistributor.sendToServer(new SetBackpackSortModePacket(
                             menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), sortMode.ordinal()));
                 }));

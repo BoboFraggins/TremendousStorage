@@ -85,7 +85,10 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         }
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
-        configDrawer = new ConfigDrawer(new SortPane(networkPane::getSortMode, this::cycleSortMode));
+        configDrawer = new ConfigDrawer(new SortPane(networkPane::getSortMode, newMode -> {
+            networkPane.setSortMode(newMode);
+            PacketDistributor.sendToServer(new SetSortModePacket(menu.getSatPos(), newMode));
+        }));
     }
 
     // -------------------------------------------------------------------------
