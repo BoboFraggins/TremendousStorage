@@ -1142,8 +1142,10 @@ public final class Registration {
 
                         output.accept(TUBE_ITEM.get());
                         output.accept(STORAGE_INTERFACE.get());
-                        output.accept(IMPORT_INTERFACE.get());
-                        output.accept(EXPORT_INTERFACE.get());
+
+                        // TODO: Disable Importer/Exporter until Filters are implemented
+                        // output.accept(IMPORT_INTERFACE.get());
+                        // output.accept(EXPORT_INTERFACE.get());
 
                         output.accept(WIRELESS_SAT.get());
                         output.accept(EXPERIENCE_SYRINGE.get());

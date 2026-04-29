@@ -5,9 +5,8 @@ import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 /**
  * Screen for the Recycling Bin.
@@ -24,6 +23,11 @@ import net.minecraft.world.item.Items;
  * </pre>
  */
 public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu> {
+
+    private static final ResourceLocation GHOST_BUCKET =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/bucket.png");
+    private static final ResourceLocation GHOST_BOTTLE =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/glass_bottle.png");
 
     // Height of the content pane above the player inventory.
     // Derived from: INV_Y(90) - Dialog.TITLE_H(17) = 73.
@@ -69,7 +73,7 @@ public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu
         g.drawString(font, fillLabel, x + 132 - font.width(fillLabel) / 2, y + Dialog.TITLE_H + 2, 0x404040, false);
 
         // Ghost hint in fill slot when empty
-        drawGhostFillHint(g, x + RecyclingBinMenu.FLUID_IN_X, y + RecyclingBinMenu.FLUID_IN_Y, partialTick);
+        drawGhostFillHint(g, x + RecyclingBinMenu.FLUID_IN_X, y + RecyclingBinMenu.FLUID_IN_Y);
     }
 
     @Override
@@ -105,20 +109,11 @@ public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu
         g.fill(cx - 1, top + 13, cx + 1, top + 15, 0xFF555555); // 2 px wide
     }
 
-    private void drawGhostFillHint(GuiGraphics g, int sx, int sy, float partialTick) {
+    private void drawGhostFillHint(GuiGraphics g, int sx, int sy) {
         if (!menu.getSlot(1).getItem().isEmpty()) return;
-        if (minecraft == null || minecraft.player == null) return;
 
-        // 80-tick cycle: first 40 ticks show bucket, next 40 show glass bottle.
-        long tick = minecraft.player.tickCount;
-        int cyclePos = (int) (tick % 80);
-        ItemStack ghost = cyclePos < 40 ? new ItemStack(Items.BUCKET) : new ItemStack(Items.GLASS_BOTTLE);
-
-        // Sine-wave overlay: alpha ranges from 0x50 (visible) to 0xC0 (dim).
-        double phase = ((cyclePos % 40) + partialTick) * Math.PI / 20.0;
-        int overlayAlpha = 0x50 + (int) (0x70 * (0.5 + 0.5 * Math.sin(phase)));
-
-        g.renderItem(ghost, sx, sy);
-        g.fill(sx, sy, sx + 16, sy + 16, overlayAlpha << 24);
+        int phase = (int) ((System.currentTimeMillis() / 1500) % 2);
+        ResourceLocation ghostTex = phase == 0 ? GHOST_BUCKET : GHOST_BOTTLE;
+        g.blit(ghostTex, sx, sy, 0, 0, 16, 16, 16, 16);
     }
 }
