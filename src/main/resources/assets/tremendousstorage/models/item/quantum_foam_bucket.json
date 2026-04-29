@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "tremendousstorage:item/quantum_foam_bucket"
+  }
+}

@@ -12,6 +12,7 @@ import net.bobofraggins.tremendousstorage.storage.chest.ChestClientEvents;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetClientEvents;
 import net.bobofraggins.tremendousstorage.storage.honey.HoneyClientEvents;
 import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesClientEvents;
+import net.bobofraggins.tremendousstorage.storage.items.QuantumFoamClientEvents;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceClientEvents;
 import net.bobofraggins.tremendousstorage.storage.personalaccessterminal.PersonalAccessTerminalClientEvents;
 import net.bobofraggins.tremendousstorage.storage.personalaccessterminal.PersonalAccessTerminalClientTickHandler;
@@ -55,6 +56,7 @@ public final class ClientEventRegistrar {
         modBus.register(PersonalAccessTerminalClientEvents.class);
         modBus.register(HoneyClientEvents.class);
         modBus.register(PositiveVibesClientEvents.class);
+        modBus.register(QuantumFoamClientEvents.class);
         modBus.register(XpFluidClientEvents.class);
 
         // ── Game-bus client events (tick handlers, input, etc.) ─────────────────

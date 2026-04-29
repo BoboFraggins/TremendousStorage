@@ -1,0 +1,18 @@
+{
+  "containers": [
+    {
+      "filled": ["tremendousstorage:quantum_foam_bucket"],
+      "fill_sound": "minecraft:item.bucket.fill",
+      "empty_sound": "minecraft:item.bucket.empty",
+      "empty": "minecraft:bucket",
+      "capacity": "BUCKET"
+    }
+  ],
+  "equivalent_fluids": [
+    "tremendousstorage:quantum_foam"
+  ],
+  "flowing_texture": "tremendousstorage:fluid/quantum_foam_flow",
+  "still_texture": "tremendousstorage:fluid/quantum_foam_still",
+  "tint_method": "no_tint",
+  "translation_key": "fluid.tremendousstorage.quantum_foam"
+}

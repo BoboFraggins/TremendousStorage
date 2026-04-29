@@ -69,6 +69,10 @@ import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesBlock;
 import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesCauldronBlock;
 import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesFluid;
 import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesInteractions;
+import net.bobofraggins.tremendousstorage.storage.items.QuantumFoamBlock;
+import net.bobofraggins.tremendousstorage.storage.items.QuantumFoamCauldronBlock;
+import net.bobofraggins.tremendousstorage.storage.items.QuantumFoamFluid;
+import net.bobofraggins.tremendousstorage.storage.items.QuantumFoamInteractions;
 import net.bobofraggins.tremendousstorage.storage.items.VexRepellentEffect;
 import net.bobofraggins.tremendousstorage.storage.items.VexRepellentPotionItem;
 import net.bobofraggins.tremendousstorage.storage.items.ZombieBrainItem;
@@ -768,6 +772,61 @@ public final class Registration {
             ITEMS.registerSimpleBlockItem("positive_vibes_cauldron", POSITIVE_VIBES_CAULDRON);
 
     // -------------------------------------------------------------------------
+    // Quantum Foam fluid
+    // -------------------------------------------------------------------------
+
+    public static final DeferredHolder<FluidType, FluidType> QUANTUM_FOAM_TYPE = FLUID_TYPE_REGISTER.register(
+            "quantum_foam",
+            () -> new FluidType(
+                    FluidType.Properties.create().density(200).viscosity(1000).temperature(300)));
+
+    public static final DeferredHolder<net.minecraft.world.level.material.Fluid, QuantumFoamFluid.Source>
+            QUANTUM_FOAM_SOURCE = FLUID_REGISTER.register("quantum_foam", QuantumFoamFluid.Source::new);
+
+    public static final DeferredHolder<net.minecraft.world.level.material.Fluid, QuantumFoamFluid.Flowing>
+            QUANTUM_FOAM_FLOWING = FLUID_REGISTER.register("quantum_foam_flowing", QuantumFoamFluid.Flowing::new);
+
+    public static final DeferredBlock<QuantumFoamBlock> QUANTUM_FOAM_BLOCK = BLOCKS.register(
+            "quantum_foam",
+            () -> new QuantumFoamBlock(
+                    QUANTUM_FOAM_SOURCE.get(),
+                    BlockBehaviour.Properties.of()
+                            .noCollission()
+                            .strength(100f)
+                            .noLootTable()
+                            .liquid()
+                            .replaceable()
+                            .pushReaction(PushReaction.DESTROY)
+                            .lightLevel(state -> 5)));
+
+    public static final DeferredHolder<Item, Item> QUANTUM_FOAM_BOTTLE =
+            ITEMS.register("quantum_foam_bottle", () -> new Item(new Item.Properties()));
+
+    public static final DeferredHolder<Item, BucketItem> QUANTUM_FOAM_BUCKET = ITEMS.register(
+            "quantum_foam_bucket",
+            () -> new BucketItem(
+                    QUANTUM_FOAM_SOURCE.get(), new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    /** Shared properties object for the Quantum Foam Source + Flowing fluids. */
+    public static final BaseFlowingFluid.Properties QUANTUM_FOAM_FLUID_PROPS = new BaseFlowingFluid.Properties(
+                    QUANTUM_FOAM_TYPE, () -> QUANTUM_FOAM_SOURCE.get(), () -> QUANTUM_FOAM_FLOWING.get())
+            .bucket(() -> QUANTUM_FOAM_BUCKET.get())
+            .block(() -> QUANTUM_FOAM_BLOCK.get())
+            .slopeFindDistance(4)
+            .levelDecreasePerBlock(1)
+            .tickRate(5);
+
+    public static final DeferredBlock<QuantumFoamCauldronBlock> QUANTUM_FOAM_CAULDRON = BLOCKS.register(
+            "quantum_foam_cauldron",
+            () -> new QuantumFoamCauldronBlock(BlockBehaviour.Properties.of()
+                    .strength(2f)
+                    .sound(SoundType.METAL)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<Item, BlockItem> QUANTUM_FOAM_CAULDRON_ITEM =
+            ITEMS.registerSimpleBlockItem("quantum_foam_cauldron", QUANTUM_FOAM_CAULDRON);
+
+    // -------------------------------------------------------------------------
     // Stirling Engine block + block entity
     // -------------------------------------------------------------------------
 
@@ -1226,6 +1285,7 @@ public final class Registration {
 
     private static void onCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(PositiveVibesInteractions::register);
+        event.enqueueWork(QuantumFoamInteractions::register);
     }
 
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
