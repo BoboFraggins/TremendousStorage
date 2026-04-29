@@ -60,28 +60,38 @@ public class RecyclingBinRenderer
     private static final float PEDAL_PIVOT_Y = 2f / 16f;
     private static final float PEDAL_PIVOT_Z = 3f / 16f;
 
-    // Liquid cube geometry — all 6 cubes share the same Y floor/ceiling in the model.
-    // Each row: { x0, z0, x1, z1 }  (Y is handled separately)
     private static final float LIQUID_FLOOR = 1f / 16f;
     private static final float LIQUID_CEIL = 5f / 16f;
-    private static final float[][] LIQUID_CUBES = {
-        {2f / 16f, 6f / 16f, 5f / 16f, 10f / 16f},
-        {1.5f / 16f, 7.5f / 16f, 2f / 16f, 8.5f / 16f},
-        {4.5f / 16f, 4.5f / 16f, 5.5f / 16f, 5f / 16f},
-        {4.5f / 16f, 11f / 16f, 5.5f / 16f, 11.5f / 16f},
-        {3f / 16f, 5f / 16f, 6f / 16f, 6f / 16f},
-        {3f / 16f, 10f / 16f, 6f / 16f, 11f / 16f},
+    private static final float EPS = 0.001f;
+
+    // Horizontal (top) surfaces — each entry is { x0, z0, x1, z1 }.
+    // Rendered as epsilon-thin slabs at y = [topY, topY + EPS].
+    private static final float[][] LIQUID_TOP_SURFACES = {
+        {2f / 16f, 6f / 16f, 5f / 16f, 10f / 16f}, // cube 0
+        {1.5f / 16f, 7.5f / 16f, 2f / 16f, 8.5f / 16f}, // cube 1
+        {4.5f / 16f, 4.5f / 16f, 5.5f / 16f, 5f / 16f}, // cube 2
+        {4.5f / 16f, 11f / 16f, 5.5f / 16f, 11.5f / 16f}, // cube 3
+        {3f / 16f, 5f / 16f, 6f / 16f, 6f / 16f}, // cube 4
+        {3f / 16f, 10f / 16f, 6f / 16f, 11f / 16f}, // cube 5
     };
 
-    // Per-cube bitmask of pink (exterior) faces from the bbmodel — indexed by Direction.ordinal()
-    // DOWN=0, UP=1, NORTH=2, SOUTH=3, WEST=4, EAST=5
-    private static final int[] LIQUID_PINK_FACES = {
-        (1 << 1) | (1 << 5), // cube 0 (542adec7): up, east
-        (1 << 1) | (1 << 2) | (1 << 3) | (1 << 4), // cube 1 (269c750f): up, north, south, west
-        (1 << 1) | (1 << 2) | (1 << 4) | (1 << 5), // cube 2 (21ae416c): up, north, west, east
-        (1 << 1) | (1 << 3) | (1 << 4) | (1 << 5), // cube 3 (1f89c213): up, south, west, east
-        (1 << 1) | (1 << 4) | (1 << 5), // cube 4 (2e208553): up, west, east
-        (1 << 1) | (1 << 4) | (1 << 5), // cube 5 (80997daa): up, west, east
+    // Vertical (side) surfaces — each entry is { x0, z0, x1, z1 } with EPS baked into the thin
+    // dimension. Rendered as epsilon-thin slabs at y = [LIQUID_FLOOR, topY].
+    private static final float[][] LIQUID_SIDE_SURFACES = {
+        {5f / 16f - EPS, 6f / 16f, 5f / 16f, 10f / 16f}, // cube 0 east
+        {1.5f / 16f, 7.5f / 16f, 2f / 16f, 7.5f / 16f + EPS}, // cube 1 north
+        {1.5f / 16f, 8.5f / 16f - EPS, 2f / 16f, 8.5f / 16f}, // cube 1 south
+        {1.5f / 16f, 7.5f / 16f, 1.5f / 16f + EPS, 8.5f / 16f}, // cube 1 west
+        {4.5f / 16f, 4.5f / 16f, 5.5f / 16f, 4.5f / 16f + EPS}, // cube 2 north
+        {4.5f / 16f, 4.5f / 16f, 4.5f / 16f + EPS, 5f / 16f}, // cube 2 west
+        {5.5f / 16f - EPS, 4.5f / 16f, 5.5f / 16f, 5f / 16f}, // cube 2 east
+        {4.5f / 16f, 11.5f / 16f - EPS, 5.5f / 16f, 11.5f / 16f}, // cube 3 south
+        {4.5f / 16f, 11f / 16f, 4.5f / 16f + EPS, 11.5f / 16f}, // cube 3 west
+        {5.5f / 16f - EPS, 11f / 16f, 5.5f / 16f, 11.5f / 16f}, // cube 3 east
+        {3f / 16f, 5f / 16f, 3f / 16f + EPS, 6f / 16f}, // cube 4 west
+        {6f / 16f - EPS, 5f / 16f, 6f / 16f, 6f / 16f}, // cube 4 east
+        {3f / 16f, 10f / 16f, 3f / 16f + EPS, 11f / 16f}, // cube 5 west
+        {6f / 16f - EPS, 10f / 16f, 6f / 16f, 11f / 16f}, // cube 5 east
     };
 
     private static float facingYRot(Direction facing) {
@@ -177,162 +187,93 @@ public class RecyclingBinRenderer
         float v0 = sprite.getV0(), v1 = sprite.getV1();
         VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
 
-        for (int i = 0; i < LIQUID_CUBES.length; i++) {
-            float[] c = LIQUID_CUBES[i];
-            int pink = LIQUID_PINK_FACES[i];
-            float x0 = c[0], z0 = c[1], x1 = c[2], z1 = c[3];
-
-            if ((pink & (1 << 1)) != 0) {
-                quad(
-                        vc,
-                        mat,
-                        r,
-                        g,
-                        b,
-                        a,
-                        packedLight,
-                        packedOverlay,
-                        u0,
-                        v0,
-                        u1,
-                        v1,
-                        x0,
-                        topY,
-                        z0,
-                        x0,
-                        topY,
-                        z1,
-                        x1,
-                        topY,
-                        z1,
-                        x1,
-                        topY,
-                        z0,
-                        0,
-                        1,
-                        0);
-            }
-            if ((pink & (1 << 2)) != 0) {
-                quad(
-                        vc,
-                        mat,
-                        r,
-                        g,
-                        b,
-                        a,
-                        packedLight,
-                        packedOverlay,
-                        u0,
-                        v0,
-                        u1,
-                        v1,
-                        x1,
-                        topY,
-                        z0,
-                        x0,
-                        topY,
-                        z0,
-                        x0,
-                        LIQUID_FLOOR,
-                        z0,
-                        x1,
-                        LIQUID_FLOOR,
-                        z0,
-                        0,
-                        0,
-                        -1);
-            }
-            if ((pink & (1 << 3)) != 0) {
-                quad(
-                        vc,
-                        mat,
-                        r,
-                        g,
-                        b,
-                        a,
-                        packedLight,
-                        packedOverlay,
-                        u0,
-                        v0,
-                        u1,
-                        v1,
-                        x0,
-                        topY,
-                        z1,
-                        x1,
-                        topY,
-                        z1,
-                        x1,
-                        LIQUID_FLOOR,
-                        z1,
-                        x0,
-                        LIQUID_FLOOR,
-                        z1,
-                        0,
-                        0,
-                        1);
-            }
-            if ((pink & (1 << 4)) != 0) {
-                quad(
-                        vc,
-                        mat,
-                        r,
-                        g,
-                        b,
-                        a,
-                        packedLight,
-                        packedOverlay,
-                        u0,
-                        v0,
-                        u1,
-                        v1,
-                        x0,
-                        topY,
-                        z0,
-                        x0,
-                        topY,
-                        z1,
-                        x0,
-                        LIQUID_FLOOR,
-                        z1,
-                        x0,
-                        LIQUID_FLOOR,
-                        z0,
-                        -1,
-                        0,
-                        0);
-            }
-            if ((pink & (1 << 5)) != 0) {
-                quad(
-                        vc,
-                        mat,
-                        r,
-                        g,
-                        b,
-                        a,
-                        packedLight,
-                        packedOverlay,
-                        u0,
-                        v0,
-                        u1,
-                        v1,
-                        x1,
-                        topY,
-                        z1,
-                        x1,
-                        topY,
-                        z0,
-                        x1,
-                        LIQUID_FLOOR,
-                        z0,
-                        x1,
-                        LIQUID_FLOOR,
-                        z1,
-                        1,
-                        0,
-                        0);
-            }
+        for (float[] s : LIQUID_TOP_SURFACES) {
+            renderBox(
+                    vc,
+                    mat,
+                    r,
+                    g,
+                    b,
+                    a,
+                    packedLight,
+                    packedOverlay,
+                    u0,
+                    v0,
+                    u1,
+                    v1,
+                    s[0],
+                    topY,
+                    s[1],
+                    s[2],
+                    topY + EPS,
+                    s[3]);
         }
+        for (float[] s : LIQUID_SIDE_SURFACES) {
+            renderBox(
+                    vc,
+                    mat,
+                    r,
+                    g,
+                    b,
+                    a,
+                    packedLight,
+                    packedOverlay,
+                    u0,
+                    v0,
+                    u1,
+                    v1,
+                    s[0],
+                    LIQUID_FLOOR,
+                    s[1],
+                    s[2],
+                    topY,
+                    s[3]);
+        }
+    }
+
+    private static void renderBox(
+            VertexConsumer vc,
+            Matrix4f mat,
+            int r,
+            int g,
+            int b,
+            int a,
+            int light,
+            int overlay,
+            float u0,
+            float v0,
+            float u1,
+            float v1,
+            float x0,
+            float y0,
+            float z0,
+            float x1,
+            float y1,
+            float z1) {
+        // +Y
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x1, y1, z1, x1, y1, z0, 0,
+                1, 0);
+        // -Y
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x0, y0, z0, x1, y0, z0, x1, y0, z1, 0,
+                -1, 0);
+        // -Z north
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0,
+                0, -1);
+        // +Z south
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0,
+                0, 1);
+        // -X west
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1,
+                0, 0);
+        // +X east
+        quad(
+                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
+                0, 0);
     }
 
     private static void quad(

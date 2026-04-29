@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.tank;
 
 import java.util.List;
+import java.util.Optional;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.storage.TieredBlockItem;
@@ -10,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
@@ -21,8 +23,10 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BucketPickup;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -38,10 +42,13 @@ import net.neoforged.neoforge.fluids.FluidUtil;
  *
  * <p>In <b>Block Mode</b> (default): right-clicking a fluid source or {@code IFluidHandler.BLOCK}
  * fills/drains the item via its registered capability; right-clicking any other block places it.
+ * Right-clicking on air toggles to Bucket Mode.
  *
- * <p>In <b>Bucket Mode</b>: right-clicking on air toggles back to Block Mode. Right-clicking a
- * matching fluid source picks up one bucket (1000 mB) into the tank; right-clicking anything
- * else attempts to place one bucket of tank fluid into the world.
+ * <p>In <b>Bucket Mode</b>: all interaction is handled in {@link #use} via a
+ * {@link ClipContext.Fluid#SOURCE_ONLY} raycast so the crosshair correctly resolves to fluid
+ * source blocks. Right-clicking a matching source picks up one bucket; right-clicking anything
+ * else places one bucket from the tank. Right-clicking on air (raycast miss) toggles back to
+ * Block Mode.
  *
  * <p>The mode is stored in {@link TankContents#bucketMode()} and persists on the item.
  */
@@ -82,76 +89,118 @@ public class TankItem extends TieredBlockItem {
     }
 
     // -------------------------------------------------------------------------
-    // Mode toggle (right-click on air)
+    // use() — mode toggle and all Bucket Mode interactions
     // -------------------------------------------------------------------------
 
+    /**
+     * Handles mode toggle (right-click on air) and all Bucket Mode fluid interactions.
+     *
+     * <p>Bucket Mode uses {@link ClipContext.Fluid#SOURCE_ONLY} so the crosshair stops at fluid
+     * source blocks rather than passing through them. Block Mode uses {@link ClipContext.Fluid#NONE}
+     * only to check for a raycast miss (the toggle condition); actual block interaction is handled
+     * by {@link #useOn}.
+     */
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        // Only toggle when not targeting a block; let useOn handle block-targeted clicks.
-        BlockHitResult hit = getPlayerPOVHitResult(level, player, ClipContext.Fluid.NONE);
-        if (hit.getType() != HitResult.Type.MISS) {
+        TankContents c = stack.getOrDefault(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
+
+        // Raycast: SOURCE_ONLY in Bucket Mode (stops at fluid sources), NONE in Block Mode.
+        BlockHitResult hit = getPlayerPOVHitResult(
+                level, player, c.bucketMode() ? ClipContext.Fluid.SOURCE_ONLY : ClipContext.Fluid.NONE);
+
+        if (hit.getType() == HitResult.Type.MISS) {
+            // Aiming at air/sky — toggle mode.
+            if (!level.isClientSide()) {
+                boolean newBucketMode = !c.bucketMode();
+                stack.set(
+                        Registration.TANK_CONTENTS.get(), new TankContents(c.storedFluid(), c.amount(), newBucketMode));
+                player.displayClientMessage(
+                        Component.translatable(
+                                newBucketMode
+                                        ? "item.tremendousstorage.tank.mode_bucket"
+                                        : "item.tremendousstorage.tank.mode_block"),
+                        true);
+            }
+            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+        }
+
+        if (!c.bucketMode()) {
+            // Block Mode: block-targeted clicks are handled by useOn.
             return InteractionResultHolder.pass(stack);
         }
-        if (!level.isClientSide()) {
-            TankContents c = stack.getOrDefault(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
-            boolean newBucketMode = !c.bucketMode();
-            stack.set(Registration.TANK_CONTENTS.get(), new TankContents(c.storedFluid(), c.amount(), newBucketMode));
-            player.displayClientMessage(
-                    Component.translatable(
-                            newBucketMode
-                                    ? "item.tremendousstorage.tank.mode_bucket"
-                                    : "item.tremendousstorage.tank.mode_block"),
-                    true);
+
+        // Bucket Mode: interact with the block the raycast hit.
+        BlockPos pos = hit.getBlockPos();
+        Direction face = hit.getDirection();
+        BlockState state = level.getBlockState(pos);
+
+        // Try to pick up a matching fluid source block.
+        if (level.getFluidState(pos).isSource() && state.getBlock() instanceof BucketPickup bucketPickup) {
+            Fluid worldFluid = level.getFluidState(pos).getType();
+            FluidStack worldFluidStack = new FluidStack(worldFluid, FluidType.BUCKET_VOLUME);
+            boolean canAccept =
+                    c.storedFluid().isEmpty() || FluidStack.isSameFluidSameComponents(c.storedFluid(), worldFluidStack);
+
+            if (canAccept && tierCapacity(stack) - c.amount() >= FluidType.BUCKET_VOLUME) {
+                if (!level.isClientSide()) {
+                    Optional<SoundEvent> sound = bucketPickup.getPickupSound(state);
+                    ItemStack picked = bucketPickup.pickupBlock(player, level, pos, state);
+                    if (!picked.isEmpty()) {
+                        FluidStack newType =
+                                c.storedFluid().isEmpty() ? worldFluidStack.copyWithAmount(1) : c.storedFluid();
+                        stack.set(
+                                Registration.TANK_CONTENTS.get(),
+                                new TankContents(newType, c.amount() + FluidType.BUCKET_VOLUME, true));
+                        sound.ifPresent(s -> player.playSound(s, 1.0F, 1.0F));
+                        level.gameEvent(player, GameEvent.FLUID_PICKUP, pos);
+                    }
+                }
+                return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+            }
+            // Wrong fluid or tank full — fall through to placement.
         }
-        return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+
+        // Try to place one bucket of fluid from the tank into the world.
+        if (!c.storedFluid().isEmpty() && c.amount() >= FluidType.BUCKET_VOLUME) {
+            Fluid fluid = c.storedFluid().getFluid();
+            boolean isLiquidContainer = state.getBlock() instanceof LiquidBlockContainer lbc
+                    && lbc.canPlaceLiquid(player, level, pos, state, fluid);
+            BlockPos targetPos = isLiquidContainer ? pos : pos.relative(face);
+            FluidStack toPlace = c.storedFluid().copyWithAmount(FluidType.BUCKET_VOLUME);
+
+            if (!level.isClientSide()) {
+                FluidActionResult place = FluidUtil.tryPlaceFluid(player, level, hand, targetPos, stack, toPlace);
+                if (place.isSuccess()) {
+                    return InteractionResultHolder.sidedSuccess(place.getResult(), level.isClientSide());
+                }
+                return InteractionResultHolder.fail(stack);
+            }
+            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+        }
+
+        return InteractionResultHolder.fail(stack);
     }
 
     // -------------------------------------------------------------------------
-    // Block / Bucket Mode right-click on block
+    // useOn() — Block Mode only; Bucket Mode defers to use()
     // -------------------------------------------------------------------------
 
     @Override
     public InteractionResult useOn(UseOnContext context) {
-        Level level = context.getLevel();
-        Player player = context.getPlayer();
         ItemStack stack = context.getItemInHand();
         TankContents c = stack.getOrDefault(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
 
+        // In Bucket Mode all interaction is handled in use(); returning PASS here causes
+        // the engine to call use() after this method.
         if (c.bucketMode()) {
-            if (!level.isClientSide() && player != null) {
-                BlockPos pos = context.getClickedPos();
-                Direction face = context.getClickedFace();
-                InteractionHand hand = context.getHand();
-
-                // Try to pick up a bucket of matching fluid from the world.
-                FluidActionResult pickup = FluidUtil.tryPickUpFluid(stack, player, level, pos, face);
-                if (pickup.isSuccess()) {
-                    player.setItemInHand(hand, pickup.getResult());
-                    return InteractionResult.SUCCESS;
-                }
-
-                // Try to place a bucket of fluid from the tank into the world.
-                if (!c.storedFluid().isEmpty() && c.amount() >= FluidType.BUCKET_VOLUME) {
-                    Fluid fluid = c.storedFluid().getFluid();
-                    BlockState state = level.getBlockState(pos);
-                    boolean isLiquidContainer = state.getBlock() instanceof LiquidBlockContainer lbc
-                            && lbc.canPlaceLiquid(player, level, pos, state, fluid);
-                    BlockPos targetPos = isLiquidContainer ? pos : pos.relative(face);
-                    FluidStack toPlace = c.storedFluid().copyWithAmount(FluidType.BUCKET_VOLUME);
-                    FluidActionResult place = FluidUtil.tryPlaceFluid(player, level, hand, targetPos, stack, toPlace);
-                    if (place.isSuccess()) {
-                        player.setItemInHand(hand, place.getResult());
-                        return InteractionResult.SUCCESS;
-                    }
-                }
-            }
-            // Client-side optimistic success prevents block-placement prediction.
-            return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.FAIL;
+            return InteractionResult.PASS;
         }
 
         // Block Mode: fill/drain via fluid handler, then fall through to block placement.
+        Level level = context.getLevel();
         if (!level.isClientSide()) {
+            Player player = context.getPlayer();
             if (player != null) {
                 boolean success = FluidUtil.interactWithFluidHandler(
                         player, context.getHand(), level, context.getClickedPos(), context.getClickedFace());
