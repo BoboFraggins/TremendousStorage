@@ -228,11 +228,11 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
         if (handler == null) return;
 
         FluidStack contained = handler.getFluidInTank(0);
-        FluidStack vibesType = new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), 1);
+        FluidStack vibesType = new FluidStack(Registration.QUANTUM_FOAM_SOURCE.get(), 1);
 
         if (!contained.isEmpty()) {
-            // Item has fluid → insert Positive Vibes into the recycling bin
-            if (contained.getFluid() != Registration.POSITIVE_VIBES_SOURCE.get()) return; // wrong fluid
+            // Item has fluid → insert Quantum Foam into the recycling bin
+            if (contained.getFluid() != Registration.QUANTUM_FOAM_SOURCE.get()) return; // wrong fluid
             int amt = contained.getAmount();
             int space = FLUID_CAPACITY_MB - vibesAmount;
             if (space < amt) return; // hold until there is room for the full amount
@@ -241,16 +241,15 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
             transferContainer.setItem(0, ItemStack.EMPTY);
             transferContainer.setItem(1, handler.getContainer());
         } else {
-            // Item is empty → fill it with Positive Vibes from the recycling bin
+            // Item is empty → fill it with Quantum Foam from the recycling bin
             if (vibesAmount == 0) return;
             int canFill = handler.fill(vibesType.copyWithAmount(vibesAmount), IFluidHandler.FluidAction.SIMULATE);
-            if (canFill <= 0) return; // item doesn't accept Positive Vibes
+            if (canFill <= 0) return; // item doesn't accept Quantum Foam
             // Hold until the bin has enough to fill the container completely
             if (vibesAmount < canFill) return;
             extractVibes(canFill, false);
             handler.fill(
-                    new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), canFill),
-                    IFluidHandler.FluidAction.EXECUTE);
+                    new FluidStack(Registration.QUANTUM_FOAM_SOURCE.get(), canFill), IFluidHandler.FluidAction.EXECUTE);
             transferContainer.setItem(0, ItemStack.EMPTY);
             transferContainer.setItem(1, handler.getContainer());
         }

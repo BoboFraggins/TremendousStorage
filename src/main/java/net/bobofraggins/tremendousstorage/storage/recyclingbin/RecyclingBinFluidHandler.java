@@ -5,8 +5,8 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 /**
- * Exposes the Recycling Bin's Positive Vibes fluid tank as an {@link IFluidHandler}.
- * Accepts insert and extract of Positive Vibes only; capacity is fixed at
+ * Exposes the Recycling Bin's Quantum Foam fluid tank as an {@link IFluidHandler}.
+ * Accepts insert and extract of Quantum Foam only; capacity is fixed at
  * {@value RecyclingBinBlockEntity#FLUID_CAPACITY_MB} mB.
  */
 public class RecyclingBinFluidHandler implements IFluidHandler {
@@ -26,7 +26,7 @@ public class RecyclingBinFluidHandler implements IFluidHandler {
     public FluidStack getFluidInTank(int tank) {
         int amount = be.getVibesAmount();
         if (amount == 0) return FluidStack.EMPTY;
-        return new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), amount);
+        return new FluidStack(Registration.QUANTUM_FOAM_SOURCE.get(), amount);
     }
 
     @Override
@@ -36,7 +36,7 @@ public class RecyclingBinFluidHandler implements IFluidHandler {
 
     @Override
     public boolean isFluidValid(int tank, FluidStack stack) {
-        return !stack.isEmpty() && stack.getFluid() == Registration.POSITIVE_VIBES_SOURCE.get();
+        return !stack.isEmpty() && stack.getFluid() == Registration.QUANTUM_FOAM_SOURCE.get();
     }
 
     @Override
@@ -61,6 +61,6 @@ public class RecyclingBinFluidHandler implements IFluidHandler {
     public FluidStack drain(int maxDrain, FluidAction action) {
         int drained = be.extractVibes(maxDrain, action.simulate());
         if (drained == 0) return FluidStack.EMPTY;
-        return new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), drained);
+        return new FluidStack(Registration.QUANTUM_FOAM_SOURCE.get(), drained);
     }
 }

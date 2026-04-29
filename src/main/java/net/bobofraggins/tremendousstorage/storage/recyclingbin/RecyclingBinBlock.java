@@ -110,7 +110,7 @@ public class RecyclingBinBlock extends BaseEntityBlock {
             int drained = be.extractVibes(BOTTLE_MB, true);
             if (drained >= BOTTLE_MB) {
                 be.extractVibes(BOTTLE_MB, false);
-                ItemStack bottle = new ItemStack(Registration.POSITIVE_VIBES_BOTTLE.get());
+                ItemStack bottle = new ItemStack(Registration.QUANTUM_FOAM_BOTTLE.get());
                 player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, bottle));
                 level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
                 return ItemInteractionResult.SUCCESS;

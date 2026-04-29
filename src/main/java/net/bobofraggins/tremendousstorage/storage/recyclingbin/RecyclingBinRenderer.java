@@ -33,7 +33,7 @@ import org.joml.Matrix4f;
  *   <li>Body — static, rendered with facing Y-rotation only.
  *   <li>Lid — animates open (rotates up by up to 90°) around the hinge at y=13/16, z=13/16.
  *   <li>Pedal — animates in sync (rotates down by up to 22.5°) around x=11/16, y=2/16, z=3/16.
- *   <li>Liquid — six cubes rendered procedurally using the Positive Vibes flowing texture,
+ *   <li>Liquid — six cubes rendered procedurally using the Quantum Foam flowing texture,
  *       scaled in height to reflect current fill level.
  * </ul>
  */
@@ -49,7 +49,7 @@ public class RecyclingBinRenderer
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_pedal"));
 
     private static final ResourceLocation FLOWING_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "fluid/positive_vibes_flow");
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "fluid/quantum_foam_flow");
 
     // Lid hinge pivot (y=13/16, z=13/16)
     private static final float LID_PIVOT_Y = 13f / 16f;
@@ -174,7 +174,7 @@ public class RecyclingBinRenderer
                 .getAtlas(InventoryMenu.BLOCK_ATLAS)
                 .getSprite(FLOWING_TEXTURE);
 
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.POSITIVE_VIBES_TYPE.get());
+        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.QUANTUM_FOAM_TYPE.get());
         int tint = ext.getTintColor();
         int r = (tint >> 16) & 0xFF;
         int g = (tint >> 8) & 0xFF;

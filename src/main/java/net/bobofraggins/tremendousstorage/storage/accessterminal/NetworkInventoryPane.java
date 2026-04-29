@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -96,10 +95,11 @@ public class NetworkInventoryPane implements IDialogPane {
     private boolean draggingScrollbar = false;
 
     /**
-     * Item hashes (by item+components) already extracted in the current shift-drag session.
-     * Cleared on mouseReleased and at the start of each new mouseClicked.
+     * Grid index of the last slot that fired an extract in the current shift-drag session.
+     * Prevents re-firing while the mouse stays within the same slot, but allows re-entry after
+     * the mouse leaves and comes back. Reset to -1 on mouseClicked and mouseReleased.
      */
-    private final Set<Integer> shiftDragVisited = new HashSet<>();
+    private int lastShiftDragSlot = -1;
 
     /** False until the first server response arrives. */
     private boolean hasContents = false;
@@ -131,7 +131,7 @@ public class NetworkInventoryPane implements IDialogPane {
 
     @Override
     public boolean mouseClicked(double localX, double localY, int button) {
-        shiftDragVisited.clear();
+        lastShiftDragSlot = -1;
         if (isInScrollbar(localX, localY)) {
             draggingScrollbar = true;
             scrollToY(localY);
@@ -175,7 +175,7 @@ public class NetworkInventoryPane implements IDialogPane {
                     int amount = (int) Math.min(totalCount, maxStack);
                     PacketDistributor.sendToServer(
                             new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, false));
-                    shiftDragVisited.add(ItemStack.hashItemAndComponents(target));
+                    lastShiftDragSlot = idx;
                 } else {
                     int amount = (button == 1)
                             ? (int) Math.max(1, (totalCount + 1) / 2)
@@ -213,16 +213,16 @@ public class NetworkInventoryPane implements IDialogPane {
                 int col = (int) ((localX - GRID_X) / AccessTerminalLayout.SLOT_SIZE);
                 int row = (int) ((localY - gridStartY()) / AccessTerminalLayout.SLOT_SIZE);
                 int idx = (row + scrollOffset) * AccessTerminalLayout.NETWORK_COLS + col;
-                if (idx >= 0 && idx < stacks.size()) {
+                if (idx >= 0 && idx < stacks.size() && idx != lastShiftDragSlot) {
                     ItemStack target = stacks.get(idx);
                     long totalCount = counts.get(idx);
                     boolean isFluidSlot = !isFluid.isEmpty() && idx < isFluid.size() && isFluid.get(idx);
-                    int key = ItemStack.hashItemAndComponents(target);
-                    if (totalCount > 0 && !isFluidSlot && shiftDragVisited.add(key)) {
+                    if (totalCount > 0 && !isFluidSlot) {
                         int amount = (int) Math.min(totalCount, target.getMaxStackSize());
                         PacketDistributor.sendToServer(
                                 new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, false));
                     }
+                    lastShiftDragSlot = idx;
                 }
                 return true;
             }
@@ -232,7 +232,7 @@ public class NetworkInventoryPane implements IDialogPane {
 
     @Override
     public boolean mouseReleased(double localX, double localY, int button) {
-        shiftDragVisited.clear();
+        lastShiftDragSlot = -1;
         if (draggingScrollbar) {
             draggingScrollbar = false;
             return true;
