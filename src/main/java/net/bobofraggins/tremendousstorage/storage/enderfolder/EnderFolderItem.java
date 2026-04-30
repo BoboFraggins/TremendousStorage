@@ -144,11 +144,16 @@ public class EnderFolderItem extends ManillaFolderItem {
     }
 
     private static void updatePlayerInventory(Player player, long linkId, FolderContents fc) {
+        boolean changed = false;
         for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
             ItemStack s = player.getInventory().getItem(i);
             if (isLinked(s, linkId)) {
                 s.set(Registration.FOLDER_CONTENTS.get(), fc);
+                changed = true;
             }
+        }
+        if (changed) {
+            player.getInventory().setChanged();
         }
     }
 

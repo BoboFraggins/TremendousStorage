@@ -99,9 +99,7 @@ public class FolderStorageRecipe extends CustomRecipe {
                     ManillaFolderItem.getContents(folder).tier());
         }
 
-        // Insert exactly 1 item — vanilla crafting removes exactly 1 from each input slot,
-        // so absorbing more would leave the remainder in the grid without consuming it.
-        FolderContents.InsertResult result = contents.insert(1, capacity);
+        FolderContents.InsertResult result = contents.insert(item.getCount(), capacity);
         return ManillaFolderItem.setContents(folder.copyWithCount(1), result.updated());
     }
 
