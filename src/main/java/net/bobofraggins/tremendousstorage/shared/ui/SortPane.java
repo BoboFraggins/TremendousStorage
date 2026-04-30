@@ -3,7 +3,6 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -63,8 +62,7 @@ public class SortPane implements IDialogPane {
         int rightBtnX = rowX + BTN_W + GAP + LBL_W + GAP;
         int lblX = rowX + BTN_W + GAP;
 
-        Component label =
-                Component.translatable("screen.tremendousstorage.sort_label").withStyle(ChatFormatting.BOLD);
+        Component label = Component.translatable("screen.tremendousstorage.sort_label");
         graphics.drawString(font, label, (width - font.width(label)) / 2, LABEL_Y, 0x404040, false);
 
         ResourceLocation leftTex = isInButton(localMouseX, localMouseY, leftBtnX) ? BTN_LEFT_FOCUSED : BTN_LEFT;

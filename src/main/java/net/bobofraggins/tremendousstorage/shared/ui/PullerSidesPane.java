@@ -4,7 +4,6 @@ import net.bobofraggins.tremendousstorage.shared.network.SetPullerSidesPacket;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -84,8 +83,7 @@ public class PullerSidesPane implements IDialogPane {
 
     @Override
     public void render(GuiGraphics g, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
-        Component header = Component.translatable("screen.tremendousstorage.puller_upgrade_label")
-                .withStyle(ChatFormatting.BOLD);
+        Component header = Component.translatable("screen.tremendousstorage.puller_upgrade_label");
         g.drawString(font, header, (width - font.width(header)) / 2, HEADER_Y, 0x404040, false);
 
         int sidesMask = getSidesMask();

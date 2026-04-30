@@ -3,7 +3,6 @@ package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 import java.util.function.BooleanSupplier;
 import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
 import net.bobofraggins.tremendousstorage.shared.ui.IDialogPane;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -50,8 +49,7 @@ public class AutoFeedPane implements IDialogPane {
     @Override
     public void render(
             GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
-        Component label = Component.translatable("screen.tremendousstorage.auto_feed_label")
-                .withStyle(ChatFormatting.BOLD);
+        Component label = Component.translatable("screen.tremendousstorage.auto_feed_label");
         graphics.drawString(font, label, (width - font.width(label)) / 2, LABEL_Y, 0x404040, false);
 
         int toggleX = (width - TOGGLE_W) / 2;

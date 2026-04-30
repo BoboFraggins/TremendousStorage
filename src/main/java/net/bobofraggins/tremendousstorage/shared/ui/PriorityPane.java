@@ -3,7 +3,6 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
@@ -73,8 +72,7 @@ public class PriorityPane implements IDialogPane {
         int upBtnX = rowX + BTN_W + GAP + LBL_W + GAP;
         int lblX = rowX + BTN_W + GAP;
 
-        Component priorityLabel = Component.translatable("screen.tremendousstorage.priority_label")
-                .withStyle(ChatFormatting.BOLD);
+        Component priorityLabel = Component.translatable("screen.tremendousstorage.priority_label");
         graphics.drawString(font, priorityLabel, (width - font.width(priorityLabel)) / 2, LABEL_Y, 0x404040, false);
 
         boolean canDown = selected > 0;
