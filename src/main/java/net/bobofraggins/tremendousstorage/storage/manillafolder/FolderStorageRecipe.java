@@ -1,5 +1,12 @@
 package net.bobofraggins.tremendousstorage.storage.manillafolder;
 
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.BaseUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.HaarpUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.InterdimensionalUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.MagnetUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.PullerUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeItem;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
@@ -56,6 +63,9 @@ public class FolderStorageRecipe extends CustomRecipe {
 
         // Damageable items (tools, weapons, armour) are not supported
         if (item.isDamageableItem()) return false;
+
+        // Upgrade items should apply to the folder, not be stored inside it
+        if (isUpgradeItem(item)) return false;
 
         // Unlocked folder accepts any item; locked folder must match
         return contents.accepts(item);
@@ -137,6 +147,16 @@ public class FolderStorageRecipe extends CustomRecipe {
         }
 
         return remaining;
+    }
+
+    private static boolean isUpgradeItem(ItemStack stack) {
+        return stack.getItem() instanceof StorageUpgradeItem
+                || stack.getItem() instanceof BaseUpgradeItem
+                || stack.getItem() instanceof CraftingUpgradeItem
+                || stack.getItem() instanceof MagnetUpgradeItem
+                || stack.getItem() instanceof HaarpUpgradeItem
+                || stack.getItem() instanceof PullerUpgradeItem
+                || stack.getItem() instanceof InterdimensionalUpgradeItem;
     }
 
     @Override
