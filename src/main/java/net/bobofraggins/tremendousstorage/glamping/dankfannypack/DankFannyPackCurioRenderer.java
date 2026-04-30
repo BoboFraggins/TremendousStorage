@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.glamping.dankfannypack;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
@@ -42,10 +43,8 @@ public class DankFannyPackCurioRenderer implements ICurioRenderer {
 
         poseStack.pushPose();
         humanoid.body.translateAndRotate(poseStack);
-        // Centre block [8, 2.5, 8] on the body waist:
-        //   X: -0.5 brings block x=8 to body-local x=0
-        //   Y: -0.65 drops belt centre (~y=2.5) to ~8 px below shoulder pivot (waist)
-        //   Z: -0.5 centres block z=8 on body depth, letting the ±1px overhang sit naturally
+        poseStack.mulPose(Axis.YP.rotationDegrees(180f));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
         poseStack.translate(-0.5, -0.65, -0.5);
 
         Minecraft.getInstance()

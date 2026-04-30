@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.glamping.magichat;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
@@ -37,8 +38,8 @@ public class MagicHatCurioRenderer implements ICurioRenderer {
 
         poseStack.pushPose();
         humanoid.head.translateAndRotate(poseStack);
-        // Center the block model origin on the head and sit it on top:
-        // block [8,0,8] (center-bottom) → head-local [0, top-of-head, 0]
+        poseStack.mulPose(Axis.YP.rotationDegrees(180f));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
         poseStack.translate(-0.5, 0.5, -0.5);
 
         Minecraft.getInstance()
