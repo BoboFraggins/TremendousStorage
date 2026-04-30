@@ -16,6 +16,7 @@ import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig;
 import net.bobofraggins.tremendousstorage.shared.network.NetworkEvents;
 import net.bobofraggins.tremendousstorage.shared.register.ClientEventRegistrar;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderEvents;
 import net.bobofraggins.tremendousstorage.storage.items.LazuriteEquipmentHandler;
 import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesEffectHandler;
 import net.bobofraggins.tremendousstorage.storage.items.VexRepellentBrewingRecipes;
@@ -50,6 +51,7 @@ public class TremendousStorage {
 
         // ── Game-bus registrations (both sides) ──────────────────────────────────
         NeoForge.EVENT_BUS.register(GlampingEvents.class);
+        NeoForge.EVENT_BUS.register(EnderFolderEvents.class);
         NeoForge.EVENT_BUS.register(PicnicBasketFeedHandler.class);
         NeoForge.EVENT_BUS.register(LazuriteEquipmentHandler.class);
         NeoForge.EVENT_BUS.register(VexRepellentEffectHandler.class);
