@@ -45,7 +45,7 @@ public class DankFannyPackCurioRenderer implements ICurioRenderer {
         humanoid.body.translateAndRotate(poseStack);
         poseStack.mulPose(Axis.YP.rotationDegrees(180f));
         poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
-        poseStack.translate(-0.5, -0.65, -0.5);
+        poseStack.translate(0.0, -0.25, 0.0);
 
         Minecraft.getInstance()
                 .getItemRenderer()

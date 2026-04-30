@@ -40,7 +40,7 @@ public class MagicHatCurioRenderer implements ICurioRenderer {
         humanoid.head.translateAndRotate(poseStack);
         poseStack.mulPose(Axis.YP.rotationDegrees(180f));
         poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
-        poseStack.translate(-0.5, 0.5, -0.5);
+        poseStack.translate(0.0, 1.0, 0.0);
 
         Minecraft.getInstance()
                 .getItemRenderer()
