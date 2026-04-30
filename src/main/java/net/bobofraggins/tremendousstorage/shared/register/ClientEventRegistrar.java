@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.shared.register;
 
 import net.bobofraggins.tremendousstorage.external.mobgrindinutils.XpFluidClientEvents;
+import net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatClientEvents;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClientEvents;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClientTickHandler;
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineClientEvents;
@@ -55,6 +56,7 @@ public final class ClientEventRegistrar {
         modBus.register(QuickStackClientEvents.class);
         modBus.register(PersonalAccessTerminalClientEvents.class);
         modBus.register(HoneyClientEvents.class);
+        modBus.register(MagicHatClientEvents.class);
         modBus.register(PositiveVibesClientEvents.class);
         modBus.register(QuantumFoamClientEvents.class);
         modBus.register(XpFluidClientEvents.class);

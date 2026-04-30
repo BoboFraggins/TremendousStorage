@@ -6,6 +6,8 @@ import net.bobofraggins.tremendousstorage.experiencesyringe.ExperienceSyringeIte
 import net.bobofraggins.tremendousstorage.external.exdeorum.ExDeorumIntegration;
 import net.bobofraggins.tremendousstorage.external.exnihilosequentia.ExNihiloSequentiaIntegration;
 import net.bobofraggins.tremendousstorage.glamping.GlampingRegistration;
+import net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatBlock;
+import net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatItem;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlock;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlockEntity;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketCraftingRecipe;
@@ -727,6 +729,18 @@ public final class Registration {
                     BLOCK_ENTITY_TYPES.register("ender_picnic_basket", () -> BlockEntityType.Builder.of(
                                     EnderPicnicBasketBlockEntity::new, ENDER_PICNIC_BASKET_BLOCK.get())
                             .build(null));
+
+    // -------------------------------------------------------------------------
+    // Magic Hat
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<MagicHatBlock> MAGIC_HAT_BLOCK = BLOCKS.register(
+            "magic_hat",
+            () -> new MagicHatBlock(
+                    BlockBehaviour.Properties.of().strength(0.5f).noOcclusion().sound(SoundType.WOOL)));
+
+    public static final DeferredHolder<Item, MagicHatItem> MAGIC_HAT_ITEM =
+            ITEMS.register("magic_hat", () -> new MagicHatItem(MAGIC_HAT_BLOCK.get()));
 
     public static final DeferredHolder<Item, BackpackItem> TREMENDOUS_BACKPACK =
             ITEMS.register("backpack", () -> new BackpackItem(TREMENDOUS_BACKPACK_BLOCK.get()));

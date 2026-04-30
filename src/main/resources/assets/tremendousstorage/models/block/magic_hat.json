@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "tremendousstorage:block/magic_hat_texture",
+    "texture": "tremendousstorage:block/magic_hat_texture"
+  },
+  "texture_size": [32, 32],
+  "elements": [
+    {
+      "from": [3, 0, 3],
+      "to": [13, 1, 13],
+      "faces": {
+        "north": {"uv": [16, 19, 26, 20], "texture": "#texture"},
+        "east":  {"uv": [0,  20, 10, 21], "texture": "#texture"},
+        "south": {"uv": [16, 20, 26, 21], "texture": "#texture"},
+        "west":  {"uv": [0,  21, 10, 22], "texture": "#texture"},
+        "up":    {"uv": [10, 10,  0,  0], "texture": "#texture"},
+        "down":  {"uv": [10, 10,  0, 20], "texture": "#texture"}
+      }
+    },
+    {
+      "from": [5, 1, 5],
+      "to": [11, 8, 11],
+      "faces": {
+        "north": {"uv": [10,  0, 16,  7], "texture": "#texture"},
+        "east":  {"uv": [10,  7, 16, 14], "texture": "#texture"},
+        "south": {"uv": [10, 14, 16, 21], "texture": "#texture"},
+        "west":  {"uv": [16,  0, 22,  7], "texture": "#texture"},
+        "up":    {"uv": [22, 13, 16,  7], "texture": "#texture"},
+        "down":  {"uv": [22, 13, 16, 19], "texture": "#texture"}
+      }
+    }
+  ]
+}
