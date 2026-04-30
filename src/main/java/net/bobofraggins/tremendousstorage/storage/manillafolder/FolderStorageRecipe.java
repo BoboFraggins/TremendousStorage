@@ -99,54 +99,20 @@ public class FolderStorageRecipe extends CustomRecipe {
                     ManillaFolderItem.getContents(folder).tier());
         }
 
-        FolderContents.InsertResult result = contents.insert(item.getCount(), capacity);
+        // Insert exactly 1 item — vanilla crafting removes exactly 1 from each input slot,
+        // so absorbing more would leave the remainder in the grid without consuming it.
+        FolderContents.InsertResult result = contents.insert(1, capacity);
         return ManillaFolderItem.setContents(folder.copyWithCount(1), result.updated());
     }
 
     /**
-     * Returns any items that didn't fit into the folder back into the crafting grid slot they came
-     * from. The folder slot gets the updated folder (via normal output). The item slot gets the
-     * overflow remainder, or empty if everything fit.
+     * Vanilla removes exactly 1 from each input slot. Since assemble() also inserts exactly 1,
+     * nothing needs to be put back — both inputs are fully consumed per craft.
+     * Shift-clicking repeatedly crafts until the item slot is empty or the folder is full.
      */
     @Override
     public net.minecraft.core.NonNullList<ItemStack> getRemainingItems(CraftingInput input) {
-        net.minecraft.core.NonNullList<ItemStack> remaining =
-                net.minecraft.core.NonNullList.withSize(input.size(), ItemStack.EMPTY);
-
-        ItemStack folder = ItemStack.EMPTY;
-        int itemSlot = -1;
-        ItemStack item = ItemStack.EMPTY;
-
-        for (int i = 0; i < input.size(); i++) {
-            ItemStack stack = input.getItem(i);
-            if (stack.isEmpty()) continue;
-            if (stack.getItem() instanceof ManillaFolderItem) {
-                folder = stack;
-            } else {
-                itemSlot = i;
-                item = stack;
-            }
-        }
-
-        if (folder.isEmpty() || item.isEmpty() || itemSlot < 0) return remaining;
-
-        FolderContents contents = ManillaFolderItem.getContents(folder);
-        long capacity = ManillaFolderItem.getCapacity(folder);
-
-        if (contents.isEmpty()) {
-            contents = new FolderContents(
-                    java.util.Optional.of(item.copyWithCount(1)),
-                    0L,
-                    ManillaFolderItem.getContents(folder).tier());
-        }
-
-        FolderContents.InsertResult result = contents.insert(item.getCount(), capacity);
-
-        if (result.remainder() > 0) {
-            remaining.set(itemSlot, item.copyWithCount((int) result.remainder()));
-        }
-
-        return remaining;
+        return net.minecraft.core.NonNullList.withSize(input.size(), ItemStack.EMPTY);
     }
 
     private static boolean isUpgradeItem(ItemStack stack) {
