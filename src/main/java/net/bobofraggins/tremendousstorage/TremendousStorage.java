@@ -8,7 +8,9 @@ import net.bobofraggins.tremendousstorage.external.mobgrindinutils.MobGrindingUt
 import net.bobofraggins.tremendousstorage.external.productivemetalworks.ProductiveMetalworksIntegration;
 import net.bobofraggins.tremendousstorage.glamping.GlampingEvents;
 import net.bobofraggins.tremendousstorage.glamping.GlampingRegistration;
+import net.bobofraggins.tremendousstorage.glamping.dankfannypack.DankFannyPackMagnetHandler;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketFeedHandler;
+import net.bobofraggins.tremendousstorage.shared.ItemPickupInterceptor;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageClientConfig;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig;
 import net.bobofraggins.tremendousstorage.shared.network.NetworkEvents;
@@ -53,6 +55,8 @@ public class TremendousStorage {
         NeoForge.EVENT_BUS.register(VexRepellentEffectHandler.class);
         NeoForge.EVENT_BUS.register(ZombieBrainDropHandler.class);
         NeoForge.EVENT_BUS.register(PositiveVibesEffectHandler.class);
+        NeoForge.EVENT_BUS.register(DankFannyPackMagnetHandler.class);
+        NeoForge.EVENT_BUS.register(ItemPickupInterceptor.class);
 
         // ── Client-only event registrations ──────────────────────────────────────
         if (FMLEnvironment.dist.isClient()) {

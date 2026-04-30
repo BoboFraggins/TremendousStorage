@@ -78,6 +78,15 @@ public final class NetworkEvents {
         registrar.playToServer(
                 SetPullerSidesPacket.TYPE, SetPullerSidesPacket.STREAM_CODEC, SetPullerSidesPacket::handle);
         registrar.playToServer(OpenBackpackPacket.TYPE, OpenBackpackPacket.STREAM_CODEC, OpenBackpackPacket::handle);
+        registrar.playToServer(OpenFannyPackPacket.TYPE, OpenFannyPackPacket.STREAM_CODEC, OpenFannyPackPacket::handle);
+        registrar.playToServer(
+                SetFannyPackVoidExcessPacket.TYPE,
+                SetFannyPackVoidExcessPacket.STREAM_CODEC,
+                SetFannyPackVoidExcessPacket::handle);
+        registrar.playToServer(
+                SetFannyPackPriorityPacket.TYPE,
+                SetFannyPackPriorityPacket.STREAM_CODEC,
+                SetFannyPackPriorityPacket::handle);
         registrar.playToServer(
                 BackpackInteractPacket.TYPE, BackpackInteractPacket.STREAM_CODEC, BackpackInteractPacket::handle);
         registrar.playToServer(

@@ -6,6 +6,9 @@ import net.bobofraggins.tremendousstorage.experiencesyringe.ExperienceSyringeIte
 import net.bobofraggins.tremendousstorage.external.exdeorum.ExDeorumIntegration;
 import net.bobofraggins.tremendousstorage.external.exnihilosequentia.ExNihiloSequentiaIntegration;
 import net.bobofraggins.tremendousstorage.glamping.GlampingRegistration;
+import net.bobofraggins.tremendousstorage.glamping.dankfannypack.DankFannyPackItem;
+import net.bobofraggins.tremendousstorage.glamping.dankfannypack.DankFannyPackMenu;
+import net.bobofraggins.tremendousstorage.glamping.dankfannypack.FannyPackContents;
 import net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatBlock;
 import net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatItem;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlock;
@@ -289,6 +292,13 @@ public final class Registration {
             DATA_COMPONENTS.register("experience_syringe_stored_xp", () -> DataComponentType.<Integer>builder()
                     .persistent(com.mojang.serialization.Codec.intRange(0, ExperienceSyringeItem.CAPACITY))
                     .networkSynchronized(net.minecraft.network.codec.ByteBufCodecs.VAR_INT)
+                    .build());
+
+    /** Data component storing the 8 folder slots and settings on a Dank Fanny Pack item. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<FannyPackContents>> FANNY_PACK_CONTENTS =
+            DATA_COMPONENTS.register("fanny_pack_contents", () -> DataComponentType.<FannyPackContents>builder()
+                    .persistent(FannyPackContents.CODEC)
+                    .networkSynchronized(FannyPackContents.STREAM_CODEC)
                     .build());
 
     /** Data component storing all inventory and settings on a Tremendous Backpack item. */
@@ -731,6 +741,13 @@ public final class Registration {
                             .build(null));
 
     // -------------------------------------------------------------------------
+    // Dank Fanny Pack
+    // -------------------------------------------------------------------------
+
+    public static final DeferredHolder<Item, DankFannyPackItem> DANK_FANNY_PACK =
+            ITEMS.register("dank_fanny_pack", DankFannyPackItem::new);
+
+    // -------------------------------------------------------------------------
     // Magic Hat
     // -------------------------------------------------------------------------
 
@@ -959,6 +976,9 @@ public final class Registration {
 
     public static final DeferredHolder<MenuType<?>, MenuType<FilingCabinetMenu>> FILING_CABINET_MENU =
             MENU_TYPES.register("filing_cabinet", () -> IMenuTypeExtension.create(FilingCabinetMenu::new));
+
+    public static final DeferredHolder<MenuType<?>, MenuType<DankFannyPackMenu>> DANK_FANNY_PACK_MENU =
+            MENU_TYPES.register("dank_fanny_pack", () -> IMenuTypeExtension.create(DankFannyPackMenu::new));
 
     public static final DeferredHolder<MenuType<?>, MenuType<PriorityControl>> PRIORITY_MENU =
             MENU_TYPES.register("priority", () -> IMenuTypeExtension.create(PriorityControl::new));

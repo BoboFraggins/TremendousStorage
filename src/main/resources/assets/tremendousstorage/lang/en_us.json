@@ -100,6 +100,8 @@
   "screen.tremendousstorage.access_terminal.connected": "Network: Connected",
   "screen.tremendousstorage.access_terminal.disconnected": "Network: Not Connected",
   "screen.tremendousstorage.access_terminal.empty": "Network is empty",
+  "item.tremendousstorage.dank_fanny_pack": "Dank Fanny Pack",
+  "key.tremendousstorage.open_dank_fanny_pack": "Open Dank Fanny Pack",
   "block.tremendousstorage.magic_hat": "Magic Hat",
   "item.tremendousstorage.magic_hat.tooltip_capture": "Right-click a mob to capture it.",
   "item.tremendousstorage.magic_hat.tooltip_release": "Right-click to release.",
