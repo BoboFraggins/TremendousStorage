@@ -81,6 +81,19 @@ public final class PicnicBasketItemUtils {
     // Insert / extract
     // -------------------------------------------------------------------------
 
+    /** Returns true if the basket already has an entry whose StorageKey matches {@code key}. */
+    public static boolean isTypeStored(HolderLookup.Provider registries, ItemStack basketStack, StorageKey key) {
+        CustomData data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data == null) return false;
+        ListTag types = data.copyTag().getList("Types", Tag.TAG_COMPOUND);
+        for (int i = 0; i < types.size(); i++) {
+            ItemStack stored =
+                    ItemStack.parseOptional(registries, types.getCompound(i).getCompound("Type"));
+            if (!stored.isEmpty() && StorageKey.of(stored).equals(key)) return true;
+        }
+        return false;
+    }
+
     /**
      * Inserts up to {@code amount} of {@code toInsert} into the basket's BLOCK_ENTITY_DATA.
      * Modifies {@code basketStack} in place. Returns the number of items actually inserted.

@@ -187,10 +187,12 @@ public final class ItemPickupInterceptor {
         if (!incoming.has(DataComponents.FOOD)) return false;
 
         var registries = player.level().registryAccess();
+        StorageKey key = StorageKey.of(incoming);
 
         for (int i = 0; i <= 40; i++) {
             ItemStack stack = player.getInventory().getItem(i);
             if (!PicnicBasketItemUtils.isBasket(stack)) continue;
+            if (!PicnicBasketItemUtils.isTypeStored(registries, stack, key)) continue;
 
             long absorbed =
                     PicnicBasketItemUtils.insertIntoBasketItem(registries, stack, incoming, incoming.getCount());
