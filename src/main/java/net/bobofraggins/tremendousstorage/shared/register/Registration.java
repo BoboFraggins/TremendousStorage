@@ -1211,6 +1211,8 @@ public final class Registration {
                         output.accept(CANVAS.get());
                         output.accept(CANVAS_BLOCK_ITEM.get());
                         output.accept(GlampingRegistration.TENT_ITEM.get());
+                        output.accept(MAGIC_HAT_ITEM.get());
+                        output.accept(DANK_FANNY_PACK.get());
                         output.accept(TREMENDOUS_BACKPACK.get());
                         output.accept(PICNIC_BASKET_ITEM.get());
                         output.accept(LAZURITE_ORE_ITEM.get());
@@ -1275,6 +1277,8 @@ public final class Registration {
                         output.accept(HONEY_FLUID_BUCKET.get());
                         output.accept(POSITIVE_VIBES_BUCKET.get());
                         output.accept(POSITIVE_VIBES_BOTTLE.get());
+                        output.accept(QUANTUM_FOAM_BUCKET.get());
+                        output.accept(QUANTUM_FOAM_BOTTLE.get());
                         output.accept(VEX_REPELLENT_POTION.get());
                         output.accept(VEX_REPELLENT_POTION_EXTENDED.get());
                         output.accept(VEX_REPELLENT_POTION_LONG.get());
