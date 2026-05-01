@@ -1,7 +1,9 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
 import javax.annotation.Nullable;
+import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -25,9 +27,13 @@ public class FolderExtractionSlot extends Slot {
 
     private final Slot folderSlot;
 
-    public FolderExtractionSlot(Slot folderSlot, int x, int y) {
+    @Nullable
+    private final MinecraftServer server;
+
+    public FolderExtractionSlot(Slot folderSlot, int x, int y, @Nullable MinecraftServer server) {
         super(new SimpleContainer(1), 0, x, y);
         this.folderSlot = folderSlot;
+        this.server = server;
     }
 
     // -------------------------------------------------------------------------
@@ -127,13 +133,22 @@ public class FolderExtractionSlot extends Slot {
     private FolderContents getContents() {
         ItemStack folder = folderSlot.getItem();
         if (folder.isEmpty()) return null;
+        if (folder.getItem() instanceof EnderFolderItem) {
+            return EnderFolderItem.getLiveContents(folder, server);
+        }
         return folder.get(FolderContents.type());
     }
 
     private void writeFolderContents(FolderContents updated) {
         ItemStack folder = folderSlot.getItem();
         if (folder.isEmpty()) return;
-        folder.set(FolderContents.type(), updated);
-        folderSlot.setChanged();
+        if (folder.getItem() instanceof EnderFolderItem) {
+            ItemStack copy = folder.copyWithCount(1);
+            EnderFolderItem.setLiveContents(copy, updated, server);
+            folderSlot.set(copy);
+        } else {
+            folder.set(FolderContents.type(), updated);
+            folderSlot.setChanged();
+        }
     }
 }

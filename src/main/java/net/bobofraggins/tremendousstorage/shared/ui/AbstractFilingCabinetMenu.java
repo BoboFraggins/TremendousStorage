@@ -97,7 +97,8 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
         for (int i = 0; i < FOLDER_SLOTS; i++) {
             int col = i < ROWS_PER_COLUMN ? EXTRACTION_X_LEFT : EXTRACTION_X_RIGHT;
             int row = i % ROWS_PER_COLUMN;
-            addSlot(new FolderExtractionSlot(folderSlots[i], col, FOLDER_Y_START + row * 18));
+            addSlot(new FolderExtractionSlot(
+                    folderSlots[i], col, FOLDER_Y_START + row * 18, playerInv.player.getServer()));
         }
 
         // Slots 16-42: player main inventory (centred: (176-162)/2 = 7 px)
