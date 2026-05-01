@@ -2,9 +2,12 @@ package net.bobofraggins.tremendousstorage.storage.enderfolder;
 
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 /**
@@ -23,6 +26,24 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 public final class EnderFolderEvents {
 
     private EnderFolderEvents() {}
+
+    /**
+     * When a player opens any container, sync every Ender Folder slot from live storage so that
+     * the component is correct before the player hovers over or interacts with the item.
+     * {@code broadcastChanges()} sends the updated slot to the client within one tick.
+     */
+    @SubscribeEvent
+    public static void onContainerOpen(PlayerContainerEvent.Open event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        MinecraftServer server = player.getServer();
+        if (server == null) return;
+        for (Slot slot : event.getContainer().slots) {
+            ItemStack stack = slot.getItem();
+            if (stack.getItem() instanceof EnderFolderItem) {
+                EnderFolderItem.syncFromStorage(stack, server);
+            }
+        }
+    }
 
     @SubscribeEvent
     public static void onItemCrafted(PlayerEvent.ItemCraftedEvent event) {
