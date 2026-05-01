@@ -49,12 +49,12 @@ public record QuickStackFilingCabinetPacket() implements CustomPacketPayload {
                 Slot folderSlot = fcMenu.getSlot(i);
                 ItemStack folderItem = folderSlot.getItem();
                 if (folderItem.isEmpty()) continue;
+                if (!(folderItem.getItem() instanceof ManillaFolderItem)) continue;
 
-                // Only plain ManillaFolders — Ender Folders have networked storage semantics
-                if (!(folderItem.getItem() instanceof ManillaFolderItem)
-                        || folderItem.getItem() instanceof EnderFolderItem) continue;
-
-                FolderContents contents = ManillaFolderItem.getContents(folderItem);
+                boolean isEnder = folderItem.getItem() instanceof EnderFolderItem;
+                FolderContents contents = isEnder
+                        ? EnderFolderItem.getLiveContents(folderItem, player.getServer())
+                        : ManillaFolderItem.getContents(folderItem);
                 if (contents.isEmpty()) continue; // unlocked — don't start new dedications
 
                 long capacity = ManillaFolderItem.getCapacity(folderItem);
@@ -79,7 +79,13 @@ public record QuickStackFilingCabinetPacket() implements CustomPacketPayload {
                 }
 
                 if (changed) {
-                    folderSlot.set(ManillaFolderItem.setContents(folderItem.copy(), contents));
+                    ItemStack updatedFolder = folderItem.copy();
+                    if (isEnder) {
+                        EnderFolderItem.setLiveContents(updatedFolder, contents, player.getServer());
+                    } else {
+                        updatedFolder = ManillaFolderItem.setContents(updatedFolder, contents);
+                    }
+                    folderSlot.set(updatedFolder);
                 }
             }
         });
