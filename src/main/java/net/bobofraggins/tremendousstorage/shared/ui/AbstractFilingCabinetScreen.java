@@ -1,12 +1,16 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.shared.network.QuickStackFilingCabinetPacket;
 import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -14,6 +18,7 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.joml.Matrix4f;
 
 /**
  * Shared screen base for
@@ -172,8 +177,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
             int sy = slot.y;
             graphics.renderItem(stack, sx, sy);
             long count = stack.getCount();
-            String countStr = count > 1 ? CountFormat.format(count) : null;
-            graphics.renderItemDecorations(font, stack, sx, sy, countStr);
+            if (count > 1) renderSizeLabel(graphics, font, sx, sy, CountFormat.format(count), 0xFFFFFF);
             if (hoveredSlot == slot) {
                 renderSlotHighlight(graphics, sx, sy, 0);
             }
@@ -186,6 +190,32 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
         // Title is drawn by Dialog.
+    }
+
+    /** Renders a count label at 0.666 scale in the bottom-right corner of a 16×16 slot. */
+    private static void renderSizeLabel(GuiGraphics graphics, Font font, float x, float y, String text, int color) {
+        float scale = 0.666f;
+        float scaleInv = 1f / scale;
+        float offset = -1f;
+
+        graphics.pose().pushPose();
+        graphics.pose().translate(0f, 0f, 200f);
+        graphics.pose().scale(scale, scale, scale);
+        Matrix4f mat = graphics.pose().last().pose();
+
+        float textX = (x + offset + 16f + 2f - font.width(text) * scale) * scaleInv;
+        float textY = (y + offset + 10f) * scaleInv;
+
+        MultiBufferSource.BufferSource buffers =
+                Minecraft.getInstance().renderBuffers().bufferSource();
+        RenderSystem.disableBlend();
+        font.drawInBatch(
+                text, textX + 1f, textY + 1f, 0x414141, false, mat, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
+        font.drawInBatch(text, textX, textY, color, false, mat, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
+        buffers.endBatch();
+        RenderSystem.enableBlend();
+
+        graphics.pose().popPose();
     }
 
     private static void drawSlotBackground(GuiGraphics graphics, int sx, int sy, int w, int h) {
