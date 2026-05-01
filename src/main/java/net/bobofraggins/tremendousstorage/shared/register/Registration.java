@@ -17,6 +17,7 @@ import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBaske
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteBarsBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteOreBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuritePaxelItem;
+import net.bobofraggins.tremendousstorage.lazurite.LazuriteRepairRecipe;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteTier;
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlock;
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlockEntity;
@@ -1098,6 +1099,10 @@ public final class Registration {
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderTapeRecipe>> FOLDER_TAPE_RECIPE =
             RECIPE_SERIALIZERS.register(
                     "folder_tape", () -> new SimpleCraftingRecipeSerializer<>(FolderTapeRecipe::new));
+
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<LazuriteRepairRecipe>>
+            LAZURITE_REPAIR_RECIPE = RECIPE_SERIALIZERS.register(
+                    "lazurite_repair", () -> new SimpleCraftingRecipeSerializer<>(LazuriteRepairRecipe::new));
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderChestCraftingRecipe>>
             ENDER_CHEST_CRAFTING_RECIPE =

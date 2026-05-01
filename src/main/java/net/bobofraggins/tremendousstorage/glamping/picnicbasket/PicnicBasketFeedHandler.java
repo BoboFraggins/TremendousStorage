@@ -5,6 +5,7 @@ import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -15,6 +16,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
@@ -139,12 +142,29 @@ public class PicnicBasketFeedHandler {
             }
         }
 
-        // Decrement stored count; remove entry if exhausted
-        long remaining = entry.getLong("Count") - 1;
-        if (remaining <= 0) {
-            types.remove(chosenIdx);
+        // Consume one use: damageable items lose durability (respecting Unbreaking); others
+        // lose one count.
+        if (stored.isDamageableItem()) {
+            int unbreaking = EnchantmentHelper.getItemEnchantmentLevel(
+                    level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.UNBREAKING),
+                    stored);
+            boolean takeDamage = unbreaking == 0 || level.random.nextInt(unbreaking + 1) == 0;
+            if (takeDamage) {
+                int newDamage = stored.getDamageValue() + 1;
+                if (newDamage >= stored.getMaxDamage()) {
+                    types.remove(chosenIdx);
+                } else {
+                    stored.setDamageValue(newDamage);
+                    entry.put("Type", stored.save(registries));
+                }
+            }
         } else {
-            entry.putLong("Count", remaining);
+            long remaining = entry.getLong("Count") - 1;
+            if (remaining <= 0) {
+                types.remove(chosenIdx);
+            } else {
+                entry.putLong("Count", remaining);
+            }
         }
 
         beTag.put("Types", types);

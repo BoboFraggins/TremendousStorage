@@ -117,32 +117,38 @@ public class BackpackMenu extends AbstractContainerMenu {
         this.player = playerInv.player;
         this.access = ContainerLevelAccess.create(playerInv.player.level(), playerInv.player.blockPosition());
 
-        int playerInvY = 49 + rows * 18;
-        int hotbarY = playerInvY + 58;
+        // craftY is where the crafting pane starts in the dialog (aligns with CraftingGridPane).
+        // playerInvY follows immediately after the crafting pane (3 rows × 18 + 4 px gap = 58).
+        int craftY = 49 + rows * 18;
+        int playerInvY;
 
         if (hasCraftingUpgrade) {
             this.craftSlots = new TransientCraftingContainer(this, 3, 3);
             this.resultSlots = new ResultContainer();
 
-            // Slot 0: craft result
-            addSlot(new ResultSlot(playerInv.player, craftSlots, resultSlots, 0, 120, playerInvY - 18 + 18));
+            // Slot 0: craft result (row-1 position, x=120 — matches CraftingGridPane.RESULT_LOCAL_Y)
+            addSlot(new ResultSlot(playerInv.player, craftSlots, resultSlots, 0, 120, craftY + 18));
 
             // Slots 1-9: 3×3 crafting grid
-            int craftY = playerInvY - 18 - 3 * 18;
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 3; col++) {
                     addSlot(new Slot(craftSlots, col + row * 3, 30 + col * 18, craftY + row * 18));
                 }
             }
 
+            // Player inventory starts after the crafting pane (3 × 18 + 4 px gap)
+            playerInvY = craftY + 3 * 18 + 4;
             this.invStart = 10;
             this.hotbarEnd = 46;
         } else {
             this.craftSlots = null;
             this.resultSlots = null;
+            playerInvY = craftY;
             this.invStart = 0;
             this.hotbarEnd = 36;
         }
+
+        int hotbarY = playerInvY + 58;
 
         // Player main inventory
         for (int row = 0; row < 3; row++) {

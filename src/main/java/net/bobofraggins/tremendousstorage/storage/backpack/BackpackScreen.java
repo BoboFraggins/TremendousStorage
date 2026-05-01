@@ -13,6 +13,7 @@ import net.bobofraggins.tremendousstorage.shared.network.SetBackpackPriorityPack
 import net.bobofraggins.tremendousstorage.shared.network.SetBackpackSortModePacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
+import net.bobofraggins.tremendousstorage.shared.ui.CraftingGridPane;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.LocalInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
@@ -58,11 +59,20 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
     public BackpackScreen(BackpackMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
         inventoryPane = new LocalInventoryPane();
-        dialog = new Dialog(
-                Dialog.blankPane(PlayerInventoryPane.WIDTH, 7),
-                inventoryPane,
-                Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
-                new PlayerInventoryPane());
+        if (menu.hasCraftingUpgrade()) {
+            dialog = new Dialog(
+                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 7),
+                    inventoryPane,
+                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
+                    new CraftingGridPane(),
+                    new PlayerInventoryPane());
+        } else {
+            dialog = new Dialog(
+                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 7),
+                    inventoryPane,
+                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
+                    new PlayerInventoryPane());
+        }
         this.imageWidth = dialog.totalWidth();
         this.imageHeight = dialog.totalHeight();
         configDrawer = new ConfigDrawer(
@@ -197,7 +207,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
         if (searchBox.getEditBox().isFocused()) {
             if (keyCode == 256) {
                 searchBox.getEditBox().setFocused(false);
-                return true;
+                return super.keyPressed(keyCode, scanCode, modifiers);
             }
             searchBox.getEditBox().keyPressed(keyCode, scanCode, modifiers);
             return true;
@@ -261,8 +271,8 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
-        dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
         configDrawer.renderTab(graphics, mouseX, mouseY);
+        dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
         searchBox.render(graphics, font);
     }
 

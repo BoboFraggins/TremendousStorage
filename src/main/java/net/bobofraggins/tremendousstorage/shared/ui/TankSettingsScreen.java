@@ -82,8 +82,8 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
     protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
         // Drawer renders behind the main panel
         configDrawer.render(g, font, mouseX, mouseY, partialTick);
-        dialog.render(g, font, title, mouseX, mouseY, partialTick);
         configDrawer.renderTab(g, mouseX, mouseY);
+        dialog.render(g, font, title, mouseX, mouseY, partialTick);
 
         int x = leftPos;
         int y = topPos;

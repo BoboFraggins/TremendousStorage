@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.shared.network.QuickStackFilingCabinetPacket;
+import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -117,8 +118,8 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
 
         // Drawer renders first so the dialog's left border appears on top of it
         configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
-        dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
         configDrawer.renderTab(graphics, mouseX, mouseY);
+        dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
 
         // Folder and extraction slots — two columns of 4 rows each
         for (int row = 0; row < AbstractFilingCabinetMenu.ROWS_PER_COLUMN; row++) {
@@ -147,9 +148,9 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
     }
 
     /**
-     * Renders each slot; extraction slots that are locked-but-empty get a dimmed ghost icon
-     * instead of a normal (empty) slot render. Slots with counts over 999 use abbreviated
-     * labels (e.g. "16k", "1.5M") to keep the text readable within the slot bounds.
+     * Renders each slot; extraction slots that are locked-but-empty get a dimmed ghost icon,
+     * and extraction slots with items always use compact count labels ("1.2k", "64") to match
+     * other inventories in the mod.
      */
     @Override
     protected void renderSlot(GuiGraphics graphics, Slot slot) {
@@ -165,30 +166,21 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
             return;
         }
 
-        if (!slot.hasItem() || slot.getItem().getCount() <= 999) {
-            super.renderSlot(graphics, slot);
+        if (slot instanceof FolderExtractionSlot && slot.hasItem()) {
+            ItemStack stack = slot.getItem();
+            int sx = leftPos + slot.x;
+            int sy = topPos + slot.y;
+            graphics.renderItem(stack, sx, sy);
+            long count = stack.getCount();
+            String countStr = count > 1 ? CountFormat.format(count) : null;
+            graphics.renderItemDecorations(font, stack, sx, sy, countStr);
+            if (hoveredSlot == slot) {
+                renderSlotHighlight(graphics, sx, sy, 0);
+            }
             return;
         }
 
-        // Large count — render item and abbreviated count, then hover highlight
-        ItemStack stack = slot.getItem();
-        int sx = leftPos + slot.x;
-        int sy = topPos + slot.y;
-        graphics.renderItem(stack, sx, sy);
-        graphics.renderItemDecorations(font, stack, sx, sy, abbreviateCount(stack.getCount()));
-        if (hoveredSlot == slot) {
-            renderSlotHighlight(graphics, sx, sy, 0);
-        }
-    }
-
-    /** Formats a large count as a compact string: 16050 → "16k", 1500 → "1.5k", 2M → "2M". */
-    private static String abbreviateCount(int count) {
-        if (count >= 1_000_000) {
-            int tenths = count / 100_000;
-            return (tenths % 10 == 0 ? tenths / 10 : tenths / 10 + "." + tenths % 10) + "M";
-        }
-        int tenths = count / 100;
-        return (tenths % 10 == 0 ? tenths / 10 : tenths / 10 + "." + tenths % 10) + "k";
+        super.renderSlot(graphics, slot);
     }
 
     @Override

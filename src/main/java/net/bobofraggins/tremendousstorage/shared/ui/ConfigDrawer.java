@@ -182,14 +182,14 @@ public class ConfigDrawer {
         int tabY = dialogY + 15;
         int midH = TAB_H - 2 * CORNER;
 
-        // Fill — right edge is the natural tab boundary; dialog/drawer renders on top of the seam.
-        graphics.fill(tabX + CORNER, tabY + CORNER, tabX + TAB_W, tabY + TAB_H - CORNER, COLOR_BODY);
+        // Fill — right edge extends 2 px into the dialog so the seam is fully covered.
+        graphics.fill(tabX + CORNER, tabY + CORNER, tabX + TAB_W + 2, tabY + TAB_H - CORNER, COLOR_BODY);
 
         // Top-left corner
         graphics.blit(TEX_CORNER_TL, tabX, tabY, 0, 0, CORNER, CORNER, CORNER, CORNER);
 
         // Top edge
-        for (int px = 0; px < TAB_W - CORNER; px++) {
+        for (int px = 0; px < TAB_W - CORNER + 2; px++) {
             graphics.blit(TEX_EDGE_TOP, tabX + CORNER + px, tabY, 0, 0, 1, CORNER, 1, CORNER);
         }
 
@@ -202,13 +202,13 @@ public class ConfigDrawer {
         graphics.blit(TEX_CORNER_BL, tabX, tabY + TAB_H - CORNER, 0, 0, CORNER, CORNER, CORNER, CORNER);
 
         // Bottom edge
-        for (int px = 0; px < TAB_W - CORNER; px++) {
+        for (int px = 0; px < TAB_W - CORNER + 2; px++) {
             graphics.blit(TEX_EDGE_BOTTOM, tabX + CORNER + px, tabY + TAB_H - CORNER, 0, 0, 1, CORNER, 1, CORNER);
         }
         // No right border — abuts the dialog (closed) or drawer body (open)
 
         if (showTabButton) {
-            boolean hovered = mouseX >= tabX && mouseX < tabX + TAB_W && mouseY >= tabY && mouseY < tabY + TAB_H;
+            boolean hovered = mouseX >= tabX && mouseX < tabX + TAB_W + 2 && mouseY >= tabY && mouseY < tabY + TAB_H;
             graphics.blitSprite(hovered ? BUTTON_HOVER : BUTTON_NORMAL, tabX + 4, tabY + 3, 16, 16);
         }
     }
@@ -222,7 +222,10 @@ public class ConfigDrawer {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (showTabButton) {
             int tabX = dialogX - TAB_W + 5 - Math.round((WIDTH + TAB_W + 2) * getProgress(System.currentTimeMillis()));
-            if (mouseX >= tabX && mouseX < tabX + TAB_W && mouseY >= dialogY + 15 && mouseY < dialogY + 15 + TAB_H) {
+            if (mouseX >= tabX
+                    && mouseX < tabX + TAB_W + 2
+                    && mouseY >= dialogY + 15
+                    && mouseY < dialogY + 15 + TAB_H) {
                 toggle();
                 return true;
             }

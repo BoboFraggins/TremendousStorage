@@ -204,7 +204,7 @@ public class FilingCabinetItemHandler implements IItemHandler, IKeyCounterContri
             ItemStack folder = be.getFolder(slot);
             if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) continue;
             FolderContents contents = getContents(folder);
-            if (contents.accepts(probe)) return true;
+            if (!contents.isEmpty() && contents.accepts(probe)) return true;
         }
         return false;
     }

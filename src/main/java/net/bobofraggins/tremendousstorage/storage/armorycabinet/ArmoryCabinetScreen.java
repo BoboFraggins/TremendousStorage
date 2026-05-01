@@ -156,7 +156,7 @@ public class ArmoryCabinetScreen extends AbstractContainerScreen<ArmoryCabinetMe
         if (searchBox.getEditBox().isFocused()) {
             if (keyCode == 256) {
                 searchBox.getEditBox().setFocused(false);
-                return true;
+                return super.keyPressed(keyCode, scanCode, modifiers);
             }
             searchBox.getEditBox().keyPressed(keyCode, scanCode, modifiers);
             return true;
@@ -221,8 +221,8 @@ public class ArmoryCabinetScreen extends AbstractContainerScreen<ArmoryCabinetMe
     @Override
     protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
         configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
-        dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
         configDrawer.renderTab(graphics, mouseX, mouseY);
+        dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
         searchBox.render(graphics, font);
     }
 
