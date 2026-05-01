@@ -157,8 +157,8 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         if (slot instanceof FolderExtractionSlot extractSlot && extractSlot.isGhost()) {
             ItemStack ghost = extractSlot.getGhostItem();
             if (!ghost.isEmpty()) {
-                int sx = leftPos + slot.x;
-                int sy = topPos + slot.y;
+                int sx = slot.x;
+                int sy = slot.y;
                 graphics.renderItem(ghost, sx, sy);
                 // Dark overlay to distinguish ghost from a real item
                 graphics.fill(sx, sy, sx + 16, sy + 16, 0x80000000);
@@ -168,8 +168,8 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
 
         if (slot instanceof FolderExtractionSlot && slot.hasItem()) {
             ItemStack stack = slot.getItem();
-            int sx = leftPos + slot.x;
-            int sy = topPos + slot.y;
+            int sx = slot.x;
+            int sy = slot.y;
             graphics.renderItem(stack, sx, sy);
             long count = stack.getCount();
             String countStr = count > 1 ? CountFormat.format(count) : null;

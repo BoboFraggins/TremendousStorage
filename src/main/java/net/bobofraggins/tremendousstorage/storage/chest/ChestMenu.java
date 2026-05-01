@@ -112,24 +112,28 @@ public class ChestMenu extends AbstractContainerMenu {
         this.player = inv.player;
         this.access = ContainerLevelAccess.create(inv.player.level(), pos);
 
-        int playerInvY = 49 + rows * 18;
-        int hotbarY = playerInvY + 58;
+        // When the crafting upgrade is present the CraftingGridPane replaces the blank(20) spacer,
+        // so craftY is 20 px earlier than playerInvY in the no-crafting layout.
+        int playerInvY;
 
         if (hasCraftingUpgrade) {
             this.craftSlots = new TransientCraftingContainer(this, 3, 3);
             this.resultSlots = new ResultContainer();
 
-            // Slot 0: craft result
-            addSlot(new ResultSlot(inv.player, craftSlots, resultSlots, 0, 120, playerInvY - 18 + 18));
+            int craftY = 29 + rows * 18; // title(17) + blank(7) + inventoryPane gap(5) = 29
 
-            // Slots 1-9: 3×3 crafting grid (positioned above player inventory)
-            int craftY = playerInvY - 18 - 3 * 18;
+            // Slot 0: craft result (row-1 position, x=120 — matches CraftingGridPane.RESULT_LOCAL_Y)
+            addSlot(new ResultSlot(inv.player, craftSlots, resultSlots, 0, 120, craftY + 18));
+
+            // Slots 1-9: 3×3 crafting grid
             for (int row = 0; row < 3; row++) {
                 for (int col = 0; col < 3; col++) {
                     addSlot(new Slot(craftSlots, col + row * 3, 30 + col * 18, craftY + row * 18));
                 }
             }
 
+            // Player inventory starts after the crafting pane (3 × 18 + 4 px gap = 58)
+            playerInvY = craftY + 3 * 18 + 4;
             this.invStart = 10;
             this.invEnd = 37;
             this.hotbarStart = 37;
@@ -137,11 +141,14 @@ public class ChestMenu extends AbstractContainerMenu {
         } else {
             this.craftSlots = null;
             this.resultSlots = null;
+            playerInvY = 49 + rows * 18; // title(17) + blank(7) + inventoryPane gap(5) + blank(20) = 49
             this.invStart = 0;
             this.invEnd = 27;
             this.hotbarStart = 27;
             this.hotbarEnd = 36;
         }
+
+        int hotbarY = playerInvY + 58;
 
         // Player main inventory
         for (int row = 0; row < 3; row++) {

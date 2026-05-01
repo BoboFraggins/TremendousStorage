@@ -63,7 +63,6 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
             dialog = new Dialog(
                     Dialog.blankPane(PlayerInventoryPane.WIDTH, 7),
                     inventoryPane,
-                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
                     new CraftingGridPane(),
                     new PlayerInventoryPane());
         } else {

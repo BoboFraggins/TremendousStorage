@@ -67,7 +67,6 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
             dialog = new Dialog(
                     Dialog.blankPane(PlayerInventoryPane.WIDTH, 7),
                     inventoryPane,
-                    Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
                     new CraftingGridPane(),
                     new PlayerInventoryPane());
         } else {
