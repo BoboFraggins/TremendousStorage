@@ -160,16 +160,23 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
                 for (int fi = 0; fi < FOLDER_SLOTS && !stack.isEmpty(); fi++) {
                     Slot folderSlot = slots.get(fi);
                     ItemStack folderItem = folderSlot.getItem();
-                    if (folderItem.isEmpty()
-                            || !(folderItem.getItem() instanceof ManillaFolderItem)
-                            || folderItem.getItem() instanceof EnderFolderItem) continue;
-                    FolderContents contents = ManillaFolderItem.getContents(folderItem);
+                    if (folderItem.isEmpty() || !(folderItem.getItem() instanceof ManillaFolderItem)) continue;
+                    boolean isEnder = folderItem.getItem() instanceof EnderFolderItem;
+                    FolderContents contents = isEnder
+                            ? EnderFolderItem.getLiveContents(folderItem, player.getServer())
+                            : ManillaFolderItem.getContents(folderItem);
                     if (contents.isEmpty() || !contents.accepts(stack)) continue;
                     FolderContents.InsertResult result =
                             contents.insert(stack.getCount(), ManillaFolderItem.getCapacity(folderItem));
                     int inserted = (int) (stack.getCount() - result.remainder());
                     if (inserted <= 0) continue;
-                    folderSlot.set(ManillaFolderItem.setContents(folderItem.copy(), result.updated()));
+                    ItemStack updatedFolder = folderItem.copy();
+                    if (isEnder) {
+                        EnderFolderItem.setLiveContents(updatedFolder, result.updated(), player.getServer());
+                    } else {
+                        updatedFolder = ManillaFolderItem.setContents(updatedFolder, result.updated());
+                    }
+                    folderSlot.set(updatedFolder);
                     stack.shrink(inserted);
                 }
                 if (stack.getCount() == copy.getCount()) return ItemStack.EMPTY;
