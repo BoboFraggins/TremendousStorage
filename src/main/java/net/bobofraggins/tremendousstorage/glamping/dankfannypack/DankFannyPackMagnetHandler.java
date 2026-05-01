@@ -5,6 +5,7 @@ import static net.bobofraggins.tremendousstorage.shared.ui.AbstractFilingCabinet
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.network.OpenFannyPackPacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.core.NonNullList;
@@ -42,6 +43,7 @@ public final class DankFannyPackMagnetHandler {
 
         AABB area = player.getBoundingBox().inflate(3);
         boolean changed = false;
+        boolean[] enderSlotModified = new boolean[FOLDER_SLOTS];
 
         for (ItemEntity entity : player.level().getEntitiesOfClass(ItemEntity.class, area)) {
             if (entity.isRemoved()) continue;
@@ -59,9 +61,13 @@ public final class DankFannyPackMagnetHandler {
                 FolderContents.InsertResult result = fc.insert(remaining, capacity);
                 long absorbed = remaining - result.remainder();
                 if (absorbed > 0) {
-                    folders.set(slot, ManillaFolderItem.setContents(folderItem.copyWithCount(1), result.updated()));
+                    ItemStack updated = ManillaFolderItem.setContents(folderItem.copyWithCount(1), result.updated());
+                    folders.set(slot, updated);
                     remaining = result.remainder();
                     changed = true;
+                    if (folderItem.getItem() instanceof EnderFolderItem) {
+                        enderSlotModified[slot] = true;
+                    }
                 }
             }
 
@@ -77,6 +83,17 @@ public final class DankFannyPackMagnetHandler {
         if (changed) {
             loc.stack.set(Registration.FANNY_PACK_CONTENTS.get(), contents.withSlots(folders));
             DankFannyPackItem.setFannyPackStack(player, loc.stack, loc.slotType, loc.slotIndex, loc.slotId);
+
+            // Sync only the ender folders that actually absorbed items this tick.
+            net.minecraft.server.MinecraftServer server = player.getServer();
+            if (server != null) {
+                for (int slot = 0; slot < FOLDER_SLOTS; slot++) {
+                    if (enderSlotModified[slot]) {
+                        ItemStack updated = folders.get(slot);
+                        EnderFolderItem.setLiveContents(updated, ManillaFolderItem.getContents(updated), server);
+                    }
+                }
+            }
         }
     }
 

@@ -1,9 +1,12 @@
 package net.bobofraggins.tremendousstorage.storage.enderfolder;
 
 import java.util.List;
+import net.bobofraggins.tremendousstorage.glamping.dankfannypack.DankFannyPackItem;
+import net.bobofraggins.tremendousstorage.glamping.dankfannypack.FannyPackContents;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
@@ -139,6 +142,7 @@ public class EnderFolderItem extends ManillaFolderItem {
         for (net.minecraft.server.level.ServerLevel level : server.getAllLevels()) {
             for (Player player : level.players()) {
                 updatePlayerInventory(player, linkId, fc);
+                updateFannyPacksForPlayer(player, linkId, fc);
             }
         }
     }
@@ -155,6 +159,57 @@ public class EnderFolderItem extends ManillaFolderItem {
         if (changed) {
             player.getInventory().setChanged();
         }
+    }
+
+    /** Updates any Ender Folder slots inside a Dank Fanny Pack that match {@code linkId}. */
+    private static void updateFannyPacksForPlayer(Player player, long linkId, FolderContents fc) {
+        // Main inventory (includes hotbar, storage, armor, offhand)
+        for (int i = 0; i < player.getInventory().getContainerSize(); i++) {
+            ItemStack s = player.getInventory().getItem(i);
+            if (updateFannyPackFolders(s, linkId, fc)) {
+                player.getInventory().setChanged();
+            }
+        }
+        // Curios (belt slot etc.)
+        try {
+            var inv = player.getCapability(top.theillusivec4.curios.api.CuriosCapability.INVENTORY);
+            if (inv != null) {
+                for (var entry : inv.getCurios().entrySet()) {
+                    var handler = entry.getValue().getStacks();
+                    for (int i = 0; i < handler.getSlots(); i++) {
+                        ItemStack s = handler.getStackInSlot(i);
+                        if (updateFannyPackFolders(s, linkId, fc)) {
+                            handler.setStackInSlot(i, s);
+                        }
+                    }
+                }
+            }
+        } catch (NoClassDefFoundError | Exception ignored) {
+        }
+    }
+
+    /**
+     * If {@code stack} is a Dank Fanny Pack, updates any Ender Folder slots inside it whose link
+     * ID matches {@code linkId}. Writes the updated {@link FannyPackContents} back to the item.
+     *
+     * @return true if any folder was updated
+     */
+    private static boolean updateFannyPackFolders(ItemStack stack, long linkId, FolderContents fc) {
+        if (!(stack.getItem() instanceof DankFannyPackItem)) return false;
+        FannyPackContents contents =
+                stack.getOrDefault(Registration.FANNY_PACK_CONTENTS.get(), FannyPackContents.EMPTY);
+        NonNullList<ItemStack> folders = contents.toItemList();
+        boolean changed = false;
+        for (ItemStack folder : folders) {
+            if (isLinked(folder, linkId)) {
+                folder.set(Registration.FOLDER_CONTENTS.get(), fc);
+                changed = true;
+            }
+        }
+        if (changed) {
+            stack.set(Registration.FANNY_PACK_CONTENTS.get(), contents.withSlots(folders));
+        }
+        return changed;
     }
 
     private static boolean isLinked(ItemStack stack, long linkId) {

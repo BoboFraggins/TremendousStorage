@@ -6,6 +6,7 @@ import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketItem
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
+import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.core.NonNullList;
@@ -107,6 +108,7 @@ public final class ItemPickupInterceptor {
 
         long remaining = incoming.getCount();
         boolean changed = false;
+        boolean[] enderSlotModified = new boolean[folders.size()];
         for (int slot = 0; slot < folders.size() && remaining > 0; slot++) {
             ItemStack folderItem = folders.get(slot);
             if (folderItem.isEmpty() || !(folderItem.getItem() instanceof ManillaFolderItem)) continue;
@@ -119,6 +121,9 @@ public final class ItemPickupInterceptor {
                 folders.set(slot, ManillaFolderItem.setContents(folderItem.copyWithCount(1), result.updated()));
                 remaining = result.remainder();
                 changed = true;
+                if (folderItem.getItem() instanceof EnderFolderItem) {
+                    enderSlotModified[slot] = true;
+                }
             }
         }
 
@@ -126,6 +131,17 @@ public final class ItemPickupInterceptor {
 
         fannyStack.set(Registration.FANNY_PACK_CONTENTS.get(), contents.withSlots(folders));
         DankFannyPackItem.setFannyPackStack(player, fannyStack, slotType, slotIndex, slotId);
+
+        // Sync ender folders that absorbed items to shared storage.
+        net.minecraft.server.MinecraftServer server = player.getServer();
+        if (server != null) {
+            for (int slot = 0; slot < folders.size(); slot++) {
+                if (enderSlotModified[slot]) {
+                    ItemStack updated = folders.get(slot);
+                    EnderFolderItem.setLiveContents(updated, ManillaFolderItem.getContents(updated), server);
+                }
+            }
+        }
 
         if (remaining == 0 || contents.voidExcess()) {
             entity.discard();
