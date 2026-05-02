@@ -1,0 +1,28 @@
+{
+  "name": "Tank",
+  "icon": "tremendousstorage:tank",
+  "category": "tremendousstorage:storage",
+  "sortnum": 4,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:tank",
+      "text": "The $(item)Tank$() stores a single type of fluid in very large quantities. It locks to the first fluid inserted and connects to the $(l:network/network_interface)fluid network$() via a tube."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Upgrades",
+      "text": "$(bold)Storage Upgrade$() — raises the tier and capacity by one step:$(br2)Wood → Copper → Iron → Gold → Diamond → Emerald → Netherite$(br2)The tank unlocks again once fully drained."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Fluid Interaction",
+      "text": "$(bold)Right-click with a Bucket$() to fill or drain 1,000 mB.$(br)$(bold)Glass Bottle$() fills or drains 250 mB of water.$(br)$(bold)Honey Bottle$() fills or drains 250 mB of honey.$(br2)The tank UI includes input and output slots for fluid container items.$(br2)Enable $(thing)Void Excess$() in the settings panel to automatically discard overflow fluid."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Other Upgrades",
+      "text": "$(bold)Puller Upgrade$() — pulls fluid from adjacent fluid handlers each tick; configurable per side.$(br2)$(bold)Magnet Upgrade$() — collects fluid container items (full buckets, bottles) that are dropped nearby."
+    }
+  ]
+}

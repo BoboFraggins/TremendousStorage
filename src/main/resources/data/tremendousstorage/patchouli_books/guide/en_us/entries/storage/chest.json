@@ -1,0 +1,18 @@
+{
+  "name": "Chest",
+  "icon": "tremendousstorage:chest",
+  "category": "tremendousstorage:storage",
+  "sortnum": 3,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:chest",
+      "text": "The $(item)Tremendous Chest$() is a bulk-storage block that holds any mix of items — including enchanted gear and items with custom NBT — in a single large pool. It is the workhorse of most storage setups and connects to the $(l:network/network_interface)item network$() via a tube."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Upgrades",
+      "text": "$(bold)Storage Upgrade$() — raises the tier and capacity by one step:$(br2)Wood → Copper → Iron → Gold → Diamond → Emerald → Netherite$(br2)$(bold)Crafting Upgrade$() — adds a crafting grid to the chest UI.$(br2)$(bold)Magnet Upgrade$() — automatically collects dropped items within 3 blocks.$(br2)$(bold)Puller Upgrade$() — extracts items from adjacent inventories each tick.$(br2)Connect the chest to a tube to make it part of the $(l:network/network_interface)Network$()."
+    }
+  ]
+}

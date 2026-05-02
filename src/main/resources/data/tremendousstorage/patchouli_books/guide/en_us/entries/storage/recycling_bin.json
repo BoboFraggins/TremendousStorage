@@ -1,0 +1,23 @@
+{
+  "name": "Recycling Bin",
+  "icon": "tremendousstorage:recycling_bin",
+  "category": "tremendousstorage:storage",
+  "sortnum": 9,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:recycling_bin",
+      "text": "The $(item)Recycling Bin$() destroys unwanted items and converts them into $(thing)Quantum Foam$() — a fluid representing pure distilled good vibes. Each item destroyed produces $(bold)10 mB$() of Quantum Foam. The bin holds up to $(bold)10,000 mB$()."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Usage",
+      "text": "$(bold)Right-click$() to open the recycling UI. Items placed in the input slot are converted to Quantum Foam when destroyed.$(br2)$(bold)Right-click with a Glass Bottle$() on the bin (when it holds at least 250 mB) to fill a $(item)Quantum Foam Bottle$().$(br2)The UI also has a fluid transfer pane with input and output slots for container items such as buckets and bottles."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Shift-Click Routing",
+      "text": "When clicking items into the bin's UI:$(br2)$(bold)Normal click$() — routes buckets and bottles to the fluid transfer slot.$(br2)$(bold)Shift-click$() — routes empty buckets and empty bottles to the fluid transfer slot; everything else is sent directly to the void and destroyed immediately."
+    }
+  ]
+}

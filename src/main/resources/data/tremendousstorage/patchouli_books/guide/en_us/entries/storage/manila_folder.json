@@ -1,0 +1,23 @@
+{
+  "name": "Manila Folder",
+  "icon": "tremendousstorage:manila_folder",
+  "category": "tremendousstorage:storage",
+  "sortnum": 6,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:manila_folder",
+      "text": "A $(item)Manila Folder$() stores a single item type in large quantities. Folders start unlocked and lock to the first item type stored inside them. They live in $(l:storage/filing_cabinet)Filing Cabinets$() and $(l:storage/fanny_pack)Fanny Packs$()."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Tiers",
+      "text": "Folders come in seven tiers of increasing capacity:$(br2)Wood → Copper → Iron → Gold → Diamond → Emerald → Netherite$(br2)Empty folders stack to 64. A locked folder is a single non-stackable item."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Crafting Interactions",
+      "text": "$(bold)Locking:$() Place a folder and an item together in a crafting grid to store that item and lock the folder to it.$(br2)$(bold)Extracting:$() Place a locked folder alone in a crafting grid to remove one item stack, reducing the stored count.$(br2)$(bold)Merging:$() Place two same-tier folders locked to the same item type in a crafting grid to combine them, provided the total count fits within the tier's capacity.$(br2)$(bold)Erasing:$() Use $(item)Whiteout Tape$() on a locked folder to unlock it and discard all stored items."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Stirling Engine",
+  "icon": "tremendousstorage:stirling_engine",
+  "category": "tremendousstorage:network",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:stirling_engine",
+      "text": "The $(item)Stirling Engine$() generates $(thing)Forge Energy (FE)$() by harvesting heat from hot blocks placed directly beneath it. It is the built-in power source for a TremendousStorage network and requires no fuel items."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Heat Sources",
+      "text": "Place one of the following blocks $(bold)directly under$() the Stirling Engine:$(br2)$(bold)Lava block$() — highest output$(br)$(bold)Magma block$() — medium output$(br)$(bold)Lit Campfire$() — low output$(br2)The engine's flywheel animates while it is actively producing power. Output is pushed to all adjacent blocks that accept FE."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Upgrades",
+      "text": "$(bold)Storage Upgrade$() — raises the tier and significantly increases power output at each step:$(br2)Wood → Copper → Iron → Gold → Diamond → Emerald → Netherite$(br2)The engine also stores FE internally and pushes energy each tick to neighbouring handlers, smoothing out delivery to large networks."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Experience Syringe",
+  "icon": "tremendousstorage:experience_syringe",
+  "category": "tremendousstorage:storage",
+  "sortnum": 10,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:experience_syringe",
+      "text": "The $(item)Experience Syringe$() is a portable XP battery. It stores up to $(bold)1,600 XP points$() (32 buckets) and lets you bank and restore experience without wasting a drop."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Usage",
+      "text": "$(bold)Right-click$() (empty hand) — withdraws exactly the XP needed to bring you to your next level.$(br2)$(bold)Sneak + right-click$() — deposits your current level-progress XP into the syringe. If you are standing at a precise level boundary, the full previous level's worth of XP is deposited instead.$(br2)Both actions play the experience orb pickup sound. The item bar on the syringe turns neon green as it fills."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Capacity",
+      "text": "The syringe holds a maximum of $(bold)1,600 XP points$(). The item tooltip shows current fill as both mB and XP points (50 XP = 1,000 mB).$(br2)There is no upgrade path — one syringe is enough to capture a player's level progression without waste."
+    }
+  ]
+}

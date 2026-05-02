@@ -1,0 +1,23 @@
+{
+  "name": "Picnic Basket",
+  "icon": "tremendousstorage:picnic_basket",
+  "category": "tremendousstorage:storage",
+  "sortnum": 7,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:picnic_basket",
+      "text": "The $(item)Picnic Basket$() is a bulk-storage block that accepts only $(thing)food items$(). It stores a large pool of any mix of edible items and can optionally feed the player automatically."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Usage",
+      "text": "$(bold)Right-click$() to open the basket UI. Only items with a food component (anything you can eat) are accepted.$(br2)$(bold)Auto-feed$() is enabled by default: when the player's hunger bar is not full and the basket is nearby, it automatically consumes one food item to restore hunger.$(br2)The Picnic Basket connects to the $(l:network/network_interface)item network$() via a tube and is treated as a high-priority storage target by default."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "No Upgrades",
+      "text": "The Picnic Basket does not accept any upgrades. Its capacity is fixed at placement and cannot be increased."
+    }
+  ]
+}

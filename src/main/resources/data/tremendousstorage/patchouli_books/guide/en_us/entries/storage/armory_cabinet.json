@@ -1,0 +1,23 @@
+{
+  "name": "Armory Cabinet",
+  "icon": "tremendousstorage:armory_cabinet",
+  "category": "tremendousstorage:storage",
+  "sortnum": 8,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:armory_cabinet",
+      "text": "The $(item)Armory Cabinet$() is a two-block-tall bulk-storage block that accepts only $(thing)weapons, tools, and armour$() — items with durability or tagged as equipment. It holds up to $(bold)1,024 items$() and connects to the $(l:network/network_interface)item network$()."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Usage",
+      "text": "$(bold)Right-click$() either half of the cabinet to open the storage UI. Items without durability (plain blocks, food, books, etc.) are rejected.$(br2)Connect the cabinet to a tube to make it part of the network, which makes it easy to route output from automated smelters, crafters, or enchanting setups directly into organised equipment storage."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "No Upgrades",
+      "text": "The Armory Cabinet does not accept any upgrades. Its capacity is fixed at 1,024 items and cannot be increased."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Filing Cabinet",
+  "icon": "tremendousstorage:filing_cabinet",
+  "category": "tremendousstorage:storage",
+  "sortnum": 5,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:filing_cabinet",
+      "text": "The $(item)Filing Cabinet$() holds up to $(bold)8 Manila Folders$(), each dedicated to one item type. It is the primary home for folder-based storage and connects to the $(l:network/network_interface)item network$() via a tube."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Usage",
+      "text": "$(bold)Right-click$() to open the cabinet drawer UI. Place folders in the slots — each folder stores a single item type at that folder's tier capacity. Remove a folder to retrieve it with its contents intact.$(br2)When connected to the network, other blocks can insert items and they are routed to whichever folder is locked to that type."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Upgrades",
+      "text": "$(bold)Puller Upgrade$() — extracts items from adjacent inventories and routes them into matching folders. If no folder is locked to an item type, the first empty folder is locked to it on insert.$(br2)$(bold)Magnet Upgrade$() — picks up dropped items within 3 blocks and routes them into folders that are $(bold)already locked$() to that type. Unlike the Puller, it will not lock new folders."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Wireless Hub",
+  "icon": "tremendousstorage:wireless_hub",
+  "category": "tremendousstorage:network",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:wireless_hub",
+      "text": "The $(item)Wireless Hub$() links $(thing)Wireless SATs$() to your $(l:network/network_interface)Network Interface$(). A linked SAT lets you access the full network terminal from anywhere within the hub's range — no tubes required."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Linking a SAT",
+      "text": "Place an unlinked $(item)Wireless SAT$() in the $(bold)left slot$() of the Wireless Hub UI. The hub locates the Network Interface on the tube network and records its position in the SAT. The linked SAT appears in the $(bold)right slot$().$(br2)Hold a linked SAT and right-click to open the network terminal from anywhere within the hub's range."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Upgrades",
+      "text": "$(bold)Storage Upgrade$() — raises the tier and increases the wireless range at each step, up to unlimited at Netherite:$(br2)Wood → Copper → Iron → Gold → Diamond → Emerald → Netherite$(br2)$(bold)HAARP Upgrade$() — enables weather control. Set the desired weather mode (Off, Clear, Rain, Thunder) in the hub UI; the hub corrects the weather periodically, consuming $(item)Positive Vibes$() from the network's fluid storage.$(br2)$(bold)Interdimensional Upgrade$() — allows linked SATs to access the network from a different dimension."
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Fanny Pack",
+  "icon": "tremendousstorage:dank_fanny_pack",
+  "category": "tremendousstorage:storage",
+  "sortnum": 1,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:dank_fanny_pack",
+      "text": "The $(item)Fanny Pack$() is a wearable belt item that holds up to $(bold)8 Manila Folders$(). Think of it as a portable filing cabinet you can wear at your hip."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Usage",
+      "text": "$(bold)Right-click$() while holding the Fanny Pack to open its folder UI, showing all 8 folder slots.$(br2)With $(item)Curios$() installed, wear it in the $(thing)belt$() slot for hands-free access.$(br2)Each folder slot independently stores one item type at the folder's tier capacity. Folders can be moved freely between Fanny Packs and $(l:storage/filing_cabinet)Filing Cabinets$()."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "No Upgrades",
+      "text": "The Fanny Pack does not accept any upgrades directly. Its capacity is determined entirely by the $(l:storage/manila_folder)Manila Folders$() it contains.$(br2)To increase storage, upgrade the individual folders inside, or swap them for higher-tier ones."
+    }
+  ]
+}

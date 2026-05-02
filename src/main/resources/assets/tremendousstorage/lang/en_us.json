@@ -196,5 +196,6 @@
   "block.tremendousstorage.tent": "Tent",
   "block.tremendousstorage.tent_door": "Tent Door",
   "item.tremendousstorage.picnic_basket.tooltip": "Automatically feeds the player when hungry.",
-  "item.tremendousstorage.ender_picnic_basket.tooltip": "Automatically feeds the player when hungry. Links to a shared inventory."
+  "item.tremendousstorage.ender_picnic_basket.tooltip": "Automatically feeds the player when hungry. Links to a shared inventory.",
+  "item.patchouli.guide_book.tremendousstorage.guide": "Guide to Tremendous Storage"
 }

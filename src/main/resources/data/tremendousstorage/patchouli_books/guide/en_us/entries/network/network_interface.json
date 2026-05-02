@@ -1,0 +1,28 @@
+{
+  "name": "Network Interface",
+  "icon": "tremendousstorage:network_interface",
+  "category": "tremendousstorage:network",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:network_interface",
+      "text": "The $(item)Network Interface$() is the brain of a TremendousStorage network. It aggregates all items and fluids stored in connected blocks into a single searchable terminal and manages the network's power supply."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Building a Network",
+      "text": "Connect storage blocks to the Network Interface using $(thing)Tubes$(). The interface scans all reachable tube-connected blocks and caches their contents.$(br2)$(bold)Right-click$() to open the access terminal and search or withdraw from the entire network at once.$(br2)$(bold)Sneak + right-click$() to quickly deposit all items from your inventory into the network in one action."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Priority",
+      "text": "Each connected storage block has a $(thing)Priority$() setting (Low, Normal, High). Items are inserted into the highest-priority block that will accept them; extraction pulls from the highest-priority block first.$(br2)Example: set a $(l:storage/filing_cabinet)Filing Cabinet$() to High priority so specific items always fill their designated folders before spilling into a bulk $(l:storage/chest)Chest$()."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Power",
+      "text": "The network consumes $(thing)Forge Energy (FE)$() to operate. The Network Interface stores up to $(bold)100,000 FE$() at Wood tier (scales with tier upgrades) and shares power across the entire tube network.$(br2)Supply power with a $(l:network/stirling_engine)Stirling Engine$() placed next to any tube, or with energy pipes from another mod.$(br2)$(bold)Storage Upgrade$() — raises the tier, increasing energy capacity and network discovery range."
+    }
+  ]
+}

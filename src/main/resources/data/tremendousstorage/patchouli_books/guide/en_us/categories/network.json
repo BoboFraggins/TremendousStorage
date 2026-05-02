@@ -1,0 +1,6 @@
+{
+  "name": "Network",
+  "description": "Connect your storage blocks into a unified network for centralised access and automation.",
+  "icon": "tremendousstorage:network_interface",
+  "sortnum": 1
+}

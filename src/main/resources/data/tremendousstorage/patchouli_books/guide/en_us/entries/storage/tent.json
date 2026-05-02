@@ -1,0 +1,23 @@
+{
+  "name": "Tent",
+  "icon": "tremendousstorage:tent",
+  "category": "tremendousstorage:storage",
+  "sortnum": 2,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:tent",
+      "text": "The $(item)Tent$() is a two-block-tall decorative block that serves as a personal portal to a private $(thing)glamping dimension$(). Each tent leads to its own unique pocket of wilderness — your cosy home away from home."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Placement & Use",
+      "text": "Place the Tent like a bed — it occupies two blocks in the direction you face. $(bold)Right-click$() to teleport to your private camp.$(br2)Right-clicking the tent door from inside the glamping dimension returns you to the overworld at your departure point.$(br2)The camp is a pre-generated 16×16 space with a placed tent-door structure. Breaking and re-placing the tent returns you to the exact same camp each time."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Named Tents",
+      "text": "Rename the Tent with an $(item)Anvil$() before placing it. The custom name seeds the camp location — two tents with the same name lead to the same camp, which is great for building a shared base.$(br2)The custom name is preserved when the tent is broken and picked up, so you can move it without losing your camp."
+    }
+  ]
+}

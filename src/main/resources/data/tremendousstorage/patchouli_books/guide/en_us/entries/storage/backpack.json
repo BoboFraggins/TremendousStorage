@@ -1,0 +1,28 @@
+{
+  "name": "Backpack",
+  "icon": "tremendousstorage:backpack",
+  "category": "tremendousstorage:storage",
+  "sortnum": 0,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:backpack",
+      "text": "The $(item)Backpack$() is a wearable bulk-storage item. It stores any mix of items in a single shared pool, tracking counts per item type with no per-stack limits. It starts at Wood tier and can be upgraded all the way to Netherite."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Usage",
+      "text": "$(bold)Right-click$() while holding the backpack to open its inventory UI.$(br2)$(bold)Sneak + right-click$() on a block face to place the backpack as a block. Right-click the placed block to pick it back up.$(br2)With the $(item)Curios$() mod installed, wear it in the $(thing)back$() slot. Press $(thing)B$() to open it from anywhere in your inventory."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Upgrades",
+      "text": "Apply a $(item)Storage Upgrade$() to advance the backpack one tier at a time:$(br2)Wood → Copper → Iron → Gold → Diamond → Emerald → Netherite$(br2)Each tier significantly increases capacity."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Other Upgrades",
+      "text": "$(bold)Crafting Upgrade$() — adds a crafting grid to the backpack UI.$(br2)$(bold)Magnet Upgrade$() — automatically collects dropped items within 3 blocks.$(br2)$(bold)Puller Upgrade$() — extracts items from adjacent inventories each tick."
+    }
+  ]
+}
