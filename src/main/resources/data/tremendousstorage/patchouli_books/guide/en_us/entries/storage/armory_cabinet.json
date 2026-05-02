@@ -7,7 +7,7 @@
     {
       "type": "patchouli:spotlight",
       "item": "tremendousstorage:armory_cabinet",
-      "text": "The $(item)Armory Cabinet$() is a two-block-tall bulk-storage block that accepts only $(thing)weapons, tools, and armour$() — items with durability or tagged as equipment. It holds up to $(bold)1,024 items$() and connects to the $(l:network/network_interface)item network$()."
+      "text": "The $(item)Armory Cabinet$() is a two-block-tall bulk-storage block that accepts only $(thing)weapons, tools, armour, and arrows$() — items with durability or tagged as equipment. It holds up to $(bold)1,024 items$() and connects to the $(l:network/network_interface)item network$()."
     },
     {
       "type": "patchouli:text",

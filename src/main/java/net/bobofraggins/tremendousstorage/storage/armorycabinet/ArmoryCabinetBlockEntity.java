@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
  * Block entity for the Armory Cabinet.
  *
  * <p>Accepts only items that have durability (max damage &gt; 0) or are tagged as
- * {@code c:tools}, {@code c:weapons}, or {@code c:armor}. No upgrades.
+ * {@code c:tools}, {@code c:weapons}, {@code c:armor}, or {@code minecraft:arrows}. No upgrades.
  */
 public class ArmoryCabinetBlockEntity extends ChestBlockEntity {
 
@@ -34,6 +34,8 @@ public class ArmoryCabinetBlockEntity extends ChestBlockEntity {
             TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "weapons"));
     private static final TagKey<Item> TAG_ARMOR =
             TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "armor"));
+    private static final TagKey<Item> TAG_ARROWS =
+            TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("minecraft", "arrows"));
 
     // -------------------------------------------------------------------------
     // Animation state (client-side) — two-phase open/close
@@ -140,7 +142,7 @@ public class ArmoryCabinetBlockEntity extends ChestBlockEntity {
     public boolean acceptsItem(ItemStack stack) {
         if (stack.isEmpty()) return false;
         if (stack.getMaxDamage() > 0) return true;
-        return stack.is(TAG_TOOLS) || stack.is(TAG_WEAPONS) || stack.is(TAG_ARMOR);
+        return stack.is(TAG_TOOLS) || stack.is(TAG_WEAPONS) || stack.is(TAG_ARMOR) || stack.is(TAG_ARROWS);
     }
 
     @Override
