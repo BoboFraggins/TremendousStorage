@@ -32,8 +32,8 @@ import org.joml.Matrix4f;
  * Renders the Recycling Bin in four parts:
  * <ul>
  *   <li>Body — static baked model.
- *   <li>Lid — animates open (up to 90°) around the hinge at y=13/16, z=13/16.
- *   <li>Pedal — animates in sync (up to −22.5°) around x=11/16, y=2/16, z=3/16.
+ *   <li>Lid — animates open (up to 90°) around the hinge at y=12/16, z=12/16.
+ *   <li>Pedal — animates in sync (up to −22.5°) around x=12/16, y=1/16, z=4/16.
  *   <li>Fluid — single rectangular fill rendered like the Tank, using the Quantum Foam
  *       still texture. Always shown at a minimum of 1% to indicate the tank is present.
  * </ul>
@@ -49,25 +49,22 @@ public class RecyclingBinRenderer
     private static final ModelResourceLocation PEDAL_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_pedal"));
 
-    // Lid hinge pivot — back-top edge of the lid (y=13/16, z=13/16 in model space)
-    private static final float LID_PIVOT_Y = 13f / 16f;
-    private static final float LID_PIVOT_Z = 13f / 16f;
+    // Lid hinge pivot — back-bottom edge of lid element [8,12,4]→[16,14,12]: y=12, z=12
+    private static final float LID_PIVOT_Y = 12f / 16f;
+    private static final float LID_PIVOT_Z = 12f / 16f;
 
-    // Pedal rotation pivot — from bbmodel origin x=11, y=2, z=3
-    private static final float PEDAL_PIVOT_X = 11f / 16f;
-    private static final float PEDAL_PIVOT_Y = 2f / 16f;
-    private static final float PEDAL_PIVOT_Z = 3f / 16f;
+    // Pedal rotation pivot — back-bottom edge of pedal element [11,1,1]→[13,2,4]: x=12, y=1, z=4
+    private static final float PEDAL_PIVOT_X = 12f / 16f;
+    private static final float PEDAL_PIVOT_Y = 1f / 16f;
+    private static final float PEDAL_PIVOT_Z = 4f / 16f;
 
-    // Fluid interior bounds — derived from the glass wall elements in recycling_bin_body.json:
-    //   front outer glass [8,1,4]→[14,13,5] : inner face at z=5, x spans 8–14
-    //   back  outer glass [8,1,11]→[14,13,12]: inner face at z=11
-    //   floor/ceiling from all glass panels  : y=1 to y=13
-    private static final float FLUID_X0 = 8f / 16f;
-    private static final float FLUID_X1 = 14f / 16f;
+    // Fluid interior bounds — from the "fluid" guide element in the bbmodel: [1,1,5]→[7,9,11]
+    private static final float FLUID_X0 = 1f / 16f;
+    private static final float FLUID_X1 = 7f / 16f;
     private static final float FLUID_Z0 = 5f / 16f;
     private static final float FLUID_Z1 = 11f / 16f;
     private static final float FLUID_FLOOR = 1f / 16f;
-    private static final float FLUID_CEIL = 13f / 16f;
+    private static final float FLUID_CEIL = 9f / 16f;
     private static final float FLUID_H = FLUID_CEIL - FLUID_FLOOR;
 
     public RecyclingBinRenderer(BlockEntityRendererProvider.Context ctx) {}
