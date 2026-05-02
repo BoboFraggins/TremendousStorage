@@ -4,10 +4,6 @@
     "particle": "tremendousstorage:block/recycling_bin_texture",
     "0": "tremendousstorage:block/recycling_bin_texture"
   },
-  "texture_size": [
-    64,
-    64
-  ],
   "elements": [
     {
       "from": [
@@ -23,55 +19,55 @@
       "faces": {
         "north": {
           "uv": [
-            6,
-            36,
-            8,
-            37
+            1.5,
+            9.0,
+            2.0,
+            9.25
           ],
           "texture": "#0"
         },
         "east": {
           "uv": [
-            0,
-            36,
-            3,
-            37
+            0.0,
+            9.0,
+            0.75,
+            9.25
           ],
           "texture": "#0"
         },
         "south": {
           "uv": [
-            30,
-            36,
-            32,
-            37
+            7.5,
+            9.0,
+            8.0,
+            9.25
           ],
           "texture": "#0"
         },
         "west": {
           "uv": [
-            3,
-            36,
-            6,
-            37
+            0.75,
+            9.0,
+            1.5,
+            9.25
           ],
           "texture": "#0"
         },
         "up": {
           "uv": [
-            16,
-            35,
-            14,
-            32
+            4.0,
+            8.75,
+            3.5,
+            8.0
           ],
           "texture": "#0"
         },
         "down": {
           "uv": [
-            16,
-            35,
-            14,
-            38
+            4.0,
+            8.75,
+            3.5,
+            9.5
           ],
           "texture": "#0"
         }
