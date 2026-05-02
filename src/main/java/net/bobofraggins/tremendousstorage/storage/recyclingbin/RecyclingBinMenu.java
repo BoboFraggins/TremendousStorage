@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
@@ -123,6 +124,10 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
         return true;
     }
 
+    private static boolean isEmptyBucketOrBottle(ItemStack stack) {
+        return stack.getItem() == Items.BUCKET || stack.getItem() == Items.GLASS_BOTTLE;
+    }
+
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
         Slot slot = slots.get(index);
@@ -137,22 +142,18 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
             // Fluid slots → player inventory + hotbar
             if (!moveItemStackTo(stack, 3, 39, false)) return ItemStack.EMPTY;
         } else if (index < 30) {
-            // Player inventory → empty containers to fluid input, everything else to void
-            if (isEmptyFluidContainer(stack)) {
-                if (!moveItemStackTo(stack, 1, 2, false)) {
-                    if (!moveItemStackTo(stack, 30, 39, false)) return ItemStack.EMPTY;
-                }
+            // Player inventory → empty buckets/bottles to fluid input, everything else to void
+            if (isEmptyBucketOrBottle(stack)) {
+                if (!moveItemStackTo(stack, 1, 2, false)) return ItemStack.EMPTY;
             } else {
                 if (!moveItemStackTo(stack, 0, 1, false)) {
                     if (!moveItemStackTo(stack, 30, 39, false)) return ItemStack.EMPTY;
                 }
             }
         } else {
-            // Hotbar → empty containers to fluid input, everything else to void
-            if (isEmptyFluidContainer(stack)) {
-                if (!moveItemStackTo(stack, 1, 2, false)) {
-                    if (!moveItemStackTo(stack, 3, 30, false)) return ItemStack.EMPTY;
-                }
+            // Hotbar → empty buckets/bottles to fluid input, everything else to void
+            if (isEmptyBucketOrBottle(stack)) {
+                if (!moveItemStackTo(stack, 1, 2, false)) return ItemStack.EMPTY;
             } else {
                 if (!moveItemStackTo(stack, 0, 1, false)) {
                     if (!moveItemStackTo(stack, 3, 30, false)) return ItemStack.EMPTY;
