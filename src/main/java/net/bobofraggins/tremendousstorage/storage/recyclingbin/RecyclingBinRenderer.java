@@ -6,6 +6,7 @@ import com.mojang.math.Axis;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
@@ -30,11 +31,11 @@ import org.joml.Matrix4f;
 /**
  * Renders the Recycling Bin in four parts:
  * <ul>
- *   <li>Body — static, rendered with facing Y-rotation only.
- *   <li>Lid — animates open (rotates up by up to 90°) around the hinge at y=13/16, z=13/16.
- *   <li>Pedal — animates in sync (rotates down by up to 22.5°) around x=11/16, y=2/16, z=3/16.
- *   <li>Liquid — six cubes rendered procedurally using the Quantum Foam flowing texture,
- *       scaled in height to reflect current fill level.
+ *   <li>Body — static baked model.
+ *   <li>Lid — animates open (up to 90°) around the hinge at y=13/16, z=13/16.
+ *   <li>Pedal — animates in sync (up to −22.5°) around x=11/16, y=2/16, z=3/16.
+ *   <li>Fluid — single rectangular fill rendered like the Tank, using the Quantum Foam
+ *       still texture. Always shown at a minimum of 1% to indicate the tank is present.
  * </ul>
  */
 public class RecyclingBinRenderer
@@ -48,60 +49,26 @@ public class RecyclingBinRenderer
     private static final ModelResourceLocation PEDAL_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_pedal"));
 
-    private static final ResourceLocation FLOWING_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "fluid/quantum_foam_flow");
-
-    // Lid hinge pivot (y=13/16, z=13/16)
+    // Lid hinge pivot — back-top edge of the lid (y=13/16, z=13/16 in model space)
     private static final float LID_PIVOT_Y = 13f / 16f;
     private static final float LID_PIVOT_Z = 13f / 16f;
 
-    // Pedal pivot (origin from bbmodel: x=11, y=2, z=3 in 0-16 space)
+    // Pedal rotation pivot — from bbmodel origin x=11, y=2, z=3
     private static final float PEDAL_PIVOT_X = 11f / 16f;
     private static final float PEDAL_PIVOT_Y = 2f / 16f;
     private static final float PEDAL_PIVOT_Z = 3f / 16f;
 
-    private static final float LIQUID_FLOOR = 1f / 16f;
-    private static final float LIQUID_CEIL = 5f / 16f;
-    private static final float EPS = 0.001f;
-
-    // Horizontal (top) surfaces — each entry is { x0, z0, x1, z1 }.
-    // Rendered as epsilon-thin slabs at y = [topY, topY + EPS].
-    private static final float[][] LIQUID_TOP_SURFACES = {
-        {2f / 16f, 6f / 16f, 5f / 16f, 10f / 16f}, // cube 0
-        {1.5f / 16f, 7.5f / 16f, 2f / 16f, 8.5f / 16f}, // cube 1
-        {4.5f / 16f, 4.5f / 16f, 5.5f / 16f, 5f / 16f}, // cube 2
-        {4.5f / 16f, 11f / 16f, 5.5f / 16f, 11.5f / 16f}, // cube 3
-        {3f / 16f, 5f / 16f, 6f / 16f, 6f / 16f}, // cube 4
-        {3f / 16f, 10f / 16f, 6f / 16f, 11f / 16f}, // cube 5
-    };
-
-    // Vertical (side) surfaces — each entry is { x0, z0, x1, z1 } with EPS baked into the thin
-    // dimension. Rendered as epsilon-thin slabs at y = [LIQUID_FLOOR, topY].
-    private static final float[][] LIQUID_SIDE_SURFACES = {
-        {5f / 16f - EPS, 6f / 16f, 5f / 16f, 10f / 16f}, // cube 0 east
-        {1.5f / 16f, 7.5f / 16f, 2f / 16f, 7.5f / 16f + EPS}, // cube 1 north
-        {1.5f / 16f, 8.5f / 16f - EPS, 2f / 16f, 8.5f / 16f}, // cube 1 south
-        {1.5f / 16f, 7.5f / 16f, 1.5f / 16f + EPS, 8.5f / 16f}, // cube 1 west
-        {4.5f / 16f, 4.5f / 16f, 5.5f / 16f, 4.5f / 16f + EPS}, // cube 2 north
-        {4.5f / 16f, 4.5f / 16f, 4.5f / 16f + EPS, 5f / 16f}, // cube 2 west
-        {5.5f / 16f - EPS, 4.5f / 16f, 5.5f / 16f, 5f / 16f}, // cube 2 east
-        {4.5f / 16f, 11.5f / 16f - EPS, 5.5f / 16f, 11.5f / 16f}, // cube 3 south
-        {4.5f / 16f, 11f / 16f, 4.5f / 16f + EPS, 11.5f / 16f}, // cube 3 west
-        {5.5f / 16f - EPS, 11f / 16f, 5.5f / 16f, 11.5f / 16f}, // cube 3 east
-        {3f / 16f, 5f / 16f, 3f / 16f + EPS, 6f / 16f}, // cube 4 west
-        {6f / 16f - EPS, 5f / 16f, 6f / 16f, 6f / 16f}, // cube 4 east
-        {3f / 16f, 10f / 16f, 3f / 16f + EPS, 11f / 16f}, // cube 5 west
-        {6f / 16f - EPS, 10f / 16f, 6f / 16f, 11f / 16f}, // cube 5 east
-    };
-
-    private static float facingYRot(Direction facing) {
-        return switch (facing) {
-            case SOUTH -> 180f;
-            case EAST -> 270f;
-            case WEST -> 90f;
-            default -> 0f;
-        };
-    }
+    // Fluid interior bounds — derived from the glass wall elements in recycling_bin_body.json:
+    //   front outer glass [8,1,4]→[14,13,5] : inner face at z=5, x spans 8–14
+    //   back  outer glass [8,1,11]→[14,13,12]: inner face at z=11
+    //   floor/ceiling from all glass panels  : y=1 to y=13
+    private static final float FLUID_X0 = 8f / 16f;
+    private static final float FLUID_X1 = 14f / 16f;
+    private static final float FLUID_Z0 = 5f / 16f;
+    private static final float FLUID_Z1 = 11f / 16f;
+    private static final float FLUID_FLOOR = 1f / 16f;
+    private static final float FLUID_CEIL = 13f / 16f;
+    private static final float FLUID_H = FLUID_CEIL - FLUID_FLOOR;
 
     public RecyclingBinRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -156,126 +123,230 @@ public class RecyclingBinRenderer
         renderQuads(solidConsumer, poseStack.last(), pedalModel, blockState, level, packedLight, packedOverlay, random);
         poseStack.popPose();
 
-        // Liquid fill
+        // Fluid fill — always rendered (minimum 1% so the tank area is always visible)
         float fillFraction = (float) be.getVibesAmount() / RecyclingBinBlockEntity.FLUID_CAPACITY_MB;
-        if (fillFraction > 0f) {
-            poseStack.pushPose();
-            applyFacingRotation(poseStack, yRot);
-            renderLiquid(poseStack.last().pose(), bufferSource, fillFraction, packedLight, packedOverlay);
-            poseStack.popPose();
-        }
+        poseStack.pushPose();
+        applyFacingRotation(poseStack, yRot);
+        renderFluid(poseStack.last().pose(), bufferSource, fillFraction, packedLight, packedOverlay);
+        poseStack.popPose();
     }
 
-    static void renderLiquid(
+    static void renderFluid(
             Matrix4f mat, MultiBufferSource bufferSource, float fillFraction, int packedLight, int packedOverlay) {
 
+        float fill = Math.max(0.01f, fillFraction);
+        float fillTop = FLUID_FLOOR + fill * FLUID_H;
+
+        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.QUANTUM_FOAM_TYPE.get());
         TextureAtlasSprite sprite = Minecraft.getInstance()
                 .getModelManager()
                 .getAtlas(InventoryMenu.BLOCK_ATLAS)
-                .getSprite(FLOWING_TEXTURE);
+                .getSprite(ext.getStillTexture());
 
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.QUANTUM_FOAM_TYPE.get());
         int tint = ext.getTintColor();
-        int r = (tint >> 16) & 0xFF;
-        int g = (tint >> 8) & 0xFF;
-        int b = tint & 0xFF;
-        int a = (tint >> 24) & 0xFF;
-        if (a == 0) a = 255;
+        int fr = (tint >> 16) & 0xFF;
+        int fg = (tint >> 8) & 0xFF;
+        int fb = tint & 0xFF;
+        int fa = (tint >> 24) & 0xFF;
+        if (fa == 0) fa = 77;
 
-        float topY = LIQUID_FLOOR + (LIQUID_CEIL - LIQUID_FLOOR) * fillFraction;
-        float u0 = sprite.getU0(), u1 = sprite.getU1();
-        float v0 = sprite.getV0(), v1 = sprite.getV1();
+        int fluidLight =
+                Registration.QUANTUM_FOAM_TYPE.get().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
+
         VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
 
-        for (float[] s : LIQUID_TOP_SURFACES) {
-            renderBox(
-                    vc,
-                    mat,
-                    r,
-                    g,
-                    b,
-                    a,
-                    packedLight,
-                    packedOverlay,
-                    u0,
-                    v0,
-                    u1,
-                    v1,
-                    s[0],
-                    topY,
-                    s[1],
-                    s[2],
-                    topY + EPS,
-                    s[3]);
+        float uL = sprite.getU0();
+        float uR = sprite.getU1();
+        float vT = sprite.getV0();
+        float vB = Mth.lerp(fill, sprite.getV0(), sprite.getV1());
+
+        // North (-Z)
+        quad(
+                vc,
+                mat,
+                fr,
+                fg,
+                fb,
+                fa,
+                fluidLight,
+                packedOverlay,
+                uL,
+                vB,
+                uR,
+                vT,
+                FLUID_X1,
+                FLUID_FLOOR,
+                FLUID_Z0,
+                FLUID_X0,
+                FLUID_FLOOR,
+                FLUID_Z0,
+                FLUID_X0,
+                fillTop,
+                FLUID_Z0,
+                FLUID_X1,
+                fillTop,
+                FLUID_Z0,
+                0,
+                0,
+                -1);
+        // South (+Z)
+        quad(
+                vc,
+                mat,
+                fr,
+                fg,
+                fb,
+                fa,
+                fluidLight,
+                packedOverlay,
+                uL,
+                vB,
+                uR,
+                vT,
+                FLUID_X0,
+                FLUID_FLOOR,
+                FLUID_Z1,
+                FLUID_X1,
+                FLUID_FLOOR,
+                FLUID_Z1,
+                FLUID_X1,
+                fillTop,
+                FLUID_Z1,
+                FLUID_X0,
+                fillTop,
+                FLUID_Z1,
+                0,
+                0,
+                1);
+        // West (-X)
+        quad(
+                vc,
+                mat,
+                fr,
+                fg,
+                fb,
+                fa,
+                fluidLight,
+                packedOverlay,
+                uL,
+                vB,
+                uR,
+                vT,
+                FLUID_X0,
+                FLUID_FLOOR,
+                FLUID_Z0,
+                FLUID_X0,
+                FLUID_FLOOR,
+                FLUID_Z1,
+                FLUID_X0,
+                fillTop,
+                FLUID_Z1,
+                FLUID_X0,
+                fillTop,
+                FLUID_Z0,
+                -1,
+                0,
+                0);
+        // East (+X)
+        quad(
+                vc,
+                mat,
+                fr,
+                fg,
+                fb,
+                fa,
+                fluidLight,
+                packedOverlay,
+                uL,
+                vB,
+                uR,
+                vT,
+                FLUID_X1,
+                FLUID_FLOOR,
+                FLUID_Z1,
+                FLUID_X1,
+                FLUID_FLOOR,
+                FLUID_Z0,
+                FLUID_X1,
+                fillTop,
+                FLUID_Z0,
+                FLUID_X1,
+                fillTop,
+                FLUID_Z1,
+                1,
+                0,
+                0);
+        // Top (+Y)
+        quad(
+                vc,
+                mat,
+                fr,
+                fg,
+                fb,
+                fa,
+                fluidLight,
+                packedOverlay,
+                uL,
+                vB,
+                uR,
+                vT,
+                FLUID_X0,
+                fillTop,
+                FLUID_Z0,
+                FLUID_X0,
+                fillTop,
+                FLUID_Z1,
+                FLUID_X1,
+                fillTop,
+                FLUID_Z1,
+                FLUID_X1,
+                fillTop,
+                FLUID_Z0,
+                0,
+                1,
+                0);
+    }
+
+    private static float facingYRot(Direction facing) {
+        return switch (facing) {
+            case SOUTH -> 180f;
+            case EAST -> 270f;
+            case WEST -> 90f;
+            default -> 0f;
+        };
+    }
+
+    private static void applyFacingRotation(PoseStack poseStack, float yRot) {
+        poseStack.translate(0.5, 0.5, 0.5);
+        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
+        poseStack.translate(-0.5, -0.5, -0.5);
+    }
+
+    private static void renderQuads(
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            BakedModel model,
+            BlockState blockState,
+            Level level,
+            int packedLight,
+            int packedOverlay,
+            RandomSource random) {
+        for (Direction dir : Direction.values()) {
+            random.setSeed(42L);
+            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.cutout())) {
+                float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
+                consumer.putBulkData(pose, quad, shade, shade, shade, 1f, packedLight, packedOverlay);
+            }
         }
-        for (float[] s : LIQUID_SIDE_SURFACES) {
-            renderBox(
-                    vc,
-                    mat,
-                    r,
-                    g,
-                    b,
-                    a,
-                    packedLight,
-                    packedOverlay,
-                    u0,
-                    v0,
-                    u1,
-                    v1,
-                    s[0],
-                    LIQUID_FLOOR,
-                    s[1],
-                    s[2],
-                    topY,
-                    s[3]);
+        random.setSeed(42L);
+        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.cutout())) {
+            Direction dir = quad.getDirection();
+            float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
+            consumer.putBulkData(pose, quad, shade, shade, shade, 1f, packedLight, packedOverlay);
         }
     }
 
-    private static void renderBox(
-            VertexConsumer vc,
-            Matrix4f mat,
-            int r,
-            int g,
-            int b,
-            int a,
-            int light,
-            int overlay,
-            float u0,
-            float v0,
-            float u1,
-            float v1,
-            float x0,
-            float y0,
-            float z0,
-            float x1,
-            float y1,
-            float z1) {
-        // +Y
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x1, y1, z1, x1, y1, z0, 0,
-                1, 0);
-        // -Y
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y0, z1, x0, y0, z0, x1, y0, z0, x1, y0, z1, 0,
-                -1, 0);
-        // -Z north
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z0, x0, y1, z0, x0, y0, z0, x1, y0, z0, 0,
-                0, -1);
-        // +Z south
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z1, x1, y1, z1, x1, y0, z1, x0, y0, z1, 0,
-                0, 1);
-        // -X west
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x0, y1, z0, x0, y1, z1, x0, y0, z1, x0, y0, z0, -1,
-                0, 0);
-        // +X east
-        quad(
-                vc, mat, r, g, b, a, light, overlay, u0, v0, u1, v1, x1, y1, z1, x1, y1, z0, x1, y0, z0, x1, y0, z1, 1,
-                0, 0);
-    }
-
+    @SuppressWarnings("java:S107")
     private static void quad(
             VertexConsumer vc,
             Matrix4f mat,
@@ -328,36 +399,6 @@ public class RecyclingBinRenderer
                 .setOverlay(overlay)
                 .setLight(light)
                 .setNormal(nx, ny, nz);
-    }
-
-    private static void applyFacingRotation(PoseStack poseStack, float yRot) {
-        poseStack.translate(0.5, 0.5, 0.5);
-        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
-        poseStack.translate(-0.5, -0.5, -0.5);
-    }
-
-    private static void renderQuads(
-            VertexConsumer consumer,
-            PoseStack.Pose pose,
-            BakedModel model,
-            BlockState blockState,
-            Level level,
-            int packedLight,
-            int packedOverlay,
-            RandomSource random) {
-        for (Direction dir : Direction.values()) {
-            random.setSeed(42L);
-            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.cutout())) {
-                float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
-                consumer.putBulkData(pose, quad, shade, shade, shade, 1f, packedLight, packedOverlay);
-            }
-        }
-        random.setSeed(42L);
-        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.cutout())) {
-            Direction dir = quad.getDirection();
-            float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
-            consumer.putBulkData(pose, quad, shade, shade, shade, 1f, packedLight, packedOverlay);
-        }
     }
 
     @Override

@@ -87,7 +87,7 @@ public class RecyclingBinItemRenderer extends BlockEntityWithoutLevelRenderer {
         if (vibes <= 0) return;
 
         float fillFraction = (float) vibes / RecyclingBinBlockEntity.FLUID_CAPACITY_MB;
-        RecyclingBinRenderer.renderLiquid(
+        RecyclingBinRenderer.renderFluid(
                 poseStack.last().pose(), bufferSource, fillFraction, packedLight, packedOverlay);
     }
 }
