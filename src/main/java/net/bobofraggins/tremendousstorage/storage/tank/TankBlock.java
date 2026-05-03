@@ -2,7 +2,6 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
-import net.bobofraggins.tremendousstorage.external.mobgrindinutils.MobGrindingUtilsIntegration;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
@@ -211,7 +210,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
             Fluid xpFluid = (!locked.isEmpty()
                             && locked.getFluid().builtInRegistryHolder().is(EXPERIENCE_FLUID_TAG))
                     ? locked.getFluid()
-                    : MobGrindingUtilsIntegration.getXpFluid();
+                    : Registration.XP_JUICE_SOURCE.get();
             FluidStack xp = new FluidStack(xpFluid, BOTTLE_MB);
             long inserted = be.insert(xp, BOTTLE_MB, true);
             if (inserted >= BOTTLE_MB) {

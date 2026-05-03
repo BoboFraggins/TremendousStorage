@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.external.jei;
 
-import net.bobofraggins.tremendousstorage.external.mobgrindinutils.MobGrindingUtilsIntegration;
+import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -24,6 +24,6 @@ public record TankExtractionJeiRecipe(ItemStack tank, ItemStack container, ItemS
         return new TankExtractionJeiRecipe(
                 XpJuiceTankItem.create(),
                 new ItemStack(Items.BUCKET),
-                new ItemStack(MobGrindingUtilsIntegration.XP_FLUID_BUCKET.get()));
+                new ItemStack(Registration.XP_JUICE_BUCKET.get()));
     }
 }

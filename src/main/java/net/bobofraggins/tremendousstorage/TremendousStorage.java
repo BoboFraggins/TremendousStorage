@@ -4,7 +4,6 @@ import com.mojang.logging.LogUtils;
 import net.bobofraggins.tremendousstorage.experiencesyringe.ExperienceSyringeEvents;
 import net.bobofraggins.tremendousstorage.external.create.CreateIntegration;
 import net.bobofraggins.tremendousstorage.external.mekanism.MekanismIntegration;
-import net.bobofraggins.tremendousstorage.external.mobgrindinutils.MobGrindingUtilsIntegration;
 import net.bobofraggins.tremendousstorage.external.productivemetalworks.ProductiveMetalworksIntegration;
 import net.bobofraggins.tremendousstorage.glamping.GlampingEvents;
 import net.bobofraggins.tremendousstorage.glamping.GlampingRegistration;
@@ -65,7 +64,6 @@ public class TremendousStorage {
             ClientEventRegistrar.register(modEventBus);
         }
 
-        MobGrindingUtilsIntegration.register(modEventBus);
         if (ModList.get().isLoaded("productivemetalworks")) {
             ProductiveMetalworksIntegration.register(modEventBus);
         }

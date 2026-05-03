@@ -1,6 +1,5 @@
 package net.bobofraggins.tremendousstorage.experiencesyringe;
 
-import net.bobofraggins.tremendousstorage.external.mobgrindinutils.MobGrindingUtilsIntegration;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -47,7 +46,7 @@ public class ExperienceSyringeFluidHandler implements IFluidHandlerItem {
     public FluidStack getFluidInTank(int tank) {
         int stored = container.getOrDefault(Registration.EXPERIENCE_SYRINGE_STORED_XP, 0);
         if (stored == 0) return FluidStack.EMPTY;
-        Fluid xpFluid = MobGrindingUtilsIntegration.getXpFluid();
+        Fluid xpFluid = Registration.XP_JUICE_SOURCE.get();
         if (xpFluid == Fluids.EMPTY) return FluidStack.EMPTY;
         return new FluidStack(xpFluid, ExperienceSyringeItem.xpToMb(stored));
     }
@@ -94,7 +93,7 @@ public class ExperienceSyringeFluidHandler implements IFluidHandlerItem {
         if (action.execute()) {
             container.set(Registration.EXPERIENCE_SYRINGE_STORED_XP, stored - xpToDrain);
         }
-        Fluid xpFluid = MobGrindingUtilsIntegration.getXpFluid();
+        Fluid xpFluid = Registration.XP_JUICE_SOURCE.get();
         return new FluidStack(xpFluid, mbDrained);
     }
 }

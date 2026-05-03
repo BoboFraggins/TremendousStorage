@@ -117,6 +117,7 @@ import net.bobofraggins.tremendousstorage.storage.whiteout.WhiteoutTapeItem;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlock;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubMenu;
+import net.bobofraggins.tremendousstorage.storage.xpjuice.XpJuiceFluid;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -655,6 +656,46 @@ public final class Registration {
             .slopeFindDistance(2)
             .levelDecreasePerBlock(2)
             .tickRate(40);
+
+    // -------------------------------------------------------------------------
+    // XP Juice fluid type + fluids + fluid block + bucket
+    // -------------------------------------------------------------------------
+
+    public static final DeferredHolder<FluidType, FluidType> XP_JUICE_TYPE = FLUID_TYPE_REGISTER.register(
+            "xp_juice",
+            () -> new FluidType(
+                    FluidType.Properties.create().density(900).viscosity(1500).temperature(300)));
+
+    public static final DeferredHolder<net.minecraft.world.level.material.Fluid, XpJuiceFluid.Source> XP_JUICE_SOURCE =
+            FLUID_REGISTER.register("xp_juice", XpJuiceFluid.Source::new);
+
+    public static final DeferredHolder<net.minecraft.world.level.material.Fluid, XpJuiceFluid.Flowing>
+            XP_JUICE_FLOWING = FLUID_REGISTER.register("xp_juice_flowing", XpJuiceFluid.Flowing::new);
+
+    public static final DeferredBlock<net.minecraft.world.level.block.LiquidBlock> XP_JUICE_BLOCK = BLOCKS.register(
+            "xp_juice",
+            () -> new net.minecraft.world.level.block.LiquidBlock(
+                    XP_JUICE_SOURCE.get(),
+                    BlockBehaviour.Properties.of()
+                            .noCollission()
+                            .strength(100f)
+                            .noLootTable()
+                            .liquid()
+                            .replaceable()
+                            .pushReaction(PushReaction.DESTROY)));
+
+    public static final DeferredHolder<Item, BucketItem> XP_JUICE_BUCKET = ITEMS.register(
+            "xp_juice_bucket",
+            () -> new BucketItem(
+                    XP_JUICE_SOURCE.get(), new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
+
+    public static final BaseFlowingFluid.Properties XP_JUICE_FLUID_PROPS = new BaseFlowingFluid.Properties(
+                    XP_JUICE_TYPE, () -> XP_JUICE_SOURCE.get(), () -> XP_JUICE_FLOWING.get())
+            .bucket(() -> XP_JUICE_BUCKET.get())
+            .block(() -> XP_JUICE_BLOCK.get())
+            .slopeFindDistance(2)
+            .levelDecreasePerBlock(1)
+            .tickRate(20);
 
     // -------------------------------------------------------------------------
     // Positive Vibes fluid type + fluids + fluid block + cauldron + items
@@ -1225,6 +1266,7 @@ public final class Registration {
                         output.accept(TOASTED_MARSHMALLOW.get());
                         output.accept(SMORE.get());
                         output.accept(HONEY_FLUID_BUCKET.get());
+                        output.accept(XP_JUICE_BUCKET.get());
                         output.accept(POSITIVE_VIBES_BUCKET.get());
                         output.accept(POSITIVE_VIBES_BOTTLE.get());
                         output.accept(VEX_REPELLENT_POTION.get());

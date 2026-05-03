@@ -1,6 +1,5 @@
 package net.bobofraggins.tremendousstorage.shared.register;
 
-import net.bobofraggins.tremendousstorage.external.mobgrindinutils.XpFluidClientEvents;
 import net.bobofraggins.tremendousstorage.glamping.dankfannypack.DankFannyPackClientEvents;
 import net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatClientEvents;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClientEvents;
@@ -21,6 +20,7 @@ import net.bobofraggins.tremendousstorage.storage.recyclingbin.RecyclingBinClien
 import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageClientEvents;
 import net.bobofraggins.tremendousstorage.storage.tank.TankClientEvents;
 import net.bobofraggins.tremendousstorage.storage.tube.TubeClientEvents;
+import net.bobofraggins.tremendousstorage.storage.xpjuice.XpJuiceClientEvents;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -60,7 +60,7 @@ public final class ClientEventRegistrar {
         modBus.register(MagicHatClientEvents.class);
         modBus.register(PositiveVibesClientEvents.class);
 
-        modBus.register(XpFluidClientEvents.class);
+        modBus.register(XpJuiceClientEvents.class);
 
         // ── Game-bus client events (tick handlers, input, etc.) ─────────────────
         NeoForge.EVENT_BUS.register(BackpackClientTickHandler.class);
