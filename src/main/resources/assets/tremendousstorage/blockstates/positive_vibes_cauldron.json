@@ -1,5 +1,5 @@
 {
   "variants": {
-    "": { "model": "minecraft:block/cauldron_full" }
+    "": { "model": "tremendousstorage:block/positive_vibes_cauldron" }
   }
 }
