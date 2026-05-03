@@ -5,10 +5,8 @@
     { "item": "tremendousstorage:lazurite_ingot" }
   ],
   "result": {
-    "id": "patchouli:guide_book",
-    "components": {
-      "patchouli:book": "tremendousstorage:guide"
-    }
+    "id": "tremendousstorage:tremendous_storage_guide",
+    "count": 1
   },
   "category": "misc"
 }

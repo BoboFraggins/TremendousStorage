@@ -14,6 +14,7 @@ import net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatItem;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlock;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketBlockEntity;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.EnderPicnicBasketCraftingRecipe;
+import net.bobofraggins.tremendousstorage.guidebook.TremendousStorageGuideItem;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteBarsBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuriteOreBlock;
 import net.bobofraggins.tremendousstorage.lazurite.LazuritePaxelItem;
@@ -756,6 +757,9 @@ public final class Registration {
     public static final DeferredHolder<Item, MagicHatItem> MAGIC_HAT_ITEM =
             ITEMS.register("magic_hat", () -> new MagicHatItem(MAGIC_HAT_BLOCK.get()));
 
+    public static final DeferredHolder<Item, TremendousStorageGuideItem> TREMENDOUS_STORAGE_GUIDE =
+            ITEMS.register("tremendous_storage_guide", TremendousStorageGuideItem::new);
+
     public static final DeferredHolder<Item, BackpackItem> TREMENDOUS_BACKPACK =
             ITEMS.register("backpack", () -> new BackpackItem(TREMENDOUS_BACKPACK_BLOCK.get()));
 
@@ -1154,6 +1158,7 @@ public final class Registration {
                     .title(Component.translatable("itemGroup.tremendousstorage"))
                     .icon(() -> STORAGE_ACCESS_TERMINAL_ITEM.get().getDefaultInstance())
                     .displayItems((params, output) -> {
+                        output.accept(TREMENDOUS_STORAGE_GUIDE.get());
                         output.accept(CANVAS.get());
                         output.accept(CANVAS_BLOCK_ITEM.get());
                         output.accept(GlampingRegistration.TENT_ITEM.get());
