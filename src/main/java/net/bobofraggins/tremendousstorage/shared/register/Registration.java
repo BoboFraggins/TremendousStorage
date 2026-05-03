@@ -757,8 +757,7 @@ public final class Registration {
     public static final DeferredHolder<Item, MagicHatItem> MAGIC_HAT_ITEM =
             ITEMS.register("magic_hat", () -> new MagicHatItem(MAGIC_HAT_BLOCK.get()));
 
-    public static final DeferredHolder<Item, TremendousStorageGuideItem> TREMENDOUS_STORAGE_GUIDE =
-            ITEMS.register("tremendous_storage_guide", TremendousStorageGuideItem::new);
+    public static DeferredHolder<Item, TremendousStorageGuideItem> TREMENDOUS_STORAGE_GUIDE = null;
 
     public static final DeferredHolder<Item, BackpackItem> TREMENDOUS_BACKPACK =
             ITEMS.register("backpack", () -> new BackpackItem(TREMENDOUS_BACKPACK_BLOCK.get()));
@@ -1158,7 +1157,7 @@ public final class Registration {
                     .title(Component.translatable("itemGroup.tremendousstorage"))
                     .icon(() -> STORAGE_ACCESS_TERMINAL_ITEM.get().getDefaultInstance())
                     .displayItems((params, output) -> {
-                        output.accept(TREMENDOUS_STORAGE_GUIDE.get());
+                        if (TREMENDOUS_STORAGE_GUIDE != null) output.accept(TREMENDOUS_STORAGE_GUIDE.get());
                         output.accept(CANVAS.get());
                         output.accept(CANVAS_BLOCK_ITEM.get());
                         output.accept(GlampingRegistration.TENT_ITEM.get());
@@ -1249,6 +1248,9 @@ public final class Registration {
     // -------------------------------------------------------------------------
 
     public static void register(IEventBus modEventBus) {
+        if (ModList.get().isLoaded("patchouli")) {
+            TREMENDOUS_STORAGE_GUIDE = ITEMS.register("tremendous_storage_guide", TremendousStorageGuideItem::new);
+        }
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);
         BLOCK_ENTITY_TYPES.register(modEventBus);
