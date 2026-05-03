@@ -7,12 +7,12 @@
     {
       "type": "patchouli:spotlight",
       "item": "tremendousstorage:recycling_bin",
-      "text": "The $(item)Recycling Bin$() destroys unwanted items and converts them into $(thing)Quantum Foam$() — a fluid representing pure distilled good vibes. Each item destroyed produces $(bold)10 mB$() of Quantum Foam. The bin holds up to $(bold)10,000 mB$()."
+      "text": "The $(item)Recycling Bin$() destroys unwanted items and converts them into $(thing)Positive Vibes$() — a fluid representing pure distilled good vibes. Each item destroyed produces $(bold)10 mB$() of Positive Vibes. The bin holds up to $(bold)10,000 mB$()."
     },
     {
       "type": "patchouli:text",
       "title": "Usage",
-      "text": "$(bold)Right-click$() to open the recycling UI. Items placed in the input slot are converted to Quantum Foam when destroyed.$(br2)$(bold)Right-click with a Glass Bottle$() on the bin (when it holds at least 250 mB) to fill a $(item)Quantum Foam Bottle$().$(br2)The UI also has a fluid transfer pane with input and output slots for container items such as buckets and bottles."
+      "text": "$(bold)Right-click$() to open the recycling UI. Items placed in the input slot are converted to Positive Vibes when destroyed.$(br2)$(bold)Right-click with a Glass Bottle$() on the bin (when it holds at least 250 mB) to fill a $(item)Positive Vibes Bottle$().$(br2)The UI also has a fluid transfer pane with input and output slots for container items such as buckets and bottles."
     },
     {
       "type": "patchouli:text",

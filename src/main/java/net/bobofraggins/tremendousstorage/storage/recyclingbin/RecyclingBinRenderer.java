@@ -34,7 +34,7 @@ import org.joml.Matrix4f;
  *   <li>Body — static baked model.
  *   <li>Lid — animates open (up to 90°) around the hinge at y=12/16, z=12/16.
  *   <li>Pedal — animates in sync (up to −22.5°) around x=12/16, y=1/16, z=4/16.
- *   <li>Fluid — single rectangular fill rendered like the Tank, using the Quantum Foam
+ *   <li>Fluid — single rectangular fill rendered like the Tank, using the Positive Vibes
  *       still texture. Always shown at a minimum of 1% to indicate the tank is present.
  * </ul>
  */
@@ -134,7 +134,7 @@ public class RecyclingBinRenderer
         float fill = Math.max(0.01f, fillFraction);
         float fillTop = FLUID_FLOOR + fill * FLUID_H;
 
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.QUANTUM_FOAM_TYPE.get());
+        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.POSITIVE_VIBES_TYPE.get());
         TextureAtlasSprite sprite = Minecraft.getInstance()
                 .getModelManager()
                 .getAtlas(InventoryMenu.BLOCK_ATLAS)
@@ -148,7 +148,7 @@ public class RecyclingBinRenderer
         if (fa == 0) fa = 77;
 
         int fluidLight =
-                Registration.QUANTUM_FOAM_TYPE.get().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
+                Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
 
         VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
 

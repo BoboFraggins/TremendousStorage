@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/block",
-  "textures": {
-    "particle": "tremendousstorage:fluid/quantum_foam_still"
-  }
-}
