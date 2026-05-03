@@ -437,7 +437,6 @@ public final class Registration {
             "barrel",
             () -> new BarrelBlock(BlockBehaviour.Properties.of()
                     .strength(3.0f, 1000.0f)
-                    .requiresCorrectToolForDrops()
                     .sound(SoundType.WOOD)
                     .noOcclusion()));
 
