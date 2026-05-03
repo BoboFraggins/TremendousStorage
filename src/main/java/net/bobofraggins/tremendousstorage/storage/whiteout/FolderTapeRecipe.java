@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.whiteout;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.bobofraggins.tremendousstorage.storage.tank.TankContents;
@@ -56,6 +57,19 @@ public class FolderTapeRecipe extends CustomRecipe {
         return ItemStack.EMPTY;
     }
 
+    private static ItemStack findBarrelItem(CraftingInput input) {
+        for (int i = 0; i < input.size(); i++) {
+            ItemStack s = input.getItem(i);
+            if (s.has(Registration.BARREL_CONTENTS.get())) return s;
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static boolean isBarrelLockedEmpty(ItemStack barrel) {
+        BarrelContents contents = barrel.getOrDefault(Registration.BARREL_CONTENTS.get(), BarrelContents.EMPTY);
+        return contents.isLocked() && contents.count() == 0;
+    }
+
     /** True if the folder is locked (has a stored item type) but currently empty (count == 0). */
     private static boolean isFolderLockedEmpty(ItemStack folder) {
         FolderContents contents = ManillaFolderItem.getContents(folder);
@@ -84,7 +98,9 @@ public class FolderTapeRecipe extends CustomRecipe {
             if (s.getItem() instanceof WhiteoutTapeItem) {
                 if (!tape.isEmpty()) return false; // two tapes
                 tape = s;
-            } else if (s.getItem() instanceof ManillaFolderItem || s.has(Registration.TANK_CONTENTS.get())) {
+            } else if (s.getItem() instanceof ManillaFolderItem
+                    || s.has(Registration.TANK_CONTENTS.get())
+                    || s.has(Registration.BARREL_CONTENTS.get())) {
                 if (!target.isEmpty()) return false; // two targets
                 target = s;
             } else {
@@ -96,6 +112,8 @@ public class FolderTapeRecipe extends CustomRecipe {
 
         if (target.getItem() instanceof ManillaFolderItem) {
             return isFolderLockedEmpty(target);
+        } else if (target.has(Registration.BARREL_CONTENTS.get())) {
+            return isBarrelLockedEmpty(target);
         } else {
             return isTankLockedEmpty(target);
         }
@@ -112,6 +130,13 @@ public class FolderTapeRecipe extends CustomRecipe {
         if (!tank.isEmpty()) {
             ItemStack result = tank.copyWithCount(1);
             result.set(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
+            return result;
+        }
+
+        ItemStack barrel = findBarrelItem(input);
+        if (!barrel.isEmpty()) {
+            ItemStack result = barrel.copyWithCount(1);
+            result.set(Registration.BARREL_CONTENTS.get(), BarrelContents.EMPTY);
             return result;
         }
 

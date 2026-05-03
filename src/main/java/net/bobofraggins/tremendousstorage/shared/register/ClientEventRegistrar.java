@@ -9,6 +9,7 @@ import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.storage.armorycabinet.ArmoryCabinetClientEvents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackClientEvents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackClientTickHandler;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelClientEvents;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestClientEvents;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetClientEvents;
 import net.bobofraggins.tremendousstorage.storage.honey.HoneyClientEvents;
@@ -61,6 +62,7 @@ public final class ClientEventRegistrar {
         modBus.register(PositiveVibesClientEvents.class);
 
         modBus.register(XpJuiceClientEvents.class);
+        modBus.register(BarrelClientEvents.class);
 
         // ── Game-bus client events (tick handlers, input, etc.) ─────────────────
         NeoForge.EVENT_BUS.register(BackpackClientTickHandler.class);

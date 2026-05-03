@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.shared.network;
 
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -44,6 +45,7 @@ public record SetPriorityPacket(BlockPos pos, int priority) implements CustomPac
             Priority p = Priority.fromOrdinal(packet.priority());
             if (be instanceof FilingCabinetBlockEntity fc) fc.setPriority(p);
             else if (be instanceof ChestBlockEntity bs) bs.setPriority(p);
+            else if (be instanceof BarrelBlockEntity bb) bb.setPriority(p);
         });
     }
 }

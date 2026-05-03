@@ -195,5 +195,7 @@
   "item.tremendousstorage.picnic_basket.tooltip": "Automatically feeds the player when hungry.",
   "item.tremendousstorage.ender_picnic_basket.tooltip": "Automatically feeds the player when hungry. Links to a shared inventory.",
   "item.patchouli.guide_book.tremendousstorage.guide": "Guide to Tremendous Storage",
-  "item.tremendousstorage.tremendous_storage_guide": "Tremendous Storage Guide"
+  "item.tremendousstorage.tremendous_storage_guide": "Tremendous Storage Guide",
+  "block.tremendousstorage.barrel": "Barrel",
+  "screen.tremendousstorage.barrel": "Barrel"
 }

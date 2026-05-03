@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IBI",
+    "BCB",
+    "IBI"
+  ],
+  "key": {
+    "I": { "item": "tremendousstorage:lazurite_bars" },
+    "B": { "item": "tremendousstorage:lazurite_ingot" },
+    "C": { "tag": "minecraft:barrels" }
+  },
+  "result": {
+    "id": "tremendousstorage:barrel",
+    "count": 1
+  },
+  "category": "misc"
+}

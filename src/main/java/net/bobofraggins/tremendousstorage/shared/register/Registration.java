@@ -40,6 +40,10 @@ import net.bobofraggins.tremendousstorage.storage.backpack.BackpackBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackMenu;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlock;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelContents;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelMenu;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.BaseUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.EnderStorageUpgradeItem;
@@ -300,6 +304,13 @@ public final class Registration {
                     .networkSynchronized(FannyPackContents.STREAM_CODEC)
                     .build());
 
+    /** Data component storing the locked item type and quantity on a Barrel block item. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<BarrelContents>> BARREL_CONTENTS =
+            DATA_COMPONENTS.register("barrel_contents", () -> DataComponentType.<BarrelContents>builder()
+                    .persistent(BarrelContents.CODEC)
+                    .networkSynchronized(BarrelContents.STREAM_CODEC)
+                    .build());
+
     /** Data component storing all inventory and settings on a Tremendous Backpack item. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<BackpackContents>>
             TREMENDOUS_BACKPACK_CONTENTS =
@@ -417,6 +428,25 @@ public final class Registration {
                     net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockEntity::new,
                     PICNIC_BASKET_BLOCK.get())
             .build(null));
+
+    // -------------------------------------------------------------------------
+    // Barrel block + block entity
+    // -------------------------------------------------------------------------
+
+    public static final DeferredBlock<BarrelBlock> BARREL = BLOCKS.register(
+            "barrel",
+            () -> new BarrelBlock(BlockBehaviour.Properties.of()
+                    .strength(3.0f, 1000.0f)
+                    .requiresCorrectToolForDrops()
+                    .sound(SoundType.WOOD)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<Item, BlockItem> BARREL_ITEM =
+            ITEMS.register("barrel", () -> new TieredBlockItem(BARREL.get(), new Item.Properties()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BarrelBlockEntity>> BARREL_BE_TYPE =
+            BLOCK_ENTITY_TYPES.register("barrel", () -> BlockEntityType.Builder.of(BarrelBlockEntity::new, BARREL.get())
+                    .build(null));
 
     // -------------------------------------------------------------------------
     // Storage upgrade items
@@ -957,6 +987,9 @@ public final class Registration {
     // Menu types
     // -------------------------------------------------------------------------
 
+    public static final DeferredHolder<MenuType<?>, MenuType<BarrelMenu>> BARREL_MENU =
+            MENU_TYPES.register("barrel", () -> IMenuTypeExtension.create(BarrelMenu::new));
+
     public static final DeferredHolder<MenuType<?>, MenuType<ArmoryCabinetMenu>> ARMORY_CABINET_MENU =
             MENU_TYPES.register("armory_cabinet", () -> IMenuTypeExtension.create(ArmoryCabinetMenu::new));
 
@@ -1216,6 +1249,7 @@ public final class Registration {
                         output.accept(TANK_ITEM.get());
                         output.accept(ARMORY_CABINET_ITEM.get());
                         output.accept(FILING_CABINET_ITEM.get());
+                        output.accept(BARREL_ITEM.get());
 
                         output.accept(MANILA_FOLDER.get());
                         output.accept(WHITEOUT_TAPE.get());
@@ -1330,6 +1364,10 @@ public final class Registration {
     }
 
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK,
+                BARREL_BE_TYPE.get(),
+                (be, side) -> new net.bobofraggins.tremendousstorage.storage.barrel.BarrelItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 ARMORY_CABINET_BE_TYPE.get(),

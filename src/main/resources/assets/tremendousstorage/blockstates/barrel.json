@@ -1,0 +1,32 @@
+{
+  "variants": {
+    "facing=east,tier=copper":     { "model": "tremendousstorage:block/barrel", "y": 90  },
+    "facing=east,tier=diamond":    { "model": "tremendousstorage:block/barrel", "y": 90  },
+    "facing=east,tier=emerald":    { "model": "tremendousstorage:block/barrel", "y": 90  },
+    "facing=east,tier=gold":       { "model": "tremendousstorage:block/barrel", "y": 90  },
+    "facing=east,tier=iron":       { "model": "tremendousstorage:block/barrel", "y": 90  },
+    "facing=east,tier=netherite":  { "model": "tremendousstorage:block/barrel", "y": 90  },
+    "facing=east,tier=wood":       { "model": "tremendousstorage:block/barrel", "y": 90  },
+    "facing=north,tier=copper":    { "model": "tremendousstorage:block/barrel"            },
+    "facing=north,tier=diamond":   { "model": "tremendousstorage:block/barrel"            },
+    "facing=north,tier=emerald":   { "model": "tremendousstorage:block/barrel"            },
+    "facing=north,tier=gold":      { "model": "tremendousstorage:block/barrel"            },
+    "facing=north,tier=iron":      { "model": "tremendousstorage:block/barrel"            },
+    "facing=north,tier=netherite": { "model": "tremendousstorage:block/barrel"            },
+    "facing=north,tier=wood":      { "model": "tremendousstorage:block/barrel"            },
+    "facing=south,tier=copper":    { "model": "tremendousstorage:block/barrel", "y": 180 },
+    "facing=south,tier=diamond":   { "model": "tremendousstorage:block/barrel", "y": 180 },
+    "facing=south,tier=emerald":   { "model": "tremendousstorage:block/barrel", "y": 180 },
+    "facing=south,tier=gold":      { "model": "tremendousstorage:block/barrel", "y": 180 },
+    "facing=south,tier=iron":      { "model": "tremendousstorage:block/barrel", "y": 180 },
+    "facing=south,tier=netherite": { "model": "tremendousstorage:block/barrel", "y": 180 },
+    "facing=south,tier=wood":      { "model": "tremendousstorage:block/barrel", "y": 180 },
+    "facing=west,tier=copper":     { "model": "tremendousstorage:block/barrel", "y": 270 },
+    "facing=west,tier=diamond":    { "model": "tremendousstorage:block/barrel", "y": 270 },
+    "facing=west,tier=emerald":    { "model": "tremendousstorage:block/barrel", "y": 270 },
+    "facing=west,tier=gold":       { "model": "tremendousstorage:block/barrel", "y": 270 },
+    "facing=west,tier=iron":       { "model": "tremendousstorage:block/barrel", "y": 270 },
+    "facing=west,tier=netherite":  { "model": "tremendousstorage:block/barrel", "y": 270 },
+    "facing=west,tier=wood":       { "model": "tremendousstorage:block/barrel", "y": 270 }
+  }
+}
