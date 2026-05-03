@@ -55,7 +55,8 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
         reg.addRecipeCategories(
                 new PositiveVibesCauldronCategory(guiHelper),
                 new EnderFolderCraftingCategory(guiHelper),
-                new EnderStorageCraftingCategory(guiHelper));
+                new EnderStorageCraftingCategory(guiHelper),
+                new TankExtractionCategory(guiHelper));
     }
 
     @Override
@@ -73,6 +74,10 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
                         EnderStorageCraftingCategory.Recipe.BACKPACK,
                         EnderStorageCraftingCategory.Recipe.TANK,
                         EnderStorageCraftingCategory.Recipe.PICNIC_BASKET));
+
+        reg.addRecipes(
+                TankExtractionCategory.RECIPE_TYPE,
+                List.of(TankExtractionJeiRecipe.bottleOEnchanting(), TankExtractionJeiRecipe.xpJuiceBucket()));
 
         IVanillaRecipeFactory brewFactory = reg.getJeiHelpers().getVanillaRecipeFactory();
         reg.addRecipes(
@@ -98,6 +103,7 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
         reg.addRecipeCatalyst(new ItemStack(Items.CRAFTING_TABLE), EnderFolderCraftingCategory.RECIPE_TYPE);
         reg.addRecipeCatalyst(
                 Registration.ENDER_STORAGE_UPGRADE.get().getDefaultInstance(), EnderFolderCraftingCategory.RECIPE_TYPE);
+        reg.addRecipeCatalyst(XpJuiceTankItem.create(), TankExtractionCategory.RECIPE_TYPE);
         reg.addRecipeCatalyst(new ItemStack(Items.CRAFTING_TABLE), EnderStorageCraftingCategory.RECIPE_TYPE);
         reg.addRecipeCatalyst(
                 Registration.ENDER_STORAGE_UPGRADE.get().getDefaultInstance(),
