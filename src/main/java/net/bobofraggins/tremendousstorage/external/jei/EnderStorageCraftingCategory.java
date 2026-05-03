@@ -50,6 +50,11 @@ public class EnderStorageCraftingCategory implements IRecipeCategory<EnderStorag
         public static final Recipe TANK =
                 new Recipe("jei.tremendousstorage.ender_tank_crafting", tieredTanks(), tieredEnderTanks());
 
+        public static final Recipe PICNIC_BASKET = new Recipe(
+                "jei.tremendousstorage.ender_picnic_basket_crafting",
+                List.of(new ItemStack(Registration.PICNIC_BASKET_ITEM.get())),
+                List.of(new ItemStack(Registration.ENDER_PICNIC_BASKET_ITEM.get())));
+
         final String titleKey;
         final List<ItemStack> inputs;
         final List<ItemStack> outputs;

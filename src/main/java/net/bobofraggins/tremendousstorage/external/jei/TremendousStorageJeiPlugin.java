@@ -70,7 +70,8 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
                 List.of(
                         EnderStorageCraftingCategory.Recipe.CHEST,
                         EnderStorageCraftingCategory.Recipe.BACKPACK,
-                        EnderStorageCraftingCategory.Recipe.TANK));
+                        EnderStorageCraftingCategory.Recipe.TANK,
+                        EnderStorageCraftingCategory.Recipe.PICNIC_BASKET));
     }
 
     @Override
