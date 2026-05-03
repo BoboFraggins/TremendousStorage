@@ -43,6 +43,7 @@ import net.bobofraggins.tremendousstorage.storage.backpack.BackpackMenu;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlock;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelContents;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelItemHandler;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelMenu;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.BaseUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
@@ -60,6 +61,9 @@ import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackBlo
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackCraftingRecipe;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackItem;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackMenu;
+import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelBlock;
+import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelCraftingRecipe;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlock;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestCraftingRecipe;
@@ -446,6 +450,21 @@ public final class Registration {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BarrelBlockEntity>> BARREL_BE_TYPE =
             BLOCK_ENTITY_TYPES.register("barrel", () -> BlockEntityType.Builder.of(BarrelBlockEntity::new, BARREL.get())
                     .build(null));
+
+    public static final DeferredBlock<EnderBarrelBlock> ENDER_BARREL = BLOCKS.register(
+            "ender_barrel",
+            () -> new EnderBarrelBlock(BlockBehaviour.Properties.of()
+                    .strength(3.0f, 1000.0f)
+                    .sound(SoundType.WOOD)
+                    .noOcclusion()));
+
+    public static final DeferredHolder<Item, BlockItem> ENDER_BARREL_ITEM =
+            ITEMS.register("ender_barrel", () -> new EnderTieredBlockItem(ENDER_BARREL.get(), new Item.Properties()));
+
+    public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderBarrelBlockEntity>>
+            ENDER_BARREL_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "ender_barrel", () -> BlockEntityType.Builder.of(EnderBarrelBlockEntity::new, ENDER_BARREL.get())
+                            .build(null));
 
     // -------------------------------------------------------------------------
     // Storage upgrade items
@@ -1201,6 +1220,22 @@ public final class Registration {
                         }
                     });
 
+    public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderBarrelCraftingRecipe>>
+            ENDER_BARREL_CRAFTING_RECIPE =
+                    RECIPE_SERIALIZERS.register("ender_barrel_crafting", () -> new RecipeSerializer<>() {
+                        @Override
+                        public com.mojang.serialization.MapCodec<EnderBarrelCraftingRecipe> codec() {
+                            return EnderBarrelCraftingRecipe.CODEC;
+                        }
+
+                        @Override
+                        public net.minecraft.network.codec.StreamCodec<
+                                        net.minecraft.network.RegistryFriendlyByteBuf, EnderBarrelCraftingRecipe>
+                                streamCodec() {
+                            return EnderBarrelCraftingRecipe.STREAM_CODEC;
+                        }
+                    });
+
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<StorageUpgradeCraftingRecipe>>
             STORAGE_UPGRADE_CRAFTING_RECIPE =
                     RECIPE_SERIALIZERS.register("storage_upgrade_crafting", () -> new RecipeSerializer<>() {
@@ -1249,6 +1284,7 @@ public final class Registration {
                         output.accept(ARMORY_CABINET_ITEM.get());
                         output.accept(FILING_CABINET_ITEM.get());
                         output.accept(BARREL_ITEM.get());
+                        output.accept(ENDER_BARREL_ITEM.get());
 
                         output.accept(MANILA_FOLDER.get());
                         output.accept(WHITEOUT_TAPE.get());
@@ -1364,9 +1400,9 @@ public final class Registration {
 
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                BARREL_BE_TYPE.get(),
-                (be, side) -> new net.bobofraggins.tremendousstorage.storage.barrel.BarrelItemHandler(be));
+                Capabilities.ItemHandler.BLOCK, BARREL_BE_TYPE.get(), (be, side) -> new BarrelItemHandler(be));
+        event.registerBlockEntity(
+                Capabilities.ItemHandler.BLOCK, ENDER_BARREL_BE_TYPE.get(), (be, side) -> new BarrelItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 ARMORY_CABINET_BE_TYPE.get(),

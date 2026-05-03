@@ -197,5 +197,7 @@
   "item.patchouli.guide_book.tremendousstorage.guide": "Guide to Tremendous Storage",
   "item.tremendousstorage.tremendous_storage_guide": "Tremendous Storage Guide",
   "block.tremendousstorage.barrel": "Barrel",
-  "screen.tremendousstorage.barrel": "Barrel"
+  "screen.tremendousstorage.barrel": "Barrel",
+  "block.tremendousstorage.ender_barrel": "Ender Barrel",
+  "jei.tremendousstorage.ender_barrel_crafting": "Ender Barrel Crafting"
 }

@@ -23,22 +23,27 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BarrelBlockEntity extends BlockEntity implements MenuProvider, NetworkListable {
 
     /** Type key — always count=1; empty means unlocked. */
-    private ItemStack storedItem = ItemStack.EMPTY;
+    protected ItemStack storedItem = ItemStack.EMPTY;
 
-    private long count = 0L;
-    private StorageTier tier = StorageTier.WOOD;
-    private boolean voidExcess = false;
-    private Priority priority = Priority.NORMAL;
+    protected long count = 0L;
+    protected StorageTier tier = StorageTier.WOOD;
+    protected boolean voidExcess = false;
+    protected Priority priority = Priority.NORMAL;
 
     private final NiLink niLink = new NiLink();
 
     public BarrelBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.BARREL_BE_TYPE.get(), pos, state);
+        this(Registration.BARREL_BE_TYPE.get(), pos, state);
+    }
+
+    protected BarrelBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
     }
 
     // -------------------------------------------------------------------------
@@ -161,7 +166,17 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     // setChanged / notify
     // -------------------------------------------------------------------------
 
-    private void notifyChanged() {
+    /** Directly sets item type and count without going through insert/extract logic. */
+    protected void loadContents(ItemStack newStoredItem, long newCount) {
+        storedItem = newStoredItem.isEmpty() ? ItemStack.EMPTY : newStoredItem.copyWithCount(1);
+        count = newCount;
+        super.setChanged();
+        if (level != null) {
+            level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+        }
+    }
+
+    protected void notifyChanged() {
         super.setChanged();
         if (level instanceof ServerLevel sl) {
             niLink.notifyChanged(sl, worldPosition, getBlockState());

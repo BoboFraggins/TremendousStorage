@@ -1,0 +1,6 @@
+{
+  "parent": "tremendousstorage:block/ender_barrel",
+  "textures": {
+    "front": "tremendousstorage:block/ender_barrels/ender_barrel_emerald"
+  }
+}

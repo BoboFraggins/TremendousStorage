@@ -55,6 +55,9 @@ public class EnderStorageCraftingCategory implements IRecipeCategory<EnderStorag
                 List.of(new ItemStack(Registration.PICNIC_BASKET_ITEM.get())),
                 List.of(new ItemStack(Registration.ENDER_PICNIC_BASKET_ITEM.get())));
 
+        public static final Recipe BARREL =
+                new Recipe("jei.tremendousstorage.ender_barrel_crafting", tieredBarrels(), tieredEnderBarrels());
+
         final String titleKey;
         final List<ItemStack> inputs;
         final List<ItemStack> outputs;
@@ -111,6 +114,30 @@ public class EnderStorageCraftingCategory implements IRecipeCategory<EnderStorag
 
         private static List<ItemStack> tieredEnderTanks() {
             return List.of(new ItemStack(Registration.ENDER_TANK_ITEM.get()));
+        }
+
+        private static List<ItemStack> tieredBarrels() {
+            return Arrays.stream(StorageTier.values())
+                    .map(tier -> {
+                        ItemStack stack = new ItemStack(Registration.BARREL_ITEM.get());
+                        CompoundTag tag = new CompoundTag();
+                        tag.putString("Tier", tier.getId());
+                        stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+                        return stack;
+                    })
+                    .toList();
+        }
+
+        private static List<ItemStack> tieredEnderBarrels() {
+            return Arrays.stream(StorageTier.values())
+                    .map(tier -> {
+                        ItemStack stack = new ItemStack(Registration.ENDER_BARREL_ITEM.get());
+                        CompoundTag tag = new CompoundTag();
+                        tag.putString("Tier", tier.getId());
+                        stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+                        return stack;
+                    })
+                    .toList();
         }
     }
 

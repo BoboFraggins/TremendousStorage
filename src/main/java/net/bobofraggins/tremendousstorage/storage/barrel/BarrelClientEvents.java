@@ -13,6 +13,7 @@ public final class BarrelClientEvents {
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(Registration.BARREL_BE_TYPE.get(), BarrelRenderer::new);
+        event.registerBlockEntityRenderer(Registration.ENDER_BARREL_BE_TYPE.get(), BarrelRenderer::new);
     }
 
     @SubscribeEvent
