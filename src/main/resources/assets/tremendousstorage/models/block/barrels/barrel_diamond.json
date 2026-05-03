@@ -1,0 +1,6 @@
+{
+  "parent": "tremendousstorage:block/barrel",
+  "textures": {
+    "front": "tremendousstorage:block/barrels/barrel_diamond"
+  }
+}
