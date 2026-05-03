@@ -1280,11 +1280,10 @@ public final class Registration {
                         output.accept(LAZURITE_NUGGET.get());
                         output.accept(LAZURITE_BLOCK_ITEM.get());
                         output.accept(TREMENDOUS_CHEST_ITEM.get());
+                        output.accept(BARREL_ITEM.get());
                         output.accept(TANK_ITEM.get());
                         output.accept(ARMORY_CABINET_ITEM.get());
                         output.accept(FILING_CABINET_ITEM.get());
-                        output.accept(BARREL_ITEM.get());
-                        output.accept(ENDER_BARREL_ITEM.get());
 
                         output.accept(MANILA_FOLDER.get());
                         output.accept(WHITEOUT_TAPE.get());
@@ -1306,14 +1305,15 @@ public final class Registration {
                         output.accept(EXPERIENCE_SYRINGE.get());
                         output.accept(RECYCLING_BIN_ITEM.get());
                         output.accept(BASE_UPGRADE.get());
+                        for (DeferredHolder<Item, StorageUpgradeItem> upgrade : STORAGE_UPGRADES) {
+                            output.accept(upgrade.get());
+                        }
                         output.accept(CRAFTING_UPGRADE.get());
                         output.accept(ENDER_STORAGE_UPGRADE.get());
                         output.accept(ENDER_TREMENDOUS_BACKPACK_ITEM.get());
                         output.accept(ENDER_PICNIC_BASKET_ITEM.get());
+                        output.accept(ENDER_BARREL_ITEM.get());
                         output.accept(ENDER_TREMENDOUS_CHEST_ITEM.get());
-                        for (DeferredHolder<Item, StorageUpgradeItem> upgrade : STORAGE_UPGRADES) {
-                            output.accept(upgrade.get());
-                        }
                         output.accept(ENDER_TANK_ITEM.get());
                         output.accept(ENDER_FOLDER.get());
                         output.accept(MAGNET_UPGRADE.get());
