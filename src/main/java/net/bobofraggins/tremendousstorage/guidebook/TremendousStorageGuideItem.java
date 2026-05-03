@@ -24,14 +24,15 @@ public class TremendousStorageGuideItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         if (!level.isClientSide() && ModList.get().isLoaded("patchouli")) {
             try {
-                // Look up openBookGUI on IPatchouliAPI (the interface where it is declared),
-                // not on PatchouliAPI (the static factory class) or the opaque impl class.
                 Object api = Class.forName("vazkii.patchouli.api.PatchouliAPI")
                         .getMethod("get")
                         .invoke(null);
-                Method openBook = Class.forName("vazkii.patchouli.api.IPatchouliAPI")
-                        .getMethod("openBookGUI", ServerPlayer.class, ResourceLocation.class);
-                openBook.invoke(api, (ServerPlayer) player, BOOK_ID);
+                for (Method m : api.getClass().getMethods()) {
+                    if (m.getName().equals("openBookGUI") && m.getParameterCount() == 2) {
+                        m.invoke(api, (ServerPlayer) player, BOOK_ID);
+                        break;
+                    }
+                }
             } catch (ReflectiveOperationException | NoClassDefFoundError ignored) {
             }
         }
