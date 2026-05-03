@@ -1329,6 +1329,16 @@ public final class Registration {
     private static void onCommonSetup(FMLCommonSetupEvent event) {
         event.enqueueWork(PositiveVibesInteractions::register);
         event.enqueueWork(QuantumFoamInteractions::register);
+        if (ModList.get().isLoaded("curios")) {
+            event.enqueueWork(() -> {
+                try {
+                    top.theillusivec4.curios.api.CuriosApi.registerCurio(
+                            MAGIC_HAT_ITEM.get(),
+                            net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatCurioIntegration.INSTANCE);
+                } catch (NoClassDefFoundError ignored) {
+                }
+            });
+        }
     }
 
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
