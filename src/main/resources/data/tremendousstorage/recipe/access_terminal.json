@@ -13,7 +13,7 @@
     "B": { "tag": "minecraft:wooden_buttons" }
   },
   "result": {
-    "id": "tremendousstorage:access_terminal",
+    "id": "tremendousstorage:storage_access_terminal",
     "count": 1
   },
   "category": "misc"
