@@ -2,12 +2,13 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "pattern": [
-    "I I",
-    "I I",
-    "III"
+    "L L",
+    "LGL",
+    "LLL"
   ],
   "key": {
-    "I": { "item": "minecraft:iron_ingot" }
+    "L": { "item": "tremendousstorage:lazurite_ingot" },
+    "G": { "tag": "c:glass_blocks" }
   },
   "result": {
     "count": 1,
