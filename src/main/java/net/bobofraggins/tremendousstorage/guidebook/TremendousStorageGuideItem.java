@@ -26,7 +26,7 @@ public class TremendousStorageGuideItem extends Item {
             try {
                 Class<?> apiClass = Class.forName("vazkii.patchouli.api.PatchouliAPI");
                 Object api = apiClass.getMethod("get").invoke(null);
-                Method openBook = apiClass.getMethod("openBookGUI", ServerPlayer.class, ResourceLocation.class);
+                Method openBook = api.getClass().getMethod("openBookGUI", ServerPlayer.class, ResourceLocation.class);
                 openBook.invoke(api, (ServerPlayer) player, BOOK_ID);
             } catch (ReflectiveOperationException | NoClassDefFoundError ignored) {
             }
