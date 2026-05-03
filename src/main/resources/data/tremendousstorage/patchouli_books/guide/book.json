@@ -1,7 +1,7 @@
 {
   "name": "Tremendous Storage Guide",
   "landing_text": "Welcome to TremendousStorage! This guide covers every block and item in the mod, from a humble backpack to a fully automated item network.$(br2)Use the categories on the left to navigate.",
-  "creative_tab": "tremendousstorage",
-  "version": "1",
+  "creative_tab": "tremendousstorage:tremendousstorage",
+  "version": 1,
   "i18n": false
 }
