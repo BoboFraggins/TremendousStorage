@@ -9,6 +9,7 @@ import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.ITypedIngredient;
+import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
@@ -72,6 +73,19 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
                         EnderStorageCraftingCategory.Recipe.BACKPACK,
                         EnderStorageCraftingCategory.Recipe.TANK,
                         EnderStorageCraftingCategory.Recipe.PICNIC_BASKET));
+
+        IVanillaRecipeFactory brewFactory = reg.getJeiHelpers().getVanillaRecipeFactory();
+        reg.addRecipes(
+                RecipeTypes.BREWING,
+                List.of(
+                        brewFactory.createBrewingRecipe(
+                                List.of(new ItemStack(Registration.VEX_REPELLENT_POTION.get())),
+                                new ItemStack(Items.REDSTONE),
+                                new ItemStack(Registration.VEX_REPELLENT_POTION_EXTENDED.get())),
+                        brewFactory.createBrewingRecipe(
+                                List.of(new ItemStack(Registration.VEX_REPELLENT_POTION_EXTENDED.get())),
+                                new ItemStack(Items.REDSTONE),
+                                new ItemStack(Registration.VEX_REPELLENT_POTION_LONG.get()))));
     }
 
     @Override
