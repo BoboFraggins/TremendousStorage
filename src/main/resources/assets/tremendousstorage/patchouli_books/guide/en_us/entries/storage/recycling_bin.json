@@ -2,7 +2,7 @@
   "name": "Recycling Bin",
   "icon": "tremendousstorage:recycling_bin",
   "category": "tremendousstorage:storage",
-  "sortnum": 9,
+  "sortnum": 10,
   "pages": [
     {
       "type": "patchouli:spotlight",

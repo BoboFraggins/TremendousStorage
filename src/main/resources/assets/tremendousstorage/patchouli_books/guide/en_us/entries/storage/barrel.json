@@ -1,0 +1,28 @@
+{
+  "name": "Barrel",
+  "icon": "tremendousstorage:barrel",
+  "category": "tremendousstorage:storage",
+  "sortnum": 4,
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "tremendousstorage:barrel",
+      "text": "The $(item)Barrel$() stores a single item type in bulk. It locks to the first item inserted and displays that item and its count on the front face. Connect it to the $(l:network/network_interface)item network$() by placing it adjacent to a tube."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Front Face Interactions",
+      "text": "The front face has two zones:$(br2)$(bold)Item area$() (inner 12×12): $(bold)Left-click$() to deposit the held stack. $(bold)Right-click$() to retrieve one stack. The barrel stays locked to its item type even when emptied.$(br2)$(bold)Click ring$() (edges) and all other sides: $(bold)Right-click$() to open the barrel UI, where void excess and priority can be configured."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Upgrades",
+      "text": "$(bold)Storage Upgrade$() — raises the tier and capacity by one step:$(br2)Wood → Copper → Iron → Gold → Diamond → Emerald → Netherite$(br2)Apply by right-clicking the click ring with the upgrade, or combine in a crafting grid.$(br2)$(bold)Whiteout Tape$() — unlocks a barrel that is locked but empty. Right-click the click ring, or combine in a crafting grid."
+    },
+    {
+      "type": "patchouli:text",
+      "title": "Ender Barrel",
+      "text": "Craft a $(item)Barrel$() with an $(item)Ender Upgrade$() to produce two $(item)Ender Barrels$() that share a single inventory across any distance. Both barrels always show the same contents and tier."
+    }
+  ]
+}

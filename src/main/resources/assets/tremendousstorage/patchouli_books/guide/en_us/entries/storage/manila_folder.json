@@ -2,7 +2,7 @@
   "name": "Manila Folder",
   "icon": "tremendousstorage:manila_folder",
   "category": "tremendousstorage:storage",
-  "sortnum": 6,
+  "sortnum": 7,
   "pages": [
     {
       "type": "patchouli:spotlight",

@@ -2,7 +2,7 @@
   "name": "Filing Cabinet",
   "icon": "tremendousstorage:filing_cabinet",
   "category": "tremendousstorage:storage",
-  "sortnum": 5,
+  "sortnum": 6,
   "pages": [
     {
       "type": "patchouli:spotlight",
