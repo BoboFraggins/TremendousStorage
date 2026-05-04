@@ -64,7 +64,7 @@ public class BarrelBlock extends BaseEntityBlock {
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (!level.isClientSide()) {
             if (level.getBlockEntity(pos) instanceof BarrelBlockEntity be) {
-                player.openMenu(be);
+                player.openMenu(be, buf -> buf.writeBlockPos(pos));
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide());

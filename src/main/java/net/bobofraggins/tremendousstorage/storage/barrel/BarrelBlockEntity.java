@@ -307,12 +307,4 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     public Packet<ClientGamePacketListener> getUpdatePacket() {
         return ClientboundBlockEntityDataPacket.create(this);
     }
-
-    // -------------------------------------------------------------------------
-    // ExtendedMenuProvider — writes extra data for the client-side menu constructor
-    // -------------------------------------------------------------------------
-
-    public void writeExtraMenuData(net.minecraft.network.RegistryFriendlyByteBuf buf) {
-        buf.writeBlockPos(worldPosition);
-    }
 }
