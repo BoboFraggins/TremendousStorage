@@ -4,5 +4,6 @@
   "creative_tab": "tremendousstorage:tremendousstorage",
   "version": 1,
   "i18n": false,
-  "use_resource_pack": true
+  "use_resource_pack": true,
+  "dont_generate_book": true
 }
