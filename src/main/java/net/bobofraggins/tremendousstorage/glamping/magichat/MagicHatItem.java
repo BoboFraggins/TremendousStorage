@@ -5,6 +5,7 @@ import java.util.Optional;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -13,13 +14,19 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -34,12 +41,32 @@ import net.minecraft.world.phys.Vec3;
  * <p>When the hat contains a mob, right-clicking on a block face or in air releases it ~1.5
  * blocks in front of the player. Block placement is suppressed while a mob is stored.
  */
-public class MagicHatItem extends BlockItem {
+public class MagicHatItem extends BlockItem implements Equipable {
 
     private static final String MOB_KEY = "CapturedMob";
 
+    static final ResourceLocation LUCK_MODIFIER_ID =
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "lucky_magic_hat_luck");
+
+    private static final ItemAttributeModifiers DEFAULT_MODIFIERS = ItemAttributeModifiers.builder()
+            .add(
+                    Attributes.LUCK,
+                    new AttributeModifier(LUCK_MODIFIER_ID, 2.0, AttributeModifier.Operation.ADD_VALUE),
+                    EquipmentSlotGroup.HEAD)
+            .build();
+
     public MagicHatItem(Block block) {
         super(block, new Item.Properties().stacksTo(1));
+    }
+
+    @Override
+    public EquipmentSlot getEquipmentSlot() {
+        return EquipmentSlot.HEAD;
+    }
+
+    @Override
+    public ItemAttributeModifiers getDefaultAttributeModifiers() {
+        return DEFAULT_MODIFIERS;
     }
 
     // -------------------------------------------------------------------------
@@ -99,7 +126,8 @@ public class MagicHatItem extends BlockItem {
             }
             return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
         }
-        return InteractionResultHolder.pass(stack);
+        // No mob stored — equip to (or swap with) the vanilla head slot.
+        return this.swapWithEquipmentSlot(this, level, player, hand);
     }
 
     private static void releaseMob(ItemStack stack, Player player, Level level) {
