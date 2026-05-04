@@ -1,13 +1,19 @@
 package net.bobofraggins.tremendousstorage.storage.whiteout;
 
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlock;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 
 /**
  * Whiteout Tape — a limited-use tool that unlocks locked-but-empty storage blocks and folders.
@@ -41,6 +47,22 @@ public class WhiteoutTapeItem extends Item {
         var pos = ctx.getClickedPos();
         var be = level.getBlockEntity(pos);
         var tape = ctx.getItemInHand();
+
+        if (be instanceof BarrelBlockEntity barrel) {
+            // Skip the item-display area — that zone is for extract gestures only.
+            BlockState state = level.getBlockState(pos);
+            Direction facing = state.getValue(BarrelBlock.FACING);
+            if (ctx.getClickedFace() == facing) {
+                BlockPos bp = ctx.getClickedPos();
+                if (BarrelBlock.isInItemArea(new BlockHitResult(ctx.getClickLocation(), facing, bp, false), facing)) {
+                    return InteractionResult.PASS;
+                }
+            }
+            if (!barrel.isLocked() || barrel.getCount() > 0) return InteractionResult.PASS;
+            barrel.clearItem();
+            consumeDurability(tape, ctx);
+            return InteractionResult.SUCCESS;
+        }
 
         if (be instanceof TankBlockEntity tank) {
             if (!tank.isLocked() || tank.getAmount() > 0) {
