@@ -12,6 +12,10 @@ public final class NetworkEvents {
     @SubscribeEvent
     static void onRegisterPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar("1");
+        registrar.playToServer(
+                net.bobofraggins.tremendousstorage.storage.barrel.BarrelInsertPacket.TYPE,
+                net.bobofraggins.tremendousstorage.storage.barrel.BarrelInsertPacket.STREAM_CODEC,
+                net.bobofraggins.tremendousstorage.storage.barrel.BarrelInsertPacket::handle);
         registrar.playToServer(SetPriorityPacket.TYPE, SetPriorityPacket.STREAM_CODEC, SetPriorityPacket::handle);
         registrar.playToServer(SetVoidExcessPacket.TYPE, SetVoidExcessPacket.STREAM_CODEC, SetVoidExcessPacket::handle);
         registrar.playToServer(

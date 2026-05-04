@@ -65,6 +65,7 @@ public final class ClientEventRegistrar {
         modBus.register(BarrelClientEvents.class);
 
         // ── Game-bus client events (tick handlers, input, etc.) ─────────────────
+        NeoForge.EVENT_BUS.addListener(BarrelClientEvents::onLeftClickBlock);
         NeoForge.EVENT_BUS.register(BackpackClientTickHandler.class);
         NeoForge.EVENT_BUS.register(PicnicBasketClientTickHandler.class);
         NeoForge.EVENT_BUS.register(PersonalAccessTerminalClientTickHandler.class);

@@ -2,14 +2,21 @@ package net.bobofraggins.tremendousstorage.storage.storageupgrade;
 
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlock;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * Upgrade item that raises a Tremendous Chest by one {@link StorageTier}.
@@ -40,6 +47,20 @@ public class StorageUpgradeItem extends Item {
     public InteractionResult useOn(UseOnContext ctx) {
         BlockEntity be = ctx.getLevel().getBlockEntity(ctx.getClickedPos());
 
+        // Don't apply upgrade when clicking the barrel's item-display area — that zone is reserved
+        // for insert/extract gestures and upgrades should only apply from the barrel-click ring.
+        if (be instanceof BarrelBlockEntity) {
+            BlockState state = ctx.getLevel().getBlockState(ctx.getClickedPos());
+            Direction facing = state.getValue(BarrelBlock.FACING);
+            if (ctx.getClickedFace() == facing) {
+                Vec3 loc = ctx.getClickLocation();
+                BlockPos pos = ctx.getClickedPos();
+                if (BarrelBlock.isInItemArea(new BlockHitResult(loc, facing, pos, false), facing)) {
+                    return InteractionResult.PASS;
+                }
+            }
+        }
+
         boolean matches = false;
         if (be instanceof ChestBlockEntity bulk && bulk.isUpgradeable() && bulk.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
@@ -64,6 +85,11 @@ public class StorageUpgradeItem extends Item {
         } else if (be instanceof StirlingEngineBlockEntity engine && engine.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 engine.setTier(to);
+            }
+            matches = true;
+        } else if (be instanceof BarrelBlockEntity barrel && barrel.getTier() == from) {
+            if (!ctx.getLevel().isClientSide()) {
+                barrel.setTier(to);
             }
             matches = true;
         }

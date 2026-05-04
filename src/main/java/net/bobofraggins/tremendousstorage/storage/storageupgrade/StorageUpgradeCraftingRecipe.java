@@ -166,6 +166,8 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
                 || item == Registration.ENDER_FOLDER.get()
                 || item == Registration.TANK_ITEM.get()
                 || item == Registration.ENDER_TANK_ITEM.get()
+                || item == Registration.BARREL_ITEM.get()
+                || item == Registration.ENDER_BARREL_ITEM.get()
                 || item == Registration.NETWORK_INTERFACE_ITEM.get()
                 || item == Registration.WIRELESS_HUB_ITEM.get();
     }
@@ -309,6 +311,8 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
         if (item == Registration.ENDER_TANK_ITEM.get()) return Registration.ENDER_TANK_BE_TYPE.get();
         if (item == Registration.NETWORK_INTERFACE_ITEM.get()) return Registration.NETWORK_INTERFACE_BE_TYPE.get();
         if (item == Registration.WIRELESS_HUB_ITEM.get()) return Registration.WIRELESS_HUB_BE_TYPE.get();
+        if (item == Registration.BARREL_ITEM.get()) return Registration.BARREL_BE_TYPE.get();
+        if (item == Registration.ENDER_BARREL_ITEM.get()) return Registration.ENDER_BARREL_BE_TYPE.get();
         if (item == Registration.FILING_CABINET_ITEM.get()) return Registration.FILING_CABINET_BE_TYPE.get();
         if (item == Registration.PICNIC_BASKET_ITEM.get()) return Registration.PICNIC_BASKET_BE_TYPE.get();
         if (item == Registration.ENDER_PICNIC_BASKET_ITEM.get()) return Registration.ENDER_PICNIC_BASKET_BE_TYPE.get();
