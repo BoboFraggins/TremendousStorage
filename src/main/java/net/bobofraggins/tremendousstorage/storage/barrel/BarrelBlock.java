@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.barrel;
 
 import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
+import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
@@ -19,7 +20,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class BarrelBlock extends BaseEntityBlock {
+public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<StorageTier> TIER = EnumProperty.create("tier", StorageTier.class);

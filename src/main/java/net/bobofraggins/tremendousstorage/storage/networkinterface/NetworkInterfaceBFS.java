@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlock;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
@@ -337,6 +338,7 @@ public final class NetworkInterfaceBFS {
 
         if (neighborBE instanceof FilingCabinetBlockEntity fc) return fc.getPriority();
         if (neighborBE instanceof ChestBlockEntity bs) return bs.getPriority();
+        if (neighborBE instanceof BarrelBlockEntity bb) return bb.getPriority();
         return Priority.NORMAL;
     }
 }
