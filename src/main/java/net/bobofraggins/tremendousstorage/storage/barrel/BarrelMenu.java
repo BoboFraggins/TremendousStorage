@@ -46,14 +46,20 @@ public class BarrelMenu extends AbstractContainerMenu {
         addDataSlots(data);
     }
 
+    // Inventory slot positions match Dialog(blankPane(WIDTH,10) + PlayerInventoryPane()) layout:
+    // titleBar(17) + spacer(10) = 27, hotbar = 27 + 3*18 + 4 = 85, x = PlayerInventoryPane margin 20
+    static final int INV_LEFT = 20;
+    static final int INV_TOP = 27;
+    static final int HOTBAR_TOP = 85;
+
     private void addPlayerSlots(Inventory inv) {
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                addSlot(new Slot(inv, col + row * 9 + 9, 8 + col * 18, 72 + row * 18));
+                addSlot(new Slot(inv, col + row * 9 + 9, INV_LEFT + col * 18, INV_TOP + row * 18));
             }
         }
         for (int col = 0; col < 9; col++) {
-            addSlot(new Slot(inv, col, 8 + col * 18, 130));
+            addSlot(new Slot(inv, col, INV_LEFT + col * 18, HOTBAR_TOP));
         }
     }
 
