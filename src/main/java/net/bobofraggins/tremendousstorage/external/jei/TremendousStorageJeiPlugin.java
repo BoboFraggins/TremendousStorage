@@ -20,6 +20,9 @@ import mezz.jei.api.runtime.IJeiRuntime;
 import net.bobofraggins.tremendousstorage.shared.network.SetImportExportFilterPacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackMenu;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
+import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackMenu;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderExtractRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderMergeRecipe;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderStorageRecipe;
@@ -124,6 +127,21 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipeTransferHandlers(IRecipeTransferRegistration reg) {
         reg.addRecipeTransferHandler(new TerminalJeiRecipeHandler(reg.getTransferHelper()), RecipeTypes.CRAFTING);
+        // Local crafting grids: output=slot 0, inputs=1-9, player inventory=10-45.
+        // JEI validates slot existence; with no crafting upgrade the menu only has 36 slots
+        // so JEI will detect the missing slots and hide the "+" button automatically.
+        reg.addRecipeTransferHandler(
+                ChestMenu.class, Registration.TREMENDOUS_CHEST_MENU.get(), RecipeTypes.CRAFTING, 1, 9, 10, 36);
+        reg.addRecipeTransferHandler(
+                BackpackMenu.class, Registration.TREMENDOUS_BACKPACK_MENU.get(), RecipeTypes.CRAFTING, 1, 9, 10, 36);
+        reg.addRecipeTransferHandler(
+                EnderBackpackMenu.class,
+                Registration.ENDER_TREMENDOUS_BACKPACK_MENU.get(),
+                RecipeTypes.CRAFTING,
+                1,
+                9,
+                10,
+                36);
     }
 
     /**
