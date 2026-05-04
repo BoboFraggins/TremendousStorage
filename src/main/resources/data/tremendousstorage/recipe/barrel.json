@@ -8,7 +8,7 @@
   "key": {
     "I": { "item": "tremendousstorage:lazurite_bars" },
     "B": { "item": "tremendousstorage:lazurite_ingot" },
-    "C": { "tag": "minecraft:barrels" }
+    "C": { "item": "minecraft:barrel" }
   },
   "result": {
     "id": "tremendousstorage:barrel",
