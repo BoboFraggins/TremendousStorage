@@ -1,6 +1,8 @@
 {
   "replace": false,
   "values": [
-    "tremendousstorage:lazurite_paxel"
+    "tremendousstorage:lazurite_paxel",
+    "tremendousstorage:lazurite_axe",
+    "tremendousstorage:lazurite_sword"
   ]
 }

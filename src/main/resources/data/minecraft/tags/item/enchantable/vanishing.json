@@ -1,6 +1,12 @@
 {
   "replace": false,
   "values": [
+    "tremendousstorage:lazurite_paxel",
+    "tremendousstorage:lazurite_pickaxe",
+    "tremendousstorage:lazurite_axe",
+    "tremendousstorage:lazurite_shovel",
+    "tremendousstorage:lazurite_hoe",
+    "tremendousstorage:lazurite_sword",
     "tremendousstorage:magic_hat"
   ]
 }
