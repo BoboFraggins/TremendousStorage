@@ -1,0 +1,6 @@
+{
+  "parent": "tremendousstorage:block/barrel_body",
+  "textures": {
+    "front": "tremendousstorage:block/ender_barrels/ender_barrel_netherite"
+  }
+}

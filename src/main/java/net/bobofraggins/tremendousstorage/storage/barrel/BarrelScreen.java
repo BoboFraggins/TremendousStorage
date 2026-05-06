@@ -2,7 +2,6 @@ package net.bobofraggins.tremendousstorage.storage.barrel;
 
 import net.bobofraggins.tremendousstorage.shared.network.SetPriorityPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetVoidExcessPacket;
-import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PriorityPane;
@@ -16,43 +15,46 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
 
     private final Dialog dialog;
-    private final ConfigDrawer configDrawer;
 
     public BarrelScreen(BarrelMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
 
-        dialog = new Dialog(Dialog.blankPane(PlayerInventoryPane.WIDTH, 10), new PlayerInventoryPane());
-        imageWidth = dialog.totalWidth();
-        imageHeight = dialog.totalHeight();
-
-        configDrawer = new ConfigDrawer(
+        dialog = new Dialog(
+                Dialog.blankPane(188, 0),
                 new VoidExcessPane(
                         menu::isVoidExcess,
                         () -> PacketDistributor.sendToServer(
                                 new SetVoidExcessPacket(menu.getPos(), !menu.isVoidExcess()))),
                 new PriorityPane(
                         () -> menu.getPriority().ordinal(),
-                        p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
+                        p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))),
+                Dialog.blankPane(0, 10),
+                new PlayerInventoryPane());
+        imageWidth = dialog.totalWidth();
+        imageHeight = dialog.totalHeight();
     }
 
     @Override
     protected void init() {
         super.init();
         dialog.init(leftPos, topPos);
-        configDrawer.init(leftPos, topPos, imageHeight);
     }
 
     @Override
     protected void renderBg(GuiGraphics gfx, float partialTick, int mx, int my) {
-        configDrawer.render(gfx, font, mx, my, partialTick);
-        configDrawer.renderTab(gfx, mx, my);
         dialog.render(gfx, font, title, mx, my, partialTick);
     }
 
     @Override
     protected void renderLabels(GuiGraphics gfx, int mx, int my) {
         // Title is drawn by Dialog. Draw only the player inventory label.
-        gfx.drawString(font, Component.translatable("container.inventory"), BarrelMenu.INV_LEFT, 17, 0x404040, false);
+        gfx.drawString(
+                font,
+                Component.translatable("container.inventory"),
+                BarrelMenu.INV_LEFT,
+                BarrelMenu.INV_TOP - 10,
+                0x404040,
+                false);
     }
 
     @Override
@@ -64,7 +66,7 @@ public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
-        if (configDrawer.mouseClicked(mx, my, button)) return true;
+        if (dialog.mouseClicked(mx, my, button)) return true;
         return super.mouseClicked(mx, my, button);
     }
 }
