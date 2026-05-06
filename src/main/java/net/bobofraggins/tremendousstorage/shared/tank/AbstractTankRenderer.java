@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import org.joml.Matrix4f;
 
 /**
@@ -22,7 +23,8 @@ import org.joml.Matrix4f;
  * <p>Handles tube-connector stub rendering and the shared octagonal-prism geometry helpers.
  * Subclasses implement {@link #renderFill} to paint their specific fill material.
  */
-public abstract class AbstractTankRenderer<T extends BlockEntity> implements BlockEntityRenderer<T> {
+public abstract class AbstractTankRenderer<T extends BlockEntity>
+        implements BlockEntityRenderer<T>, IBlockEntityRendererExtension<T> {
 
     protected static final ResourceLocation LAZURITE_BLOCK =
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/lazurite_block");

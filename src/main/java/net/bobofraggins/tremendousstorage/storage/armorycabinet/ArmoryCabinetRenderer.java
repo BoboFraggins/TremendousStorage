@@ -16,6 +16,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
@@ -36,7 +37,9 @@ import net.neoforged.neoforge.client.model.data.ModelData;
  *   <li>{@code armory_cabinet_wheel} — combination lock wheel (rotates 360° CCW in phase 1).
  * </ul>
  */
-public class ArmoryCabinetRenderer implements BlockEntityRenderer<ArmoryCabinetBlockEntity> {
+public class ArmoryCabinetRenderer
+        implements BlockEntityRenderer<ArmoryCabinetBlockEntity>,
+                IBlockEntityRendererExtension<ArmoryCabinetBlockEntity> {
 
     private static final ModelResourceLocation BODY = standalone("block/armory_cabinet_body");
     private static final ModelResourceLocation DOOR = standalone("block/armory_cabinet_door");

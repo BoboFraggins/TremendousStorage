@@ -4,6 +4,8 @@ import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlo
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlock;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlock;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlock;
@@ -28,6 +30,7 @@ public class TubeJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration reg) {
         reg.registerBlockDataProvider(TubeJadeDataProvider.INSTANCE, TubeBlockEntity.class);
+        reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, BarrelBlockEntity.class);
         reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, ChestBlockEntity.class);
         reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, TankBlockEntity.class);
         reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, FilingCabinetBlockEntity.class);
@@ -40,6 +43,7 @@ public class TubeJadePlugin implements IWailaPlugin {
     @Override
     public void registerClient(IWailaClientRegistration reg) {
         reg.registerBlockComponent(TubeJadeComponentProvider.INSTANCE, TubeBlock.class);
+        reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, BarrelBlock.class);
         reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, ChestBlock.class);
         reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, TankBlock.class);
         reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, FilingCabinetBlock.class);

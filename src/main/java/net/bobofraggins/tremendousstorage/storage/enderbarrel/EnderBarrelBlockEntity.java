@@ -164,7 +164,7 @@ public class EnderBarrelBlockEntity extends BarrelBlockEntity {
 
     @Override
     public String getNetworkName() {
-        return getDisplayName().getString();
+        return Component.translatable("block.tremendousstorage.barrel").getString() + buildSuffix(true);
     }
 
     // -------------------------------------------------------------------------

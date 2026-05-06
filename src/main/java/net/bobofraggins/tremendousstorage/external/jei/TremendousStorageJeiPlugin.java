@@ -9,6 +9,7 @@ import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.ITypedIngredient;
+import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
@@ -132,16 +133,15 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
         // so JEI will detect the missing slots and hide the "+" button automatically.
         reg.addRecipeTransferHandler(
                 ChestMenu.class, Registration.TREMENDOUS_CHEST_MENU.get(), RecipeTypes.CRAFTING, 1, 9, 10, 36);
+        IRecipeTransferHandlerHelper transferHelper = reg.getTransferHelper();
         reg.addRecipeTransferHandler(
-                BackpackMenu.class, Registration.TREMENDOUS_BACKPACK_MENU.get(), RecipeTypes.CRAFTING, 1, 9, 10, 36);
+                new BackpackJeiTransferHandler<>(
+                        BackpackMenu.class, Registration.TREMENDOUS_BACKPACK_MENU.get(), transferHelper),
+                RecipeTypes.CRAFTING);
         reg.addRecipeTransferHandler(
-                EnderBackpackMenu.class,
-                Registration.ENDER_TREMENDOUS_BACKPACK_MENU.get(),
-                RecipeTypes.CRAFTING,
-                1,
-                9,
-                10,
-                36);
+                new BackpackJeiTransferHandler<>(
+                        EnderBackpackMenu.class, Registration.ENDER_TREMENDOUS_BACKPACK_MENU.get(), transferHelper),
+                RecipeTypes.CRAFTING);
     }
 
     /**

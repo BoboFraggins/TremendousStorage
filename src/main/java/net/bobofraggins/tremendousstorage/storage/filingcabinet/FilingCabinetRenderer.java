@@ -17,6 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
@@ -30,7 +31,9 @@ import net.neoforged.neoforge.client.model.data.ModelData;
  *       per tick), interpolated with {@code partialTick} for smooth motion.
  * </ul>
  */
-public class FilingCabinetRenderer implements BlockEntityRenderer<FilingCabinetBlockEntity> {
+public class FilingCabinetRenderer
+        implements BlockEntityRenderer<FilingCabinetBlockEntity>,
+                IBlockEntityRendererExtension<FilingCabinetBlockEntity> {
 
     private static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_body"));

@@ -205,7 +205,20 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
 
     @Override
     public String getNetworkName() {
-        return getDisplayName().getString();
+        return Component.translatable("block.tremendousstorage.barrel").getString() + buildSuffix(false);
+    }
+
+    protected String buildSuffix(boolean ender) {
+        StringBuilder sb = new StringBuilder();
+        if (tier != StorageTier.WOOD) {
+            sb.append(Character.toUpperCase(tier.getId().charAt(0)))
+                    .append(tier.getId().substring(1));
+        }
+        if (ender) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Ender");
+        }
+        return sb.isEmpty() ? "" : " (" + sb + ")";
     }
 
     @Override

@@ -2,7 +2,9 @@ package net.bobofraggins.tremendousstorage.external.jade;
 
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
@@ -54,6 +56,9 @@ public enum StorageTierJadeDataProvider implements IServerDataProvider<BlockAcce
             if (at.hasCraftingUpgrade()) data.putBoolean("CraftingUpgrade", true);
         } else if (be instanceof NetworkInterfaceBlockEntity ni) {
             data.putString("StorageTier", ni.getTier().getId());
+        } else if (be instanceof BarrelBlockEntity barrel) {
+            data.putString("StorageTier", barrel.getTier().getId());
+            if (barrel instanceof EnderBarrelBlockEntity) data.putBoolean("Ender", true);
         } else if (be instanceof StirlingEngineBlockEntity engine) {
             data.putString("StorageTier", engine.getTier().getId());
         }

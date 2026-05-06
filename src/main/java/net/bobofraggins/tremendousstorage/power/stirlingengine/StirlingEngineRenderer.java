@@ -18,10 +18,13 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 /** Renders the Stirling Engine body, animated flywheel, piston, and dynamic bridge connector. */
-public class StirlingEngineRenderer implements BlockEntityRenderer<StirlingEngineBlockEntity> {
+public class StirlingEngineRenderer
+        implements BlockEntityRenderer<StirlingEngineBlockEntity>,
+                IBlockEntityRendererExtension<StirlingEngineBlockEntity> {
 
     private static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_body"));

@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import org.joml.Matrix4f;
 
 /**
@@ -32,7 +33,8 @@ import org.joml.Matrix4f;
  *   <li>East/West   — 60%
  * </ul>
  */
-public class TubeRenderer implements BlockEntityRenderer<TubeBlockEntity> {
+public class TubeRenderer
+        implements BlockEntityRenderer<TubeBlockEntity>, IBlockEntityRendererExtension<TubeBlockEntity> {
 
     /** ResourceLocation for the white tube texture (tinted by DyeColor). */
     public static final ResourceLocation TUBE_TEXTURE =

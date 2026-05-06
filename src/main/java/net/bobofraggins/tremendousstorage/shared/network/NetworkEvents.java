@@ -103,5 +103,9 @@ public final class NetworkEvents {
                 SetBackpackSortModePacket::handle);
         registrar.playToServer(
                 BackpackQuickStackPacket.TYPE, BackpackQuickStackPacket.STREAM_CODEC, BackpackQuickStackPacket::handle);
+        registrar.playToServer(
+                net.bobofraggins.tremendousstorage.shared.network.BackpackFillCraftingGridPacket.TYPE,
+                net.bobofraggins.tremendousstorage.shared.network.BackpackFillCraftingGridPacket.STREAM_CODEC,
+                net.bobofraggins.tremendousstorage.shared.network.BackpackFillCraftingGridPacket::handle);
     }
 }

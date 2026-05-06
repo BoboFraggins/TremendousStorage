@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
@@ -34,7 +35,8 @@ import net.neoforged.neoforge.client.model.data.ModelData;
  * <p>Both parts are oriented to the block's {@link WirelessHubBlock#FACING} direction before any
  * animation is applied.
  */
-public class WirelessHubRenderer implements BlockEntityRenderer<WirelessHubBlockEntity> {
+public class WirelessHubRenderer
+        implements BlockEntityRenderer<WirelessHubBlockEntity>, IBlockEntityRendererExtension<WirelessHubBlockEntity> {
 
     private static final ModelResourceLocation BASE_MODEL = ModelResourceLocation.standalone(
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_base"));

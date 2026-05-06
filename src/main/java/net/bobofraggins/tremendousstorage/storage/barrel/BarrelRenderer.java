@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 
 /**
  * Renders the locked item and count on the barrel's front face.
@@ -18,7 +19,8 @@ import net.minecraft.world.item.ItemStack;
  * <p>The item is drawn flat (like an item frame) centred on the front face; the formatted
  * count appears as small 3D text immediately below it.
  */
-public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
+public class BarrelRenderer
+        implements BlockEntityRenderer<BarrelBlockEntity>, IBlockEntityRendererExtension<BarrelBlockEntity> {
 
     public BarrelRenderer(BlockEntityRendererProvider.Context ctx) {}
 
@@ -43,7 +45,7 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
 
         // ── Item ──────────────────────────────────────────────────────────────
         ps.pushPose();
-        ps.scale(0.5f, 0.5f, 0.001f);
+        ps.scale(0.75f, 0.75f, 0.001f);
         Minecraft.getInstance()
                 .getItemRenderer()
                 .renderStatic(item, ItemDisplayContext.FIXED, light, overlay, ps, buffers, be.getLevel(), 0);
@@ -55,14 +57,14 @@ public class BarrelRenderer implements BlockEntityRenderer<BarrelBlockEntity> {
         float textScale = 1f / 80f;
 
         ps.pushPose();
-        ps.translate(0, -0.28, 0);
+        ps.translate(0, -0.42, 0);
         // Y is flipped so text doesn't appear upside-down in world space.
         ps.scale(textScale, -textScale, textScale);
         font.drawInBatch(
                 label,
                 -font.width(label) / 2f,
                 0,
-                0xFFFFFF,
+                -1,
                 false,
                 ps.last().pose(),
                 buffers,
