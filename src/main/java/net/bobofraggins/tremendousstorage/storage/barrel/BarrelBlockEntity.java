@@ -86,7 +86,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     }
 
     public long getCapacity() {
-        return tier.getCapacity();
+        return compactingUpgrade ? tier.getCapacity() * 9L : tier.getCapacity();
     }
 
     public StorageTier getTier() {
