@@ -391,23 +391,32 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     }
 
     /**
-     * Finds the decompressed form of {@code item} via a 1×1 crafting recipe. Round-trip verified:
-     * the output must re-compress back to {@code item} with the same ratio, preventing the barrel
-     * from handing out otherwise-unobtainable lower-tier items.
+     * Finds the decompressed form of {@code item} via a 1×1 crafting recipe. Among all matching
+     * uncraft recipes, candidates are preferred in ratio order 9 → 4 → 8 (same order as
+     * {@link #findUpperTier}). Each candidate is round-trip verified: its output must re-compress
+     * back to {@code item} with the same ratio, preventing unobtainable lower-tier items.
      */
     private CompactResult findLowerTier(RecipeManager rm, ItemStack item) {
         if (item.isEmpty() || level == null) return null;
         var in1 = CraftingInput.of(1, 1, List.of(item));
-        var r = rm.getRecipeFor(RecipeType.CRAFTING, in1, level);
-        if (r.isEmpty()) return null;
-        var out = r.get().value().assemble(in1, level.registryAccess());
-        if (out.isEmpty()) return null;
-        int n = out.getCount();
-        if (n != 9 && n != 4 && n != 8) return null;
-        CompactResult upper = findUpperTier(rm, out);
-        if (upper == null) return null;
-        if (!ItemStack.isSameItemSameComponents(upper.result(), item) || upper.ratio() != n) return null;
-        return new CompactResult(out.copyWithCount(1), n);
+        ItemStack out9 = ItemStack.EMPTY, out4 = ItemStack.EMPTY, out8 = ItemStack.EMPTY;
+        for (var holder : rm.getAllRecipesFor(RecipeType.CRAFTING)) {
+            if (!holder.value().matches(in1, level)) continue;
+            var out = holder.value().assemble(in1, level.registryAccess());
+            if (out.isEmpty()) continue;
+            if (out.getCount() == 9 && out9.isEmpty()) out9 = out;
+            else if (out.getCount() == 4 && out4.isEmpty()) out4 = out;
+            else if (out.getCount() == 8 && out8.isEmpty()) out8 = out;
+        }
+        for (var candidate : new ItemStack[] {out9, out4, out8}) {
+            if (candidate.isEmpty()) continue;
+            int n = candidate.getCount();
+            CompactResult upper = findUpperTier(rm, candidate);
+            if (upper == null) continue;
+            if (!ItemStack.isSameItemSameComponents(upper.result(), item) || upper.ratio() != n) continue;
+            return new CompactResult(candidate.copyWithCount(1), n);
+        }
+        return null;
     }
 
     // -------------------------------------------------------------------------
