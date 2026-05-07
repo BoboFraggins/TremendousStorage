@@ -11,6 +11,7 @@ import net.bobofraggins.tremendousstorage.storage.networkinterface.NiLink;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -24,6 +25,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -596,6 +598,22 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         components.set(
                 Registration.BARREL_CONTENTS.get(),
                 new BarrelContents(storedItem.isEmpty() ? Optional.empty() : Optional.of(storedItem), count));
+        // Explicitly populate BLOCK_ENTITY_DATA with tier and upgrade info so the loot table's
+        // copy_components function can copy it to the dropped item. The base BlockEntity
+        // implementation requires live registries to serialize ItemStacks and may produce an
+        // empty tag; we avoid that by only writing primitive fields here (the item/count are
+        // preserved separately via BarrelContents above).
+        CompoundTag tag = new CompoundTag();
+        tag.putString(TAG_TIER, tier.getId());
+        tag.putBoolean(TAG_VOID_EXCESS, voidExcess);
+        tag.putBoolean(TAG_COMPACTING, compactingUpgrade);
+        if (compactingUpgrade && baseSlot != 0) tag.putInt(TAG_BASE_SLOT, baseSlot);
+        if (hasPullerUpgrade) {
+            tag.putBoolean("PullerUpgrade", true);
+            tag.putInt("PullerSides", pullerSides);
+        }
+        tag.putInt(TAG_PRIORITY, priority.ordinal());
+        components.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
     }
 
     @Override
