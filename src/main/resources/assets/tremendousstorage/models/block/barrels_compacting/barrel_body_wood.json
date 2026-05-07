@@ -1,6 +1,6 @@
 {
   "parent": "tremendousstorage:block/barrel_body",
   "textures": {
-    "front": "tremendousstorage:block/barrels_compacting/barrel_wood"
+    "front": "tremendousstorage:block/barrels_compacting/barrel_compacting_wood"
   }
 }
