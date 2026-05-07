@@ -189,9 +189,9 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
         }
         int px = (int) Math.max(0, Math.min(15, lx * 16));
         int py = (int) Math.max(0, Math.min(15, (1.0 - ly) * 16)); // y=0 at top
-        // Top strip → slot 1; bottom half split left/right → slots 0/2; gap falls through
+        // Top strip → slot 1; bottom half split left/right → slots 2/0; gap falls through
         if (py <= 7) return 1;
-        return px < 8 ? 0 : 2;
+        return px < 8 ? 2 : 0;
     }
 
     private static void handleCompactingItemOn(BarrelBlockEntity be, ItemStack stack, Player player, int slot) {

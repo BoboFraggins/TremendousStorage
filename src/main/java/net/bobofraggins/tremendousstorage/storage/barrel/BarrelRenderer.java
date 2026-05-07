@@ -172,9 +172,9 @@ public class BarrelRenderer
             c2 = be.getCount();
         }
 
-        if (!s0.isEmpty()) renderSmallItem(ps, buffers, s0, c0, 0.25f, 0.25f, level, light, overlay);
+        if (!s2.isEmpty()) renderSmallItem(ps, buffers, s2, c2, 0.25f, 0.25f, level, light, overlay);
         if (!s1.isEmpty()) renderSmallItem(ps, buffers, s1, c1, 0.50f, 0.75f, level, light, overlay);
-        if (!s2.isEmpty()) renderSmallItem(ps, buffers, s2, c2, 0.75f, 0.25f, level, light, overlay);
+        if (!s0.isEmpty()) renderSmallItem(ps, buffers, s0, c0, 0.75f, 0.25f, level, light, overlay);
     }
 
     private static void renderSmallItem(
