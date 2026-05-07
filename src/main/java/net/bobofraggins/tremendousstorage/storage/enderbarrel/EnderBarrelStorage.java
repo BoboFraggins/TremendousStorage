@@ -26,6 +26,7 @@ public class EnderBarrelStorage extends SavedData {
     private final Map<Long, ItemStack> storedItems = new HashMap<>();
     private final Map<Long, Long> counts = new HashMap<>();
     private final Map<Long, StorageTier> tiers = new HashMap<>();
+    private final Map<Long, Integer> baseSlots = new HashMap<>();
     private final Map<Long, Long> versions = new HashMap<>();
 
     // -------------------------------------------------------------------------
@@ -63,9 +64,21 @@ public class EnderBarrelStorage extends SavedData {
         return tiers.getOrDefault(linkId, StorageTier.WOOD);
     }
 
+    public int getBaseSlot(long linkId) {
+        return baseSlots.getOrDefault(linkId, 0);
+    }
+
     public void setContents(long linkId, ItemStack storedItem, long count) {
         storedItems.put(linkId, storedItem.isEmpty() ? ItemStack.EMPTY : storedItem.copyWithCount(1));
         counts.put(linkId, count);
+        versions.merge(linkId, 1L, Long::sum);
+        setDirty();
+    }
+
+    public void setContentsAndBaseSlot(long linkId, ItemStack storedItem, long count, int baseSlot) {
+        storedItems.put(linkId, storedItem.isEmpty() ? ItemStack.EMPTY : storedItem.copyWithCount(1));
+        counts.put(linkId, count);
+        baseSlots.put(linkId, baseSlot);
         versions.merge(linkId, 1L, Long::sum);
         setDirty();
     }
@@ -107,6 +120,9 @@ public class EnderBarrelStorage extends SavedData {
             if (e.contains("Tier")) {
                 s.tiers.put(linkId, StorageTier.fromId(e.getString("Tier")));
             }
+            if (e.contains("BaseSlot")) {
+                s.baseSlots.put(linkId, e.getInt("BaseSlot"));
+            }
         }
         return s;
     }
@@ -123,6 +139,8 @@ public class EnderBarrelStorage extends SavedData {
             e.putLong("Count", counts.getOrDefault(linkId, 0L));
             StorageTier tier = tiers.getOrDefault(linkId, StorageTier.WOOD);
             if (tier != StorageTier.WOOD) e.putString("Tier", tier.getId());
+            int baseSlot = baseSlots.getOrDefault(linkId, 0);
+            if (baseSlot != 0) e.putInt("BaseSlot", baseSlot);
             links.add(e);
         }
         tag.put("Links", links);

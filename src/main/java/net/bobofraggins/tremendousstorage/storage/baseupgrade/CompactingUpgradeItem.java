@@ -3,7 +3,6 @@ package net.bobofraggins.tremendousstorage.storage.baseupgrade;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -21,8 +20,10 @@ public class CompactingUpgradeItem extends Item {
         }
         if (!ctx.getLevel().isClientSide()) {
             barrel.setCompactingUpgrade(true);
-            ItemStack held = ctx.getItemInHand();
-            held.shrink(1);
+            if (barrel.isLocked()) {
+                barrel.lockCompactingChainPreserving(1);
+            }
+            ctx.getItemInHand().shrink(1);
         }
         return InteractionResult.sidedSuccess(ctx.getLevel().isClientSide());
     }

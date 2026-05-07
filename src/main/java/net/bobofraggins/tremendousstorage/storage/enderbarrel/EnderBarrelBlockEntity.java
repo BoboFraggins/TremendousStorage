@@ -76,6 +76,9 @@ public class EnderBarrelBlockEntity extends BarrelBlockEntity {
         EnderBarrelStorage storage = getStorage(server);
         if (storage.hasLink(linkId)) {
             loadContents(storage.getStoredItem(linkId), storage.getCount(linkId));
+            baseSlot = storage.getBaseSlot(linkId);
+            compactCacheKey = null;
+            compactCacheBaseSlot = -1;
             StorageTier storageTier = storage.getTier(linkId);
             StorageTier localTier = getTier();
             if (localTier.ordinal() > storageTier.ordinal()) {
@@ -95,7 +98,7 @@ public class EnderBarrelBlockEntity extends BarrelBlockEntity {
         MinecraftServer server = level.getServer();
         if (server == null) return;
         EnderBarrelStorage storage = getStorage(server);
-        storage.setContents(linkId, storedItem, count);
+        storage.setContentsAndBaseSlot(linkId, storedItem, count, baseSlot);
         lastKnownVersion = storage.getVersion(linkId);
     }
 
@@ -132,6 +135,12 @@ public class EnderBarrelBlockEntity extends BarrelBlockEntity {
     @Override
     public void clearItem() {
         super.clearItem();
+        syncToStorage();
+    }
+
+    @Override
+    protected void notifyChanged() {
+        super.notifyChanged();
         syncToStorage();
     }
 

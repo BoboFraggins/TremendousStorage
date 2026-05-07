@@ -56,8 +56,8 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     int compactTier1Ratio = 0;
     ItemStack compactTier2Item = ItemStack.EMPTY;
     int compactTier2Ratio = 0;
-    private ItemStack compactCacheKey = null;
-    private int compactCacheBaseSlot = -1;
+    protected ItemStack compactCacheKey = null;
+    protected int compactCacheBaseSlot = -1;
 
     private final NiLink niLink = new NiLink();
 
@@ -335,15 +335,37 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     }
 
     private void pullFromHandler(IItemHandler handler) {
+        CompactingBarrelItemHandler compact = compactingUpgrade ? new CompactingBarrelItemHandler(this) : null;
         for (int s = 0; s < handler.getSlots(); s++) {
             ItemStack sim = handler.extractItem(s, PULL_AMOUNT, true);
             if (sim.isEmpty()) continue;
-            long remainder = insert(sim, sim.getCount(), true);
-            int canInsert = (int) (sim.getCount() - remainder);
+            int canInsert = simulatePullInsert(compact, sim);
             if (canInsert <= 0) continue;
             ItemStack extracted = handler.extractItem(s, canInsert, false);
-            if (!extracted.isEmpty()) insert(extracted, extracted.getCount(), false);
+            if (!extracted.isEmpty()) doPullInsert(compact, extracted);
             break;
+        }
+    }
+
+    private int simulatePullInsert(CompactingBarrelItemHandler compact, ItemStack stack) {
+        if (compact != null) {
+            for (int ts = 0; ts < 3; ts++) {
+                ItemStack rem = compact.insertItem(ts, stack.copy(), true);
+                int n = stack.getCount() - (rem.isEmpty() ? 0 : rem.getCount());
+                if (n > 0) return n;
+            }
+            return 0;
+        }
+        return (int) (stack.getCount() - insert(stack, stack.getCount(), true));
+    }
+
+    private void doPullInsert(CompactingBarrelItemHandler compact, ItemStack stack) {
+        if (compact != null) {
+            for (int ts = 0; ts < 3 && !stack.isEmpty(); ts++) {
+                stack = compact.insertItem(ts, stack, false);
+            }
+        } else {
+            insert(stack, stack.getCount(), false);
         }
     }
 
@@ -372,6 +394,36 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
 
         storedItem = base;
         count = 0;
+        baseSlot = newBaseSlot;
+        compactCacheKey = null;
+        compactCacheBaseSlot = -1;
+        notifyChanged();
+    }
+
+    /**
+     * Like {@link #lockCompactingChain} but called when the compacting upgrade is applied to an
+     * already-locked barrel. Treats the current stored item as {@code targetSlot}, walks down to
+     * find the base item, and converts the existing raw count at each step so no items are lost.
+     * Example: 100 Iron Ingots at slot 1 → storedItem = Iron Nugget, count = 900, baseSlot = 0.
+     */
+    public void lockCompactingChainPreserving(int targetSlot) {
+        if (level == null || level.isClientSide || !compactingUpgrade || !isLocked()) return;
+        if (!(level instanceof ServerLevel sl)) return;
+        RecipeManager rm = sl.getServer().getRecipeManager();
+
+        ItemStack base = storedItem.copyWithCount(1);
+        long newCount = count;
+        int newBaseSlot = targetSlot;
+        for (int i = 0; i < targetSlot; i++) {
+            CompactResult lower = findLowerTier(rm, base);
+            if (lower == null) break;
+            newCount = newCount * lower.ratio();
+            base = lower.result();
+            newBaseSlot--;
+        }
+
+        storedItem = base;
+        count = newCount;
         baseSlot = newBaseSlot;
         compactCacheKey = null;
         compactCacheBaseSlot = -1;
