@@ -1,5 +1,8 @@
 package net.bobofraggins.tremendousstorage.storage.barrel;
 
+import net.bobofraggins.tremendousstorage.shared.storage.IKeyCounterContributor;
+import net.bobofraggins.tremendousstorage.shared.storage.KeyCounter;
+import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandler;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +18,7 @@ import org.jetbrains.annotations.NotNull;
  * (baseSlot=1): slot 0 = empty, slot 1 = nether quartz, slot 2 = quartz block.
  * (baseSlot=2): slot 0 = empty, slot 1 = empty, slot 2 = item (acts like a normal barrel).
  */
-public class CompactingBarrelItemHandler implements IItemHandler {
+public class CompactingBarrelItemHandler implements IItemHandler, IKeyCounterContributor {
 
     private final BarrelBlockEntity be;
 
@@ -163,5 +166,23 @@ public class CompactingBarrelItemHandler implements IItemHandler {
             be.notifyChanged();
         }
         return type.copyWithCount(capped);
+    }
+
+    // ── IKeyCounterContributor ────────────────────────────────────────────────
+
+    @Override
+    public void contributeToKeyCounter(KeyCounter kc) {
+        cache();
+        if (!be.isLocked() || be.count <= 0) return;
+        kc.add(StorageKey.of(be.storedItem), be.count);
+        if (!be.compactingUpgrade) return;
+        if (!be.compactTier1Item.isEmpty() && be.compactTier1Ratio > 0) {
+            long n = be.count / be.compactTier1Ratio;
+            if (n > 0) kc.add(StorageKey.of(be.compactTier1Item), n);
+        }
+        if (!be.compactTier2Item.isEmpty() && be.compactTier1Ratio > 0 && be.compactTier2Ratio > 0) {
+            long n = be.count / ((long) be.compactTier1Ratio * be.compactTier2Ratio);
+            if (n > 0) kc.add(StorageKey.of(be.compactTier2Item), n);
+        }
     }
 }

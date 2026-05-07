@@ -44,7 +44,6 @@ import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlock;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelContents;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelItem;
-import net.bobofraggins.tremendousstorage.storage.barrel.BarrelItemHandler;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelMenu;
 import net.bobofraggins.tremendousstorage.storage.barrel.CompactingBarrelItemHandler;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.BaseUpgradeItem;
@@ -1410,13 +1409,11 @@ public final class Registration {
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 BARREL_BE_TYPE.get(),
-                (be, side) ->
-                        be.hasCompactingUpgrade() ? new CompactingBarrelItemHandler(be) : new BarrelItemHandler(be));
+                (be, side) -> new CompactingBarrelItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 ENDER_BARREL_BE_TYPE.get(),
-                (be, side) ->
-                        be.hasCompactingUpgrade() ? new CompactingBarrelItemHandler(be) : new BarrelItemHandler(be));
+                (be, side) -> new CompactingBarrelItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 ARMORY_CABINET_BE_TYPE.get(),
