@@ -364,8 +364,8 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
 
     /**
      * Finds the compressed form of {@code item} using 3×3 (ratio 9), 2×2 (ratio 4), or ring
-     * (ratio 8) patterns, with round-trip verification that the result uncrafts back to exactly
-     * {@code ratio} copies of {@code item}.
+     * (ratio 8) patterns. No round-trip check: compressing only produces items the player could
+     * craft themselves from the base item; the risk of unobtainable items only flows downward.
      */
     private CompactResult findUpperTier(RecipeManager rm, ItemStack item) {
         if (item.isEmpty() || level == null) return null;
@@ -373,26 +373,27 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         var r9 = rm.getRecipeFor(RecipeType.CRAFTING, in9, level);
         if (r9.isPresent()) {
             var out = r9.get().value().assemble(in9, level.registryAccess());
-            if (!out.isEmpty() && roundTripVerify(rm, out, item, 9)) return new CompactResult(out.copyWithCount(1), 9);
+            if (!out.isEmpty()) return new CompactResult(out.copyWithCount(1), 9);
         }
         var in4 = CraftingInput.of(2, 2, List.of(item, item, item, item));
         var r4 = rm.getRecipeFor(RecipeType.CRAFTING, in4, level);
         if (r4.isPresent()) {
             var out = r4.get().value().assemble(in4, level.registryAccess());
-            if (!out.isEmpty() && roundTripVerify(rm, out, item, 4)) return new CompactResult(out.copyWithCount(1), 4);
+            if (!out.isEmpty()) return new CompactResult(out.copyWithCount(1), 4);
         }
         var inRing = CraftingInput.of(3, 3, List.of(item, item, item, item, ItemStack.EMPTY, item, item, item, item));
         var rRing = rm.getRecipeFor(RecipeType.CRAFTING, inRing, level);
         if (rRing.isPresent()) {
             var out = rRing.get().value().assemble(inRing, level.registryAccess());
-            if (!out.isEmpty() && roundTripVerify(rm, out, item, 8)) return new CompactResult(out.copyWithCount(1), 8);
+            if (!out.isEmpty()) return new CompactResult(out.copyWithCount(1), 8);
         }
         return null;
     }
 
     /**
-     * Finds the decompressed form of {@code item} via a 1×1 crafting recipe, with round-trip
-     * verification that the output can be re-compressed back to {@code item}.
+     * Finds the decompressed form of {@code item} via a 1×1 crafting recipe. Round-trip verified:
+     * the output must re-compress back to {@code item} with the same ratio, preventing the barrel
+     * from handing out otherwise-unobtainable lower-tier items.
      */
     private CompactResult findLowerTier(RecipeManager rm, ItemStack item) {
         if (item.isEmpty() || level == null) return null;
@@ -403,21 +404,10 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         if (out.isEmpty()) return null;
         int n = out.getCount();
         if (n != 9 && n != 4 && n != 8) return null;
-        // Round-trip: re-compress n × out → item
         CompactResult upper = findUpperTier(rm, out);
         if (upper == null) return null;
         if (!ItemStack.isSameItemSameComponents(upper.result(), item) || upper.ratio() != n) return null;
         return new CompactResult(out.copyWithCount(1), n);
-    }
-
-    /** Returns true if crafting a single {@code compressed} item yields exactly {@code ratio} × {@code base}. */
-    private boolean roundTripVerify(RecipeManager rm, ItemStack compressed, ItemStack base, int ratio) {
-        if (level == null) return false;
-        var in1 = CraftingInput.of(1, 1, List.of(compressed));
-        var r = rm.getRecipeFor(RecipeType.CRAFTING, in1, level);
-        if (r.isEmpty()) return false;
-        var out = r.get().value().assemble(in1, level.registryAccess());
-        return !out.isEmpty() && ItemStack.isSameItemSameComponents(out, base) && out.getCount() == ratio;
     }
 
     // -------------------------------------------------------------------------
