@@ -28,7 +28,13 @@ public class PullerUpgradeItem extends Item {
         BlockEntity be = ctx.getLevel().getBlockEntity(ctx.getClickedPos());
 
         boolean matches = false;
-        if (be instanceof BarrelBlockEntity barrel && !barrel.hasPullerUpgrade()) {
+        if (be instanceof net.bobofraggins.tremendousstorage.storage.armorycabinet.ArmoryCabinetBlockEntity cabinet
+                && !cabinet.hasPullerUpgrade()) {
+            if (!ctx.getLevel().isClientSide()) {
+                cabinet.setPullerUpgrade(true);
+            }
+            matches = true;
+        } else if (be instanceof BarrelBlockEntity barrel && !barrel.hasPullerUpgrade()) {
             if (!ctx.getLevel().isClientSide()) {
                 barrel.setPullerUpgrade(true);
             }
