@@ -186,6 +186,7 @@
   "item.tremendousstorage.honey_fluid_bucket": "Honey Bucket",
   "fluid_type.tremendousstorage.xp_juice": "XP Juice",
   "item.tremendousstorage.xp_juice_bucket": "XP Juice Bucket",
+  "item.tremendousstorage.compacting_upgrade": "Compacting Upgrade",
   "item.tremendousstorage.magnet_upgrade": "Magnet Upgrade",
   "item.tremendousstorage.magnet_upgrade.tooltip": "Attracts nearby matching items and fluids into this storage.",
   "item.tremendousstorage.ender_storage_upgrade.tooltip": "Right-click a supported block to convert it into its linked Ender variant.",

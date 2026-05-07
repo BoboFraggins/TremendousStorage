@@ -41,7 +41,12 @@ public class TieredBlockItem extends BlockItem {
     public static String buildBedSuffix(ItemStack stack, boolean ender) {
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         StorageTier tier = StorageTier.WOOD;
-        boolean crafting = false, magnet = false, puller = false, haarp = false, interdimensional = false;
+        boolean crafting = false,
+                magnet = false,
+                puller = false,
+                haarp = false,
+                interdimensional = false,
+                compacting = false;
         if (data != null) {
             CompoundTag tag = data.copyTag();
             tier = StorageTier.fromId(tag.getString("Tier"));
@@ -50,6 +55,7 @@ public class TieredBlockItem extends BlockItem {
             puller = tag.getBoolean("PullerUpgrade");
             haarp = tag.getBoolean("HaarpUpgrade");
             interdimensional = tag.getBoolean("InterdimensionalUpgrade");
+            compacting = tag.getBoolean("CompactingUpgrade");
         }
         StringBuilder sb = new StringBuilder();
         if (tier != StorageTier.WOOD) sb.append(capitalize(tier.getId()));
@@ -76,6 +82,10 @@ public class TieredBlockItem extends BlockItem {
         if (interdimensional) {
             if (!sb.isEmpty()) sb.append('/');
             sb.append("Interdimensional");
+        }
+        if (compacting) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Compacting");
         }
         return sb.isEmpty() ? "" : " (" + sb + ")";
     }

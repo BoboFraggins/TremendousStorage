@@ -45,7 +45,9 @@ import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelContents;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelItemHandler;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelMenu;
+import net.bobofraggins.tremendousstorage.storage.barrel.CompactingBarrelItemHandler;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.BaseUpgradeItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.CompactingUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.EnderStorageUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.HaarpUpgradeItem;
@@ -1103,6 +1105,9 @@ public final class Registration {
     public static final DeferredHolder<Item, InterdimensionalUpgradeItem> INTERDIMENSIONAL_UPGRADE =
             ITEMS.register("interdimensional_upgrade", InterdimensionalUpgradeItem::new);
 
+    public static final DeferredHolder<Item, CompactingUpgradeItem> COMPACTING_UPGRADE =
+            ITEMS.register("compacting_upgrade", CompactingUpgradeItem::new);
+
     public static final DeferredHolder<Item, ExperienceSyringeItem> EXPERIENCE_SYRINGE =
             ITEMS.register("experience_syringe", ExperienceSyringeItem::new);
 
@@ -1320,6 +1325,7 @@ public final class Registration {
                         output.accept(HAARP_UPGRADE.get());
                         output.accept(PULLER_UPGRADE.get());
                         output.accept(INTERDIMENSIONAL_UPGRADE.get());
+                        output.accept(COMPACTING_UPGRADE.get());
 
                         output.accept(LAZURITE_PICKAXE.get());
                         output.accept(LAZURITE_AXE.get());
@@ -1400,9 +1406,15 @@ public final class Registration {
 
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK, BARREL_BE_TYPE.get(), (be, side) -> new BarrelItemHandler(be));
+                Capabilities.ItemHandler.BLOCK,
+                BARREL_BE_TYPE.get(),
+                (be, side) ->
+                        be.hasCompactingUpgrade() ? new CompactingBarrelItemHandler(be) : new BarrelItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK, ENDER_BARREL_BE_TYPE.get(), (be, side) -> new BarrelItemHandler(be));
+                Capabilities.ItemHandler.BLOCK,
+                ENDER_BARREL_BE_TYPE.get(),
+                (be, side) ->
+                        be.hasCompactingUpgrade() ? new CompactingBarrelItemHandler(be) : new BarrelItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.ItemHandler.BLOCK,
                 ARMORY_CABINET_BE_TYPE.get(),

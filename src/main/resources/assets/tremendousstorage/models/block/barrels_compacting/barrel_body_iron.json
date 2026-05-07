@@ -1,0 +1,6 @@
+{
+  "parent": "tremendousstorage:block/barrel_body",
+  "textures": {
+    "front": "tremendousstorage:block/barrels_compacting/barrel_iron"
+  }
+}

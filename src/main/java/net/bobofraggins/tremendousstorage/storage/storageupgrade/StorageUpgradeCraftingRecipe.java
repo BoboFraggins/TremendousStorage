@@ -6,6 +6,7 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem;
+import net.bobofraggins.tremendousstorage.storage.baseupgrade.CompactingUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.CraftingUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.HaarpUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.InterdimensionalUpgradeItem;
@@ -75,7 +76,8 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
                 || stack.getItem() instanceof MagnetUpgradeItem
                 || stack.getItem() instanceof HaarpUpgradeItem
                 || stack.getItem() instanceof PullerUpgradeItem
-                || stack.getItem() instanceof InterdimensionalUpgradeItem;
+                || stack.getItem() instanceof InterdimensionalUpgradeItem
+                || stack.getItem() instanceof CompactingUpgradeItem;
     }
 
     @Override
@@ -111,6 +113,9 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
         if (addition.getItem() instanceof HaarpUpgradeItem) {
             return base.getItem() == Registration.WIRELESS_HUB.get().asItem() && !alreadyHasHaarpUpgrade(base);
         }
+        if (addition.getItem() instanceof CompactingUpgradeItem) {
+            return isCompactingUpgradeTarget(base.getItem()) && !alreadyHasCompactingUpgrade(base);
+        }
         if (!isStorageBlock(base.getItem())) return false;
         if (!(addition.getItem() instanceof StorageUpgradeItem upgradeItem)) return false;
         return tierFromStack(base) == upgradeItem.getFromTier();
@@ -140,6 +145,9 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
         }
         if (addition.getItem() instanceof HaarpUpgradeItem) {
             return applyHaarpUpgrade(base);
+        }
+        if (addition.getItem() instanceof CompactingUpgradeItem) {
+            return applyCompactingUpgrade(base);
         }
         return upgrade(base, (StorageUpgradeItem) addition.getItem());
     }
@@ -224,6 +232,24 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putBoolean("HaarpUpgrade", true);
         ItemStack result = hubStack.copyWithCount(1);
+        applyBeData(result, tag);
+        return result;
+    }
+
+    private static boolean isCompactingUpgradeTarget(Item item) {
+        return item == Registration.BARREL_ITEM.get() || item == Registration.ENDER_BARREL_ITEM.get();
+    }
+
+    private static boolean alreadyHasCompactingUpgrade(ItemStack stack) {
+        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        return data != null && data.getUnsafe().getBoolean("CompactingUpgrade");
+    }
+
+    private static ItemStack applyCompactingUpgrade(ItemStack blockStack) {
+        CustomData existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
+        tag.putBoolean("CompactingUpgrade", true);
+        ItemStack result = blockStack.copyWithCount(1);
         applyBeData(result, tag);
         return result;
     }

@@ -96,7 +96,12 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
         Direction facing = state.getValue(FACING);
         if (hit.getDirection() == facing && isInItemArea(hit, facing)) {
             if (!level.isClientSide() && level.getBlockEntity(pos) instanceof BarrelBlockEntity be) {
-                extractStack(be, player);
+                if (be.hasCompactingUpgrade()) {
+                    int slot = getCompactingSlot(hit, facing);
+                    handleCompactingItemOn(be, stack, player, slot);
+                } else {
+                    extractStack(be, player);
+                }
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide());
         }
@@ -109,11 +114,15 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
         Direction facing = state.getValue(FACING);
         if (hit.getDirection() == facing && isInItemArea(hit, facing)) {
             if (!level.isClientSide() && level.getBlockEntity(pos) instanceof BarrelBlockEntity be) {
-                extractStack(be, player);
+                if (be.hasCompactingUpgrade()) {
+                    int slot = getCompactingSlot(hit, facing);
+                    extractCompactingSlot(be, player, slot);
+                } else {
+                    extractStack(be, player);
+                }
             }
             return InteractionResult.sidedSuccess(level.isClientSide());
         }
-        // Barrel-click area: open UI
         if (!level.isClientSide()) {
             if (level.getBlockEntity(pos) instanceof BarrelBlockEntity be) {
                 player.openMenu(be, buf -> buf.writeBlockPos(pos));
@@ -124,8 +133,81 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
 
     private static void extractStack(BarrelBlockEntity be, Player player) {
         if (!be.isLocked() || be.getCount() == 0) return;
-        int amount = be.getStoredItem().getMaxStackSize();
-        ItemStack extracted = be.extract(amount, false);
+        ItemStack extracted = be.extract(be.getStoredItem().getMaxStackSize(), false);
+        if (!extracted.isEmpty() && !player.addItem(extracted)) {
+            player.drop(extracted, false);
+        }
+    }
+
+    // ── Compacting barrel helpers ──────────────────────────────────────────────
+
+    /**
+     * Maps a face hit to one of the three compacting slots (0, 1, 2).
+     * In face-pixel space (y=0 at top, inner area x=2..13, y=2..13):
+     *   slot 1 = top strip  x=2..13, y=2..5
+     *   slot 0 = bottom-left  x=2..5,  y=10..13
+     *   slot 2 = bottom-right x=10..13, y=10..13
+     * Gap areas fall through to the nearest slot.
+     */
+    static int getCompactingSlot(BlockHitResult hit, Direction facing) {
+        Vec3 p = hit.getLocation();
+        BlockPos bp = hit.getBlockPos();
+        double lx, ly;
+        switch (facing) {
+            case NORTH -> {
+                lx = p.x - bp.getX();
+                ly = p.y - bp.getY();
+            }
+            case SOUTH -> {
+                lx = 1.0 - (p.x - bp.getX());
+                ly = p.y - bp.getY();
+            }
+            case EAST -> {
+                lx = p.z - bp.getZ();
+                ly = p.y - bp.getY();
+            }
+            case WEST -> {
+                lx = 1.0 - (p.z - bp.getZ());
+                ly = p.y - bp.getY();
+            }
+            default -> {
+                return 1;
+            }
+        }
+        int px = (int) Math.max(0, Math.min(15, lx * 16));
+        int py = (int) Math.max(0, Math.min(15, (1.0 - ly) * 16)); // y=0 at top
+        // Top strip → slot 1; bottom half split left/right → slots 0/2; gap falls through
+        if (py <= 7) return 1;
+        return px < 8 ? 0 : 2;
+    }
+
+    private static void handleCompactingItemOn(BarrelBlockEntity be, ItemStack stack, Player player, int slot) {
+        if (stack.isEmpty()) return;
+        if (!be.isLocked()) {
+            // Lock the chain with this item at the clicked slot
+            be.lockCompactingChain(stack, slot);
+            return;
+        }
+        // Locked: try to insert the held item into whichever slot matches its type
+        var handler = new CompactingBarrelItemHandler(be);
+        for (int s = 0; s < 3; s++) {
+            if (handler.isItemValid(s, stack)) {
+                ItemStack remainder = handler.insertItem(s, stack.copy(), false);
+                if (!player.isCreative()) {
+                    int consumed = stack.getCount() - (remainder.isEmpty() ? 0 : remainder.getCount());
+                    stack.shrink(consumed);
+                }
+                return;
+            }
+        }
+        // No slot matched: extract from clicked slot instead
+        extractCompactingSlot(be, player, slot);
+    }
+
+    private static void extractCompactingSlot(BarrelBlockEntity be, Player player, int slot) {
+        if (!be.isLocked()) return;
+        var handler = new CompactingBarrelItemHandler(be);
+        ItemStack extracted = handler.extractItem(slot, 64, false);
         if (!extracted.isEmpty() && !player.addItem(extracted)) {
             player.drop(extracted, false);
         }

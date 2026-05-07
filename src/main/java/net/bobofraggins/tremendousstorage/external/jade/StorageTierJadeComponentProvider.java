@@ -35,9 +35,16 @@ public enum StorageTierJadeComponentProvider implements IComponentProvider<Block
         boolean puller = data.getBoolean("PullerUpgrade");
         boolean haarp = data.getBoolean("HaarpUpgrade");
         boolean interdimensional = data.getBoolean("InterdimensionalUpgrade");
+        boolean compacting = data.getBoolean("CompactingUpgrade");
 
-        if (tier == StorageTier.WOOD && !ender && !crafting && !magnet && !puller && !haarp && !interdimensional)
-            return;
+        if (tier == StorageTier.WOOD
+                && !ender
+                && !crafting
+                && !magnet
+                && !puller
+                && !haarp
+                && !interdimensional
+                && !compacting) return;
 
         StringBuilder sb = new StringBuilder();
         if (tier != StorageTier.WOOD) sb.append(TieredBlockItem.capitalize(tier.getId()));
@@ -64,6 +71,10 @@ public enum StorageTierJadeComponentProvider implements IComponentProvider<Block
         if (interdimensional) {
             if (!sb.isEmpty()) sb.append('/');
             sb.append("Interdimensional");
+        }
+        if (compacting) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Compacting");
         }
 
         Component baseName = Component.translatable(accessor.getBlock().getDescriptionId());

@@ -59,6 +59,7 @@ public enum StorageTierJadeDataProvider implements IServerDataProvider<BlockAcce
         } else if (be instanceof BarrelBlockEntity barrel) {
             data.putString("StorageTier", barrel.getTier().getId());
             if (barrel instanceof EnderBarrelBlockEntity) data.putBoolean("Ender", true);
+            if (barrel.hasCompactingUpgrade()) data.putBoolean("CompactingUpgrade", true);
         } else if (be instanceof StirlingEngineBlockEntity engine) {
             data.putString("StorageTier", engine.getTier().getId());
         }

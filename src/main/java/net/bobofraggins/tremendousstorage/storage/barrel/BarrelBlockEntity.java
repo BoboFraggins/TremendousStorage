@@ -1,5 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.barrel;
 
+import java.util.List;
 import java.util.Optional;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
@@ -22,6 +23,9 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,7 +38,18 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     protected long count = 0L;
     protected StorageTier tier = StorageTier.WOOD;
     protected boolean voidExcess = false;
+    protected boolean compactingUpgrade = false;
+    // Which IItemHandler slot (0–2) the storedItem appears in; slots below this are empty.
+    protected int baseSlot = 0;
     protected Priority priority = Priority.NORMAL;
+
+    // Compacting recipe cache — server-side only, rebuilt lazily when locked item or baseSlot changes
+    ItemStack compactTier1Item = ItemStack.EMPTY;
+    int compactTier1Ratio = 0;
+    ItemStack compactTier2Item = ItemStack.EMPTY;
+    int compactTier2Ratio = 0;
+    private ItemStack compactCacheKey = null;
+    private int compactCacheBaseSlot = -1;
 
     private final NiLink niLink = new NiLink();
 
@@ -85,6 +100,36 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     public void setVoidExcess(boolean value) {
         this.voidExcess = value;
         setChanged();
+    }
+
+    public boolean hasCompactingUpgrade() {
+        return compactingUpgrade;
+    }
+
+    public void setCompactingUpgrade(boolean value) {
+        this.compactingUpgrade = value;
+        compactCacheKey = null;
+        setChanged();
+    }
+
+    public int getBaseSlot() {
+        return baseSlot;
+    }
+
+    public ItemStack getCompactTier1Item() {
+        return compactTier1Item;
+    }
+
+    public int getCompactTier1Ratio() {
+        return compactTier1Ratio;
+    }
+
+    public ItemStack getCompactTier2Item() {
+        return compactTier2Item;
+    }
+
+    public int getCompactTier2Ratio() {
+        return compactTier2Ratio;
     }
 
     public Priority getPriority() {
@@ -150,6 +195,8 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     public void clearItem() {
         storedItem = ItemStack.EMPTY;
         count = 0;
+        baseSlot = 0;
+        compactCacheKey = null;
         notifyChanged();
     }
 
@@ -218,6 +265,10 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
             if (!sb.isEmpty()) sb.append('/');
             sb.append("Ender");
         }
+        if (compactingUpgrade) {
+            if (!sb.isEmpty()) sb.append('/');
+            sb.append("Compacting");
+        }
         return sb.isEmpty() ? "" : " (" + sb + ")";
     }
 
@@ -243,6 +294,133 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     }
 
     // -------------------------------------------------------------------------
+    // Compacting chain lock
+    // -------------------------------------------------------------------------
+
+    /**
+     * Configures the compacting chain by specifying which item belongs at which slot. Walks DOWN
+     * from {@code seedItem} up to {@code targetSlot} times to find the base item (stored item),
+     * then the recipe cache walks UP from the base to fill higher slots. Resets count to zero.
+     */
+    public void lockCompactingChain(ItemStack seedItem, int targetSlot) {
+        if (level == null || level.isClientSide || !compactingUpgrade) return;
+        if (!(level instanceof ServerLevel sl)) return;
+        RecipeManager rm = sl.getServer().getRecipeManager();
+
+        ItemStack base = seedItem.copyWithCount(1);
+        int newBaseSlot = targetSlot;
+        for (int i = 0; i < targetSlot; i++) {
+            CompactResult lower = findLowerTier(rm, base);
+            if (lower == null) break;
+            base = lower.result();
+            newBaseSlot--;
+        }
+
+        storedItem = base;
+        count = 0;
+        baseSlot = newBaseSlot;
+        compactCacheKey = null;
+        compactCacheBaseSlot = -1;
+        notifyChanged();
+    }
+
+    // -------------------------------------------------------------------------
+    // Compacting recipe cache
+    // -------------------------------------------------------------------------
+
+    void ensureCompactingCache() {
+        if (level == null || level.isClientSide || !compactingUpgrade || !isLocked()) {
+            compactCacheKey = null;
+            compactCacheBaseSlot = -1;
+            return;
+        }
+        if (compactCacheKey != null
+                && ItemStack.isSameItemSameComponents(compactCacheKey, storedItem)
+                && compactCacheBaseSlot == baseSlot) return;
+        compactCacheKey = storedItem.copyWithCount(1);
+        compactCacheBaseSlot = baseSlot;
+        if (!(level instanceof ServerLevel sl)) return;
+        buildCompactingChain(sl.getServer().getRecipeManager());
+    }
+
+    private void buildCompactingChain(RecipeManager rm) {
+        compactTier1Item = ItemStack.EMPTY;
+        compactTier1Ratio = 0;
+        compactTier2Item = ItemStack.EMPTY;
+        compactTier2Ratio = 0;
+        int maxTiers = 2 - baseSlot; // slots available above storedItem
+        if (maxTiers < 1) return;
+        CompactResult t1 = findUpperTier(rm, storedItem);
+        if (t1 == null) return;
+        compactTier1Item = t1.result();
+        compactTier1Ratio = t1.ratio();
+        if (maxTiers < 2) return;
+        CompactResult t2 = findUpperTier(rm, compactTier1Item);
+        compactTier2Item = t2 != null ? t2.result() : ItemStack.EMPTY;
+        compactTier2Ratio = t2 != null ? t2.ratio() : 0;
+    }
+
+    private record CompactResult(ItemStack result, int ratio) {}
+
+    /**
+     * Finds the compressed form of {@code item} using 3×3 (ratio 9), 2×2 (ratio 4), or ring
+     * (ratio 8) patterns, with round-trip verification that the result uncrafts back to exactly
+     * {@code ratio} copies of {@code item}.
+     */
+    private CompactResult findUpperTier(RecipeManager rm, ItemStack item) {
+        if (item.isEmpty() || level == null) return null;
+        var in9 = CraftingInput.of(3, 3, List.of(item, item, item, item, item, item, item, item, item));
+        var r9 = rm.getRecipeFor(RecipeType.CRAFTING, in9, level);
+        if (r9.isPresent()) {
+            var out = r9.get().value().assemble(in9, level.registryAccess());
+            if (!out.isEmpty() && roundTripVerify(rm, out, item, 9)) return new CompactResult(out.copyWithCount(1), 9);
+        }
+        var in4 = CraftingInput.of(2, 2, List.of(item, item, item, item));
+        var r4 = rm.getRecipeFor(RecipeType.CRAFTING, in4, level);
+        if (r4.isPresent()) {
+            var out = r4.get().value().assemble(in4, level.registryAccess());
+            if (!out.isEmpty() && roundTripVerify(rm, out, item, 4)) return new CompactResult(out.copyWithCount(1), 4);
+        }
+        var inRing = CraftingInput.of(3, 3, List.of(item, item, item, item, ItemStack.EMPTY, item, item, item, item));
+        var rRing = rm.getRecipeFor(RecipeType.CRAFTING, inRing, level);
+        if (rRing.isPresent()) {
+            var out = rRing.get().value().assemble(inRing, level.registryAccess());
+            if (!out.isEmpty() && roundTripVerify(rm, out, item, 8)) return new CompactResult(out.copyWithCount(1), 8);
+        }
+        return null;
+    }
+
+    /**
+     * Finds the decompressed form of {@code item} via a 1×1 crafting recipe, with round-trip
+     * verification that the output can be re-compressed back to {@code item}.
+     */
+    private CompactResult findLowerTier(RecipeManager rm, ItemStack item) {
+        if (item.isEmpty() || level == null) return null;
+        var in1 = CraftingInput.of(1, 1, List.of(item));
+        var r = rm.getRecipeFor(RecipeType.CRAFTING, in1, level);
+        if (r.isEmpty()) return null;
+        var out = r.get().value().assemble(in1, level.registryAccess());
+        if (out.isEmpty()) return null;
+        int n = out.getCount();
+        if (n != 9 && n != 4 && n != 8) return null;
+        // Round-trip: re-compress n × out → item
+        CompactResult upper = findUpperTier(rm, out);
+        if (upper == null) return null;
+        if (!ItemStack.isSameItemSameComponents(upper.result(), item) || upper.ratio() != n) return null;
+        return new CompactResult(out.copyWithCount(1), n);
+    }
+
+    /** Returns true if crafting a single {@code compressed} item yields exactly {@code ratio} × {@code base}. */
+    private boolean roundTripVerify(RecipeManager rm, ItemStack compressed, ItemStack base, int ratio) {
+        if (level == null) return false;
+        var in1 = CraftingInput.of(1, 1, List.of(compressed));
+        var r = rm.getRecipeFor(RecipeType.CRAFTING, in1, level);
+        if (r.isEmpty()) return false;
+        var out = r.get().value().assemble(in1, level.registryAccess());
+        return !out.isEmpty() && ItemStack.isSameItemSameComponents(out, base) && out.getCount() == ratio;
+    }
+
+    // -------------------------------------------------------------------------
     // NBT
     // -------------------------------------------------------------------------
 
@@ -250,6 +428,8 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     private static final String TAG_COUNT = "Count";
     private static final String TAG_TIER = "Tier";
     private static final String TAG_VOID_EXCESS = "VoidExcess";
+    private static final String TAG_COMPACTING = "CompactingUpgrade";
+    private static final String TAG_BASE_SLOT = "BaseSlot";
     private static final String TAG_PRIORITY = "Priority";
 
     @Override
@@ -261,6 +441,8 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         tag.putLong(TAG_COUNT, count);
         tag.putString(TAG_TIER, tier.getId());
         tag.putBoolean(TAG_VOID_EXCESS, voidExcess);
+        tag.putBoolean(TAG_COMPACTING, compactingUpgrade);
+        if (compactingUpgrade && baseSlot != 0) tag.putInt(TAG_BASE_SLOT, baseSlot);
         tag.putInt(TAG_PRIORITY, priority.ordinal());
     }
 
@@ -276,6 +458,20 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         count = tag.getLong(TAG_COUNT);
         tier = StorageTier.fromId(tag.getString(TAG_TIER));
         voidExcess = tag.getBoolean(TAG_VOID_EXCESS);
+        compactingUpgrade = tag.getBoolean(TAG_COMPACTING);
+        baseSlot = tag.contains(TAG_BASE_SLOT) ? Math.max(0, Math.min(2, tag.getInt(TAG_BASE_SLOT))) : 0;
+        compactCacheKey = null;
+        compactCacheBaseSlot = -1;
+        if (compactingUpgrade) {
+            compactTier1Item = tag.contains("Compact1")
+                    ? ItemStack.parseOptional(registries, tag.getCompound("Compact1"))
+                    : ItemStack.EMPTY;
+            compactTier1Ratio = tag.contains("Compact1") ? tag.getInt("Compact1Ratio") : 0;
+            compactTier2Item = tag.contains("Compact2")
+                    ? ItemStack.parseOptional(registries, tag.getCompound("Compact2"))
+                    : ItemStack.EMPTY;
+            compactTier2Ratio = tag.contains("Compact2") ? tag.getInt("Compact2Ratio") : 0;
+        }
         priority = Priority.fromOrdinal(tag.getInt(TAG_PRIORITY));
     }
 
@@ -313,7 +509,19 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return saveWithoutMetadata(registries);
+        CompoundTag tag = saveWithoutMetadata(registries);
+        if (compactingUpgrade && level != null && !level.isClientSide) {
+            ensureCompactingCache();
+            if (!compactTier1Item.isEmpty()) {
+                tag.put("Compact1", compactTier1Item.save(registries));
+                tag.putInt("Compact1Ratio", compactTier1Ratio);
+            }
+            if (!compactTier2Item.isEmpty()) {
+                tag.put("Compact2", compactTier2Item.save(registries));
+                tag.putInt("Compact2Ratio", compactTier2Ratio);
+            }
+        }
+        return tag;
     }
 
     @Override
