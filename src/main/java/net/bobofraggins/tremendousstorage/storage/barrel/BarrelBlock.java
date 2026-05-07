@@ -197,11 +197,10 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
     private static void handleCompactingItemOn(BarrelBlockEntity be, ItemStack stack, Player player, int slot) {
         if (stack.isEmpty()) return;
         if (!be.isLocked()) {
-            // Lock the chain with this item at the clicked slot
             be.lockCompactingChain(stack, slot);
-            return;
         }
-        // Locked: try to insert the held item into whichever slot matches its type
+        if (!be.isLocked()) return;
+        // Locked (just now or previously): try to insert the held item into whichever slot matches
         var handler = new CompactingBarrelItemHandler(be);
         for (int s = 0; s < 3; s++) {
             if (handler.isItemValid(s, stack)) {
