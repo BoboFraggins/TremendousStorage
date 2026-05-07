@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -613,6 +614,8 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
             tag.putInt("PullerSides", pullerSides);
         }
         tag.putInt(TAG_PRIORITY, priority.ordinal());
+        var typeId = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(getType());
+        if (typeId != null) tag.putString("id", typeId.toString());
         components.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
     }
 
