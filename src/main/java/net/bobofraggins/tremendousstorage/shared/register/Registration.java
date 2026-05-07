@@ -43,6 +43,7 @@ import net.bobofraggins.tremendousstorage.storage.backpack.BackpackMenu;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlock;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelContents;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelItem;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelItemHandler;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelMenu;
 import net.bobofraggins.tremendousstorage.storage.barrel.CompactingBarrelItemHandler;
@@ -66,6 +67,7 @@ import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackMen
 import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelBlock;
 import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelCraftingRecipe;
+import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelItem;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlock;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestCraftingRecipe;
@@ -447,7 +449,7 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> BARREL_ITEM =
-            ITEMS.register("barrel", () -> new TieredBlockItem(BARREL.get(), new Item.Properties()));
+            ITEMS.register("barrel", () -> new BarrelItem(BARREL.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BarrelBlockEntity>> BARREL_BE_TYPE =
             BLOCK_ENTITY_TYPES.register("barrel", () -> BlockEntityType.Builder.of(BarrelBlockEntity::new, BARREL.get())
@@ -461,7 +463,7 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> ENDER_BARREL_ITEM =
-            ITEMS.register("ender_barrel", () -> new EnderTieredBlockItem(ENDER_BARREL.get(), new Item.Properties()));
+            ITEMS.register("ender_barrel", () -> new EnderBarrelItem(ENDER_BARREL.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderBarrelBlockEntity>>
             ENDER_BARREL_BE_TYPE = BLOCK_ENTITY_TYPES.register(

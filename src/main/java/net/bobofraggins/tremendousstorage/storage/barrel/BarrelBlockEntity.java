@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -614,6 +615,17 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
             tag.putInt("PullerSides", pullerSides);
         }
         tag.putInt(TAG_PRIORITY, priority.ordinal());
+        if (compactingUpgrade) {
+            ensureCompactingCache();
+            if (!compactTier1Item.isEmpty()) {
+                ResourceLocation k1 = BuiltInRegistries.ITEM.getKey(compactTier1Item.getItem());
+                if (k1 != null) tag.putString("Compact1Id", k1.toString());
+            }
+            if (!compactTier2Item.isEmpty()) {
+                ResourceLocation k2 = BuiltInRegistries.ITEM.getKey(compactTier2Item.getItem());
+                if (k2 != null) tag.putString("Compact2Id", k2.toString());
+            }
+        }
         var typeId = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(getType());
         if (typeId != null) tag.putString("id", typeId.toString());
         components.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
