@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.shared.network;
 
 import net.bobofraggins.tremendousstorage.TremendousStorage;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
@@ -41,7 +42,8 @@ public record SetPullerSidesPacket(BlockPos pos, int sidesMask) implements Custo
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
             BlockEntity be = player.level().getBlockEntity(packet.pos());
-            if (be instanceof ChestBlockEntity chest) chest.setPullerSides(packet.sidesMask());
+            if (be instanceof BarrelBlockEntity barrel) barrel.setPullerSides(packet.sidesMask());
+            else if (be instanceof ChestBlockEntity chest) chest.setPullerSides(packet.sidesMask());
             else if (be instanceof FilingCabinetBlockEntity fc) fc.setPullerSides(packet.sidesMask());
             else if (be instanceof TankBlockEntity tank) tank.setPullerSides(packet.sidesMask());
         });

@@ -27,12 +27,14 @@ public class BarrelMenu extends AbstractContainerMenu {
 
     private final BlockPos pos;
     private final ContainerData data;
+    private final boolean hasPullerUpgrade;
 
     /** Server-side constructor. */
-    public BarrelMenu(int id, Inventory playerInv, BlockPos pos, ContainerData data) {
+    public BarrelMenu(int id, Inventory playerInv, BlockPos pos, ContainerData data, boolean hasPullerUpgrade) {
         super(Registration.BARREL_MENU.get(), id);
         this.pos = pos;
         this.data = data;
+        this.hasPullerUpgrade = hasPullerUpgrade;
         addPlayerSlots(playerInv);
         addDataSlots(data);
     }
@@ -41,6 +43,7 @@ public class BarrelMenu extends AbstractContainerMenu {
     public BarrelMenu(int id, Inventory playerInv, FriendlyByteBuf buf) {
         super(Registration.BARREL_MENU.get(), id);
         this.pos = buf.readBlockPos();
+        this.hasPullerUpgrade = buf.readBoolean();
         this.data = new SimpleContainerData(2);
         addPlayerSlots(playerInv);
         addDataSlots(data);
@@ -66,6 +69,10 @@ public class BarrelMenu extends AbstractContainerMenu {
 
     public BlockPos getPos() {
         return pos;
+    }
+
+    public boolean hasPullerUpgrade() {
+        return hasPullerUpgrade;
     }
 
     public boolean isVoidExcess() {

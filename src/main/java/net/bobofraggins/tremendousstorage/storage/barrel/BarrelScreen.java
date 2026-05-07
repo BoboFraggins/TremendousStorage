@@ -2,9 +2,12 @@ package net.bobofraggins.tremendousstorage.storage.barrel;
 
 import net.bobofraggins.tremendousstorage.shared.network.SetPriorityPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetVoidExcessPacket;
+import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
+import net.bobofraggins.tremendousstorage.shared.ui.IDialogPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PriorityPane;
+import net.bobofraggins.tremendousstorage.shared.ui.PullerSidesPane;
 import net.bobofraggins.tremendousstorage.shared.ui.VoidExcessPane;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -15,6 +18,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
 
     private final Dialog dialog;
+    private final ConfigDrawer configDrawer;
 
     public BarrelScreen(BarrelMenu menu, Inventory inv, Component title) {
         super(menu, inv, title);
@@ -32,17 +36,25 @@ public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
                 new PlayerInventoryPane());
         imageWidth = dialog.totalWidth();
         imageHeight = dialog.totalHeight();
+
+        java.util.List<IDialogPane> drawerPanes = new java.util.ArrayList<>();
+        if (menu.hasPullerUpgrade()) {
+            drawerPanes.add(new PullerSidesPane(menu.getPos()));
+        }
+        configDrawer = new ConfigDrawer(drawerPanes.toArray(IDialogPane[]::new));
     }
 
     @Override
     protected void init() {
         super.init();
         dialog.init(leftPos, topPos);
+        configDrawer.init(leftPos, topPos, imageHeight);
     }
 
     @Override
     protected void renderBg(GuiGraphics gfx, float partialTick, int mx, int my) {
         dialog.render(gfx, font, title, mx, my, partialTick);
+        configDrawer.render(gfx, font, mx, my, partialTick);
     }
 
     @Override
@@ -66,6 +78,7 @@ public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
 
     @Override
     public boolean mouseClicked(double mx, double my, int button) {
+        if (configDrawer.mouseClicked(mx, my, button)) return true;
         if (dialog.mouseClicked(mx, my, button)) return true;
         return super.mouseClicked(mx, my, button);
     }

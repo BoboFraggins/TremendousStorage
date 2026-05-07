@@ -1,5 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.baseupgrade;
 
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
@@ -27,7 +28,12 @@ public class PullerUpgradeItem extends Item {
         BlockEntity be = ctx.getLevel().getBlockEntity(ctx.getClickedPos());
 
         boolean matches = false;
-        if (be instanceof ChestBlockEntity chest && !chest.hasPullerUpgrade()) {
+        if (be instanceof BarrelBlockEntity barrel && !barrel.hasPullerUpgrade()) {
+            if (!ctx.getLevel().isClientSide()) {
+                barrel.setPullerUpgrade(true);
+            }
+            matches = true;
+        } else if (be instanceof ChestBlockEntity chest && !chest.hasPullerUpgrade()) {
             if (!ctx.getLevel().isClientSide()) {
                 chest.setPullerUpgrade(true);
             }

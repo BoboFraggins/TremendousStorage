@@ -5,6 +5,7 @@ import java.util.Optional;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
+import net.bobofraggins.tremendousstorage.shared.util.PullerUtil;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkListable;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiLink;
 import net.minecraft.core.BlockPos;
@@ -29,6 +30,7 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public class BarrelBlockEntity extends BlockEntity implements MenuProvider, NetworkListable {
 
@@ -41,7 +43,13 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     protected boolean compactingUpgrade = false;
     // Which IItemHandler slot (0–2) the storedItem appears in; slots below this are empty.
     protected int baseSlot = 0;
+    protected boolean hasPullerUpgrade = false;
+    protected int pullerSides = 0;
+    protected int pullerTickCounter = 0;
     protected Priority priority = Priority.NORMAL;
+
+    private static final int PULL_TICKS = 4;
+    private static final int PULL_AMOUNT = 4;
 
     // Compacting recipe cache — server-side only, rebuilt lazily when locked item or baseSlot changes
     ItemStack compactTier1Item = ItemStack.EMPTY;
@@ -138,6 +146,24 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
 
     public void setPriority(Priority value) {
         this.priority = value;
+        setChanged();
+    }
+
+    public boolean hasPullerUpgrade() {
+        return hasPullerUpgrade;
+    }
+
+    public void setPullerUpgrade(boolean value) {
+        hasPullerUpgrade = value;
+        setChanged();
+    }
+
+    public int getPullerSides() {
+        return pullerSides;
+    }
+
+    public void setPullerSides(int mask) {
+        pullerSides = mask;
         setChanged();
     }
 
@@ -290,7 +316,35 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
                 return 2;
             }
         };
-        return new BarrelMenu(id, inv, worldPosition, data);
+        return new BarrelMenu(id, inv, worldPosition, data, hasPullerUpgrade);
+    }
+
+    // -------------------------------------------------------------------------
+    // Tick
+    // -------------------------------------------------------------------------
+
+    public static void serverTick(
+            net.minecraft.world.level.Level level,
+            BlockPos pos,
+            net.minecraft.world.level.block.state.BlockState state,
+            BarrelBlockEntity be) {
+        if (be.hasPullerUpgrade && be.pullerSides != 0 && ++be.pullerTickCounter >= PULL_TICKS) {
+            be.pullerTickCounter = 0;
+            PullerUtil.tickPuller(level, pos, state, be.pullerSides, be::pullFromHandler);
+        }
+    }
+
+    private void pullFromHandler(IItemHandler handler) {
+        for (int s = 0; s < handler.getSlots(); s++) {
+            ItemStack sim = handler.extractItem(s, PULL_AMOUNT, true);
+            if (sim.isEmpty()) continue;
+            long remainder = insert(sim, sim.getCount(), true);
+            int canInsert = (int) (sim.getCount() - remainder);
+            if (canInsert <= 0) continue;
+            ItemStack extracted = handler.extractItem(s, canInsert, false);
+            if (!extracted.isEmpty()) insert(extracted, extracted.getCount(), false);
+            break;
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -442,6 +496,10 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         tag.putBoolean(TAG_VOID_EXCESS, voidExcess);
         tag.putBoolean(TAG_COMPACTING, compactingUpgrade);
         if (compactingUpgrade && baseSlot != 0) tag.putInt(TAG_BASE_SLOT, baseSlot);
+        if (hasPullerUpgrade) {
+            tag.putBoolean("PullerUpgrade", true);
+            tag.putInt("PullerSides", pullerSides);
+        }
         tag.putInt(TAG_PRIORITY, priority.ordinal());
     }
 
@@ -461,6 +519,8 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         baseSlot = tag.contains(TAG_BASE_SLOT) ? Math.max(0, Math.min(2, tag.getInt(TAG_BASE_SLOT))) : 0;
         compactCacheKey = null;
         compactCacheBaseSlot = -1;
+        hasPullerUpgrade = tag.getBoolean("PullerUpgrade");
+        pullerSides = tag.getInt("PullerSides");
         if (compactingUpgrade) {
             compactTier1Item = tag.contains("Compact1")
                     ? ItemStack.parseOptional(registries, tag.getCompound("Compact1"))

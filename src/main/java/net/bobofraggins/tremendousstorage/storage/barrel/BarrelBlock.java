@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.barrel;
 
 import com.mojang.serialization.MapCodec;
+import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
@@ -16,6 +17,8 @@ import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -62,6 +65,13 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new BarrelBlockEntity(pos, state);
+    }
+
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
+            Level level, BlockState state, BlockEntityType<T> type) {
+        if (level.isClientSide()) return null;
+        return createTickerHelper(type, Registration.BARREL_BE_TYPE.get(), BarrelBlockEntity::serverTick);
     }
 
     /**
@@ -125,7 +135,10 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
         }
         if (!level.isClientSide()) {
             if (level.getBlockEntity(pos) instanceof BarrelBlockEntity be) {
-                player.openMenu(be, buf -> buf.writeBlockPos(pos));
+                player.openMenu(be, buf -> {
+                    buf.writeBlockPos(pos);
+                    buf.writeBoolean(be.hasPullerUpgrade());
+                });
             }
         }
         return InteractionResult.sidedSuccess(level.isClientSide());

@@ -154,7 +154,7 @@ public class EnderBarrelBlockEntity extends BarrelBlockEntity {
                 return 2;
             }
         };
-        return new BarrelMenu(id, inv, worldPosition, data);
+        return new BarrelMenu(id, inv, worldPosition, data, hasPullerUpgrade);
     }
 
     @Override
@@ -172,6 +172,7 @@ public class EnderBarrelBlockEntity extends BarrelBlockEntity {
     // -------------------------------------------------------------------------
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, EnderBarrelBlockEntity be) {
+        BarrelBlockEntity.serverTick(level, pos, state, be);
         if (be.needsStorageLoad) {
             be.needsStorageLoad = false;
             be.loadFromStorage();

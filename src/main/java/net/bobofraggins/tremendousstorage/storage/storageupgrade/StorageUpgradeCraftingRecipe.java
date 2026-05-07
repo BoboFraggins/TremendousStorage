@@ -278,7 +278,9 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
     }
 
     private static boolean isPullerUpgradeTarget(Item item) {
-        return item == Registration.TREMENDOUS_CHEST_ITEM.get()
+        return item == Registration.BARREL_ITEM.get()
+                || item == Registration.ENDER_BARREL_ITEM.get()
+                || item == Registration.TREMENDOUS_CHEST_ITEM.get()
                 || item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
                 || item instanceof BackpackItem
                 || item == Registration.TANK_ITEM.get()
