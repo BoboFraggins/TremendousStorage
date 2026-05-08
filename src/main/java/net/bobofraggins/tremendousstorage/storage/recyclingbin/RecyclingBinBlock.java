@@ -135,6 +135,7 @@ public class RecyclingBinBlock extends BaseEntityBlock {
         if (!state.is(newState.getBlock())) {
             if (level.getBlockEntity(pos) instanceof RecyclingBinBlockEntity be) {
                 be.recheckOpeners(level, pos, state);
+                net.minecraft.world.Containers.dropContents(level, pos, be.transferContainer);
             }
         }
         super.onRemove(state, level, pos, newState, movedByPiston);

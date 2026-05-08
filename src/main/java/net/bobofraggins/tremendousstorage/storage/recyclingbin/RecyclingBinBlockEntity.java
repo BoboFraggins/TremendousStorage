@@ -3,6 +3,9 @@ package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -16,6 +19,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
@@ -127,6 +131,30 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
                     t.contains("Output")
                             ? ItemStack.parseOptional(registries, t.getCompound("Output"))
                             : ItemStack.EMPTY);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Item component sync (break → item → place)
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder components) {
+        super.collectImplicitComponents(components);
+        net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
+        tag.putInt("Vibes", vibesAmount);
+        var typeId = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(getType());
+        if (typeId != null) tag.putString("id", typeId.toString());
+        components.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+    }
+
+    @Override
+    protected void applyImplicitComponents(BlockEntity.DataComponentInput input) {
+        super.applyImplicitComponents(input);
+        CustomData data = input.get(DataComponents.BLOCK_ENTITY_DATA);
+        if (data != null) {
+            net.minecraft.nbt.CompoundTag tag = data.copyTag();
+            if (tag.contains("Vibes")) vibesAmount = tag.getInt("Vibes");
         }
     }
 
