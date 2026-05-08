@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.bobofraggins.tremendousstorage.external.solcarrot.SolCarrotIntegration;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
@@ -19,6 +20,8 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 /**
@@ -117,7 +120,21 @@ public class PicnicBasketFeedHandler {
         }
         if (candidates.isEmpty()) return;
 
-        int chosenIdx = candidates.get(level.random.nextInt(candidates.size()));
+        // If SoLC is installed, prefer foods the player hasn't eaten yet
+        List<Integer> preferred = candidates;
+        if (SolCarrotIntegration.isInstalled()) {
+            List<Integer> uneaten = new ArrayList<>();
+            for (int i : candidates) {
+                ItemStack stored =
+                        ItemStack.parseOptional(registries, types.getCompound(i).getCompound("Type"));
+                if (SolCarrotIntegration.isNewFood(player, stored)) {
+                    uneaten.add(i);
+                }
+            }
+            if (!uneaten.isEmpty()) preferred = uneaten;
+        }
+
+        int chosenIdx = preferred.get(level.random.nextInt(preferred.size()));
         CompoundTag entry = types.getCompound(chosenIdx);
         ItemStack stored = ItemStack.parseOptional(registries, entry.getCompound("Type"));
         if (stored.isEmpty()) return;
@@ -141,6 +158,10 @@ public class PicnicBasketFeedHandler {
                 player.addEffect(possibleEffect.effect());
             }
         }
+
+        // Notify other mods (e.g. Spice of Life: Carrot Edition) that food was consumed
+        NeoForge.EVENT_BUS.post(
+                new LivingEntityUseItemEvent.Finish(player, stored.copyWithCount(1), 0, ItemStack.EMPTY));
 
         // Consume one use: damageable items lose durability (respecting Unbreaking); others
         // lose one count.
