@@ -85,11 +85,14 @@ public enum StorageTierJadeComponentProvider implements IComponentProvider<Block
             tooltip.add(0, Component.empty().append(baseName).append(" (" + sb + ")"));
         }
 
-        if (accessor.getBlockEntity() instanceof BarrelBlockEntity barrel && barrel.isLocked()) {
-            if (barrel.hasCompactingUpgrade()) {
-                appendCompactingLines(tooltip, barrel);
-            } else {
-                tooltip.add(contentLine(barrel.getStoredItem(), barrel.getCount(), barrel.getCapacity()));
+        if (accessor.getBlockEntity() instanceof BarrelBlockEntity barrel) {
+            tooltip.remove(JadeIds.UNIVERSAL_ITEM_STORAGE);
+            if (barrel.isLocked()) {
+                if (barrel.hasCompactingUpgrade()) {
+                    appendCompactingLines(tooltip, barrel);
+                } else {
+                    tooltip.add(contentLine(barrel.getStoredItem(), barrel.getCount(), barrel.getCapacity()));
+                }
             }
         }
     }
