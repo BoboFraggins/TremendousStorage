@@ -21,6 +21,9 @@
     "facing=north,tier=netherite": {
       "model": "tremendousstorage:block/tanks/tank_netherite"
     },
+    "facing=north,tier=nether_star": {
+      "model": "tremendousstorage:block/tanks/tank_nether_star"
+    },
     "facing=south,tier=wood": {
       "model": "tremendousstorage:block/tanks/tank_wood",
       "y": 180
@@ -47,6 +50,10 @@
     },
     "facing=south,tier=netherite": {
       "model": "tremendousstorage:block/tanks/tank_netherite",
+      "y": 180
+    },
+    "facing=south,tier=nether_star": {
+      "model": "tremendousstorage:block/tanks/tank_nether_star",
       "y": 180
     },
     "facing=east,tier=wood": {
@@ -77,6 +84,10 @@
       "model": "tremendousstorage:block/tanks/tank_netherite",
       "y": 270
     },
+    "facing=east,tier=nether_star": {
+      "model": "tremendousstorage:block/tanks/tank_nether_star",
+      "y": 270
+    },
     "facing=west,tier=wood": {
       "model": "tremendousstorage:block/tanks/tank_wood",
       "y": 90
@@ -103,6 +114,10 @@
     },
     "facing=west,tier=netherite": {
       "model": "tremendousstorage:block/tanks/tank_netherite",
+      "y": 90
+    },
+    "facing=west,tier=nether_star": {
+      "model": "tremendousstorage:block/tanks/tank_nether_star",
       "y": 90
     }
   }

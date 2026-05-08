@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "tremendousstorage:item/netherite_to_nether_star_upgrade"
+  }
+}

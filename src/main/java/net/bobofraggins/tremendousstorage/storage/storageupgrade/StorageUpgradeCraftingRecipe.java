@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.storageupgrade;
 
 import com.mojang.serialization.MapCodec;
 import javax.annotation.Nullable;
+import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
@@ -116,8 +117,11 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
         if (addition.getItem() instanceof CompactingUpgradeItem) {
             return isCompactingUpgradeTarget(base.getItem()) && !alreadyHasCompactingUpgrade(base);
         }
-        if (!isStorageBlock(base.getItem())) return false;
         if (!(addition.getItem() instanceof StorageUpgradeItem upgradeItem)) return false;
+        if (upgradeItem.getToTier() == StorageTier.NETHER_STAR
+                && !TremendousStorageConfig.INCLUDE_NETHER_STAR_TIER_UPGRADE.get()) return false;
+        boolean storageOnly = upgradeItem.isStorageOnly();
+        if (storageOnly ? !isStorageOnlyBlock(base.getItem()) : !isStorageBlock(base.getItem())) return false;
         return tierFromStack(base) == upgradeItem.getFromTier();
     }
 
@@ -178,6 +182,22 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
                 || item == Registration.ENDER_BARREL_ITEM.get()
                 || item == Registration.NETWORK_INTERFACE_ITEM.get()
                 || item == Registration.WIRELESS_HUB_ITEM.get();
+    }
+
+    /** Like {@link #isStorageBlock} but excludes infrastructure blocks (NI, Wireless Hub). */
+    private static boolean isStorageOnlyBlock(Item item) {
+        return item == Registration.TREMENDOUS_CHEST_ITEM.get()
+                || item == Registration.ENDER_TREMENDOUS_CHEST_ITEM.get()
+                || item instanceof BackpackItem
+                || item == Registration.MANILA_FOLDER.get()
+                || item == Registration.ENDER_FOLDER.get()
+                || item == Registration.TANK_ITEM.get()
+                || item == Registration.ENDER_TANK_ITEM.get()
+                || item == Registration.BARREL_ITEM.get()
+                || item == Registration.ENDER_BARREL_ITEM.get()
+                || item == Registration.FILING_CABINET_ITEM.get()
+                || item == Registration.PICNIC_BASKET_ITEM.get()
+                || item == Registration.ENDER_PICNIC_BASKET_ITEM.get();
     }
 
     private static boolean isCraftingUpgradeTarget(Item item) {

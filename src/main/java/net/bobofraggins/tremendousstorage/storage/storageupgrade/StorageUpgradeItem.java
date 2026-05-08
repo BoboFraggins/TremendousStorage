@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.storageupgrade;
 
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlockEntity;
+import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlock;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
@@ -28,11 +29,17 @@ public class StorageUpgradeItem extends Item {
 
     private final StorageTier from;
     private final StorageTier to;
+    private final boolean storageOnly;
 
     public StorageUpgradeItem(StorageTier from, StorageTier to, Properties properties) {
+        this(from, to, false, properties);
+    }
+
+    public StorageUpgradeItem(StorageTier from, StorageTier to, boolean storageOnly, Properties properties) {
         super(properties);
         this.from = from;
         this.to = to;
+        this.storageOnly = storageOnly;
     }
 
     public StorageTier getFromTier() {
@@ -43,8 +50,15 @@ public class StorageUpgradeItem extends Item {
         return to;
     }
 
+    public boolean isStorageOnly() {
+        return storageOnly;
+    }
+
     @Override
     public InteractionResult useOn(UseOnContext ctx) {
+        if (to == StorageTier.NETHER_STAR && !TremendousStorageConfig.INCLUDE_NETHER_STAR_TIER_UPGRADE.get()) {
+            return InteractionResult.PASS;
+        }
         BlockEntity be = ctx.getLevel().getBlockEntity(ctx.getClickedPos());
 
         // Don't apply upgrade when clicking the barrel's item-display area — that zone is reserved
@@ -67,7 +81,7 @@ public class StorageUpgradeItem extends Item {
                 bulk.setTier(to);
             }
             matches = true;
-        } else if (be instanceof NetworkInterfaceBlockEntity ni && ni.getTier() == from) {
+        } else if (!storageOnly && be instanceof NetworkInterfaceBlockEntity ni && ni.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 ni.setTier(to);
             }
@@ -77,12 +91,12 @@ public class StorageUpgradeItem extends Item {
                 tank.setTier(to);
             }
             matches = true;
-        } else if (be instanceof WirelessHubBlockEntity hub && hub.getTier() == from) {
+        } else if (!storageOnly && be instanceof WirelessHubBlockEntity hub && hub.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 hub.setTier(to);
             }
             matches = true;
-        } else if (be instanceof StirlingEngineBlockEntity engine && engine.getTier() == from) {
+        } else if (!storageOnly && be instanceof StirlingEngineBlockEntity engine && engine.getTier() == from) {
             if (!ctx.getLevel().isClientSide()) {
                 engine.setTier(to);
             }

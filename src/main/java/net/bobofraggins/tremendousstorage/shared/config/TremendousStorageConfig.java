@@ -8,6 +8,7 @@ public class TremendousStorageConfig {
     public static final ModConfigSpec SPEC;
     public static final ModConfigSpec.BooleanValue BONUS_CHEST_LOOT_ENABLED;
     public static final ModConfigSpec.BooleanValue STIRLING_ENGINE_ENABLED;
+    public static final ModConfigSpec.BooleanValue INCLUDE_NETHER_STAR_TIER_UPGRADE;
     public static final ModConfigSpec.DoubleValue TIER_UPGRADE_POWER_MULT;
     public static final ModConfigSpec.DoubleValue HAARP_UPGRADE_POWER_MULT;
     public static final ModConfigSpec.DoubleValue INTERDIMENSIONAL_POWER_MULT;
@@ -18,6 +19,11 @@ public class TremendousStorageConfig {
         BONUS_CHEST_LOOT_ENABLED = builder.comment(
                         "Add a Picnic Basket and s'mores to the spawn bonus chest. Default: true.")
                 .define("bonusChestLootEnabled", true);
+        builder.pop();
+        builder.push("tiers");
+        INCLUDE_NETHER_STAR_TIER_UPGRADE = builder.comment(
+                        "Enable the Netherite → Nether Star storage upgrade, raising capacity to ~2.1B. Default: true.")
+                .define("include_nether_star_tier_upgrade", true);
         builder.pop();
         builder.push("power");
         STIRLING_ENGINE_ENABLED = builder.comment(

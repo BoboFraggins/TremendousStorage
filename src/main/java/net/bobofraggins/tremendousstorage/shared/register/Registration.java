@@ -497,13 +497,20 @@ public final class Registration {
             "emerald_to_netherite_storage_upgrade",
             () -> new StorageUpgradeItem(StorageTier.EMERALD, StorageTier.NETHERITE, new Item.Properties()));
 
+    public static final DeferredHolder<Item, StorageUpgradeItem> NETHERITE_TO_NETHER_STAR_STORAGE_UPGRADE =
+            ITEMS.register(
+                    "netherite_to_nether_star_storage_upgrade",
+                    () -> new StorageUpgradeItem(
+                            StorageTier.NETHERITE, StorageTier.NETHER_STAR, true, new Item.Properties()));
+
     public static final DeferredHolder<Item, StorageUpgradeItem>[] STORAGE_UPGRADES = new DeferredHolder[] {
         WOOD_TO_COPPER_STORAGE_UPGRADE,
         COPPER_TO_IRON_STORAGE_UPGRADE,
         IRON_TO_GOLD_STORAGE_UPGRADE,
         GOLD_TO_DIAMOND_STORAGE_UPGRADE,
         DIAMOND_TO_EMERALD_STORAGE_UPGRADE,
-        EMERALD_TO_NETHERITE_STORAGE_UPGRADE
+        EMERALD_TO_NETHERITE_STORAGE_UPGRADE,
+        NETHERITE_TO_NETHER_STAR_STORAGE_UPGRADE
     };
 
     public static final DeferredBlock<TankBlock> TANK = BLOCKS.register(
@@ -1310,7 +1317,12 @@ public final class Registration {
                         output.accept(RECYCLING_BIN_ITEM.get());
                         output.accept(BASE_UPGRADE.get());
                         for (DeferredHolder<Item, StorageUpgradeItem> upgrade : STORAGE_UPGRADES) {
-                            output.accept(upgrade.get());
+                            StorageUpgradeItem item = upgrade.get();
+                            if (item.isStorageOnly()
+                                    && !net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig
+                                            .INCLUDE_NETHER_STAR_TIER_UPGRADE
+                                            .get()) continue;
+                            output.accept(item);
                         }
                         output.accept(CRAFTING_UPGRADE.get());
                         output.accept(ENDER_STORAGE_UPGRADE.get());

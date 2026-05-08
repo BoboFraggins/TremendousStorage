@@ -10,7 +10,8 @@ public enum StorageTier implements net.minecraft.util.StringRepresentable {
     GOLD("gold", 131_072L, 0xFFD83D),
     DIAMOND("diamond", 524_288L, 0x4CE6DF),
     EMERALD("emerald", 1_048_576L, 0x17DD62),
-    NETHERITE("netherite", 4_194_304L, 0x443A38);
+    NETHERITE("netherite", 4_194_304L, 0x443A38),
+    NETHER_STAR("nether_star", (long) Integer.MAX_VALUE, 0x6556C2);
 
     private final String id;
     private final long capacity;
@@ -53,6 +54,7 @@ public enum StorageTier implements net.minecraft.util.StringRepresentable {
      * this tier. WOOD returns {@code base}, COPPER returns {@code base × 4}, etc.
      */
     public long getScaledCapacity(long base) {
+        if (this == NETHER_STAR) return Integer.MAX_VALUE;
         return base << (ordinal() * 2);
     }
 

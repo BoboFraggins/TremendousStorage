@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "NNN",
+    "NUN",
+    "NNN"
+  ],
+  "key": {
+    "N": { "item": "minecraft:nether_star" },
+    "U": { "item": "tremendousstorage:emerald_to_netherite_storage_upgrade" }
+  },
+  "result": {
+    "id": "tremendousstorage:netherite_to_nether_star_storage_upgrade",
+    "count": 1
+  },
+  "category": "misc"
+}
