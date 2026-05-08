@@ -9,6 +9,7 @@ import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelBlockEn
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -98,12 +99,13 @@ public class BarrelRenderer
             renderCompactingFace(be, ps, buffers, level, light, overlay);
         } else {
             ItemStack item = be.getStoredItem();
-            ps.translate(0.5, 0.5, -0.002);
+            ps.translate(0.5, 0.5, -0.01);
             ps.pushPose();
             ps.scale(0.75f, 0.75f, 0.001f);
             Minecraft.getInstance()
                     .getItemRenderer()
-                    .renderStatic(item, ItemDisplayContext.FIXED, light, overlay, ps, buffers, level, 0);
+                    .renderStatic(
+                            item, ItemDisplayContext.FIXED, LightTexture.FULL_BRIGHT, overlay, ps, buffers, level, 0);
             ps.popPose();
             String label = CountFormat.format(be.getCount());
             Font font = Minecraft.getInstance().font;
@@ -119,9 +121,9 @@ public class BarrelRenderer
                     false,
                     ps.last().pose(),
                     buffers,
-                    Font.DisplayMode.POLYGON_OFFSET,
+                    Font.DisplayMode.NORMAL,
                     0,
-                    light);
+                    LightTexture.FULL_BRIGHT);
             ps.popPose();
         }
 
@@ -188,14 +190,14 @@ public class BarrelRenderer
             int light,
             int overlay) {
         ps.pushPose();
-        ps.translate(cx, cy, -0.002);
+        ps.translate(cx, cy, -0.01);
 
         // 4-pixel icon: scale = 4/16 = 0.25
         ps.pushPose();
         ps.scale(0.25f, 0.25f, 0.001f);
         Minecraft.getInstance()
                 .getItemRenderer()
-                .renderStatic(item, ItemDisplayContext.FIXED, light, overlay, ps, buffers, level, 0);
+                .renderStatic(item, ItemDisplayContext.FIXED, LightTexture.FULL_BRIGHT, overlay, ps, buffers, level, 0);
         ps.popPose();
 
         // Count text anchored to the bottom-right corner of the 4×4 icon area (±2/16 from centre)
@@ -213,9 +215,9 @@ public class BarrelRenderer
                 false,
                 ps.last().pose(),
                 buffers,
-                Font.DisplayMode.POLYGON_OFFSET,
+                Font.DisplayMode.NORMAL,
                 0,
-                light);
+                LightTexture.FULL_BRIGHT);
         ps.popPose();
 
         ps.popPose();
