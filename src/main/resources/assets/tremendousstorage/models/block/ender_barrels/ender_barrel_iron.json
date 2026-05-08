@@ -1,6 +1,6 @@
 {
   "parent": "tremendousstorage:block/ender_barrel",
   "textures": {
-    "front": "tremendousstorage:block/ender_barrels/ender_barrel_iron"
+    "front": "tremendousstorage:block/barrels/barrel_iron"
   }
 }

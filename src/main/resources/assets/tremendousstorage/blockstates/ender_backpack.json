@@ -1,8 +1,8 @@
 {
   "variants": {
-    "facing=north": { "model": "tremendousstorage:block/backpack_particle" },
-    "facing=south": { "model": "tremendousstorage:block/backpack_particle", "y": 180 },
-    "facing=east":  { "model": "tremendousstorage:block/backpack_particle", "y": 90 },
-    "facing=west":  { "model": "tremendousstorage:block/backpack_particle", "y": 270 }
+    "facing=north": { "model": "tremendousstorage:block/ender_backpack_particle" },
+    "facing=south": { "model": "tremendousstorage:block/ender_backpack_particle", "y": 180 },
+    "facing=east":  { "model": "tremendousstorage:block/ender_backpack_particle", "y": 90 },
+    "facing=west":  { "model": "tremendousstorage:block/ender_backpack_particle", "y": 270 }
   }
 }

@@ -1,6 +1,6 @@
 {
   "multipart": [
-    { "apply": { "model": "tremendousstorage:block/chest_particle" } },
+    { "apply": { "model": "tremendousstorage:block/ender_chest_particle" } },
 
     { "when": { "facing": "north", "south": "true" }, "apply": { "model": "tremendousstorage:block/chest_attachment", "y": 180 } },
     { "when": { "facing": "north", "east": "true"  }, "apply": { "model": "tremendousstorage:block/chest_attachment", "y": 90 } },
