@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "tremendousstorage:barrel",
-    "tremendousstorage:ender_barrel"
+    "tremendousstorage:ender_barrel",
+    "tremendousstorage:canvas_block"
   ]
 }

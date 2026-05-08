@@ -621,10 +621,8 @@ public final class Registration {
 
     public static final DeferredBlock<net.minecraft.world.level.block.Block> CANVAS_BLOCK = BLOCKS.register(
             "canvas_block",
-            () -> new net.minecraft.world.level.block.Block(BlockBehaviour.Properties.of()
-                    .strength(0.5f, 0.5f)
-                    .requiresCorrectToolForDrops()
-                    .sound(SoundType.WOOL)));
+            () -> new net.minecraft.world.level.block.Block(
+                    BlockBehaviour.Properties.of().strength(0.5f, 0.5f).sound(SoundType.WOOL)));
 
     public static final DeferredHolder<Item, BlockItem> CANVAS_BLOCK_ITEM =
             ITEMS.registerSimpleBlockItem("canvas_block", CANVAS_BLOCK);
