@@ -119,7 +119,7 @@ public class BarrelRenderer
                     false,
                     ps.last().pose(),
                     buffers,
-                    Font.DisplayMode.NORMAL,
+                    Font.DisplayMode.POLYGON_OFFSET,
                     0,
                     light);
             ps.popPose();
@@ -213,7 +213,7 @@ public class BarrelRenderer
                 false,
                 ps.last().pose(),
                 buffers,
-                Font.DisplayMode.NORMAL,
+                Font.DisplayMode.POLYGON_OFFSET,
                 0,
                 light);
         ps.popPose();
