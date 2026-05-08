@@ -124,6 +124,7 @@ public class BarrelRenderer
                     Font.DisplayMode.NORMAL,
                     0,
                     LightTexture.FULL_BRIGHT);
+            if (buffers instanceof MultiBufferSource.BufferSource bs) bs.endBatch();
             ps.popPose();
         }
 
@@ -218,6 +219,7 @@ public class BarrelRenderer
                 Font.DisplayMode.NORMAL,
                 0,
                 LightTexture.FULL_BRIGHT);
+        if (buffers instanceof MultiBufferSource.BufferSource bs) bs.endBatch();
         ps.popPose();
 
         ps.popPose();

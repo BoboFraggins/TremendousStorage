@@ -17,9 +17,7 @@ public class EnderTieredBlockItem extends TieredBlockItem {
     @Override
     public Component getName(ItemStack stack) {
         Component base = Component.translatable(getDescriptionId());
-        String suffix = buildBedSuffix(stack, true);
-        // Ender items always show at least "(Ender)"
-        if (suffix.isEmpty()) suffix = " (Ender)";
-        return Component.empty().append(base).append(suffix);
+        String suffix = buildBedSuffix(stack, false);
+        return suffix.isEmpty() ? base : Component.empty().append(base).append(suffix);
     }
 }

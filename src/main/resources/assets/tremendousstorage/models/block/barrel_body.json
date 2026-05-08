@@ -2,6 +2,7 @@
   "parent": "block/block",
   "textures": {
     "front": "tremendousstorage:block/barrel_front",
+    "rear": "#front",
     "side": "tremendousstorage:block/barrel_side",
     "particle": "#side"
   },
@@ -13,7 +14,7 @@
         "down":  { "uv": [0, 0, 16, 16], "texture": "#side"  },
         "up":    { "uv": [0, 0, 16, 16], "texture": "#side"  },
         "north": { "uv": [0, 0, 16, 16], "texture": "#front" },
-        "south": { "uv": [0, 0, 16, 16], "texture": "#side"  },
+        "south": { "uv": [0, 0, 16, 16], "texture": "#rear"  },
         "west":  { "uv": [0, 0, 16, 16], "texture": "#side", "rotation": 90 },
         "east":  { "uv": [0, 0, 16, 16], "texture": "#side", "rotation": 90 }
       }
