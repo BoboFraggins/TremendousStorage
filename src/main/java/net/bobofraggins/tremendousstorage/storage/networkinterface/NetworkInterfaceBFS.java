@@ -17,7 +17,6 @@ import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalB
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankItemAdapter;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.bobofraggins.tremendousstorage.storage.tube.TubeBlock;
@@ -31,6 +30,7 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 
 /**
@@ -70,7 +70,7 @@ public final class NetworkInterfaceBFS {
         // Connector blocks whose outgoing tube faces have already been enqueued
         Set<BlockPos> visitedConnectors = new HashSet<>();
         List<HandlerEntry> handlerEntries = new ArrayList<>();
-        List<TankBlockEntity> tanks = new ArrayList<>();
+        List<IFluidHandler> tanks = new ArrayList<>();
         int tubeCount = 0;
         List<String> storageKeys = new ArrayList<>(); // ordered by discovery
         int otherNiCount = 0;
@@ -251,7 +251,7 @@ public final class NetworkInterfaceBFS {
             Set<BlockPos> visitedConnectors,
             Set<BlockPos> collectedStorage,
             List<HandlerEntry> handlerEntries,
-            List<TankBlockEntity> tanks,
+            List<IFluidHandler> tanks,
             List<String> storageKeys,
             Deque<BlockPos> tubeQueue) {
         int feCost = 0;
@@ -289,7 +289,7 @@ public final class NetworkInterfaceBFS {
             Direction tubeDir,
             TubeBlockEntity tubeBE,
             List<HandlerEntry> handlerEntries,
-            List<TankBlockEntity> tanks,
+            List<IFluidHandler> tanks,
             List<String> storageKeys) {
 
         // Fetch block entity once and reuse for both priority resolution and UI key lookup
@@ -310,12 +310,20 @@ public final class NetworkInterfaceBFS {
 
         // Resolve IItemHandler capability
         IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, adjPos, tubeDir.getOpposite());
+        IFluidHandler fluidHandler =
+                level.getCapability(Capabilities.FluidHandler.BLOCK, adjPos, tubeDir.getOpposite());
         if (handler != null) {
             Priority priority = resolvePriority(tubeBE, tubeDir.ordinal(), neighborBE);
             handlerEntries.add(new HandlerEntry(handler, priority));
-        } else if (neighborBE instanceof TankBlockEntity tank) {
-            handlerEntries.add(new HandlerEntry(new TankItemAdapter(tank), Priority.NORMAL));
-            tanks.add(tank);
+            // Also expose fluid if the block has both item and fluid capabilities (e.g. Recycling Bin)
+            if (fluidHandler != null) {
+                handlerEntries.add(new HandlerEntry(new TankItemAdapter(fluidHandler), Priority.NORMAL));
+                tanks.add(fluidHandler);
+            }
+        } else if (fluidHandler != null) {
+            // Fluid-only block (e.g. Tank)
+            handlerEntries.add(new HandlerEntry(new TankItemAdapter(fluidHandler), Priority.NORMAL));
+            tanks.add(fluidHandler);
         }
 
         // Record block type for UI list

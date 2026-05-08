@@ -3,8 +3,8 @@ package net.bobofraggins.tremendousstorage.storage.networkinterface;
 import java.util.List;
 import java.util.NavigableMap;
 import java.util.Set;
-import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 
 /**
@@ -27,4 +27,4 @@ public record NetworkScanResult(
         boolean isValid,
         int totalFePerTick,
         Set<BlockPos> tubePositions,
-        List<TankBlockEntity> tanks) {}
+        List<IFluidHandler> tanks) {}
