@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
 import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -29,7 +30,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class RecyclingBinBlock extends BaseEntityBlock {
+public class RecyclingBinBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<RecyclingBinBlock> CODEC = simpleCodec(RecyclingBinBlock::new);
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
