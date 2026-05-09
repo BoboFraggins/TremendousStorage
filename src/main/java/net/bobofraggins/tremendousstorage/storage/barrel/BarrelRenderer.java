@@ -121,7 +121,7 @@ public class BarrelRenderer
                     false,
                     ps.last().pose(),
                     buffers,
-                    Font.DisplayMode.NORMAL,
+                    Font.DisplayMode.SEE_THROUGH,
                     0,
                     LightTexture.FULL_BRIGHT);
             if (buffers instanceof MultiBufferSource.BufferSource bs) bs.endBatch();
@@ -216,7 +216,7 @@ public class BarrelRenderer
                 false,
                 ps.last().pose(),
                 buffers,
-                Font.DisplayMode.NORMAL,
+                Font.DisplayMode.SEE_THROUGH,
                 0,
                 LightTexture.FULL_BRIGHT);
         if (buffers instanceof MultiBufferSource.BufferSource bs) bs.endBatch();

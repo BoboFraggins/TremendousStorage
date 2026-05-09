@@ -1,11 +1,15 @@
 package net.bobofraggins.tremendousstorage.storage.barrel;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -19,6 +23,19 @@ public final class BarrelClientEvents {
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerBlockEntityRenderer(Registration.BARREL_BE_TYPE.get(), BarrelRenderer::new);
         event.registerBlockEntityRenderer(Registration.ENDER_BARREL_BE_TYPE.get(), BarrelRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
+        for (StorageTier tier : StorageTier.values()) {
+            String id = tier.getId();
+            event.register(ModelResourceLocation.standalone(
+                    ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/barrels/barrel_body_" + id)));
+            event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(
+                    "tremendousstorage", "block/ender_barrels/ender_barrel_body_" + id)));
+            event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(
+                    "tremendousstorage", "block/barrels_compacting/barrel_body_" + id)));
+        }
     }
 
     @SubscribeEvent

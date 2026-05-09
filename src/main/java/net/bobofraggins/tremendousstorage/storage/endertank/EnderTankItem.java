@@ -13,7 +13,7 @@ import net.minecraft.world.level.block.Block;
 
 /**
  * Block item for the Ender Tank. Extends {@link TankItem} to inherit
- * fluid tooltip and bucket interaction, and appends "(Ender)" or "(Tier/Ender)" to the name.
+ * fluid tooltip and bucket interaction.
  */
 public class EnderTankItem extends TankItem {
 
@@ -24,9 +24,8 @@ public class EnderTankItem extends TankItem {
     @Override
     public Component getName(ItemStack stack) {
         Component base = Component.translatable(getDescriptionId());
-        String suffix = TieredBlockItem.buildBedSuffix(stack, true);
-        if (suffix.isEmpty()) suffix = " (Ender)";
-        return Component.empty().append(base).append(suffix);
+        String suffix = TieredBlockItem.buildBedSuffix(stack, false);
+        return suffix.isEmpty() ? base : Component.empty().append(base).append(suffix);
     }
 
     @Override

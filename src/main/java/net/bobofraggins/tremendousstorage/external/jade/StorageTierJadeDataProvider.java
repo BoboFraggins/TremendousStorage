@@ -4,9 +4,6 @@ import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlo
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
@@ -36,13 +33,11 @@ public enum StorageTierJadeDataProvider implements IServerDataProvider<BlockAcce
         BlockEntity be = accessor.getBlockEntity();
         if (be instanceof ChestBlockEntity chest) {
             data.putString("StorageTier", chest.getTier().getId());
-            if (chest instanceof EnderChestBlockEntity) data.putBoolean("Ender", true);
             if (chest.hasCraftingUpgrade()) data.putBoolean("CraftingUpgrade", true);
             if (chest.hasMagnetUpgrade()) data.putBoolean("MagnetUpgrade", true);
             if (chest.hasPullerUpgrade()) data.putBoolean("PullerUpgrade", true);
         } else if (be instanceof TankBlockEntity tank) {
             data.putString("StorageTier", tank.getTier().getId());
-            if (tank instanceof EnderTankBlockEntity) data.putBoolean("Ender", true);
             if (tank.hasMagnetUpgrade()) data.putBoolean("MagnetUpgrade", true);
             if (tank.hasPullerUpgrade()) data.putBoolean("PullerUpgrade", true);
         } else if (be instanceof FilingCabinetBlockEntity fc) {
@@ -58,7 +53,6 @@ public enum StorageTierJadeDataProvider implements IServerDataProvider<BlockAcce
             data.putString("StorageTier", ni.getTier().getId());
         } else if (be instanceof BarrelBlockEntity barrel) {
             data.putString("StorageTier", barrel.getTier().getId());
-            if (barrel instanceof EnderBarrelBlockEntity) data.putBoolean("Ender", true);
             if (barrel.hasCompactingUpgrade()) data.putBoolean("CompactingUpgrade", true);
             if (barrel.hasPullerUpgrade()) data.putBoolean("PullerUpgrade", true);
         } else if (be instanceof StirlingEngineBlockEntity engine) {

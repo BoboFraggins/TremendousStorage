@@ -5,8 +5,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
 /**
- * A {@link TieredBlockItem} for Ender-variant storage blocks that injects "Ender" into the
- * upgrade suffix after the tier, e.g. "(Ender)", "(Diamond/Ender)", "(Diamond/Ender/Crafting)".
+ * A {@link TieredBlockItem} for Ender-variant storage blocks whose base translation already
+ * includes "Ender" (e.g. "Ender Barrel"), so the upgrade suffix omits the redundant word.
  */
 public class EnderTieredBlockItem extends TieredBlockItem {
 
