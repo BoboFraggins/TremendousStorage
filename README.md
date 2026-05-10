@@ -2,7 +2,7 @@
 
 > *Because sometimes a chest just isn't dramatic enough.*
 
-Tremendous Storage is a Minecraft mod about turning your inventory into a ridiculous, magical, questionably safe logistics network.
+Tremendous Storage is a Minecraft mod that turns your inventory into a ridiculous, magical, questionably safe logistics network.
 
 Stuff gets sucked into fanny packs.
 Mobs disappear into magic hats.
@@ -178,7 +178,7 @@ Built for players who demand organization.
 
 Great for storing huge quantities of categorized items without turning your base into a warehouse disaster.
 
-A perfect place for your approximately nine million cobblestone.
+A perfect place for your approximately nine million blocks of cobblestone.
 
 ---
 
