@@ -1,58 +1,209 @@
-# TremendousStorage
+# Tremendous Storage
 
-A tech-themed storage mod for Minecraft 1.21.1 (NeoForge), built around the office filing metaphor.
-Store enormous quantities of a single item type, or organize a myriad of items you only have one or
-two of — all in a tidy Filing Cabinet full of Manila Folders.
+> *Because sometimes a chest just isn't dramatic enough.*
+
+Tremendous Storage is a Minecraft mod about turning your inventory into a ridiculous, magical, questionably safe logistics network.
+
+Stuff gets sucked into fanny packs.
+Mobs disappear into magic hats.
+Mining drops teleport across dimensions.
+Folders lead to other folders.
+Backpacks become suspiciously infinite.
+Brains in jars manage logistics.
+The weather gets controlled for better livestream quality.
+
+If you've ever looked at your inventory and thought:
+
+> "There has to be a more cursed way to do this."
+
+...then welcome home.
+
+---
 
 ## Features
 
-### Manila Folders
-A Manila Folder is a single inventory item that holds a large quantity of one item type. Folders
-come in tiered materials with increasing capacity:
+### 🎩 The Magic Hat
 
-| Tier      | Default Capacity  |
-|-----------|-------------------|
-| Paper     | 4,096             |
-| Copper    | 16,384            |
-| Iron      | 65,536            |
-| Gold      | 131,072           |
-| Diamond   | 524,288           |
-| Emerald   | 1,048,576         |
-| Netherite | 4,294,967,296     |
+A stylish storage solution for the discerning wizard, adventurer, or deeply unethical zookeeper.
 
-All tier limits are configurable via the server config.
+The Magic Hat isn't just storage — it's a *performance*.
 
-A fresh folder accepts any item. Once an item is placed inside, the folder locks to that item type.
-Items can be inserted into and extracted from a folder using the crafting grid.
+Need to yoink a chicken off a fence?
+Pull a rabbit from a hat?
+Accidentally collect an angry creeper?
 
-### Filing Cabinets
-A Filing Cabinet is a block that holds up to 8 Manila Folders. Right-click to open or close it.
-While open, right-click with a folder in hand to insert it, or right-click with an empty hand to
-extract a folder.
+The Magic Hat can capture mobs directly into storage and carry them around until you're ready to unleash absolute nonsense somewhere else.
 
-## Planned
-- Fluid folders (store a single fluid type, measured in mB)
-- Mekanism gas storage (soft dependency)
-- JEI/REI recipe integration
-- WAILA / The One Probe tooltips
+It's portable.
+It's magical.
+It's probably not OSHA compliant.
+
+---
+
+### 🎒 Dank Fanny Pack
+
+The humble fanny pack has evolved beyond mortal understanding.
+
+The Dank Fanny Pack automatically collects matching items into internal storage while you adventure, mine, loot, and generally destroy the local ecosystem.
+
+But the real magic happens when paired with:
+
+### 📁 Ender Folders
+
+Ender Folders link your storage together through dimensional nonsense.
+
+Combine them with a Dank Fanny Pack and suddenly:
+
+* Ore you mine underground can route directly into your storage network
+* Mob drops vanish into linked inventories instantly
+* Your backpack becomes a wireless logistics endpoint
+* Your inventory stops looking like a yard sale exploded
+
+It's basically pocket-sized applied teleportation.
+
+Very safe.
+Probably.
+
+---
+
+### 💉 Experience Syringe
+
+Ever looked at your experience bar and thought:
+
+> "I wish this were a delicious science liquid."
+
+Good news.
+
+The Experience Syringe lets you extract and store XP as portable juice for later use.
+
+Bottle up your levels before dangerous adventures.
+Store experience for enchanting sessions.
+Create suspicious glowing fluid reserves like a proper modded scientist.
+
+It's practical, efficient, and only mildly unsettling.
+
+---
+
+### ⛺ The Tent
+
+Sometimes survival means knowing when to leave.
+
+The Tent creates a personal pocket "Glamping Dimension" where players can retreat from danger, reorganize gear, rest, and pretend the exploding noises outside aren't their problem anymore.
+
+Inside you'll find a cozy personal refuge away from the chaos of the overworld.
+
+Think of it as tactical camping.
+With slightly illegal dimensional technology.
+
+---
+
+### 🧠 Rejuvenated Zombie Brains & Brains in Jars
+
+Normal storage systems just use cables.
+
+Tremendous Storage prefers reanimated neural tissue.
+
+By rejuvenating Zombie Brains, players can create Brains in Jars that act as the connective tissue between storage containers, allowing inventories to merge into larger linked systems.
+
+Some mods use digital networks.
+This one uses suspiciously alive thought matter.
+
+The future is weird.
+
+---
+
+### 📡 Wireless Hub & H.A.A.R.P. Technology
+
+The Wireless Hub expands your storage network beyond ordinary physical limitations.
+
+But things get especially concerning once you install the H.A.A.R.P. upgrade.
+
+Conspiracy theorists got it all wrong.
+
+Yes, it is alien technology.
+Yes, it was developed by the United States government.
+But no, it wasn't for mind control.
+
+They just wanted better streaming bitrate stability.
+
+With enough power, the H.A.A.R.P. upgrade can manipulate the weather itself.
+Because obviously the logical next step for inventory management is climate control.
+
+---
+
+## Designed For
+
+Tremendous Storage fits especially well in:
+
+* Kitchen sink modpacks
+* Exploration-heavy packs
+* Create factories
+* Mining-focused progression packs
+* Multiplayer servers where inventory management becomes warfare
+* Players who carry 17 shulker boxes and still somehow run out of room
+
+---
+
+## Philosophy
+
+Tremendous Storage is built around a few important principles:
+
+### Inventory management should feel fun
+
+Storage systems shouldn't just remove problems.
+They should create interesting workflows, funny moments, and satisfying automation.
+
+### Portable storage should feel magical
+
+Ender-linked folders, teleporting items, dimensional pockets, weather machines, and suspiciously hungry backpacks are far more interesting than "Chest But Bigger™".
+
+### Logistics should reward creativity
+
+Many items interact with one another in surprising ways. The best setups usually emerge when players start combining tools instead of using them individually.
+
+---
+
+## Example Setup
+
+A typical Tremendous Storage mining setup might look like this:
+
+1. Wear a Dank Fanny Pack
+2. Place matching Ender Folders in your base storage system and the fanyy pack
+3. Link them together with Brains in Jars
+4. Go mining
+5. Watch your inventory stay clean while resources teleport home
+6. Retreat into your Tent dimension when things go horribly wrong
+7. Convert excess experience into bottled XP juice
+
+Perfect.
+
+---
+
+## Multiplayer Friendly
+
+Tremendous Storage shines on multiplayer servers.
+
+Build shared logistics systems.
+Create communal drop networks.
+Set up dimensional mail systems.
+Accidentally hand your friend a bag containing 14,000 cobblestone.
+Manipulate the weather for your community's streaming event.
+
+The possibilities are endless.
+
+---
 
 ## Credits
 
-TremendousStorage is inspired by and derived in part from
+TremendousStorage is inspired by from
 **[Real Filing Cabinet](https://github.com/bafomdad/realfilingcabinet)** by
-[bafomdad](https://github.com/bafomdad), which is licensed under the
-[MIT License](https://github.com/bafomdad/realfilingcabinet/blob/master/License.md).
-
-The core folder storage concept, crafting grid insert/extract behavior, and filing cabinet block
-interaction model all originate from that project. Thank you to bafomdad for the original work.
+[bafomdad](https://github.com/bafomdad).
 
 The Lazurite Paxel implementation is derived from
 **[Mekanism](https://github.com/mekanism/Mekanism)** by
-[aidancbrady](https://github.com/aidancbrady) and contributors, which is licensed under the
-[MIT License](https://github.com/mekanism/Mekanism/blob/1.21.x/LICENSE).
+[aidancbrady](https://github.com/aidancbrady) and contributors.
 
-The `LazuritePaxelItem` class structure and `useOn` logic (combining axe strip/scrape/wax-off,
-shovel flatten/douse, and hoe till interactions) are modelled after `ItemMekanismPaxel`.
+---
 
 ## License
 
