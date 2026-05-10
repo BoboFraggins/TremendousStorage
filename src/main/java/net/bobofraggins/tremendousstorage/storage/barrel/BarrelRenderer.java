@@ -99,20 +99,23 @@ public class BarrelRenderer
             renderCompactingFace(be, ps, buffers, level, light, overlay);
         } else {
             ItemStack item = be.getStoredItem();
-            ps.translate(0.5, 0.5, -0.01);
+            ps.translate(0.5, 0.55, -0.01);
             ps.pushPose();
-            ps.scale(0.75f, 0.75f, 0.001f);
+
+            ps.scale(0.5f, 0.5f, 0.001f);
             Minecraft.getInstance()
                     .getItemRenderer()
                     .renderStatic(
                             item, ItemDisplayContext.FIXED, LightTexture.FULL_BRIGHT, overlay, ps, buffers, level, 0);
             ps.popPose();
+
             String label = CountFormat.format(be.getCount());
             Font font = Minecraft.getInstance().font;
             float ts = 1f / 80f;
             ps.pushPose();
-            ps.translate(0, -0.42, 0);
+            ps.translate(0, -0.3, -0.0001);
             ps.scale(ts, -ts, ts);
+            ps.mulPose(Axis.YP.rotationDegrees(180));
             font.drawInBatch(
                     label,
                     -font.width(label) / 2f,
@@ -121,7 +124,7 @@ public class BarrelRenderer
                     false,
                     ps.last().pose(),
                     buffers,
-                    Font.DisplayMode.SEE_THROUGH,
+                    Font.DisplayMode.NORMAL,
                     0,
                     LightTexture.FULL_BRIGHT);
             if (buffers instanceof MultiBufferSource.BufferSource bs) bs.endBatch();
@@ -175,9 +178,9 @@ public class BarrelRenderer
             c2 = be.getCount();
         }
 
-        if (!s2.isEmpty()) renderSmallItem(ps, buffers, s2, c2, 0.25f, 0.25f, level, light, overlay);
-        if (!s1.isEmpty()) renderSmallItem(ps, buffers, s1, c1, 0.50f, 0.75f, level, light, overlay);
-        if (!s0.isEmpty()) renderSmallItem(ps, buffers, s0, c0, 0.75f, 0.25f, level, light, overlay);
+        if (!s2.isEmpty()) renderSmallItem(ps, buffers, s2, c2, 0.25f, 0.275f, level, light, overlay);
+        if (!s1.isEmpty()) renderSmallItem(ps, buffers, s1, c1, 0.50f, 0.775f, level, light, overlay);
+        if (!s0.isEmpty()) renderSmallItem(ps, buffers, s0, c0, 0.75f, 0.275f, level, light, overlay);
     }
 
     private static void renderSmallItem(
@@ -204,19 +207,20 @@ public class BarrelRenderer
         // Count text anchored to the bottom-right corner of the 4×4 icon area (±2/16 from centre)
         String label = CountFormat.format(count);
         Font font = Minecraft.getInstance().font;
-        float ts = 1f / 80f;
+        float ts = 1f / 120f;
         ps.pushPose();
-        ps.translate(0.125f, -0.125f, -0.001f);
+        ps.translate(0.0, -0.1f, -0.0001f);
         ps.scale(ts, -ts, ts);
+        ps.mulPose(Axis.YP.rotationDegrees(180));
         font.drawInBatch(
                 label,
-                -font.width(label),
-                -font.lineHeight,
+                -font.width(label) / 2f,
+                0,
                 -1,
                 false,
                 ps.last().pose(),
                 buffers,
-                Font.DisplayMode.SEE_THROUGH,
+                Font.DisplayMode.NORMAL,
                 0,
                 LightTexture.FULL_BRIGHT);
         if (buffers instanceof MultiBufferSource.BufferSource bs) bs.endBatch();
