@@ -7,7 +7,7 @@ Tremendous Storage is a Minecraft mod about turning your inventory into a ridicu
 Stuff gets sucked into fanny packs.
 Mobs disappear into magic hats.
 Mining drops teleport across dimensions.
-Folders lead to other folders.
+Picnic Baskets feed you when you find yourself peckish.
 Backpacks become suspiciously infinite.
 Brains in jars manage logistics.
 The weather gets controlled for better livestream quality.
@@ -60,9 +60,6 @@ Combine them with a Dank Fanny Pack and suddenly:
 * Your inventory stops looking like a yard sale exploded
 
 It's basically pocket-sized applied teleportation.
-
-Very safe.
-Probably.
 
 ---
 
@@ -128,6 +125,64 @@ They just wanted better streaming bitrate stability on cold, dark Alaskan winter
 
 With enough power, the H.A.A.R.P. upgrade can manipulate the weather itself.
 Because obviously the logical next step for inventory management is climate control.
+
+---
+
+## Storage Blocks & Infrastructure
+
+Not every storage solution needs to involve dimensional anomalies or bottled consciousness.
+
+Sometimes you just need a really good container.
+
+Tremendous Storage also includes a variety of practical (and occasionally impractical) storage blocks for organizing your growing empire of junk.
+
+### 🧰 Chests
+
+Reliable, expandable storage for everyday use.
+
+Perfect for players who haven't yet escalated into full interdimensional inventory sorcery.
+
+---
+
+### 🪵 Compacting Barrels
+
+Automatically compress large quantities of materials into more manageable forms.
+
+Because eventually every modded Minecraft world defines 43 different varieties of metal.
+
+---
+
+### 🗄️ Filing Cabinets
+
+Built for players who demand organization.
+
+Great for storing huge quantities of categorized items without turning your base into a warehouse disaster.
+
+A perfect place for your approximately nine million cobblestone.
+
+---
+
+### 🛢️ Fluid Tanks
+
+Store large amounts of liquids safely and efficiently.
+
+Whether you're handling water, lava, liquid XP juice, suspicious glowing industrial fluids, or something that absolutely should not be exposed to air, Tremendous Storage has you covered.
+
+---
+
+### ⚔️ Armory Cabinet
+
+A dedicated storage solution for weapons, armor, and combat equipment.
+
+Keep those pesky unstackable items organized, accessible, and dramatically displayed like the fantasy protagonist you were always meant to be.
+
+---
+
+### ♻️ Recycling Bin
+
+Not every item deserves to continue existing.
+
+The Recycling Bin turns that unwanted junk, overflow materials, and the consequences of your increasingly questionable automation experiments into a pleasant smelling liquid.
 
 ---
 
