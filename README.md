@@ -26,7 +26,7 @@ If you've ever looked at your inventory and thought:
 
 A stylish storage solution for the discerning wizard, adventurer, or deeply unethical zookeeper.
 
-The Magic Hat isn't just storage — it's a *performance*.
+The Magic Hat isn't just mob storage — it's a *performance*.
 
 Need to yoink a chicken off a fence?
 Pull a rabbit from a hat?
@@ -56,7 +56,7 @@ Combine them with a Dank Fanny Pack and suddenly:
 
 * Ore you mine underground can route directly into your storage network
 * Mob drops vanish into linked inventories instantly
-* Your backpack becomes a wireless logistics endpoint
+* Your dank becomes a wireless logistics endpoint
 * Your inventory stops looking like a yard sale exploded
 
 It's basically pocket-sized applied teleportation.
@@ -86,9 +86,9 @@ It's practical, efficient, and only mildly unsettling.
 
 ### ⛺ The Tent
 
-Sometimes survival means knowing when to leave.
+Sometimes survival means knowing when to leave. Sometimes you need to store yourself.
 
-The Tent creates a personal pocket "Glamping Dimension" where players can retreat from danger, reorganize gear, rest, and pretend the exploding noises outside aren't their problem anymore.
+The Tent creates a personal pocket "Glamping Dimension" where players can retreat from danger, reorganize gear, relax in a hot tub, and pretend the exploding noises outside aren't their problem anymore.
 
 Inside you'll find a cozy personal refuge away from the chaos of the overworld.
 
@@ -97,13 +97,13 @@ With slightly illegal dimensional technology.
 
 ---
 
-### 🧠 Rejuvenated Zombie Brains & Brains in Jars
+### 🧠 Rejuvenated Zombie Brains & Network Interfaces
 
 Normal storage systems just use cables.
 
 Tremendous Storage prefers reanimated neural tissue.
 
-By rejuvenating Zombie Brains, players can create Brains in Jars that act as the connective tissue between storage containers, allowing inventories to merge into larger linked systems.
+By rejuvenating Zombie Brains, players can create Network Interfaces that act as the connective tissue between storage containers, allowing inventories to merge into larger linked systems.
 
 Some mods use digital networks.
 This one uses suspiciously alive thought matter.
@@ -121,10 +121,10 @@ But things get especially concerning once you install the H.A.A.R.P. upgrade.
 Conspiracy theorists got it all wrong.
 
 Yes, it is alien technology.
-Yes, it was developed by the United States government.
+Yes, it was developed by United States government scientists.
 But no, it wasn't for mind control.
 
-They just wanted better streaming bitrate stability.
+They just wanted better streaming bitrate stability on cold, dark Alaskan winter nights!
 
 With enough power, the H.A.A.R.P. upgrade can manipulate the weather itself.
 Because obviously the logical next step for inventory management is climate control.
@@ -133,13 +133,12 @@ Because obviously the logical next step for inventory management is climate cont
 
 ## Designed For
 
-Tremendous Storage fits especially well in:
+Tremendous Storage fits especially well for:
 
 * Kitchen sink modpacks
 * Exploration-heavy packs
 * Create factories
 * Mining-focused progression packs
-* Multiplayer servers where inventory management becomes warfare
 * Players who carry 17 shulker boxes and still somehow run out of room
 
 ---
@@ -155,7 +154,7 @@ They should create interesting workflows, funny moments, and satisfying automati
 
 ### Portable storage should feel magical
 
-Ender-linked folders, teleporting items, dimensional pockets, weather machines, and suspiciously hungry backpacks are far more interesting than "Chest But Bigger™".
+Ender-linked folders, mob yoinking hats, pocket dimensions, weather machines, and suspiciously hungry backpacks are far more interesting than just a big chest.
 
 ### Logistics should reward creativity
 
@@ -168,28 +167,12 @@ Many items interact with one another in surprising ways. The best setups usually
 A typical Tremendous Storage mining setup might look like this:
 
 1. Wear a Dank Fanny Pack
-2. Place matching Ender Folders in your base storage system and the fanyy pack
+2. Place matching Ender Folders in your base's Filing Cabinet and the fanny pack
 3. Link them together with Brains in Jars
 4. Go mining
 5. Watch your inventory stay clean while resources teleport home
 6. Retreat into your Tent dimension when things go horribly wrong
-7. Convert excess experience into bottled XP juice
-
-Perfect.
-
----
-
-## Multiplayer Friendly
-
-Tremendous Storage shines on multiplayer servers.
-
-Build shared logistics systems.
-Create communal drop networks.
-Set up dimensional mail systems.
-Accidentally hand your friend a bag containing 14,000 cobblestone.
-Manipulate the weather for your community's streaming event.
-
-The possibilities are endless.
+7. Siphone excess experience into XP juice to re-inject later
 
 ---
 
