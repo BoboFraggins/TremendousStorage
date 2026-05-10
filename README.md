@@ -81,6 +81,26 @@ It's practical, efficient, and only mildly unsettling.
 
 ---
 
+### 🧺 Picnic Basket
+
+Adventure is dangerous.
+Being hungry during adventure is worse.
+
+The Picnic Basket stores food and automatically feeds the player whenever hunger strikes, keeping explorers focused on the important things — like looting ancient ruins and provoking creatures far above their intended difficulty level.
+
+But once upgraded with an Ender Upgrade, things become truly modern.
+
+Your linked storage system can deliver meals directly to you from anywhere in the world.
+
+Deep underground?
+Lost in another dimension?
+Currently being chased by something with too many teeth?
+
+No problem.
+Your interdimensional food delivery service has you covered.
+
+---
+
 ### ⛺ The Tent
 
 Sometimes survival means knowing when to leave. Sometimes you need to store yourself.
