@@ -243,7 +243,7 @@ A typical Tremendous Storage mining setup might look like this:
 
 1. Wear a Dank Fanny Pack
 2. Place matching Ender Folders in your base's Filing Cabinet and the fanny pack
-3. Link them together with Brains in Jars
+3. Rinse off that Zombie Brain and build a Network Interface with a Wireless Hub
 4. Go mining
 5. Watch your inventory stay clean while resources teleport home
 6. Retreat into your Tent dimension when things go horribly wrong
