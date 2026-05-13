@@ -44,10 +44,9 @@ public final class BarrelClientEvents {
     }
 
     /**
-     * Intercepts left-clicks on the barrel's front face so the held item is inserted into the
-     * barrel rather than beginning block-break. Only fires on the first press (Action.START).
-     * Runs on the logical client only; hit precision is not available for left-click events so
-     * the entire front face acts as the insert target.
+     * Intercepts left-clicks on the barrel's front face to extract items.
+     * Only fires on the first press (Action.START), client-side only.
+     * Shift-click extracts a full vanilla stack; plain click extracts one item.
      */
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
         if (!event.getEntity().level().isClientSide()) return;
@@ -58,6 +57,7 @@ public final class BarrelClientEvents {
         Direction facing = state.getValue(BarrelBlock.FACING);
         if (event.getFace() != facing) return;
         event.setCanceled(true);
-        PacketDistributor.sendToServer(new BarrelInsertPacket(pos));
+        PacketDistributor.sendToServer(
+                new BarrelExtractPacket(pos, event.getEntity().isShiftKeyDown()));
     }
 }

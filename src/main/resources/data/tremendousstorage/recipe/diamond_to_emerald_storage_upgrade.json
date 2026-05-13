@@ -2,12 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "EEE",
-    "EUE",
+    "EBE",
     "EEE"
   ],
   "key": {
     "E": { "item": "minecraft:emerald" },
-    "U": { "item": "tremendousstorage:gold_to_diamond_storage_upgrade" }
+    "B": { "item": "tremendousstorage:base_upgrade" }
   },
   "result": {
     "id": "tremendousstorage:diamond_to_emerald_storage_upgrade",

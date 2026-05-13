@@ -27,8 +27,7 @@ public class BarrelItemHandler implements IItemHandler {
     public @NotNull ItemStack getStackInSlot(int slot) {
         if (slot != 0 || !be.isLocked() || be.getCount() <= 0) return ItemStack.EMPTY;
         ItemStack type = be.getStoredItem();
-        int visible = (int) Math.min(be.getCount(), type.getMaxStackSize());
-        return type.copyWithCount(visible);
+        return type.copyWithCount((int) Math.min(be.getCount(), Integer.MAX_VALUE));
     }
 
     @Override

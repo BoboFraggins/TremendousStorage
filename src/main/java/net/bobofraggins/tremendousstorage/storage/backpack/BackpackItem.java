@@ -1,5 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.backpack;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.network.OpenBackpackPacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
@@ -19,6 +21,7 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -66,6 +69,20 @@ public class BackpackItem extends BlockItem {
             }
         }
         return sb.isEmpty() ? base : Component.empty().append(base).append(" (" + sb + ")");
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
+        super.appendHoverText(stack, context, lines, flag);
+        BackpackContents contents =
+                stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+        List<net.bobofraggins.tremendousstorage.shared.util.StorageTooltip.Entry> entries = new ArrayList<>();
+        for (BackpackContents.Entry e : contents.entries()) {
+            if (e.count() > 0)
+                entries.add(
+                        new net.bobofraggins.tremendousstorage.shared.util.StorageTooltip.Entry(e.type(), e.count()));
+        }
+        net.bobofraggins.tremendousstorage.shared.util.StorageTooltip.appendSorted(entries, lines);
     }
 
     // -------------------------------------------------------------------------

@@ -2,12 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "GGG",
-    "GUG",
+    "GBG",
     "GGG"
   ],
   "key": {
     "G": { "item": "minecraft:gold_ingot" },
-    "U": { "item": "tremendousstorage:copper_to_iron_storage_upgrade" }
+    "B": { "item": "tremendousstorage:base_upgrade" }
   },
   "result": {
     "id": "tremendousstorage:iron_to_gold_storage_upgrade",

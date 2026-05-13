@@ -2,12 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "CCC",
-    "CFC",
+    "CBC",
     "CCC"
   ],
   "key": {
     "C": { "item": "minecraft:copper_ingot" },
-    "F": { "item": "tremendousstorage:base_upgrade" }
+    "B": { "item": "tremendousstorage:base_upgrade" }
   },
   "result": {
     "id": "tremendousstorage:wood_to_copper_storage_upgrade",

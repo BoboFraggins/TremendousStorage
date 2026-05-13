@@ -2,12 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "NNN",
-    "NUN",
+    "NBN",
     "NNN"
   ],
   "key": {
     "N": { "item": "minecraft:netherite_ingot" },
-    "U": { "item": "tremendousstorage:diamond_to_emerald_storage_upgrade" }
+    "B": { "item": "tremendousstorage:base_upgrade" }
   },
   "result": {
     "id": "tremendousstorage:emerald_to_netherite_storage_upgrade",

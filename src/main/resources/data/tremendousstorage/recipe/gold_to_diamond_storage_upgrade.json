@@ -2,12 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "DDD",
-    "DUD",
+    "DBD",
     "DDD"
   ],
   "key": {
     "D": { "item": "minecraft:diamond" },
-    "U": { "item": "tremendousstorage:iron_to_gold_storage_upgrade" }
+    "B": { "item": "tremendousstorage:base_upgrade" }
   },
   "result": {
     "id": "tremendousstorage:gold_to_diamond_storage_upgrade",

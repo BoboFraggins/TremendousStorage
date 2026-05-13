@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 
 import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.storage.TieredBlockItem;
+import net.bobofraggins.tremendousstorage.shared.util.StorageTooltip;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -20,5 +21,6 @@ public class PicnicBasketBlockItem extends TieredBlockItem {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
         tooltip.add(Component.translatable(tooltipKey));
+        StorageTooltip.appendBlockEntityItems(stack, tooltip, context);
     }
 }

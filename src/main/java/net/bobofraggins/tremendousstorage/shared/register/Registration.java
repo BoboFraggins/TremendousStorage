@@ -24,7 +24,6 @@ import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlo
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineEnergyHandler;
 import net.bobofraggins.tremendousstorage.shared.loot.LootModifiers;
-import net.bobofraggins.tremendousstorage.shared.storage.EnderTieredBlockItem;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.storage.TieredBlockItem;
 import net.bobofraggins.tremendousstorage.shared.ui.PriorityControl;
@@ -34,6 +33,7 @@ import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalB
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
 import net.bobofraggins.tremendousstorage.storage.armorycabinet.ArmoryCabinetBlock;
 import net.bobofraggins.tremendousstorage.storage.armorycabinet.ArmoryCabinetBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.armorycabinet.ArmoryCabinetItem;
 import net.bobofraggins.tremendousstorage.storage.armorycabinet.ArmoryCabinetMenu;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackBlock;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackBlockEntity;
@@ -56,6 +56,7 @@ import net.bobofraggins.tremendousstorage.storage.baseupgrade.MagnetUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.PullerUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlock;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.chest.ChestItem;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestItemHandler;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackBlock;
@@ -70,6 +71,7 @@ import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelItem;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlock;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestCraftingRecipe;
+import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestItem;
 import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderCraftingRecipe;
 import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.tremendousstorage.storage.endertank.EnderTankBlock;
@@ -339,7 +341,7 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> ARMORY_CABINET_ITEM =
-            ITEMS.register("armory_cabinet", () -> new BlockItem(ARMORY_CABINET.get(), new Item.Properties()));
+            ITEMS.register("armory_cabinet", () -> new ArmoryCabinetItem(ARMORY_CABINET.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ArmoryCabinetBlockEntity>>
             ARMORY_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register("armory_cabinet", () -> BlockEntityType.Builder.of(
@@ -370,7 +372,7 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> TREMENDOUS_CHEST_ITEM =
-            ITEMS.register("chest", () -> new TieredBlockItem(TREMENDOUS_CHEST.get(), new Item.Properties()));
+            ITEMS.register("chest", () -> new ChestItem(TREMENDOUS_CHEST.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ChestBlockEntity>> TREMENDOUS_CHEST_BE_TYPE =
             BLOCK_ENTITY_TYPES.register(
@@ -386,7 +388,7 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<Item, BlockItem> ENDER_TREMENDOUS_CHEST_ITEM = ITEMS.register(
-            "ender_chest", () -> new EnderTieredBlockItem(ENDER_TREMENDOUS_CHEST.get(), new Item.Properties()));
+            "ender_chest", () -> new EnderChestItem(ENDER_TREMENDOUS_CHEST.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderChestBlockEntity>>
             ENDER_TREMENDOUS_CHEST_BE_TYPE =

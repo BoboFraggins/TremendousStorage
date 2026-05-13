@@ -110,7 +110,7 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
                     int slot = getCompactingSlot(hit, facing);
                     handleCompactingItemOn(be, stack, player, slot);
                 } else {
-                    extractStack(be, player);
+                    insertHeld(be, stack, player);
                 }
             }
             return ItemInteractionResult.sidedSuccess(level.isClientSide());
@@ -121,18 +121,6 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
     @Override
     protected InteractionResult useWithoutItem(
             BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-        Direction facing = state.getValue(FACING);
-        if (hit.getDirection() == facing && isInItemArea(hit, facing)) {
-            if (!level.isClientSide() && level.getBlockEntity(pos) instanceof BarrelBlockEntity be) {
-                if (be.hasCompactingUpgrade()) {
-                    int slot = getCompactingSlot(hit, facing);
-                    extractCompactingSlot(be, player, slot);
-                } else {
-                    extractStack(be, player);
-                }
-            }
-            return InteractionResult.sidedSuccess(level.isClientSide());
-        }
         if (!level.isClientSide()) {
             if (level.getBlockEntity(pos) instanceof BarrelBlockEntity be) {
                 player.openMenu(be, buf -> {
@@ -144,11 +132,12 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
         return InteractionResult.sidedSuccess(level.isClientSide());
     }
 
-    private static void extractStack(BarrelBlockEntity be, Player player) {
-        if (!be.isLocked() || be.getCount() == 0) return;
-        ItemStack extracted = be.extract(be.getStoredItem().getMaxStackSize(), false);
-        if (!extracted.isEmpty() && !player.addItem(extracted)) {
-            player.drop(extracted, false);
+    private static void insertHeld(BarrelBlockEntity be, ItemStack stack, Player player) {
+        int original = stack.getCount();
+        long remainder = be.insert(stack, original, false);
+        if (!player.isCreative()) {
+            int consumed = original - (int) Math.min(remainder, original);
+            stack.shrink(consumed);
         }
     }
 
@@ -212,14 +201,12 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
                 return;
             }
         }
-        // No slot matched: extract from clicked slot instead
-        extractCompactingSlot(be, player, slot);
     }
 
-    private static void extractCompactingSlot(BarrelBlockEntity be, Player player, int slot) {
+    static void extractCompactingSlot(BarrelBlockEntity be, Player player, int slot, int amount) {
         if (!be.isLocked()) return;
         var handler = new CompactingBarrelItemHandler(be);
-        ItemStack extracted = handler.extractItem(slot, 64, false);
+        ItemStack extracted = handler.extractItem(slot, amount, false);
         if (!extracted.isEmpty() && !player.addItem(extracted)) {
             player.drop(extracted, false);
         }

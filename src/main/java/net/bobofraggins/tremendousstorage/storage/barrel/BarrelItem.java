@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.TieredBlockItem;
+import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -11,12 +13,27 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.Block;
 
 public class BarrelItem extends TieredBlockItem {
 
     public BarrelItem(Block block, Properties properties) {
         super(block, properties);
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
+        super.appendHoverText(stack, context, lines, flag);
+        appendBarrelContents(stack, lines);
+    }
+
+    public static void appendBarrelContents(ItemStack stack, List<Component> lines) {
+        BarrelContents contents = stack.getOrDefault(Registration.BARREL_CONTENTS.get(), BarrelContents.EMPTY);
+        if (!contents.isLocked() || contents.count() <= 0) return;
+        lines.add(Component.literal(CountFormat.format(contents.count()) + " "
+                        + contents.storedItem().get().getHoverName().getString())
+                .withStyle(ChatFormatting.GRAY));
     }
 
     @Override
