@@ -8,6 +8,7 @@ import net.bobofraggins.tremendousstorage.external.productivemetalworks.Producti
 import net.bobofraggins.tremendousstorage.glamping.GlampingEvents;
 import net.bobofraggins.tremendousstorage.glamping.GlampingRegistration;
 import net.bobofraggins.tremendousstorage.glamping.dankfannypack.DankFannyPackMagnetHandler;
+import net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatZombieHandler;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketFeedHandler;
 import net.bobofraggins.tremendousstorage.shared.ItemPickupInterceptor;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageClientConfig;
@@ -53,6 +54,7 @@ public class TremendousStorage {
         NeoForge.EVENT_BUS.register(EnderFolderEvents.class);
         NeoForge.EVENT_BUS.register(PicnicBasketFeedHandler.class);
         NeoForge.EVENT_BUS.register(LazuriteEquipmentHandler.class);
+        NeoForge.EVENT_BUS.register(MagicHatZombieHandler.class);
         NeoForge.EVENT_BUS.register(VexRepellentEffectHandler.class);
         NeoForge.EVENT_BUS.register(ZombieBrainDropHandler.class);
         NeoForge.EVENT_BUS.register(PositiveVibesEffectHandler.class);

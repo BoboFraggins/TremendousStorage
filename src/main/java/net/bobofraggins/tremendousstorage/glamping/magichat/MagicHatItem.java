@@ -43,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public class MagicHatItem extends BlockItem implements Equipable {
 
-    private static final String MOB_KEY = "CapturedMob";
+    static final String MOB_KEY = "CapturedMob";
 
     static final ResourceLocation LUCK_MODIFIER_ID =
             ResourceLocation.fromNamespaceAndPath("tremendousstorage", "lucky_magic_hat_luck");

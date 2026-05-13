@@ -50,21 +50,20 @@ public class CompactingBarrelItemHandler implements IItemHandler, IKeyCounterCon
         return switch (r) {
             case 0 -> {
                 if (!be.isLocked() || be.count <= 0) yield ItemStack.EMPTY;
-                int vis = (int) Math.min(be.count, be.storedItem.getMaxStackSize());
-                yield be.storedItem.copyWithCount(vis);
+                yield be.storedItem.copyWithCount((int) Math.min(be.count, Integer.MAX_VALUE));
             }
             case 1 -> {
                 if (be.compactTier1Item.isEmpty()) yield ItemStack.EMPTY;
                 long n = be.count / be.compactTier1Ratio;
                 if (n <= 0) yield ItemStack.EMPTY;
-                yield be.compactTier1Item.copyWithCount((int) Math.min(n, be.compactTier1Item.getMaxStackSize()));
+                yield be.compactTier1Item.copyWithCount((int) Math.min(n, Integer.MAX_VALUE));
             }
             case 2 -> {
                 if (be.compactTier2Item.isEmpty()) yield ItemStack.EMPTY;
                 long combined = (long) be.compactTier1Ratio * be.compactTier2Ratio;
                 long n = be.count / combined;
                 if (n <= 0) yield ItemStack.EMPTY;
-                yield be.compactTier2Item.copyWithCount((int) Math.min(n, be.compactTier2Item.getMaxStackSize()));
+                yield be.compactTier2Item.copyWithCount((int) Math.min(n, Integer.MAX_VALUE));
             }
             default -> ItemStack.EMPTY;
         };

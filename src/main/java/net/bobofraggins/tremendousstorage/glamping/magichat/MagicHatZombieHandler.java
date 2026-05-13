@@ -1,0 +1,63 @@
+package net.bobofraggins.tremendousstorage.glamping.magichat;
+
+import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.level.Level;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
+
+/** Gives a random 5% of naturally-spawning zombies a Magic Hat containing a surprise mob. */
+public final class MagicHatZombieHandler {
+
+    private MagicHatZombieHandler() {}
+
+    @SubscribeEvent
+    public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
+        if (!(event.getEntity() instanceof Zombie zombie)) return;
+
+        MobSpawnType spawnType = event.getSpawnType();
+        if (spawnType == MobSpawnType.COMMAND
+                || spawnType == MobSpawnType.SPAWN_EGG
+                || spawnType == MobSpawnType.BUCKET
+                || spawnType == MobSpawnType.DISPENSER) return;
+
+        if (event.getLevel().getRandom().nextFloat() >= 0.05f) return;
+
+        EntityType<?> mobType = pickMobType(event.getLevel().getRandom());
+        Level level = zombie.level();
+        Entity mob = mobType.create(level);
+        if (mob == null) return;
+
+        CompoundTag mobTag = new CompoundTag();
+        if (!mob.save(mobTag)) return;
+
+        CompoundTag wrapper = new CompoundTag();
+        wrapper.put(MagicHatItem.MOB_KEY, mobTag);
+
+        ItemStack hat = new ItemStack(Registration.MAGIC_HAT_ITEM.get());
+        hat.set(DataComponents.CUSTOM_DATA, CustomData.of(wrapper));
+
+        zombie.setItemSlot(EquipmentSlot.HEAD, hat);
+        zombie.setDropChance(EquipmentSlot.HEAD, 1.0f);
+    }
+
+    private static EntityType<?> pickMobType(RandomSource random) {
+        float r = random.nextFloat();
+        if (r < 0.50f) return EntityType.RABBIT;
+        if (r < 0.75f) return EntityType.CHICKEN;
+        if (r < 0.80f) return EntityType.SHEEP;
+        if (r < 0.85f) return EntityType.COW;
+        if (r < 0.90f) return EntityType.CAT;
+        if (r < 0.95f) return EntityType.VILLAGER;
+        return EntityType.RAVAGER;
+    }
+}
