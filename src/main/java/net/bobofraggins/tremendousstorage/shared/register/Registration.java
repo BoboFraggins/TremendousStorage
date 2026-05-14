@@ -505,6 +505,7 @@ public final class Registration {
                     () -> new StorageUpgradeItem(
                             StorageTier.NETHERITE, StorageTier.NETHER_STAR, true, new Item.Properties()));
 
+    @SuppressWarnings("unchecked")
     public static final DeferredHolder<Item, StorageUpgradeItem>[] STORAGE_UPGRADES = new DeferredHolder[] {
         WOOD_TO_COPPER_STORAGE_UPGRADE,
         COPPER_TO_IRON_STORAGE_UPGRADE,

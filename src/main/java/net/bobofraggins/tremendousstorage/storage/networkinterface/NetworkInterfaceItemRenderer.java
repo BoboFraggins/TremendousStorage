@@ -24,6 +24,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
@@ -62,7 +63,7 @@ public class NetworkInterfaceItemRenderer extends BlockEntityWithoutLevelRendere
         StorageTier tier = StorageTier.WOOD;
         var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (customData != null) {
-            CompoundTag tag = customData.getUnsafe();
+            CompoundTag tag = customData.copyTag();
             if (tag.contains("Tier")) {
                 tier = StorageTier.fromId(tag.getString("Tier"));
             }
@@ -72,7 +73,9 @@ public class NetworkInterfaceItemRenderer extends BlockEntityWithoutLevelRendere
                 .get()
                 .defaultBlockState()
                 .setValue(NetworkInterfaceBlock.TIER_PROP, tier);
-        mc.getBlockRenderer().renderSingleBlock(renderState, poseStack, bufferSource, packedLight, packedOverlay);
+        mc.getBlockRenderer()
+                .renderSingleBlock(
+                        renderState, poseStack, bufferSource, packedLight, packedOverlay, ModelData.EMPTY, null);
 
         // ---- Positive Vibes fill at 95% ----
         FluidStack vibes = new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), 1000);

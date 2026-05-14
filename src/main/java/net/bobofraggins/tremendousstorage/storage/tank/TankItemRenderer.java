@@ -20,6 +20,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
@@ -60,14 +61,16 @@ public class TankItemRenderer extends BlockEntityWithoutLevelRenderer {
         StorageTier tier = StorageTier.WOOD;
         var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (customData != null) {
-            CompoundTag tag = customData.getUnsafe();
+            CompoundTag tag = customData.copyTag();
             if (tag.contains("Tier")) {
                 tier = StorageTier.fromId(tag.getString("Tier"));
             }
         }
 
         BlockState renderState = Registration.TANK.get().defaultBlockState().setValue(TankBlock.TIER_PROP, tier);
-        mc.getBlockRenderer().renderSingleBlock(renderState, poseStack, bufferSource, packedLight, packedOverlay);
+        mc.getBlockRenderer()
+                .renderSingleBlock(
+                        renderState, poseStack, bufferSource, packedLight, packedOverlay, ModelData.EMPTY, null);
 
         // Render fluid fill only when the item actually contains fluid.
         TankContents contents = stack.get(Registration.TANK_CONTENTS.get());

@@ -56,17 +56,12 @@ public class MagicHatItem extends BlockItem implements Equipable {
             .build();
 
     public MagicHatItem(Block block) {
-        super(block, new Item.Properties().stacksTo(1));
+        super(block, new Item.Properties().stacksTo(1).attributes(DEFAULT_MODIFIERS));
     }
 
     @Override
     public EquipmentSlot getEquipmentSlot() {
         return EquipmentSlot.HEAD;
-    }
-
-    @Override
-    public ItemAttributeModifiers getDefaultAttributeModifiers() {
-        return DEFAULT_MODIFIERS;
     }
 
     // -------------------------------------------------------------------------

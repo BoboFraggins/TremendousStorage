@@ -17,8 +17,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
@@ -166,9 +166,10 @@ public class PicnicBasketFeedHandler {
         // Consume one use: damageable items lose durability (respecting Unbreaking); others
         // lose one count.
         if (stored.isDamageableItem()) {
-            int unbreaking = EnchantmentHelper.getItemEnchantmentLevel(
-                    level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.UNBREAKING),
-                    stored);
+            int unbreaking = stored.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY)
+                    .getLevel(level.registryAccess()
+                            .lookupOrThrow(Registries.ENCHANTMENT)
+                            .getOrThrow(Enchantments.UNBREAKING));
             boolean takeDamage = unbreaking == 0 || level.random.nextInt(unbreaking + 1) == 0;
             if (takeDamage) {
                 int newDamage = stored.getDamageValue() + 1;

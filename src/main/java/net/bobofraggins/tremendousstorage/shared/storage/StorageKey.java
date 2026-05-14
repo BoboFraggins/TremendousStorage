@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.shared.storage;
 
 import java.util.Objects;
 import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -59,7 +60,7 @@ public final class StorageKey {
 
     /** Reconstructs a display stack (count = 1) with this key's item and components applied. */
     public ItemStack toDisplayStack() {
-        return new ItemStack(item.builtInRegistryHolder(), 1, components);
+        return new ItemStack(BuiltInRegistries.ITEM.wrapAsHolder(item), 1, components);
     }
 
     @Override

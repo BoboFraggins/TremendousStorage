@@ -39,7 +39,7 @@ public final class TankClientEvents {
                     if (tintIndex != 0) return -1;
                     var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
                     if (customData != null) {
-                        CompoundTag tag = customData.getUnsafe();
+                        CompoundTag tag = customData.copyTag();
                         if (tag.contains("Tier")) {
                             return StorageTier.fromId(tag.getString("Tier")).getColor();
                         }

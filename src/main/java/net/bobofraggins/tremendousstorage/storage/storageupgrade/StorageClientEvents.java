@@ -56,7 +56,7 @@ public final class StorageClientEvents {
     private static int tierColorFromStack(net.minecraft.world.item.ItemStack stack) {
         var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (customData != null) {
-            CompoundTag tag = customData.getUnsafe();
+            CompoundTag tag = customData.copyTag();
             if (tag.contains("Tier")) {
                 return StorageTier.fromId(tag.getString("Tier")).getColor();
             }

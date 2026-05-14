@@ -82,7 +82,7 @@ public class RecyclingBinItemRenderer extends BlockEntityWithoutLevelRenderer {
         // Render fluid if the item has stored Positive Vibes.
         var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (customData == null) return;
-        CompoundTag tag = customData.getUnsafe();
+        CompoundTag tag = customData.copyTag();
         int vibes = tag.getInt("Vibes");
         if (vibes <= 0) return;
 

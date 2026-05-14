@@ -58,7 +58,7 @@ public class ExperienceSyringeFluidHandler implements IFluidHandlerItem {
 
     @Override
     public boolean isFluidValid(int tank, FluidStack stack) {
-        return !stack.isEmpty() && stack.getFluid().builtInRegistryHolder().is(EXPERIENCE_FLUID_TAG);
+        return !stack.isEmpty() && stack.is(EXPERIENCE_FLUID_TAG);
     }
 
     @Override

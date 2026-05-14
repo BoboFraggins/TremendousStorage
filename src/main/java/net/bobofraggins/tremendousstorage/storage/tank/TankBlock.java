@@ -169,9 +169,9 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
                     result = PotionContents.createItemStack(Items.POTION, Potions.WATER);
                 } else if (simulated.getFluid() == Registration.POSITIVE_VIBES_SOURCE.get()) {
                     result = new ItemStack(Registration.POSITIVE_VIBES_BOTTLE.get());
-                } else if (simulated.getFluid().builtInRegistryHolder().is(EXPERIENCE_FLUID_TAG)) {
+                } else if (simulated.is(EXPERIENCE_FLUID_TAG)) {
                     result = new ItemStack(Items.EXPERIENCE_BOTTLE);
-                } else if (simulated.getFluid().builtInRegistryHolder().is(HONEY_FLUID_TAG)) {
+                } else if (simulated.is(HONEY_FLUID_TAG)) {
                     result = new ItemStack(Items.HONEY_BOTTLE);
                 } else {
                     return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
@@ -207,8 +207,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
                 return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
             // Use the tank's locked experience fluid if present, otherwise the default XP fluid.
             FluidStack locked = be.getStoredFluid();
-            Fluid xpFluid = (!locked.isEmpty()
-                            && locked.getFluid().builtInRegistryHolder().is(EXPERIENCE_FLUID_TAG))
+            Fluid xpFluid = (!locked.isEmpty() && locked.is(EXPERIENCE_FLUID_TAG))
                     ? locked.getFluid()
                     : Registration.XP_JUICE_SOURCE.get();
             FluidStack xp = new FluidStack(xpFluid, BOTTLE_MB);
@@ -228,7 +227,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
                 return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
             // Require the tank to already hold a honey fluid so we know which one to use.
             FluidStack stored = be.getStoredFluid();
-            if (stored.isEmpty() || !stored.getFluid().builtInRegistryHolder().is(HONEY_FLUID_TAG))
+            if (stored.isEmpty() || !stored.is(HONEY_FLUID_TAG))
                 return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
             FluidStack honey = new FluidStack(stored.getFluid(), BOTTLE_MB);
             long inserted = be.insert(honey, BOTTLE_MB, true);
