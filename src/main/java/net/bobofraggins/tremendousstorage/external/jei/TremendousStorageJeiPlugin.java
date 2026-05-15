@@ -34,7 +34,7 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * JEI plugin for TremendousStorage.
@@ -217,11 +217,11 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
                         // Update menu client-side and notify server
                         if (screen instanceof ImportInterfaceScreen is) {
                             is.getMenu().setFilterSlot(si, ghost);
-                            PacketDistributor.sendToServer(new SetImportExportFilterPacket(
+                            ClientPacketDistributor.sendToServer(new SetImportExportFilterPacket(
                                     is.getMenu().getPos(), is.getMenu().getFaceIndex(), si, ghost));
                         } else if (screen instanceof ExportInterfaceScreen es) {
                             es.getMenu().setFilterSlot(si, ghost);
-                            PacketDistributor.sendToServer(new SetImportExportFilterPacket(
+                            ClientPacketDistributor.sendToServer(new SetImportExportFilterPacket(
                                     es.getMenu().getPos(), es.getMenu().getFaceIndex(), si, ghost));
                         }
                     }

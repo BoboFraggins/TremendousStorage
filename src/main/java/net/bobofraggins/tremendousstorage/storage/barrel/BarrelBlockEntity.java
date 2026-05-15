@@ -10,6 +10,7 @@ import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkListab
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiLink;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -34,6 +35,8 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.items.IItemHandler;
 
 public class BarrelBlockEntity extends BlockEntity implements MenuProvider, NetworkListable {
@@ -542,52 +545,46 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     private static final String TAG_PRIORITY = "Priority";
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
         if (!storedItem.isEmpty()) {
-            tag.put(TAG_ITEM, storedItem.save(registries));
+            output.store(TAG_ITEM, ItemStack.OPTIONAL_CODEC, storedItem);
         }
-        tag.putLong(TAG_COUNT, count);
-        tag.putString(TAG_TIER, tier.getId());
-        tag.putBoolean(TAG_VOID_EXCESS, voidExcess);
-        tag.putBoolean(TAG_COMPACTING, compactingUpgrade);
-        if (compactingUpgrade && baseSlot != 0) tag.putInt(TAG_BASE_SLOT, baseSlot);
+        output.putLong(TAG_COUNT, count);
+        output.putString(TAG_TIER, tier.getId());
+        output.putBoolean(TAG_VOID_EXCESS, voidExcess);
+        output.putBoolean(TAG_COMPACTING, compactingUpgrade);
+        if (compactingUpgrade && baseSlot != 0) output.putInt(TAG_BASE_SLOT, baseSlot);
         if (hasPullerUpgrade) {
-            tag.putBoolean("PullerUpgrade", true);
-            tag.putInt("PullerSides", pullerSides);
+            output.putBoolean("PullerUpgrade", true);
+            output.putInt("PullerSides", pullerSides);
         }
-        tag.putInt(TAG_PRIORITY, priority.ordinal());
+        output.putInt(TAG_PRIORITY, priority.ordinal());
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        if (tag.contains(TAG_ITEM)) {
-            storedItem = ItemStack.parseOptional(registries, tag.getCompound(TAG_ITEM));
-            if (!storedItem.isEmpty()) storedItem = storedItem.copyWithCount(1);
-        } else {
-            storedItem = ItemStack.EMPTY;
-        }
-        count = tag.getLong(TAG_COUNT);
-        tier = StorageTier.fromId(tag.getString(TAG_TIER));
-        voidExcess = tag.getBoolean(TAG_VOID_EXCESS);
-        compactingUpgrade = tag.getBoolean(TAG_COMPACTING);
-        baseSlot = tag.contains(TAG_BASE_SLOT) ? Math.max(0, Math.min(2, tag.getInt(TAG_BASE_SLOT))) : 0;
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        storedItem = input.read(TAG_ITEM, ItemStack.OPTIONAL_CODEC)
+                .filter(s -> !s.isEmpty())
+                .map(s -> s.copyWithCount(1))
+                .orElse(ItemStack.EMPTY);
+        count = input.getLongOr(TAG_COUNT, 0L);
+        tier = StorageTier.fromId(input.getStringOr(TAG_TIER, ""));
+        voidExcess = input.getBooleanOr(TAG_VOID_EXCESS, false);
+        compactingUpgrade = input.getBooleanOr(TAG_COMPACTING, false);
+        baseSlot = Math.max(0, Math.min(2, input.getIntOr(TAG_BASE_SLOT, 0)));
         compactCacheKey = null;
         compactCacheBaseSlot = -1;
-        hasPullerUpgrade = tag.getBoolean("PullerUpgrade");
-        pullerSides = tag.getInt("PullerSides");
+        hasPullerUpgrade = input.getBooleanOr("PullerUpgrade", false);
+        pullerSides = input.getIntOr("PullerSides", 0);
         if (compactingUpgrade) {
-            compactTier1Item = tag.contains("Compact1")
-                    ? ItemStack.parseOptional(registries, tag.getCompound("Compact1"))
-                    : ItemStack.EMPTY;
-            compactTier1Ratio = tag.contains("Compact1") ? tag.getInt("Compact1Ratio") : 0;
-            compactTier2Item = tag.contains("Compact2")
-                    ? ItemStack.parseOptional(registries, tag.getCompound("Compact2"))
-                    : ItemStack.EMPTY;
-            compactTier2Ratio = tag.contains("Compact2") ? tag.getInt("Compact2Ratio") : 0;
+            compactTier1Item = input.read("Compact1", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+            compactTier1Ratio = input.getIntOr("Compact1Ratio", 0);
+            compactTier2Item = input.read("Compact2", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+            compactTier2Ratio = input.getIntOr("Compact2Ratio", 0);
         }
-        priority = Priority.fromOrdinal(tag.getInt(TAG_PRIORITY));
+        priority = Priority.fromOrdinal(input.getIntOr(TAG_PRIORITY, 0));
     }
 
     // -------------------------------------------------------------------------
@@ -632,7 +629,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     }
 
     @Override
-    protected void applyImplicitComponents(BlockEntity.DataComponentInput input) {
+    protected void applyImplicitComponents(DataComponentGetter input) {
         super.applyImplicitComponents(input);
         BarrelContents contents = input.get(Registration.BARREL_CONTENTS);
         if (contents != null) {
@@ -642,9 +639,9 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     }
 
     @Override
-    public void removeComponentsFromTag(CompoundTag tag) {
-        tag.remove(TAG_ITEM);
-        tag.remove(TAG_COUNT);
+    public void removeComponentsFromTag(net.minecraft.world.level.storage.ValueOutput output) {
+        output.discard(TAG_ITEM);
+        output.discard(TAG_COUNT);
     }
 
     // -------------------------------------------------------------------------
@@ -656,12 +653,20 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         CompoundTag tag = saveWithoutMetadata(registries);
         if (compactingUpgrade && level != null && !level.isClientSide) {
             ensureCompactingCache();
+            net.minecraft.resources.RegistryOps<net.minecraft.nbt.Tag> ops =
+                    registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE);
             if (!compactTier1Item.isEmpty()) {
-                tag.put("Compact1", compactTier1Item.save(registries));
+                ItemStack.OPTIONAL_CODEC
+                        .encodeStart(ops, compactTier1Item)
+                        .result()
+                        .ifPresent(t -> tag.put("Compact1", t));
                 tag.putInt("Compact1Ratio", compactTier1Ratio);
             }
             if (!compactTier2Item.isEmpty()) {
-                tag.put("Compact2", compactTier2Item.save(registries));
+                ItemStack.OPTIONAL_CODEC
+                        .encodeStart(ops, compactTier2Item)
+                        .result()
+                        .ifPresent(t -> tag.put("Compact2", t));
                 tag.putInt("Compact2Ratio", compactTier2Ratio);
             }
         }

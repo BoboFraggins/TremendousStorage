@@ -1,12 +1,13 @@
 package net.bobofraggins.tremendousstorage.storage.baseupgrade;
 
-import java.util.List;
+import java.util.function.Consumer;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEntity;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 
 /**
@@ -23,8 +24,13 @@ public class HaarpUpgradeItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("item.tremendousstorage.haarp_upgrade.tooltip"));
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            TooltipDisplay tooltip,
+            Consumer<Component> tooltipAdder,
+            TooltipFlag flag) {
+        tooltipAdder.accept(Component.translatable("item.tremendousstorage.haarp_upgrade.tooltip"));
     }
 
     @Override

@@ -13,6 +13,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import org.joml.Matrix4f;
 
@@ -63,7 +64,8 @@ public abstract class AbstractTankRenderer<T extends BlockEntity>
             PoseStack poseStack,
             MultiBufferSource bufferSource,
             int packedLight,
-            int packedOverlay) {
+            int packedOverlay,
+            Vec3 cameraPos) {
 
         poseStack.pushPose();
         Matrix4f mat = poseStack.last().pose();

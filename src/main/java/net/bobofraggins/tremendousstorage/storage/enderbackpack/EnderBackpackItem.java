@@ -38,7 +38,7 @@ public class EnderBackpackItem extends BackpackItem {
             // (e.g. backpack was previously placed and broken before the component was set)
             var bedData = backpackStack.get(DataComponents.BLOCK_ENTITY_DATA);
             if (bedData != null) {
-                linkIdObj = bedData.copyTag().getLong("LinkId");
+                linkIdObj = bedData.copyTag().getLong("LinkId").orElse(null);
             }
         }
         if (linkIdObj == null || linkIdObj == -1L) {
@@ -52,7 +52,7 @@ public class EnderBackpackItem extends BackpackItem {
                 backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
 
         // Sync FROM storage (or seed storage if this is first open)
-        EnderBackpackStorage storage = EnderBackpackStorage.get(player.server);
+        EnderBackpackStorage storage = EnderBackpackStorage.get(player.getServer());
         if (storage.hasLink(linkId)) {
             ListTag saved = storage.getTypes(linkId);
             contents = EnderBackpackMenu.listTagToContents(

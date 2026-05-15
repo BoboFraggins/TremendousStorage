@@ -7,11 +7,13 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.storage.TagValueOutput;
 
 /**
  * Crafting recipe: Tremendous Chest (any tier) + Ender Storage Upgrade →
@@ -46,7 +48,7 @@ public class EnderChestCraftingRecipe extends AbstractEnderCraftingRecipe {
         CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (existing == null) return -1L;
         CompoundTag tag = existing.copyTag();
-        return tag.contains(EnderChestBlockEntity.TAG_LINK_ID) ? tag.getLong(EnderChestBlockEntity.TAG_LINK_ID) : -1L;
+        return tag.getLongOr(EnderChestBlockEntity.TAG_LINK_ID, -1L);
     }
 
     @Override
@@ -55,7 +57,9 @@ public class EnderChestCraftingRecipe extends AbstractEnderCraftingRecipe {
         CustomData existing = base.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putLong(EnderChestBlockEntity.TAG_LINK_ID, linkId);
-        BlockItem.setBlockEntityData(result, Registration.ENDER_TREMENDOUS_CHEST_BE_TYPE.get(), tag);
+        TagValueOutput _tagOut = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
+        _tagOut.store(tag);
+        BlockItem.setBlockEntityData(result, Registration.ENDER_TREMENDOUS_CHEST_BE_TYPE.get(), _tagOut);
         return result;
     }
 

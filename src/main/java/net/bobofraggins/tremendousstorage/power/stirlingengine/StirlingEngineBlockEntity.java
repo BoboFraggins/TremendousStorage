@@ -14,6 +14,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
 
@@ -165,19 +167,19 @@ public class StirlingEngineBlockEntity extends BlockEntity {
     // -------------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putString("Tier", tier.getId());
-        tag.putInt("EnergyStored", energyStored);
-        tag.putBoolean("Heated", heated);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.putString("Tier", tier.getId());
+        output.putInt("EnergyStored", energyStored);
+        output.putBoolean("Heated", heated);
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        tier = StorageTier.fromId(tag.getString("Tier"));
-        energyStored = tag.getInt("EnergyStored");
-        heated = tag.getBoolean("Heated");
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        tier = StorageTier.fromId(input.getStringOr("Tier", ""));
+        energyStored = input.getIntOr("EnergyStored", 0);
+        heated = input.getBooleanOr("Heated", false);
     }
 
     // -------------------------------------------------------------------------

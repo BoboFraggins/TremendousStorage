@@ -7,6 +7,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
+import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
 
 public final class RecyclingBinClientEvents {
 
@@ -18,10 +19,19 @@ public final class RecyclingBinClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_body"));
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_lid"));
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_pedal"));
+    public static void onRegisterAdditionalModels(ModelEvent.RegisterStandalone event) {
+        event.register(
+                RecyclingBinRenderer.BODY_MODEL_KEY,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_body")));
+        event.register(
+                RecyclingBinRenderer.LID_MODEL_KEY,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_lid")));
+        event.register(
+                RecyclingBinRenderer.PEDAL_MODEL_KEY,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_pedal")));
     }
 
     @SubscribeEvent

@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -16,6 +17,7 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
@@ -52,10 +54,10 @@ public class StirlingEngineBlock extends BaseEntityBlock implements NetworkConne
         if (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof StirlingEngineBlockEntity engine) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof net.minecraft.world.item.BlockItem) {
-                    BlockItem.setBlockEntityData(
-                            drop,
-                            engine.getType(),
-                            engine.saveCustomOnly(params.getLevel().registryAccess()));
+                    TagValueOutput _beOut = TagValueOutput.createWithContext(
+                            ProblemReporter.DISCARDING, params.getLevel().registryAccess());
+                    engine.saveCustomOnly(_beOut);
+                    BlockItem.setBlockEntityData(drop, engine.getType(), _beOut);
                 }
             }
         }

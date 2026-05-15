@@ -6,9 +6,7 @@ import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Inventory;
@@ -18,6 +16,8 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * Block entity for the Ender Picnic Basket.
@@ -146,15 +146,15 @@ public class EnderPicnicBasketBlockEntity extends EnderChestBlockEntity {
     // -------------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putBoolean("AutoFeed", autoFeed);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.putBoolean("AutoFeed", autoFeed);
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        autoFeed = !tag.contains("AutoFeed") || tag.getBoolean("AutoFeed");
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        autoFeed = input.getBooleanOr("AutoFeed", true);
     }
 
     // -------------------------------------------------------------------------

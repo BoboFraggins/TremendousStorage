@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 import java.util.List;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -173,18 +173,27 @@ public class Dialog {
         int midH = totalH - 2 * CORNER; // height of middle strip (between corners)
 
         // ── Top corners + top edge ────────────────────────────────────────────
-        graphics.blit(RenderType::guiTextured, TEX_CORNER_TL, x, y, 0, 0, CORNER, CORNER, CORNER, CORNER);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEX_CORNER_TL, x, y, 0, 0, CORNER, CORNER, CORNER, CORNER);
         for (int px = 0; px < midW; px++) {
-            graphics.blit(RenderType::guiTextured, TEX_EDGE_TOP, x + CORNER + px, y, 0, 0, 1, CORNER, 1, CORNER);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, TEX_EDGE_TOP, x + CORNER + px, y, 0, 0, 1, CORNER, 1, CORNER);
         }
         graphics.blit(
-                RenderType::guiTextured, TEX_CORNER_TR, x + width - CORNER, y, 0, 0, CORNER, CORNER, CORNER, CORNER);
+                RenderPipelines.GUI_TEXTURED,
+                TEX_CORNER_TR,
+                x + width - CORNER,
+                y,
+                0,
+                0,
+                CORNER,
+                CORNER,
+                CORNER,
+                CORNER);
 
         // ── Side edges + center fill ──────────────────────────────────────────
         for (int py = 0; py < midH; py++) {
-            graphics.blit(RenderType::guiTextured, TEX_EDGE_LEFT, x, bodyTop + py, 0, 0, CORNER, 1, CORNER, 1);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, TEX_EDGE_LEFT, x, bodyTop + py, 0, 0, CORNER, 1, CORNER, 1);
             graphics.blit(
-                    RenderType::guiTextured,
+                    RenderPipelines.GUI_TEXTURED,
                     TEX_EDGE_RIGHT,
                     x + width - CORNER,
                     bodyTop + py,
@@ -199,10 +208,10 @@ public class Dialog {
 
         // ── Bottom edge + bottom corners ──────────────────────────────────────
         graphics.blit(
-                RenderType::guiTextured, TEX_CORNER_BL, x, bodyBot - CORNER, 0, 0, CORNER, CORNER, CORNER, CORNER);
+                RenderPipelines.GUI_TEXTURED, TEX_CORNER_BL, x, bodyBot - CORNER, 0, 0, CORNER, CORNER, CORNER, CORNER);
         for (int px = 0; px < midW; px++) {
             graphics.blit(
-                    RenderType::guiTextured,
+                    RenderPipelines.GUI_TEXTURED,
                     TEX_EDGE_BOTTOM,
                     x + CORNER + px,
                     bodyBot - CORNER,
@@ -214,7 +223,7 @@ public class Dialog {
                     CORNER);
         }
         graphics.blit(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 TEX_CORNER_BR,
                 x + width - CORNER,
                 bodyBot - CORNER,
@@ -234,10 +243,10 @@ public class Dialog {
             int paneAbsY = getPaneAbsY(i);
             int localMouseX = mouseX - x;
             int localMouseY = mouseY - paneAbsY;
-            graphics.pose().pushPose();
-            graphics.pose().translate(x, paneAbsY, 0);
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(x, paneAbsY);
             pane.render(graphics, font, width, localMouseX, localMouseY, partialTick);
-            graphics.pose().popPose();
+            graphics.pose().popMatrix();
         }
     }
 

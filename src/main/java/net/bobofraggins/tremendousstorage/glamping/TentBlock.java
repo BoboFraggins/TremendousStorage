@@ -110,7 +110,6 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
         if (level.isClientSide()) return;
         BlockPos headPos = pos.relative(state.getValue(FACING));
         level.setBlock(headPos, state.setValue(PART, BedPart.HEAD), Block.UPDATE_ALL);
-        level.blockUpdated(pos, Blocks.AIR);
         state.updateNeighbourShapes(level, pos, Block.UPDATE_ALL);
 
         // Copy the item's custom name into the FOOT block entity so it survives the

@@ -49,13 +49,13 @@ public class TieredBlockItem extends BlockItem {
                 compacting = false;
         if (data != null) {
             CompoundTag tag = data.copyTag();
-            tier = StorageTier.fromId(tag.getString("Tier"));
-            crafting = tag.getBoolean("CraftingUpgrade");
-            magnet = tag.getBoolean("MagnetUpgrade");
-            puller = tag.getBoolean("PullerUpgrade");
-            haarp = tag.getBoolean("HaarpUpgrade");
-            interdimensional = tag.getBoolean("InterdimensionalUpgrade");
-            compacting = tag.getBoolean("CompactingUpgrade");
+            tier = StorageTier.fromId(tag.getStringOr("Tier", ""));
+            crafting = tag.getBooleanOr("CraftingUpgrade", false);
+            magnet = tag.getBooleanOr("MagnetUpgrade", false);
+            puller = tag.getBooleanOr("PullerUpgrade", false);
+            haarp = tag.getBooleanOr("HaarpUpgrade", false);
+            interdimensional = tag.getBooleanOr("InterdimensionalUpgrade", false);
+            compacting = tag.getBooleanOr("CompactingUpgrade", false);
         }
         StringBuilder sb = new StringBuilder();
         if (tier != StorageTier.WOOD) sb.append(capitalize(tier.getId()));

@@ -3,41 +3,34 @@ package net.bobofraggins.tremendousstorage.storage.chest;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 
-/**
- * Renders the body and animated lid of the Tremendous Chest.
- *
- * <p>Both parts are rendered here so they share the same lighting pipeline and
- * exhibit no AO mismatch (matching the approach used by vanilla chests). The body
- * is rendered first with only the facing Y-rotation applied; the lid is then rendered
- * with the additional pivot animation: z=15/16, y=9/16, rotating around the X axis.
- */
 public class ChestRenderer
         implements BlockEntityRenderer<ChestBlockEntity>, IBlockEntityRendererExtension<ChestBlockEntity> {
 
-    private static final ModelResourceLocation BODY_MODEL = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/chest_body"), "standalone");
-    private static final ModelResourceLocation LID_MODEL = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/chest_lid"), "standalone");
+    static final StandaloneModelKey<BlockStateModel> BODY_MODEL_KEY =
+            new StandaloneModelKey<>(() -> "tremendousstorage:block/chest_body");
+    static final StandaloneModelKey<BlockStateModel> LID_MODEL_KEY =
+            new StandaloneModelKey<>(() -> "tremendousstorage:block/chest_lid");
 
-    /** Y-rotation in degrees to apply for each facing direction (model default is NORTH). */
     private static float facingYRot(Direction facing) {
         return switch (facing) {
             case SOUTH -> 180f;
@@ -56,11 +49,12 @@ public class ChestRenderer
             PoseStack poseStack,
             MultiBufferSource bufferSource,
             int packedLight,
-            int packedOverlay) {
+            int packedOverlay,
+            Vec3 cameraPos) {
 
         Minecraft mc = Minecraft.getInstance();
-        BakedModel bodyModel = mc.getModelManager().getModel(BODY_MODEL);
-        BakedModel lidModel = mc.getModelManager().getModel(LID_MODEL);
+        BlockStateModel bodyModel = mc.getModelManager().getStandaloneModel(BODY_MODEL_KEY);
+        BlockStateModel lidModel = mc.getModelManager().getStandaloneModel(LID_MODEL_KEY);
         VertexConsumer consumer = bufferSource.getBuffer(RenderType.solid());
 
         Level level = be.getLevel();
@@ -79,17 +73,16 @@ public class ChestRenderer
 
         RandomSource random = RandomSource.create();
 
-        // Render body with facing rotation only.
+        // Body — facing rotation only.
         poseStack.pushPose();
         poseStack.translate(0.5, 0.5, 0.5);
         poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
         poseStack.translate(-0.5, -0.5, -0.5);
         renderQuadsWithShading(
-                consumer, poseStack.last(), bodyModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
+                consumer, poseStack.last(), bodyModel, level, r, g, b, packedLight, packedOverlay, random);
         poseStack.popPose();
 
-        // Render lid with facing rotation + pivot animation.
-        // Pivot at back-bottom edge of lid (z=15/16, y=9/16 in model space).
+        // Lid — facing rotation + pivot animation.
         float openFraction = Mth.lerp(partialTick, be.prevLidAngle, be.lidAngle);
         poseStack.pushPose();
         poseStack.translate(0.5, 0.5, 0.5);
@@ -99,20 +92,14 @@ public class ChestRenderer
         poseStack.mulPose(Axis.XP.rotationDegrees(openFraction * 90f));
         poseStack.translate(0.0, -9.0 / 16.0, -15.0 / 16.0);
         renderQuadsWithShading(
-                consumer, poseStack.last(), lidModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
+                consumer, poseStack.last(), lidModel, level, r, g, b, packedLight, packedOverlay, random);
         poseStack.popPose();
     }
 
-    /**
-     * Renders all quads of the given model with per-face directional shading, matching the
-     * chunk renderer's behavior. Tinted quads receive the tier color × shade; untinted quads
-     * receive shade × white (1,1,1).
-     */
     private static void renderQuadsWithShading(
             VertexConsumer consumer,
             PoseStack.Pose pose,
-            BakedModel model,
-            BlockState blockState,
+            BlockStateModel model,
             Level level,
             float r,
             float g,
@@ -120,12 +107,31 @@ public class ChestRenderer
             int packedLight,
             int packedOverlay,
             RandomSource random) {
-        for (Direction dir : Direction.values()) {
-            random.setSeed(42L);
-            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.solid())) {
-                float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
+        List<BlockModelPart> parts = new ArrayList<>();
+        random.setSeed(42L);
+        model.collectParts(random, parts);
+        for (BlockModelPart part : parts) {
+            for (Direction dir : Direction.values()) {
+                for (var quad : part.getQuads(dir)) {
+                    float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
+                    float qr, qg, qb;
+                    if (quad.tintIndex() >= 0) {
+                        qr = r * shade;
+                        qg = g * shade;
+                        qb = b * shade;
+                    } else {
+                        qr = shade;
+                        qg = shade;
+                        qb = shade;
+                    }
+                    consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, packedOverlay);
+                }
+            }
+            for (var quad : part.getQuads(null)) {
+                Direction dir = quad.direction();
+                float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
                 float qr, qg, qb;
-                if (quad.getTintIndex() >= 0) {
+                if (quad.tintIndex() >= 0) {
                     qr = r * shade;
                     qg = g * shade;
                     qb = b * shade;
@@ -137,28 +143,11 @@ public class ChestRenderer
                 consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, packedOverlay);
             }
         }
-        // Unculled quads
-        random.setSeed(42L);
-        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.solid())) {
-            Direction dir = quad.getDirection();
-            float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
-            float qr, qg, qb;
-            if (quad.getTintIndex() >= 0) {
-                qr = r * shade;
-                qg = g * shade;
-                qb = b * shade;
-            } else {
-                qr = shade;
-                qg = shade;
-                qb = shade;
-            }
-            consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, packedOverlay);
-        }
     }
 
     @Override
-    public boolean shouldRenderOffScreen(ChestBlockEntity be) {
-        return be.lidAngle > 0f || be.prevLidAngle > 0f;
+    public boolean shouldRenderOffScreen() {
+        return true;
     }
 
     @Override

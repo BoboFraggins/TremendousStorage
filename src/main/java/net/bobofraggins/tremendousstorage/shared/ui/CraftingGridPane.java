@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -74,7 +74,7 @@ public class CraftingGridPane implements IDialogPane {
 
         // Arrow
         graphics.blit(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 CRAFTING_TEXTURE,
                 arrowX,
                 ARROW_LOCAL_Y,
@@ -87,7 +87,7 @@ public class CraftingGridPane implements IDialogPane {
 
         // Result slot background
         graphics.blit(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 CRAFTING_TEXTURE,
                 resultX - RESULT_BG_OFFSET,
                 RESULT_LOCAL_Y - RESULT_BG_OFFSET,

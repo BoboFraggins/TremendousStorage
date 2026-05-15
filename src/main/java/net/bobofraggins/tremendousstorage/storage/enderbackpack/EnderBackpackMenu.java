@@ -10,7 +10,9 @@ import net.bobofraggins.tremendousstorage.storage.backpack.BackpackMenu;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -83,7 +85,7 @@ public class EnderBackpackMenu extends BackpackMenu {
         BackpackContents contents =
                 backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
         ListTag types = contentsToListTag(contents, sp.level().registryAccess());
-        EnderBackpackStorage.get(sp.server).setTypes(linkId, types);
+        EnderBackpackStorage.get(sp.getServer()).setTypes(linkId, types);
     }
 
     // -------------------------------------------------------------------------
@@ -96,9 +98,10 @@ public class EnderBackpackMenu extends BackpackMenu {
      */
     static ListTag contentsToListTag(BackpackContents contents, HolderLookup.Provider registries) {
         ListTag list = new ListTag();
+        RegistryOps<net.minecraft.nbt.Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
         for (BackpackContents.Entry e : contents.entries()) {
             CompoundTag entry = new CompoundTag();
-            entry.put("Type", e.type().save(registries));
+            ItemStack.OPTIONAL_CODEC.encodeStart(ops, e.type()).result().ifPresent(t -> entry.put("Type", t));
             entry.putLong("Count", e.count());
             list.add(entry);
         }
@@ -111,10 +114,13 @@ public class EnderBackpackMenu extends BackpackMenu {
      */
     static BackpackContents listTagToContents(ListTag list, BackpackContents base, HolderLookup.Provider registries) {
         List<BackpackContents.Entry> entries = new ArrayList<>();
+        RegistryOps<net.minecraft.nbt.Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag entry = list.getCompound(i);
-            long count = entry.getLong("Count");
-            ItemStack.parse(registries, entry.getCompound("Type"))
+            CompoundTag entry = list.getCompoundOrEmpty(i);
+            long count = entry.getLongOr("Count", 0L);
+            entry.getCompound("Type")
+                    .flatMap(t -> ItemStack.OPTIONAL_CODEC.parse(ops, t).result())
+                    .filter(s -> !s.isEmpty())
                     .ifPresent(stack -> entries.add(new BackpackContents.Entry(stack, count)));
         }
         return new BackpackContents(entries, base.tier(), base.priority(), base.sortMode(), base.hasCraftingUpgrade());

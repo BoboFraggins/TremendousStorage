@@ -11,11 +11,11 @@ import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.TriState;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.player.ItemEntityPickupEvent;
 
 /**
@@ -63,7 +63,7 @@ public final class ItemPickupInterceptor {
         int slotType = -1, slotIndex = -1;
         String slotId = "";
 
-        var items = player.getInventory().items;
+        var items = player.getInventory().getNonEquipmentItems();
         outer:
         for (int i = 0; i < items.size(); i++) {
             if (items.get(i).getItem() instanceof DankFannyPackItem) {
@@ -192,7 +192,7 @@ public final class ItemPickupInterceptor {
                 || !(stack.getItem() instanceof net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem))
             return false;
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.copyTag().getBoolean("MagnetUpgrade");
+        return data != null && data.copyTag().getBooleanOr("MagnetUpgrade", false);
     }
 
     // -------------------------------------------------------------------------

@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * JEI recipe transfer handler for the Storage Access Terminal.
@@ -60,7 +60,7 @@ class TerminalJeiRecipeHandler implements IRecipeTransferHandler<AccessTerminalM
             return helper.createInternalError();
         }
         if (doTransfer) {
-            PacketDistributor.sendToServer(new SatFillCraftingGridPacket(container.getSatPos(), recipe.id()));
+            ClientPacketDistributor.sendToServer(new SatFillCraftingGridPacket(container.getSatPos(), recipe.id()));
         }
         return null;
     }

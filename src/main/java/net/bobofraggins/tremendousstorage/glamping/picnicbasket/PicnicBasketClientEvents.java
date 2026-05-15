@@ -9,6 +9,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyModifier;
 
@@ -44,9 +45,18 @@ public final class PicnicBasketClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_body"));
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_left_lid"));
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_right_lid"));
+    public static void onRegisterAdditionalModels(ModelEvent.RegisterStandalone event) {
+        event.register(
+                PicnicBasketRenderer.BODY_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_body")));
+        event.register(
+                PicnicBasketRenderer.LEFT_LID_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_left_lid")));
+        event.register(
+                PicnicBasketRenderer.RIGHT_LID_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_right_lid")));
     }
 }

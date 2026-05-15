@@ -8,6 +8,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
 
 /** Client-only event subscriber for Stirling Engine rendering. */
 public final class StirlingEngineClientEvents {
@@ -36,16 +37,27 @@ public final class StirlingEngineClientEvents {
     @SubscribeEvent
     public static void onRegisterItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
         event.register(
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
+                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
                 net.bobofraggins.tremendousstorage.shared.storage.StorageTierTintSource.MAP_CODEC);
     }
 
     @SubscribeEvent
-    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        event.register(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_body"));
+    public static void onRegisterAdditionalModels(ModelEvent.RegisterStandalone event) {
         event.register(
-                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_flywheel"));
-        event.register(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_piston"));
-        event.register(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_bridge"));
+                StirlingEngineRenderer.BODY_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_body")));
+        event.register(
+                StirlingEngineRenderer.FLYWHEEL_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(ResourceLocation.fromNamespaceAndPath(
+                        TremendousStorage.MODID, "block/stirling_engine_flywheel")));
+        event.register(
+                StirlingEngineRenderer.PISTON_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(ResourceLocation.fromNamespaceAndPath(
+                        TremendousStorage.MODID, "block/stirling_engine_piston")));
+        event.register(
+                StirlingEngineRenderer.BRIDGE_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(ResourceLocation.fromNamespaceAndPath(
+                        TremendousStorage.MODID, "block/stirling_engine_bridge")));
     }
 }

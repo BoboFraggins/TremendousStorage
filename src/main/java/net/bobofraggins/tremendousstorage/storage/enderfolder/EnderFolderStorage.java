@@ -1,14 +1,15 @@
 package net.bobofraggins.tremendousstorage.storage.enderfolder;
 
+import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Map;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
 /**
@@ -23,6 +24,12 @@ public class EnderFolderStorage extends SavedData {
 
     private static final String SAVE_KEY = "tremendousstorage_ender_folders";
 
+    private static final Codec<EnderFolderStorage> CODEC =
+            CompoundTag.CODEC.xmap(EnderFolderStorage::fromCompoundTag, EnderFolderStorage::toCompoundTag);
+
+    static final SavedDataType<EnderFolderStorage> TYPE =
+            new SavedDataType<>(SAVE_KEY, ctx -> new EnderFolderStorage(), ctx -> CODEC);
+
     private final Map<Long, FolderContents> contents = new HashMap<>();
 
     // -------------------------------------------------------------------------
@@ -31,8 +38,7 @@ public class EnderFolderStorage extends SavedData {
 
     public static EnderFolderStorage get(MinecraftServer server) {
         DimensionDataStorage storage = server.overworld().getDataStorage();
-        return storage.computeIfAbsent(
-                new SavedData.Factory<>(EnderFolderStorage::new, EnderFolderStorage::load, null), SAVE_KEY);
+        return storage.computeIfAbsent(TYPE);
     }
 
     // -------------------------------------------------------------------------
@@ -67,32 +73,33 @@ public class EnderFolderStorage extends SavedData {
     }
 
     // -------------------------------------------------------------------------
-    // NBT persistence
+    // NBT persistence via Codec
     // -------------------------------------------------------------------------
 
-    private static EnderFolderStorage load(CompoundTag tag, HolderLookup.Provider registries) {
+    private static EnderFolderStorage fromCompoundTag(CompoundTag tag) {
         EnderFolderStorage storage = new EnderFolderStorage();
-        ListTag list = tag.getList("Links", Tag.TAG_COMPOUND);
+        ListTag list = tag.getListOrEmpty("Links");
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag entry = list.getCompound(i);
-            long linkId = entry.getLong("LinkId");
-            FolderContents fc = FolderContents.CODEC
-                    .parse(net.minecraft.nbt.NbtOps.INSTANCE, entry.get("Contents"))
-                    .result()
+            CompoundTag entry = list.getCompoundOrEmpty(i);
+            long linkId = entry.getLongOr("LinkId", 0L);
+            if (linkId == 0L) continue;
+            FolderContents fc = entry.getCompound("Contents")
+                    .flatMap(ct ->
+                            FolderContents.CODEC.parse(NbtOps.INSTANCE, ct).result())
                     .orElse(FolderContents.EMPTY);
             storage.contents.put(linkId, fc);
         }
         return storage;
     }
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    private CompoundTag toCompoundTag() {
+        CompoundTag tag = new CompoundTag();
         ListTag list = new ListTag();
         for (Map.Entry<Long, FolderContents> entry : contents.entrySet()) {
             CompoundTag e = new CompoundTag();
             e.putLong("LinkId", entry.getKey());
             FolderContents.CODEC
-                    .encodeStart(net.minecraft.nbt.NbtOps.INSTANCE, entry.getValue())
+                    .encodeStart(NbtOps.INSTANCE, entry.getValue())
                     .result()
                     .ifPresent(nbt -> e.put("Contents", nbt));
             list.add(e);

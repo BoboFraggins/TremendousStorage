@@ -9,7 +9,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -101,18 +103,21 @@ public class PicnicBasketFeedHandler {
 
         CompoundTag beTag = existing.copyTag();
         // Default true: feed unless explicitly disabled
-        if (beTag.contains("AutoFeed") && !beTag.getBoolean("AutoFeed")) return;
-        ListTag types = beTag.getList("Types", Tag.TAG_COMPOUND);
+        if (!beTag.getBooleanOr("AutoFeed", true)) return;
+        ListTag types = beTag.getListOrEmpty("Types");
         if (types.isEmpty()) return;
 
         HolderLookup.Provider registries = level.registryAccess();
+        RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
 
         // Collect indices of non-empty food entries
         List<Integer> candidates = new ArrayList<>();
         for (int i = 0; i < types.size(); i++) {
-            if (types.getCompound(i).getLong("Count") > 0) {
-                ItemStack stored =
-                        ItemStack.parseOptional(registries, types.getCompound(i).getCompound("Type"));
+            if (types.getCompoundOrEmpty(i).getLongOr("Count", 0L) > 0) {
+                ItemStack stored = ItemStack.OPTIONAL_CODEC
+                        .parse(ops, types.getCompoundOrEmpty(i).getCompoundOrEmpty("Type"))
+                        .result()
+                        .orElse(ItemStack.EMPTY);
                 if (!stored.isEmpty() && stored.has(DataComponents.FOOD)) {
                     candidates.add(i);
                 }
@@ -125,8 +130,10 @@ public class PicnicBasketFeedHandler {
         if (SolCarrotIntegration.isInstalled()) {
             List<Integer> uneaten = new ArrayList<>();
             for (int i : candidates) {
-                ItemStack stored =
-                        ItemStack.parseOptional(registries, types.getCompound(i).getCompound("Type"));
+                ItemStack stored = ItemStack.OPTIONAL_CODEC
+                        .parse(ops, types.getCompoundOrEmpty(i).getCompoundOrEmpty("Type"))
+                        .result()
+                        .orElse(ItemStack.EMPTY);
                 if (SolCarrotIntegration.isNewFood(player, stored)) {
                     uneaten.add(i);
                 }
@@ -135,8 +142,11 @@ public class PicnicBasketFeedHandler {
         }
 
         int chosenIdx = preferred.get(level.random.nextInt(preferred.size()));
-        CompoundTag entry = types.getCompound(chosenIdx);
-        ItemStack stored = ItemStack.parseOptional(registries, entry.getCompound("Type"));
+        CompoundTag entry = types.getCompoundOrEmpty(chosenIdx);
+        ItemStack stored = ItemStack.OPTIONAL_CODEC
+                .parse(ops, entry.getCompoundOrEmpty("Type"))
+                .result()
+                .orElse(ItemStack.EMPTY);
         if (stored.isEmpty()) return;
 
         FoodProperties food = stored.get(DataComponents.FOOD);
@@ -178,11 +188,11 @@ public class PicnicBasketFeedHandler {
                     types.remove(chosenIdx);
                 } else {
                     stored.setDamageValue(newDamage);
-                    entry.put("Type", stored.save(registries));
+                    ItemStack.OPTIONAL_CODEC.encodeStart(ops, stored).result().ifPresent(t -> entry.put("Type", t));
                 }
             }
         } else {
-            long remaining = entry.getLong("Count") - 1;
+            long remaining = entry.getLongOr("Count", 0L) - 1;
             if (remaining <= 0) {
                 types.remove(chosenIdx);
             } else {

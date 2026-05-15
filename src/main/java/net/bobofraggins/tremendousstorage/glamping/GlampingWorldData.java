@@ -1,5 +1,6 @@
 package net.bobofraggins.tremendousstorage.glamping;
 
+import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -8,17 +9,16 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongArrayTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 
 /**
  * Server-side saved data tracking:
@@ -33,6 +33,12 @@ import net.minecraft.world.level.saveddata.SavedData;
 public class GlampingWorldData extends SavedData {
 
     private static final String DATA_NAME = TremendousStorage.MODID + "_glamping";
+
+    private static final Codec<GlampingWorldData> CODEC =
+            CompoundTag.CODEC.xmap(GlampingWorldData::fromCompoundTag, GlampingWorldData::toCompoundTag);
+
+    static final SavedDataType<GlampingWorldData> TYPE =
+            new SavedDataType<>(DATA_NAME, ctx -> new GlampingWorldData(), ctx -> CODEC);
 
     // -------------------------------------------------------------------------
     // ReturnTarget
@@ -49,24 +55,17 @@ public class GlampingWorldData extends SavedData {
     private final Map<UUID, ReturnTarget> returnTargets = new HashMap<>();
 
     // -------------------------------------------------------------------------
-    // Factory / loading
+    // Static access
     // -------------------------------------------------------------------------
 
-    private static final Factory<GlampingWorldData> FACTORY =
-            new Factory<>(GlampingWorldData::new, GlampingWorldData::load, null);
-
     public static GlampingWorldData getOrCreate(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(FACTORY, DATA_NAME);
+        return server.overworld().getDataStorage().computeIfAbsent(TYPE);
     }
 
     // -------------------------------------------------------------------------
     // Portal camp allocation (sequential)
     // -------------------------------------------------------------------------
 
-    /**
-     * Allocates and returns the origin of the next portal camp.
-     * Also marks it as claimed so tent seed derivation cannot collide with it.
-     */
     public BlockPos allocateNewCamp() {
         int x = nextCampIndex * GlampingDimension.CAMP_SPACING;
         BlockPos origin = new BlockPos(x, GlampingDimension.CAMP_BOTTOM_Y, 0);
@@ -105,11 +104,43 @@ public class GlampingWorldData extends SavedData {
     }
 
     // -------------------------------------------------------------------------
-    // Serialisation
+    // Serialisation via Codec
     // -------------------------------------------------------------------------
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider provider) {
+    private static GlampingWorldData fromCompoundTag(CompoundTag tag) {
+        GlampingWorldData data = new GlampingWorldData();
+        data.nextCampIndex = tag.getIntOr("nextCampIndex", 0);
+
+        for (long v : tag.getLongArray("claimedCamps").orElse(new long[0])) {
+            data.claimedCamps.add(v);
+        }
+
+        ListTag list = tag.getListOrEmpty("returnTargets");
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag t = list.getCompoundOrEmpty(i);
+            String uuidStr = t.getStringOr("uuid", "");
+            if (uuidStr.isEmpty()) continue;
+            try {
+                UUID uuid = UUID.fromString(uuidStr);
+                ResourceKey<Level> dim = ResourceKey.create(
+                        Registries.DIMENSION, ResourceLocation.parse(t.getStringOr("dim", "minecraft:overworld")));
+                data.returnTargets.put(
+                        uuid,
+                        new ReturnTarget(
+                                dim,
+                                t.getDoubleOr("x", 0.0),
+                                t.getDoubleOr("y", 64.0),
+                                t.getDoubleOr("z", 0.0),
+                                t.getFloatOr("yRot", 0f),
+                                t.getFloatOr("xRot", 0f)));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+        return data;
+    }
+
+    private CompoundTag toCompoundTag() {
+        CompoundTag tag = new CompoundTag();
         tag.putInt("nextCampIndex", nextCampIndex);
 
         long[] claimed = claimedCamps.stream().mapToLong(Long::longValue).toArray();
@@ -118,7 +149,7 @@ public class GlampingWorldData extends SavedData {
         ListTag list = new ListTag();
         for (Map.Entry<UUID, ReturnTarget> entry : returnTargets.entrySet()) {
             CompoundTag t = new CompoundTag();
-            t.putUUID("uuid", entry.getKey());
+            t.putString("uuid", entry.getKey().toString());
             ReturnTarget r = entry.getValue();
             t.putString("dim", r.dimension().location().toString());
             t.putDouble("x", r.x());
@@ -130,34 +161,5 @@ public class GlampingWorldData extends SavedData {
         }
         tag.put("returnTargets", list);
         return tag;
-    }
-
-    public static GlampingWorldData load(CompoundTag tag, HolderLookup.Provider provider) {
-        GlampingWorldData data = new GlampingWorldData();
-        data.nextCampIndex = tag.getInt("nextCampIndex");
-
-        if (tag.contains("claimedCamps", Tag.TAG_LONG_ARRAY)) {
-            for (long v : tag.getLongArray("claimedCamps")) {
-                data.claimedCamps.add(v);
-            }
-        }
-
-        ListTag list = tag.getList("returnTargets", Tag.TAG_COMPOUND);
-        for (int i = 0; i < list.size(); i++) {
-            CompoundTag t = list.getCompound(i);
-            UUID uuid = t.getUUID("uuid");
-            ResourceKey<Level> dim =
-                    ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(t.getString("dim")));
-            data.returnTargets.put(
-                    uuid,
-                    new ReturnTarget(
-                            dim,
-                            t.getDouble("x"),
-                            t.getDouble("y"),
-                            t.getDouble("z"),
-                            t.getFloat("yRot"),
-                            t.getFloat("xRot")));
-        }
-        return data;
     }
 }

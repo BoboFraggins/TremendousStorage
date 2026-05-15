@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.tank;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.storage.TieredBlockItem;
@@ -15,9 +15,11 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -62,12 +64,17 @@ public class TankItem extends TieredBlockItem {
     // -------------------------------------------------------------------------
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
-        super.appendHoverText(stack, context, lines, flag);
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            TooltipDisplay lines,
+            Consumer<Component> tooltipAdder,
+            TooltipFlag flag) {
+        super.appendHoverText(stack, context, lines, tooltipAdder, flag);
         TankContents contents = stack.getOrDefault(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
         if (contents.isLocked()) {
             long cap = tierCapacity(stack);
-            lines.add(Component.translatable(
+            tooltipAdder.accept(Component.translatable(
                             "item.tremendousstorage.tank.tooltip",
                             CountFormat.format(contents.amount()),
                             CountFormat.format(cap),
@@ -75,7 +82,7 @@ public class TankItem extends TieredBlockItem {
                     .withStyle(ChatFormatting.GRAY));
         }
         if (contents.bucketMode()) {
-            lines.add(Component.translatable("item.tremendousstorage.tank.mode_bucket")
+            tooltipAdder.accept(Component.translatable("item.tremendousstorage.tank.mode_bucket")
                     .withStyle(ChatFormatting.AQUA));
         }
     }
@@ -83,7 +90,7 @@ public class TankItem extends TieredBlockItem {
     static long tierCapacity(ItemStack stack) {
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return TankBlockEntity.BASE_CAPACITY;
-        StorageTier tier = StorageTier.fromId(data.copyTag().getString("Tier"));
+        StorageTier tier = StorageTier.fromId(data.copyTag().getStringOr("Tier", ""));
         return tier.getScaledCapacity(TankBlockEntity.BASE_CAPACITY);
     }
 

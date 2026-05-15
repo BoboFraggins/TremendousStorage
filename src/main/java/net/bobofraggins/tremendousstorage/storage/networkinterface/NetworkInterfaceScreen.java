@@ -8,11 +8,11 @@ import net.bobofraggins.tremendousstorage.shared.network.RequestNetworkContentsP
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Screen for the Network Interface block.
@@ -66,7 +66,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         super.init();
         dialog.init(leftPos, topPos);
         // Request block list from server
-        PacketDistributor.sendToServer(new RequestNetworkContentsPacket(menu.getPos()));
+        ClientPacketDistributor.sendToServer(new RequestNetworkContentsPacket(menu.getPos()));
         // Clear stale data from a previous screen open
         NetworkContentsPacket.PENDING = List.of();
         entries = List.of();
@@ -84,7 +84,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         int counter = menu.getScanDirtyCounter();
         if (counter != lastScanDirtyCounter) {
             lastScanDirtyCounter = counter;
-            PacketDistributor.sendToServer(new RequestNetworkContentsPacket(menu.getPos()));
+            ClientPacketDistributor.sendToServer(new RequestNetworkContentsPacket(menu.getPos()));
             NetworkContentsPacket.PENDING = List.of();
         }
         List<String> pending = NetworkContentsPacket.PENDING;
@@ -104,7 +104,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         if (QuickStackClientEvents.QUICK_STACK != null
                 && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)
                 && menu.isNetworkValid()) {
-            PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), true));
+            ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), true));
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -255,7 +255,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
             thumbY = trackY + 1 + (int) ((trackH - 2 - SCROLLER_H) * frac);
         }
         graphics.blitSprite(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 canScroll ? SCROLLER : SCROLLER_DISABLED,
                 thumbX,
                 thumbY,

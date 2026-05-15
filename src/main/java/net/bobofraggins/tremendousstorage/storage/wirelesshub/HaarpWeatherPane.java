@@ -6,7 +6,7 @@ import net.bobofraggins.tremendousstorage.shared.ui.IDialogPane;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Dialog pane for the HAARP weather-control section of the Wireless Hub UI.
@@ -95,7 +95,7 @@ public class HaarpWeatherPane implements IDialogPane {
         for (int i = 0; i < MODES.length; i++) {
             int rowY = FIRST_ROW_Y + i * ROW_STRIDE;
             if (localY >= rowY && localY < rowY + ROW_STRIDE) {
-                PacketDistributor.sendToServer(new SetHaarpModePacket(hubPosSupplier.get(), i));
+                ClientPacketDistributor.sendToServer(new SetHaarpModePacket(hubPosSupplier.get(), i));
                 return true;
             }
         }

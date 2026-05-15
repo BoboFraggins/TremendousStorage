@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
@@ -96,7 +97,8 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
             PoseStack poseStack,
             MultiBufferSource bufferSource,
             int packedLight,
-            int packedOverlay) {
+            int packedOverlay,
+            Vec3 cameraPos) {
 
         Level level = be.getLevel();
         if (level != null) {
@@ -123,14 +125,14 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         ItemStackRenderState brainRenderState = new ItemStackRenderState();
         Minecraft.getInstance()
                 .getItemModelResolver()
-                .updateForTopItem(brainRenderState, brainStack, ItemDisplayContext.FIXED, false, null, null, 0);
+                .updateForTopItem(brainRenderState, brainStack, ItemDisplayContext.FIXED, null, null, 0);
         brainRenderState.render(poseStack, bufferSource, packedLight, packedOverlay);
 
         poseStack.popPose();
     }
 
     @Override
-    public boolean shouldRenderOffScreen(NetworkInterfaceBlockEntity be) {
+    public boolean shouldRenderOffScreen() {
         return true;
     }
 

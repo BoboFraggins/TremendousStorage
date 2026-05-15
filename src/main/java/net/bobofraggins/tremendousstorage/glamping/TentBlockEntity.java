@@ -2,10 +2,10 @@ package net.bobofraggins.tremendousstorage.glamping;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * Persists the tent's name and its assigned glamping-dimension camp origin.
@@ -56,16 +56,16 @@ public class TentBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.saveAdditional(tag, provider);
-        if (tentName != null) tag.putString("tentName", tentName);
-        if (campOrigin != null) tag.putLong("campOrigin", campOrigin.asLong());
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        if (tentName != null) output.putString("tentName", tentName);
+        if (campOrigin != null) output.putLong("campOrigin", campOrigin.asLong());
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider provider) {
-        super.loadAdditional(tag, provider);
-        tentName = tag.contains("tentName") ? tag.getString("tentName") : null;
-        campOrigin = tag.contains("campOrigin") ? BlockPos.of(tag.getLong("campOrigin")) : null;
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        tentName = input.getString("tentName").orElse(null);
+        campOrigin = input.getLong("campOrigin").map(BlockPos::of).orElse(null);
     }
 }

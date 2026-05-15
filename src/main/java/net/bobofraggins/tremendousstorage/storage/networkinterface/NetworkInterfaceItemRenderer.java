@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.mojang.serialization.MapCodec;
+import java.util.Set;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.tank.TankRenderer;
@@ -23,13 +24,16 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 public class NetworkInterfaceItemRenderer implements SpecialModelRenderer<StorageTier> {
 
     private final ItemStackRenderState brainRenderState = new ItemStackRenderState();
+
+    @Override
+    public void getExtents(Set<Vector3f> output) {}
 
     @Override
     @Nullable
@@ -38,7 +42,7 @@ public class NetworkInterfaceItemRenderer implements SpecialModelRenderer<Storag
         if (customData != null) {
             CompoundTag tag = customData.copyTag();
             if (tag.contains("Tier")) {
-                return StorageTier.fromId(tag.getString("Tier"));
+                return StorageTier.fromId(tag.getString("Tier").orElse(""));
             }
         }
         return StorageTier.WOOD;
@@ -60,9 +64,7 @@ public class NetworkInterfaceItemRenderer implements SpecialModelRenderer<Storag
                 .get()
                 .defaultBlockState()
                 .setValue(NetworkInterfaceBlock.TIER_PROP, tier);
-        mc.getBlockRenderer()
-                .renderSingleBlock(
-                        renderState, poseStack, bufferSource, packedLight, packedOverlay, ModelData.EMPTY, null);
+        mc.getBlockRenderer().renderSingleBlock(renderState, poseStack, bufferSource, packedLight, packedOverlay);
 
         // Positive Vibes fill at 95%
         FluidStack vibes = new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), 1000);
@@ -116,7 +118,7 @@ public class NetworkInterfaceItemRenderer implements SpecialModelRenderer<Storag
 
         ItemStack brainStack = new ItemStack(Registration.BRAIN.get());
         mc.getItemModelResolver()
-                .updateForTopItem(brainRenderState, brainStack, ItemDisplayContext.FIXED, false, null, null, 0);
+                .updateForTopItem(brainRenderState, brainStack, ItemDisplayContext.FIXED, null, null, 0);
         brainRenderState.render(poseStack, bufferSource, packedLight, packedOverlay);
 
         poseStack.popPose();

@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.personalaccessterminal;
 
-import java.util.List;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
@@ -18,6 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 /**
@@ -47,16 +48,21 @@ public class PersonalAccessTerminalItem extends Item {
     // -------------------------------------------------------------------------
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext ctx, List<Component> lines, TooltipFlag flag) {
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext ctx,
+            TooltipDisplay lines,
+            Consumer<Component> tooltipAdder,
+            TooltipFlag flag) {
         BlockPos niPos = stack.get(Registration.WIRELESS_NI_POS.get());
         if (niPos != null) {
-            lines.add(Component.translatable(
+            tooltipAdder.accept(Component.translatable(
                     "item.tremendousstorage.personal_access_terminal.linked",
                     niPos.getX(),
                     niPos.getY(),
                     niPos.getZ()));
         } else {
-            lines.add(Component.translatable("item.tremendousstorage.personal_access_terminal.unlinked"));
+            tooltipAdder.accept(Component.translatable("item.tremendousstorage.personal_access_terminal.unlinked"));
         }
     }
 
@@ -108,7 +114,7 @@ public class PersonalAccessTerminalItem extends Item {
         ServerLevel hubLevel = resolveHubLevel(player, hubDimensionId);
 
         // Cross-dimension check: the hub must have the Interdimensional Upgrade
-        if (!hubLevel.dimension().equals(player.serverLevel().dimension())) {
+        if (!hubLevel.dimension().equals(player.level().dimension())) {
             boolean upgradePresent = hubPos != null
                     && hubLevel.getBlockEntity(hubPos) instanceof WirelessHubBlockEntity hub
                     && hub.hasInterdimensionalUpgrade();
@@ -162,7 +168,7 @@ public class PersonalAccessTerminalItem extends Item {
             ServerLevel level = player.getServer().getLevel(key);
             if (level != null) return level;
         }
-        return player.serverLevel();
+        return player.level();
     }
 
     /** Returns true if this stack has a linked NI position. */

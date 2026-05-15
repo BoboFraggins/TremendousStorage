@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.items;
 
-import java.util.List;
+import java.util.function.Consumer;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -17,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 /**
@@ -71,11 +72,16 @@ public class VexRepellentPotionItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            TooltipDisplay tooltip,
+            Consumer<Component> tooltipAdder,
+            TooltipFlag flag) {
         int totalSeconds = duration / 20;
         int minutes = totalSeconds / 60;
         int seconds = totalSeconds % 60;
-        tooltip.add(Component.translatable("effect.tremendousstorage.vex_repellent")
+        tooltipAdder.accept(Component.translatable("effect.tremendousstorage.vex_repellent")
                 .withStyle(ChatFormatting.BLUE)
                 .append(Component.literal(String.format(" (%d:%02d)", minutes, seconds))
                         .withStyle(ChatFormatting.DARK_GRAY)));

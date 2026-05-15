@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.KeyMapping;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
@@ -41,12 +40,5 @@ public final class DankFannyPackClientEvents {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         NeoForge.EVENT_BUS.register(DankFannyPackClientTickHandler.class);
-
-        if (!ModList.get().isLoaded("curios")) return;
-        try {
-            top.theillusivec4.curios.api.client.CuriosRendererRegistry.register(
-                    Registration.DANK_FANNY_PACK.get(), DankFannyPackCurioRenderer::new);
-        } catch (NoClassDefFoundError ignored) {
-        }
     }
 }

@@ -9,6 +9,7 @@ import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.bobofraggins.tremendousstorage.storage.tube.TubeBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -28,6 +29,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -192,23 +194,13 @@ public class ChestBlock extends BaseEntityBlock implements NetworkConnector {
         if (be instanceof ChestBlockEntity bulk) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof net.minecraft.world.item.BlockItem) {
-                    net.minecraft.world.item.BlockItem.setBlockEntityData(
-                            drop,
-                            bulk.getType(),
-                            bulk.saveCustomOnly(params.getLevel().registryAccess()));
+                    TagValueOutput _beOut = TagValueOutput.createWithContext(
+                            ProblemReporter.DISCARDING, params.getLevel().registryAccess());
+                    bulk.saveCustomOnly(_beOut);
+                    net.minecraft.world.item.BlockItem.setBlockEntityData(drop, bulk.getType(), _beOut);
                 }
             }
         }
         return drops;
-    }
-
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof ChestBlockEntity be) {
-                be.recheckOpeners(level, pos, state);
-            }
-        }
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

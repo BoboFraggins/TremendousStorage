@@ -12,6 +12,7 @@ import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyModifier;
 import org.lwjgl.glfw.GLFW;
@@ -27,7 +28,7 @@ public final class PersonalAccessTerminalClientEvents {
     @SubscribeEvent
     public static void onRegisterItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
         event.register(
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
+                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
                 net.bobofraggins.tremendousstorage.shared.storage.StorageTierTintSource.MAP_CODEC);
     }
 
@@ -37,9 +38,15 @@ public final class PersonalAccessTerminalClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_base"));
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_dish"));
+    public static void onRegisterAdditionalModels(ModelEvent.RegisterStandalone event) {
+        event.register(
+                WirelessHubRenderer.BASE_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_base")));
+        event.register(
+                WirelessHubRenderer.DISH_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_dish")));
     }
 
     @SubscribeEvent

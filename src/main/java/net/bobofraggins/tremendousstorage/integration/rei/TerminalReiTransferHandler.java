@@ -5,7 +5,7 @@
 // import net.bobofraggins.tremendousstorage.shared.network.SatFillCraftingGridPacket;
 // import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
 // import net.minecraft.resources.ResourceLocation;
-// import net.neoforged.neoforge.network.PacketDistributor;
+// import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 // /**
 //  * REI recipe transfer handler for the Storage Access Terminal.
@@ -45,7 +45,7 @@
 //             return Result.createSuccessful();
 //         }
 
-//         PacketDistributor.sendToServer(new SatFillCraftingGridPacket(menu.getSatPos(), recipeId));
+//         ClientPacketDistributor.sendToServer(new SatFillCraftingGridPacket(menu.getSatPos(), recipeId));
 //         return Result.createSuccessful();
 //     }
 // }

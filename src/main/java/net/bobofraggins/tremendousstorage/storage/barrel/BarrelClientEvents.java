@@ -10,8 +10,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 /** Registers the block entity renderer and GUI screen for the Barrel. */
 public final class BarrelClientEvents {
@@ -25,15 +26,21 @@ public final class BarrelClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
+    public static void onRegisterAdditionalModels(ModelEvent.RegisterStandalone event) {
         for (StorageTier tier : StorageTier.values()) {
             String id = tier.getId();
             event.register(
-                    ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/barrels/barrel_body_" + id));
-            event.register(ResourceLocation.fromNamespaceAndPath(
-                    "tremendousstorage", "block/ender_barrels/ender_barrel_body_" + id));
-            event.register(ResourceLocation.fromNamespaceAndPath(
-                    "tremendousstorage", "block/barrels_compacting/barrel_body_" + id));
+                    BarrelRenderer.BODY_MODELS[tier.ordinal()],
+                    SimpleUnbakedStandaloneModel.blockStateModel(ResourceLocation.fromNamespaceAndPath(
+                            "tremendousstorage", "block/barrels/barrel_body_" + id)));
+            event.register(
+                    BarrelRenderer.ENDER_BODY_MODELS[tier.ordinal()],
+                    SimpleUnbakedStandaloneModel.blockStateModel(ResourceLocation.fromNamespaceAndPath(
+                            "tremendousstorage", "block/ender_barrels/ender_barrel_body_" + id)));
+            event.register(
+                    BarrelRenderer.COMPACTING_BODY_MODELS[tier.ordinal()],
+                    SimpleUnbakedStandaloneModel.blockStateModel(ResourceLocation.fromNamespaceAndPath(
+                            "tremendousstorage", "block/barrels_compacting/barrel_body_" + id)));
         }
     }
 
@@ -56,7 +63,7 @@ public final class BarrelClientEvents {
         Direction facing = state.getValue(BarrelBlock.FACING);
         if (event.getFace() != facing) return;
         event.setCanceled(true);
-        PacketDistributor.sendToServer(
+        ClientPacketDistributor.sendToServer(
                 new BarrelExtractPacket(pos, event.getEntity().isShiftKeyDown()));
     }
 }

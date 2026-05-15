@@ -24,7 +24,7 @@ public record StorageTierTintSource() implements ItemTintSource {
         if (customData != null) {
             CompoundTag tag = customData.copyTag();
             if (tag.contains("Tier")) {
-                return StorageTier.fromId(tag.getString("Tier")).getColor();
+                return StorageTier.fromId(tag.getStringOr("Tier", "")).getColor();
             }
         }
         return StorageTier.WOOD.getColor();

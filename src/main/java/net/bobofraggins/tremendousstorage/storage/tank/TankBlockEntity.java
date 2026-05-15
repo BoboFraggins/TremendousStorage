@@ -9,6 +9,7 @@ import net.bobofraggins.tremendousstorage.storage.networkinterface.NiLink;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -27,6 +28,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -441,57 +444,44 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     private static final String TAG_TRANSFER = "Transfer";
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
         if (!storedFluid.isEmpty()) {
-            tag.put(TAG_FLUID, storedFluid.save(registries));
+            output.store(TAG_FLUID, FluidStack.OPTIONAL_CODEC, storedFluid);
         }
-        tag.putLong(TAG_AMOUNT, amount);
-        tag.putBoolean(TAG_VOID_EXCESS, voidExcess);
-        tag.putString(TAG_TIER, tier.getId());
-        if (hasMagnetUpgrade) tag.putBoolean("MagnetUpgrade", true);
+        output.putLong(TAG_AMOUNT, amount);
+        output.putBoolean(TAG_VOID_EXCESS, voidExcess);
+        output.putString(TAG_TIER, tier.getId());
+        if (hasMagnetUpgrade) output.putBoolean("MagnetUpgrade", true);
         if (hasPullerUpgrade) {
-            tag.putBoolean("PullerUpgrade", true);
-            tag.putInt("PullerSides", pullerSides);
+            output.putBoolean("PullerUpgrade", true);
+            output.putInt("PullerSides", pullerSides);
         }
-        net.minecraft.nbt.CompoundTag transferTag = new net.minecraft.nbt.CompoundTag();
+        ValueOutput xfer = output.child(TAG_TRANSFER);
         ItemStack in = transferContainer.getItem(0);
         ItemStack out = transferContainer.getItem(1);
-        if (!in.isEmpty()) transferTag.put("Input", in.save(registries));
-        if (!out.isEmpty()) transferTag.put("Output", out.save(registries));
-        tag.put(TAG_TRANSFER, transferTag);
+        if (!in.isEmpty()) xfer.store("Input", ItemStack.OPTIONAL_CODEC, in);
+        if (!out.isEmpty()) xfer.store("Output", ItemStack.OPTIONAL_CODEC, out);
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        voidExcess = tag.getBoolean(TAG_VOID_EXCESS);
-        tier = StorageTier.fromId(tag.getString(TAG_TIER));
-        hasMagnetUpgrade = tag.getBoolean("MagnetUpgrade");
-        hasPullerUpgrade = tag.getBoolean("PullerUpgrade");
-        pullerSides = tag.getInt("PullerSides");
-        if (tag.contains(TAG_FLUID)) {
-            storedFluid = FluidStack.parseOptional(registries, tag.getCompound(TAG_FLUID));
-            if (!storedFluid.isEmpty()) {
-                storedFluid = storedFluid.copyWithAmount(1);
-            }
-        } else {
-            storedFluid = FluidStack.EMPTY;
-        }
-        amount = tag.getLong(TAG_AMOUNT);
-        if (tag.contains(TAG_TRANSFER)) {
-            net.minecraft.nbt.CompoundTag t = tag.getCompound(TAG_TRANSFER);
-            transferContainer.setItem(
-                    0,
-                    t.contains("Input")
-                            ? ItemStack.parseOptional(registries, t.getCompound("Input"))
-                            : ItemStack.EMPTY);
-            transferContainer.setItem(
-                    1,
-                    t.contains("Output")
-                            ? ItemStack.parseOptional(registries, t.getCompound("Output"))
-                            : ItemStack.EMPTY);
-        }
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        voidExcess = input.getBooleanOr(TAG_VOID_EXCESS, false);
+        tier = StorageTier.fromId(input.getStringOr(TAG_TIER, ""));
+        hasMagnetUpgrade = input.getBooleanOr("MagnetUpgrade", false);
+        hasPullerUpgrade = input.getBooleanOr("PullerUpgrade", false);
+        pullerSides = input.getIntOr("PullerSides", 0);
+        storedFluid = input.read(TAG_FLUID, FluidStack.OPTIONAL_CODEC)
+                .filter(f -> !f.isEmpty())
+                .map(f -> f.copyWithAmount(1))
+                .orElse(FluidStack.EMPTY);
+        amount = input.getLongOr(TAG_AMOUNT, 0L);
+        ValueInput xfer = input.childOrEmpty(TAG_TRANSFER);
+        transferContainer.setItem(
+                0, xfer.read("Input", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
+        transferContainer.setItem(
+                1, xfer.read("Output", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
     }
 
     // -------------------------------------------------------------------------
@@ -514,7 +504,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
      * {@code block_entity_data} (fluid is then loaded by {@link #loadAdditional}).
      */
     @Override
-    protected void applyImplicitComponents(BlockEntity.DataComponentInput input) {
+    protected void applyImplicitComponents(DataComponentGetter input) {
         super.applyImplicitComponents(input);
         TankContents contents = input.get(Registration.TANK_CONTENTS);
         if (contents != null) {
@@ -527,9 +517,9 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
 
     /** Removes fluid fields from the NBT tag since they are stored in the component instead. */
     @Override
-    public void removeComponentsFromTag(CompoundTag tag) {
-        tag.remove(TAG_FLUID);
-        tag.remove(TAG_AMOUNT);
+    public void removeComponentsFromTag(net.minecraft.world.level.storage.ValueOutput output) {
+        output.discard(TAG_FLUID);
+        output.discard(TAG_AMOUNT);
     }
 
     // -------------------------------------------------------------------------

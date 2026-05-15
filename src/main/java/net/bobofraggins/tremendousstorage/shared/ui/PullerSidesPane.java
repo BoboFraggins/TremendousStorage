@@ -7,7 +7,7 @@ import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Config drawer pane for the Puller Upgrade.
@@ -103,7 +103,12 @@ public class PullerSidesPane implements IDialogPane {
             g.fill(bx, by + BUTTON_SIZE, bx + BUTTON_SIZE + 1, by + BUTTON_SIZE + 1, COLOR_DARK);
             g.fill(bx + BUTTON_SIZE, by, bx + BUTTON_SIZE + 1, by + BUTTON_SIZE, COLOR_DARK);
             g.blitSprite(
-                    RenderType::guiTextured, on ? TEX_ON : TEX_OFF, bx + 1, by + 1, BUTTON_SIZE - 2, BUTTON_SIZE - 2);
+                    RenderPipelines.GUI_TEXTURED,
+                    on ? TEX_ON : TEX_OFF,
+                    bx + 1,
+                    by + 1,
+                    BUTTON_SIZE - 2,
+                    BUTTON_SIZE - 2);
 
             ItemStack adjacent = getAdjacentItem(facing, bit);
             if (!adjacent.isEmpty()) {
@@ -122,7 +127,7 @@ public class PullerSidesPane implements IDialogPane {
             int by = BUTTONS_Y + row * stride;
             if (localX >= bx && localX < bx + BUTTON_SIZE && localY >= by && localY < by + BUTTON_SIZE) {
                 int updated = getSidesMask() ^ (1 << bit);
-                PacketDistributor.sendToServer(new SetPullerSidesPacket(pos, updated));
+                ClientPacketDistributor.sendToServer(new SetPullerSidesPacket(pos, updated));
                 return true;
             }
         }

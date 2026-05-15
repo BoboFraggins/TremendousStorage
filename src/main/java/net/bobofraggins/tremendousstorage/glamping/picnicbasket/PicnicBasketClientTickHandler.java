@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Handles the Picnic Basket keybind (unbound by default) on the client.
@@ -28,7 +28,7 @@ public final class PicnicBasketClientTickHandler {
                 && PicnicBasketClientEvents.OPEN_PICNIC_BASKET.consumeClick()) {
             OpenPicnicBasketPacket packet = findBasket(mc);
             if (packet != null) {
-                PacketDistributor.sendToServer(packet);
+                ClientPacketDistributor.sendToServer(packet);
             }
         }
     }
@@ -40,7 +40,7 @@ public final class PicnicBasketClientTickHandler {
     @Nullable
     private static OpenPicnicBasketPacket findBasket(Minecraft mc) {
         // Main inventory (slots 0-35)
-        var items = mc.player.getInventory().items;
+        var items = mc.player.getInventory().getNonEquipmentItems();
         for (int i = 0; i < items.size(); i++) {
             if (isBasket(items.get(i))) {
                 return new OpenPicnicBasketPacket(PicnicBasketItemUtils.SLOT_INVENTORY, i, "");

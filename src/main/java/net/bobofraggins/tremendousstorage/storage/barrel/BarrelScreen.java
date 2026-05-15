@@ -13,7 +13,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
 
@@ -27,11 +27,11 @@ public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
                 Dialog.blankPane(188, 0),
                 new VoidExcessPane(
                         menu::isVoidExcess,
-                        () -> PacketDistributor.sendToServer(
+                        () -> ClientPacketDistributor.sendToServer(
                                 new SetVoidExcessPacket(menu.getPos(), !menu.isVoidExcess()))),
                 new PriorityPane(
                         () -> menu.getPriority().ordinal(),
-                        p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))),
+                        p -> ClientPacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))),
                 Dialog.blankPane(0, 10),
                 new PlayerInventoryPane());
         imageWidth = dialog.totalWidth();

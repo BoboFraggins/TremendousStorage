@@ -17,14 +17,16 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Screen for the Picnic Basket item-form UI (opened via keybind).
@@ -62,7 +64,7 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
                     ItemStack basket = getCurrentBasketStack();
                     if (basket.isEmpty()) return;
                     boolean current = PicnicBasketItemUtils.readAutoFeed(basket);
-                    PacketDistributor.sendToServer(new PicnicBasketItemAutoFeedPacket(
+                    ClientPacketDistributor.sendToServer(new PicnicBasketItemAutoFeedPacket(
                             menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), !current));
                 }));
     }
@@ -73,7 +75,7 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
         dialog.init(leftPos, topPos);
         configDrawer.init(leftPos, topPos, imageHeight);
         inventoryPane.setClickHandler(
-                (idx, amount, toCursor) -> PacketDistributor.sendToServer(new PicnicBasketItemInteractPacket(
+                (idx, amount, toCursor) -> ClientPacketDistributor.sendToServer(new PicnicBasketItemInteractPacket(
                         menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), idx, amount, toCursor)));
 
         searchBox = new SearchBoxWidget(font, leftPos, topPos, imageWidth);
@@ -109,17 +111,21 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
             return;
         }
         var registries = Minecraft.getInstance().level.registryAccess();
+        RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
         CompoundTag beTag = data.copyTag();
-        ListTag types = beTag.getList("Types", Tag.TAG_COMPOUND);
+        ListTag types = beTag.getListOrEmpty("Types");
         int n = types.size();
         List<ItemStack> stacks = new ArrayList<>(n);
         List<Long> counts = new ArrayList<>(n);
         for (int i = 0; i < n; i++) {
-            CompoundTag entry = types.getCompound(i);
-            ItemStack stack = ItemStack.parseOptional(registries, entry.getCompound("Type"));
+            CompoundTag entry = types.getCompoundOrEmpty(i);
+            ItemStack stack = ItemStack.OPTIONAL_CODEC
+                    .parse(ops, entry.getCompoundOrEmpty("Type"))
+                    .result()
+                    .orElse(ItemStack.EMPTY);
             if (!stack.isEmpty()) {
                 stacks.add(stack);
-                counts.add(entry.getLong("Count"));
+                counts.add(entry.getLongOr("Count", 0L));
             }
         }
         inventoryPane.setContents(stacks, counts);
@@ -200,7 +206,7 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
         int paneAbsY = dialog.getPaneAbsY(1);
         ItemStack hovered = inventoryPane.getHoveredStack(mouseX - leftPos, mouseY - paneAbsY);
         if (hovered != null) {
-            graphics.renderTooltip(font, hovered, mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, hovered, mouseX, mouseY);
         }
     }
 

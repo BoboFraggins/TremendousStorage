@@ -1,11 +1,13 @@
 package net.bobofraggins.tremendousstorage.storage.enderchest;
 
-import java.util.List;
+import java.util.function.Consumer;
 import net.bobofraggins.tremendousstorage.shared.storage.EnderTieredBlockItem;
 import net.bobofraggins.tremendousstorage.shared.util.StorageTooltip;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.block.Block;
 
 public class EnderChestItem extends EnderTieredBlockItem {
@@ -15,8 +17,13 @@ public class EnderChestItem extends EnderTieredBlockItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
-        super.appendHoverText(stack, context, lines, flag);
-        StorageTooltip.appendBlockEntityItems(stack, lines, context);
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            TooltipDisplay lines,
+            Consumer<Component> tooltipAdder,
+            TooltipFlag flag) {
+        super.appendHoverText(stack, context, lines, tooltipAdder, flag);
+        StorageTooltip.appendBlockEntityItems(stack, tooltipAdder, context);
     }
 }

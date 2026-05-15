@@ -7,7 +7,9 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -85,10 +87,13 @@ public final class PicnicBasketItemUtils {
     public static boolean isTypeStored(HolderLookup.Provider registries, ItemStack basketStack, StorageKey key) {
         CustomData data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return false;
-        ListTag types = data.copyTag().getList("Types", Tag.TAG_COMPOUND);
+        RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
+        ListTag types = data.copyTag().getListOrEmpty("Types");
         for (int i = 0; i < types.size(); i++) {
-            ItemStack stored =
-                    ItemStack.parseOptional(registries, types.getCompound(i).getCompound("Type"));
+            ItemStack stored = ItemStack.OPTIONAL_CODEC
+                    .parse(ops, types.getCompoundOrEmpty(i).getCompoundOrEmpty("Type"))
+                    .result()
+                    .orElse(ItemStack.EMPTY);
             if (!stored.isEmpty() && StorageKey.of(stored).equals(key)) return true;
         }
         return false;
@@ -105,13 +110,14 @@ public final class PicnicBasketItemUtils {
         CustomData data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag beTag = data != null ? data.copyTag() : new CompoundTag();
 
-        StorageTier tier = StorageTier.fromId(beTag.getString("Tier"));
+        StorageTier tier = StorageTier.fromId(beTag.getStringOr("Tier", ""));
         long capacity = tier.getCapacity();
+        RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
 
-        ListTag types = beTag.getList("Types", Tag.TAG_COMPOUND);
+        ListTag types = beTag.getListOrEmpty("Types");
         long totalCount = 0;
         for (int i = 0; i < types.size(); i++) {
-            totalCount += types.getCompound(i).getLong("Count");
+            totalCount += types.getCompoundOrEmpty(i).getLongOr("Count", 0L);
         }
         long space = capacity - totalCount;
         if (space <= 0) return 0;
@@ -120,17 +126,20 @@ public final class PicnicBasketItemUtils {
         StorageKey key = StorageKey.of(toInsert);
         boolean found = false;
         for (int i = 0; i < types.size(); i++) {
-            CompoundTag entry = types.getCompound(i);
-            ItemStack stored = ItemStack.parseOptional(registries, entry.getCompound("Type"));
+            CompoundTag entry = types.getCompoundOrEmpty(i);
+            ItemStack stored = ItemStack.OPTIONAL_CODEC
+                    .parse(ops, entry.getCompoundOrEmpty("Type"))
+                    .result()
+                    .orElse(ItemStack.EMPTY);
             if (!stored.isEmpty() && StorageKey.of(stored).equals(key)) {
-                entry.putLong("Count", entry.getLong("Count") + toInsertAmt);
+                entry.putLong("Count", entry.getLongOr("Count", 0L) + toInsertAmt);
                 found = true;
                 break;
             }
         }
         if (!found) {
             CompoundTag entry = new CompoundTag();
-            entry.put("Type", toInsert.save(registries));
+            ItemStack.OPTIONAL_CODEC.encodeStart(ops, toInsert).result().ifPresent(t -> entry.put("Type", t));
             entry.putLong("Count", toInsertAmt);
             types.add(entry);
         }
@@ -150,15 +159,19 @@ public final class PicnicBasketItemUtils {
         if (data == null) return ItemStack.EMPTY;
 
         CompoundTag beTag = data.copyTag();
-        ListTag types = beTag.getList("Types", Tag.TAG_COMPOUND);
+        RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
+        ListTag types = beTag.getListOrEmpty("Types");
 
         if (typeIndex < 0 || typeIndex >= types.size()) return ItemStack.EMPTY;
 
-        CompoundTag entry = types.getCompound(typeIndex);
-        long count = entry.getLong("Count");
+        CompoundTag entry = types.getCompoundOrEmpty(typeIndex);
+        long count = entry.getLongOr("Count", 0L);
         if (count == 0) return ItemStack.EMPTY;
 
-        ItemStack stored = ItemStack.parseOptional(registries, entry.getCompound("Type"));
+        ItemStack stored = ItemStack.OPTIONAL_CODEC
+                .parse(ops, entry.getCompoundOrEmpty("Type"))
+                .result()
+                .orElse(ItemStack.EMPTY);
         if (stored.isEmpty()) return ItemStack.EMPTY;
 
         long toExtract = Math.min(amount, Math.min(stored.getMaxStackSize(), count));
@@ -185,7 +198,7 @@ public final class PicnicBasketItemUtils {
         CustomData data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return true;
         CompoundTag tag = data.copyTag();
-        return !tag.contains("AutoFeed") || tag.getBoolean("AutoFeed");
+        return tag.getBooleanOr("AutoFeed", true);
     }
 
     /** Writes the AutoFeed flag to the basket's BLOCK_ENTITY_DATA. */

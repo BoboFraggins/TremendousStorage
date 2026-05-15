@@ -8,7 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Handles the Wireless SAT keybind on the client.
@@ -30,7 +30,7 @@ public final class PersonalAccessTerminalClientTickHandler {
                 && PersonalAccessTerminalClientEvents.OPEN_WIRELESS_SAT.consumeClick()) {
             OpenPersonalAccessTerminalPacket packet = findLinkedPersonalAccessTerminal(mc);
             if (packet != null) {
-                PacketDistributor.sendToServer(packet);
+                ClientPacketDistributor.sendToServer(packet);
             }
         }
     }
@@ -42,7 +42,7 @@ public final class PersonalAccessTerminalClientTickHandler {
     @Nullable
     private static OpenPersonalAccessTerminalPacket findLinkedPersonalAccessTerminal(Minecraft mc) {
         // Main inventory + off-hand
-        for (ItemStack stack : mc.player.getInventory().items) {
+        for (ItemStack stack : mc.player.getInventory().getNonEquipmentItems()) {
             OpenPersonalAccessTerminalPacket packet = buildPacket(stack);
             if (packet != null) return packet;
         }

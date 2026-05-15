@@ -13,7 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -348,7 +348,7 @@ public class LocalInventoryPane implements IDialogPane {
 
         for (int row = 0; row < rows; row++) {
             graphics.blit(
-                    RenderType::guiTextured,
+                    RenderPipelines.GUI_TEXTURED,
                     BG_TEXTURE,
                     GRID_X,
                     startY + row * AccessTerminalLayout.SLOT_SIZE,
@@ -409,7 +409,7 @@ public class LocalInventoryPane implements IDialogPane {
         }
 
         graphics.blitSprite(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 canScroll ? SCROLLER : SCROLLER_DISABLED,
                 thumbX,
                 thumbY,

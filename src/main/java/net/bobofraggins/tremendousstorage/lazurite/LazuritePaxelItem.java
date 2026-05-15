@@ -14,7 +14,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -25,24 +24,22 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.neoforged.neoforge.common.ItemAbilities;
 import net.neoforged.neoforge.common.ItemAbility;
 
-public class LazuritePaxelItem extends DiggerItem {
+public class LazuritePaxelItem extends net.minecraft.world.item.Item {
 
     private static final Set<ItemAbility> PAXEL_ACTIONS =
             Set.copyOf(com.google.common.collect.ImmutableSet.<ItemAbility>builder()
-                    .addAll(ItemAbilities.DEFAULT_PICKAXE_ACTIONS)
                     .addAll(ItemAbilities.DEFAULT_AXE_ACTIONS)
                     .addAll(ItemAbilities.DEFAULT_SHOVEL_ACTIONS)
                     .addAll(ItemAbilities.DEFAULT_HOE_ACTIONS)
-                    .addAll(ItemAbilities.DEFAULT_SWORD_ACTIONS)
                     .build());
 
     public LazuritePaxelItem(Properties properties) {
-        super(
-                LazuriteTier.PAXEL,
+        super(LazuriteTier.PAXEL.applyToolProperties(
+                properties,
                 BlockTags.create(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "mineable/paxel")),
                 3.0f,
                 -3.0f,
-                properties);
+                LazuriteTier.PAXEL.speed()));
     }
 
     @Override
@@ -121,10 +118,9 @@ public class LazuritePaxelItem extends DiggerItem {
         return null;
     }
 
-    /** Sword: mark the attack as valid so durability is consumed. */
     @Override
-    public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        return true;
+    public void hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+        // intentionally empty - mark as valid for durability consumption
     }
 
     /** Sword: consume 1 durability per hit (not 2 like a digger tool). */

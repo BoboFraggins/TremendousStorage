@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.baseupgrade;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
@@ -17,9 +18,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -46,8 +49,13 @@ public class EnderStorageUpgradeItem extends BaseUpgradeItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
-        tooltip.add(Component.translatable("item.tremendousstorage.ender_storage_upgrade.tooltip"));
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            TooltipDisplay tooltip,
+            Consumer<Component> tooltipAdder,
+            TooltipFlag flag) {
+        tooltipAdder.accept(Component.translatable("item.tremendousstorage.ender_storage_upgrade.tooltip"));
     }
 
     @Override

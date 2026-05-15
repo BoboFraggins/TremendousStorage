@@ -3,45 +3,38 @@ package net.bobofraggins.tremendousstorage.storage.wirelesshub;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 
 /**
- * Renders the Wireless Hub using baked models exported from the Blockbench source.
- *
- * <p>Two model parts:
+ * Renders the Wireless Hub using two model parts:
  * <ul>
- *   <li>{@code wireless_hub_base} — the static body (base plate + tier highlight rings). Tier-tinted
- *       quads (tintindex=0) receive the {@link net.bobofraggins.tremendousstorage.shared.storage.StorageTier}
- *       color.
- *   <li>{@code wireless_hub_dish} — the dish/arm assembly. Rendered with an additional Y rotation
- *       that spins continuously (one full revolution every 40 ticks / 2 seconds) when the hub is
- *       attached to an active network.
+ *   <li>{@code wireless_hub_base} — static body; tier-tinted quads (tintindex=0) receive the tier color.
+ *   <li>{@code wireless_hub_dish} — dish/arm assembly, spinning continuously when connected.
  * </ul>
- *
- * <p>Both parts are oriented to the block's {@link WirelessHubBlock#FACING} direction before any
- * animation is applied.
  */
 public class WirelessHubRenderer
         implements BlockEntityRenderer<WirelessHubBlockEntity>, IBlockEntityRendererExtension<WirelessHubBlockEntity> {
 
-    private static final ModelResourceLocation BASE_MODEL = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_base"), "standalone");
-    private static final ModelResourceLocation DISH_MODEL = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_dish"), "standalone");
+    public static final StandaloneModelKey<BlockStateModel> BASE_MODEL =
+            new StandaloneModelKey<>(() -> "tremendousstorage:block/wireless_hub_base");
+    public static final StandaloneModelKey<BlockStateModel> DISH_MODEL =
+            new StandaloneModelKey<>(() -> "tremendousstorage:block/wireless_hub_dish");
 
     /** Dish pivot is the block centre in all three axes (8/16 = 0.5). */
     private static final float PIVOT = 0.5f;
@@ -55,11 +48,12 @@ public class WirelessHubRenderer
             PoseStack poseStack,
             MultiBufferSource bufferSource,
             int packedLight,
-            int packedOverlay) {
+            int packedOverlay,
+            Vec3 cameraPos) {
 
         Minecraft mc = Minecraft.getInstance();
-        BakedModel baseModel = mc.getModelManager().getModel(BASE_MODEL);
-        BakedModel dishModel = mc.getModelManager().getModel(DISH_MODEL);
+        BlockStateModel baseModel = mc.getModelManager().getStandaloneModel(BASE_MODEL);
+        BlockStateModel dishModel = mc.getModelManager().getStandaloneModel(DISH_MODEL);
         VertexConsumer consumer = bufferSource.getBuffer(RenderType.solid());
 
         Level level = be.getLevel();
@@ -74,7 +68,7 @@ public class WirelessHubRenderer
                     case WEST -> 90f;
                     case NORTH -> 180f;
                     case EAST -> 270f;
-                    default -> 0f; // SOUTH
+                    default -> 0f;
                 };
 
         int color = be.getTier().getColor();
@@ -84,14 +78,13 @@ public class WirelessHubRenderer
 
         RandomSource random = RandomSource.create();
 
-        // ---- Static base ----
+        // Static base
         poseStack.pushPose();
         applyFacingRotation(poseStack, facingYRot);
-        renderModel(
-                consumer, poseStack.last(), baseModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
+        renderModel(consumer, poseStack.last(), baseModel, level, r, g, b, packedLight, packedOverlay, random);
         poseStack.popPose();
 
-        // ---- Spinning dish ----
+        // Spinning dish
         poseStack.pushPose();
         applyFacingRotation(poseStack, facingYRot);
         if (be.isConnected()) {
@@ -100,8 +93,7 @@ public class WirelessHubRenderer
             poseStack.mulPose(Axis.YP.rotationDegrees(dishAngle));
             poseStack.translate(-PIVOT, -PIVOT, -PIVOT);
         }
-        renderModel(
-                consumer, poseStack.last(), dishModel, blockState, level, r, g, b, packedLight, packedOverlay, random);
+        renderModel(consumer, poseStack.last(), dishModel, level, r, g, b, packedLight, packedOverlay, random);
         poseStack.popPose();
     }
 
@@ -116,8 +108,7 @@ public class WirelessHubRenderer
     private static void renderModel(
             VertexConsumer consumer,
             PoseStack.Pose pose,
-            BakedModel model,
-            BlockState blockState,
+            BlockStateModel model,
             Level level,
             float r,
             float g,
@@ -125,12 +116,31 @@ public class WirelessHubRenderer
             int packedLight,
             int packedOverlay,
             RandomSource random) {
-        for (Direction dir : Direction.values()) {
-            random.setSeed(42L);
-            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.solid())) {
-                float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
+        List<BlockModelPart> parts = new ArrayList<>();
+        random.setSeed(42L);
+        model.collectParts(random, parts);
+        for (BlockModelPart part : parts) {
+            for (Direction dir : Direction.values()) {
+                for (var quad : part.getQuads(dir)) {
+                    float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
+                    float qr, qg, qb;
+                    if (quad.tintIndex() >= 0) {
+                        qr = r * shade;
+                        qg = g * shade;
+                        qb = b * shade;
+                    } else {
+                        qr = shade;
+                        qg = shade;
+                        qb = shade;
+                    }
+                    consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, packedOverlay);
+                }
+            }
+            for (var quad : part.getQuads(null)) {
+                Direction dir = quad.direction();
+                float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
                 float qr, qg, qb;
-                if (quad.getTintIndex() >= 0) {
+                if (quad.tintIndex() >= 0) {
                     qr = r * shade;
                     qg = g * shade;
                     qb = b * shade;
@@ -141,22 +151,6 @@ public class WirelessHubRenderer
                 }
                 consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, packedOverlay);
             }
-        }
-        random.setSeed(42L);
-        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.solid())) {
-            Direction dir = quad.getDirection();
-            float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
-            float qr, qg, qb;
-            if (quad.getTintIndex() >= 0) {
-                qr = r * shade;
-                qg = g * shade;
-                qb = b * shade;
-            } else {
-                qr = shade;
-                qg = shade;
-                qb = shade;
-            }
-            consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, packedOverlay);
         }
     }
 }

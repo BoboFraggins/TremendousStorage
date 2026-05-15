@@ -6,6 +6,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
 
 /** Client-only event subscriber for Tremendous Chest rendering. */
 public final class ChestClientEvents {
@@ -21,14 +22,19 @@ public final class ChestClientEvents {
     @SubscribeEvent
     public static void onRegisterItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
         event.register(
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
+                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
                 net.bobofraggins.tremendousstorage.shared.storage.StorageTierTintSource.MAP_CODEC);
     }
 
     @SubscribeEvent
-    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        // Both body and lid are rendered by the BESR, so both must be registered as standalone models.
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/chest_body"));
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/chest_lid"));
+    public static void onRegisterAdditionalModels(ModelEvent.RegisterStandalone event) {
+        event.register(
+                ChestRenderer.BODY_MODEL_KEY,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/chest_body")));
+        event.register(
+                ChestRenderer.LID_MODEL_KEY,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/chest_lid")));
     }
 }

@@ -3,24 +3,26 @@ package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import java.util.ArrayList;
+import java.util.List;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 
 /**
  * Renders the body and animated split lids of the placed Picnic Basket.
@@ -34,12 +36,12 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 public class PicnicBasketRenderer
         implements BlockEntityRenderer<ChestBlockEntity>, IBlockEntityRendererExtension<ChestBlockEntity> {
 
-    static final ModelResourceLocation BODY_MODEL = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_body"), "standalone");
-    static final ModelResourceLocation LEFT_LID_MODEL = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_left_lid"), "standalone");
-    static final ModelResourceLocation RIGHT_LID_MODEL = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_right_lid"), "standalone");
+    static final StandaloneModelKey<BlockStateModel> BODY_MODEL =
+            new StandaloneModelKey<>(() -> "tremendousstorage:block/picnic_basket_body");
+    static final StandaloneModelKey<BlockStateModel> LEFT_LID_MODEL =
+            new StandaloneModelKey<>(() -> "tremendousstorage:block/picnic_basket_left_lid");
+    static final StandaloneModelKey<BlockStateModel> RIGHT_LID_MODEL =
+            new StandaloneModelKey<>(() -> "tremendousstorage:block/picnic_basket_right_lid");
 
     private static float facingYRot(Direction facing) {
         return switch (facing) {
@@ -59,12 +61,13 @@ public class PicnicBasketRenderer
             PoseStack poseStack,
             MultiBufferSource bufferSource,
             int packedLight,
-            int packedOverlay) {
+            int packedOverlay,
+            Vec3 cameraPos) {
 
         Minecraft mc = Minecraft.getInstance();
-        BakedModel bodyModel = mc.getModelManager().getModel(BODY_MODEL);
-        BakedModel leftLidModel = mc.getModelManager().getModel(LEFT_LID_MODEL);
-        BakedModel rightLidModel = mc.getModelManager().getModel(RIGHT_LID_MODEL);
+        BlockStateModel bodyModel = mc.getModelManager().getStandaloneModel(BODY_MODEL);
+        BlockStateModel leftLidModel = mc.getModelManager().getStandaloneModel(LEFT_LID_MODEL);
+        BlockStateModel rightLidModel = mc.getModelManager().getStandaloneModel(RIGHT_LID_MODEL);
         VertexConsumer consumer = bufferSource.getBuffer(RenderType.solid());
 
         Level level = be.getLevel();
@@ -83,13 +86,12 @@ public class PicnicBasketRenderer
         poseStack.translate(0.5, 0.5, 0.5);
         poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
         poseStack.translate(-0.5, -0.5, -0.5);
-        renderQuads(consumer, poseStack.last(), bodyModel, blockState, level, packedLight, packedOverlay, random);
+        renderQuads(consumer, poseStack.last(), bodyModel, level, packedLight, packedOverlay, random);
         poseStack.popPose();
 
         float openFraction = Mth.lerp(partialTick, be.prevLidAngle, be.lidAngle);
 
         // Left lid — right half of basket (x=8..13) rotates +Z away from center.
-        // Pivot: [8/16, 8/16, 8/16] as set in Blockbench.
         poseStack.pushPose();
         poseStack.translate(0.5, 0.5, 0.5);
         poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
@@ -97,7 +99,7 @@ public class PicnicBasketRenderer
         poseStack.translate(8.0 / 16.0, 8.0 / 16.0, 8.0 / 16.0);
         poseStack.mulPose(Axis.ZP.rotationDegrees(openFraction * 90f));
         poseStack.translate(-8.0 / 16.0, -8.0 / 16.0, -8.0 / 16.0);
-        renderQuads(consumer, poseStack.last(), leftLidModel, blockState, level, packedLight, packedOverlay, random);
+        renderQuads(consumer, poseStack.last(), leftLidModel, level, packedLight, packedOverlay, random);
         poseStack.popPose();
 
         // Right lid — left half of basket (x=3..8) rotates −Z away from center.
@@ -108,37 +110,39 @@ public class PicnicBasketRenderer
         poseStack.translate(8.0 / 16.0, 8.0 / 16.0, 8.0 / 16.0);
         poseStack.mulPose(Axis.ZP.rotationDegrees(-openFraction * 90f));
         poseStack.translate(-8.0 / 16.0, -8.0 / 16.0, -8.0 / 16.0);
-        renderQuads(consumer, poseStack.last(), rightLidModel, blockState, level, packedLight, packedOverlay, random);
+        renderQuads(consumer, poseStack.last(), rightLidModel, level, packedLight, packedOverlay, random);
         poseStack.popPose();
     }
 
     private static void renderQuads(
             VertexConsumer consumer,
             PoseStack.Pose pose,
-            BakedModel model,
-            BlockState blockState,
+            BlockStateModel model,
             Level level,
             int packedLight,
             int packedOverlay,
             RandomSource random) {
-        for (Direction dir : Direction.values()) {
-            random.setSeed(42L);
-            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.solid())) {
-                float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
+        List<BlockModelPart> parts = new ArrayList<>();
+        random.setSeed(42L);
+        model.collectParts(random, parts);
+        for (BlockModelPart part : parts) {
+            for (Direction dir : Direction.values()) {
+                for (var quad : part.getQuads(dir)) {
+                    float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
+                    consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
+                }
+            }
+            for (var quad : part.getQuads(null)) {
+                Direction dir = quad.direction();
+                float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
                 consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
             }
-        }
-        random.setSeed(42L);
-        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.solid())) {
-            Direction dir = quad.getDirection();
-            float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
-            consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
         }
     }
 
     @Override
-    public boolean shouldRenderOffScreen(ChestBlockEntity be) {
-        return be.lidAngle > 0f || be.prevLidAngle > 0f;
+    public boolean shouldRenderOffScreen() {
+        return true;
     }
 
     @Override

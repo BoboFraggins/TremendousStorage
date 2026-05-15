@@ -100,7 +100,7 @@ public final class DankFannyPackMagnetHandler {
     @Nullable
     private static FannyLocation findFannyPack(Player player) {
         // Main inventory
-        var items = player.getInventory().items;
+        var items = player.getInventory().getNonEquipmentItems();
         for (int i = 0; i < items.size(); i++) {
             if (items.get(i).getItem() instanceof DankFannyPackItem) {
                 return new FannyLocation(items.get(i), OpenFannyPackPacket.SLOT_INVENTORY, i, "");

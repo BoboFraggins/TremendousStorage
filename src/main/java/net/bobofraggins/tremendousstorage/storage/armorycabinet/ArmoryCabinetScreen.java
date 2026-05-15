@@ -32,7 +32,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 public class ArmoryCabinetScreen extends AbstractContainerScreen<ArmoryCabinetMenu> {
 
@@ -58,10 +58,11 @@ public class ArmoryCabinetScreen extends AbstractContainerScreen<ArmoryCabinetMe
         this.imageHeight = dialog.totalHeight();
         configDrawer = new ConfigDrawer(new IDialogPane[] {
             new PriorityPane(
-                    menu::getPriority, p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))),
+                    menu::getPriority,
+                    p -> ClientPacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))),
             new SortPane(() -> sortMode, newMode -> {
                 sortMode = newMode;
-                PacketDistributor.sendToServer(new SetSortModePacket(menu.getPos(), sortMode));
+                ClientPacketDistributor.sendToServer(new SetSortModePacket(menu.getPos(), sortMode));
             })
         });
     }
@@ -71,7 +72,7 @@ public class ArmoryCabinetScreen extends AbstractContainerScreen<ArmoryCabinetMe
         super.init();
         dialog.init(leftPos, topPos);
         configDrawer.init(leftPos, topPos, imageHeight);
-        inventoryPane.setClickHandler((idx, amount, toCursor) -> PacketDistributor.sendToServer(
+        inventoryPane.setClickHandler((idx, amount, toCursor) -> ClientPacketDistributor.sendToServer(
                 new LocalStorageInteractPacket(menu.getPos(), true, idx, amount, toCursor)));
 
         if (Minecraft.getInstance().level != null) {
@@ -96,7 +97,7 @@ public class ArmoryCabinetScreen extends AbstractContainerScreen<ArmoryCabinetMe
                 16,
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack"),
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack_focused"),
-                () -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false))));
+                () -> ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false))));
     }
 
     @Override
@@ -163,7 +164,7 @@ public class ArmoryCabinetScreen extends AbstractContainerScreen<ArmoryCabinetMe
         }
         if (QuickStackClientEvents.QUICK_STACK != null
                 && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)) {
-            PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false));
+            ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false));
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -214,7 +215,7 @@ public class ArmoryCabinetScreen extends AbstractContainerScreen<ArmoryCabinetMe
         int paneAbsY = dialog.getPaneAbsY(1);
         ItemStack hovered = inventoryPane.getHoveredStack(mouseX - leftPos, mouseY - paneAbsY);
         if (hovered != null) {
-            graphics.renderTooltip(font, hovered, mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, hovered, mouseX, mouseY);
         }
     }
 

@@ -7,6 +7,7 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -130,10 +132,10 @@ public class AccessTerminalBlock extends BaseEntityBlock implements NetworkConne
         if (be instanceof AccessTerminalBlockEntity terminal) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof BlockItem) {
-                    BlockItem.setBlockEntityData(
-                            drop,
-                            terminal.getType(),
-                            terminal.saveCustomOnly(params.getLevel().registryAccess()));
+                    TagValueOutput _beOut = TagValueOutput.createWithContext(
+                            ProblemReporter.DISCARDING, params.getLevel().registryAccess());
+                    terminal.saveCustomOnly(_beOut);
+                    BlockItem.setBlockEntityData(drop, terminal.getType(), _beOut);
                 }
             }
         }

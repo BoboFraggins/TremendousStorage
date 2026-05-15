@@ -212,14 +212,10 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof BarrelBlockEntity be) {
-                level.updateNeighbourForOutputSignal(pos, this);
-                be.drops();
-            }
-        }
-        super.onRemove(state, level, pos, newState, movedByPiston);
+    protected void affectNeighborsAfterRemoval(
+            BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        level.updateNeighbourForOutputSignal(pos, this);
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
     }
 
     @Override

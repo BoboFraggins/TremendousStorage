@@ -5,8 +5,6 @@ import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Inventory;
@@ -18,6 +16,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * Block entity for the Ender Tremendous Chest.
@@ -205,15 +205,15 @@ public class EnderChestBlockEntity extends ChestBlockEntity {
     // -------------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putLong(TAG_LINK_ID, linkId);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.putLong(TAG_LINK_ID, linkId);
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        linkId = tag.getLong(TAG_LINK_ID);
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        linkId = input.getLongOr(TAG_LINK_ID, -1L);
         needsStorageLoad = (linkId != -1L);
     }
 }

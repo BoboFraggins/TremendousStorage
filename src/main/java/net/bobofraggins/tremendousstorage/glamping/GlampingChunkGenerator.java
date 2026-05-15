@@ -50,7 +50,7 @@ public class GlampingChunkGenerator extends ChunkGenerator {
         for (int x = startX; x < startX + 16; x++) {
             for (int z = startZ; z < startZ + 16; z++) {
                 for (int y = 0; y < 128; y++) {
-                    chunk.setBlockState(new BlockPos(x, y, z), canvas, false);
+                    chunk.setBlockState(new BlockPos(x, y, z), canvas, 0);
                 }
             }
         }

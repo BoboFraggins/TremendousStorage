@@ -1,11 +1,12 @@
 package net.bobofraggins.tremendousstorage.storage.manillafolder;
 
-import java.util.List;
+import java.util.function.Consumer;
 import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 
 /**
  * A Manila Folder stores a large quantity of a single item type.
@@ -62,18 +63,23 @@ public class ManillaFolderItem extends Item {
     // -------------------------------------------------------------------------
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            TooltipDisplay lines,
+            Consumer<Component> tooltipAdder,
+            TooltipFlag flag) {
         FolderContents contents = getContents(stack);
         if (contents.isEmpty()) {
-            lines.add(Component.translatable("item.tremendousstorage.manila_folder.empty"));
+            tooltipAdder.accept(Component.translatable("item.tremendousstorage.manila_folder.empty"));
         } else {
             ItemStack stored = contents.storedItem().get();
-            lines.add(Component.translatable(
+            tooltipAdder.accept(Component.translatable(
                     "item.tremendousstorage.manila_folder.contents",
                     CountFormat.format(contents.count()),
                     stored.getHoverName()));
         }
-        lines.add(Component.translatable(
+        tooltipAdder.accept(Component.translatable(
                 "item.tremendousstorage.manila_folder.capacity", CountFormat.format(contents.getCapacity())));
     }
 }

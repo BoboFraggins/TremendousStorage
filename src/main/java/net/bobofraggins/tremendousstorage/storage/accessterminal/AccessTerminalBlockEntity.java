@@ -15,6 +15,8 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * Block entity for the Storage Access Terminal.
@@ -83,21 +85,21 @@ public class AccessTerminalBlockEntity extends BlockEntity implements NiCacheHol
     // -------------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putString("SortMode", sortMode.name());
-        if (hasCraftingUpgrade) tag.putBoolean("CraftingUpgrade", true);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.putString("SortMode", sortMode.name());
+        if (hasCraftingUpgrade) output.putBoolean("CraftingUpgrade", true);
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
         try {
-            sortMode = SortMode.valueOf(tag.getString("SortMode"));
+            sortMode = SortMode.valueOf(input.getStringOr("SortMode", ""));
         } catch (IllegalArgumentException e) {
             sortMode = SortMode.AMOUNT;
         }
-        hasCraftingUpgrade = tag.getBoolean("CraftingUpgrade");
+        hasCraftingUpgrade = input.getBooleanOr("CraftingUpgrade", false);
     }
 
     @Override
@@ -111,8 +113,8 @@ public class AccessTerminalBlockEntity extends BlockEntity implements NiCacheHol
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
-        super.onDataPacket(net, pkt, registries);
+    public void onDataPacket(Connection net, ValueInput valueInput) {
+        super.onDataPacket(net, valueInput);
     }
 
     // -------------------------------------------------------------------------

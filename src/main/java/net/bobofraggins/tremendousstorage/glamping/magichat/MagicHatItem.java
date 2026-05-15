@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.glamping.magichat;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -9,6 +9,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -25,9 +26,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -69,8 +72,10 @@ public class MagicHatItem extends BlockItem {
         if (!target.isAlive()) return InteractionResult.PASS;
 
         if (!player.level().isClientSide()) {
-            CompoundTag mobTag = new CompoundTag();
-            if (!target.save(mobTag)) return InteractionResult.PASS; // entity refused save
+            TagValueOutput _tagOut = TagValueOutput.createWithContext(
+                    ProblemReporter.DISCARDING, player.level().registryAccess());
+            if (!target.save(_tagOut)) return InteractionResult.PASS;
+            CompoundTag mobTag = _tagOut.buildResult();
             CompoundTag wrapper = new CompoundTag();
             wrapper.put(MOB_KEY, mobTag);
             stack.set(DataComponents.CUSTOM_DATA, CustomData.of(wrapper));
@@ -124,7 +129,7 @@ public class MagicHatItem extends BlockItem {
         if (customData == null) return;
         CompoundTag wrapper = customData.copyTag();
         if (!wrapper.contains(MOB_KEY)) return;
-        CompoundTag mobTag = wrapper.getCompound(MOB_KEY);
+        CompoundTag mobTag = wrapper.getCompoundOrEmpty(MOB_KEY);
 
         Vec3 look = player.getLookAngle();
         double spawnX = player.getX() + look.x * 1.5;
@@ -161,7 +166,8 @@ public class MagicHatItem extends BlockItem {
         if (!hasMob(stack)) return base;
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
         if (data == null) return base;
-        Optional<EntityType<?>> type = EntityType.by(data.copyTag().getCompound(MOB_KEY));
+        Optional<EntityType<?>> type =
+                data.copyTag().getCompoundOrEmpty(MOB_KEY).getString("id").flatMap(EntityType::byString);
         return type.map(t -> (Component) Component.empty()
                         .append(base)
                         .append(" (")
@@ -171,12 +177,17 @@ public class MagicHatItem extends BlockItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
-        super.appendHoverText(stack, context, lines, flag);
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            TooltipDisplay lines,
+            Consumer<Component> tooltipAdder,
+            TooltipFlag flag) {
+        super.appendHoverText(stack, context, lines, tooltipAdder, flag);
         if (hasMob(stack)) {
-            lines.add(Component.translatable("item.tremendousstorage.magic_hat.tooltip_release"));
+            tooltipAdder.accept(Component.translatable("item.tremendousstorage.magic_hat.tooltip_release"));
         } else {
-            lines.add(Component.translatable("item.tremendousstorage.magic_hat.tooltip_capture"));
+            tooltipAdder.accept(Component.translatable("item.tremendousstorage.magic_hat.tooltip_capture"));
         }
     }
 

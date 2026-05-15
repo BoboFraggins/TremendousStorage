@@ -91,10 +91,10 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
 
         // Player inventory slot backgrounds
         int invPaneY = WirelessHubMenu.INV_Y_BASE + haarpH;
-        g.pose().pushPose();
-        g.pose().translate(x, y + invPaneY, 0);
+        g.pose().pushMatrix();
+        g.pose().translate(x, y + invPaneY);
         playerInvPane.render(g, font, BG_WIDTH, mouseX - x, mouseY - (y + invPaneY), partialTick);
-        g.pose().popPose();
+        g.pose().popMatrix();
     }
 
     private static void drawSlot(GuiGraphics g, int sx, int sy) {

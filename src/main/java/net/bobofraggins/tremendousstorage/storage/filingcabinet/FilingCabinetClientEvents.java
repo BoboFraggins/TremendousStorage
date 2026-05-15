@@ -11,6 +11,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
 
 /** Client-only event subscriber for screen registration. */
 public final class FilingCabinetClientEvents {
@@ -23,9 +24,15 @@ public final class FilingCabinetClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_body"));
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_drawer"));
+    public static void onRegisterAdditionalModels(ModelEvent.RegisterStandalone event) {
+        event.register(
+                FilingCabinetRenderer.BODY_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_body")));
+        event.register(
+                FilingCabinetRenderer.DRAWER_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_drawer")));
     }
 
     @SubscribeEvent

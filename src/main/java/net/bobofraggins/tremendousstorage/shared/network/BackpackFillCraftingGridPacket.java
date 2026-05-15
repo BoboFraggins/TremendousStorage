@@ -109,13 +109,13 @@ public record BackpackFillCraftingGridPacket(int slotType, int slotIndex, String
     }
 
     private static ItemStack takeFromInventory(Inventory inv, ItemStack wanted) {
-        for (int i = 0; i < inv.items.size(); i++) {
-            ItemStack stack = inv.items.get(i);
+        for (int i = 0; i < inv.getNonEquipmentItems().size(); i++) {
+            ItemStack stack = inv.getNonEquipmentItems().get(i);
             if (stack.isEmpty()) continue;
             if (ItemStack.isSameItemSameComponents(stack, wanted)) {
                 ItemStack result = stack.copyWithCount(1);
                 stack.shrink(1);
-                if (stack.isEmpty()) inv.items.set(i, ItemStack.EMPTY);
+                if (stack.isEmpty()) inv.getNonEquipmentItems().set(i, ItemStack.EMPTY);
                 return result;
             }
         }

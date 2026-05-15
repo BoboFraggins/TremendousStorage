@@ -8,7 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Priority screen for a Storage Interface attachment on a Tube face.
@@ -24,7 +24,7 @@ public class StorageInterfaceScreen extends AbstractContainerScreen<StorageInter
         super(menu, inv, title);
         PriorityPane priorityPane = new PriorityPane(
                 menu::getPriority,
-                p -> PacketDistributor.sendToServer(
+                p -> ClientPacketDistributor.sendToServer(
                         new SetStorageInterfacePriorityPacket(menu.getPos(), menu.getFaceIndex(), p)));
         dialog = new Dialog(priorityPane, new PlayerInventoryPane());
         this.imageWidth = dialog.totalWidth();

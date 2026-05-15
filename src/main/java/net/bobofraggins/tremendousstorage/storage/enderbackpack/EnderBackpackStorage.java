@@ -1,14 +1,14 @@
 package net.bobofraggins.tremendousstorage.storage.enderbackpack;
 
+import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Map;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
 /**
@@ -22,14 +22,19 @@ public class EnderBackpackStorage extends SavedData {
 
     private static final String SAVE_KEY = "tremendousstorage_ender_backpacks";
 
+    private static final Codec<EnderBackpackStorage> CODEC =
+            CompoundTag.CODEC.xmap(EnderBackpackStorage::fromCompoundTag, EnderBackpackStorage::toCompoundTag);
+
+    static final SavedDataType<EnderBackpackStorage> TYPE =
+            new SavedDataType<>(SAVE_KEY, ctx -> new EnderBackpackStorage(), ctx -> CODEC);
+
     private final Map<Long, ListTag> inventories = new HashMap<>();
     private final Map<Long, Long> versions = new HashMap<>();
     private final Map<Long, StorageTier> tiers = new HashMap<>();
 
     public static EnderBackpackStorage get(MinecraftServer server) {
         DimensionDataStorage storage = server.overworld().getDataStorage();
-        return storage.computeIfAbsent(
-                new SavedData.Factory<>(EnderBackpackStorage::new, EnderBackpackStorage::load, null), SAVE_KEY);
+        return storage.computeIfAbsent(TYPE);
     }
 
     public boolean hasLink(long linkId) {
@@ -69,24 +74,25 @@ public class EnderBackpackStorage extends SavedData {
         }
     }
 
-    private static EnderBackpackStorage load(CompoundTag tag, HolderLookup.Provider registries) {
+    // -------------------------------------------------------------------------
+    // NBT persistence via Codec
+    // -------------------------------------------------------------------------
+
+    private static EnderBackpackStorage fromCompoundTag(CompoundTag tag) {
         EnderBackpackStorage storage = new EnderBackpackStorage();
-        ListTag links = tag.getList("Links", Tag.TAG_COMPOUND);
+        ListTag links = tag.getListOrEmpty("Links");
         for (int i = 0; i < links.size(); i++) {
-            CompoundTag entry = links.getCompound(i);
-            long linkId = entry.getLong("LinkId");
-            ListTag types = entry.getList("Types", Tag.TAG_COMPOUND);
-            storage.inventories.put(linkId, types);
-            if (entry.contains("Tier")) {
-                storage.tiers.put(linkId, StorageTier.fromId(entry.getString("Tier")));
-            }
-            // CraftingUpgrade was previously shared; it is now per-instance so we ignore it here.
+            CompoundTag entry = links.getCompoundOrEmpty(i);
+            long linkId = entry.getLongOr("LinkId", 0L);
+            if (linkId == 0L) continue;
+            storage.inventories.put(linkId, entry.getListOrEmpty("Types"));
+            entry.getString("Tier").ifPresent(tier -> storage.tiers.put(linkId, StorageTier.fromId(tier)));
         }
         return storage;
     }
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    private CompoundTag toCompoundTag() {
+        CompoundTag tag = new CompoundTag();
         ListTag links = new ListTag();
         for (Map.Entry<Long, ListTag> entry : inventories.entrySet()) {
             long linkId = entry.getKey();
@@ -94,9 +100,7 @@ public class EnderBackpackStorage extends SavedData {
             e.putLong("LinkId", linkId);
             e.put("Types", entry.getValue());
             StorageTier tier = tiers.getOrDefault(linkId, StorageTier.WOOD);
-            if (tier != StorageTier.WOOD) {
-                e.putString("Tier", tier.getId());
-            }
+            if (tier != StorageTier.WOOD) e.putString("Tier", tier.getId());
             links.add(e);
         }
         tag.put("Links", links);

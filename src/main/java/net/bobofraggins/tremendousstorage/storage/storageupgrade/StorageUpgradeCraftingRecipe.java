@@ -21,6 +21,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -32,6 +33,7 @@ import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.storage.TagValueOutput;
 
 /**
  * Crafting recipe: storage block item (any tier) + matching Storage Upgrade →
@@ -217,7 +219,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
             return Boolean.TRUE.equals(stack.get(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get()));
         }
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.copyTag().getBoolean("CraftingUpgrade");
+        return data != null && data.copyTag().getBooleanOr("CraftingUpgrade", false);
     }
 
     private static ItemStack applyCraftingUpgrade(ItemStack blockStack) {
@@ -244,7 +246,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
 
     private static boolean alreadyHasHaarpUpgrade(ItemStack stack) {
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.copyTag().getBoolean("HaarpUpgrade");
+        return data != null && data.copyTag().getBooleanOr("HaarpUpgrade", false);
     }
 
     private static ItemStack applyHaarpUpgrade(ItemStack hubStack) {
@@ -262,7 +264,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
 
     private static boolean alreadyHasCompactingUpgrade(ItemStack stack) {
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.copyTag().getBoolean("CompactingUpgrade");
+        return data != null && data.copyTag().getBooleanOr("CompactingUpgrade", false);
     }
 
     private static ItemStack applyCompactingUpgrade(ItemStack blockStack) {
@@ -285,7 +287,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
 
     private static boolean alreadyHasMagnetUpgrade(ItemStack stack) {
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.copyTag().getBoolean("MagnetUpgrade");
+        return data != null && data.copyTag().getBooleanOr("MagnetUpgrade", false);
     }
 
     private static ItemStack applyMagnetUpgrade(ItemStack stack) {
@@ -313,7 +315,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
 
     private static boolean alreadyHasPullerUpgrade(ItemStack stack) {
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.copyTag().getBoolean("PullerUpgrade");
+        return data != null && data.copyTag().getBooleanOr("PullerUpgrade", false);
     }
 
     private static ItemStack applyPullerUpgrade(ItemStack stack) {
@@ -333,7 +335,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
 
     private static boolean alreadyHasInterdimensionalUpgrade(ItemStack stack) {
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.copyTag().getBoolean("InterdimensionalUpgrade");
+        return data != null && data.copyTag().getBooleanOr("InterdimensionalUpgrade", false);
     }
 
     private static ItemStack applyInterdimensionalUpgrade(ItemStack stack) {
@@ -381,7 +383,9 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
     private static void applyBeData(ItemStack stack, CompoundTag tag) {
         BlockEntityType<?> beType = beTypeForItem(stack.getItem());
         if (beType != null) {
-            BlockItem.setBlockEntityData(stack, beType, tag);
+            TagValueOutput _tagOut = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
+            _tagOut.store(tag);
+            BlockItem.setBlockEntityData(stack, beType, _tagOut);
         } else {
             stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
         }
@@ -400,7 +404,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
         if (data != null) {
             CompoundTag tag = data.copyTag();
             if (tag.contains("Tier")) {
-                return StorageTier.fromId(tag.getString("Tier"));
+                return StorageTier.fromId(tag.getStringOr("Tier", ""));
             }
         }
         return StorageTier.WOOD;

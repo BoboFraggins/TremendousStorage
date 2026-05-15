@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,6 +32,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -211,23 +213,13 @@ public class ArmoryCabinetBlock extends BaseEntityBlock {
         if (be instanceof ArmoryCabinetBlockEntity cabinet) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof net.minecraft.world.item.BlockItem) {
-                    BlockItem.setBlockEntityData(
-                            drop,
-                            cabinet.getType(),
-                            cabinet.saveCustomOnly(params.getLevel().registryAccess()));
+                    TagValueOutput _beOut = TagValueOutput.createWithContext(
+                            ProblemReporter.DISCARDING, params.getLevel().registryAccess());
+                    cabinet.saveCustomOnly(_beOut);
+                    BlockItem.setBlockEntityData(drop, cabinet.getType(), _beOut);
                 }
             }
         }
         return drops;
-    }
-
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!state.is(newState.getBlock()) && state.getValue(HALF) == DoubleBlockHalf.LOWER) {
-            if (level.getBlockEntity(pos) instanceof ArmoryCabinetBlockEntity be) {
-                be.recheckOpeners(level, pos, state);
-            }
-        }
-        super.onRemove(state, level, pos, newState, movedByPiston);
     }
 }

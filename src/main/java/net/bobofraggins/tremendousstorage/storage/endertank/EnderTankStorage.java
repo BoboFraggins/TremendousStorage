@@ -1,14 +1,15 @@
 package net.bobofraggins.tremendousstorage.storage.endertank;
 
+import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Map;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
 
@@ -22,6 +23,12 @@ public class EnderTankStorage extends SavedData {
 
     private static final String SAVE_KEY = "tremendousstorage_ender_tanks";
 
+    private static final Codec<EnderTankStorage> CODEC =
+            CompoundTag.CODEC.xmap(EnderTankStorage::fromCompoundTag, EnderTankStorage::toCompoundTag);
+
+    static final SavedDataType<EnderTankStorage> TYPE =
+            new SavedDataType<>(SAVE_KEY, ctx -> new EnderTankStorage(), ctx -> CODEC);
+
     private record FluidState(FluidStack type, long amount) {}
 
     private final Map<Long, FluidState> tanks = new HashMap<>();
@@ -34,8 +41,7 @@ public class EnderTankStorage extends SavedData {
 
     public static EnderTankStorage get(MinecraftServer server) {
         DimensionDataStorage storage = server.overworld().getDataStorage();
-        return storage.computeIfAbsent(
-                new SavedData.Factory<>(EnderTankStorage::new, EnderTankStorage::load, null), SAVE_KEY);
+        return storage.computeIfAbsent(TYPE);
     }
 
     // -------------------------------------------------------------------------
@@ -93,29 +99,29 @@ public class EnderTankStorage extends SavedData {
     }
 
     // -------------------------------------------------------------------------
-    // NBT persistence
+    // NBT persistence via Codec
     // -------------------------------------------------------------------------
 
-    private static EnderTankStorage load(CompoundTag tag, HolderLookup.Provider registries) {
+    private static EnderTankStorage fromCompoundTag(CompoundTag tag) {
         EnderTankStorage storage = new EnderTankStorage();
-        ListTag links = tag.getList("Links", Tag.TAG_COMPOUND);
+        ListTag links = tag.getListOrEmpty("Links");
         for (int i = 0; i < links.size(); i++) {
-            CompoundTag entry = links.getCompound(i);
-            long linkId = entry.getLong("LinkId");
-            FluidStack type = entry.contains("Fluid")
-                    ? FluidStack.parseOptional(registries, entry.getCompound("Fluid"))
-                    : FluidStack.EMPTY;
-            long amount = entry.getLong("Amount");
+            CompoundTag entry = links.getCompoundOrEmpty(i);
+            long linkId = entry.getLongOr("LinkId", 0L);
+            if (linkId == 0L) continue;
+            FluidStack type = entry.getCompound("Fluid")
+                    .flatMap(ft ->
+                            FluidStack.OPTIONAL_CODEC.parse(NbtOps.INSTANCE, ft).result())
+                    .orElse(FluidStack.EMPTY);
+            long amount = entry.getLongOr("Amount", 0L);
             storage.tanks.put(linkId, new FluidState(type, amount));
-            if (entry.contains("Tier")) {
-                storage.tiers.put(linkId, StorageTier.fromId(entry.getString("Tier")));
-            }
+            entry.getString("Tier").ifPresent(tier -> storage.tiers.put(linkId, StorageTier.fromId(tier)));
         }
         return storage;
     }
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    private CompoundTag toCompoundTag() {
+        CompoundTag tag = new CompoundTag();
         ListTag links = new ListTag();
         for (Map.Entry<Long, FluidState> entry : tanks.entrySet()) {
             long linkId = entry.getKey();
@@ -123,13 +129,14 @@ public class EnderTankStorage extends SavedData {
             e.putLong("LinkId", linkId);
             FluidStack type = entry.getValue().type();
             if (!type.isEmpty()) {
-                e.put("Fluid", type.save(registries));
+                FluidStack.OPTIONAL_CODEC
+                        .encodeStart(NbtOps.INSTANCE, type)
+                        .result()
+                        .ifPresent(nbt -> e.put("Fluid", nbt));
             }
             e.putLong("Amount", entry.getValue().amount());
             StorageTier tier = tiers.getOrDefault(linkId, StorageTier.WOOD);
-            if (tier != StorageTier.WOOD) {
-                e.putString("Tier", tier.getId());
-            }
+            if (tier != StorageTier.WOOD) e.putString("Tier", tier.getId());
             links.add(e);
         }
         tag.put("Links", links);

@@ -9,8 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -19,6 +17,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -398,74 +398,60 @@ public class TubeBlockEntity extends BlockEntity {
     // -------------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
 
-        tag.putString("NetworkTier", networkTier.getId());
+        output.putString("NetworkTier", networkTier.getId());
 
-        // Attachment types as byte[6]
-        byte[] types = new byte[6];
-        for (int i = 0; i < 6; i++) types[i] = (byte) attachmentType[i].ordinal();
-        tag.putByteArray("AttachmentTypes", types);
+        // Attachment types as int[6]
+        int[] types = new int[6];
+        for (int i = 0; i < 6; i++) types[i] = attachmentType[i].ordinal();
+        output.putIntArray("AttachmentTypes", types);
 
-        // Priorities as byte[6]
-        byte[] prios = new byte[6];
-        for (int i = 0; i < 6; i++) prios[i] = (byte) attachmentPriority[i].ordinal();
-        tag.putByteArray("AttachmentPriorities", prios);
+        // Priorities as int[6]
+        int[] prios = new int[6];
+        for (int i = 0; i < 6; i++) prios[i] = attachmentPriority[i].ordinal();
+        output.putIntArray("AttachmentPriorities", prios);
 
-        // Filter slots: outer ListTag of 6 inner ListTags, each with 9 CompoundTags
-        ListTag outerList = new ListTag();
+        // Filter slots as a flat list of {face, slot, item} entries
+        var filterList = output.childrenList("FilterSlots");
         for (int i = 0; i < 6; i++) {
-            ListTag innerList = new ListTag();
             for (int s = 0; s < 9; s++) {
-                CompoundTag slotTag = new CompoundTag();
                 if (!filterSlots[i][s].isEmpty()) {
-                    filterSlots[i][s].save(registries, slotTag);
+                    var entry = filterList.addChild();
+                    entry.putInt("face", i);
+                    entry.putInt("slot", s);
+                    entry.store("item", ItemStack.OPTIONAL_CODEC, filterSlots[i][s]);
                 }
-                innerList.add(slotTag);
             }
-            outerList.add(innerList);
         }
-        tag.put("FilterSlots", outerList);
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
 
-        if (tag.contains("NetworkTier")) networkTier = StorageTier.fromId(tag.getString("NetworkTier"));
+        input.getString("NetworkTier").ifPresent(t -> networkTier = StorageTier.fromId(t));
 
-        // Attachment types
-        if (tag.contains("AttachmentTypes")) {
-            byte[] types = tag.getByteArray("AttachmentTypes");
-            for (int i = 0; i < 6; i++) {
-                attachmentType[i] =
-                        (i < types.length) ? AttachmentType.fromOrdinal(types[i] & 0xFF) : AttachmentType.NONE;
-            }
-        } else if (tag.contains("Attachments")) {
-            // Legacy migration: old boolean bitmask
-            int mask = tag.getByte("Attachments") & 0xFF;
-            for (int i = 0; i < 6; i++) {
-                attachmentType[i] = (mask & (1 << i)) != 0 ? AttachmentType.STORAGE_INTERFACE : AttachmentType.NONE;
-            }
-        }
-
-        // Priorities
-        byte[] prios = tag.getByteArray("AttachmentPriorities");
+        // Attachment types from int[6]
+        int[] types = input.getIntArray("AttachmentTypes").orElse(new int[0]);
         for (int i = 0; i < 6; i++) {
-            attachmentPriority[i] = (i < prios.length) ? Priority.fromOrdinal(prios[i] & 0xFF) : Priority.NORMAL;
+            attachmentType[i] = (i < types.length) ? AttachmentType.fromOrdinal(types[i]) : AttachmentType.NONE;
         }
 
-        // Filter slots
-        if (tag.contains("FilterSlots", Tag.TAG_LIST)) {
-            ListTag outerList = tag.getList("FilterSlots", Tag.TAG_LIST);
-            for (int i = 0; i < 6 && i < outerList.size(); i++) {
-                ListTag innerList = outerList.getList(i);
-                for (int s = 0; s < 9 && s < innerList.size(); s++) {
-                    CompoundTag slotTag = innerList.getCompound(s);
-                    filterSlots[i][s] =
-                            slotTag.isEmpty() ? ItemStack.EMPTY : ItemStack.parseOptional(registries, slotTag);
-                }
+        // Priorities from int[6]
+        int[] prios = input.getIntArray("AttachmentPriorities").orElse(new int[0]);
+        for (int i = 0; i < 6; i++) {
+            attachmentPriority[i] = (i < prios.length) ? Priority.fromOrdinal(prios[i]) : Priority.NORMAL;
+        }
+
+        // Filter slots from flat list
+        for (var entry : input.childrenListOrEmpty("FilterSlots")) {
+            int face = entry.getIntOr("face", -1);
+            int slot = entry.getIntOr("slot", -1);
+            if (face >= 0 && face < 6 && slot >= 0 && slot < 9) {
+                filterSlots[face][slot] =
+                        entry.read("item", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
             }
         }
     }

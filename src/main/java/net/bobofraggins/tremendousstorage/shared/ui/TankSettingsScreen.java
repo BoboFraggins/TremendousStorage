@@ -5,11 +5,11 @@ import net.bobofraggins.tremendousstorage.shared.network.SetVoidExcessPacket;
 import net.bobofraggins.tremendousstorage.storage.tank.ClearTankPane;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Settings screen for the Tank.
@@ -55,9 +55,10 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
 
         VoidExcessPane voidPane = new VoidExcessPane(
                 menu::isVoidExcess,
-                () -> PacketDistributor.sendToServer(new SetVoidExcessPacket(menu.getPos(), !menu.isVoidExcess())));
-        ClearTankPane clearPane =
-                new ClearTankPane(() -> PacketDistributor.sendToServer(new ClearTankContentsPacket(menu.getPos())));
+                () -> ClientPacketDistributor.sendToServer(
+                        new SetVoidExcessPacket(menu.getPos(), !menu.isVoidExcess())));
+        ClearTankPane clearPane = new ClearTankPane(
+                () -> ClientPacketDistributor.sendToServer(new ClearTankContentsPacket(menu.getPos())));
         if (menu.hasPullerUpgrade()) {
             configDrawer = new ConfigDrawer(voidPane, clearPane, new PullerSidesPane(menu.getPos()));
         } else {
@@ -104,7 +105,7 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
                     };
             int gx = x + TankSettingsMenu.FLUID_IN_X;
             int gy = y + TankSettingsMenu.FLUID_IN_Y;
-            g.blit(RenderType::guiTextured, ghostTex, gx, gy, 0, 0, 16, 16, 16, 16);
+            g.blit(RenderPipelines.GUI_TEXTURED, ghostTex, gx, gy, 0, 0, 16, 16, 16, 16);
         }
 
         // Down-arrow between the two slots

@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.backpack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.network.OpenBackpackPacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
@@ -22,6 +23,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -58,11 +60,11 @@ public class BackpackItem extends BlockItem {
         CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data != null) {
             var tag = data.copyTag();
-            if (tag.getBoolean("MagnetUpgrade")) {
+            if (tag.getBooleanOr("MagnetUpgrade", false)) {
                 if (!sb.isEmpty()) sb.append('/');
                 sb.append("Magnet");
             }
-            if (tag.getBoolean("PullerUpgrade")) {
+            if (tag.getBooleanOr("PullerUpgrade", false)) {
                 if (!sb.isEmpty()) sb.append('/');
                 sb.append("Puller");
             }
@@ -71,8 +73,13 @@ public class BackpackItem extends BlockItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
-        super.appendHoverText(stack, context, lines, flag);
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            TooltipDisplay lines,
+            Consumer<Component> tooltipAdder,
+            TooltipFlag flag) {
+        super.appendHoverText(stack, context, lines, tooltipAdder, flag);
         BackpackContents contents =
                 stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
         List<net.bobofraggins.tremendousstorage.shared.util.StorageTooltip.Entry> entries = new ArrayList<>();
@@ -81,7 +88,7 @@ public class BackpackItem extends BlockItem {
                 entries.add(
                         new net.bobofraggins.tremendousstorage.shared.util.StorageTooltip.Entry(e.type(), e.count()));
         }
-        net.bobofraggins.tremendousstorage.shared.util.StorageTooltip.appendSorted(entries, lines);
+        net.bobofraggins.tremendousstorage.shared.util.StorageTooltip.appendSorted(entries, tooltipAdder);
     }
 
     // -------------------------------------------------------------------------
@@ -97,7 +104,9 @@ public class BackpackItem extends BlockItem {
         }
         // Right-click (no sneak) → open the backpack UI.
         if (!ctx.getLevel().isClientSide() && player instanceof ServerPlayer sp) {
-            int slotIndex = ctx.getHand() == InteractionHand.MAIN_HAND ? sp.getInventory().selected : 40;
+            int slotIndex = ctx.getHand() == InteractionHand.MAIN_HAND
+                    ? sp.getInventory().getSelectedSlot()
+                    : 40;
             openBackpackUi(sp, OpenBackpackPacket.SLOT_INVENTORY, slotIndex, "");
         }
         return InteractionResult.SUCCESS;
@@ -107,7 +116,8 @@ public class BackpackItem extends BlockItem {
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
 
-        int slotIndex = hand == InteractionHand.MAIN_HAND ? player.getInventory().selected : 40;
+        int slotIndex =
+                hand == InteractionHand.MAIN_HAND ? player.getInventory().getSelectedSlot() : 40;
         openBackpackUi((ServerPlayer) player, OpenBackpackPacket.SLOT_INVENTORY, slotIndex, "");
         return InteractionResult.SUCCESS;
     }

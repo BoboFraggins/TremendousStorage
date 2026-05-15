@@ -18,12 +18,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -38,6 +40,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -533,10 +537,14 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
      * Used by ender subclasses to persist inventory to shared storage.
      */
     protected ListTag saveTypes(HolderLookup.Provider registries) {
+        RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
         ListTag list = new ListTag();
         for (StorageKey key : orderedKeys) {
             CompoundTag entry = new CompoundTag();
-            entry.put(TAG_TYPE, key.toDisplayStack().save(registries));
+            ItemStack.OPTIONAL_CODEC
+                    .encodeStart(ops, key.toDisplayStack())
+                    .result()
+                    .ifPresent(t -> entry.put(TAG_TYPE, t));
             entry.putLong(TAG_COUNT, items.getLong(key));
             list.add(entry);
         }
@@ -548,18 +556,23 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
      * Used by ender subclasses to restore inventory from shared storage.
      */
     protected void loadTypes(ListTag list, HolderLookup.Provider registries) {
+        RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
         items.clear();
         orderedKeys.clear();
         cachedTotalCount = 0;
         for (int i = 0; i < list.size(); i++) {
-            CompoundTag entry = list.getCompound(i);
-            long count = entry.getLong(TAG_COUNT);
-            ItemStack.parse(registries, entry.getCompound(TAG_TYPE)).ifPresent(stack -> {
-                StorageKey key = StorageKey.of(stack);
-                items.put(key, count);
-                orderedKeys.add(key);
-                cachedTotalCount += count;
-            });
+            CompoundTag entry = list.getCompoundOrEmpty(i);
+            long count = entry.getLongOr(TAG_COUNT, 0L);
+            entry.getCompound(TAG_TYPE)
+                    .flatMap(typeTag ->
+                            ItemStack.OPTIONAL_CODEC.parse(ops, typeTag).result())
+                    .filter(s -> !s.isEmpty())
+                    .ifPresent(stack -> {
+                        StorageKey key = StorageKey.of(stack);
+                        items.put(key, count);
+                        orderedKeys.add(key);
+                        cachedTotalCount += count;
+                    });
         }
     }
 
@@ -593,55 +606,53 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
     private static final String TAG_COUNT = "Count";
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        ListTag list = new ListTag();
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        var typesList = output.childrenList(TAG_TYPES);
         for (StorageKey key : orderedKeys) {
-            CompoundTag entry = new CompoundTag();
-            entry.put(TAG_TYPE, key.toDisplayStack().save(registries));
+            var entry = typesList.addChild();
+            entry.store(TAG_TYPE, ItemStack.OPTIONAL_CODEC, key.toDisplayStack());
             entry.putLong(TAG_COUNT, items.getLong(key));
-            list.add(entry);
         }
-        tag.put(TAG_TYPES, list);
-        tag.putInt("Priority", priority.ordinal());
-        tag.putString("SortMode", sortMode.name());
-        tag.putString("Tier", tier.getId());
-        if (hasCraftingUpgrade) tag.putBoolean("CraftingUpgrade", true);
-        if (hasMagnetUpgrade) tag.putBoolean("MagnetUpgrade", true);
+        output.putInt("Priority", priority.ordinal());
+        output.putString("SortMode", sortMode.name());
+        output.putString("Tier", tier.getId());
+        if (hasCraftingUpgrade) output.putBoolean("CraftingUpgrade", true);
+        if (hasMagnetUpgrade) output.putBoolean("MagnetUpgrade", true);
         if (hasPullerUpgrade) {
-            tag.putBoolean("PullerUpgrade", true);
-            tag.putInt("PullerSides", pullerSides);
+            output.putBoolean("PullerUpgrade", true);
+            output.putInt("PullerSides", pullerSides);
         }
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
         items.clear();
         orderedKeys.clear();
         cachedTotalCount = 0;
-        ListTag list = tag.getList(TAG_TYPES, Tag.TAG_COMPOUND);
-        for (int i = 0; i < list.size(); i++) {
-            CompoundTag entry = list.getCompound(i);
-            long count = entry.getLong(TAG_COUNT);
-            ItemStack.parse(registries, entry.getCompound(TAG_TYPE)).ifPresent(stack -> {
-                StorageKey key = StorageKey.of(stack);
-                items.put(key, count);
-                orderedKeys.add(key);
-                cachedTotalCount += count;
-            });
+        for (var entry : input.childrenListOrEmpty(TAG_TYPES)) {
+            long count = entry.getLongOr(TAG_COUNT, 0L);
+            entry.read(TAG_TYPE, ItemStack.OPTIONAL_CODEC)
+                    .filter(s -> !s.isEmpty())
+                    .ifPresent(stack -> {
+                        StorageKey key = StorageKey.of(stack);
+                        items.put(key, count);
+                        orderedKeys.add(key);
+                        cachedTotalCount += count;
+                    });
         }
-        priority = Priority.fromOrdinal(tag.getInt("Priority"));
+        priority = Priority.fromOrdinal(input.getIntOr("Priority", 0));
         try {
-            sortMode = SortMode.valueOf(tag.getString("SortMode"));
+            sortMode = SortMode.valueOf(input.getStringOr("SortMode", ""));
         } catch (IllegalArgumentException e) {
             sortMode = SortMode.AMOUNT;
         }
-        tier = StorageTier.fromId(tag.getString("Tier"));
-        hasCraftingUpgrade = tag.getBoolean("CraftingUpgrade");
-        hasMagnetUpgrade = tag.getBoolean("MagnetUpgrade");
-        hasPullerUpgrade = tag.getBoolean("PullerUpgrade");
-        pullerSides = tag.getInt("PullerSides");
+        tier = StorageTier.fromId(input.getStringOr("Tier", ""));
+        hasCraftingUpgrade = input.getBooleanOr("CraftingUpgrade", false);
+        hasMagnetUpgrade = input.getBooleanOr("MagnetUpgrade", false);
+        hasPullerUpgrade = input.getBooleanOr("PullerUpgrade", false);
+        pullerSides = input.getIntOr("PullerSides", 0);
     }
 
     // -------------------------------------------------------------------------
@@ -659,8 +670,8 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
-        super.onDataPacket(net, pkt, registries);
+    public void onDataPacket(Connection net, ValueInput valueInput) {
+        super.onDataPacket(net, valueInput);
         // Re-render the chunk section so IBlockColor picks up the new tier color immediately.
         if (level != null && level.isClientSide()) {
             level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);

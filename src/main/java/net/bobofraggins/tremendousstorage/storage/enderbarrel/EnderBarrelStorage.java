@@ -1,15 +1,16 @@
 package net.bobofraggins.tremendousstorage.storage.enderbarrel;
 
+import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Map;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
 /**
@@ -23,6 +24,12 @@ public class EnderBarrelStorage extends SavedData {
 
     private static final String SAVE_KEY = "tremendousstorage_ender_barrels";
 
+    private static final Codec<EnderBarrelStorage> CODEC =
+            CompoundTag.CODEC.xmap(EnderBarrelStorage::fromCompoundTag, EnderBarrelStorage::toCompoundTag);
+
+    static final SavedDataType<EnderBarrelStorage> TYPE =
+            new SavedDataType<>(SAVE_KEY, ctx -> new EnderBarrelStorage(), ctx -> CODEC);
+
     private final Map<Long, ItemStack> storedItems = new HashMap<>();
     private final Map<Long, Long> counts = new HashMap<>();
     private final Map<Long, StorageTier> tiers = new HashMap<>();
@@ -35,8 +42,7 @@ public class EnderBarrelStorage extends SavedData {
 
     public static EnderBarrelStorage get(MinecraftServer server) {
         DimensionDataStorage storage = server.overworld().getDataStorage();
-        return storage.computeIfAbsent(
-                new SavedData.Factory<>(EnderBarrelStorage::new, EnderBarrelStorage::load, null), SAVE_KEY);
+        return storage.computeIfAbsent(TYPE);
     }
 
     // -------------------------------------------------------------------------
@@ -103,39 +109,44 @@ public class EnderBarrelStorage extends SavedData {
     }
 
     // -------------------------------------------------------------------------
-    // NBT persistence
+    // NBT persistence via Codec
     // -------------------------------------------------------------------------
 
-    private static EnderBarrelStorage load(CompoundTag tag, HolderLookup.Provider registries) {
+    private static EnderBarrelStorage fromCompoundTag(CompoundTag tag) {
         EnderBarrelStorage s = new EnderBarrelStorage();
-        ListTag links = tag.getList("Links", Tag.TAG_COMPOUND);
+        ListTag links = tag.getListOrEmpty("Links");
         for (int i = 0; i < links.size(); i++) {
-            CompoundTag e = links.getCompound(i);
-            long linkId = e.getLong("LinkId");
-            ItemStack item =
-                    e.contains("Item") ? ItemStack.parseOptional(registries, e.getCompound("Item")) : ItemStack.EMPTY;
+            CompoundTag e = links.getCompoundOrEmpty(i);
+            long linkId = e.getLongOr("LinkId", 0L);
+            if (linkId == 0L) continue;
+            ItemStack item = e.getCompound("Item")
+                    .flatMap(it ->
+                            ItemStack.OPTIONAL_CODEC.parse(NbtOps.INSTANCE, it).result())
+                    .orElse(ItemStack.EMPTY);
             if (!item.isEmpty()) item = item.copyWithCount(1);
             s.storedItems.put(linkId, item);
-            s.counts.put(linkId, e.getLong("Count"));
-            if (e.contains("Tier")) {
-                s.tiers.put(linkId, StorageTier.fromId(e.getString("Tier")));
-            }
-            if (e.contains("BaseSlot")) {
-                s.baseSlots.put(linkId, e.getInt("BaseSlot"));
-            }
+            s.counts.put(linkId, e.getLongOr("Count", 0L));
+            e.getString("Tier").ifPresent(tier -> s.tiers.put(linkId, StorageTier.fromId(tier)));
+            int baseSlot = e.getIntOr("BaseSlot", 0);
+            if (baseSlot != 0) s.baseSlots.put(linkId, baseSlot);
         }
         return s;
     }
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    private CompoundTag toCompoundTag() {
+        CompoundTag tag = new CompoundTag();
         ListTag links = new ListTag();
         for (Map.Entry<Long, ItemStack> entry : storedItems.entrySet()) {
             long linkId = entry.getKey();
             CompoundTag e = new CompoundTag();
             e.putLong("LinkId", linkId);
             ItemStack item = entry.getValue();
-            if (!item.isEmpty()) e.put("Item", item.save(registries));
+            if (!item.isEmpty()) {
+                ItemStack.OPTIONAL_CODEC
+                        .encodeStart(NbtOps.INSTANCE, item)
+                        .result()
+                        .ifPresent(t -> e.put("Item", t));
+            }
             e.putLong("Count", counts.getOrDefault(linkId, 0L));
             StorageTier tier = tiers.getOrDefault(linkId, StorageTier.WOOD);
             if (tier != StorageTier.WOOD) e.putString("Tier", tier.getId());

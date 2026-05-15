@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
@@ -40,7 +41,8 @@ public class TankRenderer extends AbstractTankRenderer<TankBlockEntity> {
             PoseStack poseStack,
             MultiBufferSource bufferSource,
             int packedLight,
-            int packedOverlay) {
+            int packedOverlay,
+            Vec3 cameraPos) {
         Level level = be.getLevel();
         if (level != null) {
             packedLight = LevelRenderer.getLightColor(level, be.getBlockPos());

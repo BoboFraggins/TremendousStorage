@@ -21,12 +21,12 @@ public class FolderItemDecorator implements IItemDecorator {
         ItemStack display = contents.storedItem().get().copyWithCount(1);
 
         var pose = guiGraphics.pose();
-        pose.pushPose();
+        pose.pushMatrix();
         // Translate to bottom-right quadrant of the 16x16 slot and scale to half size
-        pose.translate(xOffset + 8, yOffset + 8, 300);
-        pose.scale(0.5f, 0.5f, 1.0f);
+        pose.translate(xOffset + 8, yOffset + 8);
+        pose.scale(0.5f, 0.5f);
         guiGraphics.renderItem(display, 0, 0);
-        pose.popPose();
+        pose.popMatrix();
 
         return false;
     }

@@ -28,6 +28,8 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -440,26 +442,24 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     // -------------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.put("inventory", inventory.serializeNBT(registries));
-        tag.putString("Tier", tier.getId());
-        if (haarpUpgrade) tag.putBoolean("HaarpUpgrade", true);
-        if (haarpMode != WeatherMode.OFF) tag.putInt("HaarpMode", haarpMode.ordinal());
-        if (interdimensionalUpgrade) tag.putBoolean("InterdimensionalUpgrade", true);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        inventory.serialize(output.child("inventory"));
+        output.putString("Tier", tier.getId());
+        if (haarpUpgrade) output.putBoolean("HaarpUpgrade", true);
+        if (haarpMode != WeatherMode.OFF) output.putInt("HaarpMode", haarpMode.ordinal());
+        if (interdimensionalUpgrade) output.putBoolean("InterdimensionalUpgrade", true);
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        if (tag.contains("inventory")) {
-            inventory.deserializeNBT(registries, tag.getCompound("inventory"));
-        }
-        tier = StorageTier.fromId(tag.getString("Tier"));
-        connected = tag.getBoolean("Connected");
-        haarpUpgrade = tag.getBoolean("HaarpUpgrade");
-        haarpMode = WeatherMode.fromOrdinal(tag.getInt("HaarpMode"));
-        interdimensionalUpgrade = tag.getBoolean("InterdimensionalUpgrade");
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        inventory.deserialize(input.childOrEmpty("inventory"));
+        tier = StorageTier.fromId(input.getStringOr("Tier", ""));
+        connected = input.getBooleanOr("Connected", false);
+        haarpUpgrade = input.getBooleanOr("HaarpUpgrade", false);
+        haarpMode = WeatherMode.fromOrdinal(input.getIntOr("HaarpMode", 0));
+        interdimensionalUpgrade = input.getBooleanOr("InterdimensionalUpgrade", false);
     }
 
     // -------------------------------------------------------------------------

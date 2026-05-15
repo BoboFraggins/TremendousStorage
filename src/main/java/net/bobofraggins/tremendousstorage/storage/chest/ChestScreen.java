@@ -39,7 +39,7 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Screen for the Tremendous Chest.
@@ -80,10 +80,10 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
         this.imageHeight = dialog.totalHeight();
         List<IDialogPane> drawerPanes = new java.util.ArrayList<>();
         drawerPanes.add(new PriorityPane(
-                menu::getPriority, p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
+                menu::getPriority, p -> ClientPacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
         drawerPanes.add(new SortPane(() -> sortMode, newMode -> {
             sortMode = newMode;
-            PacketDistributor.sendToServer(new SetSortModePacket(menu.getPos(), newMode));
+            ClientPacketDistributor.sendToServer(new SetSortModePacket(menu.getPos(), newMode));
         }));
         if (menu.hasPullerUpgrade()) {
             drawerPanes.add(new PullerSidesPane(menu.getPos()));
@@ -103,7 +103,7 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
                             boolean current = true;
                             if (b instanceof PicnicBasketBlockEntity pb) current = pb.isAutoFeed();
                             else if (b instanceof EnderPicnicBasketBlockEntity eb) current = eb.isAutoFeed();
-                            PacketDistributor.sendToServer(new SetAutoFeedPacket(menu.getPos(), !current));
+                            ClientPacketDistributor.sendToServer(new SetAutoFeedPacket(menu.getPos(), !current));
                         }));
             }
         }
@@ -115,7 +115,7 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
         super.init();
         dialog.init(leftPos, topPos);
         configDrawer.init(leftPos, topPos, imageHeight);
-        inventoryPane.setClickHandler((idx, amount, toCursor) -> PacketDistributor.sendToServer(
+        inventoryPane.setClickHandler((idx, amount, toCursor) -> ClientPacketDistributor.sendToServer(
                 new LocalStorageInteractPacket(menu.getPos(), true, idx, amount, toCursor)));
 
         // Restore persisted sort mode from the client-side block entity.
@@ -142,7 +142,7 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
                 16,
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack"),
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack_focused"),
-                () -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false))));
+                () -> ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false))));
     }
 
     @Override
@@ -209,7 +209,7 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
         }
         if (QuickStackClientEvents.QUICK_STACK != null
                 && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)) {
-            PacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false));
+            ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false));
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -258,7 +258,7 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
         int paneAbsY = dialog.getPaneAbsY(1);
         ItemStack hovered = inventoryPane.getHoveredStack(mouseX - leftPos, mouseY - paneAbsY);
         if (hovered != null) {
-            graphics.renderTooltip(font, hovered, mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, hovered, mouseX, mouseY);
         }
     }
 

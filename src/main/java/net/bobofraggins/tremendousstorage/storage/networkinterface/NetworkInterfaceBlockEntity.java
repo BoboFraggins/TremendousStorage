@@ -24,6 +24,8 @@ import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.items.IItemHandler;
 
 /**
@@ -466,19 +468,19 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     // -------------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putString("Tier", tier.getId());
-        tag.putInt("EnergyStored", energyStored);
-        tag.putBoolean("Powered", powered);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.putString("Tier", tier.getId());
+        output.putInt("EnergyStored", energyStored);
+        output.putBoolean("Powered", powered);
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        tier = StorageTier.fromId(tag.getString("Tier"));
-        energyStored = tag.getInt("EnergyStored");
-        powered = tag.getBoolean("Powered");
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        tier = StorageTier.fromId(input.getStringOr("Tier", ""));
+        energyStored = input.getIntOr("EnergyStored", 0);
+        powered = input.getBooleanOr("Powered", false);
     }
 
     // -------------------------------------------------------------------------

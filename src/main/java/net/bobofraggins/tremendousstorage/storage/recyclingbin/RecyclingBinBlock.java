@@ -132,13 +132,11 @@ public class RecyclingBinBlock extends BaseEntityBlock implements NetworkConnect
     }
 
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        if (!state.is(newState.getBlock())) {
-            if (level.getBlockEntity(pos) instanceof RecyclingBinBlockEntity be) {
-                be.recheckOpeners(level, pos, state);
-                net.minecraft.world.Containers.dropContents(level, pos, be.transferContainer);
-            }
+    protected void affectNeighborsAfterRemoval(
+            BlockState state, net.minecraft.server.level.ServerLevel level, BlockPos pos, boolean movedByPiston) {
+        if (level.getBlockEntity(pos) instanceof RecyclingBinBlockEntity be) {
+            net.minecraft.world.Containers.dropContents(level, pos, be.transferContainer);
         }
-        super.onRemove(state, level, pos, newState, movedByPiston);
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
     }
 }

@@ -33,7 +33,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Screen for the Tremendous Backpack.
@@ -77,11 +77,11 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
         configDrawer = new ConfigDrawer(
                 new PriorityPane(
                         menu::getPriority,
-                        p -> PacketDistributor.sendToServer(new SetBackpackPriorityPacket(
+                        p -> ClientPacketDistributor.sendToServer(new SetBackpackPriorityPacket(
                                 menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), p))),
                 new SortPane(() -> sortMode, newMode -> {
                     sortMode = newMode;
-                    PacketDistributor.sendToServer(new SetBackpackSortModePacket(
+                    ClientPacketDistributor.sendToServer(new SetBackpackSortModePacket(
                             menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), sortMode.ordinal()));
                 }));
     }
@@ -92,7 +92,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
         dialog.init(leftPos, topPos);
         configDrawer.init(leftPos, topPos, imageHeight);
         inventoryPane.setClickHandler(
-                (idx, amount, toCursor) -> PacketDistributor.sendToServer(new BackpackInteractPacket(
+                (idx, amount, toCursor) -> ClientPacketDistributor.sendToServer(new BackpackInteractPacket(
                         menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), idx, amount, toCursor)));
 
         // Read initial sort mode from the backpack's current contents
@@ -116,7 +116,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
                 16,
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack"),
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack_focused"),
-                () -> PacketDistributor.sendToServer(
+                () -> ClientPacketDistributor.sendToServer(
                         new BackpackQuickStackPacket(menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId()))));
     }
 
@@ -213,7 +213,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
         }
         if (QuickStackClientEvents.QUICK_STACK != null
                 && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)) {
-            PacketDistributor.sendToServer(
+            ClientPacketDistributor.sendToServer(
                     new BackpackQuickStackPacket(menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId()));
             return true;
         }
@@ -263,7 +263,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
         int paneAbsY = dialog.getPaneAbsY(1);
         ItemStack hovered = inventoryPane.getHoveredStack(mouseX - leftPos, mouseY - paneAbsY);
         if (hovered != null) {
-            graphics.renderTooltip(font, hovered, mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, hovered, mouseX, mouseY);
         }
     }
 

@@ -145,9 +145,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.ShovelItem;
-import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.SoundType;
@@ -630,8 +628,14 @@ public final class Registration {
     // Lazurite tools
     // -------------------------------------------------------------------------
 
-    public static final DeferredHolder<Item, PickaxeItem> LAZURITE_PICKAXE = ITEMS.register(
-            "lazurite_pickaxe", () -> new PickaxeItem(LazuriteTier.INSTANCE, 1.0f, -2.8f, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> LAZURITE_PICKAXE = ITEMS.register(
+            "lazurite_pickaxe",
+            () -> new Item(LazuriteTier.INSTANCE.applyToolProperties(
+                    new Item.Properties(),
+                    net.minecraft.tags.BlockTags.MINEABLE_WITH_PICKAXE,
+                    1.0f,
+                    -2.8f,
+                    LazuriteTier.INSTANCE.speed())));
 
     public static final DeferredHolder<Item, AxeItem> LAZURITE_AXE = ITEMS.register(
             "lazurite_axe", () -> new AxeItem(LazuriteTier.INSTANCE, 4.0f, -3.3f, new Item.Properties()));
@@ -639,8 +643,9 @@ public final class Registration {
     public static final DeferredHolder<Item, ShovelItem> LAZURITE_SHOVEL = ITEMS.register(
             "lazurite_shovel", () -> new ShovelItem(LazuriteTier.INSTANCE, 1.5f, -3.0f, new Item.Properties()));
 
-    public static final DeferredHolder<Item, SwordItem> LAZURITE_SWORD = ITEMS.register(
-            "lazurite_sword", () -> new SwordItem(LazuriteTier.INSTANCE, 3.0f, -2.4f, new Item.Properties()));
+    public static final DeferredHolder<Item, Item> LAZURITE_SWORD = ITEMS.register(
+            "lazurite_sword",
+            () -> new Item(LazuriteTier.INSTANCE.applySwordProperties(new Item.Properties(), 3.0f, -2.4f)));
 
     public static final DeferredHolder<Item, HoeItem> LAZURITE_HOE = ITEMS.register(
             "lazurite_hoe", () -> new HoeItem(LazuriteTier.INSTANCE, -2.0f, -1.0f, new Item.Properties()));

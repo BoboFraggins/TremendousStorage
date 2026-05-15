@@ -14,7 +14,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Menu for the priority screen shared by storage blocks.
@@ -143,13 +143,13 @@ public class PriorityControl extends AbstractContainerMenu implements IDialogPan
 
         if (isInButton(localX, localY, DOWN_BTN_X)) {
             if (selected > 0) {
-                PacketDistributor.sendToServer(new SetPriorityPacket(pos, selected - 1));
+                ClientPacketDistributor.sendToServer(new SetPriorityPacket(pos, selected - 1));
             }
             return true;
         }
         if (isInButton(localX, localY, UP_BTN_X)) {
             if (selected < Priority.VALUES.length - 1) {
-                PacketDistributor.sendToServer(new SetPriorityPacket(pos, selected + 1));
+                ClientPacketDistributor.sendToServer(new SetPriorityPacket(pos, selected + 1));
             }
             return true;
         }

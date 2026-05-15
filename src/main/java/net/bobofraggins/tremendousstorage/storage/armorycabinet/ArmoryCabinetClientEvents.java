@@ -6,6 +6,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
 
 public final class ArmoryCabinetClientEvents {
 
@@ -17,16 +18,27 @@ public final class ArmoryCabinetClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        for (String part : new String[] {
-            "armory_cabinet_body",
-            "armory_cabinet_door",
-            "armory_cabinet_arm_top",
-            "armory_cabinet_arm_bottom",
-            "armory_cabinet_wheel"
-        }) {
-            event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/" + part));
-        }
+    public static void onRegisterAdditionalModels(ModelEvent.RegisterStandalone event) {
+        event.register(
+                ArmoryCabinetRenderer.BODY,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_body")));
+        event.register(
+                ArmoryCabinetRenderer.DOOR,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_door")));
+        event.register(
+                ArmoryCabinetRenderer.ARM_TOP,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_arm_top")));
+        event.register(
+                ArmoryCabinetRenderer.ARM_BOTTOM,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_arm_bottom")));
+        event.register(
+                ArmoryCabinetRenderer.WHEEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_wheel")));
     }
 
     @SubscribeEvent

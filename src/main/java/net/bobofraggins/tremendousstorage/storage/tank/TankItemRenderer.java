@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.serialization.MapCodec;
+import java.util.Set;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.minecraft.client.Minecraft;
@@ -19,13 +20,16 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.client.model.data.ModelData;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.RenderData> {
 
     public record RenderData(StorageTier tier, @Nullable TankContents contents) {}
+
+    @Override
+    public void getExtents(Set<Vector3f> output) {}
 
     @Override
     @Nullable
@@ -35,7 +39,7 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
         if (customData != null) {
             CompoundTag tag = customData.copyTag();
             if (tag.contains("Tier")) {
-                tier = StorageTier.fromId(tag.getString("Tier"));
+                tier = StorageTier.fromId(tag.getString("Tier").orElse(""));
             }
         }
         return new RenderData(tier, stack.get(Registration.TANK_CONTENTS.get()));
@@ -54,9 +58,7 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
 
         StorageTier tier = data != null ? data.tier() : StorageTier.WOOD;
         BlockState renderState = Registration.TANK.get().defaultBlockState().setValue(TankBlock.TIER_PROP, tier);
-        mc.getBlockRenderer()
-                .renderSingleBlock(
-                        renderState, poseStack, bufferSource, packedLight, packedOverlay, ModelData.EMPTY, null);
+        mc.getBlockRenderer().renderSingleBlock(renderState, poseStack, bufferSource, packedLight, packedOverlay);
 
         TankContents contents = data != null ? data.contents() : null;
         if (contents == null || contents.isEmpty()) return;

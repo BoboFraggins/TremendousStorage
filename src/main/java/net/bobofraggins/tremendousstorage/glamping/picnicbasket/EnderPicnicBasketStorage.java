@@ -1,26 +1,30 @@
 package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 
+import com.mojang.serialization.Codec;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 
 /**
  * Server-side persistent storage for Ender Picnic Basket shared inventories.
  *
  * <p>Each linked pair of Ender Picnic Baskets shares a 64-bit {@code linkId}. This map stores
- * the authoritative serialised item list for each link ID. Simpler than {@link
- * net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestStorage} because the picnic
- * basket has no tier or crafting-upgrade state to track.
+ * the authoritative serialised item list for each link ID.
  */
 public class EnderPicnicBasketStorage extends SavedData {
 
     private static final String SAVE_KEY = "tremendousstorage_ender_picnic_baskets";
+
+    private static final Codec<EnderPicnicBasketStorage> CODEC =
+            CompoundTag.CODEC.xmap(EnderPicnicBasketStorage::fromCompoundTag, EnderPicnicBasketStorage::toCompoundTag);
+
+    static final SavedDataType<EnderPicnicBasketStorage> TYPE =
+            new SavedDataType<>(SAVE_KEY, ctx -> new EnderPicnicBasketStorage(), ctx -> CODEC);
 
     private final Map<Long, ListTag> inventories = new HashMap<>();
     private final Map<Long, Long> versions = new HashMap<>();
@@ -31,8 +35,7 @@ public class EnderPicnicBasketStorage extends SavedData {
 
     public static EnderPicnicBasketStorage get(MinecraftServer server) {
         DimensionDataStorage storage = server.overworld().getDataStorage();
-        return storage.computeIfAbsent(
-                new SavedData.Factory<>(EnderPicnicBasketStorage::new, EnderPicnicBasketStorage::load, null), SAVE_KEY);
+        return storage.computeIfAbsent(TYPE);
     }
 
     // -------------------------------------------------------------------------
@@ -57,10 +60,6 @@ public class EnderPicnicBasketStorage extends SavedData {
         setDirty();
     }
 
-    /**
-     * Seeds a new link entry with the given inventory. Does nothing if this link ID is already
-     * registered (i.e. the second basket is being placed after the first was already used).
-     */
     public void initLink(long linkId, ListTag types) {
         if (!inventories.containsKey(linkId)) {
             inventories.put(linkId, types);
@@ -69,23 +68,23 @@ public class EnderPicnicBasketStorage extends SavedData {
     }
 
     // -------------------------------------------------------------------------
-    // NBT persistence
+    // NBT persistence via Codec
     // -------------------------------------------------------------------------
 
-    private static EnderPicnicBasketStorage load(CompoundTag tag, HolderLookup.Provider registries) {
+    private static EnderPicnicBasketStorage fromCompoundTag(CompoundTag tag) {
         EnderPicnicBasketStorage storage = new EnderPicnicBasketStorage();
-        ListTag links = tag.getList("Links", Tag.TAG_COMPOUND);
+        ListTag links = tag.getListOrEmpty("Links");
         for (int i = 0; i < links.size(); i++) {
-            CompoundTag entry = links.getCompound(i);
-            long linkId = entry.getLong("LinkId");
-            ListTag types = entry.getList("Types", Tag.TAG_COMPOUND);
-            storage.inventories.put(linkId, types);
+            CompoundTag entry = links.getCompoundOrEmpty(i);
+            long linkId = entry.getLongOr("LinkId", 0L);
+            if (linkId == 0L) continue;
+            storage.inventories.put(linkId, entry.getListOrEmpty("Types"));
         }
         return storage;
     }
 
-    @Override
-    public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
+    private CompoundTag toCompoundTag() {
+        CompoundTag tag = new CompoundTag();
         ListTag links = new ListTag();
         for (Map.Entry<Long, ListTag> entry : inventories.entrySet()) {
             CompoundTag e = new CompoundTag();

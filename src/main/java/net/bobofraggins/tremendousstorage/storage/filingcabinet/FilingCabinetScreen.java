@@ -12,7 +12,7 @@ import net.bobofraggins.tremendousstorage.shared.ui.PullerSidesPane;
 import net.bobofraggins.tremendousstorage.shared.ui.VoidExcessPane;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Screen for the Filing Cabinet block.
@@ -40,10 +40,10 @@ public class FilingCabinetScreen extends AbstractFilingCabinetScreen<FilingCabin
         panes.add(new VoidExcessPane(menu::isVoidExcess, () -> {
             boolean next = !menu.isVoidExcess();
             menu.setVoidExcess(next);
-            PacketDistributor.sendToServer(new SetVoidExcessPacket(menu.getPos(), next));
+            ClientPacketDistributor.sendToServer(new SetVoidExcessPacket(menu.getPos(), next));
         }));
         panes.add(new PriorityPane(
-                menu::getPriority, p -> PacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
+                menu::getPriority, p -> ClientPacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
         if (menu.hasPullerUpgrade()) {
             panes.add(new PullerSidesPane(menu.getPos()));
         }

@@ -3,6 +3,8 @@ package net.bobofraggins.tremendousstorage.storage.barrel;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import java.util.ArrayList;
+import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
 import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelBlockEntity;
@@ -12,49 +14,47 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 
 /**
- * Renders the barrel body (baked model with proper AO + shading) plus the locked item and count
- * on its front face, matching the rendering approach used by the Filing Cabinet and Chest.
+ * Renders the barrel body (standalone model with proper AO + shading) plus the locked item and
+ * count on its front face.
  */
 public class BarrelRenderer
         implements BlockEntityRenderer<BarrelBlockEntity>, IBlockEntityRendererExtension<BarrelBlockEntity> {
 
-    private static final ModelResourceLocation[] BODY_MODELS;
-    private static final ModelResourceLocation[] ENDER_BODY_MODELS;
-    private static final ModelResourceLocation[] COMPACTING_BODY_MODELS;
+    @SuppressWarnings("unchecked")
+    static final StandaloneModelKey<BlockStateModel>[] BODY_MODELS =
+            new StandaloneModelKey[StorageTier.values().length];
+
+    @SuppressWarnings("unchecked")
+    static final StandaloneModelKey<BlockStateModel>[] ENDER_BODY_MODELS =
+            new StandaloneModelKey[StorageTier.values().length];
+
+    @SuppressWarnings("unchecked")
+    static final StandaloneModelKey<BlockStateModel>[] COMPACTING_BODY_MODELS =
+            new StandaloneModelKey[StorageTier.values().length];
 
     static {
-        StorageTier[] tiers = StorageTier.values();
-        BODY_MODELS = new ModelResourceLocation[tiers.length];
-        ENDER_BODY_MODELS = new ModelResourceLocation[tiers.length];
-        COMPACTING_BODY_MODELS = new ModelResourceLocation[tiers.length];
-        for (StorageTier tier : tiers) {
-            BODY_MODELS[tier.ordinal()] = new ModelResourceLocation(
-                    ResourceLocation.fromNamespaceAndPath(
-                            "tremendousstorage", "block/barrels/barrel_body_" + tier.getId()),
-                    "standalone");
-            ENDER_BODY_MODELS[tier.ordinal()] = new ModelResourceLocation(
-                    ResourceLocation.fromNamespaceAndPath(
-                            "tremendousstorage", "block/ender_barrels/ender_barrel_body_" + tier.getId()),
-                    "standalone");
-            COMPACTING_BODY_MODELS[tier.ordinal()] = new ModelResourceLocation(
-                    ResourceLocation.fromNamespaceAndPath(
-                            "tremendousstorage", "block/barrels_compacting/barrel_body_" + tier.getId()),
-                    "standalone");
+        for (StorageTier tier : StorageTier.values()) {
+            final String id = tier.getId();
+            BODY_MODELS[tier.ordinal()] =
+                    new StandaloneModelKey<>(() -> "tremendousstorage:block/barrels/barrel_body_" + id);
+            ENDER_BODY_MODELS[tier.ordinal()] =
+                    new StandaloneModelKey<>(() -> "tremendousstorage:block/ender_barrels/ender_barrel_body_" + id);
+            COMPACTING_BODY_MODELS[tier.ordinal()] =
+                    new StandaloneModelKey<>(() -> "tremendousstorage:block/barrels_compacting/barrel_body_" + id);
         }
     }
 
@@ -62,7 +62,13 @@ public class BarrelRenderer
 
     @Override
     public void render(
-            BarrelBlockEntity be, float partialTick, PoseStack ps, MultiBufferSource buffers, int light, int overlay) {
+            BarrelBlockEntity be,
+            float partialTick,
+            PoseStack ps,
+            MultiBufferSource buffers,
+            int light,
+            int overlay,
+            Vec3 cameraPos) {
 
         Level level = be.getLevel();
         if (level != null) {
@@ -78,23 +84,22 @@ public class BarrelRenderer
                     default -> 0f;
                 };
 
-        // ── Barrel body ───────────────────────────────────────────────────────
+        // Barrel body
         boolean isEnder = be instanceof EnderBarrelBlockEntity;
         int tierIdx = be.getTier().ordinal();
-        ModelResourceLocation modelLoc = be.hasCompactingUpgrade()
+        StandaloneModelKey<BlockStateModel> modelKey = be.hasCompactingUpgrade()
                 ? COMPACTING_BODY_MODELS[tierIdx]
                 : (isEnder ? ENDER_BODY_MODELS[tierIdx] : BODY_MODELS[tierIdx]);
-        BakedModel bodyModel = Minecraft.getInstance().getModelManager().getModel(modelLoc);
-        BlockState blockState = be.getBlockState();
+        BlockStateModel bodyModel = Minecraft.getInstance().getModelManager().getStandaloneModel(modelKey);
         VertexConsumer consumer = buffers.getBuffer(RenderType.solid());
         RandomSource random = RandomSource.create();
 
         ps.pushPose();
         applyFacingRotation(ps, facingYRot);
-        renderModel(consumer, ps.last(), bodyModel, blockState, level, light, overlay, random);
+        renderModel(consumer, ps.last(), bodyModel, level, light, overlay, random);
         ps.popPose();
 
-        // ── Stored item + count ───────────────────────────────────────────────
+        // Stored item + count
         if (!be.isLocked()) return;
 
         ps.pushPose();
@@ -147,16 +152,10 @@ public class BarrelRenderer
         }
     }
 
-    /**
-     * Renders three 4×4 item icons for a compacting barrel.
-     * Slot 0 → bottom-left (0.25, 0.25), slot 1 → top-centre (0.50, 0.75), slot 2 → bottom-right (0.75, 0.25).
-     * Pose must already have the facing rotation applied; z=0 is the front face.
-     */
     private static void renderCompactingFace(
             BarrelBlockEntity be, PoseStack ps, MultiBufferSource buffers, Level level, int light, int overlay) {
         int base = be.getBaseSlot();
 
-        // Determine item and count for each of the three IItemHandler slots
         ItemStack s0 = ItemStack.EMPTY, s1 = ItemStack.EMPTY, s2 = ItemStack.EMPTY;
         long c0 = 0, c1 = 0, c2 = 0;
 
@@ -201,7 +200,6 @@ public class BarrelRenderer
         ps.pushPose();
         ps.translate(cx, cy, -0.01);
 
-        // 4-pixel icon: scale = 4/16 = 0.25
         ps.pushPose();
         ps.scale(0.25f, 0.25f, 0.001f);
         Minecraft.getInstance()
@@ -209,7 +207,6 @@ public class BarrelRenderer
                 .renderStatic(item, ItemDisplayContext.FIXED, LightTexture.FULL_BRIGHT, overlay, ps, buffers, level, 0);
         ps.popPose();
 
-        // Count text anchored to the bottom-right corner of the 4×4 icon area (±2/16 from centre)
         String label = CountFormat.format(count);
         Font font = Minecraft.getInstance().font;
         float ts = 1f / 120f;
@@ -237,24 +234,26 @@ public class BarrelRenderer
     private static void renderModel(
             VertexConsumer consumer,
             PoseStack.Pose pose,
-            BakedModel model,
-            BlockState blockState,
+            BlockStateModel model,
             Level level,
             int packedLight,
             int packedOverlay,
             RandomSource random) {
-        for (Direction dir : Direction.values()) {
-            random.setSeed(42L);
-            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.solid())) {
-                float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
+        List<BlockModelPart> parts = new ArrayList<>();
+        random.setSeed(42L);
+        model.collectParts(random, parts);
+        for (BlockModelPart part : parts) {
+            for (Direction dir : Direction.values()) {
+                for (var quad : part.getQuads(dir)) {
+                    float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
+                    consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
+                }
+            }
+            for (var quad : part.getQuads(null)) {
+                Direction dir = quad.direction();
+                float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
                 consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
             }
-        }
-        random.setSeed(42L);
-        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.solid())) {
-            Direction dir = quad.getDirection();
-            float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
-            consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
         }
     }
 }

@@ -4,12 +4,12 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
@@ -168,19 +168,19 @@ public class EnderTankBlockEntity extends TankBlockEntity {
     // -------------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
         if (linkId != -1L) {
-            tag.putLong(TAG_LINK_ID, linkId);
+            output.putLong(TAG_LINK_ID, linkId);
         }
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        if (tag.contains(TAG_LINK_ID)) {
-            linkId = tag.getLong(TAG_LINK_ID);
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        input.getLong(TAG_LINK_ID).ifPresent(id -> {
+            linkId = id;
             needsStorageLoad = true;
-        }
+        });
     }
 }

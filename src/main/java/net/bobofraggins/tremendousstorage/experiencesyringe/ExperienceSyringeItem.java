@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.experiencesyringe;
 
-import java.util.List;
+import java.util.function.Consumer;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -12,6 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 public class ExperienceSyringeItem extends Item {
@@ -100,11 +101,16 @@ public class ExperienceSyringeItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            TooltipDisplay tooltip,
+            Consumer<Component> tooltipAdder,
+            TooltipFlag flag) {
         int stored = stack.getOrDefault(Registration.EXPERIENCE_SYRINGE_STORED_XP, 0);
         int storedMb = xpToMb(stored);
         int capacityMb = xpToMb(CAPACITY);
-        tooltip.add(Component.literal(storedMb + " / " + capacityMb + " mB  (" + stored + " XP)")
+        tooltipAdder.accept(Component.literal(storedMb + " / " + capacityMb + " mB  (" + stored + " XP)")
                 .withStyle(stored == 0 ? ChatFormatting.DARK_GRAY : ChatFormatting.GREEN));
     }
 

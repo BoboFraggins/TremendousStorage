@@ -74,7 +74,7 @@ public class PersonalAccessTerminalMenu extends AccessTerminalMenu {
 
     private static boolean playerHasLinkedPersonalAccessTerminal(Player player, BlockPos niPos) {
         // Check main inventory + off-hand
-        for (ItemStack stack : player.getInventory().items) {
+        for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
             if (isMatchingPersonalAccessTerminal(stack, niPos)) return true;
         }
         if (isMatchingPersonalAccessTerminal(player.getOffhandItem(), niPos)) return true;

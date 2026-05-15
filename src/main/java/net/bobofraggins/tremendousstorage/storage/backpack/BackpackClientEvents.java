@@ -5,12 +5,12 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneModel;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyModifier;
 import org.lwjgl.glfw.GLFW;
@@ -48,20 +48,17 @@ public final class BackpackClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_body"));
-        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_flap"));
+    public static void onRegisterAdditionalModels(ModelEvent.RegisterStandalone event) {
+        event.register(
+                BackpackRenderer.BODY_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_body")));
+        event.register(
+                BackpackRenderer.FLAP_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_flap")));
     }
 
     @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent event) {
-        if (!ModList.get().isLoaded("curios")) return;
-        try {
-            top.theillusivec4.curios.api.client.CuriosRendererRegistry.register(
-                    Registration.TREMENDOUS_BACKPACK.get(), BackpackCurioRenderer::new);
-            top.theillusivec4.curios.api.client.CuriosRendererRegistry.register(
-                    Registration.ENDER_TREMENDOUS_BACKPACK_ITEM.get(), BackpackCurioRenderer::new);
-        } catch (NoClassDefFoundError ignored) {
-        }
-    }
+    public static void onClientSetup(FMLClientSetupEvent event) {}
 }

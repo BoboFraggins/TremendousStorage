@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 import java.util.function.BooleanSupplier;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -53,7 +53,8 @@ public class VoidExcessPane implements IDialogPane {
 
         int toggleX = (width - TOGGLE_W) / 2;
         ResourceLocation tex = stateGetter.getAsBoolean() ? TOGGLE_ON : TOGGLE_OFF;
-        graphics.blit(RenderType::guiTextured, tex, toggleX, TOGGLE_Y, 0, 0, TOGGLE_W, TOGGLE_H, TOGGLE_W, TOGGLE_H);
+        graphics.blit(
+                RenderPipelines.GUI_TEXTURED, tex, toggleX, TOGGLE_Y, 0, 0, TOGGLE_W, TOGGLE_H, TOGGLE_W, TOGGLE_H);
     }
 
     @Override

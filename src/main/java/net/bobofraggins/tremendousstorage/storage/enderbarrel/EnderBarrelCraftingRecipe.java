@@ -8,11 +8,13 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.storage.TagValueOutput;
 
 /**
  * Crafting recipe: Barrel (any tier) + Ender Storage Upgrade →
@@ -43,7 +45,7 @@ public class EnderBarrelCraftingRecipe extends AbstractEnderCraftingRecipe {
         CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (existing == null) return -1L;
         CompoundTag tag = existing.copyTag();
-        return tag.contains(EnderBarrelBlockEntity.TAG_LINK_ID) ? tag.getLong(EnderBarrelBlockEntity.TAG_LINK_ID) : -1L;
+        return tag.getLongOr(EnderBarrelBlockEntity.TAG_LINK_ID, -1L);
     }
 
     @Override
@@ -52,7 +54,9 @@ public class EnderBarrelCraftingRecipe extends AbstractEnderCraftingRecipe {
         CustomData existing = base.get(DataComponents.BLOCK_ENTITY_DATA);
         CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
         tag.putLong(EnderBarrelBlockEntity.TAG_LINK_ID, linkId);
-        BlockItem.setBlockEntityData(result, Registration.ENDER_BARREL_BE_TYPE.get(), tag);
+        TagValueOutput _tagOut = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
+        _tagOut.store(tag);
+        BlockItem.setBlockEntityData(result, Registration.ENDER_BARREL_BE_TYPE.get(), _tagOut);
         // Copy the barrel contents component so the ender barrel shows the same item/count
         var contents = base.get(Registration.BARREL_CONTENTS.get());
         if (contents != null) result.set(Registration.BARREL_CONTENTS.get(), contents);

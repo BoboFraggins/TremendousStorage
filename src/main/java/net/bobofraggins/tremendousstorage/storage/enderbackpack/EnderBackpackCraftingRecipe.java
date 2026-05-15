@@ -9,11 +9,13 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.storage.TagValueOutput;
 
 /**
  * Crafting recipe: Tremendous Backpack (any tier) + Ender Storage Upgrade →
@@ -70,7 +72,9 @@ public class EnderBackpackCraftingRecipe extends AbstractEnderCraftingRecipe {
             if (contents.hasCraftingUpgrade()) tag.putBoolean("CraftingUpgrade", true);
         }
         tag.putLong(EnderChestBlockEntity.TAG_LINK_ID, linkId);
-        BlockItem.setBlockEntityData(result, Registration.ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(), tag);
+        TagValueOutput _tagOut = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
+        _tagOut.store(tag);
+        BlockItem.setBlockEntityData(result, Registration.ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(), _tagOut);
 
         // Set link ID as a standalone component for fast access in item-form openUi
         result.set(Registration.ENDER_LINK_ID.get(), linkId);

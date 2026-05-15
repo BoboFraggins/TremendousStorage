@@ -32,6 +32,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.items.IItemHandler;
 
@@ -444,27 +446,27 @@ public class FilingCabinetBlockEntity extends BlockEntity
     // -------------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        ContainerHelper.saveAllItems(tag, folders, registries);
-        tag.putInt("Priority", priority.ordinal());
-        tag.putBoolean("VoidExcess", voidExcess);
-        if (hasMagnetUpgrade) tag.putBoolean("MagnetUpgrade", true);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        ContainerHelper.saveAllItems(output, folders);
+        output.putInt("Priority", priority.ordinal());
+        output.putBoolean("VoidExcess", voidExcess);
+        if (hasMagnetUpgrade) output.putBoolean("MagnetUpgrade", true);
         if (hasPullerUpgrade) {
-            tag.putBoolean("PullerUpgrade", true);
-            tag.putInt("PullerSides", pullerSides);
+            output.putBoolean("PullerUpgrade", true);
+            output.putInt("PullerSides", pullerSides);
         }
     }
 
     @Override
-    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        ContainerHelper.loadAllItems(tag, folders, registries);
-        priority = Priority.fromOrdinal(tag.getInt("Priority"));
-        voidExcess = tag.getBoolean("VoidExcess");
-        hasMagnetUpgrade = tag.getBoolean("MagnetUpgrade");
-        hasPullerUpgrade = tag.getBoolean("PullerUpgrade");
-        pullerSides = tag.getInt("PullerSides");
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        ContainerHelper.loadAllItems(input, folders);
+        priority = Priority.fromOrdinal(input.getIntOr("Priority", 0));
+        voidExcess = input.getBooleanOr("VoidExcess", false);
+        hasMagnetUpgrade = input.getBooleanOr("MagnetUpgrade", false);
+        hasPullerUpgrade = input.getBooleanOr("PullerUpgrade", false);
+        pullerSides = input.getIntOr("PullerSides", 0);
     }
 
     // -------------------------------------------------------------------------

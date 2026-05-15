@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.173'
+    id 'net.neoforged.moddev' version '2.0.141'
     id 'com.diffplug.spotless' version '7.0.2'
 }
 
@@ -18,30 +18,7 @@ base {
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-runs {
-    configureEach {
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
-        systemProperty 'forge.logging.console.level', 'debug'
-        modSource project.sourceSets.main
-    }
-
-    client {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-    }
-
-    server {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-        argument '--nogui'
-    }
-
-    gameTestServer {
-        systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
-    }
-}
-
-sourceSets.main.resources { srcDir 'src/generated/resources' }
-
-// Exclude integration files for dependencies not yet available on 1.21.4
+// Exclude integration files for dependencies not yet available on 1.21.7
 sourceSets.main.java.exclude(
     '**/external/create/**',
     '**/external/mekanism/**',
@@ -55,16 +32,58 @@ sourceSets.main.java.exclude(
     '**/storage/accessterminal/AccessTerminalJadePlugin.java',
     '**/external/mysticalagriculture/**',
     '**/lazurite/LazuriteCropPlugin.java',
-    '**/external/jei/**'
+    '**/external/jei/**',
+    // Curios not yet released for 1.21.7
+    '**/glamping/dankfannypack/DankFannyPackCurioRenderer.java',
+    '**/glamping/magichat/MagicHatCurioRenderer.java',
+    '**/storage/backpack/BackpackCurioRenderer.java'
 )
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+neoForge {
+    version = project.neo_version
+
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            systemProperty 'forge.logging.console.level', 'debug'
+        }
+    }
+
+    mods {
+        "${mod_id}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
 
 configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
 
 repositories {
-    mavenLocal()
-    maven { url "https://api.modrinth.com/maven" }
     maven {
         name = "JEI Maven"
         url = "https://maven.blamejared.com"
@@ -96,20 +115,21 @@ repositories {
         name = "shedaniel Maven"
         url = "https://maven.shedaniel.me/"
     }
+    maven {
+        name = "Modrinth Maven"
+        url = "https://api.modrinth.com/maven"
+    }
 }
 
 dependencies {
-    implementation "net.neoforged:neoforge:${neo_version}"
-    compileOnly "maven.modrinth:jade:26.1.1+neoforge"
-    compileOnly "mezz.jei:jei-1.21.4-neoforge-api:20.0.0.4"
-    compileOnly "top.theillusivec4.curios:curios-neoforge:10.0.1+1.21.4:api"
+    //compileOnly "maven.modrinth:jade:26.1.1+neoforge" // not yet released for 1.21.7
+    compileOnly "mezz.jei:jei-1.21.7-neoforge-api:23.1.0.8"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:11.0.1+1.21.5:api"
     //compileOnly "mekanism:Mekanism:1.21.1-10.7.15.81:api"
     //compileOnly "com.hollingsworth.ars_nouveau:ars_nouveau-1.21.1:5.11.2.1298"
     //compileOnly "com.blakebr0.cucumber:Cucumber:1.21.1-8.0.15"
     //compileOnly "com.blakebr0.mysticalagriculture:MysticalAgriculture:1.21.1-8.0.23"
-    //compileOnly "maven.modrinth:structure-pool-api:${structure_pool_api_version}"
     //compileOnly("curse.maven:create-328085:7408951") { transitive = false }
-    // Recipe viewer integrations — optional at runtime, compile-only for API access
     //compileOnly "maven.modrinth:emi:${emi_version}"
     //compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
 }

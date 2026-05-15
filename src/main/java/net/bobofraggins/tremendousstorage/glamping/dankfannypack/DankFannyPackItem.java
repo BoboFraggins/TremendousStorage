@@ -27,7 +27,8 @@ public class DankFannyPackItem extends Item {
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (!level.isClientSide() && player instanceof ServerPlayer sp) {
-            int slotIndex = hand == InteractionHand.MAIN_HAND ? sp.getInventory().selected : 40;
+            int slotIndex =
+                    hand == InteractionHand.MAIN_HAND ? sp.getInventory().getSelectedSlot() : 40;
             openFannyPackUi(sp, OpenFannyPackPacket.SLOT_INVENTORY, slotIndex, "");
         }
         return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;

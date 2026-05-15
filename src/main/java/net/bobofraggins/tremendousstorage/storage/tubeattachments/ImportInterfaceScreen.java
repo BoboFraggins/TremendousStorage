@@ -9,7 +9,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Filter screen for an Import Interface attachment.
@@ -122,12 +122,12 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
         ItemStack carried = minecraft.player.containerMenu.getCarried();
         if (carried.isEmpty()) {
             menu.setFilterSlot(slotIndex, ItemStack.EMPTY);
-            PacketDistributor.sendToServer(
+            ClientPacketDistributor.sendToServer(
                     new SetImportExportFilterPacket(menu.getPos(), menu.getFaceIndex(), slotIndex, ItemStack.EMPTY));
         } else {
             ItemStack ghost = carried.copyWithCount(1);
             menu.setFilterSlot(slotIndex, ghost);
-            PacketDistributor.sendToServer(
+            ClientPacketDistributor.sendToServer(
                     new SetImportExportFilterPacket(menu.getPos(), menu.getFaceIndex(), slotIndex, ghost));
         }
     }

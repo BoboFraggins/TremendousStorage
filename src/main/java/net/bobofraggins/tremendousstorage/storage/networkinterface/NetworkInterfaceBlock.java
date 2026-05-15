@@ -9,6 +9,7 @@ import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
@@ -27,6 +28,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -101,10 +103,10 @@ public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkCon
         if (be instanceof NetworkInterfaceBlockEntity ni) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof net.minecraft.world.item.BlockItem) {
-                    BlockItem.setBlockEntityData(
-                            drop,
-                            ni.getType(),
-                            ni.saveCustomOnly(params.getLevel().registryAccess()));
+                    TagValueOutput _beOut = TagValueOutput.createWithContext(
+                            ProblemReporter.DISCARDING, params.getLevel().registryAccess());
+                    ni.saveCustomOnly(_beOut);
+                    BlockItem.setBlockEntityData(drop, ni.getType(), _beOut);
                 }
             }
         }

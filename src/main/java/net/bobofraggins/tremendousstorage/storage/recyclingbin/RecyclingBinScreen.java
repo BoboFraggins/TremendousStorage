@@ -4,7 +4,7 @@ import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -115,6 +115,6 @@ public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu
 
         int phase = (int) ((System.currentTimeMillis() / 1500) % 2);
         ResourceLocation ghostTex = phase == 0 ? GHOST_BUCKET : GHOST_BOTTLE;
-        g.blit(RenderType::guiTextured, ghostTex, sx, sy, 0, 0, 16, 16, 16, 16);
+        g.blit(RenderPipelines.GUI_TEXTURED, ghostTex, sx, sy, 0, 0, 16, 16, 16, 16);
     }
 }

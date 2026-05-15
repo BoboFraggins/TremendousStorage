@@ -10,7 +10,7 @@
 // import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
 // import net.minecraft.client.Minecraft;
 // import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-// import net.neoforged.neoforge.network.PacketDistributor;
+// import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 // /**
 //  * EMI recipe transfer handler for the Storage Access Terminal.
@@ -53,7 +53,7 @@
 //     public boolean craft(EmiRecipe recipe, EmiCraftContext<AccessTerminalMenu> context) {
 //         AccessTerminalMenu menu = context.getScreenHandler();
 //         if (!menu.hasNetwork() || recipe.getId() == null) return false;
-//         PacketDistributor.sendToServer(new SatFillCraftingGridPacket(menu.getSatPos(), recipe.getId()));
+//         ClientPacketDistributor.sendToServer(new SatFillCraftingGridPacket(menu.getSatPos(), recipe.getId()));
 //         return true;
 //     }
 // }

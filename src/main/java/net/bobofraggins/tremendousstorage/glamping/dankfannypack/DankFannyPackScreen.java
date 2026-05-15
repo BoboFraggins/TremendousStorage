@@ -8,7 +8,7 @@ import net.bobofraggins.tremendousstorage.shared.ui.PriorityPane;
 import net.bobofraggins.tremendousstorage.shared.ui.VoidExcessPane;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Screen for the Dank Fanny Pack — identical layout to the Filing Cabinet.
@@ -30,12 +30,12 @@ public class DankFannyPackScreen extends AbstractFilingCabinetScreen<DankFannyPa
                 new VoidExcessPane(menu::isVoidExcess, () -> {
                     boolean next = !menu.isVoidExcess();
                     menu.setVoidExcess(next);
-                    PacketDistributor.sendToServer(new SetFannyPackVoidExcessPacket(
+                    ClientPacketDistributor.sendToServer(new SetFannyPackVoidExcessPacket(
                             menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), next));
                 }),
                 new PriorityPane(
                         menu::getPriority,
-                        p -> PacketDistributor.sendToServer(new SetFannyPackPriorityPacket(
+                        p -> ClientPacketDistributor.sendToServer(new SetFannyPackPriorityPacket(
                                 menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), p))));
     }
 }

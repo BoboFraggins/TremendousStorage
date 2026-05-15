@@ -1,24 +1,20 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.shared.network.QuickStackFilingCabinetPacket;
 import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
-import org.joml.Matrix4f;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Shared screen base for
@@ -72,7 +68,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
                 16,
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack"),
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack_focused"),
-                () -> PacketDistributor.sendToServer(new QuickStackFilingCabinetPacket())));
+                () -> ClientPacketDistributor.sendToServer(new QuickStackFilingCabinetPacket())));
     }
 
     @Override
@@ -104,7 +100,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (QuickStackClientEvents.QUICK_STACK != null
                 && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)) {
-            PacketDistributor.sendToServer(new QuickStackFilingCabinetPacket());
+            ClientPacketDistributor.sendToServer(new QuickStackFilingCabinetPacket());
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
@@ -146,10 +142,10 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
                 0xFF555555);
 
         // Player inventory slot backgrounds
-        graphics.pose().pushPose();
-        graphics.pose().translate(x, y + playerInvY, 0);
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(x, y + playerInvY);
         PLAYER_INV_PANE.render(graphics, font, BG_WIDTH, 0, 0, 0);
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
 
     /**
@@ -179,15 +175,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
             long count = stack.getCount();
             if (count > 1) renderSizeLabel(graphics, font, sx, sy, CountFormat.format(count), 0xFFFFFF);
             if (hoveredSlot == slot) {
-                graphics.fillGradient(
-                        net.minecraft.client.renderer.RenderType.guiOverlay(),
-                        sx,
-                        sy,
-                        sx + 16,
-                        sy + 16,
-                        -2130706433,
-                        -2130706433,
-                        0);
+                graphics.fillGradient(sx, sy, sx + 16, sy + 16, -2130706433, -2130706433);
             }
             return;
         }
@@ -206,24 +194,16 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         float scaleInv = 1f / scale;
         float offset = -1f;
 
-        graphics.pose().pushPose();
-        graphics.pose().translate(0f, 0f, 200f);
-        graphics.pose().scale(scale, scale, scale);
-        Matrix4f mat = graphics.pose().last().pose();
-
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(0f, 0f);
+        graphics.pose().scale(scale, scale);
         float textX = (x + offset + 16f + 2f - font.width(text) * scale) * scaleInv;
         float textY = (y + offset + 10f) * scaleInv;
 
-        MultiBufferSource.BufferSource buffers =
-                Minecraft.getInstance().renderBuffers().bufferSource();
-        RenderSystem.disableBlend();
-        font.drawInBatch(
-                text, textX + 1f, textY + 1f, 0x414141, false, mat, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
-        font.drawInBatch(text, textX, textY, color, false, mat, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
-        buffers.endBatch();
-        RenderSystem.enableBlend();
+        graphics.drawString(font, text, (int) (textX + 1f), (int) (textY + 1f), 0x414141, false);
+        graphics.drawString(font, text, (int) textX, (int) textY, color, false);
 
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
 
     private static void drawSlotBackground(GuiGraphics graphics, int sx, int sy, int w, int h) {

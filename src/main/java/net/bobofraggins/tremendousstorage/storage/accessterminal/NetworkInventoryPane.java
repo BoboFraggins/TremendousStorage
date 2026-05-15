@@ -1,6 +1,5 @@
 package net.bobofraggins.tremendousstorage.storage.accessterminal;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,8 +19,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -29,10 +27,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.network.PacketDistributor;
-import org.joml.Matrix4f;
 
 /**
  * Dialog pane that renders the scrollable network item grid and its scrollbar.
@@ -143,7 +140,7 @@ public class NetworkInventoryPane implements IDialogPane {
         ItemStack carried = menu.getCarried();
         if (!carried.isEmpty()) {
             if (button == 0 && menu.hasNetwork()) {
-                PacketDistributor.sendToServer(new SatInsertPacket(menu.getNiPos(), -1));
+                ClientPacketDistributor.sendToServer(new SatInsertPacket(menu.getNiPos(), -1));
             }
             return true;
         }
@@ -166,22 +163,23 @@ public class NetworkInventoryPane implements IDialogPane {
                     return true; // block but consume the event
                 }
                 // Always extract 1 bucket per click for fluid slots
-                PacketDistributor.sendToServer(new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), 1, true));
+                ClientPacketDistributor.sendToServer(
+                        new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), 1, true));
             } else {
                 if (button == 2) {
                     // Middle-click: extract exactly one item to cursor
-                    PacketDistributor.sendToServer(
+                    ClientPacketDistributor.sendToServer(
                             new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), 1, true));
                 } else if (Screen.hasShiftDown()) {
                     int amount = (int) Math.min(totalCount, maxStack);
-                    PacketDistributor.sendToServer(
+                    ClientPacketDistributor.sendToServer(
                             new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, false));
                     lastShiftDragSlot = idx;
                 } else {
                     int amount = (button == 1)
                             ? (int) Math.max(1, (totalCount + 1) / 2)
                             : (int) Math.min(totalCount, maxStack);
-                    PacketDistributor.sendToServer(
+                    ClientPacketDistributor.sendToServer(
                             new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, true));
                 }
             }
@@ -220,7 +218,7 @@ public class NetworkInventoryPane implements IDialogPane {
                     boolean isFluidSlot = !isFluid.isEmpty() && idx < isFluid.size() && isFluid.get(idx);
                     if (totalCount > 0 && !isFluidSlot) {
                         int amount = (int) Math.min(totalCount, target.getMaxStackSize());
-                        PacketDistributor.sendToServer(
+                        ClientPacketDistributor.sendToServer(
                                 new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, false));
                     }
                     lastShiftDragSlot = idx;
@@ -508,7 +506,7 @@ public class NetworkInventoryPane implements IDialogPane {
         // Slot outlines from the chest-row strip in generic_54.png
         for (int row = 0; row < rows; row++) {
             graphics.blit(
-                    RenderType::guiTextured,
+                    RenderPipelines.GUI_TEXTURED,
                     BG_TEXTURE,
                     GRID_X,
                     startY + row * AccessTerminalLayout.SLOT_SIZE,
@@ -570,18 +568,7 @@ public class NetworkInventoryPane implements IDialogPane {
         int a = (tint >> 24) & 0xFF;
         if (a == 0) a = 255;
         int argb = (a << 24) | (r << 16) | (g << 8) | b;
-        // Render the fluid sprite with tint via vertex consumer
-        RenderType rt = RenderType.guiTextured(sprite.atlasLocation());
-        org.joml.Matrix4f matrix = graphics.pose().last().pose();
-        com.mojang.blaze3d.vertex.VertexConsumer vc =
-                Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(rt);
-        vc.addVertex(matrix, x, y, 0).setUv(sprite.getU0(), sprite.getV0()).setColor(argb);
-        vc.addVertex(matrix, x, y + 16, 0).setUv(sprite.getU0(), sprite.getV1()).setColor(argb);
-        vc.addVertex(matrix, x + 16, y + 16, 0)
-                .setUv(sprite.getU1(), sprite.getV1())
-                .setColor(argb);
-        vc.addVertex(matrix, x + 16, y, 0).setUv(sprite.getU1(), sprite.getV0()).setColor(argb);
-        Minecraft.getInstance().renderBuffers().bufferSource().endBatch(rt);
+        graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, 16, 16, argb);
     }
 
     /** Renders a count label at 0.666 scale in the bottom-right corner of a 16×16 slot. */
@@ -590,24 +577,16 @@ public class NetworkInventoryPane implements IDialogPane {
         float scaleInv = 1f / scale;
         float offset = -1f;
 
-        graphics.pose().pushPose();
-        graphics.pose().translate(0f, 0f, 200f);
-        graphics.pose().scale(scale, scale, scale);
-        Matrix4f mat = graphics.pose().last().pose();
-
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(0f, 0f);
+        graphics.pose().scale(scale, scale);
         float textX = (x + offset + 16f + 2f - font.width(text) * scale) * scaleInv;
         float textY = (y + offset + 10f) * scaleInv;
 
-        MultiBufferSource.BufferSource buffers =
-                Minecraft.getInstance().renderBuffers().bufferSource();
-        RenderSystem.disableBlend();
-        font.drawInBatch(
-                text, textX + 1f, textY + 1f, 0x414141, false, mat, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
-        font.drawInBatch(text, textX, textY, color, false, mat, buffers, Font.DisplayMode.NORMAL, 0, 15728880);
-        buffers.endBatch();
-        RenderSystem.enableBlend();
+        graphics.drawString(font, text, (int) (textX + 1f), (int) (textY + 1f), 0x414141, false);
+        graphics.drawString(font, text, (int) textX, (int) textY, color, false);
 
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     }
 
     /** Formats a fluid amount (in mB) for the slot label. */
@@ -650,7 +629,7 @@ public class NetworkInventoryPane implements IDialogPane {
         }
 
         graphics.blitSprite(
-                RenderType::guiTextured,
+                RenderPipelines.GUI_TEXTURED,
                 canScroll ? SCROLLER : SCROLLER_DISABLED,
                 thumbX,
                 thumbY,

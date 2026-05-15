@@ -5,7 +5,7 @@ import net.bobofraggins.tremendousstorage.shared.network.OpenFannyPackPacket;
 import net.minecraft.client.Minecraft;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Handles the Dank Fanny Pack keybind (Alt-D) on the client.
@@ -26,14 +26,14 @@ public final class DankFannyPackClientTickHandler {
         while (DankFannyPackClientEvents.OPEN_DANK_FANNY_PACK != null
                 && DankFannyPackClientEvents.OPEN_DANK_FANNY_PACK.consumeClick()) {
             OpenFannyPackPacket packet = findFannyPack(mc);
-            if (packet != null) PacketDistributor.sendToServer(packet);
+            if (packet != null) ClientPacketDistributor.sendToServer(packet);
         }
     }
 
     @Nullable
     private static OpenFannyPackPacket findFannyPack(Minecraft mc) {
         // Main inventory (slots 0-35)
-        var items = mc.player.getInventory().items;
+        var items = mc.player.getInventory().getNonEquipmentItems();
         for (int i = 0; i < items.size(); i++) {
             if (items.get(i).getItem() instanceof DankFannyPackItem) {
                 return new OpenFannyPackPacket(OpenFannyPackPacket.SLOT_INVENTORY, i, "");

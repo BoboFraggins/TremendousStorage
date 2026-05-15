@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.enderfolder;
 
-import java.util.List;
+import java.util.function.Consumer;
 import net.bobofraggins.tremendousstorage.glamping.dankfannypack.DankFannyPackItem;
 import net.bobofraggins.tremendousstorage.glamping.dankfannypack.FannyPackContents;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
@@ -10,8 +10,10 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 
 /**
  * An Ender Folder is a Manila Folder whose contents are shared globally across all items that
@@ -222,12 +224,17 @@ public class EnderFolderItem extends ManillaFolderItem {
     // -------------------------------------------------------------------------
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> lines, TooltipFlag flag) {
-        super.appendHoverText(stack, context, lines, flag);
+    public void appendHoverText(
+            ItemStack stack,
+            Item.TooltipContext context,
+            TooltipDisplay lines,
+            Consumer<Component> tooltipAdder,
+            TooltipFlag flag) {
+        super.appendHoverText(stack, context, lines, tooltipAdder, flag);
         long linkId = getLinkId(stack);
         if (linkId != -1L) {
             // Show a short hex suffix so players can visually confirm linking
-            lines.add(Component.translatable(
+            tooltipAdder.accept(Component.translatable(
                     "item.tremendousstorage.ender_folder.linked",
                     String.format("%016X", linkId).substring(12)));
         }

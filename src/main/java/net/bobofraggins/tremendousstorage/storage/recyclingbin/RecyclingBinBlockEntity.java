@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -24,6 +25,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
@@ -104,34 +107,25 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
     // -------------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.saveAdditional(tag, registries);
-        tag.putInt("Vibes", vibesAmount);
-        net.minecraft.nbt.CompoundTag transferTag = new net.minecraft.nbt.CompoundTag();
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.putInt("Vibes", vibesAmount);
+        ValueOutput xfer = output.child("Transfer");
         ItemStack in = transferContainer.getItem(0);
         ItemStack out = transferContainer.getItem(1);
-        if (!in.isEmpty()) transferTag.put("Input", in.save(registries));
-        if (!out.isEmpty()) transferTag.put("Output", out.save(registries));
-        tag.put("Transfer", transferTag);
+        if (!in.isEmpty()) xfer.store("Input", ItemStack.OPTIONAL_CODEC, in);
+        if (!out.isEmpty()) xfer.store("Output", ItemStack.OPTIONAL_CODEC, out);
     }
 
     @Override
-    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
-        super.loadAdditional(tag, registries);
-        vibesAmount = tag.getInt("Vibes");
-        if (tag.contains("Transfer")) {
-            net.minecraft.nbt.CompoundTag t = tag.getCompound("Transfer");
-            transferContainer.setItem(
-                    0,
-                    t.contains("Input")
-                            ? ItemStack.parseOptional(registries, t.getCompound("Input"))
-                            : ItemStack.EMPTY);
-            transferContainer.setItem(
-                    1,
-                    t.contains("Output")
-                            ? ItemStack.parseOptional(registries, t.getCompound("Output"))
-                            : ItemStack.EMPTY);
-        }
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        vibesAmount = input.getIntOr("Vibes", 0);
+        ValueInput xfer = input.childOrEmpty("Transfer");
+        transferContainer.setItem(
+                0, xfer.read("Input", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
+        transferContainer.setItem(
+                1, xfer.read("Output", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY));
     }
 
     // -------------------------------------------------------------------------
@@ -149,12 +143,12 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
     }
 
     @Override
-    protected void applyImplicitComponents(BlockEntity.DataComponentInput input) {
+    protected void applyImplicitComponents(DataComponentGetter input) {
         super.applyImplicitComponents(input);
         CustomData data = input.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data != null) {
             net.minecraft.nbt.CompoundTag tag = data.copyTag();
-            if (tag.contains("Vibes")) vibesAmount = tag.getInt("Vibes");
+            if (tag.contains("Vibes")) vibesAmount = tag.getIntOr("Vibes", 0);
         }
     }
 

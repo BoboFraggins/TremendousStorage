@@ -3,6 +3,8 @@ package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import java.util.ArrayList;
+import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -10,43 +12,42 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 import org.joml.Matrix4f;
 
 /**
  * Renders the Recycling Bin in four parts:
  * <ul>
- *   <li>Body — static baked model.
+ *   <li>Body — static model.
  *   <li>Lid — animates open (up to 90°) around the hinge at y=12/16, z=12/16.
  *   <li>Pedal — animates in sync (up to −22.5°) around x=12/16, y=1/16, z=4/16.
- *   <li>Fluid — single rectangular fill rendered like the Tank, using the Positive Vibes
- *       still texture. Always shown at a minimum of 1% to indicate the tank is present.
+ *   <li>Fluid — Positive Vibes fill rendered via vertex consumer.
  * </ul>
  */
 public class RecyclingBinRenderer
         implements BlockEntityRenderer<RecyclingBinBlockEntity>,
                 IBlockEntityRendererExtension<RecyclingBinBlockEntity> {
 
-    private static final ModelResourceLocation BODY_MODEL = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_body"), "standalone");
-    private static final ModelResourceLocation LID_MODEL = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_lid"), "standalone");
-    private static final ModelResourceLocation PEDAL_MODEL = new ModelResourceLocation(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_pedal"), "standalone");
+    static final StandaloneModelKey<BlockStateModel> BODY_MODEL_KEY =
+            new StandaloneModelKey<>(() -> "tremendousstorage:block/recycling_bin_body");
+    static final StandaloneModelKey<BlockStateModel> LID_MODEL_KEY =
+            new StandaloneModelKey<>(() -> "tremendousstorage:block/recycling_bin_lid");
+    static final StandaloneModelKey<BlockStateModel> PEDAL_MODEL_KEY =
+            new StandaloneModelKey<>(() -> "tremendousstorage:block/recycling_bin_pedal");
 
     // Lid hinge pivot — back-bottom edge of lid element [8,12,4]→[16,14,12]: y=12, z=12
     private static final float LID_PIVOT_Y = 12f / 16f;
@@ -75,12 +76,13 @@ public class RecyclingBinRenderer
             PoseStack poseStack,
             MultiBufferSource bufferSource,
             int packedLight,
-            int packedOverlay) {
+            int packedOverlay,
+            Vec3 cameraPos) {
 
         Minecraft mc = Minecraft.getInstance();
-        BakedModel bodyModel = mc.getModelManager().getModel(BODY_MODEL);
-        BakedModel lidModel = mc.getModelManager().getModel(LID_MODEL);
-        BakedModel pedalModel = mc.getModelManager().getModel(PEDAL_MODEL);
+        BlockStateModel bodyModel = mc.getModelManager().getStandaloneModel(BODY_MODEL_KEY);
+        BlockStateModel lidModel = mc.getModelManager().getStandaloneModel(LID_MODEL_KEY);
+        BlockStateModel pedalModel = mc.getModelManager().getStandaloneModel(PEDAL_MODEL_KEY);
         VertexConsumer solidConsumer = bufferSource.getBuffer(RenderType.cutout());
 
         Level level = be.getLevel();
@@ -98,7 +100,7 @@ public class RecyclingBinRenderer
         // Body
         poseStack.pushPose();
         applyFacingRotation(poseStack, yRot);
-        renderQuads(solidConsumer, poseStack.last(), bodyModel, blockState, level, packedLight, packedOverlay, random);
+        renderQuads(solidConsumer, poseStack.last(), bodyModel, level, packedLight, packedOverlay, random);
         poseStack.popPose();
 
         // Lid
@@ -107,7 +109,7 @@ public class RecyclingBinRenderer
         poseStack.translate(0.0, LID_PIVOT_Y, LID_PIVOT_Z);
         poseStack.mulPose(Axis.XP.rotationDegrees(openFraction * 90f));
         poseStack.translate(0.0, -LID_PIVOT_Y, -LID_PIVOT_Z);
-        renderQuads(solidConsumer, poseStack.last(), lidModel, blockState, level, packedLight, packedOverlay, random);
+        renderQuads(solidConsumer, poseStack.last(), lidModel, level, packedLight, packedOverlay, random);
         poseStack.popPose();
 
         // Pedal
@@ -116,7 +118,7 @@ public class RecyclingBinRenderer
         poseStack.translate(PEDAL_PIVOT_X, PEDAL_PIVOT_Y, PEDAL_PIVOT_Z);
         poseStack.mulPose(Axis.XP.rotationDegrees(openFraction * -22.5f));
         poseStack.translate(-PEDAL_PIVOT_X, -PEDAL_PIVOT_Y, -PEDAL_PIVOT_Z);
-        renderQuads(solidConsumer, poseStack.last(), pedalModel, blockState, level, packedLight, packedOverlay, random);
+        renderQuads(solidConsumer, poseStack.last(), pedalModel, level, packedLight, packedOverlay, random);
         poseStack.popPose();
 
         // Fluid fill — always rendered (minimum 1% so the tank area is always visible)
@@ -321,24 +323,26 @@ public class RecyclingBinRenderer
     private static void renderQuads(
             VertexConsumer consumer,
             PoseStack.Pose pose,
-            BakedModel model,
-            BlockState blockState,
+            BlockStateModel model,
             Level level,
             int packedLight,
             int packedOverlay,
             RandomSource random) {
-        for (Direction dir : Direction.values()) {
-            random.setSeed(42L);
-            for (var quad : model.getQuads(blockState, dir, random, ModelData.EMPTY, RenderType.cutout())) {
-                float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
+        List<BlockModelPart> parts = new ArrayList<>();
+        random.setSeed(42L);
+        model.collectParts(random, parts);
+        for (BlockModelPart part : parts) {
+            for (Direction dir : Direction.values()) {
+                for (var quad : part.getQuads(dir)) {
+                    float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
+                    consumer.putBulkData(pose, quad, shade, shade, shade, 1f, packedLight, packedOverlay);
+                }
+            }
+            for (var quad : part.getQuads(null)) {
+                Direction dir = quad.direction();
+                float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
                 consumer.putBulkData(pose, quad, shade, shade, shade, 1f, packedLight, packedOverlay);
             }
-        }
-        random.setSeed(42L);
-        for (var quad : model.getQuads(blockState, null, random, ModelData.EMPTY, RenderType.cutout())) {
-            Direction dir = quad.getDirection();
-            float shade = level != null ? level.getShade(dir, quad.isShade()) : 1f;
-            consumer.putBulkData(pose, quad, shade, shade, shade, 1f, packedLight, packedOverlay);
         }
     }
 
@@ -398,8 +402,8 @@ public class RecyclingBinRenderer
     }
 
     @Override
-    public boolean shouldRenderOffScreen(RecyclingBinBlockEntity be) {
-        return be.lidAngle > 0f || be.prevLidAngle > 0f;
+    public boolean shouldRenderOffScreen() {
+        return true;
     }
 
     @Override

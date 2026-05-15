@@ -29,7 +29,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * Screen for the Storage Access Terminal.
@@ -87,7 +87,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         this.imageHeight = dialog.totalHeight();
         configDrawer = new ConfigDrawer(new SortPane(networkPane::getSortMode, newMode -> {
             networkPane.setSortMode(newMode);
-            PacketDistributor.sendToServer(new SetSortModePacket(menu.getSatPos(), newMode));
+            ClientPacketDistributor.sendToServer(new SetSortModePacket(menu.getSatPos(), newMode));
         }));
     }
 
@@ -131,7 +131,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
                 16,
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack"),
                 ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack_focused"),
-                () -> PacketDistributor.sendToServer(new QuickStackPacket(menu.getNiPos(), true))));
+                () -> ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getNiPos(), true))));
 
         if (menu.hasCraftingUpgrade()) {
             // Up/down arrows above and below the crafting arrow for recipe cycling.
@@ -151,18 +151,18 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
                     btnW,
                     btnH,
                     true,
-                    () -> PacketDistributor.sendToServer(new CycleRecipePacket(menu.getSatPos(), -1))));
+                    () -> ClientPacketDistributor.sendToServer(new CycleRecipePacket(menu.getSatPos(), -1))));
             downArrow = addRenderableWidget(new CycleArrowButton(
                     btnX,
                     downBtnY,
                     btnW,
                     btnH,
                     false,
-                    () -> PacketDistributor.sendToServer(new CycleRecipePacket(menu.getSatPos(), +1))));
+                    () -> ClientPacketDistributor.sendToServer(new CycleRecipePacket(menu.getSatPos(), +1))));
         }
 
         if (menu.hasNetwork()) {
-            PacketDistributor.sendToServer(new RequestSatContentsPacket(menu.getNiPos()));
+            ClientPacketDistributor.sendToServer(new RequestSatContentsPacket(menu.getNiPos()));
         }
         SatContentsPacket.PENDING_STACKS = null;
         SatContentsPacket.PENDING_COUNTS = List.of();
@@ -202,7 +202,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     private void cycleSortMode() {
         SortMode next = networkPane.getSortMode().next();
         networkPane.setSortMode(next);
-        PacketDistributor.sendToServer(new SetSortModePacket(menu.getSatPos(), next));
+        ClientPacketDistributor.sendToServer(new SetSortModePacket(menu.getSatPos(), next));
     }
 
     @Override
@@ -218,7 +218,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         if (QuickStackClientEvents.QUICK_STACK != null
                 && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)
                 && menu.hasNetwork()) {
-            PacketDistributor.sendToServer(new QuickStackPacket(menu.getNiPos(), true));
+            ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getNiPos(), true));
             return true;
         }
         if (QuickStackClientEvents.CYCLE_SORT != null && QuickStackClientEvents.CYCLE_SORT.matches(keyCode, scanCode)) {
@@ -276,7 +276,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         int networkPaneAbsY = dialog.getPaneAbsY(0);
         ItemStack hovered = networkPane.getHoveredStack(mouseX - leftPos, mouseY - networkPaneAbsY);
         if (hovered != null) {
-            graphics.renderTooltip(font, hovered, mouseX, mouseY);
+            graphics.setTooltipForNextFrame(font, hovered, mouseX, mouseY);
         }
     }
 

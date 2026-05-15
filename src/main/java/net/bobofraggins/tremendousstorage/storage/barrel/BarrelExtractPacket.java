@@ -42,7 +42,7 @@ public record BarrelExtractPacket(BlockPos pos, boolean sneaking) implements Cus
     public static void handle(BarrelExtractPacket packet, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
-            Level level = player.serverLevel();
+            Level level = player.level();
             BlockState state = level.getBlockState(packet.pos());
             if (!(state.getBlock() instanceof BarrelBlock)) return;
             if (!(level.getBlockEntity(packet.pos()) instanceof BarrelBlockEntity be)) return;

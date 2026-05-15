@@ -214,7 +214,7 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
                     level.playSound(
                             null,
                             be.getBlockPos(),
-                            SoundEvents.ITEM_BREAK,
+                            SoundEvents.ITEM_BREAK.value(),
                             SoundSource.BLOCKS,
                             1.0f,
                             0.9f + level.random.nextFloat() * 0.2f);

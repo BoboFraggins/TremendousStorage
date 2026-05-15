@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -68,8 +68,8 @@ public class SortPane implements IDialogPane {
 
         ResourceLocation leftTex = isInButton(localMouseX, localMouseY, leftBtnX) ? BTN_LEFT_FOCUSED : BTN_LEFT;
         ResourceLocation rightTex = isInButton(localMouseX, localMouseY, rightBtnX) ? BTN_RIGHT_FOCUSED : BTN_RIGHT;
-        graphics.blit(RenderType::guiTextured, leftTex, leftBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
-        graphics.blit(RenderType::guiTextured, rightTex, rightBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, leftTex, leftBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, rightTex, rightBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
 
         graphics.fill(lblX, ROW_Y, lblX + LBL_W, ROW_Y + BTN_H, 0xFFC6C6C6);
 

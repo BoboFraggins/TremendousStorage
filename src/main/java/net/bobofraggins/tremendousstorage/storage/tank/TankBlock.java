@@ -13,6 +13,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -37,6 +38,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -118,10 +120,10 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
         if (be instanceof TankBlockEntity tank) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof BlockItem) {
-                    BlockItem.setBlockEntityData(
-                            drop,
-                            tank.getType(),
-                            tank.saveCustomOnly(params.getLevel().registryAccess()));
+                    TagValueOutput _beOut = TagValueOutput.createWithContext(
+                            ProblemReporter.DISCARDING, params.getLevel().registryAccess());
+                    tank.saveCustomOnly(_beOut);
+                    BlockItem.setBlockEntityData(drop, tank.getType(), _beOut);
                 }
             }
         }

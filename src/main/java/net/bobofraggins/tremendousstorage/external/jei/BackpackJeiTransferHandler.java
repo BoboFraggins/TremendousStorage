@@ -27,7 +27,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * JEI recipe transfer handler for Tremendous Backpack menus with a crafting upgrade.
@@ -85,7 +85,7 @@ class BackpackJeiTransferHandler<T extends BackpackMenu>
 
         // Build map of available items: player inventory + backpack contents
         Map<StorageKey, Long> available = new HashMap<>();
-        for (ItemStack stack : player.getInventory().items) {
+        for (ItemStack stack : player.getInventory().getNonEquipmentItems()) {
             if (stack.isEmpty()) continue;
             StorageKey key = StorageKey.of(stack);
             available.merge(key, (long) stack.getCount(), Long::sum);
@@ -142,7 +142,7 @@ class BackpackJeiTransferHandler<T extends BackpackMenu>
         }
 
         if (doTransfer) {
-            PacketDistributor.sendToServer(new BackpackFillCraftingGridPacket(
+            ClientPacketDistributor.sendToServer(new BackpackFillCraftingGridPacket(
                     menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), slotItems));
         }
 
