@@ -35,10 +35,10 @@ public class FilingCabinetRenderer
         implements BlockEntityRenderer<FilingCabinetBlockEntity>,
                 IBlockEntityRendererExtension<FilingCabinetBlockEntity> {
 
-    private static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_body"));
-    private static final ModelResourceLocation DRAWER_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_drawer"));
+    private static final ModelResourceLocation BODY_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_body"), "standalone");
+    private static final ModelResourceLocation DRAWER_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_drawer"), "standalone");
 
     /** Maximum drawer slide distance in block units. */
     private static final float DRAWER_SLIDE = 8f / 16f;

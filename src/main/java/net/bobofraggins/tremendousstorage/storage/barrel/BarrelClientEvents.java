@@ -2,7 +2,6 @@ package net.bobofraggins.tremendousstorage.storage.barrel;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -29,12 +28,12 @@ public final class BarrelClientEvents {
     public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
         for (StorageTier tier : StorageTier.values()) {
             String id = tier.getId();
-            event.register(ModelResourceLocation.standalone(
-                    ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/barrels/barrel_body_" + id)));
-            event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(
-                    "tremendousstorage", "block/ender_barrels/ender_barrel_body_" + id)));
-            event.register(ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(
-                    "tremendousstorage", "block/barrels_compacting/barrel_body_" + id)));
+            event.register(
+                    ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/barrels/barrel_body_" + id));
+            event.register(ResourceLocation.fromNamespaceAndPath(
+                    "tremendousstorage", "block/ender_barrels/ender_barrel_body_" + id));
+            event.register(ResourceLocation.fromNamespaceAndPath(
+                    "tremendousstorage", "block/barrels_compacting/barrel_body_" + id));
         }
     }
 

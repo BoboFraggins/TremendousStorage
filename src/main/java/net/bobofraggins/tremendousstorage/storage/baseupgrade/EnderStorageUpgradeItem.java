@@ -90,7 +90,7 @@ public class EnderStorageUpgradeItem extends BaseUpgradeItem {
             }
         }
 
-        return InteractionResult.sidedSuccess(level.isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     // -------------------------------------------------------------------------

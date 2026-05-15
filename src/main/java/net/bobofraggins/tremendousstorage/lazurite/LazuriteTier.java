@@ -1,45 +1,22 @@
 package net.bobofraggins.tremendousstorage.lazurite;
 
-import net.bobofraggins.tremendousstorage.TremendousStorage;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ToolMaterial;
 
-public enum LazuriteTier implements Tier {
-    INSTANCE,
-    PAXEL;
+public final class LazuriteTier {
 
-    @Override
-    public int getUses() {
-        return this == PAXEL ? 2048 : 1024;
-    }
+    private LazuriteTier() {}
 
-    @Override
-    public float getSpeed() {
-        return 4.0f;
-    }
+    public static final TagKey<Item> LAZURITE_MATERIALS = TagKey.create(
+            Registries.ITEM, ResourceLocation.fromNamespaceAndPath("tremendousstorage", "lazurite_tool_materials"));
 
-    @Override
-    public float getAttackDamageBonus() {
-        return 4.0f;
-    }
+    public static final ToolMaterial INSTANCE =
+            new ToolMaterial(BlockTags.INCORRECT_FOR_IRON_TOOL, 1024, 4.0f, 4.0f, 14, LAZURITE_MATERIALS);
 
-    @Override
-    public TagKey<Block> getIncorrectBlocksForDrops() {
-        return BlockTags.create(
-                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "incorrect_for_lazurite_tool"));
-    }
-
-    @Override
-    public int getEnchantmentValue() {
-        return 14;
-    }
-
-    @Override
-    public Ingredient getRepairIngredient() {
-        return Ingredient.of(net.bobofraggins.tremendousstorage.shared.register.Registration.LAZURITE_INGOT.get());
-    }
+    public static final ToolMaterial PAXEL =
+            new ToolMaterial(BlockTags.INCORRECT_FOR_IRON_TOOL, 2048, 4.0f, 4.0f, 14, LAZURITE_MATERIALS);
 }

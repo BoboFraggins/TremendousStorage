@@ -2,11 +2,11 @@ package net.bobofraggins.tremendousstorage.storage.networkinterface;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalScreen;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
+import net.neoforged.neoforge.client.event.RegisterSpecialModelRendererEvent;
 
 /** Client-only event subscriber for Network Interface rendering and screen registration. */
 public final class NetworkInterfaceClientEvents {
@@ -19,14 +19,10 @@ public final class NetworkInterfaceClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRegisterClientExtensions(RegisterClientExtensionsEvent event) {
-        IClientItemExtensions extensions = new IClientItemExtensions() {
-            @Override
-            public net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                return NetworkInterfaceItemRenderer.getInstance();
-            }
-        };
-        event.registerItem(extensions, Registration.NETWORK_INTERFACE_ITEM.get());
+    public static void onRegisterSpecialModelRenderers(RegisterSpecialModelRendererEvent event) {
+        event.register(
+                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "network_interface_renderer"),
+                NetworkInterfaceItemRenderer.Unbaked.MAP_CODEC);
     }
 
     @SubscribeEvent

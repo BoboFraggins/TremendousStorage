@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.shared.register;
 
-import com.blakebr0.mysticalagriculture.api.MysticalAgricultureAPI;
+// import com.blakebr0.mysticalagriculture.api.MysticalAgricultureAPI; // disabled - not available on 1.21.4
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.experiencesyringe.ExperienceSyringeItem;
 import net.bobofraggins.tremendousstorage.external.exdeorum.ExDeorumIntegration;
@@ -135,7 +135,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.inventory.MenuType;
@@ -149,8 +148,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.ShovelItem;
 import net.minecraft.world.item.SwordItem;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -344,9 +343,8 @@ public final class Registration {
             ITEMS.register("armory_cabinet", () -> new ArmoryCabinetItem(ARMORY_CABINET.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ArmoryCabinetBlockEntity>>
-            ARMORY_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register("armory_cabinet", () -> BlockEntityType.Builder.of(
-                    ArmoryCabinetBlockEntity::new, ARMORY_CABINET.get())
-            .build(null));
+            ARMORY_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "armory_cabinet", () -> new BlockEntityType<>(ArmoryCabinetBlockEntity::new, ARMORY_CABINET.get()));
 
     public static final DeferredBlock<FilingCabinetBlock> FILING_CABINET = BLOCKS.register(
             "filing_cabinet",
@@ -359,9 +357,8 @@ public final class Registration {
             ITEMS.register("filing_cabinet", () -> new TieredBlockItem(FILING_CABINET.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FilingCabinetBlockEntity>>
-            FILING_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register("filing_cabinet", () -> BlockEntityType.Builder.of(
-                    FilingCabinetBlockEntity::new, FILING_CABINET.get())
-            .build(null));
+            FILING_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "filing_cabinet", () -> new BlockEntityType<>(FilingCabinetBlockEntity::new, FILING_CABINET.get()));
 
     public static final DeferredBlock<ChestBlock> TREMENDOUS_CHEST = BLOCKS.register(
             "chest",
@@ -376,8 +373,7 @@ public final class Registration {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ChestBlockEntity>> TREMENDOUS_CHEST_BE_TYPE =
             BLOCK_ENTITY_TYPES.register(
-                    "chest", () -> BlockEntityType.Builder.of(ChestBlockEntity::new, TREMENDOUS_CHEST.get())
-                            .build(null));
+                    "chest", () -> new BlockEntityType<>(ChestBlockEntity::new, TREMENDOUS_CHEST.get()));
 
     public static final DeferredBlock<EnderChestBlock> ENDER_TREMENDOUS_CHEST = BLOCKS.register(
             "ender_chest",
@@ -391,10 +387,9 @@ public final class Registration {
             "ender_chest", () -> new EnderChestItem(ENDER_TREMENDOUS_CHEST.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderChestBlockEntity>>
-            ENDER_TREMENDOUS_CHEST_BE_TYPE =
-                    BLOCK_ENTITY_TYPES.register("ender_chest", () -> BlockEntityType.Builder.of(
-                                    EnderChestBlockEntity::new, ENDER_TREMENDOUS_CHEST.get())
-                            .build(null));
+            ENDER_TREMENDOUS_CHEST_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "ender_chest",
+                    () -> new BlockEntityType<>(EnderChestBlockEntity::new, ENDER_TREMENDOUS_CHEST.get()));
 
     public static final DeferredBlock<BackpackBlock> TREMENDOUS_BACKPACK_BLOCK = BLOCKS.register(
             "backpack",
@@ -404,9 +399,8 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BackpackBlockEntity>>
-            TREMENDOUS_BACKPACK_BE_TYPE = BLOCK_ENTITY_TYPES.register("backpack", () -> BlockEntityType.Builder.of(
-                    BackpackBlockEntity::new, TREMENDOUS_BACKPACK_BLOCK.get())
-            .build(null));
+            TREMENDOUS_BACKPACK_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "backpack", () -> new BlockEntityType<>(BackpackBlockEntity::new, TREMENDOUS_BACKPACK_BLOCK.get()));
 
     public static final DeferredBlock<EnderBackpackBlock> ENDER_TREMENDOUS_BACKPACK_BLOCK = BLOCKS.register(
             "ender_backpack",
@@ -416,10 +410,9 @@ public final class Registration {
                     .noOcclusion()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderBackpackBlockEntity>>
-            ENDER_TREMENDOUS_BACKPACK_BE_TYPE =
-                    BLOCK_ENTITY_TYPES.register("ender_backpack", () -> BlockEntityType.Builder.of(
-                                    EnderBackpackBlockEntity::new, ENDER_TREMENDOUS_BACKPACK_BLOCK.get())
-                            .build(null));
+            ENDER_TREMENDOUS_BACKPACK_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "ender_backpack",
+                    () -> new BlockEntityType<>(EnderBackpackBlockEntity::new, ENDER_TREMENDOUS_BACKPACK_BLOCK.get()));
 
     public static final DeferredBlock<net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlock>
             PICNIC_BASKET_BLOCK = BLOCKS.register(
@@ -433,10 +426,11 @@ public final class Registration {
     public static final DeferredHolder<
                     BlockEntityType<?>,
                     BlockEntityType<net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockEntity>>
-            PICNIC_BASKET_BE_TYPE = BLOCK_ENTITY_TYPES.register("picnic_basket", () -> BlockEntityType.Builder.of(
-                    net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockEntity::new,
-                    PICNIC_BASKET_BLOCK.get())
-            .build(null));
+            PICNIC_BASKET_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "picnic_basket",
+                    () -> new BlockEntityType<>(
+                            net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockEntity::new,
+                            PICNIC_BASKET_BLOCK.get()));
 
     // -------------------------------------------------------------------------
     // Barrel block + block entity
@@ -453,8 +447,7 @@ public final class Registration {
             ITEMS.register("barrel", () -> new BarrelItem(BARREL.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BarrelBlockEntity>> BARREL_BE_TYPE =
-            BLOCK_ENTITY_TYPES.register("barrel", () -> BlockEntityType.Builder.of(BarrelBlockEntity::new, BARREL.get())
-                    .build(null));
+            BLOCK_ENTITY_TYPES.register("barrel", () -> new BlockEntityType<>(BarrelBlockEntity::new, BARREL.get()));
 
     public static final DeferredBlock<EnderBarrelBlock> ENDER_BARREL = BLOCKS.register(
             "ender_barrel",
@@ -468,8 +461,7 @@ public final class Registration {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderBarrelBlockEntity>>
             ENDER_BARREL_BE_TYPE = BLOCK_ENTITY_TYPES.register(
-                    "ender_barrel", () -> BlockEntityType.Builder.of(EnderBarrelBlockEntity::new, ENDER_BARREL.get())
-                            .build(null));
+                    "ender_barrel", () -> new BlockEntityType<>(EnderBarrelBlockEntity::new, ENDER_BARREL.get()));
 
     // -------------------------------------------------------------------------
     // Storage upgrade items
@@ -528,8 +520,7 @@ public final class Registration {
             ITEMS.register("tank", () -> new TankItem(TANK.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TankBlockEntity>> TANK_BE_TYPE =
-            BLOCK_ENTITY_TYPES.register("tank", () -> BlockEntityType.Builder.of(TankBlockEntity::new, TANK.get())
-                    .build(null));
+            BLOCK_ENTITY_TYPES.register("tank", () -> new BlockEntityType<>(TankBlockEntity::new, TANK.get()));
 
     public static final DeferredBlock<EnderTankBlock> ENDER_TANK = BLOCKS.register(
             "ender_tank",
@@ -544,8 +535,7 @@ public final class Registration {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderTankBlockEntity>> ENDER_TANK_BE_TYPE =
             BLOCK_ENTITY_TYPES.register(
-                    "ender_tank", () -> BlockEntityType.Builder.of(EnderTankBlockEntity::new, ENDER_TANK.get())
-                            .build(null));
+                    "ender_tank", () -> new BlockEntityType<>(EnderTankBlockEntity::new, ENDER_TANK.get()));
 
     // -------------------------------------------------------------------------
     // Recycling Bin
@@ -564,8 +554,7 @@ public final class Registration {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RecyclingBinBlockEntity>>
             RECYCLING_BIN_BE_TYPE = BLOCK_ENTITY_TYPES.register(
-                    "recycling_bin", () -> BlockEntityType.Builder.of(RecyclingBinBlockEntity::new, RECYCLING_BIN.get())
-                            .build(null));
+                    "recycling_bin", () -> new BlockEntityType<>(RecyclingBinBlockEntity::new, RECYCLING_BIN.get()));
 
     // -------------------------------------------------------------------------
     // Lazurite bars
@@ -642,35 +631,19 @@ public final class Registration {
     // -------------------------------------------------------------------------
 
     public static final DeferredHolder<Item, PickaxeItem> LAZURITE_PICKAXE = ITEMS.register(
-            "lazurite_pickaxe",
-            () -> new PickaxeItem(
-                    LazuriteTier.INSTANCE,
-                    new Item.Properties()
-                            .attributes(PickaxeItem.createAttributes(LazuriteTier.INSTANCE, 1.0f, -2.8f))));
+            "lazurite_pickaxe", () -> new PickaxeItem(LazuriteTier.INSTANCE, 1.0f, -2.8f, new Item.Properties()));
 
     public static final DeferredHolder<Item, AxeItem> LAZURITE_AXE = ITEMS.register(
-            "lazurite_axe",
-            () -> new AxeItem(
-                    LazuriteTier.INSTANCE,
-                    new Item.Properties().attributes(AxeItem.createAttributes(LazuriteTier.INSTANCE, 4.0f, -3.3f))));
+            "lazurite_axe", () -> new AxeItem(LazuriteTier.INSTANCE, 4.0f, -3.3f, new Item.Properties()));
 
     public static final DeferredHolder<Item, ShovelItem> LAZURITE_SHOVEL = ITEMS.register(
-            "lazurite_shovel",
-            () -> new ShovelItem(
-                    LazuriteTier.INSTANCE,
-                    new Item.Properties().attributes(ShovelItem.createAttributes(LazuriteTier.INSTANCE, 1.5f, -3.0f))));
+            "lazurite_shovel", () -> new ShovelItem(LazuriteTier.INSTANCE, 1.5f, -3.0f, new Item.Properties()));
 
     public static final DeferredHolder<Item, SwordItem> LAZURITE_SWORD = ITEMS.register(
-            "lazurite_sword",
-            () -> new SwordItem(
-                    LazuriteTier.INSTANCE,
-                    new Item.Properties().attributes(SwordItem.createAttributes(LazuriteTier.INSTANCE, 3, -2.4f))));
+            "lazurite_sword", () -> new SwordItem(LazuriteTier.INSTANCE, 3.0f, -2.4f, new Item.Properties()));
 
     public static final DeferredHolder<Item, HoeItem> LAZURITE_HOE = ITEMS.register(
-            "lazurite_hoe",
-            () -> new HoeItem(
-                    LazuriteTier.INSTANCE,
-                    new Item.Properties().attributes(HoeItem.createAttributes(LazuriteTier.INSTANCE, -2.0f, -1.0f))));
+            "lazurite_hoe", () -> new HoeItem(LazuriteTier.INSTANCE, -2.0f, -1.0f, new Item.Properties()));
 
     public static final DeferredHolder<Item, LazuritePaxelItem> LAZURITE_PAXEL =
             ITEMS.register("lazurite_paxel", () -> new LazuritePaxelItem(new Item.Properties()));
@@ -833,10 +806,9 @@ public final class Registration {
                     ENDER_PICNIC_BASKET_BLOCK.get(), "item.tremendousstorage.ender_picnic_basket.tooltip"));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderPicnicBasketBlockEntity>>
-            ENDER_PICNIC_BASKET_BE_TYPE =
-                    BLOCK_ENTITY_TYPES.register("ender_picnic_basket", () -> BlockEntityType.Builder.of(
-                                    EnderPicnicBasketBlockEntity::new, ENDER_PICNIC_BASKET_BLOCK.get())
-                            .build(null));
+            ENDER_PICNIC_BASKET_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "ender_picnic_basket",
+                    () -> new BlockEntityType<>(EnderPicnicBasketBlockEntity::new, ENDER_PICNIC_BASKET_BLOCK.get()));
 
     // -------------------------------------------------------------------------
     // Dank Fanny Pack
@@ -919,9 +891,9 @@ public final class Registration {
             "stirling_engine", () -> new TieredBlockItem(STIRLING_ENGINE.get(), new Item.Properties().fireResistant()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StirlingEngineBlockEntity>>
-            STIRLING_ENGINE_BE_TYPE = BLOCK_ENTITY_TYPES.register("stirling_engine", () -> BlockEntityType.Builder.of(
-                    StirlingEngineBlockEntity::new, STIRLING_ENGINE.get())
-            .build(null));
+            STIRLING_ENGINE_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "stirling_engine",
+                    () -> new BlockEntityType<>(StirlingEngineBlockEntity::new, STIRLING_ENGINE.get()));
 
     // -------------------------------------------------------------------------
     // Network Interface block + block entity
@@ -940,10 +912,9 @@ public final class Registration {
             "network_interface", () -> new TieredBlockItem(NETWORK_INTERFACE.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<NetworkInterfaceBlockEntity>>
-            NETWORK_INTERFACE_BE_TYPE =
-                    BLOCK_ENTITY_TYPES.register("network_interface", () -> BlockEntityType.Builder.of(
-                                    NetworkInterfaceBlockEntity::new, NETWORK_INTERFACE.get())
-                            .build(null));
+            NETWORK_INTERFACE_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "network_interface",
+                    () -> new BlockEntityType<>(NetworkInterfaceBlockEntity::new, NETWORK_INTERFACE.get()));
 
     // -------------------------------------------------------------------------
     // Storage Access Terminal block
@@ -961,10 +932,9 @@ public final class Registration {
             "storage_access_terminal", () -> new TieredBlockItem(STORAGE_ACCESS_TERMINAL.get(), new Item.Properties()));
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<AccessTerminalBlockEntity>>
-            STORAGE_ACCESS_TERMINAL_BE_TYPE =
-                    BLOCK_ENTITY_TYPES.register("storage_access_terminal", () -> BlockEntityType.Builder.of(
-                                    AccessTerminalBlockEntity::new, STORAGE_ACCESS_TERMINAL.get())
-                            .build(null));
+            STORAGE_ACCESS_TERMINAL_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "storage_access_terminal",
+                    () -> new BlockEntityType<>(AccessTerminalBlockEntity::new, STORAGE_ACCESS_TERMINAL.get()));
 
     // -------------------------------------------------------------------------
     // Wireless Hub block + block entity
@@ -984,8 +954,7 @@ public final class Registration {
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WirelessHubBlockEntity>>
             WIRELESS_HUB_BE_TYPE = BLOCK_ENTITY_TYPES.register(
-                    "wireless_hub", () -> BlockEntityType.Builder.of(WirelessHubBlockEntity::new, WIRELESS_HUB.get())
-                            .build(null));
+                    "wireless_hub", () -> new BlockEntityType<>(WirelessHubBlockEntity::new, WIRELESS_HUB.get()));
 
     // -------------------------------------------------------------------------
     // Wireless SAT item
@@ -1009,8 +978,7 @@ public final class Registration {
     public static final DeferredHolder<Item, BlockItem> TUBE_ITEM = ITEMS.registerSimpleBlockItem("tube", TUBE);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TubeBlockEntity>> TUBE_BE_TYPE =
-            BLOCK_ENTITY_TYPES.register("tube", () -> BlockEntityType.Builder.of(TubeBlockEntity::new, TUBE.get())
-                    .build(null));
+            BLOCK_ENTITY_TYPES.register("tube", () -> new BlockEntityType<>(TubeBlockEntity::new, TUBE.get()));
 
     // -------------------------------------------------------------------------
     // Menu types
@@ -1135,24 +1103,94 @@ public final class Registration {
     // -------------------------------------------------------------------------
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderStorageRecipe>>
-            FOLDER_STORAGE_RECIPE = RECIPE_SERIALIZERS.register(
-                    "folder_storage", () -> new SimpleCraftingRecipeSerializer<>(FolderStorageRecipe::new));
+            FOLDER_STORAGE_RECIPE = RECIPE_SERIALIZERS.register("folder_storage", () -> new RecipeSerializer<>() {
+        @Override
+        public com.mojang.serialization.MapCodec<FolderStorageRecipe> codec() {
+            return CraftingBookCategory.CODEC
+                    .xmap(FolderStorageRecipe::new, FolderStorageRecipe::category)
+                    .fieldOf("category");
+        }
+
+        @Override
+        public net.minecraft.network.codec.StreamCodec<
+                        net.minecraft.network.RegistryFriendlyByteBuf, FolderStorageRecipe>
+                streamCodec() {
+            return net.minecraft.network.codec.StreamCodec.composite(
+                    CraftingBookCategory.STREAM_CODEC, FolderStorageRecipe::category, FolderStorageRecipe::new);
+        }
+    });
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderExtractRecipe>>
-            FOLDER_EXTRACT_RECIPE = RECIPE_SERIALIZERS.register(
-                    "folder_extract", () -> new SimpleCraftingRecipeSerializer<>(FolderExtractRecipe::new));
+            FOLDER_EXTRACT_RECIPE = RECIPE_SERIALIZERS.register("folder_extract", () -> new RecipeSerializer<>() {
+        @Override
+        public com.mojang.serialization.MapCodec<FolderExtractRecipe> codec() {
+            return CraftingBookCategory.CODEC
+                    .xmap(FolderExtractRecipe::new, FolderExtractRecipe::category)
+                    .fieldOf("category");
+        }
+
+        @Override
+        public net.minecraft.network.codec.StreamCodec<
+                        net.minecraft.network.RegistryFriendlyByteBuf, FolderExtractRecipe>
+                streamCodec() {
+            return net.minecraft.network.codec.StreamCodec.composite(
+                    CraftingBookCategory.STREAM_CODEC, FolderExtractRecipe::category, FolderExtractRecipe::new);
+        }
+    });
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderMergeRecipe>> FOLDER_MERGE_RECIPE =
-            RECIPE_SERIALIZERS.register(
-                    "folder_merge", () -> new SimpleCraftingRecipeSerializer<>(FolderMergeRecipe::new));
+            RECIPE_SERIALIZERS.register("folder_merge", () -> new RecipeSerializer<>() {
+                @Override
+                public com.mojang.serialization.MapCodec<FolderMergeRecipe> codec() {
+                    return CraftingBookCategory.CODEC
+                            .xmap(FolderMergeRecipe::new, FolderMergeRecipe::category)
+                            .fieldOf("category");
+                }
+
+                @Override
+                public net.minecraft.network.codec.StreamCodec<
+                                net.minecraft.network.RegistryFriendlyByteBuf, FolderMergeRecipe>
+                        streamCodec() {
+                    return net.minecraft.network.codec.StreamCodec.composite(
+                            CraftingBookCategory.STREAM_CODEC, FolderMergeRecipe::category, FolderMergeRecipe::new);
+                }
+            });
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderTapeRecipe>> FOLDER_TAPE_RECIPE =
-            RECIPE_SERIALIZERS.register(
-                    "folder_tape", () -> new SimpleCraftingRecipeSerializer<>(FolderTapeRecipe::new));
+            RECIPE_SERIALIZERS.register("folder_tape", () -> new RecipeSerializer<>() {
+                @Override
+                public com.mojang.serialization.MapCodec<FolderTapeRecipe> codec() {
+                    return CraftingBookCategory.CODEC
+                            .xmap(FolderTapeRecipe::new, FolderTapeRecipe::category)
+                            .fieldOf("category");
+                }
+
+                @Override
+                public net.minecraft.network.codec.StreamCodec<
+                                net.minecraft.network.RegistryFriendlyByteBuf, FolderTapeRecipe>
+                        streamCodec() {
+                    return net.minecraft.network.codec.StreamCodec.composite(
+                            CraftingBookCategory.STREAM_CODEC, FolderTapeRecipe::category, FolderTapeRecipe::new);
+                }
+            });
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<LazuriteRepairRecipe>>
-            LAZURITE_REPAIR_RECIPE = RECIPE_SERIALIZERS.register(
-                    "lazurite_repair", () -> new SimpleCraftingRecipeSerializer<>(LazuriteRepairRecipe::new));
+            LAZURITE_REPAIR_RECIPE = RECIPE_SERIALIZERS.register("lazurite_repair", () -> new RecipeSerializer<>() {
+        @Override
+        public com.mojang.serialization.MapCodec<LazuriteRepairRecipe> codec() {
+            return CraftingBookCategory.CODEC
+                    .xmap(LazuriteRepairRecipe::new, LazuriteRepairRecipe::category)
+                    .fieldOf("category");
+        }
+
+        @Override
+        public net.minecraft.network.codec.StreamCodec<
+                        net.minecraft.network.RegistryFriendlyByteBuf, LazuriteRepairRecipe>
+                streamCodec() {
+            return net.minecraft.network.codec.StreamCodec.composite(
+                    CraftingBookCategory.STREAM_CODEC, LazuriteRepairRecipe::category, LazuriteRepairRecipe::new);
+        }
+    });
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderChestCraftingRecipe>>
             ENDER_CHEST_CRAFTING_RECIPE =
@@ -1362,15 +1400,16 @@ public final class Registration {
                         output.accept(VEX_REPELLENT_POTION_EXTENDED.get());
                         output.accept(VEX_REPELLENT_POTION_LONG.get());
 
-                        if (ModList.get().isLoaded("mysticalagriculture")) {
-                            var lazurite = MysticalAgricultureAPI.getCropRegistry()
-                                    .getCropById(
-                                            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "lazurite"));
-                            if (lazurite != null) {
-                                output.accept(lazurite.getSeedsItem());
-                                output.accept(lazurite.getEssenceItem());
-                            }
-                        }
+                        // if (ModList.get().isLoaded("mysticalagriculture")) { // disabled - not available on 1.21.4
+                        //     var lazurite = MysticalAgricultureAPI.getCropRegistry()
+                        //             .getCropById(
+                        //                     ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID,
+                        // "lazurite"));
+                        //     if (lazurite != null) {
+                        //         output.accept(lazurite.getSeedsItem());
+                        //         output.accept(lazurite.getEssenceItem());
+                        //     }
+                        // }
                     })
                     .build());
 

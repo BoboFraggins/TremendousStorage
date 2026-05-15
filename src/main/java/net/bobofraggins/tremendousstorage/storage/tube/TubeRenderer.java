@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
@@ -112,7 +111,9 @@ public class TubeRenderer
         int g = (argb >> 8) & 0xFF;
         int b = argb & 0xFF;
 
-        var atlas = Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS);
+        var atlas = Minecraft.getInstance()
+                .getModelManager()
+                .getAtlas(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS);
         TextureAtlasSprite sprite = atlas.getSprite(TUBE_TEXTURE);
         TextureAtlasSprite tubeFace0 = atlas.getSprite(TUBE_FACE_0);
         TextureAtlasSprite tubeFace1 = atlas.getSprite(TUBE_FACE_1);

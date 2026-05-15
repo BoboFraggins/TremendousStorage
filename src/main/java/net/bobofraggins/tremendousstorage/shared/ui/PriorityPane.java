@@ -5,6 +5,7 @@ import java.util.function.IntSupplier;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -83,8 +84,8 @@ public class PriorityPane implements IDialogPane {
         ResourceLocation upTex = !canUp
                 ? BTN_RIGHT_DISABLED
                 : (isInButton(localMouseX, localMouseY, upBtnX) ? BTN_RIGHT_FOCUSED : BTN_RIGHT);
-        graphics.blit(downTex, downBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
-        graphics.blit(upTex, upBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
+        graphics.blit(RenderType::guiTextured, downTex, downBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
+        graphics.blit(RenderType::guiTextured, upTex, upBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
 
         // Label box (no border)
         graphics.fill(lblX, ROW_Y, lblX + LBL_W, ROW_Y + BTN_H, 0xFFC6C6C6);

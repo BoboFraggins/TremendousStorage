@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -27,7 +28,8 @@ public class PressableIconButton extends AbstractWidget {
 
     @Override
     protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        graphics.blitSprite(pressing ? pressedSprite : normalSprite, getX(), getY(), width, height);
+        graphics.blitSprite(
+                RenderType::guiTextured, pressing ? pressedSprite : normalSprite, getX(), getY(), width, height);
     }
 
     @Override

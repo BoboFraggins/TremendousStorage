@@ -2,8 +2,10 @@ package net.bobofraggins.tremendousstorage.power.stirlingengine;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
@@ -13,6 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
@@ -36,7 +39,7 @@ public class StirlingEngineBlock extends BaseEntityBlock implements NetworkConne
             Level level,
             BlockPos pos,
             Block neighborBlock,
-            BlockPos neighborPos,
+            @Nullable Orientation orientation,
             boolean movedByPiston) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof StirlingEngineBlockEntity be) {
             be.setChanged();
@@ -49,7 +52,10 @@ public class StirlingEngineBlock extends BaseEntityBlock implements NetworkConne
         if (params.getOptionalParameter(LootContextParams.BLOCK_ENTITY) instanceof StirlingEngineBlockEntity engine) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof net.minecraft.world.item.BlockItem) {
-                    engine.saveToItem(drop, params.getLevel().registryAccess());
+                    BlockItem.setBlockEntityData(
+                            drop,
+                            engine.getType(),
+                            engine.saveCustomOnly(params.getLevel().registryAccess()));
                 }
             }
         }
@@ -63,7 +69,7 @@ public class StirlingEngineBlock extends BaseEntityBlock implements NetworkConne
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return RenderShape.MODEL;
     }
 
     @Override

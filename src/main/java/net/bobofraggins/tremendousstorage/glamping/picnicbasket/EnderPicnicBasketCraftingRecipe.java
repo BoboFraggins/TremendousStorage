@@ -11,6 +11,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
 /**
@@ -59,12 +60,12 @@ public class EnderPicnicBasketCraftingRecipe extends AbstractEnderCraftingRecipe
     }
 
     @Override
-    public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider registries) {
-        return new ItemStack(Registration.ENDER_PICNIC_BASKET_ITEM.get());
+    public RecipeSerializer<? extends CraftingRecipe> getSerializer() {
+        return net.bobofraggins.tremendousstorage.shared.register.Registration.ENDER_PICNIC_BASKET_CRAFTING_RECIPE
+                .get();
     }
 
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-        return Registration.ENDER_PICNIC_BASKET_CRAFTING_RECIPE.get();
+    public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider registries) {
+        return new ItemStack(Registration.ENDER_PICNIC_BASKET_ITEM.get());
     }
 }

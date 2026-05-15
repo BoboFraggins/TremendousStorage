@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 import java.util.List;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 
 /**
@@ -134,23 +135,62 @@ public class ConfigDrawer {
         graphics.fill(drawerX + CORNER, drawerTop + CORNER, dialogX + 1, drawerTop + drawerH - CORNER, COLOR_BODY);
 
         // Top-left corner + top edge
-        graphics.blit(TEX_CORNER_TL, drawerX, drawerTop, 0, 0, CORNER, CORNER, CORNER, CORNER);
+        graphics.blit(RenderType::guiTextured, TEX_CORNER_TL, drawerX, drawerTop, 0, 0, CORNER, CORNER, CORNER, CORNER);
         int edgeW = WIDTH + TAB_W - CORNER;
         for (int px = 0; px < edgeW; px++) {
-            graphics.blit(TEX_EDGE_TOP, drawerX + CORNER + px, drawerTop, 0, 0, 1, CORNER, 1, CORNER);
+            graphics.blit(
+                    RenderType::guiTextured,
+                    TEX_EDGE_TOP,
+                    drawerX + CORNER + px,
+                    drawerTop,
+                    0,
+                    0,
+                    1,
+                    CORNER,
+                    1,
+                    CORNER);
         }
 
         // Left edge
         int midH = drawerH - 2 * CORNER;
         for (int py = 0; py < midH; py++) {
-            graphics.blit(TEX_EDGE_LEFT, drawerX, drawerTop + CORNER + py, 0, 0, CORNER, 1, CORNER, 1);
+            graphics.blit(
+                    RenderType::guiTextured,
+                    TEX_EDGE_LEFT,
+                    drawerX,
+                    drawerTop + CORNER + py,
+                    0,
+                    0,
+                    CORNER,
+                    1,
+                    CORNER,
+                    1);
         }
 
         // Bottom-left corner + bottom edge
-        graphics.blit(TEX_CORNER_BL, drawerX, drawerTop + drawerH - CORNER, 0, 0, CORNER, CORNER, CORNER, CORNER);
+        graphics.blit(
+                RenderType::guiTextured,
+                TEX_CORNER_BL,
+                drawerX,
+                drawerTop + drawerH - CORNER,
+                0,
+                0,
+                CORNER,
+                CORNER,
+                CORNER,
+                CORNER);
         for (int px = 0; px < edgeW; px++) {
             graphics.blit(
-                    TEX_EDGE_BOTTOM, drawerX + CORNER + px, drawerTop + drawerH - CORNER, 0, 0, 1, CORNER, 1, CORNER);
+                    RenderType::guiTextured,
+                    TEX_EDGE_BOTTOM,
+                    drawerX + CORNER + px,
+                    drawerTop + drawerH - CORNER,
+                    0,
+                    0,
+                    1,
+                    CORNER,
+                    1,
+                    CORNER);
         }
 
         // Pane content — offset by top inset
@@ -186,30 +226,51 @@ public class ConfigDrawer {
         graphics.fill(tabX + CORNER, tabY + CORNER, tabX + TAB_W + 1, tabY + TAB_H - CORNER, COLOR_BODY);
 
         // Top-left corner
-        graphics.blit(TEX_CORNER_TL, tabX, tabY, 0, 0, CORNER, CORNER, CORNER, CORNER);
+        graphics.blit(RenderType::guiTextured, TEX_CORNER_TL, tabX, tabY, 0, 0, CORNER, CORNER, CORNER, CORNER);
 
         // Top edge
         for (int px = 0; px < TAB_W - CORNER + 1; px++) {
-            graphics.blit(TEX_EDGE_TOP, tabX + CORNER + px, tabY, 0, 0, 1, CORNER, 1, CORNER);
+            graphics.blit(RenderType::guiTextured, TEX_EDGE_TOP, tabX + CORNER + px, tabY, 0, 0, 1, CORNER, 1, CORNER);
         }
 
         // Left edge
         for (int py = 0; py < midH; py++) {
-            graphics.blit(TEX_EDGE_LEFT, tabX, tabY + CORNER + py, 0, 0, CORNER, 1, CORNER, 1);
+            graphics.blit(RenderType::guiTextured, TEX_EDGE_LEFT, tabX, tabY + CORNER + py, 0, 0, CORNER, 1, CORNER, 1);
         }
 
         // Bottom-left corner
-        graphics.blit(TEX_CORNER_BL, tabX, tabY + TAB_H - CORNER, 0, 0, CORNER, CORNER, CORNER, CORNER);
+        graphics.blit(
+                RenderType::guiTextured,
+                TEX_CORNER_BL,
+                tabX,
+                tabY + TAB_H - CORNER,
+                0,
+                0,
+                CORNER,
+                CORNER,
+                CORNER,
+                CORNER);
 
         // Bottom edge
         for (int px = 0; px < TAB_W - CORNER + 1; px++) {
-            graphics.blit(TEX_EDGE_BOTTOM, tabX + CORNER + px, tabY + TAB_H - CORNER, 0, 0, 1, CORNER, 1, CORNER);
+            graphics.blit(
+                    RenderType::guiTextured,
+                    TEX_EDGE_BOTTOM,
+                    tabX + CORNER + px,
+                    tabY + TAB_H - CORNER,
+                    0,
+                    0,
+                    1,
+                    CORNER,
+                    1,
+                    CORNER);
         }
         // No right border — abuts the dialog (closed) or drawer body (open)
 
         if (showTabButton) {
             boolean hovered = mouseX >= tabX && mouseX < tabX + TAB_W + 1 && mouseY >= tabY && mouseY < tabY + TAB_H;
-            graphics.blitSprite(hovered ? BUTTON_HOVER : BUTTON_NORMAL, tabX + 4, tabY + 3, 16, 16);
+            graphics.blitSprite(
+                    RenderType::guiTextured, hovered ? BUTTON_HOVER : BUTTON_NORMAL, tabX + 4, tabY + 3, 16, 16);
         }
     }
 

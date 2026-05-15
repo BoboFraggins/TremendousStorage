@@ -3,10 +3,12 @@ package net.bobofraggins.tremendousstorage.shared.network;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -45,8 +47,8 @@ public record SatFillCraftingGridPacket(BlockPos satPos, ResourceLocation recipe
             if (!(player.level() instanceof ServerLevel serverLevel)) return;
 
             serverLevel
-                    .getRecipeManager()
-                    .byKey(packet.recipeId())
+                    .recipeAccess()
+                    .byKey(ResourceKey.create(Registries.RECIPE, packet.recipeId()))
                     .filter(h -> h.value() instanceof CraftingRecipe)
                     .ifPresent(h -> {
                         menu.setPendingPinRecipeId(packet.recipeId());

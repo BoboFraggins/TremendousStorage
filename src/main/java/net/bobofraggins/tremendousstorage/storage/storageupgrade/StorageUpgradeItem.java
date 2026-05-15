@@ -112,7 +112,7 @@ public class StorageUpgradeItem extends Item {
             if (!ctx.getLevel().isClientSide()) {
                 ctx.getItemInHand().shrink(1);
             }
-            return InteractionResult.sidedSuccess(ctx.getLevel().isClientSide());
+            return InteractionResult.SUCCESS;
         }
 
         return InteractionResult.PASS;

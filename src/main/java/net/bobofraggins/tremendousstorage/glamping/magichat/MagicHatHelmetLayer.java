@@ -8,6 +8,7 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.client.renderer.entity.state.PlayerRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -17,9 +18,9 @@ import net.minecraft.world.item.ItemStack;
  * Render layer that draws the Magic Hat on the player's head when it is equipped in the
  * vanilla helmet slot. Uses the same pose transforms as {@link MagicHatCurioRenderer}.
  */
-public class MagicHatHelmetLayer extends RenderLayer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+public class MagicHatHelmetLayer extends RenderLayer<PlayerRenderState, PlayerModel> {
 
-    public MagicHatHelmetLayer(RenderLayerParent<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> renderer) {
+    public MagicHatHelmetLayer(RenderLayerParent<PlayerRenderState, PlayerModel> renderer) {
         super(renderer);
     }
 
@@ -28,13 +29,13 @@ public class MagicHatHelmetLayer extends RenderLayer<AbstractClientPlayer, Playe
             PoseStack poseStack,
             MultiBufferSource bufferSource,
             int packedLight,
-            AbstractClientPlayer player,
-            float limbSwing,
-            float limbSwingAmount,
-            float partialTick,
-            float ageInTicks,
-            float netHeadYaw,
-            float headPitch) {
+            PlayerRenderState renderState,
+            float yRot,
+            float xRot) {
+
+        // Retrieve the actual player entity to get the helmet stack
+        AbstractClientPlayer player = Minecraft.getInstance().player;
+        if (player == null) return;
 
         ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
         if (!(helmet.getItem() instanceof MagicHatItem)) return;

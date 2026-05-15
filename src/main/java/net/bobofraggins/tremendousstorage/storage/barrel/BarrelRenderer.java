@@ -43,13 +43,18 @@ public class BarrelRenderer
         ENDER_BODY_MODELS = new ModelResourceLocation[tiers.length];
         COMPACTING_BODY_MODELS = new ModelResourceLocation[tiers.length];
         for (StorageTier tier : tiers) {
-            BODY_MODELS[tier.ordinal()] = ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(
-                    "tremendousstorage", "block/barrels/barrel_body_" + tier.getId()));
-            ENDER_BODY_MODELS[tier.ordinal()] = ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(
-                    "tremendousstorage", "block/ender_barrels/ender_barrel_body_" + tier.getId()));
-            COMPACTING_BODY_MODELS[tier.ordinal()] =
-                    ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath(
-                            "tremendousstorage", "block/barrels_compacting/barrel_body_" + tier.getId()));
+            BODY_MODELS[tier.ordinal()] = new ModelResourceLocation(
+                    ResourceLocation.fromNamespaceAndPath(
+                            "tremendousstorage", "block/barrels/barrel_body_" + tier.getId()),
+                    "standalone");
+            ENDER_BODY_MODELS[tier.ordinal()] = new ModelResourceLocation(
+                    ResourceLocation.fromNamespaceAndPath(
+                            "tremendousstorage", "block/ender_barrels/ender_barrel_body_" + tier.getId()),
+                    "standalone");
+            COMPACTING_BODY_MODELS[tier.ordinal()] = new ModelResourceLocation(
+                    ResourceLocation.fromNamespaceAndPath(
+                            "tremendousstorage", "block/barrels_compacting/barrel_body_" + tier.getId()),
+                    "standalone");
         }
     }
 

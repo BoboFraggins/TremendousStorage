@@ -2,13 +2,9 @@ package net.bobofraggins.tremendousstorage.storage.personalaccessterminal;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubRenderer;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubScreen;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -29,20 +25,10 @@ public final class PersonalAccessTerminalClientEvents {
     public static KeyMapping OPEN_WIRELESS_SAT;
 
     @SubscribeEvent
-    public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
+    public static void onRegisterItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
         event.register(
-                (stack, tintIndex) -> {
-                    if (tintIndex != 0) return -1;
-                    var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-                    if (customData != null) {
-                        CompoundTag tag = customData.copyTag();
-                        if (tag.contains("Tier")) {
-                            return StorageTier.fromId(tag.getString("Tier")).getColor();
-                        }
-                    }
-                    return StorageTier.WOOD.getColor();
-                },
-                Registration.WIRELESS_HUB_ITEM.get());
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
+                net.bobofraggins.tremendousstorage.shared.storage.StorageTierTintSource.MAP_CODEC);
     }
 
     @SubscribeEvent
@@ -52,10 +38,8 @@ public final class PersonalAccessTerminalClientEvents {
 
     @SubscribeEvent
     public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        event.register(ModelResourceLocation.standalone(
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_base")));
-        event.register(ModelResourceLocation.standalone(
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_dish")));
+        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_base"));
+        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_dish"));
     }
 
     @SubscribeEvent

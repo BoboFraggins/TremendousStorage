@@ -70,8 +70,7 @@ public class GlampingChunkGenerator extends ChunkGenerator {
             RandomState randomState,
             BiomeManager biomeManager,
             StructureManager structureManager,
-            ChunkAccess chunk,
-            net.minecraft.world.level.levelgen.GenerationStep.Carving step) {
+            ChunkAccess chunk) {
         // No carvers.
     }
 

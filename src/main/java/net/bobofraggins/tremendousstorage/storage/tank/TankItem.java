@@ -14,7 +14,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -101,7 +100,7 @@ public class TankItem extends TieredBlockItem {
      * by {@link #useOn}.
      */
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         TankContents c = stack.getOrDefault(Registration.TANK_CONTENTS.get(), TankContents.EMPTY);
 
@@ -122,12 +121,12 @@ public class TankItem extends TieredBlockItem {
                                         : "item.tremendousstorage.tank.mode_block"),
                         true);
             }
-            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+            return InteractionResult.SUCCESS;
         }
 
         if (!c.bucketMode()) {
             // Block Mode: block-targeted clicks are handled by useOn.
-            return InteractionResultHolder.pass(stack);
+            return InteractionResult.PASS;
         }
 
         // Bucket Mode: interact with the block the raycast hit.
@@ -156,7 +155,7 @@ public class TankItem extends TieredBlockItem {
                         level.gameEvent(player, GameEvent.FLUID_PICKUP, pos);
                     }
                 }
-                return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+                return InteractionResult.SUCCESS;
             }
             // Wrong fluid or tank full — fall through to placement.
         }
@@ -172,14 +171,14 @@ public class TankItem extends TieredBlockItem {
             if (!level.isClientSide()) {
                 FluidActionResult place = FluidUtil.tryPlaceFluid(player, level, hand, targetPos, stack, toPlace);
                 if (place.isSuccess()) {
-                    return InteractionResultHolder.sidedSuccess(place.getResult(), level.isClientSide());
+                    return InteractionResult.SUCCESS;
                 }
-                return InteractionResultHolder.fail(stack);
+                return InteractionResult.FAIL;
             }
-            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+            return InteractionResult.SUCCESS;
         }
 
-        return InteractionResultHolder.fail(stack);
+        return InteractionResult.FAIL;
     }
 
     // -------------------------------------------------------------------------

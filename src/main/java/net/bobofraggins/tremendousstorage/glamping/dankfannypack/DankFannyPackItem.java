@@ -4,7 +4,7 @@ import net.bobofraggins.tremendousstorage.shared.network.OpenFannyPackPacket;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -25,12 +25,12 @@ public class DankFannyPackItem extends Item {
     // -------------------------------------------------------------------------
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (!level.isClientSide() && player instanceof ServerPlayer sp) {
             int slotIndex = hand == InteractionHand.MAIN_HAND ? sp.getInventory().selected : 40;
             openFannyPackUi(sp, OpenFannyPackPacket.SLOT_INVENTORY, slotIndex, "");
         }
-        return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand), level.isClientSide());
+        return level.isClientSide() ? InteractionResult.SUCCESS : InteractionResult.CONSUME;
     }
 
     // -------------------------------------------------------------------------

@@ -9,6 +9,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
 /**
@@ -54,13 +55,12 @@ public class EnderFolderCraftingRecipe extends AbstractEnderCraftingRecipe {
         return result;
     }
 
-    @Override
     public ItemStack getResultItem(HolderLookup.Provider registries) {
         return new ItemStack(Registration.ENDER_FOLDER.get());
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends CraftingRecipe> getSerializer() {
         return Registration.ENDER_FOLDER_CRAFTING_RECIPE.get();
     }
 }

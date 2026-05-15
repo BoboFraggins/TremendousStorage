@@ -15,13 +15,16 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
@@ -190,7 +193,8 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
         double tx = campOrigin.getX() + GlampingDimension.CAMP_SIZE / 2 + 0.5;
         double ty = campOrigin.getY();
         double tz = campOrigin.getZ() + GlampingDimension.CAMP_SIZE - 2 + 0.5;
-        serverPlayer.teleportTo(glampingLevel, tx, ty, tz, Set.of(), serverPlayer.getYRot(), serverPlayer.getXRot());
+        serverPlayer.teleportTo(
+                glampingLevel, tx, ty, tz, Set.<Relative>of(), serverPlayer.getYRot(), serverPlayer.getXRot(), false);
 
         return InteractionResult.SUCCESS;
     }
@@ -202,13 +206,16 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
     @Override
     public BlockState updateShape(
             BlockState state,
-            Direction direction,
-            BlockState neighborState,
-            LevelAccessor level,
+            LevelReader level,
+            ScheduledTickAccess scheduledTickAccess,
             BlockPos pos,
-            BlockPos neighborPos) {
+            Direction direction,
+            BlockPos neighborPos,
+            BlockState neighborState,
+            RandomSource random) {
         if (neighborState.is(this)) {
-            return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+            return super.updateShape(
+                    state, level, scheduledTickAccess, pos, direction, neighborPos, neighborState, random);
         }
         Direction facing = state.getValue(FACING);
         BedPart part = state.getValue(PART);
@@ -216,7 +223,7 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
         if (direction == toPartner) {
             return Blocks.AIR.defaultBlockState();
         }
-        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+        return super.updateShape(state, level, scheduledTickAccess, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override

@@ -165,12 +165,7 @@ public class FolderTapeRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return width * height >= 2;
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-        return Registration.FOLDER_TAPE_RECIPE.get();
+    public RecipeSerializer<? extends CustomRecipe> getSerializer() {
+        return net.bobofraggins.tremendousstorage.shared.register.Registration.FOLDER_TAPE_RECIPE.get();
     }
 }

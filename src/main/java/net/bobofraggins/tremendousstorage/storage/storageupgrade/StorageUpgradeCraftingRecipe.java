@@ -28,6 +28,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -55,13 +56,13 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
     }
 
     @Override
-    public boolean isSpecial() {
-        return true;
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return width * height >= 2;
+    public boolean isSpecial() {
+        return true;
     }
 
     private static boolean isBaseIngredient(ItemStack stack) {
@@ -156,13 +157,12 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
         return upgrade(base, (StorageUpgradeItem) addition.getItem());
     }
 
-    @Override
     public ItemStack getResultItem(HolderLookup.Provider registries) {
         return new ItemStack(Registration.TREMENDOUS_CHEST_ITEM.get());
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends CraftingRecipe> getSerializer() {
         return Registration.STORAGE_UPGRADE_CRAFTING_RECIPE.get();
     }
 

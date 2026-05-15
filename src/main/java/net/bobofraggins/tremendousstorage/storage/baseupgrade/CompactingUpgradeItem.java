@@ -25,6 +25,6 @@ public class CompactingUpgradeItem extends Item {
             }
             ctx.getItemInHand().shrink(1);
         }
-        return InteractionResult.sidedSuccess(ctx.getLevel().isClientSide());
+        return InteractionResult.SUCCESS;
     }
 }

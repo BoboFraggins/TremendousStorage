@@ -1,7 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.armorycabinet;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -26,8 +25,7 @@ public final class ArmoryCabinetClientEvents {
             "armory_cabinet_arm_bottom",
             "armory_cabinet_wheel"
         }) {
-            event.register(ModelResourceLocation.standalone(
-                    ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/" + part)));
+            event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/" + part));
         }
     }
 

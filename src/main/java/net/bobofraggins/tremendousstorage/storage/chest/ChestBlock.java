@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.chest;
 
 import com.mojang.serialization.MapCodec;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
@@ -10,7 +11,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -26,7 +26,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -47,7 +48,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class ChestBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<ChestBlock> CODEC = simpleCodec(ChestBlock::new);
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final Property<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty NORTH = BooleanProperty.create("north");
     public static final BooleanProperty SOUTH = BooleanProperty.create("south");
     public static final BooleanProperty EAST = BooleanProperty.create("east");
@@ -113,11 +114,11 @@ public class ChestBlock extends BaseEntityBlock implements NetworkConnector {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return RenderShape.MODEL;
     }
 
     @Override
-    public VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
+    public VoxelShape getOcclusionShape(BlockState state) {
         return Shapes.empty();
     }
 
@@ -143,7 +144,7 @@ public class ChestBlock extends BaseEntityBlock implements NetworkConnector {
             Level level,
             BlockPos pos,
             Block neighborBlock,
-            BlockPos neighborPos,
+            @Nullable Orientation orientation,
             boolean movedByPiston) {
         if (!level.isClientSide()) {
             BlockState updated = computeConnections(state, level, pos);
@@ -157,7 +158,7 @@ public class ChestBlock extends BaseEntityBlock implements NetworkConnector {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(
+    protected InteractionResult useItemOn(
             ItemStack stack,
             BlockState state,
             Level level,
@@ -165,7 +166,7 @@ public class ChestBlock extends BaseEntityBlock implements NetworkConnector {
             Player player,
             InteractionHand hand,
             BlockHitResult hit) {
-        if (stack.getItem() instanceof StorageUpgradeItem) return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        if (stack.getItem() instanceof StorageUpgradeItem) return InteractionResult.FAIL;
         return super.useItemOn(stack, state, level, pos, player, hand, hit);
     }
 
@@ -191,7 +192,10 @@ public class ChestBlock extends BaseEntityBlock implements NetworkConnector {
         if (be instanceof ChestBlockEntity bulk) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof net.minecraft.world.item.BlockItem) {
-                    bulk.saveToItem(drop, params.getLevel().registryAccess());
+                    net.minecraft.world.item.BlockItem.setBlockEntityData(
+                            drop,
+                            bulk.getType(),
+                            bulk.saveCustomOnly(params.getLevel().registryAccess()));
                 }
             }
         }

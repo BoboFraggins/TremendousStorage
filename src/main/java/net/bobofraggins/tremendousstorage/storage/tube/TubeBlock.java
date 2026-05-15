@@ -15,13 +15,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -32,6 +30,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -192,7 +191,7 @@ public class TubeBlock extends BaseEntityBlock {
             Level level,
             BlockPos pos,
             Block neighborBlock,
-            BlockPos neighborPos,
+            @Nullable Orientation orientation,
             boolean movedByPiston) {
         if (!level.isClientSide()) {
             BlockState updated = computeState(state, level, pos);
@@ -209,12 +208,15 @@ public class TubeBlock extends BaseEntityBlock {
     @Override
     public BlockState updateShape(
             BlockState state,
-            Direction direction,
-            BlockState neighborState,
-            LevelAccessor level,
+            net.minecraft.world.level.LevelReader levelReader,
+            net.minecraft.world.level.ScheduledTickAccess scheduledTickAccess,
             BlockPos pos,
-            BlockPos neighborPos) {
-        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+            Direction direction,
+            BlockPos neighborPos,
+            BlockState neighborState,
+            net.minecraft.util.RandomSource random) {
+        return super.updateShape(
+                state, levelReader, scheduledTickAccess, pos, direction, neighborPos, neighborState, random);
     }
 
     BlockState computeState(BlockState current, LevelReader level, BlockPos pos) {
@@ -269,7 +271,7 @@ public class TubeBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return RenderShape.MODEL;
     }
 
     // -------------------------------------------------------------------------
@@ -290,7 +292,7 @@ public class TubeBlock extends BaseEntityBlock {
      * install attachment on the clicked face (if not already present) and consume one item.
      */
     @Override
-    protected ItemInteractionResult useItemOn(
+    protected InteractionResult useItemOn(
             ItemStack stack,
             BlockState state,
             Level level,
@@ -306,14 +308,14 @@ public class TubeBlock extends BaseEntityBlock {
         } else if (stack.getItem() instanceof ExportInterfaceItem) {
             newType = AttachmentType.EXPORT_INTERFACE;
         } else {
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
 
-        if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
-        if (!(level.getBlockEntity(pos) instanceof TubeBlockEntity be)) return ItemInteractionResult.FAIL;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
+        if (!(level.getBlockEntity(pos) instanceof TubeBlockEntity be)) return InteractionResult.FAIL;
 
         int faceIndex = hit.getDirection().ordinal();
-        if (be.hasAttachment(faceIndex)) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (be.hasAttachment(faceIndex)) return InteractionResult.TRY_WITH_EMPTY_HAND;
 
         // Restore state from the item's data components before setting the type
         if (newType == AttachmentType.STORAGE_INTERFACE) {
@@ -337,7 +339,7 @@ public class TubeBlock extends BaseEntityBlock {
             level.setBlockAndUpdate(pos, updated);
         }
 
-        return ItemInteractionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     /**

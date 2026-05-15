@@ -153,11 +153,12 @@ public class PicnicBasketFeedHandler {
                 SoundSource.PLAYERS,
                 0.5f,
                 level.random.nextFloat() * 0.1f + 0.9f);
-        for (FoodProperties.PossibleEffect possibleEffect : food.effects()) {
-            if (level.random.nextFloat() < possibleEffect.probability()) {
-                player.addEffect(possibleEffect.effect());
-            }
-        }
+        // TODO: food.effects() API changed in 1.21.4 - needs investigation
+        // for (var possibleEffect : food.effects()) {
+        //     if (level.random.nextFloat() < possibleEffect.probability()) {
+        //         player.addEffect(possibleEffect.effect());
+        //     }
+        // }
 
         // Notify other mods (e.g. Spice of Life: Carrot Edition) that food was consumed
         NeoForge.EVENT_BUS.post(

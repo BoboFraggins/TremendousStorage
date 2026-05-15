@@ -2,8 +2,9 @@ package net.bobofraggins.tremendousstorage;
 
 import com.mojang.logging.LogUtils;
 import net.bobofraggins.tremendousstorage.experiencesyringe.ExperienceSyringeEvents;
-import net.bobofraggins.tremendousstorage.external.create.CreateIntegration;
-import net.bobofraggins.tremendousstorage.external.mekanism.MekanismIntegration;
+// import net.bobofraggins.tremendousstorage.external.create.CreateIntegration; // excluded - not available on 1.21.4
+// import net.bobofraggins.tremendousstorage.external.mekanism.MekanismIntegration; // excluded - not available on
+// 1.21.4
 import net.bobofraggins.tremendousstorage.external.productivemetalworks.ProductiveMetalworksIntegration;
 import net.bobofraggins.tremendousstorage.glamping.GlampingEvents;
 import net.bobofraggins.tremendousstorage.glamping.GlampingRegistration;
@@ -69,12 +70,13 @@ public class TremendousStorage {
         if (ModList.get().isLoaded("productivemetalworks")) {
             ProductiveMetalworksIntegration.register(modEventBus);
         }
-        if (ModList.get().isLoaded("create")) {
-            CreateIntegration.register(modEventBus);
-        }
-        if (ModList.get().isLoaded("mekanism")) {
-            MekanismIntegration.register(modEventBus);
-        }
+        // Create and Mekanism integrations disabled - not available on 1.21.4
+        // if (ModList.get().isLoaded("create")) {
+        //     CreateIntegration.register(modEventBus);
+        // }
+        // if (ModList.get().isLoaded("mekanism")) {
+        //     MekanismIntegration.register(modEventBus);
+        // }
         LOGGER.info("TremendousStorage initialized");
     }
 }

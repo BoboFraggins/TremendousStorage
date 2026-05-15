@@ -10,6 +10,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 
 /**
@@ -59,13 +60,12 @@ public class EnderTankCraftingRecipe extends AbstractEnderCraftingRecipe {
         return result;
     }
 
-    @Override
     public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider registries) {
         return new ItemStack(Registration.ENDER_TANK_ITEM.get());
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends CraftingRecipe> getSerializer() {
         return Registration.ENDER_TANK_CRAFTING_RECIPE.get();
     }
 }

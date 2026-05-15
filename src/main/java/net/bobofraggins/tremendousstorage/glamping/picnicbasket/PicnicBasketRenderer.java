@@ -34,12 +34,12 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 public class PicnicBasketRenderer
         implements BlockEntityRenderer<ChestBlockEntity>, IBlockEntityRendererExtension<ChestBlockEntity> {
 
-    static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_body"));
-    static final ModelResourceLocation LEFT_LID_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_left_lid"));
-    static final ModelResourceLocation RIGHT_LID_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_right_lid"));
+    static final ModelResourceLocation BODY_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_body"), "standalone");
+    static final ModelResourceLocation LEFT_LID_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_left_lid"), "standalone");
+    static final ModelResourceLocation RIGHT_LID_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_right_lid"), "standalone");
 
     private static float facingYRot(Direction facing) {
         return switch (facing) {

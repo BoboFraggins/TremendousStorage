@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -21,7 +22,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -43,7 +45,7 @@ public class FilingCabinetBlock extends BaseEntityBlock implements NetworkConnec
         return CODEC;
     }
 
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final Property<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     public FilingCabinetBlock(Properties props) {
         super(props);
@@ -75,7 +77,7 @@ public class FilingCabinetBlock extends BaseEntityBlock implements NetworkConnec
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return RenderShape.MODEL;
     }
 
     @Override
@@ -112,7 +114,10 @@ public class FilingCabinetBlock extends BaseEntityBlock implements NetworkConnec
         if (be instanceof FilingCabinetBlockEntity cabinet) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof BlockItem) {
-                    cabinet.saveToItem(drop, params.getLevel().registryAccess());
+                    BlockItem.setBlockEntityData(
+                            drop,
+                            cabinet.getType(),
+                            cabinet.saveCustomOnly(params.getLevel().registryAccess()));
                 }
             }
         }
@@ -129,7 +134,7 @@ public class FilingCabinetBlock extends BaseEntityBlock implements NetworkConnec
             Level level,
             BlockPos pos,
             Block neighborBlock,
-            BlockPos neighborPos,
+            @Nullable Orientation orientation,
             boolean movedByPiston) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FilingCabinetBlockEntity be) {
             be.setChanged();

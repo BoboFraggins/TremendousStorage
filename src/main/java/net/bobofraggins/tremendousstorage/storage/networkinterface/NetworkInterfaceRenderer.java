@@ -12,7 +12,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -68,7 +68,7 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         int fluidLight =
                 Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
 
-        VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
+        VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentItemSheet());
         TankRenderer.renderCubeFill(
                 vc,
                 mat,
@@ -120,18 +120,11 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         poseStack.mulPose(Axis.XP.rotationDegrees(3f));
 
         ItemStack brainStack = new ItemStack(Registration.BRAIN.get());
-        BakedModel model = Minecraft.getInstance().getItemRenderer().getModel(brainStack, level, null, 0);
+        ItemStackRenderState brainRenderState = new ItemStackRenderState();
         Minecraft.getInstance()
-                .getItemRenderer()
-                .render(
-                        brainStack,
-                        ItemDisplayContext.FIXED,
-                        false,
-                        poseStack,
-                        bufferSource,
-                        packedLight,
-                        packedOverlay,
-                        model);
+                .getItemModelResolver()
+                .updateForTopItem(brainRenderState, brainStack, ItemDisplayContext.FIXED, false, null, null, 0);
+        brainRenderState.render(poseStack, bufferSource, packedLight, packedOverlay);
 
         poseStack.popPose();
     }

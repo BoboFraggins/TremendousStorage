@@ -11,9 +11,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -25,8 +25,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -36,7 +36,7 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 /** A single-block-tall Network Interface. */
 public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkConnector {
 
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final Property<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<StorageTier> TIER_PROP = EnumProperty.create("tier", StorageTier.class);
 
     public static final MapCodec<NetworkInterfaceBlock> CODEC = simpleCodec(NetworkInterfaceBlock::new);
@@ -101,7 +101,10 @@ public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkCon
         if (be instanceof NetworkInterfaceBlockEntity ni) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof net.minecraft.world.item.BlockItem) {
-                    ni.saveToItem(drop, params.getLevel().registryAccess());
+                    BlockItem.setBlockEntityData(
+                            drop,
+                            ni.getType(),
+                            ni.saveCustomOnly(params.getLevel().registryAccess()));
                 }
             }
         }
@@ -118,7 +121,7 @@ public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkCon
             Level level,
             BlockPos pos,
             net.minecraft.world.level.block.Block neighborBlock,
-            net.minecraft.core.BlockPos neighborPos,
+            @javax.annotation.Nullable net.minecraft.world.level.redstone.Orientation orientation,
             boolean movedByPiston) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof NetworkInterfaceBlockEntity ni) {
             ni.setChanged();
@@ -130,7 +133,7 @@ public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkCon
     // -------------------------------------------------------------------------
 
     @Override
-    protected ItemInteractionResult useItemOn(
+    protected InteractionResult useItemOn(
             ItemStack stack,
             BlockState state,
             Level level,
@@ -138,7 +141,7 @@ public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkCon
             Player player,
             InteractionHand hand,
             BlockHitResult hit) {
-        if (stack.getItem() instanceof StorageUpgradeItem) return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        if (stack.getItem() instanceof StorageUpgradeItem) return InteractionResult.FAIL;
         return super.useItemOn(stack, state, level, pos, player, hand, hit);
     }
 

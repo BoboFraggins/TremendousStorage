@@ -93,12 +93,7 @@ public class FolderExtractRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return width * height >= 1;
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends CustomRecipe> getSerializer() {
         return net.bobofraggins.tremendousstorage.shared.register.Registration.FOLDER_EXTRACT_RECIPE.get();
     }
 

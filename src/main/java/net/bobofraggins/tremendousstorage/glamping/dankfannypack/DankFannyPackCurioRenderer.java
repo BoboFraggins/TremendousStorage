@@ -6,9 +6,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import top.theillusivec4.curios.api.SlotContext;
@@ -23,22 +24,20 @@ import top.theillusivec4.curios.api.client.ICurioRenderer;
 public class DankFannyPackCurioRenderer implements ICurioRenderer {
 
     @Override
-    public <T extends LivingEntity, M extends EntityModel<T>> void render(
+    public <S extends LivingEntityRenderState, M extends EntityModel<? super S>> void render(
             ItemStack stack,
             SlotContext slotContext,
             PoseStack poseStack,
-            RenderLayerParent<T, M> renderLayerParent,
             MultiBufferSource bufferSource,
             int light,
-            float limbSwing,
-            float limbSwingAmount,
-            float partialTicks,
-            float ageInTicks,
-            float netHeadYaw,
-            float headPitch) {
+            S renderState,
+            RenderLayerParent<S, M> renderLayerParent,
+            EntityRendererProvider.Context context,
+            float yRotation,
+            float xRotation) {
 
         if (stack.isEmpty()) return;
-        EntityModel<T> model = renderLayerParent.getModel();
+        M model = renderLayerParent.getModel();
         if (!(model instanceof HumanoidModel<?> humanoid)) return;
 
         poseStack.pushPose();

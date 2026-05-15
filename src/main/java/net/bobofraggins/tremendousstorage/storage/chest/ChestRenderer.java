@@ -32,10 +32,10 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 public class ChestRenderer
         implements BlockEntityRenderer<ChestBlockEntity>, IBlockEntityRendererExtension<ChestBlockEntity> {
 
-    private static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/chest_body"));
-    private static final ModelResourceLocation LID_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/chest_lid"));
+    private static final ModelResourceLocation BODY_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/chest_body"), "standalone");
+    private static final ModelResourceLocation LID_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/chest_lid"), "standalone");
 
     /** Y-rotation in degrees to apply for each facing direction (model default is NORTH). */
     private static float facingYRot(Direction facing) {

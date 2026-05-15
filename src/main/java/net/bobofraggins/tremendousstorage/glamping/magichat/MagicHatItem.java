@@ -11,17 +11,15 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -41,7 +39,7 @@ import net.minecraft.world.phys.Vec3;
  * <p>When the hat contains a mob, right-clicking on a block face or in air releases it ~1.5
  * blocks in front of the player. Block placement is suppressed while a mob is stored.
  */
-public class MagicHatItem extends BlockItem implements Equipable {
+public class MagicHatItem extends BlockItem {
 
     static final String MOB_KEY = "CapturedMob";
 
@@ -57,11 +55,6 @@ public class MagicHatItem extends BlockItem implements Equipable {
 
     public MagicHatItem(Block block) {
         super(block, new Item.Properties().stacksTo(1).attributes(DEFAULT_MODIFIERS));
-    }
-
-    @Override
-    public EquipmentSlot getEquipmentSlot() {
-        return EquipmentSlot.HEAD;
     }
 
     // -------------------------------------------------------------------------
@@ -94,7 +87,7 @@ public class MagicHatItem extends BlockItem implements Equipable {
                             1.0f,
                             1.0f);
         }
-        return InteractionResult.sidedSuccess(player.level().isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     // -------------------------------------------------------------------------
@@ -107,22 +100,22 @@ public class MagicHatItem extends BlockItem implements Equipable {
             if (!ctx.getLevel().isClientSide()) {
                 releaseMob(ctx.getItemInHand(), ctx.getPlayer(), ctx.getLevel());
             }
-            return InteractionResult.sidedSuccess(ctx.getLevel().isClientSide());
+            return InteractionResult.SUCCESS;
         }
         return super.useOn(ctx);
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (hasMob(stack)) {
             if (!level.isClientSide()) {
                 releaseMob(stack, player, level);
             }
-            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide());
+            return InteractionResult.SUCCESS;
         }
-        // No mob stored — equip to (or swap with) the vanilla head slot.
-        return this.swapWithEquipmentSlot(this, level, player, hand);
+        // No mob stored — fall through to block placement (BlockItem.use)
+        return super.use(level, player, hand);
     }
 
     private static void releaseMob(ItemStack stack, Player player, Level level) {
@@ -138,7 +131,7 @@ public class MagicHatItem extends BlockItem implements Equipable {
         double spawnY = player.getY();
         double spawnZ = player.getZ() + look.z * 1.5;
 
-        Entity entity = EntityType.loadEntityRecursive(mobTag, serverLevel, e -> {
+        Entity entity = EntityType.loadEntityRecursive(mobTag, serverLevel, EntitySpawnReason.LOAD, e -> {
             e.setPos(spawnX, spawnY, spawnZ);
             e.setDeltaMovement(Vec3.ZERO);
             return e;

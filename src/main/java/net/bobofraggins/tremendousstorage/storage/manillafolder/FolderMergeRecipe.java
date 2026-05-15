@@ -56,12 +56,7 @@ public class FolderMergeRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return width * height >= 2;
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends CustomRecipe> getSerializer() {
         return net.bobofraggins.tremendousstorage.shared.register.Registration.FOLDER_MERGE_RECIPE.get();
     }
 

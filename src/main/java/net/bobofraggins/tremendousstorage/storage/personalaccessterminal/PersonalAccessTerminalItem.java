@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,11 +33,6 @@ public class PersonalAccessTerminalItem extends Item {
 
     public PersonalAccessTerminalItem() {
         super(new Item.Properties().stacksTo(1));
-    }
-
-    @Override
-    public String getDescriptionId() {
-        return "item.tremendousstorage.personal_access_terminal";
     }
 
     @Override
@@ -70,17 +65,17 @@ public class PersonalAccessTerminalItem extends Item {
     // -------------------------------------------------------------------------
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (level.isClientSide()) {
-            return InteractionResultHolder.success(stack);
+            return InteractionResult.SUCCESS;
         }
 
         BlockPos niPos = stack.get(Registration.WIRELESS_NI_POS.get());
         if (niPos == null) {
             player.displayClientMessage(
                     Component.translatable("item.tremendousstorage.personal_access_terminal.not_linked"), true);
-            return InteractionResultHolder.fail(stack);
+            return InteractionResult.FAIL;
         }
 
         BlockPos hubPos = stack.get(Registration.WIRELESS_HUB_POS.get());
@@ -88,7 +83,7 @@ public class PersonalAccessTerminalItem extends Item {
         boolean hasCraftingUpgrade =
                 Boolean.TRUE.equals(stack.get(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get()));
         openSatUi((ServerPlayer) player, niPos, hubPos, hubDimId, hasCraftingUpgrade);
-        return InteractionResultHolder.success(stack);
+        return InteractionResult.SUCCESS;
     }
 
     /**

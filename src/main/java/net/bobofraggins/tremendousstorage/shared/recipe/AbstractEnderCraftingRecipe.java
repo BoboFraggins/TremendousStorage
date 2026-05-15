@@ -11,6 +11,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.level.Level;
 
 /**
@@ -39,15 +40,7 @@ public abstract class AbstractEnderCraftingRecipe implements CraftingRecipe {
         return CraftingBookCategory.MISC;
     }
 
-    @Override
-    public boolean isSpecial() {
-        return true;
-    }
-
-    @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return width * height >= 2;
-    }
+    // isSpecial() removed in 1.21.4 - recipes without specific output are handled differently
 
     @Override
     public boolean matches(CraftingInput input, Level level) {
@@ -113,6 +106,11 @@ public abstract class AbstractEnderCraftingRecipe implements CraftingRecipe {
         tag.remove("PullerSides");
         second.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
         return second;
+    }
+
+    @Override
+    public PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     // -------------------------------------------------------------------------

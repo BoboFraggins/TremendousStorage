@@ -67,7 +67,7 @@ public class BarrelItem extends TieredBlockItem {
         if (id.isEmpty()) return;
         ResourceLocation rl = ResourceLocation.tryParse(id);
         if (rl == null) return;
-        Item item = BuiltInRegistries.ITEM.get(rl);
+        Item item = BuiltInRegistries.ITEM.get(rl).map(h -> h.value()).orElse(null);
         if (item != null && item != Items.AIR)
             names.add(new ItemStack(item).getHoverName().getString());
     }

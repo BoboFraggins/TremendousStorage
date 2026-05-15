@@ -8,6 +8,7 @@ import net.bobofraggins.tremendousstorage.shared.network.RequestNetworkContentsP
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -253,7 +254,13 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
             float frac = scrollOffset / (float) maxScroll;
             thumbY = trackY + 1 + (int) ((trackH - 2 - SCROLLER_H) * frac);
         }
-        graphics.blitSprite(canScroll ? SCROLLER : SCROLLER_DISABLED, thumbX, thumbY, SCROLLER_W, SCROLLER_H);
+        graphics.blitSprite(
+                RenderType::guiTextured,
+                canScroll ? SCROLLER : SCROLLER_DISABLED,
+                thumbX,
+                thumbY,
+                SCROLLER_W,
+                SCROLLER_H);
     }
 
     @Override

@@ -8,7 +8,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -22,14 +21,14 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
 
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final Property<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<StorageTier> TIER = EnumProperty.create("tier", StorageTier.class);
 
     public static final MapCodec<BarrelBlock> CODEC = simpleCodec(BarrelBlock::new);
@@ -95,7 +94,7 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(
+    protected InteractionResult useItemOn(
             ItemStack stack,
             BlockState state,
             Level level,
@@ -113,9 +112,9 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
                     insertHeld(be, stack, player);
                 }
             }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide());
+            return InteractionResult.SUCCESS;
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     @Override
@@ -129,7 +128,7 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
                 });
             }
         }
-        return InteractionResult.sidedSuccess(level.isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     private static void insertHeld(BarrelBlockEntity be, ItemStack stack, Player player) {
@@ -241,8 +240,13 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
 
     @Override
     public void neighborChanged(
-            BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
-        super.neighborChanged(state, level, pos, block, fromPos, isMoving);
+            BlockState state,
+            Level level,
+            BlockPos pos,
+            Block block,
+            @javax.annotation.Nullable net.minecraft.world.level.redstone.Orientation orientation,
+            boolean isMoving) {
+        super.neighborChanged(state, level, pos, block, orientation, isMoving);
         if (level.getBlockEntity(pos) instanceof BarrelBlockEntity be) {
             level.invalidateCapabilities(pos);
         }

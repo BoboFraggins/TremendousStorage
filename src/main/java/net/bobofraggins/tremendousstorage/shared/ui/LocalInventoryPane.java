@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -347,13 +348,16 @@ public class LocalInventoryPane implements IDialogPane {
 
         for (int row = 0; row < rows; row++) {
             graphics.blit(
+                    RenderType::guiTextured,
                     BG_TEXTURE,
                     GRID_X,
                     startY + row * AccessTerminalLayout.SLOT_SIZE,
                     7,
                     17,
                     AccessTerminalLayout.NETWORK_W,
-                    AccessTerminalLayout.SLOT_SIZE);
+                    AccessTerminalLayout.SLOT_SIZE,
+                    256,
+                    256);
         }
 
         if (displayStacks.isEmpty()) return;
@@ -405,6 +409,7 @@ public class LocalInventoryPane implements IDialogPane {
         }
 
         graphics.blitSprite(
+                RenderType::guiTextured,
                 canScroll ? SCROLLER : SCROLLER_DISABLED,
                 thumbX,
                 thumbY,

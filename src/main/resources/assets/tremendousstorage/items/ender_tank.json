@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "tremendousstorage:item/ender_tank",
+    "model": {
+      "type": "tremendousstorage:tank_renderer"
+    }
+  }
+}

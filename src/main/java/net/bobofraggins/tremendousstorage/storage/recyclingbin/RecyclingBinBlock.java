@@ -4,11 +4,11 @@ import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -33,7 +33,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class RecyclingBinBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<RecyclingBinBlock> CODEC = simpleCodec(RecyclingBinBlock::new);
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final Property<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     private static final VoxelShape SHAPE = Block.box(0, 0, 0, 16, 14, 16);
     private static final int BOTTLE_MB = 250;
@@ -71,11 +71,11 @@ public class RecyclingBinBlock extends BaseEntityBlock implements NetworkConnect
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return RenderShape.MODEL;
     }
 
     @Override
-    public VoxelShape getOcclusionShape(BlockState state, net.minecraft.world.level.BlockGetter level, BlockPos pos) {
+    public VoxelShape getOcclusionShape(BlockState state) {
         return Shapes.empty();
     }
 
@@ -96,7 +96,7 @@ public class RecyclingBinBlock extends BaseEntityBlock implements NetworkConnect
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(
+    protected InteractionResult useItemOn(
             ItemStack stack,
             BlockState state,
             Level level,
@@ -104,20 +104,20 @@ public class RecyclingBinBlock extends BaseEntityBlock implements NetworkConnect
             Player player,
             InteractionHand hand,
             BlockHitResult hit) {
-        if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (stack.is(Items.GLASS_BOTTLE)) {
             if (!(level.getBlockEntity(pos) instanceof RecyclingBinBlockEntity be))
-                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                return InteractionResult.TRY_WITH_EMPTY_HAND;
             int drained = be.extractVibes(BOTTLE_MB, true);
             if (drained >= BOTTLE_MB) {
                 be.extractVibes(BOTTLE_MB, false);
                 ItemStack bottle = new ItemStack(Registration.POSITIVE_VIBES_BOTTLE.get());
                 player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, bottle));
                 level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     @Override

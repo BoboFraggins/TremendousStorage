@@ -21,10 +21,11 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
@@ -507,13 +508,16 @@ public class NetworkInventoryPane implements IDialogPane {
         // Slot outlines from the chest-row strip in generic_54.png
         for (int row = 0; row < rows; row++) {
             graphics.blit(
+                    RenderType::guiTextured,
                     BG_TEXTURE,
                     GRID_X,
                     startY + row * AccessTerminalLayout.SLOT_SIZE,
                     7,
                     17,
                     AccessTerminalLayout.NETWORK_W,
-                    AccessTerminalLayout.SLOT_SIZE);
+                    AccessTerminalLayout.SLOT_SIZE,
+                    256,
+                    256);
         }
 
         if (!hasContents) return;
@@ -557,15 +561,27 @@ public class NetworkInventoryPane implements IDialogPane {
         ResourceLocation stillTex = ext.getStillTexture(fluid);
         TextureAtlasSprite sprite = Minecraft.getInstance()
                 .getModelManager()
-                .getAtlas(InventoryMenu.BLOCK_ATLAS)
+                .getAtlas(TextureAtlas.LOCATION_BLOCKS)
                 .getSprite(stillTex);
         int tint = ext.getTintColor(fluid);
-        float r = ((tint >> 16) & 0xFF) / 255f;
-        float g = ((tint >> 8) & 0xFF) / 255f;
-        float b = (tint & 0xFF) / 255f;
-        float a = ((tint >> 24) & 0xFF) / 255f;
-        if (a == 0f) a = 1f;
-        graphics.blit(x, y, 0, 16, 16, sprite, r, g, b, a);
+        int r = (tint >> 16) & 0xFF;
+        int g = (tint >> 8) & 0xFF;
+        int b = tint & 0xFF;
+        int a = (tint >> 24) & 0xFF;
+        if (a == 0) a = 255;
+        int argb = (a << 24) | (r << 16) | (g << 8) | b;
+        // Render the fluid sprite with tint via vertex consumer
+        RenderType rt = RenderType.guiTextured(sprite.atlasLocation());
+        org.joml.Matrix4f matrix = graphics.pose().last().pose();
+        com.mojang.blaze3d.vertex.VertexConsumer vc =
+                Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(rt);
+        vc.addVertex(matrix, x, y, 0).setUv(sprite.getU0(), sprite.getV0()).setColor(argb);
+        vc.addVertex(matrix, x, y + 16, 0).setUv(sprite.getU0(), sprite.getV1()).setColor(argb);
+        vc.addVertex(matrix, x + 16, y + 16, 0)
+                .setUv(sprite.getU1(), sprite.getV1())
+                .setColor(argb);
+        vc.addVertex(matrix, x + 16, y, 0).setUv(sprite.getU1(), sprite.getV0()).setColor(argb);
+        Minecraft.getInstance().renderBuffers().bufferSource().endBatch(rt);
     }
 
     /** Renders a count label at 0.666 scale in the bottom-right corner of a 16×16 slot. */
@@ -634,6 +650,7 @@ public class NetworkInventoryPane implements IDialogPane {
         }
 
         graphics.blitSprite(
+                RenderType::guiTextured,
                 canScroll ? SCROLLER : SCROLLER_DISABLED,
                 thumbX,
                 thumbY,

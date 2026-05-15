@@ -7,6 +7,7 @@ import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -101,7 +102,8 @@ public class PullerSidesPane implements IDialogPane {
             g.fill(bx, by + 1, bx + 1, by + BUTTON_SIZE, COLOR_LIGHT);
             g.fill(bx, by + BUTTON_SIZE, bx + BUTTON_SIZE + 1, by + BUTTON_SIZE + 1, COLOR_DARK);
             g.fill(bx + BUTTON_SIZE, by, bx + BUTTON_SIZE + 1, by + BUTTON_SIZE, COLOR_DARK);
-            g.blitSprite(on ? TEX_ON : TEX_OFF, bx + 1, by + 1, BUTTON_SIZE - 2, BUTTON_SIZE - 2);
+            g.blitSprite(
+                    RenderType::guiTextured, on ? TEX_ON : TEX_OFF, bx + 1, by + 1, BUTTON_SIZE - 2, BUTTON_SIZE - 2);
 
             ItemStack adjacent = getAdjacentItem(facing, bit);
             if (!adjacent.isEmpty()) {

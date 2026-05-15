@@ -74,7 +74,7 @@ public class TankRenderer extends AbstractTankRenderer<TankBlockEntity> {
 
         int fluidLight = fluid.getFluidType().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
 
-        VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
+        VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentItemSheet());
 
         float uL = fluidSprite.getU0(), uR = fluidSprite.getU1();
         float vT = fluidSprite.getV0();

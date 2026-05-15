@@ -40,7 +40,9 @@ public class LazuritePaxelItem extends DiggerItem {
         super(
                 LazuriteTier.PAXEL,
                 BlockTags.create(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "mineable/paxel")),
-                properties.attributes(DiggerItem.createAttributes(LazuriteTier.PAXEL, 3.0f, -3.0f)));
+                3.0f,
+                -3.0f,
+                properties);
     }
 
     @Override
@@ -95,7 +97,7 @@ public class LazuritePaxelItem extends DiggerItem {
                 stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
             }
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     private BlockState tryAxe(BlockState state, UseOnContext context, Level level, BlockPos pos, Player player) {

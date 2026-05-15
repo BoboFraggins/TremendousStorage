@@ -26,14 +26,17 @@ public class StirlingEngineRenderer
         implements BlockEntityRenderer<StirlingEngineBlockEntity>,
                 IBlockEntityRendererExtension<StirlingEngineBlockEntity> {
 
-    private static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_body"));
-    private static final ModelResourceLocation FLYWHEEL_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_flywheel"));
-    private static final ModelResourceLocation PISTON_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_piston"));
-    private static final ModelResourceLocation BRIDGE_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_bridge"));
+    private static final ModelResourceLocation BODY_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_body"), "standalone");
+    private static final ModelResourceLocation FLYWHEEL_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_flywheel"),
+            "standalone");
+    private static final ModelResourceLocation PISTON_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_piston"),
+            "standalone");
+    private static final ModelResourceLocation BRIDGE_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_bridge"),
+            "standalone");
 
     /** Flywheel rotation pivot — centre of the flywheel disc at X=1.5, Y=7.0, Z=8.0 px. */
     private static final float FW_X = 1.5f / 16f;

@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "tremendousstorage:item/network_interface",
+    "model": {
+      "type": "tremendousstorage:network_interface_renderer"
+    }
+  }
+}

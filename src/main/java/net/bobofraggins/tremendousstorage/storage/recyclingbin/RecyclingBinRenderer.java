@@ -19,7 +19,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
@@ -42,12 +41,12 @@ public class RecyclingBinRenderer
         implements BlockEntityRenderer<RecyclingBinBlockEntity>,
                 IBlockEntityRendererExtension<RecyclingBinBlockEntity> {
 
-    private static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_body"));
-    private static final ModelResourceLocation LID_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_lid"));
-    private static final ModelResourceLocation PEDAL_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_pedal"));
+    private static final ModelResourceLocation BODY_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_body"), "standalone");
+    private static final ModelResourceLocation LID_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_lid"), "standalone");
+    private static final ModelResourceLocation PEDAL_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_pedal"), "standalone");
 
     // Lid hinge pivot — back-bottom edge of lid element [8,12,4]→[16,14,12]: y=12, z=12
     private static final float LID_PIVOT_Y = 12f / 16f;
@@ -137,7 +136,7 @@ public class RecyclingBinRenderer
         IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.POSITIVE_VIBES_TYPE.get());
         TextureAtlasSprite sprite = Minecraft.getInstance()
                 .getModelManager()
-                .getAtlas(InventoryMenu.BLOCK_ATLAS)
+                .getAtlas(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS)
                 .getSprite(ext.getStillTexture());
 
         int tint = ext.getTintColor();
@@ -150,7 +149,7 @@ public class RecyclingBinRenderer
         int fluidLight =
                 Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
 
-        VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentCullBlockSheet());
+        VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentItemSheet());
 
         float uL = sprite.getU0();
         float uR = sprite.getU1();

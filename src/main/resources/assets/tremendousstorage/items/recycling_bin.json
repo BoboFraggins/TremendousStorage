@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:special",
+    "base": "tremendousstorage:item/recycling_bin",
+    "model": {
+      "type": "tremendousstorage:recycling_bin_renderer"
+    }
+  }
+}

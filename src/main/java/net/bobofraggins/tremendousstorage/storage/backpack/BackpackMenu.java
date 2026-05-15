@@ -218,7 +218,7 @@ public class BackpackMenu extends AbstractContainerMenu {
                 level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
         if (optional.isPresent()) {
             RecipeHolder<CraftingRecipe> holder = optional.get();
-            if (resultSlots.setRecipeUsed(level, sp, holder)) {
+            if (resultSlots.setRecipeUsed(sp, holder)) {
                 ItemStack assembled = holder.value().assemble(input, level.registryAccess());
                 if (assembled.isItemEnabled(level.enabledFeatures())) result = assembled;
             }

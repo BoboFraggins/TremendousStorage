@@ -23,6 +23,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -103,7 +104,7 @@ public class AccessTerminalBlock extends BaseEntityBlock implements NetworkConne
             Level level,
             BlockPos pos,
             Block neighborBlock,
-            BlockPos neighborPos,
+            @Nullable Orientation orientation,
             boolean movedByPiston) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof AccessTerminalBlockEntity be) {
             be.setChanged();
@@ -129,7 +130,10 @@ public class AccessTerminalBlock extends BaseEntityBlock implements NetworkConne
         if (be instanceof AccessTerminalBlockEntity terminal) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof BlockItem) {
-                    terminal.saveToItem(drop, params.getLevel().registryAccess());
+                    BlockItem.setBlockEntityData(
+                            drop,
+                            terminal.getType(),
+                            terminal.saveCustomOnly(params.getLevel().registryAccess()));
                 }
             }
         }

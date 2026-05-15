@@ -38,10 +38,10 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 public class WirelessHubRenderer
         implements BlockEntityRenderer<WirelessHubBlockEntity>, IBlockEntityRendererExtension<WirelessHubBlockEntity> {
 
-    private static final ModelResourceLocation BASE_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_base"));
-    private static final ModelResourceLocation DISH_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_dish"));
+    private static final ModelResourceLocation BASE_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_base"), "standalone");
+    private static final ModelResourceLocation DISH_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_dish"), "standalone");
 
     /** Dish pivot is the block centre in all three axes (8/16 = 0.5). */
     private static final float PIVOT = 0.5f;

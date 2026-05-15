@@ -3,8 +3,8 @@ package net.bobofraggins.tremendousstorage.lazurite;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
@@ -60,16 +60,23 @@ public class LazuriteRepairRecipe extends CustomRecipe {
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return width * height >= 2;
+    public RecipeSerializer<? extends CustomRecipe> getSerializer() {
+        return net.bobofraggins.tremendousstorage.shared.register.Registration.LAZURITE_REPAIR_RECIPE.get();
     }
 
-    @Override
-    public RecipeSerializer<?> getSerializer() {
-        return Registration.LAZURITE_REPAIR_RECIPE.get();
-    }
+    private static final java.util.Set<java.util.function.Supplier<? extends Item>> LAZURITE_TOOLS = java.util.Set.of(
+            Registration.LAZURITE_PICKAXE,
+            Registration.LAZURITE_AXE,
+            Registration.LAZURITE_SHOVEL,
+            Registration.LAZURITE_SWORD,
+            Registration.LAZURITE_HOE,
+            Registration.LAZURITE_PAXEL);
 
     private static boolean isLazuriteTool(ItemStack stack) {
-        return stack.getItem() instanceof TieredItem t && t.getTier() instanceof LazuriteTier;
+        Item item = stack.getItem();
+        for (var supplier : LAZURITE_TOOLS) {
+            if (supplier.get() == item) return true;
+        }
+        return false;
     }
 }

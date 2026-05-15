@@ -6,6 +6,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -59,14 +60,22 @@ public class TentDoorBlock extends Block {
                     spawn.getX() + 0.5,
                     spawn.getY(),
                     spawn.getZ() + 0.5,
-                    Set.of(),
+                    Set.<Relative>of(),
                     serverPlayer.getYRot(),
-                    serverPlayer.getXRot());
+                    serverPlayer.getXRot(),
+                    false);
         } else {
             ServerLevel returnLevel = server.getLevel(target.dimension());
             if (returnLevel != null) {
                 serverPlayer.teleportTo(
-                        returnLevel, target.x(), target.y(), target.z(), Set.of(), target.yRot(), target.xRot());
+                        returnLevel,
+                        target.x(),
+                        target.y(),
+                        target.z(),
+                        Set.<Relative>of(),
+                        target.yRot(),
+                        target.xRot(),
+                        false);
             }
         }
         return InteractionResult.SUCCESS;

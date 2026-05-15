@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.items;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.cauldron.CauldronInteraction;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -45,7 +45,7 @@ public final class PositiveVibesInteractions {
                                 pos, Registration.POSITIVE_VIBES_CAULDRON.get().defaultBlockState());
                         level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
                     }
-                    return ItemInteractionResult.sidedSuccess(level.isClientSide);
+                    return InteractionResult.SUCCESS;
                 });
 
         // 2. Positive Vibes cauldron + empty bucket → Positive Vibes Bucket
@@ -56,7 +56,7 @@ public final class PositiveVibesInteractions {
                 level.setBlockAndUpdate(pos, Blocks.CAULDRON.defaultBlockState());
                 level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
             }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         });
 
         // 3. Positive Vibes cauldron + Zombie Brain → Brain in hand, cauldron emptied
@@ -67,7 +67,7 @@ public final class PositiveVibesInteractions {
                 level.setBlockAndUpdate(pos, Blocks.CAULDRON.defaultBlockState());
                 level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
             }
-            return ItemInteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         });
     }
 }

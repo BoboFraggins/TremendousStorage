@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.1.20'
+    id 'net.neoforged.gradle.userdev' version '7.0.173'
     id 'com.diffplug.spotless' version '7.0.2'
 }
 
@@ -37,21 +37,33 @@ runs {
     gameTestServer {
         systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
     }
-
-    data {
-        arguments.addAll '--mod', project.mod_id, '--all', '--output',
-            file('src/generated/resources/').getAbsolutePath(), '--existing',
-            file('src/main/resources/').getAbsolutePath()
-    }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+// Exclude integration files for dependencies not yet available on 1.21.4
+sourceSets.main.java.exclude(
+    '**/external/create/**',
+    '**/external/mekanism/**',
+    '**/external/jade/**',
+    '**/*JadePlugin.java',
+    '**/storage/networkinterface/NetworkInterfaceJadePlugin.java',
+    '**/storage/tube/TubeJadePlugin.java',
+    '**/storage/tank/TankJadePlugin.java',
+    '**/storage/filingcabinet/FilingCabinetJadePlugin.java',
+    '**/storage/chest/ChestJadePlugin.java',
+    '**/storage/accessterminal/AccessTerminalJadePlugin.java',
+    '**/external/mysticalagriculture/**',
+    '**/lazurite/LazuriteCropPlugin.java',
+    '**/external/jei/**'
+)
 
 configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
 
 repositories {
+    mavenLocal()
     maven { url "https://api.modrinth.com/maven" }
     maven {
         name = "JEI Maven"
@@ -88,18 +100,18 @@ repositories {
 
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
-    compileOnly "maven.modrinth:jade:15.9.2+neoforge"
-    compileOnly "mezz.jei:jei-1.21.1-neoforge-api:19.27.0.340"
-    compileOnly "top.theillusivec4.curios:curios-neoforge:9.2.2+1.21.1:api"
-    compileOnly "mekanism:Mekanism:1.21.1-10.7.15.81:api"
-    compileOnly "com.hollingsworth.ars_nouveau:ars_nouveau-1.21.1:5.11.2.1298"
-    compileOnly "com.blakebr0.cucumber:Cucumber:1.21.1-8.0.15"
-    compileOnly "com.blakebr0.mysticalagriculture:MysticalAgriculture:1.21.1-8.0.23"
-    compileOnly "maven.modrinth:structure-pool-api:${structure_pool_api_version}"
-    compileOnly("curse.maven:create-328085:7408951") { transitive = false }
+    compileOnly "maven.modrinth:jade:26.1.1+neoforge"
+    compileOnly "mezz.jei:jei-1.21.4-neoforge-api:20.0.0.4"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:10.0.1+1.21.4:api"
+    //compileOnly "mekanism:Mekanism:1.21.1-10.7.15.81:api"
+    //compileOnly "com.hollingsworth.ars_nouveau:ars_nouveau-1.21.1:5.11.2.1298"
+    //compileOnly "com.blakebr0.cucumber:Cucumber:1.21.1-8.0.15"
+    //compileOnly "com.blakebr0.mysticalagriculture:MysticalAgriculture:1.21.1-8.0.23"
+    //compileOnly "maven.modrinth:structure-pool-api:${structure_pool_api_version}"
+    //compileOnly("curse.maven:create-328085:7408951") { transitive = false }
     // Recipe viewer integrations — optional at runtime, compile-only for API access
-    compileOnly "maven.modrinth:emi:${emi_version}"
-    compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
+    //compileOnly "maven.modrinth:emi:${emi_version}"
+    //compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"
 }
 
 tasks.withType(ProcessResources).configureEach {

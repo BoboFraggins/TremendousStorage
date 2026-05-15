@@ -510,7 +510,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         if (item.isEmpty() || level == null) return null;
         var in1 = CraftingInput.of(1, 1, List.of(item));
         ItemStack out9 = ItemStack.EMPTY, out4 = ItemStack.EMPTY, out8 = ItemStack.EMPTY;
-        for (var holder : rm.getAllRecipesFor(RecipeType.CRAFTING)) {
+        for (var holder : rm.recipeMap().byType(RecipeType.CRAFTING)) {
             if (!holder.value().matches(in1, level)) continue;
             var out = holder.value().assemble(in1, level.registryAccess());
             if (out.isEmpty()) continue;

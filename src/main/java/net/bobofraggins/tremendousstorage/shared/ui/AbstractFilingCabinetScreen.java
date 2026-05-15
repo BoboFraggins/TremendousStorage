@@ -179,7 +179,15 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
             long count = stack.getCount();
             if (count > 1) renderSizeLabel(graphics, font, sx, sy, CountFormat.format(count), 0xFFFFFF);
             if (hoveredSlot == slot) {
-                renderSlotHighlight(graphics, sx, sy, 0);
+                graphics.fillGradient(
+                        net.minecraft.client.renderer.RenderType.guiOverlay(),
+                        sx,
+                        sy,
+                        sx + 16,
+                        sy + 16,
+                        -2130706433,
+                        -2130706433,
+                        0);
             }
             return;
         }

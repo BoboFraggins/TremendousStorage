@@ -5,9 +5,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -24,17 +24,17 @@ public final class MagicHatZombieHandler {
     public static void onFinalizeSpawn(FinalizeSpawnEvent event) {
         if (!(event.getEntity() instanceof Zombie zombie)) return;
 
-        MobSpawnType spawnType = event.getSpawnType();
-        if (spawnType == MobSpawnType.COMMAND
-                || spawnType == MobSpawnType.SPAWN_EGG
-                || spawnType == MobSpawnType.BUCKET
-                || spawnType == MobSpawnType.DISPENSER) return;
+        EntitySpawnReason spawnType = event.getSpawnType();
+        if (spawnType == EntitySpawnReason.COMMAND
+                || spawnType == EntitySpawnReason.SPAWN_ITEM_USE
+                || spawnType == EntitySpawnReason.BUCKET
+                || spawnType == EntitySpawnReason.DISPENSER) return;
 
         if (event.getLevel().getRandom().nextFloat() >= 0.05f) return;
 
         EntityType<?> mobType = pickMobType(event.getLevel().getRandom());
         Level level = zombie.level();
-        Entity mob = mobType.create(level);
+        Entity mob = mobType.create(level, EntitySpawnReason.TRIGGERED);
         if (mob == null) return;
 
         CompoundTag mobTag = new CompoundTag();

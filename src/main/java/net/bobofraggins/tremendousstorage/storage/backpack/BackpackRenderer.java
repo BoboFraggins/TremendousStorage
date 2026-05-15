@@ -37,10 +37,10 @@ import net.neoforged.neoforge.client.model.data.ModelData;
 public class BackpackRenderer
         implements BlockEntityRenderer<ChestBlockEntity>, IBlockEntityRendererExtension<ChestBlockEntity> {
 
-    static final ModelResourceLocation BODY_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_body"));
-    static final ModelResourceLocation FLAP_MODEL = ModelResourceLocation.standalone(
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_flap"));
+    static final ModelResourceLocation BODY_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_body"), "standalone");
+    static final ModelResourceLocation FLAP_MODEL = new ModelResourceLocation(
+            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_flap"), "standalone");
 
     private static float facingYRot(Direction facing) {
         return switch (facing) {

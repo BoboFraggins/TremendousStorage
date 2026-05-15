@@ -3,7 +3,6 @@ package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -46,11 +45,8 @@ public final class PicnicBasketClientEvents {
 
     @SubscribeEvent
     public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        event.register(ModelResourceLocation.standalone(
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_body")));
-        event.register(ModelResourceLocation.standalone(
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_left_lid")));
-        event.register(ModelResourceLocation.standalone(
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_right_lid")));
+        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_body"));
+        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_left_lid"));
+        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_right_lid"));
     }
 }

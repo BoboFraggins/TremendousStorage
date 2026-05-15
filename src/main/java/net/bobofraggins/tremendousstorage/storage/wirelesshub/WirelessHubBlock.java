@@ -9,7 +9,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -24,7 +23,8 @@ import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -40,7 +40,7 @@ import net.minecraft.world.phys.BlockHitResult;
 public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<WirelessHubBlock> CODEC = simpleCodec(WirelessHubBlock::new);
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final Property<Direction> FACING = HorizontalDirectionalBlock.FACING;
 
     @Override
     public MapCodec<WirelessHubBlock> codec() {
@@ -72,7 +72,7 @@ public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnecto
     @Override
     public RenderShape getRenderShape(BlockState state) {
         // All geometry (base, rods, arc) is drawn by WirelessHubRenderer; JSON provides particle only.
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return RenderShape.MODEL;
     }
 
     @Override
@@ -82,7 +82,10 @@ public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnecto
         if (be instanceof WirelessHubBlockEntity hub) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof BlockItem) {
-                    hub.saveToItem(drop, params.getLevel().registryAccess());
+                    BlockItem.setBlockEntityData(
+                            drop,
+                            hub.getType(),
+                            hub.saveCustomOnly(params.getLevel().registryAccess()));
                 }
             }
         }
@@ -95,7 +98,7 @@ public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnecto
             Level level,
             BlockPos pos,
             Block neighborBlock,
-            BlockPos neighborPos,
+            @Nullable Orientation orientation,
             boolean movedByPiston) {
         if (!level.isClientSide() && level.getBlockEntity(pos) instanceof WirelessHubBlockEntity be) {
             be.setChanged();
@@ -103,7 +106,7 @@ public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnecto
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(
+    protected InteractionResult useItemOn(
             ItemStack stack,
             BlockState state,
             Level level,
@@ -111,7 +114,7 @@ public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnecto
             Player player,
             InteractionHand hand,
             BlockHitResult hit) {
-        if (stack.getItem() instanceof StorageUpgradeItem) return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        if (stack.getItem() instanceof StorageUpgradeItem) return InteractionResult.FAIL;
         return super.useItemOn(stack, state, level, pos, player, hand, hit);
     }
 

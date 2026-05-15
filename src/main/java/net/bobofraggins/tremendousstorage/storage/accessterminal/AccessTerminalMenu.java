@@ -241,7 +241,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         CraftingInput input = craftSlots.asCraftInput();
 
         List<RecipeHolder<CraftingRecipe>> newMatches =
-                level.getServer().getRecipeManager().getAllRecipesFor(RecipeType.CRAFTING).stream()
+                level.getServer().getRecipeManager().recipeMap().byType(RecipeType.CRAFTING).stream()
                         .filter(h -> h.value().matches(input, level))
                         .toList();
 
@@ -278,7 +278,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         ItemStack result = ItemStack.EMPTY;
         if (!matchingRecipes.isEmpty()) {
             RecipeHolder<CraftingRecipe> holder = matchingRecipes.get(selectedRecipeIndex);
-            if (resultSlots.setRecipeUsed(level, serverPlayer, holder)) {
+            if (resultSlots.setRecipeUsed(serverPlayer, holder)) {
                 ItemStack assembled = holder.value().assemble(input, level.registryAccess());
                 if (assembled.isItemEnabled(level.enabledFeatures())) {
                     result = assembled;
@@ -454,11 +454,11 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             if (current.isEmpty()) {
                 // Normal case: ingredient was fully consumed — pull a fresh stack from network
                 anyRefilled |= extractFromNetworkIntoSlot(handler, snap, i);
-            } else if (snap.hasCraftingRemainingItem()) {
+            } else if (!snap.getItem().getCraftingRemainder().isEmpty()) {
                 // Container item case (e.g. lava bucket → empty bucket):
                 // onTake placed the remainder (empty bucket) back in the slot.
                 // If that remainder matches what's there now, swap it for a full one.
-                ItemStack remainder = snap.getCraftingRemainingItem();
+                ItemStack remainder = snap.getItem().getCraftingRemainder();
                 if (!remainder.isEmpty() && ItemStack.isSameItemSameComponents(current, remainder)) {
                     // Try to extract the full item (e.g. lava bucket) from the network
                     ItemStack needed = snap.copyWithCount(1);
@@ -528,7 +528,9 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         }
 
         // Place ingredients from the network into the grid.
-        var ingredients = recipe.getIngredients();
+        var placementInfo = recipe.placementInfo();
+        var compactIngredients = placementInfo.ingredients();
+        var slotMapping = placementInfo.slotsToIngredientIndex();
         if (recipe instanceof ShapedRecipe shaped) {
             int w = shaped.getWidth();
             int h = shaped.getHeight();
@@ -536,14 +538,21 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                 for (int col = 0; col < w; col++) {
                     int recipeIdx = row * w + col;
                     int gridIdx = row * 3 + col;
-                    if (recipeIdx < ingredients.size()) {
-                        craftSlots.setItem(gridIdx, extractOneFromNetwork(handler, ingredients.get(recipeIdx)));
+                    if (recipeIdx < slotMapping.size()) {
+                        int ingredIdx = slotMapping.getInt(recipeIdx);
+                        if (ingredIdx >= 0 && ingredIdx < compactIngredients.size()) {
+                            craftSlots.setItem(
+                                    gridIdx, extractOneFromNetwork(handler, compactIngredients.get(ingredIdx)));
+                        }
                     }
                 }
             }
         } else {
-            for (int i = 0; i < Math.min(ingredients.size(), 9); i++) {
-                craftSlots.setItem(i, extractOneFromNetwork(handler, ingredients.get(i)));
+            for (int i = 0; i < Math.min(slotMapping.size(), 9); i++) {
+                int ingredIdx = slotMapping.getInt(i);
+                if (ingredIdx >= 0 && ingredIdx < compactIngredients.size()) {
+                    craftSlots.setItem(i, extractOneFromNetwork(handler, compactIngredients.get(ingredIdx)));
+                }
             }
         }
 

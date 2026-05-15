@@ -2,10 +2,6 @@ package net.bobofraggins.tremendousstorage.power.stirlingengine;
 
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
-import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -38,31 +34,18 @@ public final class StirlingEngineClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
+    public static void onRegisterItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
         event.register(
-                (stack, tintIndex) -> {
-                    if (tintIndex != 0) return -1;
-                    var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-                    if (customData != null) {
-                        CompoundTag tag = customData.copyTag();
-                        if (tag.contains("Tier")) {
-                            return StorageTier.fromId(tag.getString("Tier")).getColor();
-                        }
-                    }
-                    return StorageTier.WOOD.getColor();
-                },
-                Registration.STIRLING_ENGINE_ITEM.get());
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
+                net.bobofraggins.tremendousstorage.shared.storage.StorageTierTintSource.MAP_CODEC);
     }
 
     @SubscribeEvent
     public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        event.register(ModelResourceLocation.standalone(
-                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_body")));
-        event.register(ModelResourceLocation.standalone(
-                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_flywheel")));
-        event.register(ModelResourceLocation.standalone(
-                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_piston")));
-        event.register(ModelResourceLocation.standalone(
-                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_bridge")));
+        event.register(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_body"));
+        event.register(
+                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_flywheel"));
+        event.register(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_piston"));
+        event.register(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "block/stirling_engine_bridge"));
     }
 }

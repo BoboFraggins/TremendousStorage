@@ -15,7 +15,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -24,7 +23,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
@@ -35,8 +33,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -64,7 +62,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<TankBlock> CODEC = simpleCodec(TankBlock::new);
 
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final Property<net.minecraft.core.Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final EnumProperty<StorageTier> TIER_PROP = EnumProperty.create("tier", StorageTier.class);
 
     public TankBlock(Properties props) {
@@ -109,7 +107,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
     }
 
     @Override
-    public VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
+    public VoxelShape getOcclusionShape(BlockState state) {
         return Shapes.empty();
     }
 
@@ -120,7 +118,10 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
         if (be instanceof TankBlockEntity tank) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof BlockItem) {
-                    tank.saveToItem(drop, params.getLevel().registryAccess());
+                    BlockItem.setBlockEntityData(
+                            drop,
+                            tank.getType(),
+                            tank.saveCustomOnly(params.getLevel().registryAccess()));
                 }
             }
         }
@@ -146,7 +147,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
      * </ul>
      */
     @Override
-    protected ItemInteractionResult useItemOn(
+    protected InteractionResult useItemOn(
             ItemStack stack,
             BlockState state,
             Level level,
@@ -155,13 +156,13 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
             InteractionHand hand,
             BlockHitResult hit) {
         if (stack.getItem() instanceof net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeItem)
-            return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
-        if (level.isClientSide()) return ItemInteractionResult.SUCCESS;
+            return InteractionResult.FAIL;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         // --- Bottle handling (250 mB per bottle) ---
         if (stack.is(Items.GLASS_BOTTLE)) {
             if (!(level.getBlockEntity(pos) instanceof TankBlockEntity be))
-                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                return InteractionResult.TRY_WITH_EMPTY_HAND;
             FluidStack simulated = be.extract(BOTTLE_MB, true);
             if (simulated.getAmount() >= BOTTLE_MB) {
                 ItemStack result;
@@ -174,21 +175,21 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
                 } else if (simulated.is(HONEY_FLUID_TAG)) {
                     result = new ItemStack(Items.HONEY_BOTTLE);
                 } else {
-                    return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                    return InteractionResult.TRY_WITH_EMPTY_HAND;
                 }
                 be.extract(BOTTLE_MB, false);
                 player.setItemInHand(hand, ItemUtils.createFilledResult(stack, player, result));
                 level.playSound(null, pos, SoundEvents.BOTTLE_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
 
         if (stack.is(Items.POTION)) {
             PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
             if (contents != null && contents.is(Potions.WATER)) {
                 if (!(level.getBlockEntity(pos) instanceof TankBlockEntity be))
-                    return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                    return InteractionResult.TRY_WITH_EMPTY_HAND;
                 FluidStack water = new FluidStack(Fluids.WATER, BOTTLE_MB);
                 long inserted = be.insert(water, BOTTLE_MB, true);
                 if (inserted >= BOTTLE_MB) {
@@ -196,15 +197,15 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
                     player.setItemInHand(
                             hand, ItemUtils.createFilledResult(stack, player, new ItemStack(Items.GLASS_BOTTLE)));
                     level.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
-                    return ItemInteractionResult.SUCCESS;
+                    return InteractionResult.SUCCESS;
                 }
             }
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
 
         if (stack.is(Items.EXPERIENCE_BOTTLE)) {
             if (!(level.getBlockEntity(pos) instanceof TankBlockEntity be))
-                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                return InteractionResult.TRY_WITH_EMPTY_HAND;
             // Use the tank's locked experience fluid if present, otherwise the default XP fluid.
             FluidStack locked = be.getStoredFluid();
             Fluid xpFluid = (!locked.isEmpty() && locked.is(EXPERIENCE_FLUID_TAG))
@@ -217,18 +218,17 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
                 player.setItemInHand(
                         hand, ItemUtils.createFilledResult(stack, player, new ItemStack(Items.GLASS_BOTTLE)));
                 level.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
 
         if (stack.is(Items.HONEY_BOTTLE)) {
             if (!(level.getBlockEntity(pos) instanceof TankBlockEntity be))
-                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+                return InteractionResult.TRY_WITH_EMPTY_HAND;
             // Require the tank to already hold a honey fluid so we know which one to use.
             FluidStack stored = be.getStoredFluid();
-            if (stored.isEmpty() || !stored.is(HONEY_FLUID_TAG))
-                return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            if (stored.isEmpty() || !stored.is(HONEY_FLUID_TAG)) return InteractionResult.TRY_WITH_EMPTY_HAND;
             FluidStack honey = new FluidStack(stored.getFluid(), BOTTLE_MB);
             long inserted = be.insert(honey, BOTTLE_MB, true);
             if (inserted >= BOTTLE_MB) {
@@ -236,14 +236,14 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
                 player.setItemInHand(
                         hand, ItemUtils.createFilledResult(stack, player, new ItemStack(Items.GLASS_BOTTLE)));
                 level.playSound(null, pos, SoundEvents.BOTTLE_EMPTY, SoundSource.BLOCKS, 1.0f, 1.0f);
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.TRY_WITH_EMPTY_HAND;
         }
 
         // --- Bucket / modded fluid container handling (via capability) ---
         IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, state, null, null);
-        if (handler == null) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (handler == null) return InteractionResult.TRY_WITH_EMPTY_HAND;
 
         // Determine sound direction before the interaction mutates the item stack.
         // Empty bucket / empty tank item → we are filling it (BUCKET_FILL sound).
@@ -267,7 +267,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
                 level.playSound(null, pos, sound, SoundSource.BLOCKS, 1.0f, 1.0f);
             }
         }
-        return success ? ItemInteractionResult.SUCCESS : ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return success ? InteractionResult.SUCCESS : InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     /** Right-click with empty hand → open tank settings screen. */

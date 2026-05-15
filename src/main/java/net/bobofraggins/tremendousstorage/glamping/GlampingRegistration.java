@@ -2,7 +2,6 @@ package net.bobofraggins.tremendousstorage.glamping;
 
 import com.mojang.serialization.MapCodec;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -22,7 +21,7 @@ public class GlampingRegistration {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(TremendousStorage.MODID);
 
     private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES =
-            DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, TremendousStorage.MODID);
+            DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, TremendousStorage.MODID);
 
     private static final DeferredRegister<MapCodec<? extends ChunkGenerator>> CHUNK_GENERATOR_TYPES =
             DeferredRegister.create(Registries.CHUNK_GENERATOR, TremendousStorage.MODID);
@@ -41,8 +40,7 @@ public class GlampingRegistration {
     public static final DeferredHolder<Item, BlockItem> TENT_ITEM = ITEMS.registerSimpleBlockItem("tent", TENT);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TentBlockEntity>> TENT_BE_TYPE =
-            BLOCK_ENTITY_TYPES.register("tent", () -> BlockEntityType.Builder.of(TentBlockEntity::new, TENT.get())
-                    .build(null));
+            BLOCK_ENTITY_TYPES.register("tent", () -> new BlockEntityType<>(TentBlockEntity::new, TENT.get()));
 
     // -------------------------------------------------------------------------
     // Tent door block

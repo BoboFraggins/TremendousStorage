@@ -1,11 +1,8 @@
 package net.bobofraggins.tremendousstorage.storage.storageupgrade;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderItemDecorator;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
@@ -38,12 +35,10 @@ public final class StorageClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event) {
-        // BlockItem color for Tremendous Chest / Ender Tremendous Chest (reads tier from NBT component)
+    public static void onRegisterItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
         event.register(
-                (stack, tintIndex) -> tintIndex == 0 ? tierColorFromStack(stack) : -1,
-                Registration.TREMENDOUS_CHEST_ITEM.get(),
-                Registration.ENDER_TREMENDOUS_CHEST_ITEM.get());
+                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
+                net.bobofraggins.tremendousstorage.shared.storage.StorageTierTintSource.MAP_CODEC);
     }
 
     @SubscribeEvent
@@ -51,16 +46,5 @@ public final class StorageClientEvents {
         FolderItemDecorator decorator = new FolderItemDecorator();
         event.register(Registration.MANILA_FOLDER.get(), decorator);
         event.register(Registration.ENDER_FOLDER.get(), decorator);
-    }
-
-    private static int tierColorFromStack(net.minecraft.world.item.ItemStack stack) {
-        var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        if (customData != null) {
-            CompoundTag tag = customData.copyTag();
-            if (tag.contains("Tier")) {
-                return StorageTier.fromId(tag.getString("Tier")).getColor();
-            }
-        }
-        return StorageTier.WOOD.getColor();
     }
 }

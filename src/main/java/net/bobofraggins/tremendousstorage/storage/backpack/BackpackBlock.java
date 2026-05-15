@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
@@ -37,7 +37,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class BackpackBlock extends BaseEntityBlock {
 
     public static final MapCodec<BackpackBlock> CODEC = simpleCodec(BackpackBlock::new);
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final Property<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     /** Approximate bounding box of the backpack model (in 1/16-block units). */
     private static final VoxelShape SHAPE = Block.box(3.5, 0, 4.75, 12.5, 12.5, 12.75);
@@ -78,11 +78,11 @@ public class BackpackBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;
+        return RenderShape.MODEL;
     }
 
     @Override
-    public VoxelShape getOcclusionShape(BlockState state, BlockGetter level, BlockPos pos) {
+    public VoxelShape getOcclusionShape(BlockState state) {
         return Shapes.empty();
     }
 
@@ -124,7 +124,10 @@ public class BackpackBlock extends BaseEntityBlock {
         if (be instanceof net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity bulk) {
             for (ItemStack drop : drops) {
                 if (drop.getItem() instanceof net.minecraft.world.item.BlockItem) {
-                    bulk.saveToItem(drop, params.getLevel().registryAccess());
+                    net.minecraft.world.item.BlockItem.setBlockEntityData(
+                            drop,
+                            bulk.getType(),
+                            bulk.saveCustomOnly(params.getLevel().registryAccess()));
                 }
             }
         }

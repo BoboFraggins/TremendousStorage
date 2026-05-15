@@ -48,7 +48,8 @@ public class ArmoryCabinetRenderer
     private static final ModelResourceLocation WHEEL = standalone("block/armory_cabinet_wheel");
 
     private static ModelResourceLocation standalone(String path) {
-        return ModelResourceLocation.standalone(ResourceLocation.fromNamespaceAndPath("tremendousstorage", path));
+        return new ModelResourceLocation(
+                ResourceLocation.fromNamespaceAndPath("tremendousstorage", path), "standalone");
     }
 
     // Animation constants

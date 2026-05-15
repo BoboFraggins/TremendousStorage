@@ -8,9 +8,9 @@ import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -70,11 +70,11 @@ public final class LazuriteEquipmentHandler {
     @SubscribeEvent
     static void onFinalizeSpawn(FinalizeSpawnEvent event) {
         // Only natural / spawner spawns — skip commands, eggs, etc.
-        MobSpawnType spawnType = event.getSpawnType();
-        if (spawnType == MobSpawnType.COMMAND
-                || spawnType == MobSpawnType.SPAWN_EGG
-                || spawnType == MobSpawnType.BUCKET
-                || spawnType == MobSpawnType.DISPENSER) return;
+        EntitySpawnReason spawnType = event.getSpawnType();
+        if (spawnType == EntitySpawnReason.COMMAND
+                || spawnType == EntitySpawnReason.SPAWN_ITEM_USE
+                || spawnType == EntitySpawnReason.BUCKET
+                || spawnType == EntitySpawnReason.DISPENSER) return;
 
         Mob mob = event.getEntity();
         ItemStack mainhand = mob.getMainHandItem();

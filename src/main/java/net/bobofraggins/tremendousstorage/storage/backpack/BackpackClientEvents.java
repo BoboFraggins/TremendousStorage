@@ -3,7 +3,6 @@ package net.bobofraggins.tremendousstorage.storage.backpack;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
@@ -50,10 +49,8 @@ public final class BackpackClientEvents {
 
     @SubscribeEvent
     public static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event) {
-        event.register(ModelResourceLocation.standalone(
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_body")));
-        event.register(ModelResourceLocation.standalone(
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_flap")));
+        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_body"));
+        event.register(ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_flap"));
     }
 
     @SubscribeEvent
