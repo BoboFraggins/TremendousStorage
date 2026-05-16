@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -15,10 +15,9 @@ public class PriorityScreen extends AbstractContainerScreen<PriorityControl> {
     private Dialog dialog;
 
     public PriorityScreen(PriorityControl menu, Inventory inv, Component title) {
-        super(menu, inv, title);
-        dialog = new Dialog(menu);
-        this.imageWidth = dialog.totalWidth();
-        this.imageHeight = dialog.totalHeight();
+        Dialog dialog_ = new Dialog(menu);
+        super(menu, inv, title, dialog_.totalWidth(), dialog_.totalHeight());
+        dialog = dialog_;
     }
 
     @Override
@@ -28,19 +27,19 @@ public class PriorityScreen extends AbstractContainerScreen<PriorityControl> {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-        renderTooltip(graphics, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        extractBackground(graphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
+        super.extractContents(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Dialog draws the title
     }
 

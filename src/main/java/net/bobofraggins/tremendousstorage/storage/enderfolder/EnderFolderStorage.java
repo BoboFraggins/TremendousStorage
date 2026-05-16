@@ -10,7 +10,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.SavedDataStorage;
 
 /**
  * Server-side persistent storage for Ender Folder shared inventories.
@@ -28,7 +28,7 @@ public class EnderFolderStorage extends SavedData {
             CompoundTag.CODEC.xmap(EnderFolderStorage::fromCompoundTag, EnderFolderStorage::toCompoundTag);
 
     static final SavedDataType<EnderFolderStorage> TYPE =
-            new SavedDataType<>(SAVE_KEY, ctx -> new EnderFolderStorage(), ctx -> CODEC);
+            new SavedDataType<>(net.minecraft.resources.Identifier.parse(SAVE_KEY), EnderFolderStorage::new, CODEC);
 
     private final Map<Long, FolderContents> contents = new HashMap<>();
 
@@ -37,7 +37,7 @@ public class EnderFolderStorage extends SavedData {
     // -------------------------------------------------------------------------
 
     public static EnderFolderStorage get(MinecraftServer server) {
-        DimensionDataStorage storage = server.overworld().getDataStorage();
+        SavedDataStorage storage = server.overworld().getDataStorage();
         return storage.computeIfAbsent(TYPE);
     }
 

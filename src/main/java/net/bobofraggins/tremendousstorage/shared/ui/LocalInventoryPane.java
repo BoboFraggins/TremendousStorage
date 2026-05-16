@@ -11,7 +11,7 @@ import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalLayout;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -170,7 +170,7 @@ public class LocalInventoryPane implements IDialogPane {
 
     @Override
     public void render(
-            GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
+            GuiGraphicsExtractor graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
         drawGrid(graphics, font);
         drawScrollbar(graphics);
     }
@@ -350,7 +350,7 @@ public class LocalInventoryPane implements IDialogPane {
         scrollOffset = Math.max(0, Math.min(scrollOffset, maxScroll));
     }
 
-    private void drawGrid(GuiGraphics graphics, Font font) {
+    private void drawGrid(GuiGraphicsExtractor graphics, Font font) {
         int rows = visibleRows();
         int startY = gridStartY();
 
@@ -381,14 +381,14 @@ public class LocalInventoryPane implements IDialogPane {
                 int sx = GRID_X + col * AccessTerminalLayout.SLOT_SIZE + 1;
                 int sy = startY + row * AccessTerminalLayout.SLOT_SIZE + 1;
 
-                graphics.renderItem(stack, sx, sy);
+                graphics.item(stack, sx, sy);
                 String countStr = count > 1 ? CountFormat.format(count) : null;
-                graphics.renderItemDecorations(font, stack, sx, sy, countStr);
+                graphics.itemDecorations(font, stack, sx, sy, countStr);
             }
         }
     }
 
-    private void drawScrollbar(GuiGraphics graphics) {
+    private void drawScrollbar(GuiGraphicsExtractor graphics) {
         int rows = visibleRows();
         int barY = gridStartY();
         int barH = rows * AccessTerminalLayout.SLOT_SIZE;

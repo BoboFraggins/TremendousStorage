@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 
@@ -67,7 +67,7 @@ public class SearchBoxWidget {
     }
 
     /** Draws the background fill, recessed bevel, and "Search…" hint text. */
-    public void render(GuiGraphics graphics, Font font) {
+    public void render(GuiGraphicsExtractor graphics, Font font) {
         // Background
         graphics.fill(bx, by, bx + WIDTH, by + HEIGHT, 0xFF8B8B8B);
 
@@ -81,8 +81,7 @@ public class SearchBoxWidget {
 
         // Hint text
         if (editBox.getValue().isEmpty() && !editBox.isFocused()) {
-            graphics.drawString(
-                    font, "Search...", bx + MARGIN, by + (HEIGHT - font.lineHeight) / 2 + 1, 0xFFAAAAAA, false);
+            graphics.text(font, "Search...", bx + MARGIN, by + (HEIGHT - font.lineHeight) / 2 + 1, 0xFFAAAAAA, false);
         }
     }
 }

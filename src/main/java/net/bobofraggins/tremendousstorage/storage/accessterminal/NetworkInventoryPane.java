@@ -17,15 +17,13 @@ import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
@@ -120,7 +118,7 @@ public class NetworkInventoryPane implements IDialogPane {
 
     @Override
     public void render(
-            GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
+            GuiGraphicsExtractor graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
         drawGrid(graphics, font);
         drawScrollbar(graphics);
     }
@@ -507,7 +505,7 @@ public class NetworkInventoryPane implements IDialogPane {
         scrollOffset = Math.max(0, Math.min(scrollOffset, maxScroll));
     }
 
-    private void drawGrid(GuiGraphics graphics, Font font) {
+    private void drawGrid(GuiGraphicsExtractor graphics, Font font) {
         int rows = visibleRows();
         int startY = gridStartY();
 
@@ -543,7 +541,7 @@ public class NetworkInventoryPane implements IDialogPane {
                 if (fluid) {
                     renderFluidIcon(graphics, stack, sx, sy);
                 } else {
-                    graphics.renderItem(stack, sx, sy);
+                    graphics.item(stack, sx, sy);
                 }
 
                 if (count == 0) {
@@ -556,20 +554,21 @@ public class NetworkInventoryPane implements IDialogPane {
         }
     }
 
-    private static void renderFluidIcon(GuiGraphics graphics, ItemStack bucketStack, int x, int y) {
+    private static void renderFluidIcon(GuiGraphicsExtractor graphics, ItemStack bucketStack, int x, int y) {
         Optional<FluidStack> fluidOpt = FluidUtil.getFluidContained(bucketStack);
         if (fluidOpt.isEmpty()) {
-            graphics.renderItem(bucketStack, x, y);
+            graphics.item(bucketStack, x, y);
             return;
         }
         FluidStack fluid = fluidOpt.get();
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fluid.getFluid());
-        Identifier stillTex = ext.getStillTexture(fluid);
-        TextureAtlasSprite sprite = Minecraft.getInstance()
-                .getAtlasManager()
-                .getAtlasOrThrow(TextureAtlas.LOCATION_BLOCKS)
-                .getSprite(stillTex);
-        int tint = ext.getTintColor(fluid);
+        net.minecraft.client.renderer.block.FluidModel fluidModel_ = Minecraft.getInstance()
+                .getModelManager()
+                .getFluidStateModelSet()
+                .get(fluid.getFluid().defaultFluidState());
+        TextureAtlasSprite sprite = fluidModel_.stillMaterial().sprite();
+        int tint = fluidModel_.fluidTintSource() != null
+                ? fluidModel_.fluidTintSource().colorAsStack(fluid)
+                : 0xFFFFFFFF;
         int r = (tint >> 16) & 0xFF;
         int g = (tint >> 8) & 0xFF;
         int b = tint & 0xFF;
@@ -580,7 +579,8 @@ public class NetworkInventoryPane implements IDialogPane {
     }
 
     /** Renders a count label at 0.666 scale in the bottom-right corner of a 16×16 slot. */
-    private static void renderSizeLabel(GuiGraphics graphics, Font font, float x, float y, String text, int color) {
+    private static void renderSizeLabel(
+            GuiGraphicsExtractor graphics, Font font, float x, float y, String text, int color) {
         float scale = 0.666f;
         float scaleInv = 1f / scale;
         float offset = -1f;
@@ -591,8 +591,8 @@ public class NetworkInventoryPane implements IDialogPane {
         float textX = (x + offset + 16f + 2f - font.width(text) * scale) * scaleInv;
         float textY = (y + offset + 10f) * scaleInv;
 
-        graphics.drawString(font, text, (int) (textX + 1f), (int) (textY + 1f), 0x414141, false);
-        graphics.drawString(font, text, (int) textX, (int) textY, color, false);
+        graphics.text(font, text, (int) (textX + 1f), (int) (textY + 1f), 0x414141, false);
+        graphics.text(font, text, (int) textX, (int) textY, color, false);
 
         graphics.pose().popMatrix();
     }
@@ -604,7 +604,7 @@ public class NetworkInventoryPane implements IDialogPane {
         return CountFormat.format(mB / 1000) + "B";
     }
 
-    private void drawScrollbar(GuiGraphics graphics) {
+    private void drawScrollbar(GuiGraphicsExtractor graphics) {
         int rows = visibleRows();
         int barY = gridStartY();
         int barH = rows * AccessTerminalLayout.SLOT_SIZE;

@@ -4,7 +4,7 @@ import net.bobofraggins.tremendousstorage.shared.network.SetPriorityPacket;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -110,12 +110,12 @@ public class PriorityControl extends AbstractContainerMenu implements IDialogPan
 
     @Override
     public void render(
-            GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
+            GuiGraphicsExtractor graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
         int selected = getPriority();
 
         // "Priority:" label, centred
         Component priorityLabel = Component.translatable("screen.tremendousstorage.priority_label");
-        graphics.drawString(font, priorityLabel, (width - font.width(priorityLabel)) / 2, LABEL_Y, 0x404040, false);
+        graphics.text(font, priorityLabel, (width - font.width(priorityLabel)) / 2, LABEL_Y, 0x404040, false);
 
         // ▼ button
         boolean downActive = selected > 0;
@@ -133,7 +133,7 @@ public class PriorityControl extends AbstractContainerMenu implements IDialogPan
         String name = Component.translatable(current.translationKey()).getString();
         int nameX = LBL_X + (LBL_W - font.width(name)) / 2;
         int nameY = ROW_Y + (BTN_H - 8) / 2;
-        graphics.drawString(font, name, nameX, nameY, 0x404040, false);
+        graphics.text(font, name, nameX, nameY, 0x404040, false);
     }
 
     @Override
@@ -165,7 +165,7 @@ public class PriorityControl extends AbstractContainerMenu implements IDialogPan
     }
 
     private static void drawButton(
-            GuiGraphics graphics, Font font, int x, int y, int w, int h, String label, boolean active) {
+            GuiGraphicsExtractor graphics, Font font, int x, int y, int w, int h, String label, boolean active) {
         // Vanilla-style button border: dark top/left, light bottom/right, gray fill
         int fillColor = active ? 0xFFC6C6C6 : 0xFF9B9B9B;
         graphics.fill(x, y, x + w, y + 1, 0xFF555555); // top
@@ -177,6 +177,6 @@ public class PriorityControl extends AbstractContainerMenu implements IDialogPan
         // Label centred
         int lx = x + (w - font.width(label)) / 2;
         int ly = y + (h - 8) / 2;
-        graphics.drawString(font, label, lx, ly, active ? 0x404040 : 0x707070, false);
+        graphics.text(font, label, lx, ly, active ? 0x404040 : 0x707070, false);
     }
 }

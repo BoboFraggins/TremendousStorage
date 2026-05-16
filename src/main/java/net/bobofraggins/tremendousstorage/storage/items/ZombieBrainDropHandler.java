@@ -22,7 +22,7 @@ public final class ZombieBrainDropHandler {
     static void onLivingDrops(LivingDropsEvent event) {
         if (!(event.getEntity() instanceof Zombie)) return;
         Level level = event.getEntity().level();
-        if (level.random.nextInt(8) != 0) return;
+        if (level.getRandom().nextInt(8) != 0) return;
         BlockPos pos = event.getEntity().blockPosition();
         event.getDrops()
                 .add(new ItemEntity(

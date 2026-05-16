@@ -1,23 +1,23 @@
 package net.bobofraggins.tremendousstorage.storage.chest;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -82,12 +82,12 @@ public class ChestRenderer
         poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
         poseStack.translate(-0.5, -0.5, -0.5);
         final var bodyPose = poseStack.last();
-        final List<BlockModelPart> bodyParts = collectParts(bodyModel, random);
+        final List<BlockStateModelPart> bodyParts = collectParts(bodyModel, random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
-                (pose, consumer) -> renderQuadsWithShading(
-                        consumer, bodyPose, bodyParts, null, r, g, b, packedLight, packedOverlay));
+                (pose, consumer) ->
+                        renderQuadsWithShading(consumer, bodyPose, bodyParts, r, g, b, packedLight, packedOverlay));
         poseStack.popPose();
 
         // Lid
@@ -99,17 +99,17 @@ public class ChestRenderer
         poseStack.mulPose(Axis.XP.rotationDegrees(state.lidAngle * 90f));
         poseStack.translate(0.0, -9.0 / 16.0, -15.0 / 16.0);
         final var lidPose = poseStack.last();
-        final List<BlockModelPart> lidParts = collectParts(lidModel, random);
+        final List<BlockStateModelPart> lidParts = collectParts(lidModel, random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
                 (pose, consumer) ->
-                        renderQuadsWithShading(consumer, lidPose, lidParts, null, r, g, b, packedLight, packedOverlay));
+                        renderQuadsWithShading(consumer, lidPose, lidParts, r, g, b, packedLight, packedOverlay));
         poseStack.popPose();
     }
 
-    private static List<BlockModelPart> collectParts(BlockStateModel model, RandomSource random) {
-        List<BlockModelPart> parts = new ArrayList<>();
+    private static List<BlockStateModelPart> collectParts(BlockStateModel model, RandomSource random) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
         model.collectParts(random, parts);
         return parts;
@@ -127,44 +127,44 @@ public class ChestRenderer
     private static void renderQuadsWithShading(
             VertexConsumer consumer,
             PoseStack.Pose pose,
-            List<BlockModelPart> parts,
-            Level level,
+            List<BlockStateModelPart> parts,
             float r,
             float g,
             float b,
             int packedLight,
             int packedOverlay) {
-        for (BlockModelPart part : parts) {
+        for (BlockStateModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
                     float qr, qg, qb;
-                    if (quad.tintIndex() >= 0) {
-                        qr = r * shade;
-                        qg = g * shade;
-                        qb = b * shade;
+                    if (quad.materialInfo().tintIndex() >= 0) {
+                        qr = r;
+                        qg = g;
+                        qb = b;
                     } else {
-                        qr = shade;
-                        qg = shade;
-                        qb = shade;
+                        qr = qg = qb = 1f;
                     }
-                    consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, packedOverlay);
+                    QuadInstance qi = new QuadInstance();
+                    qi.setColor((0xFF << 24) | ((int) (qr * 255) << 16) | ((int) (qg * 255) << 8) | (int) (qb * 255));
+                    qi.setLightCoords(packedLight);
+                    qi.setOverlayCoords(packedOverlay);
+                    consumer.putBakedQuad(pose, quad, qi);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                Direction dir = quad.direction();
-                float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
                 float qr, qg, qb;
-                if (quad.tintIndex() >= 0) {
-                    qr = r * shade;
-                    qg = g * shade;
-                    qb = b * shade;
+                if (quad.materialInfo().tintIndex() >= 0) {
+                    qr = r;
+                    qg = g;
+                    qb = b;
                 } else {
-                    qr = shade;
-                    qg = shade;
-                    qb = shade;
+                    qr = qg = qb = 1f;
                 }
-                consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, packedOverlay);
+                QuadInstance qi = new QuadInstance();
+                qi.setColor((0xFF << 24) | ((int) (qr * 255) << 16) | ((int) (qg * 255) << 8) | (int) (qb * 255));
+                qi.setLightCoords(packedLight);
+                qi.setOverlayCoords(packedOverlay);
+                consumer.putBakedQuad(pose, quad, qi);
             }
         }
     }

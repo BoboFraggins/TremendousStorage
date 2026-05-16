@@ -3,13 +3,11 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.bobofraggins.tremendousstorage.shared.tank.AbstractTankRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.util.Mth;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Matrix4f;
 
@@ -62,16 +60,21 @@ public class TankRenderer extends AbstractTankRenderer<TankBlockEntity> {
                 if (!fluid.isEmpty()) {
                     state.fillFrac = Math.max(0.01f, (float) be.getAmount() / be.getCapacity());
                     state.fillTop = TANK_FLUID_FLOOR + state.fillFrac * TANK_FLUID_H;
-                    IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fluid.getFluid());
-                    var fluidSprite = sprite(ext.getStillTexture(fluid));
-                    int tint = ext.getTintColor(fluid);
+                    net.minecraft.client.renderer.block.FluidModel fluidModel_ =
+                            net.minecraft.client.Minecraft.getInstance()
+                                    .getModelManager()
+                                    .getFluidStateModelSet()
+                                    .get(fluid.getFluid().defaultFluidState());
+                    var fluidSprite = fluidModel_.stillMaterial().sprite();
+                    int tint = fluidModel_.fluidTintSource() != null
+                            ? fluidModel_.fluidTintSource().colorAsStack(fluid)
+                            : 0xFFFFFFFF;
                     state.fr = (tint >> 16) & 0xFF;
                     state.fg = (tint >> 8) & 0xFF;
                     state.fb = tint & 0xFF;
                     state.fa = (tint >> 24) & 0xFF;
                     if (state.fa == 0) state.fa = 77;
-                    state.fluidLight =
-                            fluid.getFluidType().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : stateBase.lightCoords;
+                    state.fluidLight = fluid.getFluidType().getLightLevel() > 0 ? 0xF000F0 : stateBase.lightCoords;
                     state.uL = fluidSprite.getU0();
                     state.uR = fluidSprite.getU1();
                     state.vT = fluidSprite.getV0();

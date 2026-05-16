@@ -10,7 +10,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -64,7 +64,7 @@ public class TankExtractionCategory implements IRecipeCategory<TankExtractionJei
 
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, TankExtractionJeiRecipe recipe, IFocusGroup focuses) {
-        builder.addSlot(RecipeIngredientRole.CATALYST, TANK_X, SLOT_Y)
+        builder.addSlot(RecipeIngredientRole.CRAFTING_STATION, TANK_X, SLOT_Y)
                 .addIngredient(VanillaTypes.ITEM_STACK, recipe.tank());
 
         builder.addSlot(RecipeIngredientRole.INPUT, CONTAINER_X, SLOT_Y)
@@ -78,7 +78,7 @@ public class TankExtractionCategory implements IRecipeCategory<TankExtractionJei
     public void draw(
             TankExtractionJeiRecipe recipe,
             IRecipeSlotsView recipeSlotsView,
-            GuiGraphics guiGraphics,
+            GuiGraphicsExtractor guiGraphics,
             double mouseX,
             double mouseY) {
         int cy = SLOT_Y + 8;

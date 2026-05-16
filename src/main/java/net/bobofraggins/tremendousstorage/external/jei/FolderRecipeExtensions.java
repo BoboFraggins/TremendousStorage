@@ -20,6 +20,7 @@ import net.bobofraggins.tremendousstorage.storage.whiteout.FolderTapeRecipe;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.display.SlotDisplay;
 
 /**
  * JEI {@link ICraftingCategoryExtension} implementations for TremendousStorage's custom crafting
@@ -70,6 +71,11 @@ public final class FolderRecipeExtensions {
         private static final StorageTier[] TIERS = StorageTier.values();
 
         @Override
+        public List<SlotDisplay> getIngredients(RecipeHolder<FolderStorageRecipe> recipeHolder) {
+            return java.util.List.of();
+        }
+
+        @Override
         public void setRecipe(
                 RecipeHolder<FolderStorageRecipe> recipeHolder,
                 IRecipeLayoutBuilder builder,
@@ -109,6 +115,11 @@ public final class FolderRecipeExtensions {
         private static final StorageTier[] TIERS = StorageTier.values();
 
         @Override
+        public List<SlotDisplay> getIngredients(RecipeHolder<FolderExtractRecipe> recipeHolder) {
+            return java.util.List.of();
+        }
+
+        @Override
         public void setRecipe(
                 RecipeHolder<FolderExtractRecipe> recipeHolder,
                 IRecipeLayoutBuilder builder,
@@ -140,6 +151,11 @@ public final class FolderRecipeExtensions {
     static final class MergeExtension implements ICraftingCategoryExtension<FolderMergeRecipe> {
 
         private static final StorageTier[] TIERS = StorageTier.values();
+
+        @Override
+        public List<SlotDisplay> getIngredients(RecipeHolder<FolderMergeRecipe> recipeHolder) {
+            return java.util.List.of();
+        }
 
         @Override
         public void setRecipe(
@@ -180,6 +196,11 @@ public final class FolderRecipeExtensions {
     static final class TapeExtension implements ICraftingCategoryExtension<FolderTapeRecipe> {
 
         private static final StorageTier[] TIERS = StorageTier.values();
+
+        @Override
+        public List<SlotDisplay> getIngredients(RecipeHolder<FolderTapeRecipe> recipeHolder) {
+            return java.util.List.of();
+        }
 
         @Override
         public void setRecipe(

@@ -109,7 +109,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
                     SoundEvents.CHEST_OPEN,
                     SoundSource.BLOCKS,
                     0.5f,
-                    level.random.nextFloat() * 0.1f + 0.9f);
+                    level.getRandom().nextFloat() * 0.1f + 0.9f);
         }
 
         @Override
@@ -122,7 +122,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
                     SoundEvents.CHEST_CLOSE,
                     SoundSource.BLOCKS,
                     0.5f,
-                    level.random.nextFloat() * 0.1f + 0.9f);
+                    level.getRandom().nextFloat() * 0.1f + 0.9f);
         }
 
         @Override
@@ -279,7 +279,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
     /** Returns the stored count for the type at {@code index}, or 0. */
     public long getCount(int index) {
         if (index < 0 || index >= orderedKeys.size()) return 0;
-        return items.getLong(orderedKeys.get(index));
+        return items.getOrDefault(orderedKeys.get(index), 0L);
     }
 
     // -------------------------------------------------------------------------
@@ -323,7 +323,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
         if (index < 0 || index >= orderedKeys.size()) return ItemStack.EMPTY;
 
         StorageKey key = orderedKeys.get(index);
-        long stored = items.getLong(key);
+        long stored = items.getOrDefault(key, 0L);
         if (stored == 0) return ItemStack.EMPTY;
 
         ItemStack typeStack = key.toDisplayStack();
@@ -357,7 +357,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
     /** Adds all stored items with their actual counts to the given KeyCounter. */
     public void populateKeyCounter(KeyCounter kc) {
         for (StorageKey key : orderedKeys) {
-            long count = items.getLong(key);
+            long count = items.getOrDefault(key, 0L);
             if (count > 0) kc.add(key, count);
         }
     }
@@ -545,7 +545,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
                     .encodeStart(ops, key.toDisplayStack())
                     .result()
                     .ifPresent(t -> entry.put(TAG_TYPE, t));
-            entry.putLong(TAG_COUNT, items.getLong(key));
+            entry.putLong(TAG_COUNT, items.getOrDefault(key, 0L));
             list.add(entry);
         }
         return list;
@@ -612,7 +612,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
         for (StorageKey key : orderedKeys) {
             var entry = typesList.addChild();
             entry.store(TAG_TYPE, ItemStack.OPTIONAL_CODEC, key.toDisplayStack());
-            entry.putLong(TAG_COUNT, items.getLong(key));
+            entry.putLong(TAG_COUNT, items.getOrDefault(key, 0L));
         }
         output.putInt("Priority", priority.ordinal());
         output.putString("SortMode", sortMode.name());

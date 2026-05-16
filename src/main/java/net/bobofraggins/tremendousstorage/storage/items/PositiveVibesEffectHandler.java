@@ -28,7 +28,8 @@ public final class PositiveVibesEffectHandler {
         if (player.level().isClientSide()) return;
         if (player.tickCount % INTERVAL != 0) return;
 
-        if (player.isInFluidType(Registration.POSITIVE_VIBES_TYPE.get())) {
+        if (player.level().getFluidState(player.blockPosition()).getFluidType()
+                == Registration.POSITIVE_VIBES_TYPE.get()) {
             player.addEffect(new MobEffectInstance(MobEffects.REGENERATION, DURATION, 0, false, true, true));
             if (player.isOnFire()) {
                 player.clearFire();

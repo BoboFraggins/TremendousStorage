@@ -5,10 +5,11 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -17,9 +18,6 @@ import top.theillusivec4.curios.api.client.ICurioRenderer;
 
 /**
  * Renders the Tremendous Backpack on the player's back when equipped in a Curios "back" slot.
- *
- * <p>Registered via {@link top.theillusivec4.curios.api.client.CuriosRendererRegistry} so Curios
- * calls this renderer at the right time in the entity rendering pipeline.
  */
 public class BackpackCurioRenderer implements ICurioRenderer {
 
@@ -33,7 +31,7 @@ public class BackpackCurioRenderer implements ICurioRenderer {
             ItemStack stack,
             SlotContext slotContext,
             PoseStack poseStack,
-            MultiBufferSource bufferSource,
+            SubmitNodeCollector collector,
             int light,
             S renderState,
             RenderLayerParent<S, M> renderLayerParent,
@@ -51,17 +49,9 @@ public class BackpackCurioRenderer implements ICurioRenderer {
         poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
         poseStack.translate(0f, Y_OFFSET, Z_OFFSET);
 
-        Minecraft.getInstance()
-                .getItemRenderer()
-                .renderStatic(
-                        stack,
-                        WORN_CONTEXT,
-                        light,
-                        OverlayTexture.NO_OVERLAY,
-                        poseStack,
-                        bufferSource,
-                        slotContext.entity().level(),
-                        0);
+        ItemStackRenderState irs = new ItemStackRenderState();
+        Minecraft.getInstance().getItemModelResolver().updateForTopItem(irs, stack, WORN_CONTEXT, null, null, 0);
+        irs.submit(poseStack, collector, light, OverlayTexture.NO_OVERLAY, 0);
 
         poseStack.popPose();
     }

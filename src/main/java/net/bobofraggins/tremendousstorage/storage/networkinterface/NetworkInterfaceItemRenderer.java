@@ -8,13 +8,10 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.tank.TankRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -22,7 +19,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3fc;
@@ -48,7 +44,6 @@ public class NetworkInterfaceItemRenderer implements SpecialModelRenderer<Storag
     @Override
     public void submit(
             @Nullable StorageTier tier,
-            ItemDisplayContext displayContext,
             PoseStack poseStack,
             SubmitNodeCollector collector,
             int packedLight,
@@ -62,17 +57,52 @@ public class NetworkInterfaceItemRenderer implements SpecialModelRenderer<Storag
                 .get()
                 .defaultBlockState()
                 .setValue(NetworkInterfaceBlock.TIER_PROP, tier);
-        MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
-        mc.getBlockRenderer().renderSingleBlock(renderState, poseStack, buffers, packedLight, packedOverlay);
-        buffers.endBatch();
+        {
+            net.minecraft.client.renderer.block.dispatch.BlockStateModel blkModel =
+                    mc.getModelManager().getBlockStateModelSet().get(renderState);
+            java.util.List<net.minecraft.client.renderer.block.dispatch.BlockStateModelPart> blkParts =
+                    new java.util.ArrayList<>();
+            blkModel.collectParts(net.minecraft.util.RandomSource.create(), blkParts);
+            collector.submitCustomGeometry(
+                    poseStack, net.minecraft.client.renderer.Sheets.cutoutBlockSheet(), (pose_, vc_) -> {
+                        for (net.minecraft.client.renderer.block.dispatch.BlockStateModelPart part_ : blkParts) {
+                            for (net.minecraft.core.Direction dir_ : net.minecraft.core.Direction.values()) {
+                                for (var quad_ : part_.getQuads(dir_)) {
+                                    com.mojang.blaze3d.vertex.QuadInstance qi_ =
+                                            new com.mojang.blaze3d.vertex.QuadInstance();
+                                    qi_.setColor(0xFFFFFFFF);
+                                    qi_.setLightCoords(packedLight);
+                                    qi_.setOverlayCoords(packedOverlay);
+                                    vc_.putBakedQuad(pose_, quad_, qi_);
+                                }
+                            }
+                            for (var quad_ : part_.getQuads(null)) {
+                                com.mojang.blaze3d.vertex.QuadInstance qi_ =
+                                        new com.mojang.blaze3d.vertex.QuadInstance();
+                                qi_.setColor(0xFFFFFFFF);
+                                qi_.setLightCoords(packedLight);
+                                qi_.setOverlayCoords(packedOverlay);
+                                vc_.putBakedQuad(pose_, quad_, qi_);
+                            }
+                        }
+                    });
+        }
 
         FluidStack vibes = new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), 1000);
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.POSITIVE_VIBES_TYPE.get());
-        TextureAtlasSprite fluidSprite = mc.getAtlasManager()
-                .getAtlasOrThrow(TextureAtlas.LOCATION_BLOCKS)
-                .getSprite(ext.getStillTexture(vibes));
+        net.minecraft.client.renderer.block.FluidModel fluidModel_ = net.minecraft.client.Minecraft.getInstance()
+                .getModelManager()
+                .getFluidStateModelSet()
+                .get(net.bobofraggins.tremendousstorage.shared.register.Registration.POSITIVE_VIBES_SOURCE
+                        .get()
+                        .defaultFluidState());
+        TextureAtlasSprite fluidSprite = fluidModel_.stillMaterial().sprite();
 
-        int fluidTint = ext.getTintColor(vibes);
+        int fluidTint = fluidModel_.fluidTintSource() != null
+                ? fluidModel_
+                        .fluidTintSource()
+                        .colorAsStack(new net.neoforged.neoforge.fluids.FluidStack(
+                                Registration.POSITIVE_VIBES_SOURCE.get(), 1))
+                : 0xFFFFFFFF;
         int fr = (fluidTint >> 16) & 0xFF;
         int fg = (fluidTint >> 8) & 0xFF;
         int fb = fluidTint & 0xFF;
@@ -85,8 +115,7 @@ public class NetworkInterfaceItemRenderer implements SpecialModelRenderer<Storag
         float vB = Mth.lerp(fillFrac, fluidSprite.getV0(), fluidSprite.getV1());
         float uL = fluidSprite.getU0(), uR = fluidSprite.getU1(), vT = fluidSprite.getV0();
 
-        int fluidLight =
-                Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
+        int fluidLight = Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0 ? 0xF000F0 : packedLight;
         final int ffrF = fr, ffgF = fg, ffbF = fb, ffaF = fa, flF = fluidLight, ovF = packedOverlay;
         collector.submitCustomGeometry(
                 poseStack,
@@ -112,17 +141,17 @@ public class NetworkInterfaceItemRenderer implements SpecialModelRenderer<Storag
         poseStack.popPose();
     }
 
-    public record Unbaked() implements SpecialModelRenderer.Unbaked {
+    public record Unbaked() implements SpecialModelRenderer.Unbaked<StorageTier> {
         public static final MapCodec<Unbaked> MAP_CODEC = MapCodec.unit(new Unbaked());
 
         @Override
         @Nullable
-        public SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context) {
+        public SpecialModelRenderer<StorageTier> bake(SpecialModelRenderer.BakingContext context) {
             return new NetworkInterfaceItemRenderer();
         }
 
         @Override
-        public MapCodec<? extends SpecialModelRenderer.Unbaked> type() {
+        public MapCodec<? extends SpecialModelRenderer.Unbaked<StorageTier>> type() {
             return MAP_CODEC;
         }
     }

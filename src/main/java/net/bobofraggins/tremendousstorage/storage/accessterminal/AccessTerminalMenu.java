@@ -279,7 +279,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         if (!matchingRecipes.isEmpty()) {
             RecipeHolder<CraftingRecipe> holder = matchingRecipes.get(selectedRecipeIndex);
             if (resultSlots.setRecipeUsed(serverPlayer, holder)) {
-                ItemStack assembled = holder.value().assemble(input, level.registryAccess());
+                ItemStack assembled = holder.value().assemble(input);
                 if (assembled.isItemEnabled(level.enabledFeatures())) {
                     result = assembled;
                 }
@@ -454,11 +454,11 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             if (current.isEmpty()) {
                 // Normal case: ingredient was fully consumed — pull a fresh stack from network
                 anyRefilled |= extractFromNetworkIntoSlot(handler, snap, i);
-            } else if (!snap.getItem().getCraftingRemainder().isEmpty()) {
+            } else if (!snap.getItem().getCraftingRemainder().create().isEmpty()) {
                 // Container item case (e.g. lava bucket → empty bucket):
                 // onTake placed the remainder (empty bucket) back in the slot.
                 // If that remainder matches what's there now, swap it for a full one.
-                ItemStack remainder = snap.getItem().getCraftingRemainder();
+                ItemStack remainder = snap.getItem().getCraftingRemainder().create();
                 if (!remainder.isEmpty() && ItemStack.isSameItemSameComponents(current, remainder)) {
                     // Try to extract the full item (e.g. lava bucket) from the network
                     ItemStack needed = snap.copyWithCount(1);

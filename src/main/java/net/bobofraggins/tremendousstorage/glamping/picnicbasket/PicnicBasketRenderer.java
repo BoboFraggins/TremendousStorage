@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
@@ -9,13 +10,13 @@ import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -83,7 +84,7 @@ public class PicnicBasketRenderer
         float openFraction = state.openFraction;
         RandomSource random = RandomSource.create();
 
-        List<BlockModelPart> bodyParts = collectParts(bodyModel, random);
+        List<BlockStateModelPart> bodyParts = collectParts(bodyModel, random);
         poseStack.pushPose();
         applyFacingRotation(poseStack, yRot);
         collector.submitCustomGeometry(
@@ -92,7 +93,7 @@ public class PicnicBasketRenderer
                 (pose, consumer) -> renderModel(consumer, pose, bodyParts, light, overlay));
         poseStack.popPose();
 
-        List<BlockModelPart> leftLidParts = collectParts(leftLidModel, random);
+        List<BlockStateModelPart> leftLidParts = collectParts(leftLidModel, random);
         poseStack.pushPose();
         applyFacingRotation(poseStack, yRot);
         poseStack.translate(8.0 / 16.0, 8.0 / 16.0, 8.0 / 16.0);
@@ -104,7 +105,7 @@ public class PicnicBasketRenderer
                 (pose, consumer) -> renderModel(consumer, pose, leftLidParts, light, overlay));
         poseStack.popPose();
 
-        List<BlockModelPart> rightLidParts = collectParts(rightLidModel, random);
+        List<BlockStateModelPart> rightLidParts = collectParts(rightLidModel, random);
         poseStack.pushPose();
         applyFacingRotation(poseStack, yRot);
         poseStack.translate(8.0 / 16.0, 8.0 / 16.0, 8.0 / 16.0);
@@ -123,23 +124,35 @@ public class PicnicBasketRenderer
         poseStack.translate(-0.5, -0.5, -0.5);
     }
 
-    private static List<BlockModelPart> collectParts(BlockStateModel model, RandomSource random) {
-        List<BlockModelPart> parts = new ArrayList<>();
+    private static List<BlockStateModelPart> collectParts(BlockStateModel model, RandomSource random) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
         model.collectParts(random, parts);
         return parts;
     }
 
     private static void renderModel(
-            VertexConsumer consumer, PoseStack.Pose pose, List<BlockModelPart> parts, int packedLight, int overlay) {
-        for (BlockModelPart part : parts) {
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            List<BlockStateModelPart> parts,
+            int packedLight,
+            int overlay) {
+        for (BlockStateModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1f, packedLight, overlay);
+                    QuadInstance qi = new QuadInstance();
+                    qi.setColor(0xFFFFFFFF);
+                    qi.setLightCoords(packedLight);
+                    qi.setOverlayCoords(overlay);
+                    consumer.putBakedQuad(pose, quad, qi);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1f, packedLight, overlay);
+                QuadInstance qi = new QuadInstance();
+                qi.setColor(0xFFFFFFFF);
+                qi.setLightCoords(packedLight);
+                qi.setOverlayCoords(overlay);
+                consumer.putBakedQuad(pose, quad, qi);
             }
         }
     }

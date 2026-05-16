@@ -1,19 +1,20 @@
 package net.bobofraggins.tremendousstorage.storage.armorycabinet;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -89,7 +90,7 @@ public class ArmoryCabinetRenderer
         // Static body
         poseStack.pushPose();
         applyFacingRotation(poseStack, state.facingYRot);
-        List<BlockModelPart> bodyParts = collectParts(mc.getModelManager().getStandaloneModel(BODY), random);
+        List<BlockStateModelPart> bodyParts = collectParts(mc.getModelManager().getStandaloneModel(BODY), random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
@@ -103,7 +104,7 @@ public class ArmoryCabinetRenderer
         poseStack.mulPose(Axis.YP.rotationDegrees(-p2 * DOOR_SWING_DEG));
         poseStack.translate(-HINGE_X, 0, -HINGE_Z);
 
-        List<BlockModelPart> doorParts = collectParts(mc.getModelManager().getStandaloneModel(DOOR), random);
+        List<BlockStateModelPart> doorParts = collectParts(mc.getModelManager().getStandaloneModel(DOOR), random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
@@ -111,7 +112,8 @@ public class ArmoryCabinetRenderer
 
         poseStack.pushPose();
         poseStack.translate(0, -ARM_RETRACT_PX * p1, 0);
-        List<BlockModelPart> armTopParts = collectParts(mc.getModelManager().getStandaloneModel(ARM_TOP), random);
+        List<BlockStateModelPart> armTopParts =
+                collectParts(mc.getModelManager().getStandaloneModel(ARM_TOP), random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
@@ -120,7 +122,8 @@ public class ArmoryCabinetRenderer
 
         poseStack.pushPose();
         poseStack.translate(0, ARM_RETRACT_PX * p1, 0);
-        List<BlockModelPart> armBotParts = collectParts(mc.getModelManager().getStandaloneModel(ARM_BOTTOM), random);
+        List<BlockStateModelPart> armBotParts =
+                collectParts(mc.getModelManager().getStandaloneModel(ARM_BOTTOM), random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
@@ -131,7 +134,7 @@ public class ArmoryCabinetRenderer
         poseStack.translate(WHEEL_X, WHEEL_Y, WHEEL_Z);
         poseStack.mulPose(Axis.ZP.rotationDegrees(-WHEEL_SPIN_DEG * p1));
         poseStack.translate(-WHEEL_X, -WHEEL_Y, -WHEEL_Z);
-        List<BlockModelPart> wheelParts = collectParts(mc.getModelManager().getStandaloneModel(WHEEL), random);
+        List<BlockStateModelPart> wheelParts = collectParts(mc.getModelManager().getStandaloneModel(WHEEL), random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
@@ -149,25 +152,32 @@ public class ArmoryCabinetRenderer
         }
     }
 
-    private static List<BlockModelPart> collectParts(BlockStateModel model, RandomSource random) {
-        List<BlockModelPart> parts = new ArrayList<>();
+    private static List<BlockStateModelPart> collectParts(BlockStateModel model, RandomSource random) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
         model.collectParts(random, parts);
         return parts;
     }
 
     private static void renderModel(
-            VertexConsumer consumer, PoseStack.Pose pose, List<BlockModelPart> parts, int packedLight) {
+            VertexConsumer consumer, PoseStack.Pose pose, List<BlockStateModelPart> parts, int packedLight) {
         int overlay = OverlayTexture.NO_OVERLAY;
-        for (BlockModelPart part : parts) {
+        for (BlockStateModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    float shade = 1f;
-                    consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, overlay);
+                    QuadInstance qi = new QuadInstance();
+                    qi.setColor(0xFFFFFFFF);
+                    qi.setLightCoords(packedLight);
+                    qi.setOverlayCoords(overlay);
+                    consumer.putBakedQuad(pose, quad, qi);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1.0f, packedLight, overlay);
+                QuadInstance qi2 = new QuadInstance();
+                qi2.setColor(0xFFFFFFFF);
+                qi2.setLightCoords(packedLight);
+                qi2.setOverlayCoords(overlay);
+                consumer.putBakedQuad(pose, quad, qi2);
             }
         }
     }

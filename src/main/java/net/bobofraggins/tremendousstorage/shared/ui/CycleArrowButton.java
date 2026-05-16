@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -23,7 +23,7 @@ public class CycleArrowButton extends AbstractWidget {
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         int color = isMouseOver(mouseX, mouseY) ? 0xFFFFFFFF : 0xFFAAAAAA;
         int cx = getX() + width / 2;
         int cy = getY() + height / 2;

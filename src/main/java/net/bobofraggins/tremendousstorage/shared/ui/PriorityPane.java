@@ -4,7 +4,7 @@ import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -65,7 +65,7 @@ public class PriorityPane implements IDialogPane {
 
     @Override
     public void render(
-            GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
+            GuiGraphicsExtractor graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
         lastRenderedWidth = width;
         int selected = priorityGetter.getAsInt();
         int rowX = (width - ROW_W) / 2;
@@ -74,7 +74,7 @@ public class PriorityPane implements IDialogPane {
         int lblX = rowX + BTN_W + GAP;
 
         Component priorityLabel = Component.translatable("screen.tremendousstorage.priority_label");
-        graphics.drawString(font, priorityLabel, (width - font.width(priorityLabel)) / 2, LABEL_Y, 0x404040, false);
+        graphics.text(font, priorityLabel, (width - font.width(priorityLabel)) / 2, LABEL_Y, 0x404040, false);
 
         boolean canDown = selected > 0;
         boolean canUp = selected < Priority.VALUES.length - 1;
@@ -94,7 +94,7 @@ public class PriorityPane implements IDialogPane {
         String name = Component.translatable(current.translationKey()).getString();
         int nameX = lblX + (LBL_W - font.width(name)) / 2;
         int nameY = ROW_Y + (BTN_H - 8) / 2;
-        graphics.drawString(font, name, nameX, nameY, 0x404040, false);
+        graphics.text(font, name, nameX, nameY, 0x404040, false);
     }
 
     @Override

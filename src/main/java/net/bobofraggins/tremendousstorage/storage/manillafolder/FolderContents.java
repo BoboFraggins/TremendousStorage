@@ -23,7 +23,7 @@ public record FolderContents(Optional<ItemStack> storedItem, long count, Storage
     public static final FolderContents EMPTY = new FolderContents(Optional.empty(), 0L, StorageTier.WOOD);
 
     public static final Codec<FolderContents> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                    ItemStack.SINGLE_ITEM_CODEC.optionalFieldOf("stored_item").forGetter(FolderContents::storedItem),
+                    ItemStack.CODEC.optionalFieldOf("stored_item").forGetter(FolderContents::storedItem),
                     Codec.LONG.optionalFieldOf("count", 0L).forGetter(FolderContents::count),
                     StorageTier.CODEC.optionalFieldOf("tier", StorageTier.WOOD).forGetter(FolderContents::tier))
             .apply(instance, FolderContents::new));

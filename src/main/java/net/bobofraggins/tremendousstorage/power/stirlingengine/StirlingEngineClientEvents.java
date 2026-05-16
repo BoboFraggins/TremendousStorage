@@ -1,7 +1,11 @@
 package net.bobofraggins.tremendousstorage.power.stirlingengine;
 
+import java.util.List;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -21,16 +25,26 @@ public final class StirlingEngineClientEvents {
     }
 
     @SubscribeEvent
-    public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event) {
+    public static void onRegisterBlockColors(RegisterColorHandlersEvent.BlockTintSources event) {
         event.register(
-                (state, level, pos, tintIndex) -> {
-                    if (tintIndex != 0 || level == null || pos == null) return -1;
-                    BlockEntity be = level.getBlockEntity(pos);
-                    if (be instanceof StirlingEngineBlockEntity engine) {
-                        return engine.getTier().getColor();
+                List.of(new BlockTintSource() {
+                    @Override
+                    public int color(net.minecraft.world.level.block.state.BlockState state) {
+                        return -1;
                     }
-                    return -1;
-                },
+
+                    @Override
+                    public int colorInWorld(
+                            net.minecraft.world.level.block.state.BlockState state,
+                            BlockAndTintGetter level,
+                            BlockPos pos) {
+                        BlockEntity be = level.getBlockEntity(pos);
+                        if (be instanceof StirlingEngineBlockEntity engine) {
+                            return engine.getTier().getColor();
+                        }
+                        return -1;
+                    }
+                }),
                 Registration.STIRLING_ENGINE.get());
     }
 

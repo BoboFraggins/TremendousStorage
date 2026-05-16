@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -37,12 +37,11 @@ public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu
     private final Dialog dialog;
 
     public RecyclingBinScreen(RecyclingBinMenu menu, Inventory inv, Component title) {
-        super(menu, inv, title);
-        dialog = new Dialog(
+        Dialog dialog_ = new Dialog(
                 Dialog.blankPane(PlayerInventoryPane.WIDTH, CONTENT_PANE_H),
                 new PlayerInventoryPane(RecyclingBinMenu.INV_START_X));
-        imageWidth = dialog.totalWidth();
-        imageHeight = dialog.totalHeight();
+        super(menu, inv, title, dialog_.totalWidth(), dialog_.totalHeight());
+        dialog = dialog_;
     }
 
     @Override
@@ -52,7 +51,7 @@ public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
+    public void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         int x = leftPos;
         int y = topPos;
 
@@ -64,28 +63,28 @@ public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu
         // Left pane: void slot + label
         drawSlot(g, x + RecyclingBinMenu.VOID_SLOT_X, y + RecyclingBinMenu.VOID_SLOT_Y);
         Component voidLabel = Component.translatable("screen.tremendousstorage.void_items");
-        g.drawString(font, voidLabel, x + 44 - font.width(voidLabel) / 2, y + Dialog.TITLE_H + 2, 0x404040, false);
+        g.text(font, voidLabel, x + 44 - font.width(voidLabel) / 2, y + Dialog.TITLE_H + 2, 0x404040, false);
 
         // Right pane: fluid slots + label + arrow
         drawSlot(g, x + RecyclingBinMenu.FLUID_IN_X, y + RecyclingBinMenu.FLUID_IN_Y);
         drawSlot(g, x + RecyclingBinMenu.FLUID_OUT_X, y + RecyclingBinMenu.FLUID_OUT_Y);
         drawDownArrow(g, x + RecyclingBinMenu.FLUID_IN_X, y + RecyclingBinMenu.FLUID_IN_Y + 16);
         Component fillLabel = Component.translatable("screen.tremendousstorage.fluid_transfer");
-        g.drawString(font, fillLabel, x + 132 - font.width(fillLabel) / 2, y + Dialog.TITLE_H + 2, 0x404040, false);
+        g.text(font, fillLabel, x + 132 - font.width(fillLabel) / 2, y + Dialog.TITLE_H + 2, 0x404040, false);
 
         // Ghost hint in fill slot when empty
         drawGhostFillHint(g, x + RecyclingBinMenu.FLUID_IN_X, y + RecyclingBinMenu.FLUID_IN_Y);
+        super.extractContents(g, mouseX, mouseY, partialTick);
     }
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        renderBackground(g, mouseX, mouseY, partialTick);
-        super.render(g, mouseX, mouseY, partialTick);
-        renderTooltip(g, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        extractBackground(g, mouseX, mouseY, partialTick);
+        super.extractRenderState(g, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         // Title is drawn by Dialog; no "Inventory" label.
     }
 
@@ -93,7 +92,7 @@ public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu
     // Drawing helpers
     // -------------------------------------------------------------------------
 
-    private static void drawSlot(GuiGraphics g, int sx, int sy) {
+    private static void drawSlot(GuiGraphicsExtractor g, int sx, int sy) {
         g.fill(sx, sy, sx + 16, sy + 1, 0xFF373737); // top
         g.fill(sx, sy + 1, sx + 1, sy + 16, 0xFF373737); // left
         g.fill(sx, sy + 16, sx + 17, sy + 17, 0xFFFFFFFF); // bottom
@@ -101,7 +100,7 @@ public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu
         g.fill(sx + 1, sy + 1, sx + 16, sy + 16, 0xFF8B8B8B); // interior
     }
 
-    private static void drawDownArrow(GuiGraphics g, int gapX, int gapY) {
+    private static void drawDownArrow(GuiGraphicsExtractor g, int gapX, int gapY) {
         int cx = gapX + 8;
         int top = gapY + 3;
         g.fill(cx - 1, top, cx + 1, top + 9, 0xFF555555); // stem
@@ -110,7 +109,7 @@ public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu
         g.fill(cx - 1, top + 13, cx + 1, top + 15, 0xFF555555); // 2 px wide
     }
 
-    private void drawGhostFillHint(GuiGraphics g, int sx, int sy) {
+    private void drawGhostFillHint(GuiGraphicsExtractor g, int sx, int sy) {
         if (!menu.getSlot(1).getItem().isEmpty()) return;
 
         int phase = (int) ((System.currentTimeMillis() / 1500) % 2);

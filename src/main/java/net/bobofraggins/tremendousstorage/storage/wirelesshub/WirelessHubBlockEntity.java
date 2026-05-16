@@ -219,12 +219,29 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
 
         if (!tryConsumeVibes(serverLevel)) return;
 
+        var weatherData = serverLevel.getWeatherData();
         switch (haarpMode) {
-            case NO_RAIN -> serverLevel.setWeatherParameters(6000, 0, false, false);
-            case RAIN -> serverLevel.setWeatherParameters(0, 6000, true, false);
-            case THUNDERSTORM -> serverLevel.setWeatherParameters(0, 6000, true, true);
+            case NO_RAIN -> {
+                weatherData.setClearWeatherTime(6000);
+                weatherData.setRainTime(0);
+                weatherData.setRaining(false);
+                weatherData.setThundering(false);
+            }
+            case RAIN -> {
+                weatherData.setClearWeatherTime(0);
+                weatherData.setRainTime(6000);
+                weatherData.setRaining(true);
+                weatherData.setThundering(false);
+            }
+            case THUNDERSTORM -> {
+                weatherData.setClearWeatherTime(0);
+                weatherData.setRainTime(6000);
+                weatherData.setRaining(true);
+                weatherData.setThundering(true);
+            }
             case OFF -> {} // unreachable
         }
+        weatherData.setDirty();
     }
 
     /**

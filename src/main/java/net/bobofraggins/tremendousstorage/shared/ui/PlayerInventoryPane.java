@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * Dialog pane that renders the player inventory and hotbar slot backgrounds.
@@ -60,7 +60,7 @@ public class PlayerInventoryPane implements IDialogPane {
 
     @Override
     public void render(
-            GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
+            GuiGraphicsExtractor graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
         // 3×9 main inventory rows
         for (int row = 0; row < INV_ROWS; row++) {
             for (int col = 0; col < COLS; col++) {
@@ -74,7 +74,7 @@ public class PlayerInventoryPane implements IDialogPane {
         }
     }
 
-    private static void drawSlotBg(GuiGraphics graphics, int sx, int sy) {
+    private static void drawSlotBg(GuiGraphicsExtractor graphics, int sx, int sy) {
         graphics.fill(sx, sy, sx + 16, sy + 1, DARK); // top
         graphics.fill(sx, sy + 1, sx + 1, sy + 16, DARK); // left
         graphics.fill(sx, sy + 16, sx + 17, sy + 17, LIGHT); // bottom

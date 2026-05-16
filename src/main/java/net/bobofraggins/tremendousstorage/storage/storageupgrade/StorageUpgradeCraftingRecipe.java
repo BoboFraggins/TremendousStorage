@@ -57,6 +57,16 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
     }
 
     @Override
+    public String group() {
+        return "";
+    }
+
+    @Override
+    public boolean showNotification() {
+        return false;
+    }
+
+    @Override
     public PlacementInfo placementInfo() {
         return PlacementInfo.NOT_PLACEABLE;
     }
@@ -128,7 +138,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
+    public ItemStack assemble(CraftingInput input) {
         ItemStack base = ItemStack.EMPTY;
         ItemStack addition = ItemStack.EMPTY;
         for (int i = 0; i < input.size(); i++) {
@@ -329,7 +339,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
     private static boolean isNetheriteTierItem(ItemStack stack) {
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return false;
-        return StorageTier.NETHERITE.getId().equals(data.getUnsafe().getString("Tier"));
+        return StorageTier.NETHERITE.getId().equals(data.getUnsafe().getStringOr("Tier", ""));
     }
 
     private static boolean alreadyHasInterdimensionalUpgrade(ItemStack stack) {

@@ -15,8 +15,7 @@ import snownee.jade.api.IComponentProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.JadeIds;
 import snownee.jade.api.config.IPluginConfig;
-import snownee.jade.api.ui.IElement;
-import snownee.jade.api.ui.IElementHelper;
+import snownee.jade.api.ui.Element;
 
 /**
  * When the player looks at a tube face that has an attachment, replaces the "Tube" block
@@ -31,12 +30,12 @@ public enum TubeJadeComponentProvider implements IComponentProvider<BlockAccesso
     }
 
     @Override
-    public IElement getIcon(BlockAccessor accessor, IPluginConfig config, IElement currentIcon) {
+    public Element getIcon(BlockAccessor accessor, IPluginConfig config, Element currentIcon) {
         AttachmentType type = getAttachmentOnSide(accessor);
         if (type == AttachmentType.NONE) return currentIcon;
         ItemStack stack = attachmentItem(type);
         if (stack.isEmpty()) return currentIcon;
-        return IElementHelper.get().item(stack);
+        return currentIcon; // IElementHelper removed in Jade 26.1.1
     }
 
     @Override
@@ -57,7 +56,7 @@ public enum TubeJadeComponentProvider implements IComponentProvider<BlockAccesso
     private static AttachmentType getAttachmentOnSide(BlockAccessor accessor) {
         CompoundTag data = accessor.getServerData();
         if (!data.contains("AttachmentTypes")) return AttachmentType.NONE;
-        byte[] types = data.getByteArray("AttachmentTypes");
+        byte[] types = data.getByteArray("AttachmentTypes").orElse(new byte[0]);
 
         // Build a temporary block entity view from synced data so we can reuse
         // TubeBlock.attachmentIndexAt for consistent AABB hit testing.

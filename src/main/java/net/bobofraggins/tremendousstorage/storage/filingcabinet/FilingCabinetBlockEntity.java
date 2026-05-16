@@ -85,7 +85,7 @@ public class FilingCabinetBlockEntity extends BlockEntity
                     SoundEvents.BARREL_OPEN,
                     SoundSource.BLOCKS,
                     0.5f,
-                    level.random.nextFloat() * 0.1f + 0.9f);
+                    level.getRandom().nextFloat() * 0.1f + 0.9f);
         }
 
         @Override
@@ -98,7 +98,7 @@ public class FilingCabinetBlockEntity extends BlockEntity
                     SoundEvents.BARREL_CLOSE,
                     SoundSource.BLOCKS,
                     0.5f,
-                    level.random.nextFloat() * 0.1f + 0.9f);
+                    level.getRandom().nextFloat() * 0.1f + 0.9f);
         }
 
         @Override

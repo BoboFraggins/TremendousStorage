@@ -223,7 +223,7 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
                             SoundEvents.ITEM_BREAK.value(),
                             SoundSource.BLOCKS,
                             1.0f,
-                            0.9f + level.random.nextFloat() * 0.2f);
+                            0.9f + level.getRandom().nextFloat() * 0.2f);
                 }
             }
             // Item is not stored — it's destroyed

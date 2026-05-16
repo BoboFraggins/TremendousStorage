@@ -53,13 +53,13 @@ public class PositiveVibesFanProcessingType implements FanProcessingType {
 
     @Override
     public void spawnProcessingParticles(Level level, Vec3 pos) {
-        if (level.random.nextInt(8) != 0) return;
+        if (level.getRandom().nextInt(8) != 0) return;
         DustParticleOptions particle = new DustParticleOptions(PARTICLE_COLOR, 1f);
         level.addParticle(
                 particle,
-                pos.x + (level.random.nextFloat() - 0.5f) * 0.5f,
+                pos.x + (level.getRandom().nextFloat() - 0.5f) * 0.5f,
                 pos.y + 0.1f,
-                pos.z + (level.random.nextFloat() - 0.5f) * 0.5f,
+                pos.z + (level.getRandom().nextFloat() - 0.5f) * 0.5f,
                 0,
                 0,
                 0);

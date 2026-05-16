@@ -4,10 +4,10 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
-import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
+import mezz.jei.api.recipe.types.IRecipeType;
 import net.bobofraggins.tremendousstorage.shared.network.SatFillCraftingGridPacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
@@ -38,7 +38,7 @@ class TerminalJeiRecipeHandler implements IRecipeTransferHandler<AccessTerminalM
     }
 
     @Override
-    public RecipeType<RecipeHolder<CraftingRecipe>> getRecipeType() {
+    public IRecipeType<RecipeHolder<CraftingRecipe>> getRecipeType() {
         return RecipeTypes.CRAFTING;
     }
 
@@ -60,7 +60,8 @@ class TerminalJeiRecipeHandler implements IRecipeTransferHandler<AccessTerminalM
             return helper.createInternalError();
         }
         if (doTransfer) {
-            ClientPacketDistributor.sendToServer(new SatFillCraftingGridPacket(container.getSatPos(), recipe.id()));
+            ClientPacketDistributor.sendToServer(new SatFillCraftingGridPacket(
+                    container.getSatPos(), recipe.id().identifier()));
         }
         return null;
     }

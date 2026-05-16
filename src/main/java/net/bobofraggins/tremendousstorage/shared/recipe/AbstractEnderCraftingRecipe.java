@@ -2,7 +2,6 @@ package net.bobofraggins.tremendousstorage.shared.recipe;
 
 import java.security.SecureRandom;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -40,6 +39,16 @@ public abstract class AbstractEnderCraftingRecipe implements CraftingRecipe {
         return CraftingBookCategory.MISC;
     }
 
+    @Override
+    public String group() {
+        return "";
+    }
+
+    @Override
+    public boolean showNotification() {
+        return false;
+    }
+
     // isSpecial() removed in 1.21.4 - recipes without specific output are handled differently
 
     @Override
@@ -61,7 +70,7 @@ public abstract class AbstractEnderCraftingRecipe implements CraftingRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
+    public ItemStack assemble(CraftingInput input) {
         ItemStack base = findBase(input);
         long linkId;
         if (isAlreadyEnder(base)) {

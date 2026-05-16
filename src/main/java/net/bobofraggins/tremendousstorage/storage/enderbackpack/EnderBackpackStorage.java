@@ -9,7 +9,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.SavedDataStorage;
 
 /**
  * Server-side persistent storage for Ender Tremendous Backpack shared inventories.
@@ -26,14 +26,14 @@ public class EnderBackpackStorage extends SavedData {
             CompoundTag.CODEC.xmap(EnderBackpackStorage::fromCompoundTag, EnderBackpackStorage::toCompoundTag);
 
     static final SavedDataType<EnderBackpackStorage> TYPE =
-            new SavedDataType<>(SAVE_KEY, ctx -> new EnderBackpackStorage(), ctx -> CODEC);
+            new SavedDataType<>(net.minecraft.resources.Identifier.parse(SAVE_KEY), EnderBackpackStorage::new, CODEC);
 
     private final Map<Long, ListTag> inventories = new HashMap<>();
     private final Map<Long, Long> versions = new HashMap<>();
     private final Map<Long, StorageTier> tiers = new HashMap<>();
 
     public static EnderBackpackStorage get(MinecraftServer server) {
-        DimensionDataStorage storage = server.overworld().getDataStorage();
+        SavedDataStorage storage = server.overworld().getDataStorage();
         return storage.computeIfAbsent(TYPE);
     }
 

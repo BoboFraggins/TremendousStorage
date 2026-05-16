@@ -6,7 +6,7 @@ import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlo
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -83,9 +83,10 @@ public class PullerSidesPane implements IDialogPane {
     }
 
     @Override
-    public void render(GuiGraphics g, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
+    public void render(
+            GuiGraphicsExtractor g, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
         Component header = Component.translatable("screen.tremendousstorage.puller_upgrade_label");
-        g.drawString(font, header, (width - font.width(header)) / 2, HEADER_Y, 0x404040, false);
+        g.text(font, header, (width - font.width(header)) / 2, HEADER_Y, 0x404040, false);
 
         int sidesMask = getSidesMask();
         Direction facing = getFacing();
@@ -112,7 +113,7 @@ public class PullerSidesPane implements IDialogPane {
 
             ItemStack adjacent = getAdjacentItem(facing, bit);
             if (!adjacent.isEmpty()) {
-                g.renderItem(adjacent, bx + 3, by + 3);
+                g.item(adjacent, bx + 3, by + 3);
             }
         }
     }

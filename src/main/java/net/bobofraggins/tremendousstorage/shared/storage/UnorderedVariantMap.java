@@ -15,12 +15,12 @@ final class UnorderedVariantMap implements VariantCounter {
 
     @Override
     public long getAmount(StorageKey key) {
-        return map.getLong(key);
+        return map.getOrDefault(key, 0L);
     }
 
     @Override
     public void add(StorageKey key, long delta) {
-        long newVal = map.getLong(key) + delta;
+        long newVal = map.getOrDefault(key, 0L) + delta;
         if (newVal <= 0) {
             map.removeLong(key);
         } else {

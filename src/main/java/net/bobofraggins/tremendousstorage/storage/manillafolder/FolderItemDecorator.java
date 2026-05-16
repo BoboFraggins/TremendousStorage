@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.manillafolder;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.IItemDecorator;
 
@@ -14,7 +14,7 @@ import net.neoforged.neoforge.client.IItemDecorator;
 public class FolderItemDecorator implements IItemDecorator {
 
     @Override
-    public boolean render(GuiGraphics guiGraphics, Font font, ItemStack stack, int xOffset, int yOffset) {
+    public boolean render(GuiGraphicsExtractor guiGraphics, Font font, ItemStack stack, int xOffset, int yOffset) {
         FolderContents contents = stack.getOrDefault(Registration.FOLDER_CONTENTS.get(), FolderContents.EMPTY);
         if (contents.storedItem().isEmpty()) return false;
 
@@ -25,7 +25,7 @@ public class FolderItemDecorator implements IItemDecorator {
         // Translate to bottom-right quadrant of the 16x16 slot and scale to half size
         pose.translate(xOffset + 8, yOffset + 8);
         pose.scale(0.5f, 0.5f);
-        guiGraphics.renderItem(display, 0, 0);
+        guiGraphics.item(display, 0, 0);
         pose.popMatrix();
 
         return false;

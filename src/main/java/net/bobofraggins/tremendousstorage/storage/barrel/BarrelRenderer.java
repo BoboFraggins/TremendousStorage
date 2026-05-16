@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.barrel;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
@@ -10,18 +11,17 @@ import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
 import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -145,7 +145,7 @@ public class BarrelRenderer
 
         ps.pushPose();
         applyFacingRotation(ps, state.facingYRot);
-        List<BlockModelPart> bodyParts = collectParts(bodyModel, random);
+        List<BlockStateModelPart> bodyParts = collectParts(bodyModel, random);
         collector.submitCustomGeometry(
                 ps,
                 Sheets.cutoutBlockSheet(),
@@ -173,7 +173,7 @@ public class BarrelRenderer
             ps.scale(0.5f, 0.5f, 0.001f);
             ItemStackRenderState irs = new ItemStackRenderState();
             mc.getItemModelResolver().updateForTopItem(irs, state.storedItem, ItemDisplayContext.FIXED, null, null, 0);
-            irs.submit(ps, collector, LightTexture.FULL_BRIGHT, overlay, 0);
+            irs.submit(ps, collector, 0xF000F0, overlay, 0);
             ps.popPose();
             String label = CountFormat.format(state.count);
             Font font = mc.font;
@@ -192,7 +192,7 @@ public class BarrelRenderer
                     buffers,
                     Font.DisplayMode.NORMAL,
                     0,
-                    LightTexture.FULL_BRIGHT);
+                    0xF000F0);
             buffers.endBatch();
             ps.popPose();
         }
@@ -225,7 +225,7 @@ public class BarrelRenderer
         Minecraft.getInstance()
                 .getItemModelResolver()
                 .updateForTopItem(irs, item, ItemDisplayContext.FIXED, null, null, 0);
-        irs.submit(ps, collector, LightTexture.FULL_BRIGHT, overlay, 0);
+        irs.submit(ps, collector, 0xF000F0, overlay, 0);
         ps.popPose();
         String label = CountFormat.format(count);
         Font font = Minecraft.getInstance().font;
@@ -244,30 +244,41 @@ public class BarrelRenderer
                 buffers,
                 Font.DisplayMode.NORMAL,
                 0,
-                LightTexture.FULL_BRIGHT);
+                0xF000F0);
         buffers.endBatch();
         ps.popPose();
         ps.popPose();
     }
 
-    private static List<BlockModelPart> collectParts(BlockStateModel model, RandomSource random) {
-        List<BlockModelPart> parts = new ArrayList<>();
+    private static List<BlockStateModelPart> collectParts(BlockStateModel model, RandomSource random) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
         model.collectParts(random, parts);
         return parts;
     }
 
     private static void renderModel(
-            VertexConsumer consumer, PoseStack.Pose pose, List<BlockModelPart> parts, int packedLight, int overlay) {
-        for (BlockModelPart part : parts) {
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            List<BlockStateModelPart> parts,
+            int packedLight,
+            int overlay) {
+        for (BlockStateModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    float shade = 1f;
-                    consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, overlay);
+                    QuadInstance qi = new QuadInstance();
+                    qi.setColor(0xFFFFFFFF);
+                    qi.setLightCoords(packedLight);
+                    qi.setOverlayCoords(overlay);
+                    consumer.putBakedQuad(pose, quad, qi);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1.0f, packedLight, overlay);
+                QuadInstance qi = new QuadInstance();
+                qi.setColor(0xFFFFFFFF);
+                qi.setLightCoords(packedLight);
+                qi.setOverlayCoords(overlay);
+                consumer.putBakedQuad(pose, quad, qi);
             }
         }
     }

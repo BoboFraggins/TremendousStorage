@@ -166,7 +166,7 @@ public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkCon
                 player.getInventory().setItem(slot, remainder);
             }
             player.getInventory().setChanged();
-            player.displayClientMessage(Component.translatable("action.tremendousstorage.deposit_complete"), true);
+            player.sendOverlayMessage(Component.translatable("action.tremendousstorage.deposit_complete"));
             return InteractionResult.SUCCESS;
         }
 

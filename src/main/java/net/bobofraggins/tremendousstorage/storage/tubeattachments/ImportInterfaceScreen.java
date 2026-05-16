@@ -4,7 +4,7 @@ import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.network.SetImportExportFilterPacket;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -39,11 +39,10 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
     private final Dialog dialog;
 
     public ImportInterfaceScreen(ImportInterfaceMenu menu, Inventory inv, Component title) {
-        super(menu, inv, title);
-        dialog = new Dialog(
+        Dialog dialog_ = new Dialog(
                 Dialog.blankPane(FILTER_PANE_W, FILTER_PANE_H), new PlayerInventoryPane(ImportInterfaceMenu.INV_X));
-        this.imageWidth = dialog.totalWidth();
-        this.imageHeight = dialog.totalHeight();
+        super(menu, inv, title, dialog_.totalWidth(), dialog_.totalHeight());
+        dialog = dialog_;
     }
 
     @Override
@@ -57,19 +56,18 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
     // -------------------------------------------------------------------------
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-        renderTooltip(graphics, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        extractBackground(graphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
 
         // "Filter:" label
         Component filterLabel = Component.translatable("screen.tremendousstorage.filter_label");
-        graphics.drawString(
+        graphics.text(
                 font,
                 filterLabel,
                 leftPos + (FILTER_PANE_W - font.width(filterLabel)) / 2,
@@ -88,14 +86,15 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
 
                 ItemStack stack = menu.getFilterSlot(slotIndex);
                 if (!stack.isEmpty()) {
-                    graphics.renderItem(stack, sx + 1, sy + 1);
+                    graphics.item(stack, sx + 1, sy + 1);
                 }
             }
         }
+        super.extractContents(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Title is drawn by Dialog.
     }
 
@@ -136,7 +135,7 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
         }
     }
 
-    private static void drawSlot(GuiGraphics g, int sx, int sy) {
+    private static void drawSlot(GuiGraphicsExtractor g, int sx, int sy) {
         g.fill(sx, sy, sx + 16, sy + 1, 0xFF373737); // top
         g.fill(sx, sy + 1, sx + 1, sy + 16, 0xFF373737); // left
         g.fill(sx, sy + 16, sx + 17, sy + 17, 0xFFFFFFFF); // bottom

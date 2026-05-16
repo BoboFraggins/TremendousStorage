@@ -63,7 +63,7 @@ public class GlampingEvents {
         if (server == null) return;
         ServerLevel overworld = server.getLevel(Level.OVERWORLD);
         if (overworld != null) {
-            overworld.setDayTime(0L);
+            ((net.minecraft.world.level.storage.ServerLevelData) overworld.getLevelData()).setDayTimeFraction(0.0f);
         }
     }
 }

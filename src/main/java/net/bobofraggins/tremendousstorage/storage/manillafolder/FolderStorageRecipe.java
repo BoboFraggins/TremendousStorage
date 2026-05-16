@@ -7,9 +7,7 @@ import net.bobofraggins.tremendousstorage.storage.baseupgrade.InterdimensionalUp
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.MagnetUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.baseupgrade.PullerUpgradeItem;
 import net.bobofraggins.tremendousstorage.storage.storageupgrade.StorageUpgradeItem;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -31,8 +29,8 @@ import net.minecraft.world.level.Level;
  */
 public class FolderStorageRecipe extends CustomRecipe {
 
-    public FolderStorageRecipe(CraftingBookCategory category) {
-        super(category);
+    public FolderStorageRecipe() {
+        super();
     }
 
     @Override
@@ -72,7 +70,7 @@ public class FolderStorageRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
+    public ItemStack assemble(CraftingInput input) {
         ItemStack folder = ItemStack.EMPTY;
         ItemStack item = ItemStack.EMPTY;
 

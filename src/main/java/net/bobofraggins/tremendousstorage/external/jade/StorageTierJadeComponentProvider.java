@@ -27,14 +27,15 @@ public enum StorageTierJadeComponentProvider implements IComponentProvider<Block
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
         CompoundTag data = accessor.getServerData();
 
-        StorageTier tier =
-                data.contains("StorageTier") ? StorageTier.fromId(data.getString("StorageTier")) : StorageTier.WOOD;
-        boolean crafting = data.getBoolean("CraftingUpgrade");
-        boolean magnet = data.getBoolean("MagnetUpgrade");
-        boolean puller = data.getBoolean("PullerUpgrade");
-        boolean haarp = data.getBoolean("HaarpUpgrade");
-        boolean interdimensional = data.getBoolean("InterdimensionalUpgrade");
-        boolean compacting = data.getBoolean("CompactingUpgrade");
+        StorageTier tier = data.contains("StorageTier")
+                ? StorageTier.fromId(data.getStringOr("StorageTier", ""))
+                : StorageTier.WOOD;
+        boolean crafting = data.getBooleanOr("CraftingUpgrade", false);
+        boolean magnet = data.getBooleanOr("MagnetUpgrade", false);
+        boolean puller = data.getBooleanOr("PullerUpgrade", false);
+        boolean haarp = data.getBooleanOr("HaarpUpgrade", false);
+        boolean interdimensional = data.getBooleanOr("InterdimensionalUpgrade", false);
+        boolean compacting = data.getBooleanOr("CompactingUpgrade", false);
 
         boolean hasUpgrades =
                 tier != StorageTier.WOOD || crafting || magnet || puller || haarp || interdimensional || compacting;

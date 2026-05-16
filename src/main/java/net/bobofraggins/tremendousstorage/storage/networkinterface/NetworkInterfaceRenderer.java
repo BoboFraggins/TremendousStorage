@@ -6,13 +6,12 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.tank.AbstractTankRenderer;
 import net.bobofraggins.tremendousstorage.storage.tank.TankRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -20,7 +19,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterfaceBlockEntity> {
@@ -62,9 +60,19 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         state.brainStack = new ItemStack(Registration.BRAIN.get());
 
         FluidStack vibes = new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), 1000);
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.POSITIVE_VIBES_TYPE.get());
-        var fluidSprite = sprite(ext.getStillTexture(vibes));
-        int tint = ext.getTintColor(vibes);
+        net.minecraft.client.renderer.block.FluidModel fluidModel_ = net.minecraft.client.Minecraft.getInstance()
+                .getModelManager()
+                .getFluidStateModelSet()
+                .get(net.bobofraggins.tremendousstorage.shared.register.Registration.POSITIVE_VIBES_SOURCE
+                        .get()
+                        .defaultFluidState());
+        var fluidSprite = fluidModel_.stillMaterial().sprite();
+        int tint = fluidModel_.fluidTintSource() != null
+                ? fluidModel_
+                        .fluidTintSource()
+                        .colorAsStack(new net.neoforged.neoforge.fluids.FluidStack(
+                                Registration.POSITIVE_VIBES_SOURCE.get(), 1))
+                : 0xFFFFFFFF;
         state.fr = (tint >> 16) & 0xFF;
         state.fg = (tint >> 8) & 0xFF;
         state.fb = tint & 0xFF;
@@ -76,9 +84,8 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         state.uR = fluidSprite.getU1();
         state.vT = fluidSprite.getV0();
         state.vB = Mth.lerp(FILL_FRAC, fluidSprite.getV0(), fluidSprite.getV1());
-        state.fluidLight = Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0
-                ? LightTexture.FULL_BRIGHT
-                : stateBase.lightCoords;
+        state.fluidLight =
+                Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0 ? 0xF000F0 : stateBase.lightCoords;
         state.hasFill = true;
     }
 

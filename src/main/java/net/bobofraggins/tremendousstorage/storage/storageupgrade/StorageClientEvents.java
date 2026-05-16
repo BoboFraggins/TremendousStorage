@@ -1,8 +1,12 @@
 package net.bobofraggins.tremendousstorage.storage.storageupgrade;
 
+import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderItemDecorator;
+import net.minecraft.client.color.block.BlockTintSource;
+import net.minecraft.client.renderer.block.BlockAndTintGetter;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
@@ -20,16 +24,26 @@ public final class StorageClientEvents {
     private StorageClientEvents() {}
 
     @SubscribeEvent
-    public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event) {
+    public static void onRegisterBlockColors(RegisterColorHandlersEvent.BlockTintSources event) {
         event.register(
-                (state, level, pos, tintIndex) -> {
-                    if (tintIndex != 0 || level == null || pos == null) return -1;
-                    BlockEntity be = level.getBlockEntity(pos);
-                    if (be instanceof ChestBlockEntity bulk) {
-                        return bulk.getTier().getColor();
+                List.of(new BlockTintSource() {
+                    @Override
+                    public int color(net.minecraft.world.level.block.state.BlockState state) {
+                        return -1;
                     }
-                    return -1;
-                },
+
+                    @Override
+                    public int colorInWorld(
+                            net.minecraft.world.level.block.state.BlockState state,
+                            BlockAndTintGetter level,
+                            BlockPos pos) {
+                        BlockEntity be = level.getBlockEntity(pos);
+                        if (be instanceof ChestBlockEntity bulk) {
+                            return bulk.getTier().getColor();
+                        }
+                        return -1;
+                    }
+                }),
                 Registration.TREMENDOUS_CHEST.get(),
                 Registration.ENDER_TREMENDOUS_CHEST.get());
     }

@@ -11,7 +11,7 @@ import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.SearchBoxWidget;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -21,7 +21,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
@@ -44,15 +44,15 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
     private Slot shiftDragSlot;
 
     public PicnicBasketItemScreen(PicnicBasketItemMenu menu, Inventory inv, Component title) {
-        super(menu, inv, title);
-        inventoryPane = new LocalInventoryPane();
-        dialog = new Dialog(
+        LocalInventoryPane inventoryPane_ = new LocalInventoryPane();
+        Dialog dialog_ = new Dialog(
                 Dialog.blankPane(PlayerInventoryPane.WIDTH, 7),
-                inventoryPane,
+                inventoryPane_,
                 Dialog.blankPane(PlayerInventoryPane.WIDTH, 20),
                 new PlayerInventoryPane());
-        this.imageWidth = dialog.totalWidth();
-        this.imageHeight = dialog.totalHeight();
+        super(menu, inv, title, dialog_.totalWidth(), dialog_.totalHeight());
+        inventoryPane = inventoryPane_;
+        dialog = dialog_;
         configDrawer = new ConfigDrawer(new AutoFeedPane(
                 () -> {
                     ItemStack basket = getCurrentBasketStack();
@@ -201,7 +201,7 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
             Slot slot = hoveredSlot;
             if (slot != null && slot != shiftDragSlot && slot.hasItem()) {
                 shiftDragSlot = slot;
-                slotClicked(slot, slot.index, 0, ClickType.QUICK_MOVE);
+                slotClicked(slot, slot.index, 0, ContainerInput.QUICK_MOVE);
             }
         }
         return super.mouseDragged(event, dragX, dragY);
@@ -219,10 +219,9 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-        renderTooltip(graphics, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        extractBackground(graphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
 
         int paneAbsY = dialog.getPaneAbsY(1);
         ItemStack hovered = inventoryPane.getHoveredStack(mouseX - leftPos, mouseY - paneAbsY);
@@ -232,15 +231,16 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         configDrawer.render(graphics, font, mouseX, mouseY, partialTick);
         configDrawer.renderTab(graphics, mouseX, mouseY);
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
         searchBox.render(graphics, font);
+        super.extractContents(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Title is drawn by Dialog.
     }
 }

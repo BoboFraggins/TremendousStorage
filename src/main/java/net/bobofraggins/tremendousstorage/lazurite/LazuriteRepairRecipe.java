@@ -1,11 +1,9 @@
 package net.bobofraggins.tremendousstorage.lazurite;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -19,8 +17,8 @@ import net.minecraft.world.level.Level;
  */
 public class LazuriteRepairRecipe extends CustomRecipe {
 
-    public LazuriteRepairRecipe(CraftingBookCategory category) {
-        super(category);
+    public LazuriteRepairRecipe() {
+        super();
     }
 
     @Override
@@ -47,7 +45,7 @@ public class LazuriteRepairRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
+    public ItemStack assemble(CraftingInput input) {
         for (int i = 0; i < input.size(); i++) {
             ItemStack stack = input.getItem(i);
             if (isLazuriteTool(stack)) {

@@ -6,7 +6,7 @@ import net.bobofraggins.tremendousstorage.shared.network.NetworkContentsPacket;
 import net.bobofraggins.tremendousstorage.shared.network.QuickStackPacket;
 import net.bobofraggins.tremendousstorage.shared.network.RequestNetworkContentsPacket;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -54,10 +54,9 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
     private boolean draggingScrollbar = false;
 
     public NetworkInterfaceScreen(NetworkInterfaceMenu menu, Inventory inv, Component title) {
-        super(menu, inv, title);
-        dialog = new Dialog(Dialog.blankPane(BG_WIDTH, BG_HEIGHT - Dialog.TITLE_H - Dialog.BOTTOM_PADDING));
-        this.imageWidth = dialog.totalWidth();
-        this.imageHeight = dialog.totalHeight();
+        Dialog dialog_ = new Dialog(Dialog.blankPane(BG_WIDTH, BG_HEIGHT - Dialog.TITLE_H - Dialog.BOTTOM_PADDING));
+        super(menu, inv, title, dialog_.totalWidth(), dialog_.totalHeight());
+        dialog = dialog_;
     }
 
     @Override
@@ -190,14 +189,13 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
     // -------------------------------------------------------------------------
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-        renderTooltip(graphics, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        extractBackground(graphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         int x = leftPos, y = topPos;
 
         dialog.render(graphics, font, title, mouseX, mouseY, partialTick);
@@ -209,7 +207,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
                         ? "screen.tremendousstorage.network_interface.valid"
                         : "screen.tremendousstorage.network_interface.invalid");
         int statusColor = valid ? 0x006600 : 0xAA0000;
-        graphics.drawString(font, statusText, x + (BG_WIDTH - font.width(statusText)) / 2, y + 18, statusColor, false);
+        graphics.text(font, statusText, x + (BG_WIDTH - font.width(statusText)) / 2, y + 18, statusColor, false);
 
         // List area separator
         graphics.fill(x + 4, y + LIST_Y_START - 2, x + BG_WIDTH - 4, y + LIST_Y_START - 1, 0x80555555);
@@ -236,7 +234,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
                     : key;
 
             int rowY = y + LIST_Y_START + i * ROW_HEIGHT;
-            graphics.drawString(font, displayStr, x + 6, rowY, 0x404040, false);
+            graphics.text(font, displayStr, x + 6, rowY, 0x404040, false);
         }
 
         graphics.disableScissor();
@@ -244,7 +242,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         // Empty state
         if (entries.isEmpty()) {
             String emptyMsg = "No blocks connected";
-            graphics.drawString(
+            graphics.text(
                     font, emptyMsg, x + (BG_WIDTH - font.width(emptyMsg)) / 2, y + LIST_Y_START + 4, 0x808080, false);
         }
 
@@ -276,10 +274,11 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
                 thumbY,
                 SCROLLER_W,
                 SCROLLER_H);
+        super.extractContents(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Title is drawn by Dialog.
     }
 }

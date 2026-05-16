@@ -68,7 +68,7 @@ public class ExperienceSyringeItem extends Item {
                         SoundEvents.EXPERIENCE_ORB_PICKUP,
                         SoundSource.PLAYERS,
                         0.1f,
-                        0.5f + level.random.nextFloat() * 0.1f);
+                        0.5f + level.getRandom().nextFloat() * 0.1f);
             }
         } else {
             // Withdraw: give the player exactly enough XP to reach their next whole level.
@@ -86,7 +86,7 @@ public class ExperienceSyringeItem extends Item {
                         SoundEvents.EXPERIENCE_ORB_PICKUP,
                         SoundSource.PLAYERS,
                         0.1f,
-                        0.5f + level.random.nextFloat() * 0.1f);
+                        0.5f + level.getRandom().nextFloat() * 0.1f);
             }
         }
 

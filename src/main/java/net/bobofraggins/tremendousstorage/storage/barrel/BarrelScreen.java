@@ -9,7 +9,7 @@ import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PriorityPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PullerSidesPane;
 import net.bobofraggins.tremendousstorage.shared.ui.VoidExcessPane;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -21,9 +21,7 @@ public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
     private final ConfigDrawer configDrawer;
 
     public BarrelScreen(BarrelMenu menu, Inventory inv, Component title) {
-        super(menu, inv, title);
-
-        dialog = new Dialog(
+        Dialog dialog_ = new Dialog(
                 Dialog.blankPane(188, 0),
                 new VoidExcessPane(
                         menu::isVoidExcess,
@@ -34,8 +32,8 @@ public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
                         p -> ClientPacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))),
                 Dialog.blankPane(0, 10),
                 new PlayerInventoryPane());
-        imageWidth = dialog.totalWidth();
-        imageHeight = dialog.totalHeight();
+        super(menu, inv, title, dialog_.totalWidth(), dialog_.totalHeight());
+        dialog = dialog_;
 
         java.util.List<IDialogPane> drawerPanes = new java.util.ArrayList<>();
         if (menu.hasPullerUpgrade()) {
@@ -52,15 +50,16 @@ public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
     }
 
     @Override
-    protected void renderBg(GuiGraphics gfx, float partialTick, int mx, int my) {
+    public void extractContents(GuiGraphicsExtractor gfx, int mx, int my, float partialTick) {
         dialog.render(gfx, font, title, mx, my, partialTick);
         configDrawer.render(gfx, font, mx, my, partialTick);
+        super.extractContents(gfx, mx, my, partialTick);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics gfx, int mx, int my) {
+    protected void extractLabels(GuiGraphicsExtractor gfx, int mx, int my) {
         // Title is drawn by Dialog. Draw only the player inventory label.
-        gfx.drawString(
+        gfx.text(
                 font,
                 Component.translatable("container.inventory"),
                 BarrelMenu.INV_LEFT,
@@ -70,10 +69,9 @@ public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
     }
 
     @Override
-    public void render(GuiGraphics gfx, int mx, int my, float partialTick) {
-        renderBackground(gfx, mx, my, partialTick);
-        super.render(gfx, mx, my, partialTick);
-        renderTooltip(gfx, mx, my);
+    public void extractRenderState(GuiGraphicsExtractor gfx, int mx, int my, float partialTick) {
+        extractBackground(gfx, mx, my, partialTick);
+        super.extractRenderState(gfx, mx, my, partialTick);
     }
 
     @Override

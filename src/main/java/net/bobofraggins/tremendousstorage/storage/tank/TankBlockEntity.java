@@ -62,7 +62,13 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
      * Two-slot container for the fill/drain pane (slot 0 = input, slot 1 = output).
      * Changes mark the BE dirty so the contents survive world save.
      */
-    public final SimpleContainer transferContainer = new SimpleContainer(2);
+    public final SimpleContainer transferContainer = new SimpleContainer(2) {
+        @Override
+        public void setChanged() {
+            super.setChanged();
+            TankBlockEntity.this.setChanged();
+        }
+    };
 
     /** Type key — always has amount=1. EMPTY means unlocked. */
     private FluidStack storedFluid = FluidStack.EMPTY;
@@ -87,7 +93,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     protected TankBlockEntity(
             net.minecraft.world.level.block.entity.BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
-        transferContainer.addListener(c -> super.setChanged());
+        // setChanged() hook wired via anonymous SimpleContainer subclass above
     }
 
     // -------------------------------------------------------------------------

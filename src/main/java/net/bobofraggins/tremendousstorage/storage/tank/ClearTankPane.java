@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
 import net.bobofraggins.tremendousstorage.shared.ui.IDialogPane;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 /** Config drawer pane with a "Clear Contents" button for the tank. */
@@ -36,7 +36,7 @@ public class ClearTankPane implements IDialogPane {
 
     @Override
     public void render(
-            GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
+            GuiGraphicsExtractor graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
         int btnX = (width - BTN_W) / 2;
         boolean hovered = isInButton(localMouseX, localMouseY, btnX);
 
@@ -51,7 +51,7 @@ public class ClearTankPane implements IDialogPane {
         Component label = Component.translatable("screen.tremendousstorage.clear_tank_contents");
         int textX = btnX + (BTN_W - font.width(label)) / 2;
         int textY = BTN_Y + (BTN_H - font.lineHeight) / 2;
-        graphics.drawString(font, label, textX, textY, 0x404040, false);
+        graphics.text(font, label, textX, textY, 0x404040, false);
     }
 
     @Override

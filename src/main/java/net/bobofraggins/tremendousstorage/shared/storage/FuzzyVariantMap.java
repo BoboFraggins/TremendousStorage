@@ -26,12 +26,12 @@ final class FuzzyVariantMap implements VariantCounter {
 
     @Override
     public long getAmount(StorageKey key) {
-        return tree.getLong(key);
+        return tree.getOrDefault(key, 0L);
     }
 
     @Override
     public void add(StorageKey key, long delta) {
-        long newVal = tree.getLong(key) + delta;
+        long newVal = tree.getOrDefault(key, 0L) + delta;
         if (newVal <= 0) {
             tree.removeLong(key);
         } else {
@@ -79,7 +79,7 @@ final class FuzzyVariantMap implements VariantCounter {
      * <p>Returns {@code 0} when the damage component is absent (fresh / undamaged item).
      */
     static int getDamage(StorageKey key) {
-        var patch = key.components.get(DataComponents.DAMAGE);
-        return (patch != null && patch.isPresent()) ? patch.get() : 0;
+        Integer damage = key.components.get(net.minecraft.core.component.DataComponentMap.EMPTY, DataComponents.DAMAGE);
+        return damage != null ? damage : 0;
     }
 }

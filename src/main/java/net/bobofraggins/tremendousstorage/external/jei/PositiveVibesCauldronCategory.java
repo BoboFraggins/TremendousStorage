@@ -8,7 +8,7 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 
 /**
@@ -76,7 +76,7 @@ public class PositiveVibesCauldronCategory implements IRecipeCategory<PositiveVi
     public void draw(
             PositiveVibesCauldronJeiRecipe recipe,
             IRecipeSlotsView recipeSlotsView,
-            GuiGraphics guiGraphics,
+            GuiGraphicsExtractor guiGraphics,
             double mouseX,
             double mouseY) {
         int count = recipe.steps().size();
@@ -89,7 +89,7 @@ public class PositiveVibesCauldronCategory implements IRecipeCategory<PositiveVi
      * Draws a small downward-pointing triangle (5×3 px) centred horizontally in the background,
      * with its top row at {@code y}.
      */
-    private void drawDownArrow(GuiGraphics g, int y) {
+    private void drawDownArrow(GuiGraphicsExtractor g, int y) {
         int cx = WIDTH / 2;
         g.fill(cx - 2, y, cx + 3, y + 1, ARROW_COLOR);
         g.fill(cx - 1, y + 1, cx + 2, y + 2, ARROW_COLOR);

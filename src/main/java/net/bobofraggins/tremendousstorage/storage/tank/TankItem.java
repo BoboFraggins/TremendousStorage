@@ -120,12 +120,10 @@ public class TankItem extends TieredBlockItem {
                 boolean newBucketMode = !c.bucketMode();
                 stack.set(
                         Registration.TANK_CONTENTS.get(), new TankContents(c.storedFluid(), c.amount(), newBucketMode));
-                player.displayClientMessage(
-                        Component.translatable(
-                                newBucketMode
-                                        ? "item.tremendousstorage.tank.mode_bucket"
-                                        : "item.tremendousstorage.tank.mode_block"),
-                        true);
+                player.sendOverlayMessage(Component.translatable(
+                        newBucketMode
+                                ? "item.tremendousstorage.tank.mode_bucket"
+                                : "item.tremendousstorage.tank.mode_block"));
             }
             return InteractionResult.SUCCESS;
         }

@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.power.stirlingengine;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
@@ -8,13 +9,13 @@ import java.util.List;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -89,7 +90,7 @@ public class StirlingEngineRenderer
 
         // Body
         poseStack.pushPose();
-        List<BlockModelPart> bodyParts = collectParts(mc.getModelManager().getStandaloneModel(BODY_MODEL), random);
+        List<BlockStateModelPart> bodyParts = collectParts(mc.getModelManager().getStandaloneModel(BODY_MODEL), random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
@@ -101,7 +102,8 @@ public class StirlingEngineRenderer
         poseStack.translate(FW_X, FW_Y, FW_Z);
         poseStack.mulPose(Axis.XP.rotationDegrees(360f * t));
         poseStack.translate(-FW_X, -FW_Y, -FW_Z);
-        List<BlockModelPart> fwParts = collectParts(mc.getModelManager().getStandaloneModel(FLYWHEEL_MODEL), random);
+        List<BlockStateModelPart> fwParts =
+                collectParts(mc.getModelManager().getStandaloneModel(FLYWHEEL_MODEL), random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
@@ -111,7 +113,8 @@ public class StirlingEngineRenderer
         // Piston
         poseStack.pushPose();
         poseStack.translate(0f, 0f, pistonZ);
-        List<BlockModelPart> pistonParts = collectParts(mc.getModelManager().getStandaloneModel(PISTON_MODEL), random);
+        List<BlockStateModelPart> pistonParts =
+                collectParts(mc.getModelManager().getStandaloneModel(PISTON_MODEL), random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
@@ -130,7 +133,7 @@ public class StirlingEngineRenderer
             poseStack.mulPose(Axis.XP.rotation((float) Math.atan2(-dy, dz)));
             poseStack.scale(1f, 1f, yzDist / ARM_REST_LEN);
             poseStack.translate(-ARM_CX, -ARM_CY, -ARM_Z0);
-            List<BlockModelPart> bridgeParts =
+            List<BlockStateModelPart> bridgeParts =
                     collectParts(mc.getModelManager().getStandaloneModel(BRIDGE_MODEL), random);
             collector.submitCustomGeometry(
                     poseStack,
@@ -140,8 +143,8 @@ public class StirlingEngineRenderer
         }
     }
 
-    private static List<BlockModelPart> collectParts(BlockStateModel model, RandomSource random) {
-        List<BlockModelPart> parts = new ArrayList<>();
+    private static List<BlockStateModelPart> collectParts(BlockStateModel model, RandomSource random) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
         model.collectParts(random, parts);
         return parts;
@@ -150,36 +153,34 @@ public class StirlingEngineRenderer
     private static void renderQuads(
             VertexConsumer consumer,
             PoseStack.Pose pose,
-            List<BlockModelPart> parts,
+            List<BlockStateModelPart> parts,
             float r,
             float g,
             float b,
             int packedLight) {
         int overlay = OverlayTexture.NO_OVERLAY;
-        for (BlockModelPart part : parts) {
+        for (BlockStateModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    float qr, qg, qb;
-                    if (quad.tintIndex() >= 0) {
-                        qr = r;
-                        qg = g;
-                        qb = b;
-                    } else {
-                        qr = qg = qb = 1f;
-                    }
-                    consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, overlay);
+                    int color = quad.materialInfo().tintIndex() >= 0
+                            ? (0xFF000000 | ((int) (r * 255) << 16) | ((int) (g * 255) << 8) | (int) (b * 255))
+                            : 0xFFFFFFFF;
+                    QuadInstance qi = new QuadInstance();
+                    qi.setColor(color);
+                    qi.setLightCoords(packedLight);
+                    qi.setOverlayCoords(overlay);
+                    consumer.putBakedQuad(pose, quad, qi);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                float qr, qg, qb;
-                if (quad.tintIndex() >= 0) {
-                    qr = r;
-                    qg = g;
-                    qb = b;
-                } else {
-                    qr = qg = qb = 1f;
-                }
-                consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, overlay);
+                int color = quad.materialInfo().tintIndex() >= 0
+                        ? (0xFF000000 | ((int) (r * 255) << 16) | ((int) (g * 255) << 8) | (int) (b * 255))
+                        : 0xFFFFFFFF;
+                QuadInstance qi = new QuadInstance();
+                qi.setColor(color);
+                qi.setLightCoords(packedLight);
+                qi.setOverlayCoords(overlay);
+                consumer.putBakedQuad(pose, quad, qi);
             }
         }
     }

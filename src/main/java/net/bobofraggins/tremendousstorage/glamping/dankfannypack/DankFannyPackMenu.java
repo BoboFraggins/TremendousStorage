@@ -66,16 +66,23 @@ public class DankFannyPackMenu extends AbstractFilingCabinetMenu {
         };
 
         NonNullList<ItemStack> folderItems = contents.toItemList();
-        SimpleContainer container = new SimpleContainer(FOLDER_SLOTS);
-        // Fill before adding the listener so initialization changes do not trigger saves.
+        boolean[] initialized = {false};
+        SimpleContainer container = new SimpleContainer(FOLDER_SLOTS) {
+            @Override
+            public void setChanged() {
+                super.setChanged();
+                if (initialized[0]) saveFolders();
+            }
+        };
+        // Fill before enabling the listener so initialization changes do not trigger saves.
         for (int i = 0; i < FOLDER_SLOTS; i++)
             container.setItem(i, folderItems.get(i).copy());
 
         addAllSlots(container, playerInv, INV_Y, HOTBAR_Y);
         addDataSlots(data);
 
-        // Listener added after addAllSlots so slots[] is populated when saveFolders() runs.
-        container.addListener(ignored -> saveFolders());
+        // Enable saves now that slots[] is populated.
+        initialized[0] = true;
     }
 
     /** Client-side constructor — invoked by {@link Registration#DANK_FANNY_PACK_MENU}. */

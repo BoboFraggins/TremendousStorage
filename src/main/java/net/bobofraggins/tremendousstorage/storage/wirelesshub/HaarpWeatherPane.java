@@ -4,7 +4,7 @@ import java.util.function.IntSupplier;
 import net.bobofraggins.tremendousstorage.shared.network.SetHaarpModePacket;
 import net.bobofraggins.tremendousstorage.shared.ui.IDialogPane;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
@@ -63,12 +63,13 @@ public class HaarpWeatherPane implements IDialogPane {
     }
 
     @Override
-    public void render(GuiGraphics g, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
+    public void render(
+            GuiGraphicsExtractor g, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
         int currentOrdinal = modeSupplier.getAsInt();
 
         // Header
         Component header = Component.translatable("screen.tremendousstorage.haarp.weather_mode");
-        g.drawString(font, header, (width - font.width(header)) / 2, HEADER_Y, 0x404040, false);
+        g.text(font, header, (width - font.width(header)) / 2, HEADER_Y, 0x404040, false);
 
         // Radio rows
         for (int i = 0; i < MODES.length; i++) {
@@ -85,7 +86,7 @@ public class HaarpWeatherPane implements IDialogPane {
 
             // Label
             Component label = Component.translatable(MODE_KEYS[i]);
-            g.drawString(font, label, LABEL_LEFT, rowY, 0x404040, false);
+            g.text(font, label, LABEL_LEFT, rowY, 0x404040, false);
         }
     }
 

@@ -207,7 +207,7 @@ public class ChestMenu extends AbstractContainerMenu {
         if (optional.isPresent()) {
             RecipeHolder<CraftingRecipe> holder = optional.get();
             if (resultSlots.setRecipeUsed(sp, holder)) {
-                ItemStack assembled = holder.value().assemble(input, level.registryAccess());
+                ItemStack assembled = holder.value().assemble(input);
                 if (assembled.isItemEnabled(level.enabledFeatures())) result = assembled;
             }
         }

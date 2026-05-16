@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 import net.bobofraggins.tremendousstorage.shared.network.ClearTankContentsPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetVoidExcessPacket;
 import net.bobofraggins.tremendousstorage.storage.tank.ClearTankPane;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -45,13 +45,11 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
     private final ConfigDrawer configDrawer;
 
     public TankSettingsScreen(TankSettingsMenu menu, Inventory inv, Component title) {
-        super(menu, inv, title);
-
-        dialog = new Dialog(
+        Dialog dialog_ = new Dialog(
                 Dialog.blankPane(PlayerInventoryPane.WIDTH, SETTINGS_PANE_H),
                 new PlayerInventoryPane(TankSettingsMenu.INV_START_X));
-        this.imageWidth = dialog.totalWidth();
-        this.imageHeight = dialog.totalHeight();
+        super(menu, inv, title, dialog_.totalWidth(), dialog_.totalHeight());
+        dialog = dialog_;
 
         VoidExcessPane voidPane = new VoidExcessPane(
                 menu::isVoidExcess,
@@ -74,14 +72,13 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-        renderTooltip(graphics, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        extractBackground(graphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderBg(GuiGraphics g, float partialTick, int mouseX, int mouseY) {
+    public void extractContents(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
         // Drawer renders behind the main panel
         configDrawer.render(g, font, mouseX, mouseY, partialTick);
         configDrawer.renderTab(g, mouseX, mouseY);
@@ -110,10 +107,11 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
 
         // Down-arrow between the two slots
         drawDownArrow(g, x + TankSettingsMenu.FLUID_IN_X, y + TankSettingsMenu.FLUID_IN_Y + 18);
+        super.extractContents(g, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics g, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         // Title is drawn by Dialog.
     }
 
@@ -132,7 +130,7 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
     // -------------------------------------------------------------------------
 
     /** Draws a single slot with the standard bevel style. */
-    private static void drawSlot(GuiGraphics g, int sx, int sy) {
+    private static void drawSlot(GuiGraphicsExtractor g, int sx, int sy) {
         g.fill(sx, sy, sx + 16, sy + 1, 0xFF373737); // top
         g.fill(sx, sy + 1, sx + 1, sy + 16, 0xFF373737); // left
         g.fill(sx, sy + 16, sx + 17, sy + 17, 0xFFFFFFFF); // bottom
@@ -146,7 +144,7 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
      * @param gapX left edge of the slot (arrow is centred horizontally within the 16 px slot)
      * @param gapY top of the gap area (= bottom edge of the slot above)
      */
-    private static void drawDownArrow(GuiGraphics g, int gapX, int gapY) {
+    private static void drawDownArrow(GuiGraphicsExtractor g, int gapX, int gapY) {
         int cx = gapX + 8; // centre of 16 px slot
         int top = gapY + 3;
         // Stem: 2 px wide

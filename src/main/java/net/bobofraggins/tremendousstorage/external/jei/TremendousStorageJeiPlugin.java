@@ -90,11 +90,13 @@ public class TremendousStorageJeiPlugin implements IModPlugin {
                         brewFactory.createBrewingRecipe(
                                 List.of(new ItemStack(Items.REDSTONE)),
                                 new ItemStack(Registration.VEX_REPELLENT_POTION.get()),
-                                new ItemStack(Registration.VEX_REPELLENT_POTION_EXTENDED.get())),
+                                new ItemStack(Registration.VEX_REPELLENT_POTION_EXTENDED.get()),
+                                Identifier.fromNamespaceAndPath("tremendousstorage", "brewing_vex_repellent_extended")),
                         brewFactory.createBrewingRecipe(
                                 List.of(new ItemStack(Items.REDSTONE)),
                                 new ItemStack(Registration.VEX_REPELLENT_POTION_EXTENDED.get()),
-                                new ItemStack(Registration.VEX_REPELLENT_POTION_LONG.get()))));
+                                new ItemStack(Registration.VEX_REPELLENT_POTION_LONG.get()),
+                                Identifier.fromNamespaceAndPath("tremendousstorage", "brewing_vex_repellent_long"))));
     }
 
     @Override

@@ -54,7 +54,7 @@ public class ChestJadePlugin implements IWailaPlugin {
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             CompoundTag data = accessor.getServerData();
-            long total = data.getLong(KEY_TOTAL);
+            long total = data.getLongOr(KEY_TOTAL, 0L);
 
             if (total == 0) {
                 tooltip.add(Component.translatable("jade.tremendousstorage.chest.empty"));
@@ -64,7 +64,7 @@ public class ChestJadePlugin implements IWailaPlugin {
             tooltip.add(Component.translatable(
                     "jade.tremendousstorage.chest.total",
                     CountFormat.format(total),
-                    CountFormat.format(data.getLong(KEY_CAPACITY))));
+                    CountFormat.format(data.getLongOr(KEY_CAPACITY, 0L))));
         }
     }
 }

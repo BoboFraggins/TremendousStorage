@@ -13,12 +13,12 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
 
 /**
  * JEI recipe category for the Ender Chest and Ender Backpack crafting recipes.
@@ -78,7 +78,9 @@ public class EnderStorageCraftingCategory implements IRecipeCategory<EnderStorag
                         ItemStack stack = new ItemStack(Registration.TREMENDOUS_CHEST_ITEM.get());
                         CompoundTag tag = new CompoundTag();
                         tag.putString("Tier", tier.getId());
-                        stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+                        stack.set(
+                                DataComponents.BLOCK_ENTITY_DATA,
+                                TypedEntityData.of(Registration.TREMENDOUS_CHEST_BE_TYPE.get(), tag));
                         return stack;
                     })
                     .toList();
@@ -90,7 +92,9 @@ public class EnderStorageCraftingCategory implements IRecipeCategory<EnderStorag
                         ItemStack stack = new ItemStack(Registration.ENDER_TREMENDOUS_CHEST_ITEM.get());
                         CompoundTag tag = new CompoundTag();
                         tag.putString("Tier", tier.getId());
-                        stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+                        stack.set(
+                                DataComponents.BLOCK_ENTITY_DATA,
+                                TypedEntityData.of(Registration.ENDER_TREMENDOUS_CHEST_BE_TYPE.get(), tag));
                         return stack;
                     })
                     .toList();
@@ -122,7 +126,9 @@ public class EnderStorageCraftingCategory implements IRecipeCategory<EnderStorag
                         ItemStack stack = new ItemStack(Registration.BARREL_ITEM.get());
                         CompoundTag tag = new CompoundTag();
                         tag.putString("Tier", tier.getId());
-                        stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+                        stack.set(
+                                DataComponents.BLOCK_ENTITY_DATA,
+                                TypedEntityData.of(Registration.BARREL_BE_TYPE.get(), tag));
                         return stack;
                     })
                     .toList();
@@ -134,7 +140,9 @@ public class EnderStorageCraftingCategory implements IRecipeCategory<EnderStorag
                         ItemStack stack = new ItemStack(Registration.ENDER_BARREL_ITEM.get());
                         CompoundTag tag = new CompoundTag();
                         tag.putString("Tier", tier.getId());
-                        stack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+                        stack.set(
+                                DataComponents.BLOCK_ENTITY_DATA,
+                                TypedEntityData.of(Registration.ENDER_BARREL_BE_TYPE.get(), tag));
                         return stack;
                     })
                     .toList();
@@ -207,11 +215,15 @@ public class EnderStorageCraftingCategory implements IRecipeCategory<EnderStorag
 
     @Override
     public void draw(
-            Recipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+            Recipe recipe,
+            IRecipeSlotsView recipeSlotsView,
+            GuiGraphicsExtractor guiGraphics,
+            double mouseX,
+            double mouseY) {
         drawRightArrow(guiGraphics, 19, HEIGHT / 2 - 1);
     }
 
-    private void drawRightArrow(GuiGraphics g, int x, int cy) {
+    private void drawRightArrow(GuiGraphicsExtractor g, int x, int cy) {
         g.fill(x, cy, x + 10, cy + 1, ARROW_COLOR);
         g.fill(x + 8, cy - 2, x + 9, cy + 3, ARROW_COLOR);
         g.fill(x + 9, cy - 1, x + 10, cy + 2, ARROW_COLOR);

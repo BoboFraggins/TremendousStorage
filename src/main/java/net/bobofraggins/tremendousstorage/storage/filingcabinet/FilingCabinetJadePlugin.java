@@ -5,7 +5,7 @@ import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -80,7 +80,13 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
                 entry.putLong("count", contents.count());
                 entry.putLong("capacity", ManillaFolderItem.getCapacity(folder));
                 // Serialize the full ItemStack so we can reconstruct it client-side for the icon
-                entry.put("stack", stored.save(accessor.getLevel().registryAccess()));
+                net.minecraft.nbt.Tag stackTag = net.minecraft.world.item.ItemStack.OPTIONAL_CODEC
+                        .encodeStart(
+                                accessor.getLevel().registryAccess().createSerializationContext(NbtOps.INSTANCE),
+                                stored)
+                        .result()
+                        .orElse(new CompoundTag());
+                entry.put("stack", stackTag);
                 list.add(entry);
             }
             data.put(KEY_ITEMS, list);
@@ -97,15 +103,19 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             CompoundTag data = accessor.getServerData();
 
-            ListTag items = data.getList(KEY_ITEMS, Tag.TAG_COMPOUND);
+            net.minecraft.nbt.ListTag items = data.getListOrEmpty(KEY_ITEMS);
             if (items.isEmpty()) return;
 
             for (int i = 0; i < items.size(); i++) {
-                CompoundTag entry = items.getCompound(i);
-                long count = entry.getLong("count");
-                long capacity = entry.getLong("capacity");
-                ItemStack stack =
-                        ItemStack.parseOptional(accessor.getLevel().registryAccess(), entry.getCompound("stack"));
+                CompoundTag entry = items.getCompoundOrEmpty(i);
+                long count = entry.getLongOr("count", 0L);
+                long capacity = entry.getLongOr("capacity", 0L);
+                ItemStack stack = net.minecraft.world.item.ItemStack.OPTIONAL_CODEC
+                        .parse(
+                                accessor.getLevel().registryAccess().createSerializationContext(NbtOps.INSTANCE),
+                                entry.getCompound("stack").orElse(new CompoundTag()))
+                        .result()
+                        .orElse(net.minecraft.world.item.ItemStack.EMPTY);
                 if (stack.isEmpty()) continue;
                 tooltip.add(Component.translatable(
                         "jade.tremendousstorage.filing_cabinet.slot",

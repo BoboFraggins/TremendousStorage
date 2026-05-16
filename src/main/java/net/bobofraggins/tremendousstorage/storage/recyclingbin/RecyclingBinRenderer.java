@@ -1,23 +1,22 @@
 package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.state.CameraRenderState;
-import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -26,7 +25,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 import org.joml.Matrix4f;
 
@@ -102,7 +100,7 @@ public class RecyclingBinRenderer
         RandomSource random = RandomSource.create();
 
         // Body
-        List<BlockModelPart> bodyParts = collectParts(bodyModel, random);
+        List<BlockStateModelPart> bodyParts = collectParts(bodyModel, random);
         poseStack.pushPose();
         applyFacingRotation(poseStack, yRot);
         collector.submitCustomGeometry(
@@ -110,7 +108,7 @@ public class RecyclingBinRenderer
         poseStack.popPose();
 
         // Lid
-        List<BlockModelPart> lidParts = collectParts(lidModel, random);
+        List<BlockStateModelPart> lidParts = collectParts(lidModel, random);
         poseStack.pushPose();
         applyFacingRotation(poseStack, yRot);
         poseStack.translate(0.0, LID_PIVOT_Y, LID_PIVOT_Z);
@@ -121,7 +119,7 @@ public class RecyclingBinRenderer
         poseStack.popPose();
 
         // Pedal
-        List<BlockModelPart> pedalParts = collectParts(pedalModel, random);
+        List<BlockStateModelPart> pedalParts = collectParts(pedalModel, random);
         poseStack.pushPose();
         applyFacingRotation(poseStack, yRot);
         poseStack.translate(PEDAL_PIVOT_X, PEDAL_PIVOT_Y, PEDAL_PIVOT_Z);
@@ -135,17 +133,25 @@ public class RecyclingBinRenderer
         float fill = Math.max(0.01f, state.fillFraction);
         float fillTop = FLUID_FLOOR + fill * FLUID_H;
 
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.POSITIVE_VIBES_TYPE.get());
-        TextureAtlasSprite sprite = mc.getAtlasManager()
-                .getAtlasOrThrow(TextureAtlas.LOCATION_BLOCKS)
-                .getSprite(ext.getStillTexture());
-        int tint = ext.getTintColor();
+        net.minecraft.client.renderer.block.FluidModel fluidModel_ = net.minecraft.client.Minecraft.getInstance()
+                .getModelManager()
+                .getFluidStateModelSet()
+                .get(net.bobofraggins.tremendousstorage.shared.register.Registration.POSITIVE_VIBES_SOURCE
+                        .get()
+                        .defaultFluidState());
+        TextureAtlasSprite sprite = fluidModel_.stillMaterial().sprite();
+        int tint = fluidModel_.fluidTintSource() != null
+                ? fluidModel_
+                        .fluidTintSource()
+                        .colorAsStack(new net.neoforged.neoforge.fluids.FluidStack(
+                                Registration.POSITIVE_VIBES_SOURCE.get(), 1))
+                : 0xFFFFFFFF;
         int fr = (tint >> 16) & 0xFF;
         int fg = (tint >> 8) & 0xFF;
         int fb = tint & 0xFF;
         int fa = (tint >> 24) & 0xFF;
         if (fa == 0) fa = 77;
-        int fluidLight = Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : light;
+        int fluidLight = Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0 ? 0xF000F0 : light;
         float uL = sprite.getU0(), uR = sprite.getU1();
         float vT = sprite.getV0(), vB = Mth.lerp(fill, sprite.getV0(), sprite.getV1());
 
@@ -310,23 +316,35 @@ public class RecyclingBinRenderer
         poseStack.translate(-0.5, -0.5, -0.5);
     }
 
-    private static List<BlockModelPart> collectParts(BlockStateModel model, RandomSource random) {
-        List<BlockModelPart> parts = new ArrayList<>();
+    private static List<BlockStateModelPart> collectParts(BlockStateModel model, RandomSource random) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
         model.collectParts(random, parts);
         return parts;
     }
 
     private static void renderModel(
-            VertexConsumer consumer, PoseStack.Pose pose, List<BlockModelPart> parts, int packedLight, int overlay) {
-        for (BlockModelPart part : parts) {
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            List<BlockStateModelPart> parts,
+            int packedLight,
+            int overlay) {
+        for (BlockStateModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1f, packedLight, overlay);
+                    QuadInstance qi = new QuadInstance();
+                    qi.setColor(0xFFFFFFFF);
+                    qi.setLightCoords(packedLight);
+                    qi.setOverlayCoords(overlay);
+                    consumer.putBakedQuad(pose, quad, qi);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1f, packedLight, overlay);
+                QuadInstance qi = new QuadInstance();
+                qi.setColor(0xFFFFFFFF);
+                qi.setLightCoords(packedLight);
+                qi.setOverlayCoords(overlay);
+                consumer.putBakedQuad(pose, quad, qi);
             }
         }
     }

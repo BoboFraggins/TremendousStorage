@@ -1,9 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.manillafolder;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -41,8 +39,8 @@ import net.minecraft.world.level.Level;
  */
 public class FolderExtractRecipe extends CustomRecipe {
 
-    public FolderExtractRecipe(CraftingBookCategory category) {
-        super(category);
+    public FolderExtractRecipe() {
+        super();
     }
 
     @Override
@@ -55,7 +53,7 @@ public class FolderExtractRecipe extends CustomRecipe {
 
     /** Extracts up to one full stack (capped at the stored item's max stack size). */
     @Override
-    public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
+    public ItemStack assemble(CraftingInput input) {
         ItemStack folder = findFolder(input);
         if (folder.isEmpty()) return ItemStack.EMPTY;
 

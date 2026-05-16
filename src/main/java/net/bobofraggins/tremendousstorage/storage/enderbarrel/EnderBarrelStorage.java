@@ -11,7 +11,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.SavedDataStorage;
 
 /**
  * Server-side persistent storage for Ender Barrel shared contents.
@@ -28,7 +28,7 @@ public class EnderBarrelStorage extends SavedData {
             CompoundTag.CODEC.xmap(EnderBarrelStorage::fromCompoundTag, EnderBarrelStorage::toCompoundTag);
 
     static final SavedDataType<EnderBarrelStorage> TYPE =
-            new SavedDataType<>(SAVE_KEY, ctx -> new EnderBarrelStorage(), ctx -> CODEC);
+            new SavedDataType<>(net.minecraft.resources.Identifier.parse(SAVE_KEY), EnderBarrelStorage::new, CODEC);
 
     private final Map<Long, ItemStack> storedItems = new HashMap<>();
     private final Map<Long, Long> counts = new HashMap<>();
@@ -41,7 +41,7 @@ public class EnderBarrelStorage extends SavedData {
     // -------------------------------------------------------------------------
 
     public static EnderBarrelStorage get(MinecraftServer server) {
-        DimensionDataStorage storage = server.overworld().getDataStorage();
+        SavedDataStorage storage = server.overworld().getDataStorage();
         return storage.computeIfAbsent(TYPE);
     }
 

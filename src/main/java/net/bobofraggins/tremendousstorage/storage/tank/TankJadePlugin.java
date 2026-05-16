@@ -2,6 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 
 import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -48,7 +49,12 @@ public class TankJadePlugin implements IWailaPlugin {
             data.putLong(KEY_CAPACITY, be.getCapacity());
             FluidStack fluid = be.getStoredFluid();
             if (!fluid.isEmpty()) {
-                data.put(KEY_FLUID, fluid.save(accessor.getLevel().registryAccess()));
+                net.minecraft.nbt.Tag fluidTag = net.neoforged.neoforge.fluids.FluidStack.OPTIONAL_CODEC
+                        .encodeStart(
+                                accessor.getLevel().registryAccess().createSerializationContext(NbtOps.INSTANCE), fluid)
+                        .result()
+                        .orElse(new CompoundTag());
+                data.put(KEY_FLUID, fluidTag);
             }
         }
 
@@ -66,12 +72,16 @@ public class TankJadePlugin implements IWailaPlugin {
                 return;
             }
 
-            FluidStack fluid =
-                    FluidStack.parseOptional(accessor.getLevel().registryAccess(), data.getCompound(KEY_FLUID));
+            FluidStack fluid = net.neoforged.neoforge.fluids.FluidStack.OPTIONAL_CODEC
+                    .parse(
+                            accessor.getLevel().registryAccess().createSerializationContext(NbtOps.INSTANCE),
+                            data.getCompound(KEY_FLUID).orElse(new CompoundTag()))
+                    .result()
+                    .orElse(net.neoforged.neoforge.fluids.FluidStack.EMPTY);
             if (fluid.isEmpty()) return;
 
-            long amount = data.getLong(KEY_AMOUNT);
-            long capacity = data.getLong(KEY_CAPACITY);
+            long amount = data.getLongOr(KEY_AMOUNT, 0L);
+            long capacity = data.getLongOr(KEY_CAPACITY, 0L);
             tooltip.add(Component.translatable(
                     "jade.tremendousstorage.tank.contents",
                     CountFormat.format(amount),

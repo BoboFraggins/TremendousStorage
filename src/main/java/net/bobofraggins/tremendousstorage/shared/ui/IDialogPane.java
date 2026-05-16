@@ -1,13 +1,13 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /**
  * A self-contained rendered panel within a {@link Dialog}.
  *
  * <p>All rendering and mouse coordinates are <em>pane-local</em>: (0, 0) is the top-left corner
- * of the pane. The {@link Dialog} translates the {@link GuiGraphics} pose stack to the pane's
+ * of the pane. The {@link Dialog} translates the {@link GuiGraphicsExtractor} pose stack to the pane's
  * screen-space origin before calling {@link #render}, so implementations can treat (0, 0) as
  * their own origin without knowing where they sit on screen.
  */
@@ -29,7 +29,8 @@ public interface IDialogPane {
      * @param localMouseY mouse Y relative to pane origin
      * @param partialTick partial tick for animations
      */
-    void render(GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick);
+    void render(
+            GuiGraphicsExtractor graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick);
 
     /**
      * Handle a mouse click in pane-local coordinates.

@@ -16,7 +16,7 @@ import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.enderfolder.EnderFolderItem;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -117,7 +117,11 @@ public class EnderFolderCraftingCategory implements IRecipeCategory<EnderFolderC
 
     @Override
     public void draw(
-            Recipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY) {
+            Recipe recipe,
+            IRecipeSlotsView recipeSlotsView,
+            GuiGraphicsExtractor guiGraphics,
+            double mouseX,
+            double mouseY) {
         // Right-pointing arrow centred vertically between the two input rows
         drawRightArrow(guiGraphics, 19, HEIGHT / 2 - 1);
     }
@@ -125,7 +129,7 @@ public class EnderFolderCraftingCategory implements IRecipeCategory<EnderFolderC
     /**
      * Draws a small right-pointing arrow with its tip at {@code (x + 13, cy)}.
      */
-    private void drawRightArrow(GuiGraphics g, int x, int cy) {
+    private void drawRightArrow(GuiGraphicsExtractor g, int x, int cy) {
         g.fill(x, cy, x + 10, cy + 1, ARROW_COLOR); // shaft
         g.fill(x + 8, cy - 2, x + 9, cy + 3, ARROW_COLOR); // arrowhead col 1
         g.fill(x + 9, cy - 1, x + 10, cy + 2, ARROW_COLOR); // arrowhead col 2

@@ -10,7 +10,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.SavedDataStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
@@ -27,7 +27,7 @@ public class EnderTankStorage extends SavedData {
             CompoundTag.CODEC.xmap(EnderTankStorage::fromCompoundTag, EnderTankStorage::toCompoundTag);
 
     static final SavedDataType<EnderTankStorage> TYPE =
-            new SavedDataType<>(SAVE_KEY, ctx -> new EnderTankStorage(), ctx -> CODEC);
+            new SavedDataType<>(net.minecraft.resources.Identifier.parse(SAVE_KEY), EnderTankStorage::new, CODEC);
 
     private record FluidState(FluidStack type, long amount) {}
 
@@ -40,7 +40,7 @@ public class EnderTankStorage extends SavedData {
     // -------------------------------------------------------------------------
 
     public static EnderTankStorage get(MinecraftServer server) {
-        DimensionDataStorage storage = server.overworld().getDataStorage();
+        SavedDataStorage storage = server.overworld().getDataStorage();
         return storage.computeIfAbsent(TYPE);
     }
 

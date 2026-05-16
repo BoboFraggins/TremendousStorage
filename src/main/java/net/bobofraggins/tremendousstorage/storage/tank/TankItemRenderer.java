@@ -6,20 +6,15 @@ import java.util.function.Consumer;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3fc;
@@ -48,7 +43,6 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
     @Override
     public void submit(
             @Nullable RenderData data,
-            ItemDisplayContext displayContext,
             PoseStack poseStack,
             SubmitNodeCollector collector,
             int packedLight,
@@ -59,9 +53,36 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
 
         StorageTier tier = data != null ? data.tier() : StorageTier.WOOD;
         BlockState renderState = Registration.TANK.get().defaultBlockState().setValue(TankBlock.TIER_PROP, tier);
-        MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
-        mc.getBlockRenderer().renderSingleBlock(renderState, poseStack, buffers, packedLight, packedOverlay);
-        buffers.endBatch();
+        {
+            net.minecraft.client.renderer.block.dispatch.BlockStateModel blkModel =
+                    mc.getModelManager().getBlockStateModelSet().get(renderState);
+            java.util.List<net.minecraft.client.renderer.block.dispatch.BlockStateModelPart> blkParts =
+                    new java.util.ArrayList<>();
+            blkModel.collectParts(net.minecraft.util.RandomSource.create(), blkParts);
+            collector.submitCustomGeometry(
+                    poseStack, net.minecraft.client.renderer.Sheets.cutoutBlockSheet(), (pose_, vc_) -> {
+                        for (net.minecraft.client.renderer.block.dispatch.BlockStateModelPart part_ : blkParts) {
+                            for (net.minecraft.core.Direction dir_ : net.minecraft.core.Direction.values()) {
+                                for (var quad_ : part_.getQuads(dir_)) {
+                                    com.mojang.blaze3d.vertex.QuadInstance qi_ =
+                                            new com.mojang.blaze3d.vertex.QuadInstance();
+                                    qi_.setColor(0xFFFFFFFF);
+                                    qi_.setLightCoords(packedLight);
+                                    qi_.setOverlayCoords(packedOverlay);
+                                    vc_.putBakedQuad(pose_, quad_, qi_);
+                                }
+                            }
+                            for (var quad_ : part_.getQuads(null)) {
+                                com.mojang.blaze3d.vertex.QuadInstance qi_ =
+                                        new com.mojang.blaze3d.vertex.QuadInstance();
+                                qi_.setColor(0xFFFFFFFF);
+                                qi_.setLightCoords(packedLight);
+                                qi_.setOverlayCoords(packedOverlay);
+                                vc_.putBakedQuad(pose_, quad_, qi_);
+                            }
+                        }
+                    });
+        }
 
         TankContents contents = data != null ? data.contents() : null;
         if (contents == null || contents.isEmpty()) return;
@@ -70,20 +91,22 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
         float fillFrac = Math.max(0.01f, (float) contents.amount() / capacity);
 
         FluidStack fluid = contents.storedFluid();
-        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fluid.getFluid());
+        net.minecraft.client.renderer.block.FluidModel fluidModel_ = net.minecraft.client.Minecraft.getInstance()
+                .getModelManager()
+                .getFluidStateModelSet()
+                .get(fluid.getFluid().defaultFluidState());
+        TextureAtlasSprite sprite = fluidModel_.stillMaterial().sprite();
 
-        TextureAtlasSprite sprite = mc.getAtlasManager()
-                .getAtlasOrThrow(TextureAtlas.LOCATION_BLOCKS)
-                .getSprite(ext.getStillTexture(fluid));
-
-        int fluidTint = ext.getTintColor(fluid);
+        int fluidTint = fluidModel_.fluidTintSource() != null
+                ? fluidModel_.fluidTintSource().colorAsStack(fluid)
+                : 0xFFFFFFFF;
         int fr = (fluidTint >> 16) & 0xFF;
         int fg = (fluidTint >> 8) & 0xFF;
         int fb = fluidTint & 0xFF;
         int fa = (fluidTint >> 24) & 0xFF;
         if (fa == 0) fa = 77;
 
-        int fluidLight = fluid.getFluidType().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
+        int fluidLight = fluid.getFluidType().getLightLevel() > 0 ? 0xF000F0 : packedLight;
 
         float fillTop = TankRenderer.TANK_FLUID_FLOOR + fillFrac * TankRenderer.TANK_FLUID_H;
         float uL = sprite.getU0(), uR = sprite.getU1();
@@ -99,17 +122,17 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
                         vc, pose.pose(), ffrF, ffgF, ffbF, ffaF, flF, overlayF, uL, vT, uR, vB, fillTop));
     }
 
-    public record Unbaked() implements SpecialModelRenderer.Unbaked {
+    public record Unbaked() implements SpecialModelRenderer.Unbaked<RenderData> {
         public static final MapCodec<Unbaked> MAP_CODEC = MapCodec.unit(new Unbaked());
 
         @Override
         @Nullable
-        public SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context) {
+        public SpecialModelRenderer<RenderData> bake(SpecialModelRenderer.BakingContext context) {
             return new TankItemRenderer();
         }
 
         @Override
-        public MapCodec<? extends SpecialModelRenderer.Unbaked> type() {
+        public MapCodec<? extends SpecialModelRenderer.Unbaked<RenderData>> type() {
             return MAP_CODEC;
         }
     }

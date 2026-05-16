@@ -5,12 +5,12 @@ import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.shared.network.QuickStackFilingCabinetPacket;
 import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
@@ -45,12 +45,10 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
 
     protected AbstractFilingCabinetScreen(
             M menu, Inventory inv, Component title, int bgHeight, int playerInvY, ConfigDrawer configDrawer) {
-        super(menu, inv, title);
+        super(menu, inv, title, BG_WIDTH, bgHeight);
         this.playerInvY = playerInvY;
         this.configDrawer = configDrawer;
         dialog = new Dialog(Dialog.blankPane(BG_WIDTH, bgHeight - Dialog.TITLE_H - Dialog.BOTTOM_PADDING));
-        this.imageWidth = dialog.totalWidth();
-        this.imageHeight = dialog.totalHeight();
     }
 
     @Override
@@ -98,7 +96,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
             Slot slot = hoveredSlot;
             if (slot != null && slot != shiftDragSlot && slot.hasItem()) {
                 shiftDragSlot = slot;
-                slotClicked(slot, slot.index, 0, ClickType.QUICK_MOVE);
+                slotClicked(slot, slot.index, 0, ContainerInput.QUICK_MOVE);
             }
         }
         return super.mouseDragged(event, dragX, dragY);
@@ -128,14 +126,13 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(graphics, mouseX, mouseY, partialTick);
-        super.render(graphics, mouseX, mouseY, partialTick);
-        renderTooltip(graphics, mouseX, mouseY);
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+        extractBackground(graphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
+    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
         int x = leftPos, y = topPos;
 
         // Drawer renders first so the dialog's left border appears on top of it
@@ -167,6 +164,8 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         graphics.pose().translate(x, y + playerInvY);
         PLAYER_INV_PANE.render(graphics, font, BG_WIDTH, 0, 0, 0);
         graphics.pose().popMatrix();
+
+        super.extractContents(graphics, mouseX, mouseY, partialTick);
     }
 
     /**
@@ -175,11 +174,11 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
      * other inventories in the mod.
      */
     @Override
-    protected void renderSlot(GuiGraphics graphics, Slot slot, int x, int y) {
+    protected void extractSlot(GuiGraphicsExtractor graphics, Slot slot, int x, int y) {
         if (slot instanceof FolderExtractionSlot extractSlot && extractSlot.isGhost()) {
             ItemStack ghost = extractSlot.getGhostItem();
             if (!ghost.isEmpty()) {
-                graphics.renderItem(ghost, x, y);
+                graphics.item(ghost, x, y);
                 graphics.fill(x, y, x + 16, y + 16, 0x80000000);
             }
             return;
@@ -187,7 +186,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
 
         if (slot instanceof FolderExtractionSlot && slot.hasItem()) {
             ItemStack stack = slot.getItem();
-            graphics.renderItem(stack, x, y);
+            graphics.item(stack, x, y);
             long count = stack.getCount();
             if (count > 1) renderSizeLabel(graphics, font, x, y, CountFormat.format(count), 0xFFFFFF);
             if (hoveredSlot == slot) {
@@ -196,16 +195,17 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
             return;
         }
 
-        super.renderSlot(graphics, slot, x, y);
+        super.extractSlot(graphics, slot, x, y);
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         // Title is drawn by Dialog.
     }
 
     /** Renders a count label at 0.666 scale in the bottom-right corner of a 16×16 slot. */
-    private static void renderSizeLabel(GuiGraphics graphics, Font font, float x, float y, String text, int color) {
+    private static void renderSizeLabel(
+            GuiGraphicsExtractor graphics, Font font, float x, float y, String text, int color) {
         float scale = 0.666f;
         float scaleInv = 1f / scale;
         float offset = -1f;
@@ -216,13 +216,13 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         float textX = (x + offset + 16f + 2f - font.width(text) * scale) * scaleInv;
         float textY = (y + offset + 10f) * scaleInv;
 
-        graphics.drawString(font, text, (int) (textX + 1f), (int) (textY + 1f), 0x414141, false);
-        graphics.drawString(font, text, (int) textX, (int) textY, color, false);
+        graphics.text(font, text, (int) (textX + 1f), (int) (textY + 1f), 0x414141, false);
+        graphics.text(font, text, (int) textX, (int) textY, color, false);
 
         graphics.pose().popMatrix();
     }
 
-    private static void drawSlotBackground(GuiGraphics graphics, int sx, int sy, int w, int h) {
+    private static void drawSlotBackground(GuiGraphicsExtractor graphics, int sx, int sy, int w, int h) {
         graphics.fill(sx, sy, sx + w, sy + 1, 0xFF373737); // top
         graphics.fill(sx, sy + 1, sx + 1, sy + h, 0xFF373737); // left
         graphics.fill(sx, sy + h, sx + w + 1, sy + h + 1, 0xFFFFFFFF); // bottom

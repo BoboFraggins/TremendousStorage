@@ -485,19 +485,19 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         var in9 = CraftingInput.of(3, 3, List.of(item, item, item, item, item, item, item, item, item));
         var r9 = rm.getRecipeFor(RecipeType.CRAFTING, in9, level);
         if (r9.isPresent()) {
-            var out = r9.get().value().assemble(in9, level.registryAccess());
+            var out = r9.get().value().assemble(in9);
             if (!out.isEmpty()) return new CompactResult(out.copyWithCount(1), 9);
         }
         var in4 = CraftingInput.of(2, 2, List.of(item, item, item, item));
         var r4 = rm.getRecipeFor(RecipeType.CRAFTING, in4, level);
         if (r4.isPresent()) {
-            var out = r4.get().value().assemble(in4, level.registryAccess());
+            var out = r4.get().value().assemble(in4);
             if (!out.isEmpty()) return new CompactResult(out.copyWithCount(1), 4);
         }
         var inRing = CraftingInput.of(3, 3, List.of(item, item, item, item, ItemStack.EMPTY, item, item, item, item));
         var rRing = rm.getRecipeFor(RecipeType.CRAFTING, inRing, level);
         if (rRing.isPresent()) {
-            var out = rRing.get().value().assemble(inRing, level.registryAccess());
+            var out = rRing.get().value().assemble(inRing);
             if (!out.isEmpty()) return new CompactResult(out.copyWithCount(1), 8);
         }
         return null;
@@ -515,7 +515,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         ItemStack out9 = ItemStack.EMPTY, out4 = ItemStack.EMPTY, out8 = ItemStack.EMPTY;
         for (var holder : rm.recipeMap().byType(RecipeType.CRAFTING)) {
             if (!holder.value().matches(in1, level)) continue;
-            var out = holder.value().assemble(in1, level.registryAccess());
+            var out = holder.value().assemble(in1);
             if (out.isEmpty()) continue;
             if (out.getCount() == 9 && out9.isEmpty()) out9 = out;
             else if (out.getCount() == 4 && out4.isEmpty()) out4 = out;

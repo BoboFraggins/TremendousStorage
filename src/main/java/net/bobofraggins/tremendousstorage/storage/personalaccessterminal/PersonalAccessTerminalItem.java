@@ -79,8 +79,8 @@ public class PersonalAccessTerminalItem extends Item {
 
         BlockPos niPos = stack.get(Registration.WIRELESS_NI_POS.get());
         if (niPos == null) {
-            player.displayClientMessage(
-                    Component.translatable("item.tremendousstorage.personal_access_terminal.not_linked"), true);
+            player.sendOverlayMessage(
+                    Component.translatable("item.tremendousstorage.personal_access_terminal.not_linked"));
             return InteractionResult.FAIL;
         }
 
@@ -119,29 +119,27 @@ public class PersonalAccessTerminalItem extends Item {
                     && hubLevel.getBlockEntity(hubPos) instanceof WirelessHubBlockEntity hub
                     && hub.hasInterdimensionalUpgrade();
             if (!upgradePresent) {
-                player.displayClientMessage(
-                        Component.translatable("item.tremendousstorage.personal_access_terminal.hub_out_of_range"),
-                        true);
+                player.sendOverlayMessage(
+                        Component.translatable("item.tremendousstorage.personal_access_terminal.hub_out_of_range"));
                 return;
             }
         }
 
         if (!(hubLevel.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) {
-            player.displayClientMessage(
-                    Component.translatable("item.tremendousstorage.personal_access_terminal.invalid_network"), true);
+            player.sendOverlayMessage(
+                    Component.translatable("item.tremendousstorage.personal_access_terminal.invalid_network"));
             return;
         }
         if (!ni.isNetworkValid()) {
-            player.displayClientMessage(
-                    Component.translatable("item.tremendousstorage.personal_access_terminal.invalid_network"), true);
+            player.sendOverlayMessage(
+                    Component.translatable("item.tremendousstorage.personal_access_terminal.invalid_network"));
             return;
         }
         if (hubPos != null) {
             if (!(hubLevel.getBlockEntity(hubPos) instanceof WirelessHubBlockEntity hub)
                     || !niPos.equals(hub.getOrFindNiPos(hubLevel))) {
-                player.displayClientMessage(
-                        Component.translatable("item.tremendousstorage.personal_access_terminal.hub_disconnected"),
-                        true);
+                player.sendOverlayMessage(
+                        Component.translatable("item.tremendousstorage.personal_access_terminal.hub_disconnected"));
                 return;
             }
         }

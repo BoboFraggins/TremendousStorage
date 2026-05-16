@@ -5,10 +5,8 @@ import net.bobofraggins.tremendousstorage.storage.barrel.BarrelContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.bobofraggins.tremendousstorage.storage.tank.TankContents;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -25,8 +23,8 @@ import net.minecraft.world.level.Level;
  */
 public class FolderTapeRecipe extends CustomRecipe {
 
-    public FolderTapeRecipe(CraftingBookCategory category) {
-        super(category);
+    public FolderTapeRecipe() {
+        super();
     }
 
     // -------------------------------------------------------------------------
@@ -120,7 +118,7 @@ public class FolderTapeRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput input, HolderLookup.Provider registries) {
+    public ItemStack assemble(CraftingInput input) {
         ItemStack folder = findFolder(input);
         if (!folder.isEmpty()) {
             return ManillaFolderItem.setContents(folder.copyWithCount(1), FolderContents.EMPTY);

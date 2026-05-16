@@ -33,10 +33,8 @@ public class InterdimensionalUpgradeItem extends Item {
 
         if (hub.getTier() != StorageTier.NETHERITE) {
             ctx.getPlayer()
-                    .displayClientMessage(
-                            Component.translatable(
-                                    "item.tremendousstorage.interdimensional_upgrade.requires_netherite"),
-                            true);
+                    .sendOverlayMessage(Component.translatable(
+                            "item.tremendousstorage.interdimensional_upgrade.requires_netherite"));
             return InteractionResult.FAIL;
         }
 

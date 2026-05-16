@@ -141,7 +141,7 @@ public class PicnicBasketFeedHandler {
             if (!uneaten.isEmpty()) preferred = uneaten;
         }
 
-        int chosenIdx = preferred.get(level.random.nextInt(preferred.size()));
+        int chosenIdx = preferred.get(level.getRandom().nextInt(preferred.size()));
         CompoundTag entry = types.getCompoundOrEmpty(chosenIdx);
         ItemStack stored = ItemStack.OPTIONAL_CODEC
                 .parse(ops, entry.getCompoundOrEmpty("Type"))
@@ -162,10 +162,10 @@ public class PicnicBasketFeedHandler {
                 SoundEvents.GENERIC_EAT,
                 SoundSource.PLAYERS,
                 0.5f,
-                level.random.nextFloat() * 0.1f + 0.9f);
+                level.getRandom().nextFloat() * 0.1f + 0.9f);
         // TODO: food.effects() API changed in 1.21.4 - needs investigation
         // for (var possibleEffect : food.effects()) {
-        //     if (level.random.nextFloat() < possibleEffect.probability()) {
+        //     if (level.getRandom().nextFloat() < possibleEffect.probability()) {
         //         player.addEffect(possibleEffect.effect());
         //     }
         // }
@@ -181,7 +181,7 @@ public class PicnicBasketFeedHandler {
                     .getLevel(level.registryAccess()
                             .lookupOrThrow(Registries.ENCHANTMENT)
                             .getOrThrow(Enchantments.UNBREAKING));
-            boolean takeDamage = unbreaking == 0 || level.random.nextInt(unbreaking + 1) == 0;
+            boolean takeDamage = unbreaking == 0 || level.getRandom().nextInt(unbreaking + 1) == 0;
             if (takeDamage) {
                 int newDamage = stored.getDamageValue() + 1;
                 if (newDamage >= stored.getMaxDamage()) {

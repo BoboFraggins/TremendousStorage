@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -56,7 +56,7 @@ public class SortPane implements IDialogPane {
 
     @Override
     public void render(
-            GuiGraphics graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
+            GuiGraphicsExtractor graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
         lastRenderedWidth = width;
         int rowX = (width - ROW_W) / 2;
         int leftBtnX = rowX;
@@ -64,7 +64,7 @@ public class SortPane implements IDialogPane {
         int lblX = rowX + BTN_W + GAP;
 
         Component label = Component.translatable("screen.tremendousstorage.sort_label");
-        graphics.drawString(font, label, (width - font.width(label)) / 2, LABEL_Y, 0x404040, false);
+        graphics.text(font, label, (width - font.width(label)) / 2, LABEL_Y, 0x404040, false);
 
         Identifier leftTex = isInButton(localMouseX, localMouseY, leftBtnX) ? BTN_LEFT_FOCUSED : BTN_LEFT;
         Identifier rightTex = isInButton(localMouseX, localMouseY, rightBtnX) ? BTN_RIGHT_FOCUSED : BTN_RIGHT;
@@ -76,7 +76,7 @@ public class SortPane implements IDialogPane {
         String name = getter.get().displayName();
         int nameX = lblX + (LBL_W - font.width(name)) / 2;
         int nameY = ROW_Y + (BTN_H - 8) / 2;
-        graphics.drawString(font, name, nameX, nameY, 0x404040, false);
+        graphics.text(font, name, nameX, nameY, 0x404040, false);
     }
 
     @Override

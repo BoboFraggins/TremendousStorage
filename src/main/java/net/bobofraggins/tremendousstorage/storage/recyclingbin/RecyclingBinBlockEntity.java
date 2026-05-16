@@ -43,7 +43,13 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
      * Two-slot container for the fill/drain pane (slot 0 = input, slot 1 = output).
      * Changes mark the BE dirty so the contents survive world save.
      */
-    public final SimpleContainer transferContainer = new SimpleContainer(2);
+    public final SimpleContainer transferContainer = new SimpleContainer(2) {
+        @Override
+        public void setChanged() {
+            super.setChanged();
+            RecyclingBinBlockEntity.this.setChanged();
+        }
+    };
 
     // -------------------------------------------------------------------------
     // Fluid storage
@@ -173,7 +179,7 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
                     SoundEvents.CHEST_OPEN,
                     SoundSource.BLOCKS,
                     0.5f,
-                    level.random.nextFloat() * 0.1f + 0.9f);
+                    level.getRandom().nextFloat() * 0.1f + 0.9f);
         }
 
         @Override
@@ -186,7 +192,7 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
                     SoundEvents.CHEST_CLOSE,
                     SoundSource.BLOCKS,
                     0.5f,
-                    level.random.nextFloat() * 0.1f + 0.9f);
+                    level.getRandom().nextFloat() * 0.1f + 0.9f);
         }
 
         @Override
@@ -295,7 +301,7 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
 
     public RecyclingBinBlockEntity(BlockPos pos, BlockState state) {
         super(BETypeHelper.get("recycling_bin"), pos, state);
-        transferContainer.addListener(c -> setChanged());
+        // setChanged() hook wired via anonymous SimpleContainer subclass above
     }
 
     @Override

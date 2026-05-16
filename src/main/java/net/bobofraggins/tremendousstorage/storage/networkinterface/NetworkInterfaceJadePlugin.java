@@ -52,7 +52,7 @@ public class NetworkInterfaceJadePlugin implements IWailaPlugin {
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             CompoundTag data = accessor.getServerData();
-            boolean valid = data.getBoolean(KEY_VALID);
+            boolean valid = data.getBooleanOr(KEY_VALID, false);
             if (!valid) {
                 tooltip.add(Component.translatable("jade.tremendousstorage.network_interface.invalid")
                         .withStyle(net.minecraft.ChatFormatting.RED));

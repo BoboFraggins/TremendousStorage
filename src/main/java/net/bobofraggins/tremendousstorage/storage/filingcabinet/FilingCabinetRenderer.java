@@ -1,19 +1,20 @@
 package net.bobofraggins.tremendousstorage.storage.filingcabinet;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -73,7 +74,7 @@ public class FilingCabinetRenderer
 
         poseStack.pushPose();
         applyFacingRotation(poseStack, state.facingYRot);
-        List<BlockModelPart> bodyParts = collectParts(bodyModel, random);
+        List<BlockStateModelPart> bodyParts = collectParts(bodyModel, random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
@@ -83,7 +84,7 @@ public class FilingCabinetRenderer
         poseStack.pushPose();
         applyFacingRotation(poseStack, state.facingYRot);
         poseStack.translate(0.0, 0.0, -state.drawerOffset * DRAWER_SLIDE);
-        List<BlockModelPart> drawerParts = collectParts(drawerModel, random);
+        List<BlockStateModelPart> drawerParts = collectParts(drawerModel, random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
@@ -99,25 +100,32 @@ public class FilingCabinetRenderer
         }
     }
 
-    private static List<BlockModelPart> collectParts(BlockStateModel model, RandomSource random) {
-        List<BlockModelPart> parts = new ArrayList<>();
+    private static List<BlockStateModelPart> collectParts(BlockStateModel model, RandomSource random) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
         model.collectParts(random, parts);
         return parts;
     }
 
     private static void renderModel(
-            VertexConsumer consumer, PoseStack.Pose pose, List<BlockModelPart> parts, int packedLight) {
+            VertexConsumer consumer, PoseStack.Pose pose, List<BlockStateModelPart> parts, int packedLight) {
         int overlay = OverlayTexture.NO_OVERLAY;
-        for (BlockModelPart part : parts) {
+        for (BlockStateModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    float shade = quad.shade() ? 1f : 1f;
-                    consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, overlay);
+                    QuadInstance qi = new QuadInstance();
+                    qi.setColor(0xFFFFFFFF);
+                    qi.setLightCoords(packedLight);
+                    qi.setOverlayCoords(overlay);
+                    consumer.putBakedQuad(pose, quad, qi);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1.0f, packedLight, overlay);
+                QuadInstance qi = new QuadInstance();
+                qi.setColor(0xFFFFFFFF);
+                qi.setLightCoords(packedLight);
+                qi.setOverlayCoords(overlay);
+                consumer.putBakedQuad(pose, quad, qi);
             }
         }
     }

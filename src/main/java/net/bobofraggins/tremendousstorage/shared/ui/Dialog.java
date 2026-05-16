@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 
 import java.util.List;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -112,7 +112,12 @@ public class Dialog {
 
             @Override
             public void render(
-                    GuiGraphics graphics, Font font, int w, int localMouseX, int localMouseY, float partialTick) {}
+                    GuiGraphicsExtractor graphics,
+                    Font font,
+                    int w,
+                    int localMouseX,
+                    int localMouseY,
+                    float partialTick) {}
         };
     }
 
@@ -165,7 +170,8 @@ public class Dialog {
     // Rendering
     // -------------------------------------------------------------------------
 
-    public void render(GuiGraphics graphics, Font font, Component title, int mouseX, int mouseY, float partialTick) {
+    public void render(
+            GuiGraphicsExtractor graphics, Font font, Component title, int mouseX, int mouseY, float partialTick) {
         int totalH = totalHeight();
         int bodyTop = y + CORNER;
         int bodyBot = y + totalH; // exclusive bottom of content area
@@ -235,7 +241,7 @@ public class Dialog {
                 CORNER);
 
         // ── Title left-aligned in title bar ──────────────────────────────────
-        graphics.drawString(font, title, x + 8, y + 6, 0x404040, false);
+        graphics.text(font, title, x + 8, y + 6, 0x404040, false);
 
         // Render each pane translated to its local origin
         for (int i = 0; i < panes.size(); i++) {

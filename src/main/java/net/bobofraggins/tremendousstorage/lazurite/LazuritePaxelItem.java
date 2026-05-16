@@ -14,6 +14,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemInstance;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -43,7 +44,7 @@ public class LazuritePaxelItem extends net.minecraft.world.item.Item {
     }
 
     @Override
-    public boolean canPerformAction(ItemStack stack, ItemAbility action) {
+    public boolean canPerformAction(ItemInstance stack, ItemAbility action) {
         return PAXEL_ACTIONS.contains(action);
     }
 

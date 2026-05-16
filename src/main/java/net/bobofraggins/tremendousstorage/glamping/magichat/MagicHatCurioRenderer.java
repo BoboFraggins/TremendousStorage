@@ -5,10 +5,11 @@ import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -23,7 +24,7 @@ public class MagicHatCurioRenderer implements ICurioRenderer {
             ItemStack stack,
             SlotContext slotContext,
             PoseStack poseStack,
-            MultiBufferSource bufferSource,
+            SubmitNodeCollector collector,
             int light,
             S renderState,
             RenderLayerParent<S, M> renderLayerParent,
@@ -41,17 +42,11 @@ public class MagicHatCurioRenderer implements ICurioRenderer {
         poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
         poseStack.translate(0.0, 1.0, 0.0);
 
+        ItemStackRenderState irs = new ItemStackRenderState();
         Minecraft.getInstance()
-                .getItemRenderer()
-                .renderStatic(
-                        stack,
-                        ItemDisplayContext.NONE,
-                        light,
-                        OverlayTexture.NO_OVERLAY,
-                        poseStack,
-                        bufferSource,
-                        slotContext.entity().level(),
-                        0);
+                .getItemModelResolver()
+                .updateForTopItem(irs, stack, ItemDisplayContext.NONE, null, null, 0);
+        irs.submit(poseStack, collector, light, OverlayTexture.NO_OVERLAY, 0);
 
         poseStack.popPose();
     }

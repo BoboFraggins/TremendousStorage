@@ -8,7 +8,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
-import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.SavedDataStorage;
 
 /**
  * Server-side persistent storage for Ender Picnic Basket shared inventories.
@@ -23,8 +23,8 @@ public class EnderPicnicBasketStorage extends SavedData {
     private static final Codec<EnderPicnicBasketStorage> CODEC =
             CompoundTag.CODEC.xmap(EnderPicnicBasketStorage::fromCompoundTag, EnderPicnicBasketStorage::toCompoundTag);
 
-    static final SavedDataType<EnderPicnicBasketStorage> TYPE =
-            new SavedDataType<>(SAVE_KEY, ctx -> new EnderPicnicBasketStorage(), ctx -> CODEC);
+    static final SavedDataType<EnderPicnicBasketStorage> TYPE = new SavedDataType<>(
+            net.minecraft.resources.Identifier.parse(SAVE_KEY), EnderPicnicBasketStorage::new, CODEC);
 
     private final Map<Long, ListTag> inventories = new HashMap<>();
     private final Map<Long, Long> versions = new HashMap<>();
@@ -34,7 +34,7 @@ public class EnderPicnicBasketStorage extends SavedData {
     // -------------------------------------------------------------------------
 
     public static EnderPicnicBasketStorage get(MinecraftServer server) {
-        DimensionDataStorage storage = server.overworld().getDataStorage();
+        SavedDataStorage storage = server.overworld().getDataStorage();
         return storage.computeIfAbsent(TYPE);
     }
 

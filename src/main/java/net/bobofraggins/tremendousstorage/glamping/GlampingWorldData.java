@@ -38,7 +38,7 @@ public class GlampingWorldData extends SavedData {
             CompoundTag.CODEC.xmap(GlampingWorldData::fromCompoundTag, GlampingWorldData::toCompoundTag);
 
     static final SavedDataType<GlampingWorldData> TYPE =
-            new SavedDataType<>(DATA_NAME, ctx -> new GlampingWorldData(), ctx -> CODEC);
+            new SavedDataType<>(net.minecraft.resources.Identifier.parse(DATA_NAME), GlampingWorldData::new, CODEC);
 
     // -------------------------------------------------------------------------
     // ReturnTarget

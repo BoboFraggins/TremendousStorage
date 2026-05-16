@@ -1,19 +1,20 @@
 package net.bobofraggins.tremendousstorage.storage.wirelesshub;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.QuadInstance;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.block.model.BlockModelPart;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelPart;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
@@ -80,7 +81,7 @@ public class WirelessHubRenderer
 
         poseStack.pushPose();
         applyFacingRotation(poseStack, state.facingYRot);
-        List<BlockModelPart> baseParts = collectParts(baseModel, random);
+        List<BlockStateModelPart> baseParts = collectParts(baseModel, random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
@@ -94,7 +95,7 @@ public class WirelessHubRenderer
             poseStack.mulPose(Axis.YP.rotationDegrees(state.dishAngle));
             poseStack.translate(-PIVOT, -PIVOT, -PIVOT);
         }
-        List<BlockModelPart> dishParts = collectParts(dishModel, random);
+        List<BlockStateModelPart> dishParts = collectParts(dishModel, random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
@@ -110,8 +111,8 @@ public class WirelessHubRenderer
         }
     }
 
-    private static List<BlockModelPart> collectParts(BlockStateModel model, RandomSource random) {
-        List<BlockModelPart> parts = new ArrayList<>();
+    private static List<BlockStateModelPart> collectParts(BlockStateModel model, RandomSource random) {
+        List<BlockStateModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
         model.collectParts(random, parts);
         return parts;
@@ -120,36 +121,34 @@ public class WirelessHubRenderer
     private static void renderModel(
             VertexConsumer consumer,
             PoseStack.Pose pose,
-            List<BlockModelPart> parts,
+            List<BlockStateModelPart> parts,
             float r,
             float g,
             float b,
             int packedLight) {
         int overlay = OverlayTexture.NO_OVERLAY;
-        for (BlockModelPart part : parts) {
+        for (BlockStateModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    float qr, qg, qb;
-                    if (quad.tintIndex() >= 0) {
-                        qr = r;
-                        qg = g;
-                        qb = b;
-                    } else {
-                        qr = qg = qb = 1f;
-                    }
-                    consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, overlay);
+                    int color = quad.materialInfo().tintIndex() >= 0
+                            ? (0xFF000000 | ((int) (r * 255) << 16) | ((int) (g * 255) << 8) | (int) (b * 255))
+                            : 0xFFFFFFFF;
+                    QuadInstance qi = new QuadInstance();
+                    qi.setColor(color);
+                    qi.setLightCoords(packedLight);
+                    qi.setOverlayCoords(overlay);
+                    consumer.putBakedQuad(pose, quad, qi);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                float qr, qg, qb;
-                if (quad.tintIndex() >= 0) {
-                    qr = r;
-                    qg = g;
-                    qb = b;
-                } else {
-                    qr = qg = qb = 1f;
-                }
-                consumer.putBulkData(pose, quad, qr, qg, qb, 1.0f, packedLight, overlay);
+                int color = quad.materialInfo().tintIndex() >= 0
+                        ? (0xFF000000 | ((int) (r * 255) << 16) | ((int) (g * 255) << 8) | (int) (b * 255))
+                        : 0xFFFFFFFF;
+                QuadInstance qi = new QuadInstance();
+                qi.setColor(color);
+                qi.setLightCoords(packedLight);
+                qi.setOverlayCoords(overlay);
+                consumer.putBakedQuad(pose, quad, qi);
             }
         }
     }

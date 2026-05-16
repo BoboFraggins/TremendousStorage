@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 
 import java.util.List;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
@@ -116,7 +116,7 @@ public class ConfigDrawer {
      * Renders only the drawer body (not the tab). Call this <em>before</em> the main dialog.
      * Follow with {@link #renderTab} <em>after</em> the main dialog so the tab appears on top.
      */
-    public void render(GuiGraphics graphics, Font font, int mouseX, int mouseY, float partialTick) {
+    public void render(GuiGraphicsExtractor graphics, Font font, int mouseX, int mouseY, float partialTick) {
         float p = getProgress(System.currentTimeMillis());
         if (p <= 0.001f) {
             return;
@@ -212,11 +212,11 @@ public class ConfigDrawer {
      * Renders the tab that protrudes from the dialog's left edge. Call this <em>after</em> the
      * main dialog so the tab appears on top of both the drawer body and the dialog background.
      */
-    public void renderTab(GuiGraphics graphics, int mouseX, int mouseY) {
+    public void renderTab(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         renderTab(graphics, mouseX, mouseY, getProgress(System.currentTimeMillis()));
     }
 
-    private void renderTab(GuiGraphics graphics, int mouseX, int mouseY, float p) {
+    private void renderTab(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float p) {
         // Tab slides left with the drawer: closed → left of dialog; open → left of drawer body.
         // The extra 2 px (animated via p) shifts the tab slightly left of the drawer edge when open.
         int tabX = dialogX - TAB_W + 5 - Math.round((WIDTH + TAB_W + 2) * p);

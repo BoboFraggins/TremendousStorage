@@ -47,11 +47,11 @@ public final class PositiveVibesCauldronJeiRecipe {
                         Component.translatable("jei.tremendousstorage.positive_vibes_cauldron.step.heal.zombie_brain")),
                 new Step(
                         new ItemStack(Registration.POSITIVE_VIBES_BUCKET.get()),
-                        RecipeIngredientRole.CATALYST,
+                        RecipeIngredientRole.CRAFTING_STATION,
                         Component.translatable("jei.tremendousstorage.positive_vibes_cauldron.step.heal.salve_bucket")),
                 new Step(
                         new ItemStack(Items.CAULDRON),
-                        RecipeIngredientRole.CATALYST,
+                        RecipeIngredientRole.CRAFTING_STATION,
                         Component.translatable("jei.tremendousstorage.positive_vibes_cauldron.step.heal.cauldron")),
                 new Step(
                         new ItemStack(Registration.BRAIN.get()),
