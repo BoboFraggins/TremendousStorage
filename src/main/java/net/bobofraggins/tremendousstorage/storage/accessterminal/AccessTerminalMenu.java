@@ -11,7 +11,7 @@ import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterf
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -79,7 +79,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     private final ContainerData recipeData = new SimpleContainerData(1);
 
     @Nullable
-    private ResourceLocation pendingPinRecipeId = null;
+    private Identifier pendingPinRecipeId = null;
 
     private final BlockPos satPos;
 
@@ -237,11 +237,11 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
      * pushes the result stack to the client.
      */
     private void updateCraftingResult(Level level) {
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
         CraftingInput input = craftSlots.asCraftInput();
 
-        List<RecipeHolder<CraftingRecipe>> newMatches =
-                level.getServer().getRecipeManager().recipeMap().byType(RecipeType.CRAFTING).stream()
+        List<RecipeHolder<CraftingRecipe>> newMatches = ((net.minecraft.server.level.ServerLevel) level)
+                .getServer().getRecipeManager().recipeMap().byType(RecipeType.CRAFTING).stream()
                         .filter(h -> h.value().matches(input, level))
                         .toList();
 
@@ -272,7 +272,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
 
     /** Assembles the result from the currently selected recipe and sends it to the client. */
     private void updateResultSlot(Level level) {
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
         CraftingInput input = craftSlots.asCraftInput();
         ServerPlayer serverPlayer = (ServerPlayer) player;
         ItemStack result = ItemStack.EMPTY;
@@ -315,7 +315,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
      * Used by JEI/EMI/REI transfer handlers so the chosen recipe survives the
      * {@link #slotsChanged} that fires after the grid is filled.
      */
-    public void setPendingPinRecipeId(ResourceLocation id) {
+    public void setPendingPinRecipeId(Identifier id) {
         pendingPinRecipeId = id;
     }
 

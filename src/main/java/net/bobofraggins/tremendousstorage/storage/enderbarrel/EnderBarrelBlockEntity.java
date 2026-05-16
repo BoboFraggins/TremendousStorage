@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.enderbarrel;
 
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelMenu;
@@ -35,7 +35,7 @@ public class EnderBarrelBlockEntity extends BarrelBlockEntity {
     private long lastKnownVersion = -1L;
 
     public EnderBarrelBlockEntity(BlockPos pos, BlockState state) {
-        this(Registration.ENDER_BARREL_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("ender_barrel"), pos, state);
     }
 
     protected EnderBarrelBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -64,13 +64,13 @@ public class EnderBarrelBlockEntity extends BarrelBlockEntity {
 
     private long getStorageVersion() {
         if (linkId == -1L || level == null || level.isClientSide()) return lastKnownVersion;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         return server == null ? lastKnownVersion : getStorage(server).getVersion(linkId);
     }
 
     private void loadFromStorage() {
         if (linkId == -1L || level == null || level.isClientSide()) return;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         if (server == null) return;
 
         EnderBarrelStorage storage = getStorage(server);
@@ -95,7 +95,7 @@ public class EnderBarrelBlockEntity extends BarrelBlockEntity {
 
     private void syncToStorage() {
         if (linkId == -1L || level == null || level.isClientSide()) return;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         if (server == null) return;
         EnderBarrelStorage storage = getStorage(server);
         storage.setContentsAndBaseSlot(linkId, storedItem, count, baseSlot);
@@ -104,7 +104,7 @@ public class EnderBarrelBlockEntity extends BarrelBlockEntity {
 
     private void syncTierToStorage(StorageTier t) {
         if (linkId == -1L || level == null || level.isClientSide()) return;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         if (server != null) getStorage(server).setTier(linkId, t);
     }
 

@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.enderbackpack;
 
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class EnderBackpackBlockEntity extends EnderChestBlockEntity {
 
     public EnderBackpackBlockEntity(BlockPos pos, BlockState state) {
-        this(Registration.ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("ender_backpack"), pos, state);
     }
 
     protected EnderBackpackBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -42,7 +42,7 @@ public class EnderBackpackBlockEntity extends EnderChestBlockEntity {
     protected void syncTierToStorage(StorageTier tier) {
         long linkId = getLinkId();
         if (linkId == -1L || level == null || level.isClientSide()) return;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         if (server != null) {
             EnderBackpackStorage.get(server).setTier(linkId, tier);
         }
@@ -52,7 +52,7 @@ public class EnderBackpackBlockEntity extends EnderChestBlockEntity {
     protected void loadFromStorage() {
         long linkId = getLinkId();
         if (linkId == -1L || level == null || level.isClientSide()) return;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         if (server == null) return;
         EnderBackpackStorage storage = EnderBackpackStorage.get(server);
         if (storage.hasLink(linkId)) {
@@ -74,7 +74,7 @@ public class EnderBackpackBlockEntity extends EnderChestBlockEntity {
     protected void syncToStorage() {
         long linkId = getLinkId();
         if (linkId == -1L || level == null || level.isClientSide()) return;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         if (server == null) return;
         EnderBackpackStorage storage = EnderBackpackStorage.get(server);
         storage.setTypes(linkId, saveTypes(level.registryAccess()));
@@ -85,7 +85,7 @@ public class EnderBackpackBlockEntity extends EnderChestBlockEntity {
     protected long getStorageVersion() {
         long linkId = getLinkId();
         if (linkId == -1L || level == null || level.isClientSide()) return lastKnownVersion;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         return server == null
                 ? lastKnownVersion
                 : EnderBackpackStorage.get(server).getVersion(linkId);

@@ -12,9 +12,8 @@ import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalL
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -48,13 +47,12 @@ public class LocalInventoryPane implements IDialogPane {
         void onClick(int idx, int amount, boolean toCursor);
     }
 
-    private static final ResourceLocation BG_TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
+    private static final Identifier BG_TEXTURE =
+            Identifier.withDefaultNamespace("textures/gui/container/generic_54.png");
 
-    private static final ResourceLocation SCROLLER =
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller");
-    private static final ResourceLocation SCROLLER_DISABLED =
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller_disabled");
+    private static final Identifier SCROLLER = Identifier.withDefaultNamespace("container/creative_inventory/scroller");
+    private static final Identifier SCROLLER_DISABLED =
+            Identifier.withDefaultNamespace("container/creative_inventory/scroller_disabled");
 
     private static final int GRID_X = AccessTerminalLayout.NETWORK_X;
     private static final int GRID_Y = AccessTerminalLayout.NETWORK_Y - AccessTerminalLayout.TITLE_H; // 1
@@ -206,7 +204,12 @@ public class LocalInventoryPane implements IDialogPane {
             // Translate display index → allStacks index → server-side index
             int allStacksIdx = (toOriginal != null) ? toOriginal[displayedIdx] : displayedIdx;
             int originalIdx = (baseToOriginal != null) ? baseToOriginal[allStacksIdx] : allStacksIdx;
-            if (Screen.hasShiftDown()) {
+            if (com.mojang.blaze3d.platform.InputConstants.isKeyDown(
+                            net.minecraft.client.Minecraft.getInstance().getWindow(),
+                            com.mojang.blaze3d.platform.InputConstants.KEY_LSHIFT)
+                    || com.mojang.blaze3d.platform.InputConstants.isKeyDown(
+                            net.minecraft.client.Minecraft.getInstance().getWindow(),
+                            com.mojang.blaze3d.platform.InputConstants.KEY_RSHIFT)) {
                 clickHandler.onClick(originalIdx, (int) Math.min(count, maxStack), false);
                 shiftDragVisited.add(originalIdx);
             } else {
@@ -235,10 +238,15 @@ public class LocalInventoryPane implements IDialogPane {
         }
         var mc = Minecraft.getInstance();
         if (button == 0
-                && Screen.hasShiftDown()
-                && clickHandler != null
-                && mc.player != null
-                && mc.player.containerMenu.getCarried().isEmpty()) {
+                        && com.mojang.blaze3d.platform.InputConstants.isKeyDown(
+                                net.minecraft.client.Minecraft.getInstance().getWindow(),
+                                com.mojang.blaze3d.platform.InputConstants.KEY_LSHIFT)
+                || com.mojang.blaze3d.platform.InputConstants.isKeyDown(
+                                net.minecraft.client.Minecraft.getInstance().getWindow(),
+                                com.mojang.blaze3d.platform.InputConstants.KEY_RSHIFT)
+                        && clickHandler != null
+                        && mc.player != null
+                        && mc.player.containerMenu.getCarried().isEmpty()) {
             if (isInGrid(localX, localY)) {
                 int col = (int) ((localX - GRID_X) / AccessTerminalLayout.SLOT_SIZE);
                 int row = (int) ((localY - gridStartY()) / AccessTerminalLayout.SLOT_SIZE);

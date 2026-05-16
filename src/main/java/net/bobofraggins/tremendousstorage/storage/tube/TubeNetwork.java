@@ -20,6 +20,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /**
  * Utility class that builds a {@link NetworkItemHandler} for a tube network.
@@ -85,8 +87,9 @@ public final class TubeNetwork {
                     AttachmentType faceAttachment =
                             tubeBE != null ? tubeBE.getAttachmentType(dir.ordinal()) : AttachmentType.NONE;
                     if (faceAttachment == AttachmentType.NONE || faceAttachment == AttachmentType.STORAGE_INTERFACE) {
-                        IItemHandler handler =
-                                level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, dir.getOpposite());
+                        ResourceHandler<ItemResource> cap =
+                                level.getCapability(Capabilities.Item.BLOCK, neighborPos, dir.getOpposite());
+                        IItemHandler handler = cap != null ? IItemHandler.of(cap) : null;
                         if (handler != null) {
                             Priority priority = resolvePriority(level, neighborPos, tubeBE, dir.ordinal());
                             entries.add(new HandlerEntry(handler, priority));

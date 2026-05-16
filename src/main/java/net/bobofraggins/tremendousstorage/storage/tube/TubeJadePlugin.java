@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.tube;
 
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.AttachmentType;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
@@ -20,8 +20,7 @@ import snownee.jade.api.config.IPluginConfig;
 @WailaPlugin
 public class TubeJadePlugin implements IWailaPlugin {
 
-    static final ResourceLocation TUBE_PROVIDER =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "tube_info");
+    static final Identifier TUBE_PROVIDER = Identifier.fromNamespaceAndPath("tremendousstorage", "tube_info");
 
     @Override
     public void register(IWailaCommonRegistration registration) {
@@ -53,7 +52,7 @@ public class TubeJadePlugin implements IWailaPlugin {
         }
 
         @Override
-        public ResourceLocation getUid() {
+        public Identifier getUid() {
             return TUBE_PROVIDER;
         }
 

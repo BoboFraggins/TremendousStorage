@@ -12,7 +12,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -26,7 +26,7 @@ public record SyncInterfaceFilterPacket(BlockPos pos, int faceIndex, List<ItemSt
         implements CustomPacketPayload {
 
     public static final Type<SyncInterfaceFilterPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "sync_interface_filter"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "sync_interface_filter"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncInterfaceFilterPacket> STREAM_CODEC =
             StreamCodec.composite(

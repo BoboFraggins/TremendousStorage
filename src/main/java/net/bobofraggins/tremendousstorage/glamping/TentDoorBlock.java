@@ -45,7 +45,7 @@ public class TentDoorBlock extends Block {
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResult.PASS;
 
-        MinecraftServer server = serverPlayer.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) serverPlayer.level()).getServer();
         if (server == null) return InteractionResult.PASS;
 
         GlampingWorldData data = GlampingWorldData.getOrCreate(server);
@@ -54,7 +54,7 @@ public class TentDoorBlock extends Block {
         if (target == null) {
             // No stored return — fall back to overworld spawn.
             ServerLevel overworld = server.overworld();
-            BlockPos spawn = overworld.getSharedSpawnPos();
+            BlockPos spawn = overworld.getRespawnData().pos();
             serverPlayer.teleportTo(
                     overworld,
                     spawn.getX() + 0.5,

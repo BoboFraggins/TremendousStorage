@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
@@ -23,15 +23,15 @@ public final class RecyclingBinClientEvents {
         event.register(
                 RecyclingBinRenderer.BODY_MODEL_KEY,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_body")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_body")));
         event.register(
                 RecyclingBinRenderer.LID_MODEL_KEY,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_lid")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_lid")));
         event.register(
                 RecyclingBinRenderer.PEDAL_MODEL_KEY,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_pedal")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/recycling_bin_pedal")));
     }
 
     @SubscribeEvent
@@ -42,7 +42,7 @@ public final class RecyclingBinClientEvents {
     @SubscribeEvent
     public static void onRegisterSpecialModelRenderers(RegisterSpecialModelRendererEvent event) {
         event.register(
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "recycling_bin_renderer"),
+                Identifier.fromNamespaceAndPath("tremendousstorage", "recycling_bin_renderer"),
                 RecyclingBinItemRenderer.Unbaked.MAP_CODEC);
     }
 }

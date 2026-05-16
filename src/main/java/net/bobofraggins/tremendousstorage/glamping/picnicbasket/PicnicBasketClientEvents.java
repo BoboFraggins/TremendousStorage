@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
@@ -29,7 +29,7 @@ public final class PicnicBasketClientEvents {
                 KeyModifier.NONE,
                 InputConstants.Type.KEYSYM,
                 InputConstants.UNKNOWN.getValue(),
-                "key.categories.tremendousstorage");
+                net.minecraft.client.KeyMapping.Category.MISC);
         event.register(OPEN_PICNIC_BASKET);
     }
 
@@ -49,14 +49,14 @@ public final class PicnicBasketClientEvents {
         event.register(
                 PicnicBasketRenderer.BODY_MODEL,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_body")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_body")));
         event.register(
                 PicnicBasketRenderer.LEFT_LID_MODEL,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_left_lid")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_left_lid")));
         event.register(
                 PicnicBasketRenderer.RIGHT_LID_MODEL,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_right_lid")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/picnic_basket_right_lid")));
     }
 }

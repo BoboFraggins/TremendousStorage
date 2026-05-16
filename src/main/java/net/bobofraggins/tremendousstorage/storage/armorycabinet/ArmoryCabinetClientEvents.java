@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.armorycabinet;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
@@ -22,23 +22,23 @@ public final class ArmoryCabinetClientEvents {
         event.register(
                 ArmoryCabinetRenderer.BODY,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_body")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_body")));
         event.register(
                 ArmoryCabinetRenderer.DOOR,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_door")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_door")));
         event.register(
                 ArmoryCabinetRenderer.ARM_TOP,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_arm_top")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_arm_top")));
         event.register(
                 ArmoryCabinetRenderer.ARM_BOTTOM,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_arm_bottom")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_arm_bottom")));
         event.register(
                 ArmoryCabinetRenderer.WHEEL,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_wheel")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/armory_cabinet_wheel")));
     }
 
     @SubscribeEvent

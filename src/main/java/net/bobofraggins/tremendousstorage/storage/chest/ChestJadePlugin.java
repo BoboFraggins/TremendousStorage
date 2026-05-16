@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.chest;
 import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
@@ -21,7 +21,7 @@ import snownee.jade.api.config.IPluginConfig;
 @WailaPlugin
 public class ChestJadePlugin implements IWailaPlugin {
 
-    static final ResourceLocation CHEST_PROVIDER = ResourceLocation.fromNamespaceAndPath("tremendousstorage", "chest");
+    static final Identifier CHEST_PROVIDER = Identifier.fromNamespaceAndPath("tremendousstorage", "chest");
 
     @Override
     public void register(IWailaCommonRegistration registration) {
@@ -47,7 +47,7 @@ public class ChestJadePlugin implements IWailaPlugin {
         }
 
         @Override
-        public ResourceLocation getUid() {
+        public Identifier getUid() {
             return CHEST_PROVIDER;
         }
 

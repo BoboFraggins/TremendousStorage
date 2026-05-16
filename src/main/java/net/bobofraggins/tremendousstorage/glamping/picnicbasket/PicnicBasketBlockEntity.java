@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.minecraft.core.BlockPos;
@@ -38,7 +38,7 @@ public class PicnicBasketBlockEntity extends ChestBlockEntity {
     }
 
     public PicnicBasketBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.PICNIC_BASKET_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("picnic_basket"), pos, state);
         setPriority(Priority.HIGH);
     }
 

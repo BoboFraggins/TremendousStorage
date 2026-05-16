@@ -5,7 +5,7 @@ import java.util.function.Consumer;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -46,8 +46,8 @@ public class MagicHatItem extends BlockItem {
 
     static final String MOB_KEY = "CapturedMob";
 
-    static final ResourceLocation LUCK_MODIFIER_ID =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "lucky_magic_hat_luck");
+    static final Identifier LUCK_MODIFIER_ID =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "lucky_magic_hat_luck");
 
     private static final ItemAttributeModifiers DEFAULT_MODIFIERS = ItemAttributeModifiers.builder()
             .add(

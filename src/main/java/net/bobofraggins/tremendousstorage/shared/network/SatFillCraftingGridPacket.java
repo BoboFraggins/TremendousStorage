@@ -8,8 +8,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -22,15 +22,15 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * the current grid contents back into the network, then extracts one ingredient per slot from
  * the network and places them in the crafting grid.
  */
-public record SatFillCraftingGridPacket(BlockPos satPos, ResourceLocation recipeId) implements CustomPacketPayload {
+public record SatFillCraftingGridPacket(BlockPos satPos, Identifier recipeId) implements CustomPacketPayload {
 
     public static final Type<SatFillCraftingGridPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "sat_fill_crafting_grid"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "sat_fill_crafting_grid"));
 
     public static final StreamCodec<FriendlyByteBuf, SatFillCraftingGridPacket> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC,
             SatFillCraftingGridPacket::satPos,
-            ByteBufCodecs.STRING_UTF8.map(ResourceLocation::parse, ResourceLocation::toString),
+            ByteBufCodecs.STRING_UTF8.map(Identifier::parse, Identifier::toString),
             SatFillCraftingGridPacket::recipeId,
             SatFillCraftingGridPacket::new);
 

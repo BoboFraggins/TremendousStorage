@@ -5,7 +5,7 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubRenderer;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubScreen;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
@@ -28,7 +28,7 @@ public final class PersonalAccessTerminalClientEvents {
     @SubscribeEvent
     public static void onRegisterItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
         event.register(
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
+                Identifier.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
                 net.bobofraggins.tremendousstorage.shared.storage.StorageTierTintSource.MAP_CODEC);
     }
 
@@ -42,11 +42,11 @@ public final class PersonalAccessTerminalClientEvents {
         event.register(
                 WirelessHubRenderer.BASE_MODEL,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_base")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_base")));
         event.register(
                 WirelessHubRenderer.DISH_MODEL,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_dish")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_dish")));
     }
 
     @SubscribeEvent
@@ -57,7 +57,7 @@ public final class PersonalAccessTerminalClientEvents {
                 KeyModifier.CONTROL,
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_E,
-                "key.categories.tremendousstorage");
+                net.minecraft.client.KeyMapping.Category.MISC);
         event.register(OPEN_WIRELESS_SAT);
     }
 

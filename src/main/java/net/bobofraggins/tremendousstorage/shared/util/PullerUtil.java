@@ -8,6 +8,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /** Shared utilities for blocks that have a puller upgrade. */
 public final class PullerUtil {
@@ -16,7 +18,7 @@ public final class PullerUtil {
 
     /**
      * Iterates over the enabled bits in {@code pullerSides}, resolves the adjacent
-     * {@link IItemHandler} capability for each, and invokes {@code pullCallback} when present.
+     * item handler capability for each, and invokes {@code pullCallback} when present.
      */
     public static void tickPuller(
             Level level, BlockPos pos, BlockState state, int pullerSides, Consumer<IItemHandler> pullCallback) {
@@ -27,9 +29,10 @@ public final class PullerUtil {
             if ((pullerSides & (1 << bit)) == 0) continue;
             Direction worldDir = bitToWorldDir(bit, facing);
             BlockPos adjacentPos = pos.relative(worldDir);
-            IItemHandler cap = level.getCapability(Capabilities.ItemHandler.BLOCK, adjacentPos, worldDir.getOpposite());
+            ResourceHandler<ItemResource> cap =
+                    level.getCapability(Capabilities.Item.BLOCK, adjacentPos, worldDir.getOpposite());
             if (cap == null) continue;
-            pullCallback.accept(cap);
+            pullCallback.accept(IItemHandler.of(cap));
         }
     }
 

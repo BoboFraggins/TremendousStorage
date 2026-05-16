@@ -8,8 +8,8 @@ import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEn
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -85,7 +85,7 @@ public class PersonalAccessTerminalItem extends Item {
         }
 
         BlockPos hubPos = stack.get(Registration.WIRELESS_HUB_POS.get());
-        ResourceLocation hubDimId = stack.get(Registration.WIRELESS_HUB_DIMENSION.get());
+        Identifier hubDimId = stack.get(Registration.WIRELESS_HUB_DIMENSION.get());
         boolean hasCraftingUpgrade =
                 Boolean.TRUE.equals(stack.get(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get()));
         openSatUi((ServerPlayer) player, niPos, hubPos, hubDimId, hasCraftingUpgrade);
@@ -107,7 +107,7 @@ public class PersonalAccessTerminalItem extends Item {
             ServerPlayer player,
             BlockPos niPos,
             @Nullable BlockPos hubPos,
-            @Nullable ResourceLocation hubDimensionId,
+            @Nullable Identifier hubDimensionId,
             boolean hasCraftingUpgrade) {
 
         // Resolve the server level where the hub and NI live
@@ -162,10 +162,12 @@ public class PersonalAccessTerminalItem extends Item {
         openSatUi(player, niPos, hubPos, null, hasCraftingUpgrade);
     }
 
-    private static ServerLevel resolveHubLevel(ServerPlayer player, @Nullable ResourceLocation hubDimensionId) {
+    private static ServerLevel resolveHubLevel(ServerPlayer player, @Nullable Identifier hubDimensionId) {
         if (hubDimensionId != null) {
             ResourceKey<Level> key = ResourceKey.create(Registries.DIMENSION, hubDimensionId);
-            ServerLevel level = player.getServer().getLevel(key);
+            ServerLevel level = ((net.minecraft.server.level.ServerLevel) player.level())
+                    .getServer()
+                    .getLevel(key);
             if (level != null) return level;
         }
         return player.level();

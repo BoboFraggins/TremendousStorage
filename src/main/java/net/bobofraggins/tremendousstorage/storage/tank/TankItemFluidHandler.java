@@ -4,7 +4,6 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 
@@ -42,9 +41,9 @@ public class TankItemFluidHandler implements IFluidHandlerItem {
     }
 
     private long capacityLong() {
-        CustomData data = container.get(DataComponents.BLOCK_ENTITY_DATA);
+        var data = container.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return TankBlockEntity.BASE_CAPACITY;
-        StorageTier tier = StorageTier.fromId(data.copyTag().getStringOr("Tier", ""));
+        StorageTier tier = StorageTier.fromId(data.getUnsafe().getStringOr("Tier", ""));
         return tier.getScaledCapacity(TankBlockEntity.BASE_CAPACITY);
     }
 

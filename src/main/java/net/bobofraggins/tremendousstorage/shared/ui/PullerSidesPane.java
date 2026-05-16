@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -51,10 +51,10 @@ public class PullerSidesPane implements IDialogPane {
     private static final int COLOR_LIGHT = 0xFFFFFFFF;
     private static final int COLOR_DARK = 0xFF555555;
 
-    private static final ResourceLocation TEX_ON =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/puller_button_on");
-    private static final ResourceLocation TEX_OFF =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/puller_button_off");
+    private static final Identifier TEX_ON =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "widget/puller_button_on");
+    private static final Identifier TEX_OFF =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "widget/puller_button_off");
 
     /** {col, row, bit} for each active button in the 3×3 grid. */
     private static final int[][] BUTTONS = {

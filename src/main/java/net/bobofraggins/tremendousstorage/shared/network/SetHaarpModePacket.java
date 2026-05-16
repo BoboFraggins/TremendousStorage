@@ -8,7 +8,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -16,7 +16,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record SetHaarpModePacket(BlockPos pos, int modeOrdinal) implements CustomPacketPayload {
 
     public static final Type<SetHaarpModePacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "set_haarp_mode"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "set_haarp_mode"));
 
     public static final StreamCodec<FriendlyByteBuf, SetHaarpModePacket> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC,

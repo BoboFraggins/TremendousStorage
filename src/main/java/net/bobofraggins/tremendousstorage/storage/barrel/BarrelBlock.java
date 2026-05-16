@@ -224,7 +224,7 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, net.minecraft.core.Direction dir) {
         if (level.getBlockEntity(pos) instanceof BarrelBlockEntity be) {
             long count = be.getCount();
             if (count == 0) return 0;

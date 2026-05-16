@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.tank;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
@@ -21,14 +21,14 @@ public final class TankClientEvents {
     @SubscribeEvent
     public static void onRegisterSpecialModelRenderers(RegisterSpecialModelRendererEvent event) {
         event.register(
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "tank_renderer"),
+                Identifier.fromNamespaceAndPath("tremendousstorage", "tank_renderer"),
                 TankItemRenderer.Unbaked.MAP_CODEC);
     }
 
     @SubscribeEvent
     public static void onRegisterItemTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
         event.register(
-                net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
+                net.minecraft.resources.Identifier.fromNamespaceAndPath("tremendousstorage", "storage_tier"),
                 net.bobofraggins.tremendousstorage.shared.storage.StorageTierTintSource.MAP_CODEC);
     }
 }

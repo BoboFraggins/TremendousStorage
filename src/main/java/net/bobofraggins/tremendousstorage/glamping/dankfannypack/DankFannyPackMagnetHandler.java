@@ -85,7 +85,8 @@ public final class DankFannyPackMagnetHandler {
             DankFannyPackItem.setFannyPackStack(player, loc.stack, loc.slotType, loc.slotIndex, loc.slotId);
 
             // Sync only the ender folders that actually absorbed items this tick.
-            net.minecraft.server.MinecraftServer server = player.getServer();
+            net.minecraft.server.MinecraftServer server =
+                    ((net.minecraft.server.level.ServerLevel) player.level()).getServer();
             if (server != null) {
                 for (int slot = 0; slot < FOLDER_SLOTS; slot++) {
                     if (enderSlotModified[slot]) {

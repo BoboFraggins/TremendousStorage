@@ -127,8 +127,12 @@ public class WirelessHubScreen extends AbstractContainerScreen<WirelessHubMenu> 
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean consumed) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.button();
+
         if (dialog.mouseClicked(mouseX, mouseY, button)) return true;
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, consumed);
     }
 }

@@ -28,7 +28,7 @@ public final class DankFannyPackClientEvents {
                 KeyModifier.ALT,
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_D,
-                "key.categories.tremendousstorage");
+                net.minecraft.client.KeyMapping.Category.MISC);
         event.register(OPEN_DANK_FANNY_PACK);
     }
 

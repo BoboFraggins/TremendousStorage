@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.barrel;
 import java.util.List;
 import java.util.Optional;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.util.PullerUtil;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkListable;
@@ -19,7 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -28,7 +28,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -69,7 +69,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     private final NiLink niLink = new NiLink();
 
     public BarrelBlockEntity(BlockPos pos, BlockState state) {
-        this(Registration.BARREL_BE_TYPE.get(), pos, state);
+        this(BETypeHelper.get("barrel"), pos, state);
     }
 
     protected BarrelBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -103,7 +103,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     public void setTier(StorageTier tier) {
         this.tier = tier;
         setChanged();
-        if (level != null && !level.isClientSide) {
+        if (level != null && !level.isClientSide()) {
             BarrelBlock.setTierBlockState(level, worldPosition, tier);
         }
     }
@@ -177,7 +177,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     @Override
     public void onLoad() {
         super.onLoad();
-        if (level != null && !level.isClientSide) {
+        if (level != null && !level.isClientSide()) {
             BarrelBlock.setTierBlockState(level, worldPosition, tier);
         }
     }
@@ -386,7 +386,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
      * then the recipe cache walks UP from the base to fill higher slots. Resets count to zero.
      */
     public void lockCompactingChain(ItemStack seedItem, int targetSlot) {
-        if (level == null || level.isClientSide || !compactingUpgrade) return;
+        if (level == null || level.isClientSide() || !compactingUpgrade) return;
         if (!(level instanceof ServerLevel sl)) return;
         RecipeManager rm = sl.getServer().getRecipeManager();
 
@@ -414,7 +414,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
      * Example: 100 Iron Ingots at slot 1 → storedItem = Iron Nugget, count = 900, baseSlot = 0.
      */
     public void lockCompactingChainPreserving(int targetSlot) {
-        if (level == null || level.isClientSide || !compactingUpgrade || !isLocked()) return;
+        if (level == null || level.isClientSide() || !compactingUpgrade || !isLocked()) return;
         if (!(level instanceof ServerLevel sl)) return;
         RecipeManager rm = sl.getServer().getRecipeManager();
 
@@ -442,7 +442,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     // -------------------------------------------------------------------------
 
     void ensureCompactingCache() {
-        if (level == null || level.isClientSide || !compactingUpgrade || !isLocked()) {
+        if (level == null || level.isClientSide() || !compactingUpgrade || !isLocked()) {
             compactCacheKey = null;
             compactCacheBaseSlot = -1;
             return;
@@ -595,7 +595,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     protected void collectImplicitComponents(DataComponentMap.Builder components) {
         super.collectImplicitComponents(components);
         components.set(
-                Registration.BARREL_CONTENTS.get(),
+                BETypeHelper.<BarrelContents>getDataComponentType("barrel_contents"),
                 new BarrelContents(storedItem.isEmpty() ? Optional.empty() : Optional.of(storedItem), count));
         // Explicitly populate BLOCK_ENTITY_DATA with tier and upgrade info so the loot table's
         // copy_components function can copy it to the dropped item. The base BlockEntity
@@ -615,23 +615,21 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         if (compactingUpgrade) {
             ensureCompactingCache();
             if (!compactTier1Item.isEmpty()) {
-                ResourceLocation k1 = BuiltInRegistries.ITEM.getKey(compactTier1Item.getItem());
+                Identifier k1 = BuiltInRegistries.ITEM.getKey(compactTier1Item.getItem());
                 if (k1 != null) tag.putString("Compact1Id", k1.toString());
             }
             if (!compactTier2Item.isEmpty()) {
-                ResourceLocation k2 = BuiltInRegistries.ITEM.getKey(compactTier2Item.getItem());
+                Identifier k2 = BuiltInRegistries.ITEM.getKey(compactTier2Item.getItem());
                 if (k2 != null) tag.putString("Compact2Id", k2.toString());
             }
         }
-        var typeId = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(getType());
-        if (typeId != null) tag.putString("id", typeId.toString());
-        components.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        components.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(getType(), tag));
     }
 
     @Override
     protected void applyImplicitComponents(DataComponentGetter input) {
         super.applyImplicitComponents(input);
-        BarrelContents contents = input.get(Registration.BARREL_CONTENTS);
+        BarrelContents contents = input.get(BETypeHelper.<BarrelContents>getDataComponentType("barrel_contents"));
         if (contents != null) {
             storedItem = contents.storedItem().map(s -> s.copyWithCount(1)).orElse(ItemStack.EMPTY);
             count = contents.count();
@@ -651,7 +649,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
         CompoundTag tag = saveWithoutMetadata(registries);
-        if (compactingUpgrade && level != null && !level.isClientSide) {
+        if (compactingUpgrade && level != null && !level.isClientSide()) {
             ensureCompactingCache();
             net.minecraft.resources.RegistryOps<net.minecraft.nbt.Tag> ops =
                     registries.createSerializationContext(net.minecraft.nbt.NbtOps.INSTANCE);

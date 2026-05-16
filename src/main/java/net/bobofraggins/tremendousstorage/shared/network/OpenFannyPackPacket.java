@@ -6,7 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -22,7 +22,7 @@ public record OpenFannyPackPacket(int slotType, int slotIndex, String slotId) im
     public static final int SLOT_CURIOS = 1;
 
     public static final Type<OpenFannyPackPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "open_fanny_pack"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "open_fanny_pack"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenFannyPackPacket> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.INT,

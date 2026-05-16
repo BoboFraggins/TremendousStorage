@@ -11,7 +11,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -30,7 +30,7 @@ public record BackpackFillCraftingGridPacket(int slotType, int slotIndex, String
         implements CustomPacketPayload {
 
     public static final Type<BackpackFillCraftingGridPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "backpack_fill_crafting_grid"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "backpack_fill_crafting_grid"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, BackpackFillCraftingGridPacket> STREAM_CODEC =
             StreamCodec.composite(

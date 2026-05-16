@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.wirelesshub;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.Nullable;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
@@ -35,6 +35,8 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 
 /**
  * Block entity for the Wireless Hub.
@@ -241,7 +243,7 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         NetworkScanResult scan = ni.getScan();
         if (scan == null) return false;
 
-        FluidStack wanted = new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), VIBES_COST_MB);
+        FluidStack wanted = new FluidStack(BETypeHelper.getFluid("positive_vibes"), VIBES_COST_MB);
         Set<BlockPos> checked = new HashSet<>();
 
         // Check positions adjacent to the NI itself and to each tube
@@ -259,7 +261,8 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     }
 
     private static boolean drainVibes(ServerLevel level, BlockPos pos, FluidStack wanted) {
-        IFluidHandler fh = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, null);
+        ResourceHandler<FluidResource> fluidCap = level.getCapability(Capabilities.Fluid.BLOCK, pos, null);
+        IFluidHandler fh = fluidCap != null ? IFluidHandler.of(fluidCap) : null;
         if (fh == null) return false;
         if (fh.drain(wanted, IFluidHandler.FluidAction.SIMULATE).getAmount() < wanted.getAmount()) return false;
         fh.drain(wanted, IFluidHandler.FluidAction.EXECUTE);
@@ -317,7 +320,7 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     };
 
     public WirelessHubBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.WIRELESS_HUB_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("wireless_hub"), pos, state);
     }
 
     // -------------------------------------------------------------------------
@@ -342,9 +345,11 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         if (!ni.isNetworkValid()) return;
 
         // Write the NI position, this hub's position, and this hub's dimension into the item
-        sat.set(Registration.WIRELESS_NI_POS.get(), niPos);
-        sat.set(Registration.WIRELESS_HUB_POS.get(), worldPosition);
-        sat.set(Registration.WIRELESS_HUB_DIMENSION.get(), level.dimension().location());
+        sat.set(BETypeHelper.<BlockPos>getDataComponentType("wireless_ni_pos"), niPos);
+        sat.set(BETypeHelper.<BlockPos>getDataComponentType("wireless_hub_pos"), worldPosition);
+        sat.set(
+                BETypeHelper.<net.minecraft.resources.Identifier>getDataComponentType("wireless_hub_dimension"),
+                level.dimension().identifier());
 
         // Move to output slot (slot 1)
         inventory.setStackInSlot(1, sat);

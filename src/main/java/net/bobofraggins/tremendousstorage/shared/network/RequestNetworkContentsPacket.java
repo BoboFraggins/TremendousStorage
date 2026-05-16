@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -25,7 +25,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record RequestNetworkContentsPacket(BlockPos pos) implements CustomPacketPayload {
 
     public static final Type<RequestNetworkContentsPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "request_network_contents"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "request_network_contents"));
 
     public static final StreamCodec<FriendlyByteBuf, RequestNetworkContentsPacket> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC, RequestNetworkContentsPacket::pos, RequestNetworkContentsPacket::new);

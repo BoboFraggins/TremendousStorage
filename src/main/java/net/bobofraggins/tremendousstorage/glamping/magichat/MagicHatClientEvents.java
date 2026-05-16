@@ -1,7 +1,8 @@
 package net.bobofraggins.tremendousstorage.glamping.magichat;
 
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.world.entity.player.PlayerModelType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -16,8 +17,8 @@ public final class MagicHatClientEvents {
 
     @SubscribeEvent
     public static void onAddLayers(EntityRenderersEvent.AddLayers event) {
-        for (PlayerSkin.Model skin : event.getSkins()) {
-            PlayerRenderer renderer = event.getSkin(skin);
+        for (PlayerModelType skin : event.getSkins()) {
+            AvatarRenderer<AbstractClientPlayer> renderer = event.getPlayerRenderer(skin);
             if (renderer != null) {
                 renderer.addLayer(new MagicHatHelmetLayer(renderer));
             }

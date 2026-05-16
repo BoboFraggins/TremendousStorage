@@ -6,8 +6,8 @@ import mekanism.api.chemical.ChemicalBuilder;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.IEventBus;
@@ -54,7 +54,7 @@ public class MekanismIntegration {
     private static void addCreativeTabItems(BuildCreativeModeTabContentsEvent event) {
         ResourceKey<CreativeModeTab> tab = ResourceKey.create(
                 Registries.CREATIVE_MODE_TAB,
-                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "tremendousstorage"));
+                Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "tremendousstorage"));
         if (event.getTabKey().equals(tab)) {
             event.accept(LAZURITE_DUST.get());
             event.accept(LAZURITE_DIRTY_DUST.get());

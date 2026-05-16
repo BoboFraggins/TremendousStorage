@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.backpack;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -31,7 +31,7 @@ public final class BackpackClientEvents {
                 KeyModifier.NONE,
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_B,
-                "key.categories.tremendousstorage");
+                net.minecraft.client.KeyMapping.Category.MISC);
         event.register(OPEN_TREMENDOUS_BACKPACK);
     }
 
@@ -52,11 +52,11 @@ public final class BackpackClientEvents {
         event.register(
                 BackpackRenderer.BODY_MODEL,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_body")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/backpack_body")));
         event.register(
                 BackpackRenderer.FLAP_MODEL,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/backpack_flap")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/backpack_flap")));
     }
 
     @SubscribeEvent

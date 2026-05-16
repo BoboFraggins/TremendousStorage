@@ -71,7 +71,11 @@ public class TankSettingsMenu extends AbstractContainerMenu {
         addSlot(new Slot(transferContainer, 0, FLUID_IN_X, FLUID_IN_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return stack.getCapability(Capabilities.FluidHandler.ITEM) != null;
+                return !stack.isEmpty()
+                        && stack.getCapability(
+                                        Capabilities.Fluid.ITEM,
+                                        net.neoforged.neoforge.transfer.access.ItemAccess.forStack(stack))
+                                != null;
             }
         });
 

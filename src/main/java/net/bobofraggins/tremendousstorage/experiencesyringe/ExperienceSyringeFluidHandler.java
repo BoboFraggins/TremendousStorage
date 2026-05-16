@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.experiencesyringe;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
@@ -24,7 +24,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 public class ExperienceSyringeFluidHandler implements IFluidHandlerItem {
 
     private static final TagKey<Fluid> EXPERIENCE_FLUID_TAG =
-            TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath("c", "experience"));
+            TagKey.create(Registries.FLUID, Identifier.fromNamespaceAndPath("c", "experience"));
 
     private final ItemStack container;
 

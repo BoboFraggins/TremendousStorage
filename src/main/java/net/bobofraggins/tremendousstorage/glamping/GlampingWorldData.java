@@ -13,8 +13,8 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.LongArrayTag;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -123,7 +123,7 @@ public class GlampingWorldData extends SavedData {
             try {
                 UUID uuid = UUID.fromString(uuidStr);
                 ResourceKey<Level> dim = ResourceKey.create(
-                        Registries.DIMENSION, ResourceLocation.parse(t.getStringOr("dim", "minecraft:overworld")));
+                        Registries.DIMENSION, Identifier.parse(t.getStringOr("dim", "minecraft:overworld")));
                 data.returnTargets.put(
                         uuid,
                         new ReturnTarget(
@@ -151,7 +151,7 @@ public class GlampingWorldData extends SavedData {
             CompoundTag t = new CompoundTag();
             t.putString("uuid", entry.getKey().toString());
             ReturnTarget r = entry.getValue();
-            t.putString("dim", r.dimension().location().toString());
+            t.putString("dim", r.dimension().identifier().toString());
             t.putDouble("x", r.x());
             t.putDouble("y", r.y());
             t.putDouble("z", r.z());

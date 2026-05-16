@@ -10,29 +10,30 @@ import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
 import net.bobofraggins.tremendousstorage.storage.enderbarrel.EnderBarrelBlockEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 
-/**
- * Renders the barrel body (standalone model with proper AO + shading) plus the locked item and
- * count on its front face.
- */
 public class BarrelRenderer
-        implements BlockEntityRenderer<BarrelBlockEntity>, IBlockEntityRendererExtension<BarrelBlockEntity> {
+        implements BlockEntityRenderer<BarrelBlockEntity, BarrelRenderer.State>,
+                IBlockEntityRendererExtension<BarrelBlockEntity> {
 
     @SuppressWarnings("unchecked")
     static final StandaloneModelKey<BlockStateModel>[] BODY_MODELS =
@@ -58,69 +59,124 @@ public class BarrelRenderer
         }
     }
 
+    public static class State extends BlockEntityRenderState {
+        public float facingYRot;
+        public StandaloneModelKey<BlockStateModel> modelKey;
+        public boolean isLocked;
+        public boolean hasCompactingUpgrade;
+        public ItemStack storedItem = ItemStack.EMPTY;
+        public long count;
+        public int baseSlot;
+        public ItemStack s0 = ItemStack.EMPTY, s1 = ItemStack.EMPTY, s2 = ItemStack.EMPTY;
+        public long c0, c1, c2;
+    }
+
     public BarrelRenderer(BlockEntityRendererProvider.Context ctx) {}
 
     @Override
-    public void render(
+    public State createRenderState() {
+        return new State();
+    }
+
+    @Override
+    public void extractRenderState(
             BarrelBlockEntity be,
+            State state,
             float partialTick,
-            PoseStack ps,
-            MultiBufferSource buffers,
-            int light,
-            int overlay,
-            Vec3 cameraPos) {
-
-        Level level = be.getLevel();
-        if (level != null) {
-            light = LevelRenderer.getLightColor(level, be.getBlockPos());
-        }
-
+            Vec3 camera,
+            ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+        BlockEntityRenderState.extractBase(be, state, breakProgress);
         Direction facing = be.getBlockState().getValue(BarrelBlock.FACING);
-        float facingYRot =
-                switch (facing) {
-                    case SOUTH -> 180f;
-                    case EAST -> 270f;
-                    case WEST -> 90f;
-                    default -> 0f;
-                };
-
-        // Barrel body
+        state.facingYRot = switch (facing) {
+            case SOUTH -> 180f;
+            case EAST -> 270f;
+            case WEST -> 90f;
+            default -> 0f;
+        };
         boolean isEnder = be instanceof EnderBarrelBlockEntity;
         int tierIdx = be.getTier().ordinal();
-        StandaloneModelKey<BlockStateModel> modelKey = be.hasCompactingUpgrade()
+        state.hasCompactingUpgrade = be.hasCompactingUpgrade();
+        state.modelKey = state.hasCompactingUpgrade
                 ? COMPACTING_BODY_MODELS[tierIdx]
                 : (isEnder ? ENDER_BODY_MODELS[tierIdx] : BODY_MODELS[tierIdx]);
-        BlockStateModel bodyModel = Minecraft.getInstance().getModelManager().getStandaloneModel(modelKey);
-        VertexConsumer consumer = buffers.getBuffer(RenderType.solid());
+        state.isLocked = be.isLocked();
+        if (state.isLocked) {
+            state.storedItem = be.getStoredItem();
+            state.count = be.getCount();
+            if (state.hasCompactingUpgrade) {
+                state.baseSlot = be.getBaseSlot();
+                state.s0 = state.s1 = state.s2 = ItemStack.EMPTY;
+                state.c0 = state.c1 = state.c2 = 0;
+                if (state.baseSlot == 0) {
+                    state.s0 = be.getStoredItem();
+                    state.c0 = be.getCount();
+                    if (!be.getCompactTier1Item().isEmpty() && be.getCompactTier1Ratio() > 0) {
+                        state.s1 = be.getCompactTier1Item();
+                        state.c1 = be.getCount() / be.getCompactTier1Ratio();
+                    }
+                    if (!be.getCompactTier2Item().isEmpty()
+                            && be.getCompactTier1Ratio() > 0
+                            && be.getCompactTier2Ratio() > 0) {
+                        state.s2 = be.getCompactTier2Item();
+                        state.c2 = be.getCount() / ((long) be.getCompactTier1Ratio() * be.getCompactTier2Ratio());
+                    }
+                } else if (state.baseSlot == 1) {
+                    state.s1 = be.getStoredItem();
+                    state.c1 = be.getCount();
+                    if (!be.getCompactTier1Item().isEmpty() && be.getCompactTier1Ratio() > 0) {
+                        state.s2 = be.getCompactTier1Item();
+                        state.c2 = be.getCount() / be.getCompactTier1Ratio();
+                    }
+                } else {
+                    state.s2 = be.getStoredItem();
+                    state.c2 = be.getCount();
+                }
+            }
+        }
+    }
+
+    @Override
+    public void submit(State state, PoseStack ps, SubmitNodeCollector collector, CameraRenderState cameraState) {
+        Minecraft mc = Minecraft.getInstance();
+        BlockStateModel bodyModel = mc.getModelManager().getStandaloneModel(state.modelKey);
+        int light = state.lightCoords;
+        int overlay = OverlayTexture.NO_OVERLAY;
         RandomSource random = RandomSource.create();
 
         ps.pushPose();
-        applyFacingRotation(ps, facingYRot);
-        renderModel(consumer, ps.last(), bodyModel, level, light, overlay, random);
+        applyFacingRotation(ps, state.facingYRot);
+        List<BlockModelPart> bodyParts = collectParts(bodyModel, random);
+        collector.submitCustomGeometry(
+                ps,
+                Sheets.cutoutBlockSheet(),
+                (pose, consumer) -> renderModel(consumer, pose, bodyParts, light, overlay));
         ps.popPose();
 
-        // Stored item + count
-        if (!be.isLocked()) return;
+        if (!state.isLocked) return;
+
+        // Use main buffer source for item and text rendering
+        MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
 
         ps.pushPose();
-        applyFacingRotation(ps, facingYRot);
+        applyFacingRotation(ps, state.facingYRot);
 
-        if (be.hasCompactingUpgrade()) {
-            renderCompactingFace(be, ps, buffers, level, light, overlay);
+        if (state.hasCompactingUpgrade) {
+            if (!state.s2.isEmpty())
+                renderSmallItem(ps, collector, buffers, state.s2, state.c2, 0.25f, 0.275f, overlay);
+            if (!state.s1.isEmpty())
+                renderSmallItem(ps, collector, buffers, state.s1, state.c1, 0.50f, 0.775f, overlay);
+            if (!state.s0.isEmpty())
+                renderSmallItem(ps, collector, buffers, state.s0, state.c0, 0.75f, 0.275f, overlay);
         } else {
-            ItemStack item = be.getStoredItem();
             ps.translate(0.5, 0.55, -0.01);
             ps.pushPose();
-
             ps.scale(0.5f, 0.5f, 0.001f);
-            Minecraft.getInstance()
-                    .getItemRenderer()
-                    .renderStatic(
-                            item, ItemDisplayContext.FIXED, LightTexture.FULL_BRIGHT, overlay, ps, buffers, level, 0);
+            ItemStackRenderState irs = new ItemStackRenderState();
+            mc.getItemModelResolver().updateForTopItem(irs, state.storedItem, ItemDisplayContext.FIXED, null, null, 0);
+            irs.submit(ps, collector, LightTexture.FULL_BRIGHT, overlay, 0);
             ps.popPose();
-
-            String label = CountFormat.format(be.getCount());
-            Font font = Minecraft.getInstance().font;
+            String label = CountFormat.format(state.count);
+            Font font = mc.font;
             float ts = 1f / 80f;
             ps.pushPose();
             ps.translate(0, -0.3, -0.0001);
@@ -137,7 +193,7 @@ public class BarrelRenderer
                     Font.DisplayMode.NORMAL,
                     0,
                     LightTexture.FULL_BRIGHT);
-            if (buffers instanceof MultiBufferSource.BufferSource bs) bs.endBatch();
+            buffers.endBatch();
             ps.popPose();
         }
 
@@ -152,61 +208,25 @@ public class BarrelRenderer
         }
     }
 
-    private static void renderCompactingFace(
-            BarrelBlockEntity be, PoseStack ps, MultiBufferSource buffers, Level level, int light, int overlay) {
-        int base = be.getBaseSlot();
-
-        ItemStack s0 = ItemStack.EMPTY, s1 = ItemStack.EMPTY, s2 = ItemStack.EMPTY;
-        long c0 = 0, c1 = 0, c2 = 0;
-
-        if (base == 0) {
-            s0 = be.getStoredItem();
-            c0 = be.getCount();
-            if (!be.getCompactTier1Item().isEmpty() && be.getCompactTier1Ratio() > 0) {
-                s1 = be.getCompactTier1Item();
-                c1 = be.getCount() / be.getCompactTier1Ratio();
-            }
-            if (!be.getCompactTier2Item().isEmpty() && be.getCompactTier1Ratio() > 0 && be.getCompactTier2Ratio() > 0) {
-                s2 = be.getCompactTier2Item();
-                c2 = be.getCount() / ((long) be.getCompactTier1Ratio() * be.getCompactTier2Ratio());
-            }
-        } else if (base == 1) {
-            s1 = be.getStoredItem();
-            c1 = be.getCount();
-            if (!be.getCompactTier1Item().isEmpty() && be.getCompactTier1Ratio() > 0) {
-                s2 = be.getCompactTier1Item();
-                c2 = be.getCount() / be.getCompactTier1Ratio();
-            }
-        } else {
-            s2 = be.getStoredItem();
-            c2 = be.getCount();
-        }
-
-        if (!s2.isEmpty()) renderSmallItem(ps, buffers, s2, c2, 0.25f, 0.275f, level, light, overlay);
-        if (!s1.isEmpty()) renderSmallItem(ps, buffers, s1, c1, 0.50f, 0.775f, level, light, overlay);
-        if (!s0.isEmpty()) renderSmallItem(ps, buffers, s0, c0, 0.75f, 0.275f, level, light, overlay);
-    }
-
     private static void renderSmallItem(
             PoseStack ps,
-            MultiBufferSource buffers,
+            SubmitNodeCollector collector,
+            MultiBufferSource.BufferSource buffers,
             ItemStack item,
             long count,
             float cx,
             float cy,
-            Level level,
-            int light,
             int overlay) {
         ps.pushPose();
         ps.translate(cx, cy, -0.01);
-
         ps.pushPose();
         ps.scale(0.25f, 0.25f, 0.001f);
+        ItemStackRenderState irs = new ItemStackRenderState();
         Minecraft.getInstance()
-                .getItemRenderer()
-                .renderStatic(item, ItemDisplayContext.FIXED, LightTexture.FULL_BRIGHT, overlay, ps, buffers, level, 0);
+                .getItemModelResolver()
+                .updateForTopItem(irs, item, ItemDisplayContext.FIXED, null, null, 0);
+        irs.submit(ps, collector, LightTexture.FULL_BRIGHT, overlay, 0);
         ps.popPose();
-
         String label = CountFormat.format(count);
         Font font = Minecraft.getInstance().font;
         float ts = 1f / 120f;
@@ -225,34 +245,29 @@ public class BarrelRenderer
                 Font.DisplayMode.NORMAL,
                 0,
                 LightTexture.FULL_BRIGHT);
-        if (buffers instanceof MultiBufferSource.BufferSource bs) bs.endBatch();
+        buffers.endBatch();
         ps.popPose();
-
         ps.popPose();
     }
 
-    private static void renderModel(
-            VertexConsumer consumer,
-            PoseStack.Pose pose,
-            BlockStateModel model,
-            Level level,
-            int packedLight,
-            int packedOverlay,
-            RandomSource random) {
+    private static List<BlockModelPart> collectParts(BlockStateModel model, RandomSource random) {
         List<BlockModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
         model.collectParts(random, parts);
+        return parts;
+    }
+
+    private static void renderModel(
+            VertexConsumer consumer, PoseStack.Pose pose, List<BlockModelPart> parts, int packedLight, int overlay) {
         for (BlockModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
-                    consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
+                    float shade = 1f;
+                    consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, overlay);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                Direction dir = quad.direction();
-                float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
-                consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
+                consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1.0f, packedLight, overlay);
             }
         }
     }

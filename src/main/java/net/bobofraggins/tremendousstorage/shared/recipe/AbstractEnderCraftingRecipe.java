@@ -7,7 +7,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -97,14 +97,14 @@ public abstract class AbstractEnderCraftingRecipe implements CraftingRecipe {
      * <p>Subclasses may override to handle additional item-form components (e.g. BackpackContents).
      */
     protected ItemStack makeSecondEnderItem(ItemStack second) {
-        CustomData data = second.get(DataComponents.BLOCK_ENTITY_DATA);
+        var data = second.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return second;
-        CompoundTag tag = data.copyTag();
+        CompoundTag tag = data.getUnsafe().copy();
         tag.remove("CraftingUpgrade");
         tag.remove("MagnetUpgrade");
         tag.remove("PullerUpgrade");
         tag.remove("PullerSides");
-        second.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        second.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(data.type(), tag));
         return second;
     }
 

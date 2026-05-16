@@ -5,7 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -15,7 +15,7 @@ public record PicnicBasketItemAutoFeedPacket(int slotType, int slotIndex, String
         implements CustomPacketPayload {
 
     public static final Type<PicnicBasketItemAutoFeedPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "picnic_basket_item_auto_feed"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "picnic_basket_item_auto_feed"));
 
     public static final StreamCodec<FriendlyByteBuf, PicnicBasketItemAutoFeedPacket> STREAM_CODEC =
             StreamCodec.composite(

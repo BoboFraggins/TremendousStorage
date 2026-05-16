@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -150,7 +150,7 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
         if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (!(player instanceof ServerPlayer serverPlayer)) return InteractionResult.PASS;
 
-        MinecraftServer server = serverPlayer.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) serverPlayer.level()).getServer();
         if (server == null) return InteractionResult.PASS;
 
         ServerLevel glampingLevel = server.getLevel(GlampingDimension.KEY);
@@ -268,8 +268,8 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
                 slotZ * GlampingDimension.CAMP_SPACING);
     }
 
-    private static final ResourceLocation CAMP_STRUCTURE =
-            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "glamping_camp");
+    private static final Identifier CAMP_STRUCTURE =
+            Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "glamping_camp");
 
     /**
      * The structure's (0,0,0) corner is offset from campOrigin by this amount so that the

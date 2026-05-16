@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.shared.ui;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Dialog pane that renders a 3×3 crafting grid, arrow, and result slot backgrounds.
@@ -13,8 +13,8 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class CraftingGridPane implements IDialogPane {
 
-    private static final ResourceLocation CRAFTING_TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/gui/container/crafting_table.png");
+    private static final Identifier CRAFTING_TEXTURE =
+            Identifier.withDefaultNamespace("textures/gui/container/crafting_table.png");
 
     public static final int SLOT_SIZE = 18;
     public static final int CRAFTING_ROWS = 3;

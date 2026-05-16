@@ -7,34 +7,27 @@ import java.util.ArrayList;
 import java.util.List;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 
-/**
- * Renders the body and animated split lids of the placed Picnic Basket.
- *
- * <p>The basket has two lids that open away from the center on the X axis:
- * <ul>
- *   <li>Left lid (right half of basket, x=8..13): rotates +Z around pivot [8/16, 8/16, 8/16]
- *   <li>Right lid (left half of basket, x=3..8): rotates −Z around pivot [8/16, 8/16, 8/16]
- * </ul>
- */
 public class PicnicBasketRenderer
-        implements BlockEntityRenderer<ChestBlockEntity>, IBlockEntityRendererExtension<ChestBlockEntity> {
+        implements BlockEntityRenderer<ChestBlockEntity, PicnicBasketRenderer.State>,
+                IBlockEntityRendererExtension<ChestBlockEntity> {
 
     static final StandaloneModelKey<BlockStateModel> BODY_MODEL =
             new StandaloneModelKey<>(() -> "tremendousstorage:block/picnic_basket_body");
@@ -42,6 +35,18 @@ public class PicnicBasketRenderer
             new StandaloneModelKey<>(() -> "tremendousstorage:block/picnic_basket_left_lid");
     static final StandaloneModelKey<BlockStateModel> RIGHT_LID_MODEL =
             new StandaloneModelKey<>(() -> "tremendousstorage:block/picnic_basket_right_lid");
+
+    public static class State extends BlockEntityRenderState {
+        public float facingYRot;
+        public float openFraction;
+    }
+
+    public PicnicBasketRenderer(BlockEntityRendererProvider.Context ctx) {}
+
+    @Override
+    public State createRenderState() {
+        return new State();
+    }
 
     private static float facingYRot(Direction facing) {
         return switch (facing) {
@@ -52,90 +57,89 @@ public class PicnicBasketRenderer
         };
     }
 
-    public PicnicBasketRenderer(BlockEntityRendererProvider.Context ctx) {}
+    @Override
+    public void extractRenderState(
+            ChestBlockEntity be,
+            State state,
+            float partialTick,
+            Vec3 camera,
+            ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+        BlockEntityRenderState.extractBase(be, state, breakProgress);
+        BlockState blockState = be.getBlockState();
+        Direction facing = blockState.getValue(PicnicBasketBlock.FACING);
+        state.facingYRot = facingYRot(facing);
+        state.openFraction = Mth.lerp(partialTick, be.prevLidAngle, be.lidAngle);
+    }
 
     @Override
-    public void render(
-            ChestBlockEntity be,
-            float partialTick,
-            PoseStack poseStack,
-            MultiBufferSource bufferSource,
-            int packedLight,
-            int packedOverlay,
-            Vec3 cameraPos) {
-
+    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
         Minecraft mc = Minecraft.getInstance();
         BlockStateModel bodyModel = mc.getModelManager().getStandaloneModel(BODY_MODEL);
         BlockStateModel leftLidModel = mc.getModelManager().getStandaloneModel(LEFT_LID_MODEL);
         BlockStateModel rightLidModel = mc.getModelManager().getStandaloneModel(RIGHT_LID_MODEL);
-        VertexConsumer consumer = bufferSource.getBuffer(RenderType.solid());
-
-        Level level = be.getLevel();
-        if (level != null) {
-            packedLight = LevelRenderer.getLightColor(level, be.getBlockPos());
-        }
-
-        BlockState blockState = be.getBlockState();
-        Direction facing = blockState.getValue(PicnicBasketBlock.FACING);
-        float yRot = facingYRot(facing);
-
+        int light = state.lightCoords;
+        int overlay = net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY;
+        float yRot = state.facingYRot;
+        float openFraction = state.openFraction;
         RandomSource random = RandomSource.create();
 
-        // Body — facing rotation only.
+        List<BlockModelPart> bodyParts = collectParts(bodyModel, random);
         poseStack.pushPose();
-        poseStack.translate(0.5, 0.5, 0.5);
-        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
-        poseStack.translate(-0.5, -0.5, -0.5);
-        renderQuads(consumer, poseStack.last(), bodyModel, level, packedLight, packedOverlay, random);
+        applyFacingRotation(poseStack, yRot);
+        collector.submitCustomGeometry(
+                poseStack,
+                Sheets.cutoutBlockSheet(),
+                (pose, consumer) -> renderModel(consumer, pose, bodyParts, light, overlay));
         poseStack.popPose();
 
-        float openFraction = Mth.lerp(partialTick, be.prevLidAngle, be.lidAngle);
-
-        // Left lid — right half of basket (x=8..13) rotates +Z away from center.
+        List<BlockModelPart> leftLidParts = collectParts(leftLidModel, random);
         poseStack.pushPose();
-        poseStack.translate(0.5, 0.5, 0.5);
-        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
-        poseStack.translate(-0.5, -0.5, -0.5);
+        applyFacingRotation(poseStack, yRot);
         poseStack.translate(8.0 / 16.0, 8.0 / 16.0, 8.0 / 16.0);
         poseStack.mulPose(Axis.ZP.rotationDegrees(openFraction * 90f));
         poseStack.translate(-8.0 / 16.0, -8.0 / 16.0, -8.0 / 16.0);
-        renderQuads(consumer, poseStack.last(), leftLidModel, level, packedLight, packedOverlay, random);
+        collector.submitCustomGeometry(
+                poseStack,
+                Sheets.cutoutBlockSheet(),
+                (pose, consumer) -> renderModel(consumer, pose, leftLidParts, light, overlay));
         poseStack.popPose();
 
-        // Right lid — left half of basket (x=3..8) rotates −Z away from center.
+        List<BlockModelPart> rightLidParts = collectParts(rightLidModel, random);
         poseStack.pushPose();
-        poseStack.translate(0.5, 0.5, 0.5);
-        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
-        poseStack.translate(-0.5, -0.5, -0.5);
+        applyFacingRotation(poseStack, yRot);
         poseStack.translate(8.0 / 16.0, 8.0 / 16.0, 8.0 / 16.0);
         poseStack.mulPose(Axis.ZP.rotationDegrees(-openFraction * 90f));
         poseStack.translate(-8.0 / 16.0, -8.0 / 16.0, -8.0 / 16.0);
-        renderQuads(consumer, poseStack.last(), rightLidModel, level, packedLight, packedOverlay, random);
+        collector.submitCustomGeometry(
+                poseStack,
+                Sheets.cutoutBlockSheet(),
+                (pose, consumer) -> renderModel(consumer, pose, rightLidParts, light, overlay));
         poseStack.popPose();
     }
 
-    private static void renderQuads(
-            VertexConsumer consumer,
-            PoseStack.Pose pose,
-            BlockStateModel model,
-            Level level,
-            int packedLight,
-            int packedOverlay,
-            RandomSource random) {
+    private static void applyFacingRotation(PoseStack poseStack, float yRot) {
+        poseStack.translate(0.5, 0.5, 0.5);
+        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
+        poseStack.translate(-0.5, -0.5, -0.5);
+    }
+
+    private static List<BlockModelPart> collectParts(BlockStateModel model, RandomSource random) {
         List<BlockModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
         model.collectParts(random, parts);
+        return parts;
+    }
+
+    private static void renderModel(
+            VertexConsumer consumer, PoseStack.Pose pose, List<BlockModelPart> parts, int packedLight, int overlay) {
         for (BlockModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
-                    consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
+                    consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1f, packedLight, overlay);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                Direction dir = quad.direction();
-                float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
-                consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
+                consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1f, packedLight, overlay);
             }
         }
     }

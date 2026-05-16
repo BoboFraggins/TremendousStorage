@@ -12,7 +12,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
 
 /**
  * Static helpers for accessing a picnic basket ItemStack from a player's inventory or Curios slot,
@@ -85,10 +85,10 @@ public final class PicnicBasketItemUtils {
 
     /** Returns true if the basket already has an entry whose StorageKey matches {@code key}. */
     public static boolean isTypeStored(HolderLookup.Provider registries, ItemStack basketStack, StorageKey key) {
-        CustomData data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        var data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return false;
         RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
-        ListTag types = data.copyTag().getListOrEmpty("Types");
+        ListTag types = data.getUnsafe().getListOrEmpty("Types");
         for (int i = 0; i < types.size(); i++) {
             ItemStack stored = ItemStack.OPTIONAL_CODEC
                     .parse(ops, types.getCompoundOrEmpty(i).getCompoundOrEmpty("Type"))
@@ -107,8 +107,8 @@ public final class PicnicBasketItemUtils {
             HolderLookup.Provider registries, ItemStack basketStack, ItemStack toInsert, long amount) {
         if (!toInsert.has(DataComponents.FOOD)) return 0;
 
-        CustomData data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag beTag = data != null ? data.copyTag() : new CompoundTag();
+        var data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        CompoundTag beTag = data != null ? data.getUnsafe() : new CompoundTag();
 
         StorageTier tier = StorageTier.fromId(beTag.getStringOr("Tier", ""));
         long capacity = tier.getCapacity();
@@ -145,7 +145,8 @@ public final class PicnicBasketItemUtils {
         }
 
         beTag.put("Types", types);
-        basketStack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(beTag));
+        basketStack.set(
+                DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(Registration.PICNIC_BASKET_BE_TYPE.get(), beTag));
         return toInsertAmt;
     }
 
@@ -155,10 +156,10 @@ public final class PicnicBasketItemUtils {
      */
     public static ItemStack extractFromBasketItem(
             HolderLookup.Provider registries, ItemStack basketStack, int typeIndex, long amount) {
-        CustomData data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        var data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return ItemStack.EMPTY;
 
-        CompoundTag beTag = data.copyTag();
+        CompoundTag beTag = data.getUnsafe();
         RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
         ListTag types = beTag.getListOrEmpty("Types");
 
@@ -185,7 +186,8 @@ public final class PicnicBasketItemUtils {
         }
 
         beTag.put("Types", types);
-        basketStack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(beTag));
+        basketStack.set(
+                DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(Registration.PICNIC_BASKET_BE_TYPE.get(), beTag));
         return stored.copyWithCount((int) toExtract);
     }
 
@@ -195,17 +197,17 @@ public final class PicnicBasketItemUtils {
 
     /** Reads the AutoFeed flag from the basket's BLOCK_ENTITY_DATA (defaults to {@code true}). */
     public static boolean readAutoFeed(ItemStack basketStack) {
-        CustomData data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        var data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return true;
-        CompoundTag tag = data.copyTag();
-        return tag.getBooleanOr("AutoFeed", true);
+        return data.getUnsafe().getBooleanOr("AutoFeed", true);
     }
 
     /** Writes the AutoFeed flag to the basket's BLOCK_ENTITY_DATA. */
     public static void writeAutoFeed(ItemStack basketStack, boolean autoFeed) {
-        CustomData data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = data != null ? data.copyTag() : new CompoundTag();
+        var data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        CompoundTag tag = data != null ? data.getUnsafe() : new CompoundTag();
         tag.putBoolean("AutoFeed", autoFeed);
-        basketStack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        basketStack.set(
+                DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(Registration.PICNIC_BASKET_BE_TYPE.get(), tag));
     }
 }

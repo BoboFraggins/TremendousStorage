@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.networkinterface;
 
 import java.util.Set;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.IKeyCounterContributor;
 import net.bobofraggins.tremendousstorage.shared.storage.KeyCounter;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
@@ -86,7 +86,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     private int pollTickCount = 0;
 
     public NetworkInterfaceBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.NETWORK_INTERFACE_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("network_interface"), pos, state);
     }
 
     // -------------------------------------------------------------------------
@@ -235,7 +235,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
     }
 
     private void syncTierBlockState(StorageTier t) {
-        if (level == null || level.isClientSide) return;
+        if (level == null || level.isClientSide()) return;
         net.minecraft.world.level.block.state.BlockState state = level.getBlockState(worldPosition);
         if (state.hasProperty(NetworkInterfaceBlock.TIER_PROP)
                 && state.getValue(NetworkInterfaceBlock.TIER_PROP) != t) {

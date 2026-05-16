@@ -79,7 +79,7 @@ public class TremendousStorageClientConfig {
      * client and the server default on the server (slot positions are unused server-side).
      */
     public static int getVisibleRowsSafe() {
-        if (net.neoforged.fml.loading.FMLEnvironment.dist.isClient()) {
+        if (net.minecraft.client.Minecraft.getInstance() != null) {
             return getVisibleRows();
         }
         return ROWS_SCALE_4_PLUS_DEFAULT;

@@ -6,7 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.KeyCounter;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
@@ -131,14 +131,14 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
         }
 
         @Override
-        protected boolean isOwnContainer(Player player) {
+        public boolean isOwnContainer(Player player) {
             return player.containerMenu instanceof ChestMenu m && m.getPos().equals(worldPosition);
         }
     };
 
     public void startOpen(Player player) {
         if (!isRemoved() && !player.isSpectator()) {
-            openersCounter.incrementOpeners(player, getLevel(), getBlockPos(), getBlockState());
+            openersCounter.incrementOpeners(player, getLevel(), getBlockPos(), getBlockState(), 64.0);
         }
     }
 
@@ -207,7 +207,7 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
     // -------------------------------------------------------------------------
 
     public ChestBlockEntity(BlockPos pos, BlockState state) {
-        this(Registration.TREMENDOUS_CHEST_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("chest"), pos, state);
     }
 
     protected ChestBlockEntity(

@@ -21,8 +21,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -122,12 +122,15 @@ public class EnderStorageUpgradeItem extends BaseUpgradeItem {
 
         BlockEntity newBe = level.getBlockEntity(pos);
         if (newBe != null) {
-            CustomData.of(savedTag).loadInto(newBe, level.registryAccess());
+            TypedEntityData.of(newBe.getType(), savedTag).loadInto(newBe, level.registryAccess());
             newBe.setChanged();
         }
 
         ItemStack second = new ItemStack(Registration.ENDER_TREMENDOUS_CHEST_ITEM.get());
-        second.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(stripInstanceUpgrades(savedTag.copy())));
+        second.set(
+                DataComponents.BLOCK_ENTITY_DATA,
+                TypedEntityData.of(
+                        Registration.ENDER_TREMENDOUS_CHEST_BE_TYPE.get(), stripInstanceUpgrades(savedTag.copy())));
         return second;
     }
 
@@ -140,7 +143,7 @@ public class EnderStorageUpgradeItem extends BaseUpgradeItem {
 
         BlockEntity newBe = level.getBlockEntity(pos);
         if (newBe != null) {
-            CustomData.of(savedTag).loadInto(newBe, level.registryAccess());
+            TypedEntityData.of(newBe.getType(), savedTag).loadInto(newBe, level.registryAccess());
             newBe.setChanged();
         }
 
@@ -154,7 +157,10 @@ public class EnderStorageUpgradeItem extends BaseUpgradeItem {
                 entries, backpack.getTier(), backpack.getPriority(), backpack.getSortMode(), false);
 
         ItemStack second = new ItemStack(Registration.ENDER_TREMENDOUS_BACKPACK_ITEM.get());
-        second.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(stripInstanceUpgrades(savedTag.copy())));
+        second.set(
+                DataComponents.BLOCK_ENTITY_DATA,
+                TypedEntityData.of(
+                        Registration.ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(), stripInstanceUpgrades(savedTag.copy())));
         second.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), contents);
         second.set(Registration.ENDER_LINK_ID.get(), linkId);
         return second;
@@ -169,12 +175,15 @@ public class EnderStorageUpgradeItem extends BaseUpgradeItem {
 
         BlockEntity newBe = level.getBlockEntity(pos);
         if (newBe != null) {
-            CustomData.of(savedTag).loadInto(newBe, level.registryAccess());
+            TypedEntityData.of(newBe.getType(), savedTag).loadInto(newBe, level.registryAccess());
             newBe.setChanged();
         }
 
         ItemStack second = new ItemStack(Registration.ENDER_PICNIC_BASKET_ITEM.get());
-        second.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(stripInstanceUpgrades(savedTag.copy())));
+        second.set(
+                DataComponents.BLOCK_ENTITY_DATA,
+                TypedEntityData.of(
+                        Registration.ENDER_PICNIC_BASKET_BE_TYPE.get(), stripInstanceUpgrades(savedTag.copy())));
         return second;
     }
 
@@ -187,12 +196,14 @@ public class EnderStorageUpgradeItem extends BaseUpgradeItem {
 
         BlockEntity newBe = level.getBlockEntity(pos);
         if (newBe != null) {
-            CustomData.of(savedTag).loadInto(newBe, level.registryAccess());
+            TypedEntityData.of(newBe.getType(), savedTag).loadInto(newBe, level.registryAccess());
             newBe.setChanged();
         }
 
         ItemStack second = new ItemStack(Registration.ENDER_TANK_ITEM.get());
-        second.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(savedTag.copy()));
+        second.set(
+                DataComponents.BLOCK_ENTITY_DATA,
+                TypedEntityData.of(Registration.ENDER_TANK_BE_TYPE.get(), savedTag.copy()));
         return second;
     }
 }

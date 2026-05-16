@@ -5,7 +5,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.Block;
 
 /**
@@ -39,7 +38,7 @@ public class TieredBlockItem extends BlockItem {
      * <p>Returns an empty string when no upgrades are present (Wood tier, no flags set).
      */
     public static String buildBedSuffix(ItemStack stack, boolean ender) {
-        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         StorageTier tier = StorageTier.WOOD;
         boolean crafting = false,
                 magnet = false,
@@ -48,7 +47,7 @@ public class TieredBlockItem extends BlockItem {
                 interdimensional = false,
                 compacting = false;
         if (data != null) {
-            CompoundTag tag = data.copyTag();
+            CompoundTag tag = data.getUnsafe();
             tier = StorageTier.fromId(tag.getStringOr("Tier", ""));
             crafting = tag.getBooleanOr("CraftingUpgrade", false);
             magnet = tag.getBooleanOr("MagnetUpgrade", false);

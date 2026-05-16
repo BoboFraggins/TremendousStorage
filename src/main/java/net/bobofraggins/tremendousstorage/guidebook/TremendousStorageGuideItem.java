@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.guidebook;
 
 import java.lang.reflect.Method;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -13,7 +13,7 @@ import net.neoforged.fml.ModList;
 /** The Tremendous Storage Guide book item. Right-clicking opens the Patchouli guide if present. */
 public class TremendousStorageGuideItem extends Item {
 
-    private static final ResourceLocation BOOK_ID = ResourceLocation.fromNamespaceAndPath("tremendousstorage", "guide");
+    private static final Identifier BOOK_ID = Identifier.fromNamespaceAndPath("tremendousstorage", "guide");
 
     public TremendousStorageGuideItem() {
         super(new Item.Properties().stacksTo(1));

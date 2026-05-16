@@ -133,7 +133,8 @@ public final class ItemPickupInterceptor {
         DankFannyPackItem.setFannyPackStack(player, fannyStack, slotType, slotIndex, slotId);
 
         // Sync ender folders that absorbed items to shared storage.
-        net.minecraft.server.MinecraftServer server = player.getServer();
+        net.minecraft.server.MinecraftServer server =
+                ((net.minecraft.server.level.ServerLevel) player.level()).getServer();
         if (server != null) {
             for (int slot = 0; slot < folders.size(); slot++) {
                 if (enderSlotModified[slot]) {
@@ -192,7 +193,7 @@ public final class ItemPickupInterceptor {
                 || !(stack.getItem() instanceof net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem))
             return false;
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.copyTag().getBooleanOr("MagnetUpgrade", false);
+        return data != null && data.getUnsafe().getBooleanOr("MagnetUpgrade", false);
     }
 
     // -------------------------------------------------------------------------

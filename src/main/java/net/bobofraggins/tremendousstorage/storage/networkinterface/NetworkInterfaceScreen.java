@@ -10,7 +10,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
@@ -42,10 +42,9 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
     private static final int SCROLLER_W = 12;
     private static final int SCROLLER_H = 15;
 
-    private static final ResourceLocation SCROLLER =
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller");
-    private static final ResourceLocation SCROLLER_DISABLED =
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller_disabled");
+    private static final Identifier SCROLLER = Identifier.withDefaultNamespace("container/creative_inventory/scroller");
+    private static final Identifier SCROLLER_DISABLED =
+            Identifier.withDefaultNamespace("container/creative_inventory/scroller_disabled");
 
     private final Dialog dialog;
 
@@ -100,42 +99,58 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
     // -------------------------------------------------------------------------
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        int keyCode = event.key();
+        int scanCode = event.scancode();
+        int modifiers = event.modifiers();
+
         if (QuickStackClientEvents.QUICK_STACK != null
-                && QuickStackClientEvents.QUICK_STACK.matches(keyCode, scanCode)
+                && QuickStackClientEvents.QUICK_STACK.matches(event)
                 && menu.isNetworkValid()) {
             ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), true));
             return true;
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        return super.keyPressed(event);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean consumed) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.button();
+
         if (button == 0 && isInScrollbar(mouseX, mouseY)) {
             draggingScrollbar = true;
             scrollToY(mouseY);
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, consumed);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+    public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double dragX, double dragY) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.button();
+
         if (draggingScrollbar) {
             scrollToY(mouseY);
             return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        return super.mouseDragged(event, dragX, dragY);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.button();
+
         if (draggingScrollbar) {
             draggingScrollbar = false;
             return true;
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
 
     @Override

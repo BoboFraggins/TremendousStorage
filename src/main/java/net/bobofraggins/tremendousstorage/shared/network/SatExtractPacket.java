@@ -10,7 +10,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -41,7 +41,7 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount, boo
         implements CustomPacketPayload {
 
     public static final Type<SatExtractPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "sat_extract"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "sat_extract"));
 
     private static final StreamCodec<RegistryFriendlyByteBuf, Integer> VAR_INT_CODEC =
             StreamCodec.of((buf, v) -> buf.writeVarInt(v), RegistryFriendlyByteBuf::readVarInt);

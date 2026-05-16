@@ -5,7 +5,7 @@ import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -36,7 +36,7 @@ public class LazuritePaxelItem extends net.minecraft.world.item.Item {
     public LazuritePaxelItem(Properties properties) {
         super(LazuriteTier.PAXEL.applyToolProperties(
                 properties,
-                BlockTags.create(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "mineable/paxel")),
+                BlockTags.create(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "mineable/paxel")),
                 3.0f,
                 -3.0f,
                 LazuriteTier.PAXEL.speed()));
@@ -68,7 +68,7 @@ public class LazuritePaxelItem extends net.minecraft.world.item.Item {
                 level.playSound(player, pos, SoundEvents.SHOVEL_FLATTEN, SoundSource.BLOCKS, 1.0f, 1.0f);
             } else {
                 result = state.getToolModifiedState(context, ItemAbilities.SHOVEL_DOUSE, false);
-                if (result != null && !level.isClientSide) {
+                if (result != null && !level.isClientSide()) {
                     level.levelEvent(null, LevelEvent.SOUND_EXTINGUISH_FIRE, pos, 0);
                 }
             }
@@ -83,7 +83,7 @@ public class LazuritePaxelItem extends net.minecraft.world.item.Item {
             return InteractionResult.PASS;
         }
 
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             ItemStack stack = context.getItemInHand();
             if (player instanceof ServerPlayer serverPlayer) {
                 CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, pos, stack);
@@ -91,7 +91,12 @@ public class LazuritePaxelItem extends net.minecraft.world.item.Item {
             level.setBlock(pos, result, Block.UPDATE_ALL_IMMEDIATE);
             level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(player, result));
             if (player != null) {
-                stack.hurtAndBreak(1, player, LivingEntity.getSlotForHand(context.getHand()));
+                stack.hurtAndBreak(
+                        1,
+                        player,
+                        context.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND
+                                ? EquipmentSlot.MAINHAND
+                                : EquipmentSlot.OFFHAND);
             }
         }
         return InteractionResult.SUCCESS;

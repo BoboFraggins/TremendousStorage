@@ -12,7 +12,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -62,8 +61,8 @@ public class EnderBackpackCraftingRecipe extends AbstractEnderCraftingRecipe {
         }
 
         // Copy or create block_entity_data (for when the ender backpack is placed as a block)
-        CustomData existing = base.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
+        var existing = base.get(DataComponents.BLOCK_ENTITY_DATA);
+        CompoundTag tag = existing != null ? existing.getUnsafe() : new CompoundTag();
         // If no block_entity_data but BackpackContents is present, seed it
         if (existing == null && contents != null) {
             tag.putString("Tier", contents.tier().getId());

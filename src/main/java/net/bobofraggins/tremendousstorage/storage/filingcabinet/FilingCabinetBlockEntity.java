@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.filingcabinet;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.util.PullerUtil;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBFS;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
@@ -107,7 +107,7 @@ public class FilingCabinetBlockEntity extends BlockEntity
         }
 
         @Override
-        protected boolean isOwnContainer(Player player) {
+        public boolean isOwnContainer(Player player) {
             return player.containerMenu instanceof FilingCabinetMenu m
                     && m.getPos().equals(worldPosition);
         }
@@ -115,7 +115,7 @@ public class FilingCabinetBlockEntity extends BlockEntity
 
     public void startOpen(Player player) {
         if (!isRemoved() && !player.isSpectator()) {
-            openersCounter.incrementOpeners(player, getLevel(), getBlockPos(), getBlockState());
+            openersCounter.incrementOpeners(player, getLevel(), getBlockPos(), getBlockState(), 64.0);
         }
     }
 
@@ -174,7 +174,7 @@ public class FilingCabinetBlockEntity extends BlockEntity
     }
 
     public FilingCabinetBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.FILING_CABINET_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("filing_cabinet"), pos, state);
     }
 
     // -------------------------------------------------------------------------

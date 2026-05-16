@@ -210,12 +210,14 @@ public class BackpackMenu extends AbstractContainerMenu {
             Player player,
             CraftingContainer craftSlots,
             ResultContainer resultSlots) {
-        if (level.isClientSide) return;
+        if (level.isClientSide()) return;
         CraftingInput input = craftSlots.asCraftInput();
         ServerPlayer sp = (ServerPlayer) player;
         ItemStack result = ItemStack.EMPTY;
-        Optional<RecipeHolder<CraftingRecipe>> optional =
-                level.getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
+        Optional<RecipeHolder<CraftingRecipe>> optional = ((net.minecraft.server.level.ServerLevel) level)
+                .getServer()
+                .getRecipeManager()
+                .getRecipeFor(RecipeType.CRAFTING, input, level);
         if (optional.isPresent()) {
             RecipeHolder<CraftingRecipe> holder = optional.get();
             if (resultSlots.setRecipeUsed(sp, holder)) {

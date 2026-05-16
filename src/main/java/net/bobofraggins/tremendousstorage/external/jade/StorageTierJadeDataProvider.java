@@ -9,7 +9,7 @@ import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterf
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubBlockEntity;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IServerDataProvider;
@@ -21,10 +21,10 @@ import snownee.jade.api.IServerDataProvider;
 public enum StorageTierJadeDataProvider implements IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
-    static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath("tremendousstorage", "storage_tier");
+    static final Identifier UID = Identifier.fromNamespaceAndPath("tremendousstorage", "storage_tier");
 
     @Override
-    public ResourceLocation getUid() {
+    public Identifier getUid() {
         return UID;
     }
 

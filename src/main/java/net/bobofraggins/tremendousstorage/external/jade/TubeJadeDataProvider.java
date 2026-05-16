@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.external.jade;
 
 import net.bobofraggins.tremendousstorage.storage.tube.TubeBlockEntity;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IServerDataProvider;
 
@@ -13,10 +13,10 @@ import snownee.jade.api.IServerDataProvider;
 public enum TubeJadeDataProvider implements IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
-    static final ResourceLocation UID = ResourceLocation.fromNamespaceAndPath("tremendousstorage", "tube");
+    static final Identifier UID = Identifier.fromNamespaceAndPath("tremendousstorage", "tube");
 
     @Override
-    public ResourceLocation getUid() {
+    public Identifier getUid() {
         return UID;
     }
 

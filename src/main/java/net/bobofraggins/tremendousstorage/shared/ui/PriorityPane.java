@@ -7,7 +7,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Dialog pane that renders a priority control (▼ / ▲ buttons and current priority label).
@@ -27,18 +27,18 @@ public class PriorityPane implements IDialogPane {
     /** Total width of [▼][gap][label][gap][▲] row. */
     private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W; // 92
 
-    private static final ResourceLocation BTN_LEFT =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left.png");
-    private static final ResourceLocation BTN_LEFT_FOCUSED =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left_focused.png");
-    private static final ResourceLocation BTN_LEFT_DISABLED =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left_disabled.png");
-    private static final ResourceLocation BTN_RIGHT =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right.png");
-    private static final ResourceLocation BTN_RIGHT_FOCUSED =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right_focused.png");
-    private static final ResourceLocation BTN_RIGHT_DISABLED =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right_disabled.png");
+    private static final Identifier BTN_LEFT =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left.png");
+    private static final Identifier BTN_LEFT_FOCUSED =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left_focused.png");
+    private static final Identifier BTN_LEFT_DISABLED =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left_disabled.png");
+    private static final Identifier BTN_RIGHT =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right.png");
+    private static final Identifier BTN_RIGHT_FOCUSED =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right_focused.png");
+    private static final Identifier BTN_RIGHT_DISABLED =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right_disabled.png");
 
     private final IntSupplier priorityGetter;
     private final IntConsumer prioritySetter;
@@ -78,10 +78,10 @@ public class PriorityPane implements IDialogPane {
 
         boolean canDown = selected > 0;
         boolean canUp = selected < Priority.VALUES.length - 1;
-        ResourceLocation downTex = !canDown
+        Identifier downTex = !canDown
                 ? BTN_LEFT_DISABLED
                 : (isInButton(localMouseX, localMouseY, downBtnX) ? BTN_LEFT_FOCUSED : BTN_LEFT);
-        ResourceLocation upTex = !canUp
+        Identifier upTex = !canUp
                 ? BTN_RIGHT_DISABLED
                 : (isInButton(localMouseX, localMouseY, upBtnX) ? BTN_RIGHT_FOCUSED : BTN_RIGHT);
         graphics.blit(RenderPipelines.GUI_TEXTURED, downTex, downBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);

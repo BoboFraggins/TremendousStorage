@@ -6,7 +6,7 @@ import net.bobofraggins.tremendousstorage.storage.tubeattachments.AttachmentType
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -26,7 +26,7 @@ public enum TubeJadeComponentProvider implements IComponentProvider<BlockAccesso
     INSTANCE;
 
     @Override
-    public ResourceLocation getUid() {
+    public Identifier getUid() {
         return TubeJadeDataProvider.UID;
     }
 

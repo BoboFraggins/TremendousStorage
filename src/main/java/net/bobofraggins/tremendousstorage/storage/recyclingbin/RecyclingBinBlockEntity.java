@@ -1,12 +1,12 @@
 package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
+import net.bobofraggins.tremendousstorage.shared.util.LegacyFluidHandlerWrapper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -20,7 +20,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
@@ -30,7 +30,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 
 public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider {
 
@@ -137,17 +137,15 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
         super.collectImplicitComponents(components);
         net.minecraft.nbt.CompoundTag tag = new net.minecraft.nbt.CompoundTag();
         tag.putInt("Vibes", vibesAmount);
-        var typeId = BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(getType());
-        if (typeId != null) tag.putString("id", typeId.toString());
-        components.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(tag));
+        components.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(getType(), tag));
     }
 
     @Override
     protected void applyImplicitComponents(DataComponentGetter input) {
         super.applyImplicitComponents(input);
-        CustomData data = input.get(DataComponents.BLOCK_ENTITY_DATA);
+        var data = input.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data != null) {
-            net.minecraft.nbt.CompoundTag tag = data.copyTag();
+            net.minecraft.nbt.CompoundTag tag = data.getUnsafe();
             if (tag.contains("Vibes")) vibesAmount = tag.getIntOr("Vibes", 0);
         }
     }
@@ -197,7 +195,7 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
         }
 
         @Override
-        protected boolean isOwnContainer(Player player) {
+        public boolean isOwnContainer(Player player) {
             return player.containerMenu instanceof RecyclingBinMenu m
                     && m.getPos().equals(worldPosition);
         }
@@ -205,7 +203,7 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
 
     public void startOpen(Player player) {
         if (!isRemoved() && !player.isSpectator()) {
-            openersCounter.incrementOpeners(player, getLevel(), getBlockPos(), getBlockState());
+            openersCounter.incrementOpeners(player, getLevel(), getBlockPos(), getBlockState(), 64.0);
         }
     }
 
@@ -246,22 +244,25 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
         if (input.isEmpty()) return;
         if (!transferContainer.getItem(1).isEmpty()) return; // output slot occupied
 
-        IFluidHandlerItem handler = input.copy().getCapability(Capabilities.FluidHandler.ITEM);
-        if (handler == null) return;
+        ItemStack inputCopy = input.copy();
+        var rawCap = inputCopy.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(inputCopy));
+        if (!(rawCap instanceof LegacyFluidHandlerWrapper cap)) return;
+        IFluidHandler handler = IFluidHandler.of(cap);
 
         FluidStack contained = handler.getFluidInTank(0);
-        FluidStack vibesFluid = new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), 1);
+        FluidStack vibesFluid = new FluidStack(BETypeHelper.getFluid("positive_vibes"), 1);
 
         if (!contained.isEmpty()) {
             // Item has fluid → insert Positive Vibes into the recycling bin
-            if (contained.getFluid() != Registration.POSITIVE_VIBES_SOURCE.get()) return; // wrong fluid
+            if (contained.getFluid() != BETypeHelper.getFluid("positive_vibes")) return; // wrong fluid
             int amt = contained.getAmount();
             int space = FLUID_CAPACITY_MB - vibesAmount;
             if (space < amt) return; // hold until there is room for the full amount
             handler.drain(amt, IFluidHandler.FluidAction.EXECUTE);
             addVibes(amt);
+            ItemStack modified = cap.getContainer();
             transferContainer.setItem(0, ItemStack.EMPTY);
-            transferContainer.setItem(1, handler.getContainer());
+            transferContainer.setItem(1, modified != null ? modified : ItemStack.EMPTY);
         } else {
             // Item is empty → fill it with Positive Vibes from the recycling bin
             if (vibesAmount == 0) return;
@@ -271,10 +272,11 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
             if (vibesAmount < canFill) return;
             extractVibes(canFill, false);
             handler.fill(
-                    new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), canFill),
+                    new FluidStack(BETypeHelper.getFluid("positive_vibes"), canFill),
                     IFluidHandler.FluidAction.EXECUTE);
+            ItemStack modified = cap.getContainer();
             transferContainer.setItem(0, ItemStack.EMPTY);
-            transferContainer.setItem(1, handler.getContainer());
+            transferContainer.setItem(1, modified != null ? modified : ItemStack.EMPTY);
         }
     }
 
@@ -292,7 +294,7 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
     // -------------------------------------------------------------------------
 
     public RecyclingBinBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.RECYCLING_BIN_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("recycling_bin"), pos, state);
         transferContainer.addListener(c -> setChanged());
     }
 

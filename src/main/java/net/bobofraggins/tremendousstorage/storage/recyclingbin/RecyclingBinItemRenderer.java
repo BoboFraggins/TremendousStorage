@@ -1,26 +1,31 @@
 package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.serialization.MapCodec;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.function.Consumer;
+import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 public class RecyclingBinItemRenderer implements SpecialModelRenderer<Integer> {
 
@@ -30,52 +35,77 @@ public class RecyclingBinItemRenderer implements SpecialModelRenderer<Integer> {
     };
 
     @Override
-    public void getExtents(Set<Vector3f> output) {}
+    public void getExtents(Consumer<Vector3fc> output) {}
 
     @Override
     @Nullable
     public Integer extractArgument(ItemStack stack) {
         var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (customData == null) return 0;
-        CompoundTag tag = customData.copyTag();
+        CompoundTag tag = customData.getUnsafe();
         return tag.getInt("Vibes").orElse(0);
     }
 
     @Override
-    public void render(
+    public void submit(
             @Nullable Integer vibes,
             ItemDisplayContext displayContext,
             PoseStack poseStack,
-            MultiBufferSource bufferSource,
+            SubmitNodeCollector collector,
             int packedLight,
             int packedOverlay,
-            boolean hasFoil) {
+            boolean hasFoil,
+            int tint) {
         Minecraft mc = Minecraft.getInstance();
-        VertexConsumer solidConsumer = bufferSource.getBuffer(RenderType.solid());
-        var random = net.minecraft.util.RandomSource.create();
+        var random = RandomSource.create();
 
         for (StandaloneModelKey<BlockStateModel> key : PART_MODELS) {
             BlockStateModel model = mc.getModelManager().getStandaloneModel(key);
             List<BlockModelPart> parts = new ArrayList<>();
             random.setSeed(42L);
             model.collectParts(random, parts);
-            for (BlockModelPart part : parts) {
-                for (Direction dir : Direction.values()) {
-                    for (var quad : part.getQuads(dir)) {
-                        solidConsumer.putBulkData(poseStack.last(), quad, 1f, 1f, 1f, 1f, packedLight, packedOverlay);
+            final List<BlockModelPart> fparts = parts;
+            collector.submitCustomGeometry(poseStack, Sheets.cutoutBlockSheet(), (pose, vc) -> {
+                for (BlockModelPart part : fparts) {
+                    for (Direction dir : Direction.values()) {
+                        for (var quad : part.getQuads(dir)) {
+                            vc.putBulkData(pose, quad, 1f, 1f, 1f, 1f, packedLight, packedOverlay);
+                        }
+                    }
+                    for (var quad : part.getQuads(null)) {
+                        vc.putBulkData(pose, quad, 1f, 1f, 1f, 1f, packedLight, packedOverlay);
                     }
                 }
-                for (var quad : part.getQuads(null)) {
-                    solidConsumer.putBulkData(poseStack.last(), quad, 1f, 1f, 1f, 1f, packedLight, packedOverlay);
-                }
-            }
+            });
         }
 
         if (vibes == null || vibes <= 0) return;
 
         float fillFraction = (float) vibes / RecyclingBinBlockEntity.FLUID_CAPACITY_MB;
-        RecyclingBinRenderer.renderFluid(
-                poseStack.last().pose(), bufferSource, fillFraction, packedLight, packedOverlay);
+        float fill = Math.max(0.01f, fillFraction);
+        float fillTop = RecyclingBinRenderer.FLUID_FLOOR + fill * RecyclingBinRenderer.FLUID_H;
+
+        IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(Registration.POSITIVE_VIBES_TYPE.get());
+        TextureAtlasSprite sprite = mc.getAtlasManager()
+                .getAtlasOrThrow(TextureAtlas.LOCATION_BLOCKS)
+                .getSprite(ext.getStillTexture());
+        int fluidTint = ext.getTintColor();
+        int fr = (fluidTint >> 16) & 0xFF;
+        int fg = (fluidTint >> 8) & 0xFF;
+        int fb = fluidTint & 0xFF;
+        int fa = (fluidTint >> 24) & 0xFF;
+        if (fa == 0) fa = 77;
+        int fluidLight =
+                Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
+        float uL = sprite.getU0(), uR = sprite.getU1();
+        float vT = sprite.getV0(), vB = Mth.lerp(fill, sprite.getV0(), sprite.getV1());
+
+        final int ffrF = fr, ffgF = fg, ffbF = fb, ffaF = fa, flF = fluidLight, ovF = packedOverlay;
+        collector.submitCustomGeometry(
+                poseStack,
+                Sheets.translucentItemSheet(),
+                (pose, vc) -> RecyclingBinRenderer.renderFluidGeometry(
+                        vc, pose.pose(), ffrF, ffgF, ffbF, ffaF, flF, ovF, uL, uR, vT, vB, fillTop));
     }
 
     public record Unbaked() implements SpecialModelRenderer.Unbaked {
@@ -83,7 +113,7 @@ public class RecyclingBinItemRenderer implements SpecialModelRenderer<Integer> {
 
         @Override
         @Nullable
-        public SpecialModelRenderer<?> bake(EntityModelSet modelSet) {
+        public SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context) {
             return new RecyclingBinItemRenderer();
         }
 

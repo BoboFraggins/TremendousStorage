@@ -9,7 +9,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.block.Block;
 
@@ -50,9 +49,9 @@ public class EnderTankItem extends TankItem {
     }
 
     private static long linkIdFromStack(ItemStack stack) {
-        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return -1L;
-        CompoundTag tag = data.copyTag();
+        CompoundTag tag = data.getUnsafe();
         return tag.getLongOr(EnderTankBlockEntity.TAG_LINK_ID, -1L);
     }
 }

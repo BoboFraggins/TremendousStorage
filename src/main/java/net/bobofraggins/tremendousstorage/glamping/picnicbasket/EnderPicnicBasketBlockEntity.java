@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
@@ -40,7 +40,7 @@ public class EnderPicnicBasketBlockEntity extends EnderChestBlockEntity {
     }
 
     public EnderPicnicBasketBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.ENDER_PICNIC_BASKET_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("ender_picnic_basket"), pos, state);
         setPriority(Priority.HIGH);
     }
 
@@ -70,7 +70,7 @@ public class EnderPicnicBasketBlockEntity extends EnderChestBlockEntity {
     protected void loadFromStorage() {
         long linkId = getLinkId();
         if (linkId == -1L || level == null || level.isClientSide()) return;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         if (server == null) return;
         EnderPicnicBasketStorage storage = EnderPicnicBasketStorage.get(server);
         if (storage.hasLink(linkId)) {
@@ -85,7 +85,7 @@ public class EnderPicnicBasketBlockEntity extends EnderChestBlockEntity {
     protected void syncToStorage() {
         long linkId = getLinkId();
         if (linkId == -1L || level == null || level.isClientSide()) return;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         if (server == null) return;
         EnderPicnicBasketStorage storage = EnderPicnicBasketStorage.get(server);
         storage.setTypes(linkId, saveTypes(level.registryAccess()));
@@ -96,7 +96,7 @@ public class EnderPicnicBasketBlockEntity extends EnderChestBlockEntity {
     protected long getStorageVersion() {
         long linkId = getLinkId();
         if (linkId == -1L || level == null || level.isClientSide()) return lastKnownVersion;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         return server == null
                 ? lastKnownVersion
                 : EnderPicnicBasketStorage.get(server).getVersion(linkId);

@@ -4,7 +4,7 @@ import java.util.List;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Animated slide-out config panel that appears to the left of the main dialog.
@@ -33,23 +33,23 @@ public class ConfigDrawer {
     private static final int SIDE_PAD = 12;
     private static final int COLOR_BODY = 0xFFC6C6C6;
 
-    private static final ResourceLocation BUTTON_NORMAL =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config");
+    private static final Identifier BUTTON_NORMAL =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "widget/button_config");
 
-    private static final ResourceLocation BUTTON_HOVER =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "widget/button_config_focused");
+    private static final Identifier BUTTON_HOVER =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "widget/button_config_focused");
 
     // 9-slice textures shared with Dialog (left/top/bottom only — right side abuts the dialog)
-    private static final ResourceLocation TEX_CORNER_TL =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_tl.png");
-    private static final ResourceLocation TEX_CORNER_BL =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_bl.png");
-    private static final ResourceLocation TEX_EDGE_TOP =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_top.png");
-    private static final ResourceLocation TEX_EDGE_BOTTOM =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_bottom.png");
-    private static final ResourceLocation TEX_EDGE_LEFT =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_left.png");
+    private static final Identifier TEX_CORNER_TL =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_tl.png");
+    private static final Identifier TEX_CORNER_BL =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_bl.png");
+    private static final Identifier TEX_EDGE_TOP =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_top.png");
+    private static final Identifier TEX_EDGE_BOTTOM =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_bottom.png");
+    private static final Identifier TEX_EDGE_LEFT =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_left.png");
 
     private final List<IDialogPane> panes;
     private final int[] paneYOffsets;

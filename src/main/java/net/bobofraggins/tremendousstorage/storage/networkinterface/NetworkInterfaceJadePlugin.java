@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.networkinterface;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
 import snownee.jade.api.ITooltip;
@@ -20,8 +20,8 @@ import snownee.jade.api.config.IPluginConfig;
 @WailaPlugin
 public class NetworkInterfaceJadePlugin implements IWailaPlugin {
 
-    static final ResourceLocation NI_PROVIDER =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "network_interface_status");
+    static final Identifier NI_PROVIDER =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "network_interface_status");
 
     @Override
     public void register(IWailaCommonRegistration registration) {
@@ -45,7 +45,7 @@ public class NetworkInterfaceJadePlugin implements IWailaPlugin {
         }
 
         @Override
-        public ResourceLocation getUid() {
+        public Identifier getUid() {
             return NI_PROVIDER;
         }
 

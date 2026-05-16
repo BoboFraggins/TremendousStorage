@@ -2,18 +2,18 @@ package net.bobofraggins.tremendousstorage.glamping;
 
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
 public class GlampingDimension {
 
     public static final ResourceKey<Level> KEY = ResourceKey.create(
-            Registries.DIMENSION, ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "glamping"));
+            Registries.DIMENSION, Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "glamping"));
 
     public static final ResourceKey<DimensionType> TYPE_KEY = ResourceKey.create(
-            Registries.DIMENSION_TYPE, ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "glamping"));
+            Registries.DIMENSION_TYPE, Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "glamping"));
 
     /** Each portal carves a 16x16x16 space for a camp. */
     public static final int CAMP_SIZE = 16;

@@ -4,7 +4,7 @@
 // import me.shedaniel.rei.plugin.common.displays.crafting.DefaultCraftingDisplay;
 // import net.bobofraggins.tremendousstorage.shared.network.SatFillCraftingGridPacket;
 // import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
-// import net.minecraft.resources.ResourceLocation;
+// import net.minecraft.resources.Identifier;
 // import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 // /**
@@ -35,8 +35,8 @@
 //             return Result.createNotApplicable();
 //         }
 
-//         // Get the recipe's ResourceLocation directly from the display.
-//         ResourceLocation recipeId = display.getDisplayLocation().orElse(null);
+//         // Get the recipe's Identifier directly from the display.
+//         Identifier recipeId = display.getDisplayLocation().orElse(null);
 
 //         if (recipeId == null) return Result.createNotApplicable();
 

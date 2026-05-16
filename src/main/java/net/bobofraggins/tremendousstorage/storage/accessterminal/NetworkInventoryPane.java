@@ -18,12 +18,11 @@ import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
@@ -44,13 +43,12 @@ import net.neoforged.neoforge.fluids.FluidUtil;
  */
 public class NetworkInventoryPane implements IDialogPane {
 
-    private static final ResourceLocation BG_TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/gui/container/generic_54.png");
+    private static final Identifier BG_TEXTURE =
+            Identifier.withDefaultNamespace("textures/gui/container/generic_54.png");
 
-    private static final ResourceLocation SCROLLER =
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller");
-    private static final ResourceLocation SCROLLER_DISABLED =
-            ResourceLocation.withDefaultNamespace("container/creative_inventory/scroller_disabled");
+    private static final Identifier SCROLLER = Identifier.withDefaultNamespace("container/creative_inventory/scroller");
+    private static final Identifier SCROLLER_DISABLED =
+            Identifier.withDefaultNamespace("container/creative_inventory/scroller_disabled");
 
     // Pane-local coordinates derived from AccessTerminalLayout
     /** Local Y of the grid top edge (= NETWORK_Y - TITLE_H = 1). */
@@ -170,7 +168,12 @@ public class NetworkInventoryPane implements IDialogPane {
                     // Middle-click: extract exactly one item to cursor
                     ClientPacketDistributor.sendToServer(
                             new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), 1, true));
-                } else if (Screen.hasShiftDown()) {
+                } else if (com.mojang.blaze3d.platform.InputConstants.isKeyDown(
+                                net.minecraft.client.Minecraft.getInstance().getWindow(),
+                                com.mojang.blaze3d.platform.InputConstants.KEY_LSHIFT)
+                        || com.mojang.blaze3d.platform.InputConstants.isKeyDown(
+                                net.minecraft.client.Minecraft.getInstance().getWindow(),
+                                com.mojang.blaze3d.platform.InputConstants.KEY_RSHIFT)) {
                     int amount = (int) Math.min(totalCount, maxStack);
                     ClientPacketDistributor.sendToServer(
                             new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, false));
@@ -204,10 +207,15 @@ public class NetworkInventoryPane implements IDialogPane {
             return true;
         }
         if (button == 0
-                && Screen.hasShiftDown()
-                && hasContents
-                && menu.hasNetwork()
-                && menu.getCarried().isEmpty()) {
+                        && com.mojang.blaze3d.platform.InputConstants.isKeyDown(
+                                net.minecraft.client.Minecraft.getInstance().getWindow(),
+                                com.mojang.blaze3d.platform.InputConstants.KEY_LSHIFT)
+                || com.mojang.blaze3d.platform.InputConstants.isKeyDown(
+                                net.minecraft.client.Minecraft.getInstance().getWindow(),
+                                com.mojang.blaze3d.platform.InputConstants.KEY_RSHIFT)
+                        && hasContents
+                        && menu.hasNetwork()
+                        && menu.getCarried().isEmpty()) {
             if (isInGrid(localX, localY)) {
                 int col = (int) ((localX - GRID_X) / AccessTerminalLayout.SLOT_SIZE);
                 int row = (int) ((localY - gridStartY()) / AccessTerminalLayout.SLOT_SIZE);
@@ -427,7 +435,7 @@ public class NetworkInventoryPane implements IDialogPane {
     }
 
     private static String modId(ItemStack stack) {
-        ResourceLocation key = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        Identifier key = BuiltInRegistries.ITEM.getKey(stack.getItem());
         return key != null ? key.getNamespace() : "";
     }
 
@@ -556,10 +564,10 @@ public class NetworkInventoryPane implements IDialogPane {
         }
         FluidStack fluid = fluidOpt.get();
         IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fluid.getFluid());
-        ResourceLocation stillTex = ext.getStillTexture(fluid);
+        Identifier stillTex = ext.getStillTexture(fluid);
         TextureAtlasSprite sprite = Minecraft.getInstance()
-                .getModelManager()
-                .getAtlas(TextureAtlas.LOCATION_BLOCKS)
+                .getAtlasManager()
+                .getAtlasOrThrow(TextureAtlas.LOCATION_BLOCKS)
                 .getSprite(stillTex);
         int tint = ext.getTintColor(fluid);
         int r = (tint >> 16) & 0xFF;

@@ -122,7 +122,7 @@ public class AccessTerminalBlock extends BaseEntityBlock implements NetworkConne
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : (lvl, pos, st, be) -> ((AccessTerminalBlockEntity) be).serverTick();
+        return level.isClientSide() ? null : (lvl, pos, st, be) -> ((AccessTerminalBlockEntity) be).serverTick();
     }
 
     @Override

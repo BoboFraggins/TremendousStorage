@@ -9,7 +9,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -30,7 +30,7 @@ public record SatContentsPacket(List<ItemStack> stacks, List<Long> counts, Set<I
         implements CustomPacketPayload {
 
     public static final Type<SatContentsPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "sat_contents"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "sat_contents"));
 
     private static final StreamCodec<RegistryFriendlyByteBuf, List<Long>> LONG_LIST_CODEC = StreamCodec.of(
             (buf, list) -> {

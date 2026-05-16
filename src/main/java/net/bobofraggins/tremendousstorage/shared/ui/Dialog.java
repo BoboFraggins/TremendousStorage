@@ -5,7 +5,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * A dialog window that stacks {@link IDialogPane} instances vertically below a title bar.
@@ -44,22 +44,22 @@ public class Dialog {
     // Corners: 5×5. Top/bottom edges: 1×5 (tile H). Left/right edges: 5×1 (tile V).
     // The interior body fill is rendered via fill() using COLOR_BODY.
 
-    private static final ResourceLocation TEX_CORNER_TL =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_tl.png");
-    private static final ResourceLocation TEX_CORNER_TR =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_tr.png");
-    private static final ResourceLocation TEX_CORNER_BL =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_bl.png");
-    private static final ResourceLocation TEX_CORNER_BR =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_br.png");
-    private static final ResourceLocation TEX_EDGE_TOP =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_top.png");
-    private static final ResourceLocation TEX_EDGE_BOTTOM =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_bottom.png");
-    private static final ResourceLocation TEX_EDGE_LEFT =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_left.png");
-    private static final ResourceLocation TEX_EDGE_RIGHT =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_right.png");
+    private static final Identifier TEX_CORNER_TL =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_tl.png");
+    private static final Identifier TEX_CORNER_TR =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_tr.png");
+    private static final Identifier TEX_CORNER_BL =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_bl.png");
+    private static final Identifier TEX_CORNER_BR =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_corner_br.png");
+    private static final Identifier TEX_EDGE_TOP =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_top.png");
+    private static final Identifier TEX_EDGE_BOTTOM =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_bottom.png");
+    private static final Identifier TEX_EDGE_LEFT =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_left.png");
+    private static final Identifier TEX_EDGE_RIGHT =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/dialog_edge_right.png");
 
     /** Height of the title bar area; panes are positioned below this. */
     public static final int TITLE_H = 17;

@@ -5,7 +5,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * A 16×16 icon button that shows a normal sprite at rest and a pressed sprite while the mouse
@@ -13,13 +13,13 @@ import net.minecraft.resources.ResourceLocation;
  */
 public class PressableIconButton extends AbstractWidget {
 
-    private final ResourceLocation normalSprite;
-    private final ResourceLocation pressedSprite;
+    private final Identifier normalSprite;
+    private final Identifier pressedSprite;
     private final Runnable onPress;
     private boolean pressing = false;
 
     public PressableIconButton(
-            int x, int y, int width, int height, ResourceLocation normal, ResourceLocation pressed, Runnable onPress) {
+            int x, int y, int width, int height, Identifier normal, Identifier pressed, Runnable onPress) {
         super(x, y, width, height, Component.empty());
         this.normalSprite = normal;
         this.pressedSprite = pressed;
@@ -33,7 +33,11 @@ public class PressableIconButton extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean consumed) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.button();
+
         if (button == 0 && isActive() && isMouseOver(mouseX, mouseY)) {
             pressing = true;
             onPress.run();
@@ -43,9 +47,13 @@ public class PressableIconButton extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.button();
+
         if (button == 0) pressing = false;
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(event);
     }
 
     @Override

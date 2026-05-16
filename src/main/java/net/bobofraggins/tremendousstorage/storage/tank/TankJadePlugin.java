@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 import net.bobofraggins.tremendousstorage.shared.util.CountFormat;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.fluids.FluidStack;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
@@ -22,7 +22,7 @@ import snownee.jade.api.config.IPluginConfig;
 @WailaPlugin
 public class TankJadePlugin implements IWailaPlugin {
 
-    static final ResourceLocation TANK_PROVIDER = ResourceLocation.fromNamespaceAndPath("tremendousstorage", "tank");
+    static final Identifier TANK_PROVIDER = Identifier.fromNamespaceAndPath("tremendousstorage", "tank");
 
     @Override
     public void register(IWailaCommonRegistration registration) {
@@ -53,7 +53,7 @@ public class TankJadePlugin implements IWailaPlugin {
         }
 
         @Override
-        public ResourceLocation getUid() {
+        public Identifier getUid() {
             return TANK_PROVIDER;
         }
 

@@ -44,7 +44,11 @@ public class CycleArrowButton extends AbstractWidget {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean consumed) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.button();
+
         if (button == 0 && isActive() && isMouseOver(mouseX, mouseY)) {
             onPress.run();
             return true;

@@ -77,9 +77,13 @@ public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
     }
 
     @Override
-    public boolean mouseClicked(double mx, double my, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean consumed) {
+        double mx = event.x();
+        double my = event.y();
+        int button = event.button();
+
         if (configDrawer.mouseClicked(mx, my, button)) return true;
         if (dialog.mouseClicked(mx, my, button)) return true;
-        return super.mouseClicked(mx, my, button);
+        return super.mouseClicked(event, consumed);
     }
 }

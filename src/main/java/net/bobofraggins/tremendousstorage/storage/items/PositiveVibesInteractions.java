@@ -38,7 +38,7 @@ public final class PositiveVibesInteractions {
         CauldronInteraction.EMPTY
                 .map()
                 .put(Registration.POSITIVE_VIBES_BUCKET.get(), (state, level, pos, player, hand, stack) -> {
-                    if (!level.isClientSide) {
+                    if (!level.isClientSide()) {
                         stack.shrink(1);
                         player.addItem(new ItemStack(Items.BUCKET));
                         level.setBlockAndUpdate(
@@ -50,7 +50,7 @@ public final class PositiveVibesInteractions {
 
         // 2. Positive Vibes cauldron + empty bucket → Positive Vibes Bucket
         CAULDRON_INTERACTIONS.map().put(Items.BUCKET, (state, level, pos, player, hand, stack) -> {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 stack.shrink(1);
                 player.addItem(new ItemStack(Registration.POSITIVE_VIBES_BUCKET.get()));
                 level.setBlockAndUpdate(pos, Blocks.CAULDRON.defaultBlockState());
@@ -61,7 +61,7 @@ public final class PositiveVibesInteractions {
 
         // 3. Positive Vibes cauldron + Zombie Brain → Brain in hand, cauldron emptied
         CAULDRON_INTERACTIONS.map().put(Registration.ZOMBIE_BRAIN.get(), (state, level, pos, player, hand, stack) -> {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 stack.shrink(1);
                 player.setItemInHand(hand, new ItemStack(Registration.BRAIN.get()));
                 level.setBlockAndUpdate(pos, Blocks.CAULDRON.defaultBlockState());

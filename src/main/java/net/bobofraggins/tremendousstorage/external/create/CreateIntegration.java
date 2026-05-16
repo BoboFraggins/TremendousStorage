@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.external.create;
 
 import com.simibubi.create.api.registry.CreateRegistries;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.RegisterEvent;
 
@@ -28,7 +28,7 @@ public final class CreateIntegration {
     private static void onRegister(RegisterEvent event) {
         event.register(
                 CreateRegistries.FAN_PROCESSING_TYPE,
-                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "positive_vibes"),
+                Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "positive_vibes"),
                 PositiveVibesFanProcessingType::new);
     }
 }

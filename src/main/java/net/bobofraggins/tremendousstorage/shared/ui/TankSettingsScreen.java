@@ -7,7 +7,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
@@ -31,12 +31,12 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
  */
 public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu> {
 
-    private static final ResourceLocation GHOST_BUCKET =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/bucket.png");
-    private static final ResourceLocation GHOST_BOTTLE =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/glass_bottle.png");
-    private static final ResourceLocation GHOST_SYRINGE =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/experience_syringe.png");
+    private static final Identifier GHOST_BUCKET =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/bucket.png");
+    private static final Identifier GHOST_BOTTLE =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/glass_bottle.png");
+    private static final Identifier GHOST_SYRINGE =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/experience_syringe.png");
 
     /** Height of the settings pane (fluid slots + arrow + 5 px margin). 17 + 71 + 80 + 5 = 173 total. */
     private static final int SETTINGS_PANE_H = 71;
@@ -97,7 +97,7 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
         // Ghost item hint in input slot when empty — cycles bucket → bottle → syringe
         if (menu.getSlot(0).getItem().isEmpty()) {
             int phase = (int) ((System.currentTimeMillis() / 1500) % 3);
-            ResourceLocation ghostTex =
+            Identifier ghostTex =
                     switch (phase) {
                         case 0 -> GHOST_BUCKET;
                         case 1 -> GHOST_BOTTLE;
@@ -118,9 +118,13 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean consumed) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.button();
+
         if (configDrawer.mouseClicked(mouseX, mouseY, button)) return true;
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, consumed);
     }
 
     // -------------------------------------------------------------------------

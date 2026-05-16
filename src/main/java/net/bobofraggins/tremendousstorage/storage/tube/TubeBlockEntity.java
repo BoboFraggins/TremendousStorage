@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.tube;
 
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.AttachmentType;
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.InterfaceFilterContents;
@@ -21,6 +21,8 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /**
  * Stores the attachment state for each of the six tube faces.
@@ -103,7 +105,7 @@ public class TubeBlockEntity extends BlockEntity {
     }
 
     public TubeBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.TUBE_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("tube"), pos, state);
         for (int i = 0; i < 6; i++) {
             for (int s = 0; s < 9; s++) {
                 filterSlots[i][s] = ItemStack.EMPTY;
@@ -151,8 +153,9 @@ public class TubeBlockEntity extends BlockEntity {
 
                 Direction dir = Direction.values()[i];
                 BlockPos neighborPos = pos.relative(dir);
-                IItemHandler neighbor =
-                        level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, dir.getOpposite());
+                ResourceHandler<ItemResource> neighborCap =
+                        level.getCapability(Capabilities.Item.BLOCK, neighborPos, dir.getOpposite());
+                IItemHandler neighbor = neighborCap != null ? IItemHandler.of(neighborCap) : null;
                 if (neighbor == null) continue;
 
                 NetworkItemHandler network = be.getNetworkView();

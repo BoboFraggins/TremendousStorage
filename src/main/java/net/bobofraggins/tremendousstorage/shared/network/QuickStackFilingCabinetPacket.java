@@ -8,7 +8,7 @@ import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderIte
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +28,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record QuickStackFilingCabinetPacket() implements CustomPacketPayload {
 
     public static final Type<QuickStackFilingCabinetPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "quick_stack_filing_cabinet"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "quick_stack_filing_cabinet"));
 
     public static final StreamCodec<FriendlyByteBuf, QuickStackFilingCabinetPacket> STREAM_CODEC =
             StreamCodec.of((buf, ignored) -> {}, buf -> new QuickStackFilingCabinetPacket());
@@ -53,7 +53,8 @@ public record QuickStackFilingCabinetPacket() implements CustomPacketPayload {
 
                 boolean isEnder = folderItem.getItem() instanceof EnderFolderItem;
                 FolderContents contents = isEnder
-                        ? EnderFolderItem.getLiveContents(folderItem, player.getServer())
+                        ? EnderFolderItem.getLiveContents(
+                                folderItem, ((net.minecraft.server.level.ServerLevel) player.level()).getServer())
                         : ManillaFolderItem.getContents(folderItem);
                 if (contents.isEmpty()) continue; // unlocked — don't start new dedications
 
@@ -81,7 +82,10 @@ public record QuickStackFilingCabinetPacket() implements CustomPacketPayload {
                 if (changed) {
                     ItemStack updatedFolder = folderItem.copy();
                     if (isEnder) {
-                        EnderFolderItem.setLiveContents(updatedFolder, contents, player.getServer());
+                        EnderFolderItem.setLiveContents(
+                                updatedFolder,
+                                contents,
+                                ((net.minecraft.server.level.ServerLevel) player.level()).getServer());
                     } else {
                         updatedFolder = ManillaFolderItem.setContents(updatedFolder, contents);
                     }

@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -29,7 +29,7 @@ public record LocalStorageInteractPacket(BlockPos pos, boolean isBulk, int typeI
         implements CustomPacketPayload {
 
     public static final Type<LocalStorageInteractPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "local_storage_interact"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "local_storage_interact"));
 
     public static final StreamCodec<FriendlyByteBuf, LocalStorageInteractPacket> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC,

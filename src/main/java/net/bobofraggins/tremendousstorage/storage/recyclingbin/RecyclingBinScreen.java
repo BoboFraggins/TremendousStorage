@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 /**
@@ -25,10 +25,10 @@ import net.minecraft.world.entity.player.Inventory;
  */
 public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu> {
 
-    private static final ResourceLocation GHOST_BUCKET =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/bucket.png");
-    private static final ResourceLocation GHOST_BOTTLE =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/glass_bottle.png");
+    private static final Identifier GHOST_BUCKET =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/bucket.png");
+    private static final Identifier GHOST_BOTTLE =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/ghost/glass_bottle.png");
 
     // Height of the content pane above the player inventory.
     // Derived from: INV_Y(90) - Dialog.TITLE_H(17) = 73.
@@ -114,7 +114,7 @@ public class RecyclingBinScreen extends AbstractContainerScreen<RecyclingBinMenu
         if (!menu.getSlot(1).getItem().isEmpty()) return;
 
         int phase = (int) ((System.currentTimeMillis() / 1500) % 2);
-        ResourceLocation ghostTex = phase == 0 ? GHOST_BUCKET : GHOST_BOTTLE;
+        Identifier ghostTex = phase == 0 ? GHOST_BUCKET : GHOST_BOTTLE;
         g.blit(RenderPipelines.GUI_TEXTURED, ghostTex, sx, sy, 0, 0, 16, 16, 16, 16);
     }
 }

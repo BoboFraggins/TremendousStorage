@@ -1,12 +1,12 @@
 package net.bobofraggins.tremendousstorage.storage.armorycabinet;
 
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
@@ -29,13 +29,13 @@ import net.minecraft.world.level.block.state.BlockState;
 public class ArmoryCabinetBlockEntity extends ChestBlockEntity {
 
     private static final TagKey<Item> TAG_TOOLS =
-            TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "tools"));
+            TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "tools"));
     private static final TagKey<Item> TAG_WEAPONS =
-            TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "weapons"));
+            TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "weapons"));
     private static final TagKey<Item> TAG_ARMOR =
-            TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "armor"));
+            TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "armor"));
     private static final TagKey<Item> TAG_ARROWS =
-            TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("minecraft", "arrows"));
+            TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("minecraft", "arrows"));
 
     // -------------------------------------------------------------------------
     // Animation state (client-side) — two-phase open/close
@@ -84,7 +84,7 @@ public class ArmoryCabinetBlockEntity extends ChestBlockEntity {
         }
 
         @Override
-        protected boolean isOwnContainer(Player player) {
+        public boolean isOwnContainer(Player player) {
             return player.containerMenu instanceof ArmoryCabinetMenu m
                     && m.getPos().equals(worldPosition);
         }
@@ -93,7 +93,7 @@ public class ArmoryCabinetBlockEntity extends ChestBlockEntity {
     @Override
     public void startOpen(Player player) {
         if (!isRemoved() && !player.isSpectator()) {
-            acOpenersCounter.incrementOpeners(player, getLevel(), getBlockPos(), getBlockState());
+            acOpenersCounter.incrementOpeners(player, getLevel(), getBlockPos(), getBlockState(), 64.0);
         }
     }
 
@@ -130,7 +130,7 @@ public class ArmoryCabinetBlockEntity extends ChestBlockEntity {
     // -------------------------------------------------------------------------
 
     public ArmoryCabinetBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.ARMORY_CABINET_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("armory_cabinet"), pos, state);
         setPriority(Priority.HIGH);
     }
 

@@ -8,7 +8,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -18,8 +18,8 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record SetStorageInterfacePriorityPacket(BlockPos pos, int faceIndex, int priority)
         implements CustomPacketPayload {
 
-    public static final Type<SetStorageInterfacePriorityPacket> TYPE = new Type<>(
-            ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "set_storage_interface_priority"));
+    public static final Type<SetStorageInterfacePriorityPacket> TYPE =
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "set_storage_interface_priority"));
 
     public static final StreamCodec<FriendlyByteBuf, SetStorageInterfacePriorityPacket> STREAM_CODEC =
             StreamCodec.composite(

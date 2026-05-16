@@ -5,7 +5,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Config drawer pane for the void-excess toggle.
@@ -22,10 +22,10 @@ public class VoidExcessPane implements IDialogPane {
     private static final int TOGGLE_W = 64;
     private static final int TOGGLE_H = 16;
 
-    private static final ResourceLocation TOGGLE_ON =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/toggle_on.png");
-    private static final ResourceLocation TOGGLE_OFF =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/toggle_off.png");
+    private static final Identifier TOGGLE_ON =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/toggle_on.png");
+    private static final Identifier TOGGLE_OFF =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/toggle_off.png");
 
     private final BooleanSupplier stateGetter;
     private final Runnable toggleAction;
@@ -52,7 +52,7 @@ public class VoidExcessPane implements IDialogPane {
         graphics.drawString(font, label, (width - font.width(label)) / 2, LABEL_Y, 0x404040, false);
 
         int toggleX = (width - TOGGLE_W) / 2;
-        ResourceLocation tex = stateGetter.getAsBoolean() ? TOGGLE_ON : TOGGLE_OFF;
+        Identifier tex = stateGetter.getAsBoolean() ? TOGGLE_ON : TOGGLE_OFF;
         graphics.blit(
                 RenderPipelines.GUI_TEXTURED, tex, toggleX, TOGGLE_Y, 0, 0, TOGGLE_W, TOGGLE_H, TOGGLE_W, TOGGLE_H);
     }

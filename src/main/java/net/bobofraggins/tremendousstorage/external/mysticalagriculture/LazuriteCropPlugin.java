@@ -8,7 +8,7 @@ import com.blakebr0.mysticalagriculture.api.crop.CropType;
 import com.blakebr0.mysticalagriculture.api.lib.LazyIngredient;
 import com.blakebr0.mysticalagriculture.api.registry.ICropRegistry;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Registers the Lazurite crop with Mystical Agriculture via its plugin system.
@@ -24,7 +24,7 @@ public class LazuriteCropPlugin implements IMysticalAgriculturePlugin {
     @Override
     public void onRegisterCrops(ICropRegistry registry) {
         Crop lazurite = new Crop(
-                ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "lazurite"),
+                Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "lazurite"),
                 CropTier.THREE,
                 CropType.RESOURCE,
                 LazyIngredient.item("tremendousstorage:lazurite_ingot"));

@@ -13,8 +13,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -105,7 +105,7 @@ public class EndCityModifier extends LootModifier {
             if (path.equals("silk_touch") && fortuneSelected) continue;
 
             ResourceKey<Enchantment> key =
-                    ResourceKey.create(Registries.ENCHANTMENT, ResourceLocation.withDefaultNamespace(path));
+                    ResourceKey.create(Registries.ENCHANTMENT, Identifier.withDefaultNamespace(path));
             lookup.get(key).ifPresent((Holder<Enchantment> holder) -> {
                 int level = 1 + rng.nextInt(entry.getValue());
                 enchants.set(holder, level);

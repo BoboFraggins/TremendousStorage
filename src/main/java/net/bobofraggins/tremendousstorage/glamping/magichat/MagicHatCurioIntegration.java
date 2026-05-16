@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.glamping.magichat;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -16,12 +16,12 @@ public class MagicHatCurioIntegration implements ICurioItem {
 
     public static final MagicHatCurioIntegration INSTANCE = new MagicHatCurioIntegration();
 
-    private static final ResourceLocation LUCK_MODIFIER_ID =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "lucky_magic_hat_luck");
+    private static final Identifier LUCK_MODIFIER_ID =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "lucky_magic_hat_luck");
 
     @Override
     public Multimap<Holder<Attribute>, AttributeModifier> getAttributeModifiers(
-            SlotContext slotContext, ResourceLocation id, ItemStack stack) {
+            SlotContext slotContext, Identifier id, ItemStack stack) {
         return ImmutableMultimap.of(
                 Attributes.LUCK, new AttributeModifier(LUCK_MODIFIER_ID, 2.0, AttributeModifier.Operation.ADD_VALUE));
     }

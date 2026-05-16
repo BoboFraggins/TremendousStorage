@@ -1,8 +1,9 @@
 package net.bobofraggins.tremendousstorage.storage.tank;
 
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsMenu;
+import net.bobofraggins.tremendousstorage.shared.util.LegacyFluidHandlerWrapper;
 import net.bobofraggins.tremendousstorage.shared.util.PullerUtil;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkListable;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiLink;
@@ -34,7 +35,9 @@ import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 
 /**
  * Stores a single fluid type. Capacity starts at {@value #BASE_CAPACITY} mB (16 buckets) at
@@ -78,7 +81,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     private static final long PULL_AMOUNT_MB = 4_000L;
 
     public TankBlockEntity(BlockPos pos, BlockState state) {
-        this(Registration.TANK_BE_TYPE.get(), pos, state);
+        this(BETypeHelper.get("tank"), pos, state);
     }
 
     protected TankBlockEntity(
@@ -125,7 +128,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     }
 
     private void syncTierBlockState(StorageTier t) {
-        if (level == null || level.isClientSide) return;
+        if (level == null || level.isClientSide()) return;
         net.minecraft.world.level.block.state.BlockState state = level.getBlockState(worldPosition);
         if (state.hasProperty(TankBlock.TIER_PROP) && state.getValue(TankBlock.TIER_PROP) != t) {
             level.setBlock(worldPosition, state.setValue(TankBlock.TIER_PROP, t), 2);
@@ -259,8 +262,9 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
             if ((pullerSides & (1 << bit)) == 0) continue;
             Direction worldDir = PullerUtil.bitToWorldDir(bit, facing);
             BlockPos adjacentPos = pos.relative(worldDir);
-            IFluidHandler handler =
-                    level.getCapability(Capabilities.FluidHandler.BLOCK, adjacentPos, worldDir.getOpposite());
+            ResourceHandler<FluidResource> fluidCap =
+                    level.getCapability(Capabilities.Fluid.BLOCK, adjacentPos, worldDir.getOpposite());
+            IFluidHandler handler = fluidCap != null ? IFluidHandler.of(fluidCap) : null;
             if (handler == null) continue;
             for (int t = 0; t < handler.getTanks(); t++) {
                 FluidStack fluid = handler.getFluidInTank(t);
@@ -285,8 +289,10 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
             if (getCapacity() - amount <= 0) break;
             ItemStack stack = entity.getItem();
             if (stack.isEmpty()) continue;
-            IFluidHandlerItem handler = stack.copy().getCapability(Capabilities.FluidHandler.ITEM);
-            if (handler == null) continue;
+            ItemStack stackCopy = stack.copy();
+            var rawFluidCap = stackCopy.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(stackCopy));
+            if (!(rawFluidCap instanceof LegacyFluidHandlerWrapper fluidWrapper)) continue;
+            IFluidHandler handler = IFluidHandler.of(fluidWrapper);
             FluidStack contained = handler.getFluidInTank(0);
             if (contained.isEmpty()) continue;
             if (!storedFluid.isEmpty() && !FluidStack.isSameFluidSameComponents(storedFluid, contained)) continue;
@@ -295,8 +301,8 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
             FluidStack drained = handler.drain(toDrain, IFluidHandler.FluidAction.EXECUTE);
             if (drained.isEmpty()) continue;
             insert(drained, drained.getAmount(), false);
-            ItemStack remainder = handler.getContainer();
-            if (remainder.isEmpty()) {
+            ItemStack remainder = fluidWrapper.getContainer();
+            if (remainder == null || remainder.isEmpty()) {
                 entity.discard();
             } else {
                 entity.setItem(remainder);
@@ -340,8 +346,10 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
         if (input.isEmpty()) return;
         if (!transferContainer.getItem(1).isEmpty()) return; // output blocked
 
-        IFluidHandlerItem handler = input.copy().getCapability(Capabilities.FluidHandler.ITEM);
-        if (handler == null) return;
+        ItemStack inputCopy = input.copy();
+        var rawCap = inputCopy.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(inputCopy));
+        if (!(rawCap instanceof LegacyFluidHandlerWrapper fluidWrapper)) return;
+        IFluidHandler handler = IFluidHandler.of(fluidWrapper);
 
         FluidStack contained = handler.getFluidInTank(0);
 
@@ -362,8 +370,9 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
             FluidStack drained = handler.drain(simDrained.getAmount(), IFluidHandler.FluidAction.EXECUTE);
             if (drained.isEmpty()) return;
             insert(drained, drained.getAmount(), false);
+            ItemStack modified = fluidWrapper.getContainer();
             transferContainer.setItem(0, ItemStack.EMPTY);
-            transferContainer.setItem(1, handler.getContainer());
+            transferContainer.setItem(1, modified != null ? modified : ItemStack.EMPTY);
         } else {
             // Item is empty → fill from tank
             if (storedFluid.isEmpty() || amount == 0) return;
@@ -374,8 +383,9 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
             if (amount < canFill) return;
             extract(canFill, false);
             handler.fill(storedFluid.copyWithAmount(canFill), IFluidHandler.FluidAction.EXECUTE);
+            ItemStack modified = fluidWrapper.getContainer();
             transferContainer.setItem(0, ItemStack.EMPTY);
-            transferContainer.setItem(1, handler.getContainer());
+            transferContainer.setItem(1, modified != null ? modified : ItemStack.EMPTY);
         }
     }
 
@@ -495,7 +505,9 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     @Override
     protected void collectImplicitComponents(DataComponentMap.Builder components) {
         super.collectImplicitComponents(components);
-        components.set(Registration.TANK_CONTENTS.get(), new TankContents(storedFluid, amount));
+        components.set(
+                BETypeHelper.<TankContents>getDataComponentType("tank_contents"),
+                new TankContents(storedFluid, amount));
     }
 
     /**
@@ -506,7 +518,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     @Override
     protected void applyImplicitComponents(DataComponentGetter input) {
         super.applyImplicitComponents(input);
-        TankContents contents = input.get(Registration.TANK_CONTENTS);
+        TankContents contents = input.get(BETypeHelper.<TankContents>getDataComponentType("tank_contents"));
         if (contents != null) {
             storedFluid = contents.storedFluid().isEmpty()
                     ? net.neoforged.neoforge.fluids.FluidStack.EMPTY

@@ -10,7 +10,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -58,7 +58,7 @@ public class BarrelItem extends TieredBlockItem {
 
         var bedData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (bedData != null) {
-            var tag = bedData.copyTag();
+            var tag = bedData.getUnsafe();
             if (tag.getBooleanOr("CompactingUpgrade", false)) {
                 List<String> names = new ArrayList<>();
                 names.add(baseName);
@@ -72,7 +72,7 @@ public class BarrelItem extends TieredBlockItem {
 
     private static void addChainName(List<String> names, String id) {
         if (id.isEmpty()) return;
-        ResourceLocation rl = ResourceLocation.tryParse(id);
+        Identifier rl = Identifier.tryParse(id);
         if (rl == null) return;
         Item item = BuiltInRegistries.ITEM.get(rl).map(h -> h.value()).orElse(null);
         if (item != null && item != Items.AIR)

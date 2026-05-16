@@ -10,7 +10,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -20,7 +20,7 @@ public record SetBackpackPriorityPacket(int slotType, int slotIndex, String slot
         implements CustomPacketPayload {
 
     public static final Type<SetBackpackPriorityPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "set_backpack_priority"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "set_backpack_priority"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SetBackpackPriorityPacket> STREAM_CODEC =
             StreamCodec.composite(

@@ -85,6 +85,10 @@ configurations {
 
 repositories {
     maven {
+        name = "ParchmentMC"
+        url = "https://ldtteam.jfrog.io/artifactory/parchmentmc-public"
+    }
+    maven {
         name = "JEI Maven"
         url = "https://maven.blamejared.com"
     }
@@ -122,9 +126,9 @@ repositories {
 }
 
 dependencies {
-    //compileOnly "maven.modrinth:jade:26.1.1+neoforge" // not yet released for 1.21.7
-    compileOnly "mezz.jei:jei-1.21.7-neoforge-api:23.1.0.8"
-    compileOnly "top.theillusivec4.curios:curios-neoforge:11.0.1+1.21.5:api"
+    //compileOnly "maven.modrinth:jade:26.1.1+neoforge" // not yet released for 1.21.11
+    compileOnly "mezz.jei:jei-1.21.11-neoforge-api:27.4.0.22"
+    compileOnly "top.theillusivec4.curios:curios-neoforge:14.0.0+1.21.11:api"
     //compileOnly "mekanism:Mekanism:1.21.1-10.7.15.81:api"
     //compileOnly "com.hollingsworth.ars_nouveau:ars_nouveau-1.21.1:5.11.2.1298"
     //compileOnly "com.blakebr0.cucumber:Cucumber:1.21.1-8.0.15"

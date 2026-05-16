@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.backpack;
 
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.minecraft.core.BlockPos;
@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public class BackpackBlockEntity extends ChestBlockEntity {
 
     public BackpackBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.TREMENDOUS_BACKPACK_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("backpack"), pos, state);
     }
 
     @Override

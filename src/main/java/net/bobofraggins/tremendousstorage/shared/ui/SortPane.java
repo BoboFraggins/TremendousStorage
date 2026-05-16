@@ -7,7 +7,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Config-drawer pane that displays the current sort mode with left/right navigation buttons.
@@ -26,14 +26,14 @@ public class SortPane implements IDialogPane {
     private static final int GAP = 2;
     private static final int ROW_W = BTN_W + GAP + LBL_W + GAP + BTN_W; // 92
 
-    private static final ResourceLocation BTN_LEFT =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left.png");
-    private static final ResourceLocation BTN_LEFT_FOCUSED =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left_focused.png");
-    private static final ResourceLocation BTN_RIGHT =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right.png");
-    private static final ResourceLocation BTN_RIGHT_FOCUSED =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right_focused.png");
+    private static final Identifier BTN_LEFT =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left.png");
+    private static final Identifier BTN_LEFT_FOCUSED =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_left_focused.png");
+    private static final Identifier BTN_RIGHT =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right.png");
+    private static final Identifier BTN_RIGHT_FOCUSED =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "textures/gui/widget/button_right_focused.png");
 
     private final Supplier<SortMode> getter;
     private final Consumer<SortMode> setter;
@@ -66,8 +66,8 @@ public class SortPane implements IDialogPane {
         Component label = Component.translatable("screen.tremendousstorage.sort_label");
         graphics.drawString(font, label, (width - font.width(label)) / 2, LABEL_Y, 0x404040, false);
 
-        ResourceLocation leftTex = isInButton(localMouseX, localMouseY, leftBtnX) ? BTN_LEFT_FOCUSED : BTN_LEFT;
-        ResourceLocation rightTex = isInButton(localMouseX, localMouseY, rightBtnX) ? BTN_RIGHT_FOCUSED : BTN_RIGHT;
+        Identifier leftTex = isInButton(localMouseX, localMouseY, leftBtnX) ? BTN_LEFT_FOCUSED : BTN_LEFT;
+        Identifier rightTex = isInButton(localMouseX, localMouseY, rightBtnX) ? BTN_RIGHT_FOCUSED : BTN_RIGHT;
         graphics.blit(RenderPipelines.GUI_TEXTURED, leftTex, leftBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
         graphics.blit(RenderPipelines.GUI_TEXTURED, rightTex, rightBtnX, ROW_Y, 0, 0, BTN_W, BTN_H, BTN_W, BTN_H);
 

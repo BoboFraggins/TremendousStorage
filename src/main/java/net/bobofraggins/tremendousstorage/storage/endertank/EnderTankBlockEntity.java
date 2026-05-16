@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.endertank;
 
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -37,7 +37,7 @@ public class EnderTankBlockEntity extends TankBlockEntity {
     private long lastKnownVersion = -1L;
 
     public EnderTankBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.ENDER_TANK_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("ender_tank"), pos, state);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class EnderTankBlockEntity extends TankBlockEntity {
     public void setTier(StorageTier tier) {
         super.setTier(tier);
         if (linkId != -1L && level != null && !level.isClientSide()) {
-            MinecraftServer server = level.getServer();
+            MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
             if (server != null) {
                 EnderTankStorage.get(server).setTier(linkId, tier);
             }
@@ -75,7 +75,7 @@ public class EnderTankBlockEntity extends TankBlockEntity {
 
     private void loadFromStorage() {
         if (linkId == -1L || level == null || level.isClientSide()) return;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         if (server == null) return;
         EnderTankStorage storage = EnderTankStorage.get(server);
         if (storage.hasLink(linkId)) {
@@ -113,7 +113,7 @@ public class EnderTankBlockEntity extends TankBlockEntity {
 
     private void syncToStorage() {
         if (linkId == -1L || level == null || level.isClientSide()) return;
-        MinecraftServer server = level.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
         if (server == null) return;
         EnderTankStorage storage = EnderTankStorage.get(server);
         storage.setState(linkId, getStoredFluid(), getAmount());
@@ -153,7 +153,7 @@ public class EnderTankBlockEntity extends TankBlockEntity {
             be.needsStorageLoad = false;
             be.loadFromStorage();
         } else if (be.linkId != -1L) {
-            MinecraftServer server = level.getServer();
+            MinecraftServer server = ((net.minecraft.server.level.ServerLevel) level).getServer();
             if (server != null) {
                 long storageVersion = EnderTankStorage.get(server).getVersion(be.linkId);
                 if (storageVersion != be.lastKnownVersion) {

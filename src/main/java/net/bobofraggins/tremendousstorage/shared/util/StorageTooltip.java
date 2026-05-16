@@ -25,7 +25,7 @@ public final class StorageTooltip {
             ItemStack stack, Consumer<Component> tooltipAdder, TooltipContext context) {
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return;
-        CompoundTag tag = data.copyTag();
+        CompoundTag tag = data.getUnsafe();
         if (!tag.contains("Types")) return;
         ListTag types = tag.getListOrEmpty("Types");
         net.minecraft.resources.RegistryOps<net.minecraft.nbt.Tag> ops =

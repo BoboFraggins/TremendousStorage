@@ -18,7 +18,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -98,10 +98,10 @@ public class PicnicBasketFeedHandler {
     // -------------------------------------------------------------------------
 
     private static void feedFromBasket(ItemStack basketStack, Player player, ServerLevel level) {
-        CustomData existing = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
+        var existing = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (existing == null) return;
 
-        CompoundTag beTag = existing.copyTag();
+        CompoundTag beTag = existing.getUnsafe();
         // Default true: feed unless explicitly disabled
         if (!beTag.getBooleanOr("AutoFeed", true)) return;
         ListTag types = beTag.getListOrEmpty("Types");
@@ -201,6 +201,6 @@ public class PicnicBasketFeedHandler {
         }
 
         beTag.put("Types", types);
-        basketStack.set(DataComponents.BLOCK_ENTITY_DATA, CustomData.of(beTag));
+        basketStack.set(DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(existing.type(), beTag));
     }
 }

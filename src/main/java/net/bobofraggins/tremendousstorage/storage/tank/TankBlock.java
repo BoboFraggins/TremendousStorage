@@ -8,7 +8,7 @@ import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -49,6 +49,8 @@ import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 
 /**
  * The Tank block — stores up to {@link TankBlockEntity#CAPACITY} mB of a single fluid type.
@@ -132,9 +134,9 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
 
     private static final int BOTTLE_MB = 250;
     private static final TagKey<Fluid> EXPERIENCE_FLUID_TAG =
-            TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath("c", "experience"));
+            TagKey.create(Registries.FLUID, Identifier.fromNamespaceAndPath("c", "experience"));
     private static final TagKey<Fluid> HONEY_FLUID_TAG =
-            TagKey.create(Registries.FLUID, ResourceLocation.fromNamespaceAndPath("c", "honey"));
+            TagKey.create(Registries.FLUID, Identifier.fromNamespaceAndPath("c", "honey"));
 
     /**
      * Right-click with a fluid container item (bucket or glass bottle) to fill/drain the tank.
@@ -244,7 +246,8 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
         }
 
         // --- Bucket / modded fluid container handling (via capability) ---
-        IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, state, null, null);
+        ResourceHandler<FluidResource> fluidCap = level.getCapability(Capabilities.Fluid.BLOCK, pos, null);
+        IFluidHandler handler = fluidCap != null ? IFluidHandler.of(fluidCap) : null;
         if (handler == null) return InteractionResult.TRY_WITH_EMPTY_HAND;
 
         // Determine sound direction before the interaction mutates the item stack.

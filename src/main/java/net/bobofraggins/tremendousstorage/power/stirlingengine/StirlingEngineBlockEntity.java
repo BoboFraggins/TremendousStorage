@@ -1,7 +1,7 @@
 package net.bobofraggins.tremendousstorage.power.stirlingengine;
 
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageConfig;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -18,6 +18,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 
 /**
  * Block entity for the Stirling Engine generator.
@@ -54,7 +55,7 @@ public class StirlingEngineBlockEntity extends BlockEntity {
     public float animationTicks = 0f;
 
     public StirlingEngineBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.STIRLING_ENGINE_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("stirling_engine"), pos, state);
     }
 
     // -------------------------------------------------------------------------
@@ -96,10 +97,10 @@ public class StirlingEngineBlockEntity extends BlockEntity {
         if (energyStored <= 0) return;
         for (Direction dir : Direction.values()) {
             BlockPos adjPos = worldPosition.relative(dir);
-            IEnergyStorage storage = level.getCapability(Capabilities.EnergyStorage.BLOCK, adjPos, dir.getOpposite());
-            if (storage == null || !storage.canReceive()) continue;
+            EnergyHandler storage = level.getCapability(Capabilities.Energy.BLOCK, adjPos, dir.getOpposite());
+            if (storage == null || storage.getCapacityAsInt() <= storage.getAmountAsInt()) continue;
             int toSend = Math.min(energyStored, (int) tier.getScaledCapacity(BASE_PUSH_PER_TICK));
-            int accepted = storage.receiveEnergy(toSend, false);
+            int accepted = IEnergyStorage.of(storage).receiveEnergy(toSend, false);
             energyStored -= accepted;
             if (energyStored <= 0) break;
         }

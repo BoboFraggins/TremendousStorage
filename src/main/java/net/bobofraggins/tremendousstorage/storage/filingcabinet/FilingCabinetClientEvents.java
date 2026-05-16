@@ -6,7 +6,7 @@ import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsScreen;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestScreen;
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.ExportInterfaceScreen;
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.ImportInterfaceScreen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
@@ -28,11 +28,11 @@ public final class FilingCabinetClientEvents {
         event.register(
                 FilingCabinetRenderer.BODY_MODEL,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_body")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_body")));
         event.register(
                 FilingCabinetRenderer.DRAWER_MODEL,
                 SimpleUnbakedStandaloneModel.blockStateModel(
-                        ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_drawer")));
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/filing_cabinet_drawer")));
     }
 
     @SubscribeEvent

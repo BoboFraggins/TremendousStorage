@@ -59,7 +59,7 @@ public class GlampingEvents {
     public static void onPlayerWakeUp(PlayerWakeUpEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         if (!player.level().dimension().equals(GlampingDimension.KEY)) return;
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) player.level()).getServer();
         if (server == null) return;
         ServerLevel overworld = server.getLevel(Level.OVERWORLD);
         if (overworld != null) {

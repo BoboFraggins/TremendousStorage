@@ -16,7 +16,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 
 /**
  * Menu for the Recycling Bin.
@@ -67,7 +70,8 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
         addSlot(new Slot(transferContainer, 0, FLUID_IN_X, FLUID_IN_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
-                return stack.getCapability(Capabilities.FluidHandler.ITEM) != null;
+                return !stack.isEmpty()
+                        && stack.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(stack)) != null;
             }
         });
 
@@ -116,8 +120,10 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
     }
 
     static boolean isEmptyFluidContainer(ItemStack stack) {
-        IFluidHandlerItem handler = stack.getCapability(Capabilities.FluidHandler.ITEM);
-        if (handler == null) return false;
+        if (stack.isEmpty()) return false;
+        ResourceHandler<FluidResource> cap = stack.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(stack));
+        if (cap == null) return false;
+        IFluidHandler handler = IFluidHandler.of(cap);
         for (int i = 0; i < handler.getTanks(); i++) {
             if (!handler.getFluidInTank(i).isEmpty()) return false;
         }

@@ -4,43 +4,36 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.bobofraggins.tremendousstorage.storage.tube.TubeBlock;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import org.joml.Matrix4f;
 
-/**
- * Shared BESR base for all tank types (fluid, gas, source).
- *
- * <p>Handles tube-connector stub rendering and the shared octagonal-prism geometry helpers.
- * Subclasses implement {@link #renderFill} to paint their specific fill material.
- */
 public abstract class AbstractTankRenderer<T extends BlockEntity>
-        implements BlockEntityRenderer<T>, IBlockEntityRendererExtension<T> {
+        implements BlockEntityRenderer<T, AbstractTankRenderer.State>, IBlockEntityRendererExtension<T> {
 
-    protected static final ResourceLocation LAZURITE_BLOCK =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/lazurite_block");
+    protected static final Identifier LAZURITE_BLOCK =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "block/lazurite_block");
 
-    // Fluid/fill interior bounds (inside the glass jar)
     public static final float FLUID_FLOOR = 3f / 16f;
     public static final float FLUID_CEIL = 13f / 16f;
     public static final float FLUID_H = FLUID_CEIL - FLUID_FLOOR;
 
-    // Tube connector stub dimensions
     private static final float STUB_D = 2f / 16f;
     private static final float STUB_MIN = 6f / 16f;
     private static final float STUB_MAX = 10f / 16f;
 
-    // Octagon XZ vertices (all in [0,1] block space)
-    // A = NW, B = NE, C = EN, D = ES, E = SE, F = SW, G = WS, H = WN
     protected static final float AX = 6f / 16f, AZ = 1f / 16f;
     protected static final float BX = 10f / 16f, BZ = 1f / 16f;
     protected static final float CX = 15f / 16f, CZ = 6f / 16f;
@@ -50,61 +43,66 @@ public abstract class AbstractTankRenderer<T extends BlockEntity>
     protected static final float GX = 1f / 16f, GZ = 10f / 16f;
     protected static final float HX = 1f / 16f, HZ = 6f / 16f;
 
-    /**
-     * Renders the fill material for this tank type.
-     * Called once per frame if the block entity has content to show.
-     */
-    protected abstract void renderFill(
-            T be, Matrix4f mat, MultiBufferSource bufferSource, int packedLight, int packedOverlay);
-
-    @Override
-    public void render(
-            T be,
-            float partialTick,
-            PoseStack poseStack,
-            MultiBufferSource bufferSource,
-            int packedLight,
-            int packedOverlay,
-            Vec3 cameraPos) {
-
-        poseStack.pushPose();
-        Matrix4f mat = poseStack.last().pose();
-
-        renderFill(be, mat, bufferSource, packedLight, packedOverlay);
-
-        // ---- Tube connector stubs (solid lazurite) ----
-        Level level = be.getLevel();
-        if (level != null) {
-            BlockPos tankPos = be.getBlockPos();
-            boolean hasStub = false;
-            for (Direction dir : Direction.values()) {
-                if (level.getBlockState(tankPos.relative(dir)).getBlock() instanceof TubeBlock) {
-                    hasStub = true;
-                    break;
-                }
-            }
-            if (hasStub) {
-                TextureAtlasSprite lazuriteSprite = sprite(LAZURITE_BLOCK);
-                VertexConsumer solid = bufferSource.getBuffer(Sheets.solidBlockSheet());
-                for (Direction dir : Direction.values()) {
-                    if (level.getBlockState(tankPos.relative(dir)).getBlock() instanceof TubeBlock) {
-                        drawStub(solid, mat, dir, lazuriteSprite, packedLight, packedOverlay);
-                    }
-                }
-            }
-        }
-
-        poseStack.popPose();
+    public static class State extends BlockEntityRenderState {
+        public boolean hasStub;
+        public boolean[] stubDirs = new boolean[6];
     }
 
-    // -------------------------------------------------------------------------
-    // Geometry helpers (available to subclasses)
-    // -------------------------------------------------------------------------
+    @Override
+    public State createRenderState() {
+        return new State();
+    }
 
-    protected static TextureAtlasSprite sprite(ResourceLocation loc) {
+    @Override
+    public void extractRenderState(
+            T be, State state, float partialTick, Vec3 camera, ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+        BlockEntityRenderState.extractBase(be, state, breakProgress);
+        state.hasStub = false;
+        if (be.getLevel() != null) {
+            BlockPos pos = be.getBlockPos();
+            for (int i = 0; i < Direction.values().length; i++) {
+                Direction dir = Direction.values()[i];
+                state.stubDirs[i] =
+                        be.getLevel().getBlockState(pos.relative(dir)).getBlock() instanceof TubeBlock;
+                if (state.stubDirs[i]) state.hasStub = true;
+            }
+        }
+    }
+
+    protected abstract void renderFill(
+            State state, PoseStack poseStack, SubmitNodeCollector collector, int packedLight, int packedOverlay);
+
+    @Override
+    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
+        int light = state.lightCoords;
+        int overlay = net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY;
+
+        poseStack.pushPose();
+        renderFill(state, poseStack, collector, light, overlay);
+        poseStack.popPose();
+
+        if (state.hasStub) {
+            TextureAtlasSprite lazuriteSprite = sprite(LAZURITE_BLOCK);
+            poseStack.pushPose();
+            Matrix4f mat = poseStack.last().pose();
+            for (int i = 0; i < Direction.values().length; i++) {
+                if (state.stubDirs[i]) {
+                    Direction dir = Direction.values()[i];
+                    final Direction fDir = dir;
+                    collector.submitCustomGeometry(
+                            poseStack,
+                            Sheets.cutoutBlockSheet(),
+                            (pose, vc) -> drawStub(vc, pose.pose(), fDir, lazuriteSprite, light, overlay));
+                }
+            }
+            poseStack.popPose();
+        }
+    }
+
+    protected static TextureAtlasSprite sprite(Identifier loc) {
         return Minecraft.getInstance()
-                .getModelManager()
-                .getAtlas(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS)
+                .getAtlasManager()
+                .getAtlasOrThrow(TextureAtlas.LOCATION_BLOCKS)
                 .getSprite(loc);
     }
 
@@ -230,10 +228,6 @@ public abstract class AbstractTankRenderer<T extends BlockEntity>
                     1, 0, 0);
     }
 
-    /**
-     * Emits a single quad using shared left/right UV and per-vertex top/bottom V.
-     * Vertex order: v0, v1, v2, v3 (CCW from outside).
-     */
     @SuppressWarnings("java:S107")
     protected static void quadFluid(
             VertexConsumer vc,
@@ -289,7 +283,6 @@ public abstract class AbstractTankRenderer<T extends BlockEntity>
                 .setNormal(nx, ny, nz);
     }
 
-    /** Emits a single quad with explicit per-vertex atlas UV coordinates. */
     @SuppressWarnings("java:S107")
     protected static void quadFluidV(
             VertexConsumer vc,

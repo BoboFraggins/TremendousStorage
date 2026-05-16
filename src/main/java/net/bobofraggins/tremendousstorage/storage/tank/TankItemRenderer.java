@@ -1,17 +1,17 @@
 package net.bobofraggins.tremendousstorage.storage.tank;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.serialization.MapCodec;
-import java.util.Set;
+import java.util.function.Consumer;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -22,14 +22,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.RenderData> {
 
     public record RenderData(StorageTier tier, @Nullable TankContents contents) {}
 
     @Override
-    public void getExtents(Set<Vector3f> output) {}
+    public void getExtents(Consumer<Vector3fc> output) {}
 
     @Override
     @Nullable
@@ -37,28 +37,31 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
         StorageTier tier = StorageTier.WOOD;
         var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (customData != null) {
-            CompoundTag tag = customData.copyTag();
+            CompoundTag tag = customData.getUnsafe();
             if (tag.contains("Tier")) {
-                tier = StorageTier.fromId(tag.getString("Tier").orElse(""));
+                tier = StorageTier.fromId(tag.getStringOr("Tier", ""));
             }
         }
         return new RenderData(tier, stack.get(Registration.TANK_CONTENTS.get()));
     }
 
     @Override
-    public void render(
+    public void submit(
             @Nullable RenderData data,
             ItemDisplayContext displayContext,
             PoseStack poseStack,
-            MultiBufferSource bufferSource,
+            SubmitNodeCollector collector,
             int packedLight,
             int packedOverlay,
-            boolean hasFoil) {
+            boolean hasFoil,
+            int tint) {
         Minecraft mc = Minecraft.getInstance();
 
         StorageTier tier = data != null ? data.tier() : StorageTier.WOOD;
         BlockState renderState = Registration.TANK.get().defaultBlockState().setValue(TankBlock.TIER_PROP, tier);
-        mc.getBlockRenderer().renderSingleBlock(renderState, poseStack, bufferSource, packedLight, packedOverlay);
+        MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
+        mc.getBlockRenderer().renderSingleBlock(renderState, poseStack, buffers, packedLight, packedOverlay);
+        buffers.endBatch();
 
         TankContents contents = data != null ? data.contents() : null;
         if (contents == null || contents.isEmpty()) return;
@@ -69,15 +72,15 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
         FluidStack fluid = contents.storedFluid();
         IClientFluidTypeExtensions ext = IClientFluidTypeExtensions.of(fluid.getFluid());
 
-        TextureAtlasSprite sprite = mc.getModelManager()
-                .getAtlas(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS)
+        TextureAtlasSprite sprite = mc.getAtlasManager()
+                .getAtlasOrThrow(TextureAtlas.LOCATION_BLOCKS)
                 .getSprite(ext.getStillTexture(fluid));
 
-        int tint = ext.getTintColor(fluid);
-        int fr = (tint >> 16) & 0xFF;
-        int fg = (tint >> 8) & 0xFF;
-        int fb = tint & 0xFF;
-        int fa = (tint >> 24) & 0xFF;
+        int fluidTint = ext.getTintColor(fluid);
+        int fr = (fluidTint >> 16) & 0xFF;
+        int fg = (fluidTint >> 8) & 0xFF;
+        int fb = fluidTint & 0xFF;
+        int fa = (fluidTint >> 24) & 0xFF;
         if (fa == 0) fa = 77;
 
         int fluidLight = fluid.getFluidType().getLightLevel() > 0 ? LightTexture.FULL_BRIGHT : packedLight;
@@ -87,9 +90,13 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
         float vT = sprite.getV0();
         float vB = Mth.lerp(fillFrac, sprite.getV0(), sprite.getV1());
 
-        VertexConsumer vc = bufferSource.getBuffer(Sheets.translucentItemSheet());
-        TankRenderer.renderCubeFill(
-                vc, poseStack.last().pose(), fr, fg, fb, fa, fluidLight, packedOverlay, uL, vT, uR, vB, fillTop);
+        final int ffrF = fr, ffgF = fg, ffbF = fb, ffaF = fa, flF = fluidLight;
+        final int overlayF = packedOverlay;
+        collector.submitCustomGeometry(
+                poseStack,
+                Sheets.translucentItemSheet(),
+                (pose, vc) -> TankRenderer.renderCubeFill(
+                        vc, pose.pose(), ffrF, ffgF, ffbF, ffaF, flF, overlayF, uL, vT, uR, vB, fillTop));
     }
 
     public record Unbaked() implements SpecialModelRenderer.Unbaked {
@@ -97,7 +104,7 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
 
         @Override
         @Nullable
-        public SpecialModelRenderer<?> bake(EntityModelSet modelSet) {
+        public SpecialModelRenderer<?> bake(SpecialModelRenderer.BakingContext context) {
             return new TankItemRenderer();
         }
 

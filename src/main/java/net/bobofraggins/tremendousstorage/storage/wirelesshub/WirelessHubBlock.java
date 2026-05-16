@@ -138,7 +138,7 @@ public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnecto
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(
             Level level, BlockState state, BlockEntityType<T> type) {
-        if (level.isClientSide) {
+        if (level.isClientSide()) {
             return (lvl, pos, st, be) -> ((WirelessHubBlockEntity) be).clientTick();
         } else {
             return (lvl, pos, st, be) -> ((WirelessHubBlockEntity) be).serverTick();

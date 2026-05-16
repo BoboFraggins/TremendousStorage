@@ -6,7 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -24,7 +24,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record OpenPicnicBasketPacket(int slotType, int slotIndex, String slotId) implements CustomPacketPayload {
 
     public static final Type<OpenPicnicBasketPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "open_picnic_basket"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "open_picnic_basket"));
 
     public static final StreamCodec<FriendlyByteBuf, OpenPicnicBasketPacket> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.INT,

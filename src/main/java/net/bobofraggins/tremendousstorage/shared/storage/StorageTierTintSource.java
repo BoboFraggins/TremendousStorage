@@ -8,7 +8,6 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 
 /**
  * Item tint source that returns the color of the {@link StorageTier} stored in the item's
@@ -20,9 +19,9 @@ public record StorageTierTintSource() implements ItemTintSource {
 
     @Override
     public int calculate(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity) {
-        CustomData customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (customData != null) {
-            CompoundTag tag = customData.copyTag();
+            CompoundTag tag = customData.getUnsafe();
             if (tag.contains("Tier")) {
                 return StorageTier.fromId(tag.getStringOr("Tier", "")).getColor();
             }

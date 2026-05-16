@@ -4,7 +4,7 @@ import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -31,15 +31,15 @@ public final class BarrelClientEvents {
             String id = tier.getId();
             event.register(
                     BarrelRenderer.BODY_MODELS[tier.ordinal()],
-                    SimpleUnbakedStandaloneModel.blockStateModel(ResourceLocation.fromNamespaceAndPath(
-                            "tremendousstorage", "block/barrels/barrel_body_" + id)));
+                    SimpleUnbakedStandaloneModel.blockStateModel(
+                            Identifier.fromNamespaceAndPath("tremendousstorage", "block/barrels/barrel_body_" + id)));
             event.register(
                     BarrelRenderer.ENDER_BODY_MODELS[tier.ordinal()],
-                    SimpleUnbakedStandaloneModel.blockStateModel(ResourceLocation.fromNamespaceAndPath(
+                    SimpleUnbakedStandaloneModel.blockStateModel(Identifier.fromNamespaceAndPath(
                             "tremendousstorage", "block/ender_barrels/ender_barrel_body_" + id)));
             event.register(
                     BarrelRenderer.COMPACTING_BODY_MODELS[tier.ordinal()],
-                    SimpleUnbakedStandaloneModel.blockStateModel(ResourceLocation.fromNamespaceAndPath(
+                    SimpleUnbakedStandaloneModel.blockStateModel(Identifier.fromNamespaceAndPath(
                             "tremendousstorage", "block/barrels_compacting/barrel_body_" + id)));
         }
     }

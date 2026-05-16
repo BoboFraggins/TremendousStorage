@@ -7,7 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
@@ -34,8 +34,8 @@ import snownee.jade.api.config.IPluginConfig;
 @WailaPlugin
 public class FilingCabinetJadePlugin implements IWailaPlugin {
 
-    static final ResourceLocation FILING_CABINET_PROVIDER =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "filing_cabinet");
+    static final Identifier FILING_CABINET_PROVIDER =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "filing_cabinet");
 
     @Override
     public void register(IWailaCommonRegistration registration) {
@@ -87,7 +87,7 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
         }
 
         @Override
-        public ResourceLocation getUid() {
+        public Identifier getUid() {
             return FILING_CABINET_PROVIDER;
         }
 

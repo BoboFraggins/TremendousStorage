@@ -3,7 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.accessterminal;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
@@ -22,8 +22,7 @@ import snownee.jade.api.config.IPluginConfig;
 @WailaPlugin
 public class AccessTerminalJadePlugin implements IWailaPlugin {
 
-    static final ResourceLocation SAT_PROVIDER =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "sat_network_validity");
+    static final Identifier SAT_PROVIDER = Identifier.fromNamespaceAndPath("tremendousstorage", "sat_network_validity");
 
     @Override
     public void register(IWailaCommonRegistration registration) {
@@ -56,7 +55,7 @@ public class AccessTerminalJadePlugin implements IWailaPlugin {
         }
 
         @Override
-        public ResourceLocation getUid() {
+        public Identifier getUid() {
             return SAT_PROVIDER;
         }
 

@@ -6,8 +6,8 @@ import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalM
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -38,11 +38,7 @@ public class PersonalAccessTerminalMenu extends AccessTerminalMenu {
      * @param hubDimensionId     the dimension the hub (and NI) live in, or null for player's dimension
      */
     public PersonalAccessTerminalMenu(
-            int id,
-            Inventory inv,
-            BlockPos niPos,
-            boolean hasCraftingUpgrade,
-            @Nullable ResourceLocation hubDimensionId) {
+            int id, Inventory inv, BlockPos niPos, boolean hasCraftingUpgrade, @Nullable Identifier hubDimensionId) {
         // Pass niPos as both satPos and niPos — stillValid is overridden below.
         super(id, inv, niPos, niPos, hasCraftingUpgrade);
         this.hubDimensionKey = hubDimensionId != null ? ResourceKey.create(Registries.DIMENSION, hubDimensionId) : null;
@@ -55,7 +51,9 @@ public class PersonalAccessTerminalMenu extends AccessTerminalMenu {
     @Override
     protected Level getNiLevel(Player player) {
         if (hubDimensionKey != null && player instanceof ServerPlayer sp) {
-            ServerLevel level = sp.getServer().getLevel(hubDimensionKey);
+            ServerLevel level = ((net.minecraft.server.level.ServerLevel) sp.level())
+                    .getServer()
+                    .getLevel(hubDimensionKey);
             if (level != null) return level;
         }
         return player.level();
@@ -107,7 +105,7 @@ public class PersonalAccessTerminalMenu extends AccessTerminalMenu {
     // MenuProvider inner record
     // -------------------------------------------------------------------------
 
-    public record Provider(BlockPos niPos, boolean hasCraftingUpgrade, @Nullable ResourceLocation hubDimensionId)
+    public record Provider(BlockPos niPos, boolean hasCraftingUpgrade, @Nullable Identifier hubDimensionId)
             implements MenuProvider {
         @Override
         public Component getDisplayName() {

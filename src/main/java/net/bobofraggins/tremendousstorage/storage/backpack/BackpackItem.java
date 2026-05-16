@@ -22,7 +22,6 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -57,9 +56,9 @@ public class BackpackItem extends BlockItem {
             sb.append("Crafting");
         }
         // Magnet and Puller are stored in BLOCK_ENTITY_DATA (not BackpackContents)
-        CustomData data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data != null) {
-            var tag = data.copyTag();
+            var tag = data.getUnsafe();
             if (tag.getBooleanOr("MagnetUpgrade", false)) {
                 if (!sb.isEmpty()) sb.append('/');
                 sb.append("Magnet");

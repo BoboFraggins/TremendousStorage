@@ -6,7 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -15,7 +15,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record SetAutoFeedPacket(BlockPos pos, boolean autoFeed) implements CustomPacketPayload {
 
     public static final Type<SetAutoFeedPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "set_auto_feed"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "set_auto_feed"));
 
     public static final StreamCodec<FriendlyByteBuf, SetAutoFeedPacket> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC,

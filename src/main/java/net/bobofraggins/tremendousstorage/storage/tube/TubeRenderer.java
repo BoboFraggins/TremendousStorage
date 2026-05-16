@@ -4,13 +4,17 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.bobofraggins.tremendousstorage.storage.tubeattachments.AttachmentType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.Vec3;
@@ -34,33 +38,39 @@ import org.joml.Matrix4f;
  * </ul>
  */
 public class TubeRenderer
-        implements BlockEntityRenderer<TubeBlockEntity>, IBlockEntityRendererExtension<TubeBlockEntity> {
+        implements BlockEntityRenderer<TubeBlockEntity, TubeRenderer.State>,
+                IBlockEntityRendererExtension<TubeBlockEntity> {
 
-    /** ResourceLocation for the white tube texture (tinted by DyeColor). */
-    public static final ResourceLocation TUBE_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/tube");
+    public static class State extends BlockEntityRenderState {
+        public int r, g, b;
+        public BlockState blockState;
+        public AttachmentType[] attachments = new AttachmentType[6];
+    }
+
+    /** Identifier for the white tube texture (tinted by DyeColor). */
+    public static final Identifier TUBE_TEXTURE = Identifier.fromNamespaceAndPath("tremendousstorage", "block/tube");
 
     // Core face textures — selected by perpendicular connection count/pattern
-    private static final ResourceLocation TUBE_FACE_0 =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/tube_face");
-    private static final ResourceLocation TUBE_FACE_1 =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/tube_face_1");
-    private static final ResourceLocation TUBE_FACE_2ADJ =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/tube_face_2adj");
-    private static final ResourceLocation TUBE_FACE_2OPP =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/tube_face_2opp");
-    private static final ResourceLocation TUBE_FACE_3 =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/tube_face_3");
-    private static final ResourceLocation TUBE_FACE_4 =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/tube_face_4");
+    private static final Identifier TUBE_FACE_0 =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "block/tube_face");
+    private static final Identifier TUBE_FACE_1 =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "block/tube_face_1");
+    private static final Identifier TUBE_FACE_2ADJ =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "block/tube_face_2adj");
+    private static final Identifier TUBE_FACE_2OPP =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "block/tube_face_2opp");
+    private static final Identifier TUBE_FACE_3 =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "block/tube_face_3");
+    private static final Identifier TUBE_FACE_4 =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "block/tube_face_4");
 
     // Attachment face textures — steel border + accent-color random pattern
-    private static final ResourceLocation ATTACH_IMPORT_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/attachment_import");
-    private static final ResourceLocation ATTACH_EXPORT_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/attachment_export");
-    private static final ResourceLocation ATTACH_STORAGE_TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("tremendousstorage", "block/attachment_storage");
+    private static final Identifier ATTACH_IMPORT_TEXTURE =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "block/attachment_import");
+    private static final Identifier ATTACH_EXPORT_TEXTURE =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "block/attachment_export");
+    private static final Identifier ATTACH_STORAGE_TEXTURE =
+            Identifier.fromNamespaceAndPath("tremendousstorage", "block/attachment_storage");
 
     /** Small offset to prevent Z-fighting with adjacent block faces. */
     private static final float EPS = 1e-4f;
@@ -96,26 +106,33 @@ public class TubeRenderer
     public TubeRenderer(BlockEntityRendererProvider.Context ctx) {}
 
     @Override
-    public void render(
+    public State createRenderState() {
+        return new State();
+    }
+
+    @Override
+    public void extractRenderState(
             TubeBlockEntity be,
+            State state,
             float partialTick,
-            PoseStack poseStack,
-            MultiBufferSource bufferSource,
-            int packedLight,
-            int packedOverlay,
-            Vec3 cameraPos) {
-
-        BlockState state = be.getBlockState();
-        if (!(state.getBlock() instanceof TubeBlock)) return;
-
+            Vec3 camera,
+            ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+        BlockEntityRenderState.extractBase(be, state, breakProgress);
+        state.blockState = be.getBlockState();
         int argb = be.getNetworkTier().getColor();
-        int r = (argb >> 16) & 0xFF;
-        int g = (argb >> 8) & 0xFF;
-        int b = argb & 0xFF;
+        state.r = (argb >> 16) & 0xFF;
+        state.g = (argb >> 8) & 0xFF;
+        state.b = argb & 0xFF;
+        for (int i = 0; i < 6; i++) {
+            state.attachments[i] = be.getAttachmentType(i);
+        }
+    }
 
-        var atlas = Minecraft.getInstance()
-                .getModelManager()
-                .getAtlas(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS);
+    @Override
+    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
+        if (!(state.blockState.getBlock() instanceof TubeBlock)) return;
+
+        var atlas = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(TextureAtlas.LOCATION_BLOCKS);
         TextureAtlasSprite sprite = atlas.getSprite(TUBE_TEXTURE);
         TextureAtlasSprite tubeFace0 = atlas.getSprite(TUBE_FACE_0);
         TextureAtlasSprite tubeFace1 = atlas.getSprite(TUBE_FACE_1);
@@ -127,53 +144,47 @@ public class TubeRenderer
         TextureAtlasSprite exportSprite = atlas.getSprite(ATTACH_EXPORT_TEXTURE);
         TextureAtlasSprite storageSprite = atlas.getSprite(ATTACH_STORAGE_TEXTURE);
 
-        VertexConsumer vc = bufferSource.getBuffer(RenderType.solid());
-        poseStack.pushPose();
+        int light = state.lightCoords;
+        int overlay = net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY;
+        int r = state.r, g = state.g, b = state.b;
+        BlockState blockState = state.blockState;
+        AttachmentType[] attachments = state.attachments;
 
-        Matrix4f mat = poseStack.last().pose();
-
-        // Core cube — only draw faces not covered by an arm
-        drawCore(
-                vc,
-                mat,
-                state,
-                sprite,
-                tubeFace0,
-                tubeFace1,
-                tubeFace2adj,
-                tubeFace2opp,
-                tubeFace3,
-                tubeFace4,
-                r,
-                g,
-                b,
-                packedLight,
-                packedOverlay);
-
-        // Arms toward connected faces
-        for (Direction dir : Direction.values()) {
-            if (state.getValue(dirProp(dir))) {
-                drawArm(vc, mat, dir, sprite, r, g, b, packedLight, packedOverlay);
+        collector.submitCustomGeometry(poseStack, Sheets.cutoutBlockSheet(), (pose, vc) -> {
+            Matrix4f mat = pose.pose();
+            drawCore(
+                    vc,
+                    mat,
+                    blockState,
+                    sprite,
+                    tubeFace0,
+                    tubeFace1,
+                    tubeFace2adj,
+                    tubeFace2opp,
+                    tubeFace3,
+                    tubeFace4,
+                    r,
+                    g,
+                    b,
+                    light,
+                    overlay);
+            for (Direction dir : Direction.values()) {
+                if (blockState.getValue(dirProp(dir))) {
+                    drawArm(vc, mat, dir, sprite, r, g, b, light, overlay);
+                }
             }
-        }
-
-        // Attachment plates — outward face uses type texture, sides use steel trim
-        for (int i = 0; i < 6; i++) {
-            AttachmentType aType = be.getAttachmentType(i);
-            if (aType == AttachmentType.NONE) continue;
-            // Typed attachments: white vertex color (accent encoded in texture).
-            // Storage: tube-color vertex color (texture has white pattern, tinted at render time).
-            TextureAtlasSprite faceSprite =
-                    switch (aType) {
-                        case IMPORT_INTERFACE -> importSprite;
-                        case EXPORT_INTERFACE -> exportSprite;
-                        default -> storageSprite;
-                    };
-            drawAttachmentPlate(
-                    vc, mat, Direction.values()[i], faceSprite, sprite, r, g, b, packedLight, packedOverlay);
-        }
-
-        poseStack.popPose();
+            for (int i = 0; i < 6; i++) {
+                AttachmentType aType = attachments[i];
+                if (aType == AttachmentType.NONE) continue;
+                TextureAtlasSprite faceSprite =
+                        switch (aType) {
+                            case IMPORT_INTERFACE -> importSprite;
+                            case EXPORT_INTERFACE -> exportSprite;
+                            default -> storageSprite;
+                        };
+                drawAttachmentPlate(vc, mat, Direction.values()[i], faceSprite, sprite, r, g, b, light, overlay);
+            }
+        });
     }
 
     private static BooleanProperty dirProp(Direction dir) {

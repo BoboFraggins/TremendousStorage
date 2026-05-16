@@ -35,7 +35,7 @@ public final class EnderFolderEvents {
     @SubscribeEvent
     public static void onContainerOpen(PlayerContainerEvent.Open event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = ((net.minecraft.server.level.ServerLevel) player.level()).getServer();
         if (server == null) return;
         for (Slot slot : event.getContainer().slots) {
             ItemStack stack = slot.getItem();
@@ -52,7 +52,8 @@ public final class EnderFolderEvents {
 
         // Ender Folder: sync to shared storage and propagate to linked folders.
         if (result.getItem() instanceof EnderFolderItem) {
-            MinecraftServer server = event.getEntity().getServer();
+            MinecraftServer server =
+                    ((net.minecraft.server.level.ServerLevel) event.getEntity().level()).getServer();
             if (server != null) {
                 EnderFolderItem.setLiveContents(result, ManillaFolderItem.getContents(result), server);
             }

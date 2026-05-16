@@ -85,7 +85,8 @@ public class EnderBackpackMenu extends BackpackMenu {
         BackpackContents contents =
                 backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
         ListTag types = contentsToListTag(contents, sp.level().registryAccess());
-        EnderBackpackStorage.get(sp.getServer()).setTypes(linkId, types);
+        EnderBackpackStorage.get(((net.minecraft.server.level.ServerLevel) sp.level()).getServer())
+                .setTypes(linkId, types);
     }
 
     // -------------------------------------------------------------------------

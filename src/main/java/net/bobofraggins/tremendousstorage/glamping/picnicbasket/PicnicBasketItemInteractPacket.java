@@ -6,7 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
@@ -27,7 +27,7 @@ public record PicnicBasketItemInteractPacket(
         implements CustomPacketPayload {
 
     public static final Type<PicnicBasketItemInteractPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "picnic_basket_item_interact"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "picnic_basket_item_interact"));
 
     public static final StreamCodec<FriendlyByteBuf, PicnicBasketItemInteractPacket> STREAM_CODEC =
             StreamCodec.composite(

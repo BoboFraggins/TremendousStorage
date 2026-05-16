@@ -7,7 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -18,14 +18,11 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * the player actually has a linked Wireless SAT for this NI before opening the menu.
  */
 public record OpenPersonalAccessTerminalPacket(
-        BlockPos niPos,
-        @Nullable BlockPos hubPos,
-        @Nullable ResourceLocation hubDimensionId,
-        boolean hasCraftingUpgrade)
+        BlockPos niPos, @Nullable BlockPos hubPos, @Nullable Identifier hubDimensionId, boolean hasCraftingUpgrade)
         implements CustomPacketPayload {
 
     public static final Type<OpenPersonalAccessTerminalPacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "open_wireless_sat"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "open_wireless_sat"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, OpenPersonalAccessTerminalPacket> STREAM_CODEC =
             new StreamCodec<>() {
@@ -33,7 +30,7 @@ public record OpenPersonalAccessTerminalPacket(
                 public OpenPersonalAccessTerminalPacket decode(RegistryFriendlyByteBuf buf) {
                     BlockPos niPos = BlockPos.STREAM_CODEC.decode(buf);
                     BlockPos hubPos = buf.readBoolean() ? BlockPos.STREAM_CODEC.decode(buf) : null;
-                    ResourceLocation hubDimId = buf.readBoolean() ? ResourceLocation.STREAM_CODEC.decode(buf) : null;
+                    Identifier hubDimId = buf.readBoolean() ? Identifier.STREAM_CODEC.decode(buf) : null;
                     boolean hasCraftingUpgrade = buf.readBoolean();
                     return new OpenPersonalAccessTerminalPacket(niPos, hubPos, hubDimId, hasCraftingUpgrade);
                 }
@@ -49,7 +46,7 @@ public record OpenPersonalAccessTerminalPacket(
                     }
                     if (value.hubDimensionId() != null) {
                         buf.writeBoolean(true);
-                        ResourceLocation.STREAM_CODEC.encode(buf, value.hubDimensionId());
+                        Identifier.STREAM_CODEC.encode(buf, value.hubDimensionId());
                     } else {
                         buf.writeBoolean(false);
                     }

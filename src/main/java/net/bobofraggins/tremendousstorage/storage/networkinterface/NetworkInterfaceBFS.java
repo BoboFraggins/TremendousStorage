@@ -32,6 +32,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /**
  * BFS utility that scans a Network Interface's entire connected tube network.
@@ -308,10 +311,13 @@ public final class NetworkInterfaceBFS {
             return;
         }
 
-        // Resolve IItemHandler capability
-        IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, adjPos, tubeDir.getOpposite());
-        IFluidHandler fluidHandler =
-                level.getCapability(Capabilities.FluidHandler.BLOCK, adjPos, tubeDir.getOpposite());
+        // Resolve item/fluid capabilities
+        ResourceHandler<ItemResource> itemCap =
+                level.getCapability(Capabilities.Item.BLOCK, adjPos, tubeDir.getOpposite());
+        IItemHandler handler = itemCap != null ? IItemHandler.of(itemCap) : null;
+        ResourceHandler<FluidResource> fluidCap =
+                level.getCapability(Capabilities.Fluid.BLOCK, adjPos, tubeDir.getOpposite());
+        IFluidHandler fluidHandler = fluidCap != null ? IFluidHandler.of(fluidCap) : null;
         if (handler != null) {
             Priority priority = resolvePriority(tubeBE, tubeDir.ordinal(), neighborBE);
             handlerEntries.add(new HandlerEntry(handler, priority));

@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.accessterminal;
 
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
-import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiCacheHolder;
 import net.minecraft.core.BlockPos;
@@ -35,7 +35,7 @@ public class AccessTerminalBlockEntity extends BlockEntity implements NiCacheHol
     private BlockPos cachedNiPos = null;
 
     public AccessTerminalBlockEntity(BlockPos pos, BlockState state) {
-        super(Registration.STORAGE_ACCESS_TERMINAL_BE_TYPE.get(), pos, state);
+        super(BETypeHelper.get("storage_access_terminal"), pos, state);
     }
 
     @Override

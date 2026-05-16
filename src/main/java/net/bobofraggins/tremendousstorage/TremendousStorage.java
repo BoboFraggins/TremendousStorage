@@ -28,7 +28,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
@@ -63,9 +63,7 @@ public class TremendousStorage {
         NeoForge.EVENT_BUS.register(ItemPickupInterceptor.class);
 
         // ── Client-only event registrations ──────────────────────────────────────
-        if (FMLEnvironment.dist.isClient()) {
-            ClientEventRegistrar.register(modEventBus);
-        }
+        modEventBus.addListener((FMLClientSetupEvent event) -> ClientEventRegistrar.register(modEventBus));
 
         if (ModList.get().isLoaded("productivemetalworks")) {
             ProductiveMetalworksIntegration.register(modEventBus);

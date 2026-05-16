@@ -104,7 +104,11 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
     // -------------------------------------------------------------------------
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean consumed) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.button();
+
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 3; col++) {
                 int sx = leftPos + GRID_X + col * SLOT_SIZE + 1;
@@ -115,7 +119,7 @@ public class ImportInterfaceScreen extends AbstractContainerScreen<ImportInterfa
                 }
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, consumed);
     }
 
     private void handleGhostSlotClick(int slotIndex) {

@@ -2,7 +2,7 @@ package net.bobofraggins.tremendousstorage.storage.networkinterface;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalScreen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
@@ -21,7 +21,7 @@ public final class NetworkInterfaceClientEvents {
     @SubscribeEvent
     public static void onRegisterSpecialModelRenderers(RegisterSpecialModelRendererEvent event) {
         event.register(
-                ResourceLocation.fromNamespaceAndPath("tremendousstorage", "network_interface_renderer"),
+                Identifier.fromNamespaceAndPath("tremendousstorage", "network_interface_renderer"),
                 NetworkInterfaceItemRenderer.Unbaked.MAP_CODEC);
     }
 

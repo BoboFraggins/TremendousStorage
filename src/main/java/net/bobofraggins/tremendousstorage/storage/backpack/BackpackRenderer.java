@@ -7,33 +7,55 @@ import java.util.ArrayList;
 import java.util.List;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 
 public class BackpackRenderer
-        implements BlockEntityRenderer<ChestBlockEntity>, IBlockEntityRendererExtension<ChestBlockEntity> {
+        implements BlockEntityRenderer<ChestBlockEntity, BackpackRenderer.State>,
+                IBlockEntityRendererExtension<ChestBlockEntity> {
 
     static final StandaloneModelKey<BlockStateModel> BODY_MODEL =
             new StandaloneModelKey<>(() -> "tremendousstorage:block/backpack_body");
     static final StandaloneModelKey<BlockStateModel> FLAP_MODEL =
             new StandaloneModelKey<>(() -> "tremendousstorage:block/backpack_flap");
 
-    private static float facingYRot(Direction facing) {
-        return switch (facing) {
+    public static class State extends BlockEntityRenderState {
+        public float flapAngle;
+        public float facingYRot;
+    }
+
+    public BackpackRenderer(BlockEntityRendererProvider.Context ctx) {}
+
+    @Override
+    public State createRenderState() {
+        return new State();
+    }
+
+    @Override
+    public void extractRenderState(
+            ChestBlockEntity be,
+            State state,
+            float partialTick,
+            Vec3 camera,
+            ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+        BlockEntityRenderState.extractBase(be, state, breakProgress);
+        state.flapAngle = Mth.lerp(partialTick, be.prevLidAngle, be.lidAngle);
+        Direction facing = be.getBlockState().getValue(BackpackBlock.FACING);
+        state.facingYRot = switch (facing) {
             case SOUTH -> 180f;
             case EAST -> 270f;
             case WEST -> 90f;
@@ -41,77 +63,58 @@ public class BackpackRenderer
         };
     }
 
-    public BackpackRenderer(BlockEntityRendererProvider.Context ctx) {}
-
     @Override
-    public void render(
-            ChestBlockEntity be,
-            float partialTick,
-            PoseStack poseStack,
-            MultiBufferSource bufferSource,
-            int packedLight,
-            int packedOverlay,
-            Vec3 cameraPos) {
-
+    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
         Minecraft mc = Minecraft.getInstance();
         BlockStateModel bodyModel = mc.getModelManager().getStandaloneModel(BODY_MODEL);
         BlockStateModel flapModel = mc.getModelManager().getStandaloneModel(FLAP_MODEL);
-        VertexConsumer consumer = bufferSource.getBuffer(RenderType.solid());
-
-        Level level = be.getLevel();
-        if (level != null) {
-            packedLight = LevelRenderer.getLightColor(level, be.getBlockPos());
-        }
-
-        BlockState blockState = be.getBlockState();
-        Direction facing = blockState.getValue(BackpackBlock.FACING);
-        float yRot = facingYRot(facing);
-
+        int packedLight = state.lightCoords;
         RandomSource random = RandomSource.create();
 
-        // Body — facing rotation only.
         poseStack.pushPose();
         poseStack.translate(0.5, 0.5, 0.5);
-        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
+        poseStack.mulPose(Axis.YP.rotationDegrees(state.facingYRot));
         poseStack.translate(-0.5, -0.5, -0.5);
-        renderQuads(consumer, poseStack.last(), bodyModel, level, packedLight, packedOverlay, random);
+        List<BlockModelPart> bodyParts = collectParts(bodyModel, random);
+        collector.submitCustomGeometry(
+                poseStack,
+                net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
+                (pose, consumer) -> renderQuads(consumer, pose, bodyParts, packedLight));
         poseStack.popPose();
 
-        // Flap — facing rotation + pivot animation at back-top edge of body.
-        float openFraction = Mth.lerp(partialTick, be.prevLidAngle, be.lidAngle);
         poseStack.pushPose();
         poseStack.translate(0.5, 0.5, 0.5);
-        poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
+        poseStack.mulPose(Axis.YP.rotationDegrees(state.facingYRot));
         poseStack.translate(-0.5, -0.5, -0.5);
         poseStack.translate(0.0, 12.0 / 16.0, 12.251 / 16.0);
-        poseStack.mulPose(Axis.XP.rotationDegrees(openFraction * 90f));
+        poseStack.mulPose(Axis.XP.rotationDegrees(state.flapAngle * 90f));
         poseStack.translate(0.0, -12.0 / 16.0, -12.251 / 16.0);
-        renderQuads(consumer, poseStack.last(), flapModel, level, packedLight, packedOverlay, random);
+        List<BlockModelPart> flapParts = collectParts(flapModel, random);
+        collector.submitCustomGeometry(
+                poseStack,
+                net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
+                (pose, consumer) -> renderQuads(consumer, pose, flapParts, packedLight));
         poseStack.popPose();
     }
 
-    private static void renderQuads(
-            VertexConsumer consumer,
-            PoseStack.Pose pose,
-            BlockStateModel model,
-            Level level,
-            int packedLight,
-            int packedOverlay,
-            RandomSource random) {
+    private static List<BlockModelPart> collectParts(BlockStateModel model, RandomSource random) {
         List<BlockModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
         model.collectParts(random, parts);
+        return parts;
+    }
+
+    private static void renderQuads(
+            VertexConsumer consumer, PoseStack.Pose pose, List<BlockModelPart> parts, int packedLight) {
+        int overlay = OverlayTexture.NO_OVERLAY;
         for (BlockModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
-                    consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
+                    consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1.0f, packedLight, overlay);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                Direction dir = quad.direction();
-                float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
-                consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
+                consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1.0f, packedLight, overlay);
             }
         }
     }

@@ -6,34 +6,24 @@ import com.mojang.math.Axis;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension;
 import net.neoforged.neoforge.client.model.standalone.StandaloneModelKey;
 
-/**
- * Renders the Filing Cabinet using two baked model parts.
- *
- * <ul>
- *   <li>{@code filing_cabinet_body} — the static outer shell.
- *   <li>{@code filing_cabinet_drawer} — the drawer (and folder tabs inside it), which slides
- *       forward 8 pixels (along the facing direction) when the UI is open, and slides closed
- *       when dismissed.
- * </ul>
- */
 public class FilingCabinetRenderer
-        implements BlockEntityRenderer<FilingCabinetBlockEntity>,
+        implements BlockEntityRenderer<FilingCabinetBlockEntity, FilingCabinetRenderer.State>,
                 IBlockEntityRendererExtension<FilingCabinetBlockEntity> {
 
     static final StandaloneModelKey<BlockStateModel> BODY_MODEL =
@@ -41,56 +31,63 @@ public class FilingCabinetRenderer
     static final StandaloneModelKey<BlockStateModel> DRAWER_MODEL =
             new StandaloneModelKey<>(() -> "tremendousstorage:block/filing_cabinet_drawer");
 
-    /** Maximum drawer slide distance in block units. */
     private static final float DRAWER_SLIDE = 8f / 16f;
+
+    public static class State extends BlockEntityRenderState {
+        public float drawerOffset;
+        public float facingYRot;
+    }
 
     public FilingCabinetRenderer(BlockEntityRendererProvider.Context ctx) {}
 
     @Override
-    public void render(
-            FilingCabinetBlockEntity be,
-            float partialTick,
-            PoseStack poseStack,
-            MultiBufferSource bufferSource,
-            int packedLight,
-            int packedOverlay,
-            Vec3 cameraPos) {
+    public State createRenderState() {
+        return new State();
+    }
 
+    @Override
+    public void extractRenderState(
+            FilingCabinetBlockEntity be,
+            State state,
+            float partialTick,
+            Vec3 camera,
+            ModelFeatureRenderer.CrumblingOverlay breakProgress) {
+        BlockEntityRenderState.extractBase(be, state, breakProgress);
+        state.drawerOffset = Mth.lerp(partialTick, be.prevDrawerOffset, be.drawerOffset);
+        Direction facing = be.getBlockState().getValue(FilingCabinetBlock.FACING);
+        state.facingYRot = switch (facing) {
+            case SOUTH -> 180f;
+            case EAST -> 270f;
+            case WEST -> 90f;
+            default -> 0f;
+        };
+    }
+
+    @Override
+    public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
         Minecraft mc = Minecraft.getInstance();
         BlockStateModel bodyModel = mc.getModelManager().getStandaloneModel(BODY_MODEL);
         BlockStateModel drawerModel = mc.getModelManager().getStandaloneModel(DRAWER_MODEL);
-        VertexConsumer consumer = bufferSource.getBuffer(RenderType.solid());
-
-        Level level = be.getLevel();
-        if (level != null) {
-            packedLight = LevelRenderer.getLightColor(level, be.getBlockPos().above());
-        }
-
-        BlockState blockState = be.getBlockState();
-        Direction facing = blockState.getValue(FilingCabinetBlock.FACING);
-
-        float facingYRot =
-                switch (facing) {
-                    case SOUTH -> 180f;
-                    case EAST -> 270f;
-                    case WEST -> 90f;
-                    default -> 0f;
-                };
-
+        int packedLight = state.lightCoords;
         RandomSource random = RandomSource.create();
 
-        // Static body
         poseStack.pushPose();
-        applyFacingRotation(poseStack, facingYRot);
-        renderModel(consumer, poseStack.last(), bodyModel, level, packedLight, packedOverlay, random);
+        applyFacingRotation(poseStack, state.facingYRot);
+        List<BlockModelPart> bodyParts = collectParts(bodyModel, random);
+        collector.submitCustomGeometry(
+                poseStack,
+                net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
+                (pose, consumer) -> renderModel(consumer, pose, bodyParts, packedLight));
         poseStack.popPose();
 
-        // Sliding drawer — after facing rotation, "forward" is -Z in model space.
-        float openFraction = Mth.lerp(partialTick, be.prevDrawerOffset, be.drawerOffset);
         poseStack.pushPose();
-        applyFacingRotation(poseStack, facingYRot);
-        poseStack.translate(0.0, 0.0, -openFraction * DRAWER_SLIDE);
-        renderModel(consumer, poseStack.last(), drawerModel, level, packedLight, packedOverlay, random);
+        applyFacingRotation(poseStack, state.facingYRot);
+        poseStack.translate(0.0, 0.0, -state.drawerOffset * DRAWER_SLIDE);
+        List<BlockModelPart> drawerParts = collectParts(drawerModel, random);
+        collector.submitCustomGeometry(
+                poseStack,
+                net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
+                (pose, consumer) -> renderModel(consumer, pose, drawerParts, packedLight));
         poseStack.popPose();
     }
 
@@ -102,28 +99,25 @@ public class FilingCabinetRenderer
         }
     }
 
-    private static void renderModel(
-            VertexConsumer consumer,
-            PoseStack.Pose pose,
-            BlockStateModel model,
-            Level level,
-            int packedLight,
-            int packedOverlay,
-            RandomSource random) {
+    private static List<BlockModelPart> collectParts(BlockStateModel model, RandomSource random) {
         List<BlockModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
         model.collectParts(random, parts);
+        return parts;
+    }
+
+    private static void renderModel(
+            VertexConsumer consumer, PoseStack.Pose pose, List<BlockModelPart> parts, int packedLight) {
+        int overlay = OverlayTexture.NO_OVERLAY;
         for (BlockModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
-                    consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
+                    float shade = quad.shade() ? 1f : 1f;
+                    consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, overlay);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                Direction dir = quad.direction();
-                float shade = level != null ? level.getShade(dir, quad.shade()) : 1f;
-                consumer.putBulkData(pose, quad, shade, shade, shade, 1.0f, packedLight, packedOverlay);
+                consumer.putBulkData(pose, quad, 1f, 1f, 1f, 1.0f, packedLight, overlay);
             }
         }
     }

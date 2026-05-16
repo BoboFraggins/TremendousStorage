@@ -9,7 +9,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -22,7 +22,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 public record SetSortModePacket(BlockPos pos, int modeOrdinal) implements CustomPacketPayload {
 
     public static final Type<SetSortModePacket> TYPE =
-            new Type<>(ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID, "set_sort_mode"));
+            new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "set_sort_mode"));
 
     public static final StreamCodec<FriendlyByteBuf, SetSortModePacket> STREAM_CODEC = StreamCodec.composite(
             BlockPos.STREAM_CODEC,

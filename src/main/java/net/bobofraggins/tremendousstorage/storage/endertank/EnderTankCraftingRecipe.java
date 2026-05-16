@@ -10,7 +10,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -44,17 +43,17 @@ public class EnderTankCraftingRecipe extends AbstractEnderCraftingRecipe {
 
     @Override
     protected long getExistingLinkId(ItemStack stack) {
-        CustomData existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
+        var existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (existing == null) return -1L;
-        CompoundTag tag = existing.copyTag();
+        CompoundTag tag = existing.getUnsafe();
         return tag.getLongOr(EnderTankBlockEntity.TAG_LINK_ID, -1L);
     }
 
     @Override
     protected ItemStack makeEnderItem(ItemStack base, long linkId) {
         ItemStack result = new ItemStack(Registration.ENDER_TANK_ITEM.get());
-        CustomData existing = base.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = existing != null ? existing.copyTag() : new CompoundTag();
+        var existing = base.get(DataComponents.BLOCK_ENTITY_DATA);
+        CompoundTag tag = existing != null ? existing.getUnsafe() : new CompoundTag();
         tag.putLong(EnderTankBlockEntity.TAG_LINK_ID, linkId);
         TagValueOutput _tagOut = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
         _tagOut.store(tag);

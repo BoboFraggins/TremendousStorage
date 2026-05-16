@@ -28,6 +28,9 @@ import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.storage.TieredBlockItem;
 import net.bobofraggins.tremendousstorage.shared.ui.PriorityControl;
 import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsMenu;
+import net.bobofraggins.tremendousstorage.shared.util.LegacyEnergyStorageWrapper;
+import net.bobofraggins.tremendousstorage.shared.util.LegacyFluidHandlerWrapper;
+import net.bobofraggins.tremendousstorage.shared.util.LegacyItemHandlerWrapper;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
@@ -241,17 +244,15 @@ public final class Registration {
                     .build());
 
     /**
-     * Data component storing the dimension {@link net.minecraft.resources.ResourceLocation} of the
+     * Data component storing the dimension {@link net.minecraft.resources.Identifier} of the
      * Wireless Hub that linked a Wireless SAT. Used to look up the hub/NI in the correct server
      * level when the player is in a different dimension.
      */
-    public static final DeferredHolder<
-                    DataComponentType<?>, DataComponentType<net.minecraft.resources.ResourceLocation>>
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<net.minecraft.resources.Identifier>>
             WIRELESS_HUB_DIMENSION = DATA_COMPONENTS.register(
-                    "wireless_hub_dimension",
-                    () -> DataComponentType.<net.minecraft.resources.ResourceLocation>builder()
-                            .persistent(net.minecraft.resources.ResourceLocation.CODEC)
-                            .networkSynchronized(net.minecraft.resources.ResourceLocation.STREAM_CODEC)
+                    "wireless_hub_dimension", () -> DataComponentType.<net.minecraft.resources.Identifier>builder()
+                            .persistent(net.minecraft.resources.Identifier.CODEC)
+                            .networkSynchronized(net.minecraft.resources.Identifier.STREAM_CODEC)
                             .build());
 
     /**
@@ -673,7 +674,7 @@ public final class Registration {
             () -> new HoneyBlock(
                     HONEY_SOURCE.get(),
                     BlockBehaviour.Properties.of()
-                            .noCollission()
+                            .noCollision()
                             .strength(100f)
                             .noLootTable()
                             .liquid()
@@ -714,7 +715,7 @@ public final class Registration {
             () -> new net.minecraft.world.level.block.LiquidBlock(
                     XP_JUICE_SOURCE.get(),
                     BlockBehaviour.Properties.of()
-                            .noCollission()
+                            .noCollision()
                             .strength(100f)
                             .noLootTable()
                             .liquid()
@@ -754,7 +755,7 @@ public final class Registration {
             () -> new PositiveVibesBlock(
                     POSITIVE_VIBES_SOURCE.get(),
                     BlockBehaviour.Properties.of()
-                            .noCollission()
+                            .noCollision()
                             .strength(100f)
                             .noLootTable()
                             .liquid()
@@ -1408,7 +1409,7 @@ public final class Registration {
                         // if (ModList.get().isLoaded("mysticalagriculture")) { // disabled - not available on 1.21.4
                         //     var lazurite = MysticalAgricultureAPI.getCropRegistry()
                         //             .getCropById(
-                        //                     ResourceLocation.fromNamespaceAndPath(TremendousStorage.MODID,
+                        //                     Identifier.fromNamespaceAndPath(TremendousStorage.MODID,
                         // "lazurite"));
                         //     if (lazurite != null) {
                         //         output.accept(lazurite.getSeedsItem());
@@ -1464,70 +1465,89 @@ public final class Registration {
 
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
+                Capabilities.Item.BLOCK,
                 BARREL_BE_TYPE.get(),
-                (be, side) -> new CompactingBarrelItemHandler(be));
+                (be, side) -> new LegacyItemHandlerWrapper(new CompactingBarrelItemHandler(be)));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
+                Capabilities.Item.BLOCK,
                 ENDER_BARREL_BE_TYPE.get(),
-                (be, side) -> new CompactingBarrelItemHandler(be));
+                (be, side) -> new LegacyItemHandlerWrapper(new CompactingBarrelItemHandler(be)));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
+                Capabilities.Item.BLOCK,
                 ARMORY_CABINET_BE_TYPE.get(),
-                (be, side) -> new net.bobofraggins.tremendousstorage.storage.chest.ChestItemHandler(be));
+                (be, side) -> new LegacyItemHandlerWrapper(
+                        new net.bobofraggins.tremendousstorage.storage.chest.ChestItemHandler(be)));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
+                Capabilities.Item.BLOCK,
                 FILING_CABINET_BE_TYPE.get(),
-                (be, side) -> new FilingCabinetItemHandler(be));
+                (be, side) -> new LegacyItemHandlerWrapper(new FilingCabinetItemHandler(be)));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK, TREMENDOUS_CHEST_BE_TYPE.get(), (be, side) -> new ChestItemHandler(be));
+                Capabilities.Item.BLOCK,
+                TREMENDOUS_CHEST_BE_TYPE.get(),
+                (be, side) -> new LegacyItemHandlerWrapper(new ChestItemHandler(be)));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
+                Capabilities.Item.BLOCK,
                 TREMENDOUS_BACKPACK_BE_TYPE.get(),
-                (be, side) -> new ChestItemHandler(be));
+                (be, side) -> new LegacyItemHandlerWrapper(new ChestItemHandler(be)));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK, PICNIC_BASKET_BE_TYPE.get(), (be, side) -> new ChestItemHandler(be));
+                Capabilities.Item.BLOCK,
+                PICNIC_BASKET_BE_TYPE.get(),
+                (be, side) -> new LegacyItemHandlerWrapper(new ChestItemHandler(be)));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
+                Capabilities.Item.BLOCK,
                 ENDER_PICNIC_BASKET_BE_TYPE.get(),
-                (be, side) -> new ChestItemHandler(be));
+                (be, side) -> new LegacyItemHandlerWrapper(new ChestItemHandler(be)));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
+                Capabilities.Item.BLOCK,
                 ENDER_TREMENDOUS_CHEST_BE_TYPE.get(),
-                (be, side) -> new ChestItemHandler(be));
+                (be, side) -> new LegacyItemHandlerWrapper(new ChestItemHandler(be)));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
+                Capabilities.Item.BLOCK,
                 ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(),
-                (be, side) -> new ChestItemHandler(be));
+                (be, side) -> new LegacyItemHandlerWrapper(new ChestItemHandler(be)));
         event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK, TANK_BE_TYPE.get(), (be, side) -> new TankFluidHandler(be));
+                Capabilities.Fluid.BLOCK,
+                TANK_BE_TYPE.get(),
+                (be, side) -> new LegacyFluidHandlerWrapper(new TankFluidHandler(be)));
         event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK, ENDER_TANK_BE_TYPE.get(), (be, side) -> new TankFluidHandler(be));
+                Capabilities.Fluid.BLOCK,
+                ENDER_TANK_BE_TYPE.get(),
+                (be, side) -> new LegacyFluidHandlerWrapper(new TankFluidHandler(be)));
         event.registerItem(
-                Capabilities.FluidHandler.ITEM, (stack, ctx) -> new TankItemFluidHandler(stack), TANK_ITEM.get());
+                Capabilities.Fluid.ITEM,
+                (stack, ctx) -> new LegacyFluidHandlerWrapper(new TankItemFluidHandler(stack)),
+                TANK_ITEM.get());
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
+                Capabilities.Item.BLOCK,
+                TUBE_BE_TYPE.get(),
+                (be, side) -> new LegacyItemHandlerWrapper(be.getNetworkView()));
         event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> new TubeEnergyHandler(be));
+                Capabilities.Energy.BLOCK,
+                TUBE_BE_TYPE.get(),
+                (be, side) -> new LegacyEnergyStorageWrapper(new TubeEnergyHandler(be)));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getItemHandler());
-        event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getNiFluidHandler());
-        event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK,
+                Capabilities.Item.BLOCK,
                 NETWORK_INTERFACE_BE_TYPE.get(),
-                (be, side) -> new NiEnergyHandler(be));
+                (be, side) -> new LegacyItemHandlerWrapper(be.getItemHandler()));
         event.registerBlockEntity(
-                Capabilities.EnergyStorage.BLOCK,
+                Capabilities.Fluid.BLOCK,
+                NETWORK_INTERFACE_BE_TYPE.get(),
+                (be, side) -> new LegacyFluidHandlerWrapper(be.getNiFluidHandler()));
+        event.registerBlockEntity(
+                Capabilities.Energy.BLOCK,
+                NETWORK_INTERFACE_BE_TYPE.get(),
+                (be, side) -> new LegacyEnergyStorageWrapper(new NiEnergyHandler(be)));
+        event.registerBlockEntity(
+                Capabilities.Energy.BLOCK,
                 STIRLING_ENGINE_BE_TYPE.get(),
-                (be, side) -> new StirlingEngineEnergyHandler(be));
+                (be, side) -> new LegacyEnergyStorageWrapper(new StirlingEngineEnergyHandler(be)));
         event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
+                Capabilities.Item.BLOCK,
                 RECYCLING_BIN_BE_TYPE.get(),
-                (be, side) -> new RecyclingBinItemHandler(be));
+                (be, side) -> new LegacyItemHandlerWrapper(new RecyclingBinItemHandler(be)));
         event.registerBlockEntity(
-                Capabilities.FluidHandler.BLOCK,
+                Capabilities.Fluid.BLOCK,
                 RECYCLING_BIN_BE_TYPE.get(),
-                (be, side) -> new RecyclingBinFluidHandler(be));
+                (be, side) -> new LegacyFluidHandlerWrapper(new RecyclingBinFluidHandler(be)));
     }
 }
