@@ -124,6 +124,15 @@ public class ChestRenderer
         };
     }
 
+    private static float directionShade(Direction dir) {
+        return switch (dir) {
+            case DOWN -> 0.5f;
+            case UP -> 1.0f;
+            case NORTH, SOUTH -> 0.8f;
+            case EAST, WEST -> 0.6f;
+        };
+    }
+
     private static void renderQuadsWithShading(
             VertexConsumer consumer,
             PoseStack.Pose pose,
@@ -136,13 +145,14 @@ public class ChestRenderer
         for (BlockStateModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
+                    float shade = quad.materialInfo().shade() ? directionShade(dir) : 1f;
                     float qr, qg, qb;
                     if (quad.materialInfo().tintIndex() >= 0) {
-                        qr = r;
-                        qg = g;
-                        qb = b;
+                        qr = r * shade;
+                        qg = g * shade;
+                        qb = b * shade;
                     } else {
-                        qr = qg = qb = 1f;
+                        qr = qg = qb = shade;
                     }
                     QuadInstance qi = new QuadInstance();
                     qi.setColor((0xFF << 24) | ((int) (qr * 255) << 16) | ((int) (qg * 255) << 8) | (int) (qb * 255));
@@ -152,13 +162,14 @@ public class ChestRenderer
                 }
             }
             for (var quad : part.getQuads(null)) {
+                float shade = quad.materialInfo().shade() ? directionShade(quad.direction()) : 1f;
                 float qr, qg, qb;
                 if (quad.materialInfo().tintIndex() >= 0) {
-                    qr = r;
-                    qg = g;
-                    qb = b;
+                    qr = r * shade;
+                    qg = g * shade;
+                    qb = b * shade;
                 } else {
-                    qr = qg = qb = 1f;
+                    qr = qg = qb = shade;
                 }
                 QuadInstance qi = new QuadInstance();
                 qi.setColor((0xFF << 24) | ((int) (qr * 255) << 16) | ((int) (qg * 255) << 8) | (int) (qb * 255));

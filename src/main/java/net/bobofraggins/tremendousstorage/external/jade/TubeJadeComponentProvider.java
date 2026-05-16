@@ -16,6 +16,7 @@ import snownee.jade.api.ITooltip;
 import snownee.jade.api.JadeIds;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.Element;
+import snownee.jade.impl.ui.ItemStackElement;
 
 /**
  * When the player looks at a tube face that has an attachment, replaces the "Tube" block
@@ -35,7 +36,7 @@ public enum TubeJadeComponentProvider implements IComponentProvider<BlockAccesso
         if (type == AttachmentType.NONE) return currentIcon;
         ItemStack stack = attachmentItem(type);
         if (stack.isEmpty()) return currentIcon;
-        return currentIcon; // IElementHelper removed in Jade 26.1.1
+        return ItemStackElement.of(stack);
     }
 
     @Override

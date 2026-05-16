@@ -31,40 +31,33 @@
   Migrated to `RegisterFluidModelsEvent` + `FluidModel.Unbaked` + `FluidTintSources`.
   Affected: `XpJuiceClientEvents`, `PositiveVibesClientEvents`, `HoneyClientEvents`
 
-- **Jade HUD: tube attachment icon**
-  `TubeJadeComponentProvider.getIcon()` used to show the attachment's item icon (e.g. Import
-  Interface) in the Jade tooltip. Jade 26.1.1 removed `IElementHelper` with no documented
-  replacement for creating item icon elements; the method now always returns the default tube block
-  icon.
+- ~~**Jade HUD: tube attachment icon**~~ **FIXED**
+  Restored using `ItemStackElement.of(stack)` from `snownee.jade.impl.ui` (internal but stable).
   Affected: `TubeJadeComponentProvider`
 
 ### Degraded behaviour
 
-- **JEI folder recipe ingredient search highlighting**
+- **JEI folder recipe ingredient search highlighting** (not fixable without hard-coding recipe logic)
   The four `FolderRecipeExtensions` classes return an empty list from `getIngredients()` because
   the custom recipe types do not expose a standard ingredient list. JEI uses this for
   focus/search highlighting; clicking an item in JEI no longer highlights it as a relevant
   ingredient for folder recipes (display via `setRecipe` is unchanged).
   Affected: `FolderRecipeExtensions`
 
-- **HAARP weather changes may not sync to clients immediately**
+- **HAARP weather changes may not sync to clients immediately** (acceptable — propagates within 1–2 ticks)
   `ServerLevel.setWeatherParameters()` sent an immediate client packet. The replacement
-  (`serverLevel.getWeatherData()` setters) is a `SavedData` mutation that may only propagate to
-  clients on the server's next natural weather broadcast cycle rather than instantly.
+  (`serverLevel.getWeatherData()` setters) propagates via the server's natural weather broadcast
+  cycle, which fires every tick at most; in practice imperceptible.
   Affected: `WirelessHubBlockEntity`
 
-- **Chest renderer: no directional shading on tier colour overlay**
-  `Level.getShade(Direction)` was removed. The chest's colour tint is now applied uniformly across
-  all faces instead of being slightly darkened on bottom/side faces. In practice the `level`
-  parameter was already always `null` in the renderer calls, so this was already a no-op at
-  runtime.
+- ~~**Chest renderer: no directional shading on tier colour overlay**~~ **FIXED**
+  Hardcoded standard MC directional shading values (DOWN=0.5, NORTH/SOUTH=0.8, EAST/WEST=0.6,
+  UP=1.0), applied only when `materialInfo().shade()` is true.
   Affected: `ChestRenderer`
 
-- **Positive Vibes regeneration effect: feet-only fluid detection**
-  `LivingEntity.isInFluidType(FluidType)` was removed. The replacement checks
-  `level.getFluidState(player.blockPosition())`, which only tests the block at the player's feet.
-  A player at the edge of the fluid, or with only their head submerged, may not receive the
-  regeneration effect.
+- ~~**Positive Vibes regeneration effect: feet-only fluid detection**~~ **FIXED**
+  Now checks both the feet block and the block at body centre (half player height), covering
+  wading, swimming, and full submersion.
   Affected: `PositiveVibesEffectHandler`
 
 ## Client item JSON files
