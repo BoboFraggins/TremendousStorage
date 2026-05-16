@@ -27,10 +27,8 @@
 
 ### Confirmed losses
 
-- **Custom fluid textures and tints (Positive Vibes, XP Juice, Honey)**
-  `IClientFluidTypeExtensions` texture/tint registration was removed. Custom still/flowing textures
-  and tint colours for all three fluids were replaced with empty no-op registrations. In-world fluid
-  blocks and the cauldron likely render with a fallback or missing texture.
+- ~~**Custom fluid textures and tints (Positive Vibes, XP Juice, Honey)**~~ **FIXED**
+  Migrated to `RegisterFluidModelsEvent` + `FluidModel.Unbaked` + `FluidTintSources`.
   Affected: `XpJuiceClientEvents`, `PositiveVibesClientEvents`, `HoneyClientEvents`
 
 - **Jade HUD: tube attachment icon**
