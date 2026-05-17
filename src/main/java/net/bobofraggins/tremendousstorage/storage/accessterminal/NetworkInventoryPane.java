@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
@@ -26,7 +25,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.transfer.fluid.FluidUtil;
 
 /**
  * Dialog pane that renders the scrollable network item grid and its scrollbar.
@@ -555,12 +554,11 @@ public class NetworkInventoryPane implements IDialogPane {
     }
 
     private static void renderFluidIcon(GuiGraphicsExtractor graphics, ItemStack bucketStack, int x, int y) {
-        Optional<FluidStack> fluidOpt = FluidUtil.getFluidContained(bucketStack);
-        if (fluidOpt.isEmpty()) {
+        FluidStack fluid = FluidUtil.getFirstStackContained(bucketStack);
+        if (fluid.isEmpty()) {
             graphics.item(bucketStack, x, y);
             return;
         }
-        FluidStack fluid = fluidOpt.get();
         net.minecraft.client.renderer.block.FluidModel fluidModel_ = Minecraft.getInstance()
                 .getModelManager()
                 .getFluidStateModelSet()

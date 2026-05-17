@@ -30,10 +30,9 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
-import net.neoforged.neoforge.fluids.FluidActionResult;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
-import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.transfer.fluid.FluidUtil;
 
 /**
  * Block item for the Tank.
@@ -171,11 +170,13 @@ public class TankItem extends TieredBlockItem {
             boolean isLiquidContainer = state.getBlock() instanceof LiquidBlockContainer lbc
                     && lbc.canPlaceLiquid(player, level, pos, state, fluid);
             BlockPos targetPos = isLiquidContainer ? pos : pos.relative(face);
-            FluidStack toPlace = c.storedFluid().copyWithAmount(FluidType.BUCKET_VOLUME);
 
             if (!level.isClientSide()) {
-                FluidActionResult place = FluidUtil.tryPlaceFluid(player, level, hand, targetPos, stack, toPlace);
-                if (place.isSuccess()) {
+                TankItemFluidHandler tankHandler = new TankItemFluidHandler(stack.copy());
+                net.neoforged.neoforge.fluids.FluidStack placed =
+                        FluidUtil.tryPlaceFluid(tankHandler, player, level, hand, targetPos);
+                if (!placed.isEmpty()) {
+                    player.setItemInHand(hand, tankHandler.getContainer());
                     return InteractionResult.SUCCESS;
                 }
                 return InteractionResult.FAIL;

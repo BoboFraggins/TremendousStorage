@@ -47,10 +47,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.fluid.FluidUtil;
 
 /**
  * The Tank block — stores up to {@link TankBlockEntity#CAPACITY} mB of a single fluid type.
@@ -247,8 +246,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
 
         // --- Bucket / modded fluid container handling (via capability) ---
         ResourceHandler<FluidResource> fluidCap = level.getCapability(Capabilities.Fluid.BLOCK, pos, null);
-        IFluidHandler handler = fluidCap != null ? IFluidHandler.of(fluidCap) : null;
-        if (handler == null) return InteractionResult.TRY_WITH_EMPTY_HAND;
+        if (fluidCap == null) return InteractionResult.TRY_WITH_EMPTY_HAND;
 
         // Determine sound direction before the interaction mutates the item stack.
         // Empty bucket / empty tank item → we are filling it (BUCKET_FILL sound).
@@ -262,7 +260,7 @@ public class TankBlock extends BaseEntityBlock implements NetworkConnector {
         } else {
             filling = false;
         }
-        boolean success = FluidUtil.interactWithFluidHandler(player, hand, handler);
+        boolean success = FluidUtil.interactWithFluidHandler(player, hand, pos, fluidCap);
         if (success && level.getBlockEntity(pos) instanceof TankBlockEntity be) {
             FluidStack stored = be.getStoredFluid();
             if (!stored.isEmpty()) {

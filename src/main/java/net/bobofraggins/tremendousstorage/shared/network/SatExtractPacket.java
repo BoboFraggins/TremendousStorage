@@ -19,10 +19,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.common.SoundActions;
-import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidUtil;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /**
@@ -139,7 +139,8 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount, boo
 
             // Play bucket-fill sound when fluid was extracted via an empty bucket
             if (anyFluidExtracted && !result.isEmpty()) {
-                FluidUtil.getFluidContained(result).ifPresent(fluidStack -> {
+                net.neoforged.neoforge.fluids.FluidStack fluidStack = FluidUtil.getFirstStackContained(result);
+                if (!fluidStack.isEmpty()) {
                     SoundEvent sound = fluidStack.getFluidType().getSound(SoundActions.BUCKET_FILL);
                     if (sound == null) sound = SoundEvents.BUCKET_FILL;
                     player.level()
@@ -152,7 +153,7 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount, boo
                                     SoundSource.BLOCKS,
                                     1.0f,
                                     1.0f);
-                });
+                }
             }
 
             // Refresh client's item list (using KeyCounter path to include fluid tagging)
