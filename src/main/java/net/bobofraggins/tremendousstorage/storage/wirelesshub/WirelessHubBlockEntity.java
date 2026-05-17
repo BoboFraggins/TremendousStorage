@@ -53,6 +53,7 @@ import net.neoforged.neoforge.transfer.fluid.FluidResource;
  * UI. Every 60 ticks the hub checks if weather matches the desired mode; if not, it consumes
  * 1 bucket of Positive Vibes from any fluid container on the network and adjusts the weather.
  */
+@SuppressWarnings("removal")
 public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider, NiCacheHolder, NetworkListable {
 
     // -------------------------------------------------------------------------

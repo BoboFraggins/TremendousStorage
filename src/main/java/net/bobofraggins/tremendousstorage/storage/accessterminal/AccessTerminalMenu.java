@@ -459,11 +459,11 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             if (current.isEmpty()) {
                 // Normal case: ingredient was fully consumed — pull a fresh stack from network
                 anyRefilled |= extractFromNetworkIntoSlot(handler, snap, i);
-            } else if (!snap.getItem().getCraftingRemainder().create().isEmpty()) {
+            } else if (!snap.getItem().getCraftingRemainder(snap).create().isEmpty()) {
                 // Container item case (e.g. lava bucket → empty bucket):
                 // onTake placed the remainder (empty bucket) back in the slot.
                 // If that remainder matches what's there now, swap it for a full one.
-                ItemStack remainder = snap.getItem().getCraftingRemainder().create();
+                ItemStack remainder = snap.getItem().getCraftingRemainder(snap).create();
                 if (!remainder.isEmpty() && ItemStack.isSameItemSameComponents(current, remainder)) {
                     // Try to extract the full item (e.g. lava bucket) from the network
                     ItemStack needed = snap.copyWithCount(1);

@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
  * Positive Vibe Cauldron → Bucket) and healing a Zombie Brain (Zombie Brain → Positive Vibes Bucket →
  * Cauldron → Brain).
  */
+@SuppressWarnings("removal")
 public class PositiveVibesCauldronCategory implements IRecipeCategory<PositiveVibesCauldronJeiRecipe> {
 
     public static final RecipeType<PositiveVibesCauldronJeiRecipe> RECIPE_TYPE =

@@ -33,6 +33,7 @@ import net.minecraft.world.item.component.TypedEntityData;
  *   [ender upgrade]         [ender output]
  * </pre>
  */
+@SuppressWarnings("removal")
 public class EnderStorageCraftingCategory implements IRecipeCategory<EnderStorageCraftingCategory.Recipe> {
 
     // -------------------------------------------------------------------------

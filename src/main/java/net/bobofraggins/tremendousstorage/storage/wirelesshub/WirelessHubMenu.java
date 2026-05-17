@@ -31,6 +31,7 @@ import net.neoforged.neoforge.items.SlotItemHandler;
  * <p>When {@code haarpUpgrade} is true the player inventory is shifted down by
  * {@link #HAARP_SECTION_H} pixels in the screen to make room for the weather-mode panel.
  */
+@SuppressWarnings("removal")
 public class WirelessHubMenu extends AbstractContainerMenu {
 
     private static final int INPUT_SLOT = 0;

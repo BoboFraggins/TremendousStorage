@@ -42,6 +42,7 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
  * <p>Registers the Storage Access Terminal as a crafting station, and adds ghost ingredient
  * drag support for Import Interface and Export Interface filter screens.
  */
+@SuppressWarnings("removal")
 @JeiPlugin
 public class TremendousStorageJeiPlugin implements IModPlugin {
 

@@ -644,6 +644,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void removeComponentsFromTag(net.minecraft.world.level.storage.ValueOutput output) {
         output.discard(TAG_ITEM);

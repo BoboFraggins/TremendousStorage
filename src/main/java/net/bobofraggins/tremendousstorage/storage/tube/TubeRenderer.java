@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
@@ -71,6 +70,8 @@ public class TubeRenderer
             Identifier.fromNamespaceAndPath("tremendousstorage", "block/attachment_export");
     private static final Identifier ATTACH_STORAGE_TEXTURE =
             Identifier.fromNamespaceAndPath("tremendousstorage", "block/attachment_storage");
+
+    private static final Identifier BLOCKS_ATLAS = Identifier.withDefaultNamespace("textures/atlas/blocks.png");
 
     /** Small offset to prevent Z-fighting with adjacent block faces. */
     private static final float EPS = 1e-4f;
@@ -132,7 +133,7 @@ public class TubeRenderer
     public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
         if (!(state.blockState.getBlock() instanceof TubeBlock)) return;
 
-        var atlas = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(TextureAtlas.LOCATION_BLOCKS);
+        var atlas = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(BLOCKS_ATLAS);
         TextureAtlasSprite sprite = atlas.getSprite(TUBE_TEXTURE);
         TextureAtlasSprite tubeFace0 = atlas.getSprite(TUBE_FACE_0);
         TextureAtlasSprite tubeFace1 = atlas.getSprite(TUBE_FACE_1);

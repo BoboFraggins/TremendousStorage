@@ -105,10 +105,10 @@ public final class SearchSync {
         }
         if (filter.startsWith("$")) {
             String query = filter.substring(1);
-            return stack.getItem().builtInRegistryHolder().tags().anyMatch(tag -> tag.location()
-                    .toString()
-                    .toLowerCase(Locale.ROOT)
-                    .contains(query));
+            return stack.typeHolder()
+                    .tags()
+                    .anyMatch(tag ->
+                            tag.location().toString().toLowerCase(Locale.ROOT).contains(query));
         }
         return stack.getHoverName().getString().toLowerCase(Locale.ROOT).contains(filter);
     }

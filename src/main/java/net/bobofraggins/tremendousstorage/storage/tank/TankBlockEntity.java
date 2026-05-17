@@ -529,6 +529,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     }
 
     /** Removes fluid fields from the NBT tag since they are stored in the component instead. */
+    @SuppressWarnings("deprecation")
     @Override
     public void removeComponentsFromTag(net.minecraft.world.level.storage.ValueOutput output) {
         output.discard(TAG_FLUID);

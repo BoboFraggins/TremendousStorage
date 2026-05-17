@@ -33,6 +33,7 @@ import net.minecraft.world.item.ItemStack;
  *   [ender storage upgrade] [ender folder]
  * </pre>
  */
+@SuppressWarnings("removal")
 public class EnderFolderCraftingCategory implements IRecipeCategory<EnderFolderCraftingCategory.Recipe> {
 
     /**

@@ -18,6 +18,7 @@ import net.minecraft.network.chat.Component;
  *
  * <p>Layout: [Tank (catalyst)] [Container (input)]  →  [Result (output)]
  */
+@SuppressWarnings("removal")
 public class TankExtractionCategory implements IRecipeCategory<TankExtractionJeiRecipe> {
 
     public static final RecipeType<TankExtractionJeiRecipe> RECIPE_TYPE =
