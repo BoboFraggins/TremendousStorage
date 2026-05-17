@@ -32,8 +32,8 @@ import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /** A single-block-tall Network Interface. */
 public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkConnector {
@@ -157,13 +157,18 @@ public class NetworkInterfaceBlock extends BaseEntityBlock implements NetworkCon
             if (!(level.getBlockEntity(pos) instanceof NetworkInterfaceBlockEntity ni)) {
                 return InteractionResult.FAIL;
             }
-            IItemHandler network = ni.getItemHandler();
+            ResourceHandler<ItemResource> network = ni.getItemHandler();
             if (network == null) return InteractionResult.FAIL;
             for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
                 net.minecraft.world.item.ItemStack held = player.getInventory().getItem(slot);
                 if (held.isEmpty()) continue;
-                net.minecraft.world.item.ItemStack remainder = ItemHandlerHelper.insertItem(network, held, false);
-                player.getInventory().setItem(slot, remainder);
+                int inserted = network.insert(0, ItemResource.of(held), held.getCount(), null);
+                if (inserted > 0) {
+                    net.minecraft.world.item.ItemStack remainder = inserted >= held.getCount()
+                            ? net.minecraft.world.item.ItemStack.EMPTY
+                            : held.copyWithCount(held.getCount() - inserted);
+                    player.getInventory().setItem(slot, remainder);
+                }
             }
             player.getInventory().setChanged();
             player.sendOverlayMessage(Component.translatable("action.tremendousstorage.deposit_complete"));

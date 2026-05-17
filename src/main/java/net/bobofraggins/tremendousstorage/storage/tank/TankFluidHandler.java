@@ -1,26 +1,18 @@
 package net.bobofraggins.tremendousstorage.storage.tank;
 
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * Exposes the Tank as a single-tank {@link IFluidHandler} for pumps and fluid automation.
+ * Exposes the Tank as a single-tank {@link ResourceHandler}{@code <FluidResource>} for pumps and
+ * fluid automation.
  *
- * <p>Insert rules:
- * <ol>
- *   <li>If the tank is unlocked, it locks to the inserted fluid type and fills.
- *   <li>If locked to a matching fluid, fills up to remaining capacity.
- *   <li>If locked to a different fluid, returns 0 (no insertion).
- * </ol>
- *
- * <p>Extract rules:
- * <ol>
- *   <li>If unlocked or amount == 0, returns EMPTY.
- *   <li>Extracts up to {@code min(requested, amount)} mB.
- *   <li>The tank stays locked at amount 0 after full drain.
- * </ol>
+ * <p>Insert: locks to fluid type if unlocked, fills up to capacity, rejects mismatches.
+ * Extract: drains up to requested amount from stored fluid.
  */
-public class TankFluidHandler implements IFluidHandler {
+public class TankFluidHandler implements ResourceHandler<FluidResource> {
 
     private final TankBlockEntity be;
 
@@ -29,57 +21,50 @@ public class TankFluidHandler implements IFluidHandler {
     }
 
     @Override
-    public int getTanks() {
+    public int size() {
         return 1;
     }
 
     @Override
-    public FluidStack getFluidInTank(int tank) {
-        FluidStack type = be.getStoredFluid();
-        if (type.isEmpty() || be.getAmount() == 0) return FluidStack.EMPTY;
-        long visible = Math.min(Integer.MAX_VALUE, be.getAmount());
-        return type.copyWithAmount((int) visible);
-    }
-
-    @Override
-    public int getTankCapacity(int tank) {
-        return (int) Math.min(Integer.MAX_VALUE, be.getCapacity());
-    }
-
-    @Override
-    public boolean isFluidValid(int tank, FluidStack stack) {
-        if (stack.isEmpty()) return false;
+    public FluidResource getResource(int index) {
         FluidStack stored = be.getStoredFluid();
-        if (stored.isEmpty()) return true; // unlocked — accepts anything
-        return FluidStack.isSameFluidSameComponents(stored, stack);
+        return stored.isEmpty() ? FluidResource.EMPTY : FluidResource.of(stored);
     }
 
     @Override
-    public int fill(FluidStack resource, FluidAction action) {
-        if (resource.isEmpty()) return 0;
+    public long getAmountAsLong(int index) {
+        return be.getAmount();
+    }
+
+    @Override
+    public long getCapacityAsLong(int index, FluidResource resource) {
+        return be.getCapacity();
+    }
+
+    @Override
+    public boolean isValid(int index, FluidResource resource) {
+        if (resource.isEmpty()) return false;
+        FluidStack stored = be.getStoredFluid();
+        return stored.isEmpty() || resource.matches(stored);
+    }
+
+    @Override
+    public int insert(int index, FluidResource resource, int amount, TransactionContext tx) {
+        if (!isValid(index, resource) || amount <= 0) return 0;
         if (be.isVoidExcess()) {
-            // Accept anything the tank can match; excess is silently voided
-            FluidStack stored = be.getStoredFluid();
-            if (!stored.isEmpty() && !FluidStack.isSameFluidSameComponents(stored, resource)) return 0;
-            be.insert(resource, resource.getAmount(), action.simulate());
-            return resource.getAmount();
+            be.insert(resource.toStack(amount), amount, false);
+            return amount;
         }
-        long inserted = be.insert(resource, resource.getAmount(), action.simulate());
+        long inserted = be.insert(resource.toStack(amount), amount, false);
         return (int) inserted;
     }
 
     @Override
-    public FluidStack drain(FluidStack resource, FluidAction action) {
-        if (resource.isEmpty()) return FluidStack.EMPTY;
+    public int extract(int index, FluidResource resource, int amount, TransactionContext tx) {
+        if (resource.isEmpty() || amount <= 0) return 0;
         FluidStack stored = be.getStoredFluid();
-        if (stored.isEmpty() || !FluidStack.isSameFluidSameComponents(stored, resource)) {
-            return FluidStack.EMPTY;
-        }
-        return be.extract(resource.getAmount(), action.simulate());
-    }
-
-    @Override
-    public FluidStack drain(int maxDrain, FluidAction action) {
-        return be.extract(maxDrain, action.simulate());
+        if (stored.isEmpty() || !resource.matches(stored)) return 0;
+        FluidStack extracted = be.extract(amount, false);
+        return extracted.getAmount();
     }
 }

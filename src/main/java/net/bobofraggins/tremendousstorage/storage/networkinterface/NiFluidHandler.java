@@ -1,97 +1,91 @@
 package net.bobofraggins.tremendousstorage.storage.networkinterface;
 
 import java.util.List;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * Aggregated {@link IFluidHandler} for the Network Interface.
+ * Aggregated {@link ResourceHandler}{@code <FluidResource>} for the Network Interface.
  *
  * <p>Exposes all fluid handlers reachable in the network as a flat list of tank slots.
  *
- * <p>Fill order: tanks already holding the requested fluid are filled first (to consolidate),
+ * <p>Insert order: tanks already holding the requested fluid are filled first (to consolidate),
  * then unlocked (empty) tanks.
  *
- * <p>Drain: {@link #drain(FluidStack, FluidAction)} accumulates across all tanks holding the
- * same fluid. {@link #drain(int, FluidAction)} returns fluid from the first non-empty tank.
+ * <p>Extract: accumulates across all tanks holding the same fluid.
  */
-public class NiFluidHandler implements IFluidHandler {
+public class NiFluidHandler implements ResourceHandler<FluidResource> {
 
-    private final List<IFluidHandler> tanks;
+    private final List<ResourceHandler<FluidResource>> tanks;
 
-    public NiFluidHandler(List<IFluidHandler> tanks) {
+    public NiFluidHandler(List<ResourceHandler<FluidResource>> tanks) {
         this.tanks = tanks;
     }
 
     @Override
-    public int getTanks() {
+    public int size() {
         return tanks.size();
     }
 
     @Override
-    public FluidStack getFluidInTank(int tank) {
-        if (tank < 0 || tank >= tanks.size()) return FluidStack.EMPTY;
-        return tanks.get(tank).getFluidInTank(0);
+    public FluidResource getResource(int index) {
+        if (index < 0 || index >= tanks.size()) return FluidResource.EMPTY;
+        return tanks.get(index).getResource(0);
     }
 
     @Override
-    public int getTankCapacity(int tank) {
-        if (tank < 0 || tank >= tanks.size()) return 0;
-        return tanks.get(tank).getTankCapacity(0);
+    public long getAmountAsLong(int index) {
+        if (index < 0 || index >= tanks.size()) return 0;
+        return tanks.get(index).getAmountAsLong(0);
     }
 
     @Override
-    public boolean isFluidValid(int tank, FluidStack stack) {
-        if (tank < 0 || tank >= tanks.size()) return false;
-        return tanks.get(tank).isFluidValid(0, stack);
+    public long getCapacityAsLong(int index, FluidResource resource) {
+        if (index < 0 || index >= tanks.size()) return 0;
+        return tanks.get(index).getCapacityAsLong(0, resource);
     }
 
     @Override
-    public int fill(FluidStack resource, FluidAction action) {
-        if (resource.isEmpty()) return 0;
-        int remaining = resource.getAmount();
+    public boolean isValid(int index, FluidResource resource) {
+        if (index < 0 || index >= tanks.size()) return false;
+        return tanks.get(index).isValid(0, resource);
+    }
+
+    @Override
+    public int insert(int index, FluidResource resource, int amount, TransactionContext tx) {
+        if (resource.isEmpty() || amount <= 0) return 0;
+        int remaining = amount;
         // First pass: top up tanks already holding this fluid type
-        for (IFluidHandler handler : tanks) {
-            FluidStack stored = handler.getFluidInTank(0);
-            if (stored.isEmpty() || !FluidStack.isSameFluidSameComponents(stored, resource)) continue;
-            int filled = handler.fill(resource.copyWithAmount(remaining), action);
+        for (ResourceHandler<FluidResource> handler : tanks) {
+            if (handler.getResource(0).isEmpty()) continue;
+            if (!resource.equals(handler.getResource(0))) continue;
+            int filled = handler.insert(0, resource, remaining, tx);
             remaining -= filled;
-            if (remaining <= 0) return resource.getAmount();
+            if (remaining <= 0) return amount;
         }
         // Second pass: fill empty (unlocked) tanks
-        for (IFluidHandler handler : tanks) {
-            if (!handler.getFluidInTank(0).isEmpty()) continue;
-            int filled = handler.fill(resource.copyWithAmount(remaining), action);
+        for (ResourceHandler<FluidResource> handler : tanks) {
+            if (!handler.getResource(0).isEmpty()) continue;
+            int filled = handler.insert(0, resource, remaining, tx);
             remaining -= filled;
-            if (remaining <= 0) return resource.getAmount();
+            if (remaining <= 0) return amount;
         }
-        return resource.getAmount() - remaining;
+        return amount - remaining;
     }
 
     @Override
-    public FluidStack drain(FluidStack resource, FluidAction action) {
-        if (resource.isEmpty()) return FluidStack.EMPTY;
-        int remaining = resource.getAmount();
-        int totalDrained = 0;
-        FluidStack type = FluidStack.EMPTY;
-        for (IFluidHandler handler : tanks) {
+    public int extract(int index, FluidResource resource, int amount, TransactionContext tx) {
+        if (resource.isEmpty() || amount <= 0) return 0;
+        int remaining = amount;
+        int totalExtracted = 0;
+        for (ResourceHandler<FluidResource> handler : tanks) {
             if (remaining <= 0) break;
-            FluidStack drained = handler.drain(resource.copyWithAmount(remaining), action);
-            if (drained.isEmpty()) continue;
-            if (type.isEmpty()) type = drained.copyWithAmount(0);
-            totalDrained += drained.getAmount();
-            remaining -= drained.getAmount();
+            if (!resource.equals(handler.getResource(0))) continue;
+            int extracted = handler.extract(0, resource, remaining, tx);
+            totalExtracted += extracted;
+            remaining -= extracted;
         }
-        return totalDrained == 0 ? FluidStack.EMPTY : type.copyWithAmount(totalDrained);
-    }
-
-    @Override
-    public FluidStack drain(int maxDrain, FluidAction action) {
-        if (maxDrain <= 0) return FluidStack.EMPTY;
-        for (IFluidHandler handler : tanks) {
-            FluidStack drained = handler.drain(maxDrain, action);
-            if (!drained.isEmpty()) return drained;
-        }
-        return FluidStack.EMPTY;
+        return totalExtracted;
     }
 }

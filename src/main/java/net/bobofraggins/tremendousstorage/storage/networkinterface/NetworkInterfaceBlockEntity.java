@@ -21,12 +21,12 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /**
  * Block entity for the Network Interface block.
@@ -35,8 +35,8 @@ import net.neoforged.neoforge.items.IItemHandler;
  * reachable through the connected tube network (all colors). The cache is invalidated
  * whenever {@link #setChanged()} is called (which happens on neighbour changes).
  *
- * <p>Exposes an {@link IItemHandler} capability via {@link NiItemHandler}: insertion uses
- * the highest-priority storage first; extraction drains the lowest-priority storage first.
+ * <p>Exposes a {@link ResourceHandler}{@code <ItemResource>} capability via {@link NiItemHandler}:
+ * insertion uses the highest-priority storage first; extraction drains the lowest-priority first.
  *
  * <p><b>Power system:</b> The Network Interface stores FE energy and drains it each server
  * tick proportional to network demand (NI itself, connected SATs, Wireless Hubs, and tube
@@ -133,7 +133,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
      * Returns the network's composite item handler, or {@code null} if the scan is unavailable.
      * Insert = highest-priority first (two-phase); extract = by insert order slot index.
      */
-    public IItemHandler getItemHandler() {
+    public NiItemHandler getItemHandler() {
         if (getScan() == null) return null;
         if (cachedHandler == null) {
             cachedHandler = new NiItemHandler(cachedScan.insertOrder(), cachedScan.insertBuckets());
@@ -161,7 +161,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         NetworkScanResult scan = getScan();
         if (scan == null) return Set.of();
         KeyCounter tmp = new KeyCounter();
-        for (IItemHandler h : scan.insertOrder()) {
+        for (ResourceHandler<ItemResource> h : scan.insertOrder()) {
             if (h instanceof TankItemAdapter adapter) {
                 adapter.contributeToKeyCounter(tmp);
             }
@@ -196,15 +196,15 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         NetworkScanResult scan = getScan();
         KeyCounter fresh = new KeyCounter();
         if (scan != null) {
-            for (IItemHandler handler : scan.insertOrder()) {
+            for (ResourceHandler<ItemResource> handler : scan.insertOrder()) {
                 if (handler instanceof IKeyCounterContributor contributor) {
                     contributor.contributeToKeyCounter(fresh);
                 } else {
-                    int slots = handler.getSlots();
-                    for (int s = 0; s < slots; s++) {
-                        ItemStack stack = handler.getStackInSlot(s);
-                        if (stack.isEmpty()) continue;
-                        fresh.add(StorageKey.of(stack), stack.getCount());
+                    for (int s = 0; s < handler.size(); s++) {
+                        ItemResource res = handler.getResource(s);
+                        if (res.isEmpty()) continue;
+                        long amount = handler.getAmountAsLong(s);
+                        fresh.add(StorageKey.of(res.toStack(1)), amount);
                     }
                 }
             }

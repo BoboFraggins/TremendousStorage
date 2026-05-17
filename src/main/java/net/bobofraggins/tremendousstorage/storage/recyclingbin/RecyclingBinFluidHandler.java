@@ -1,15 +1,18 @@
 package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * Exposes the Recycling Bin's Positive Vibes fluid tank as an {@link IFluidHandler}.
- * Accepts insert and extract of Positive Vibes only; capacity is fixed at
+ * Exposes the Recycling Bin's Positive Vibes fluid tank as a {@link ResourceHandler}{@code
+ * <FluidResource>}. Accepts insert and extract of Positive Vibes only; capacity is fixed at
  * {@value RecyclingBinBlockEntity#FLUID_CAPACITY_MB} mB.
  */
-public class RecyclingBinFluidHandler implements IFluidHandler {
+public class RecyclingBinFluidHandler implements ResourceHandler<FluidResource> {
+
+    private static final FluidResource VIBES = FluidResource.of(Registration.POSITIVE_VIBES_SOURCE.get());
 
     private final RecyclingBinBlockEntity be;
 
@@ -18,49 +21,43 @@ public class RecyclingBinFluidHandler implements IFluidHandler {
     }
 
     @Override
-    public int getTanks() {
+    public int size() {
         return 1;
     }
 
     @Override
-    public FluidStack getFluidInTank(int tank) {
-        int amount = be.getVibesAmount();
-        if (amount == 0) return FluidStack.EMPTY;
-        return new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), amount);
+    public FluidResource getResource(int index) {
+        return be.getVibesAmount() > 0 ? VIBES : FluidResource.EMPTY;
     }
 
     @Override
-    public int getTankCapacity(int tank) {
+    public long getAmountAsLong(int index) {
+        return be.getVibesAmount();
+    }
+
+    @Override
+    public long getCapacityAsLong(int index, FluidResource resource) {
         return RecyclingBinBlockEntity.FLUID_CAPACITY_MB;
     }
 
     @Override
-    public boolean isFluidValid(int tank, FluidStack stack) {
-        return !stack.isEmpty() && stack.getFluid() == Registration.POSITIVE_VIBES_SOURCE.get();
+    public boolean isValid(int index, FluidResource resource) {
+        return !resource.isEmpty() && resource.getFluid() == Registration.POSITIVE_VIBES_SOURCE.get();
     }
 
     @Override
-    public int fill(FluidStack resource, FluidAction action) {
-        if (!isFluidValid(0, resource)) return 0;
+    public int insert(int index, FluidResource resource, int amount, TransactionContext tx) {
+        if (!isValid(index, resource) || amount <= 0) return 0;
         int space = RecyclingBinBlockEntity.FLUID_CAPACITY_MB - be.getVibesAmount();
-        int toFill = Math.min(space, resource.getAmount());
+        int toFill = Math.min(space, amount);
         if (toFill <= 0) return 0;
-        if (!action.simulate()) {
-            be.addVibes(toFill);
-        }
+        be.addVibes(toFill);
         return toFill;
     }
 
     @Override
-    public FluidStack drain(FluidStack resource, FluidAction action) {
-        if (!isFluidValid(0, resource)) return FluidStack.EMPTY;
-        return drain(resource.getAmount(), action);
-    }
-
-    @Override
-    public FluidStack drain(int maxDrain, FluidAction action) {
-        int drained = be.extractVibes(maxDrain, action.simulate());
-        if (drained == 0) return FluidStack.EMPTY;
-        return new FluidStack(Registration.POSITIVE_VIBES_SOURCE.get(), drained);
+    public int extract(int index, FluidResource resource, int amount, TransactionContext tx) {
+        if (!isValid(index, resource) || amount <= 0) return 0;
+        return be.extractVibes(amount, false);
     }
 }

@@ -1,7 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
 import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
-import net.bobofraggins.tremendousstorage.shared.util.LegacyFluidHandlerWrapper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentGetter;
@@ -29,8 +28,8 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
 
 public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider {
 
@@ -252,19 +251,19 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
 
         ItemStack inputCopy = input.copy();
         var rawCap = inputCopy.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(inputCopy));
-        if (!(rawCap instanceof LegacyFluidHandlerWrapper cap)) return;
-        IFluidHandler handler = IFluidHandler.of(cap);
+        if (!(rawCap instanceof net.bobofraggins.tremendousstorage.storage.tank.TankItemFluidHandler cap)) return;
 
-        FluidStack contained = handler.getFluidInTank(0);
-        FluidStack vibesFluid = new FluidStack(BETypeHelper.getFluid("positive_vibes"), 1);
+        FluidResource containedRes = cap.getResource(0);
+        long containedAmt = cap.getAmountAsLong(0);
 
-        if (!contained.isEmpty()) {
+        if (!containedRes.isEmpty() && containedAmt > 0) {
             // Item has fluid → insert Positive Vibes into the recycling bin
+            FluidStack contained = containedRes.toStack(1);
             if (contained.getFluid() != BETypeHelper.getFluid("positive_vibes")) return; // wrong fluid
-            int amt = contained.getAmount();
+            int amt = (int) Math.min(containedAmt, Integer.MAX_VALUE);
             int space = FLUID_CAPACITY_MB - vibesAmount;
             if (space < amt) return; // hold until there is room for the full amount
-            handler.drain(amt, IFluidHandler.FluidAction.EXECUTE);
+            cap.extract(0, containedRes, amt, null);
             addVibes(amt);
             ItemStack modified = cap.getContainer();
             transferContainer.setItem(0, ItemStack.EMPTY);
@@ -272,14 +271,15 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
         } else {
             // Item is empty → fill it with Positive Vibes from the recycling bin
             if (vibesAmount == 0) return;
-            int canFill = handler.fill(vibesFluid.copyWithAmount(vibesAmount), IFluidHandler.FluidAction.SIMULATE);
-            if (canFill <= 0) return; // item doesn't accept Positive Vibes
+            FluidResource vibesResource = FluidResource.of(BETypeHelper.getFluid("positive_vibes"));
+            if (!cap.isValid(0, vibesResource)) return; // item doesn't accept Positive Vibes
+            long capacity = cap.getCapacityAsLong(0, vibesResource);
+            int canFill = (int) Math.min(vibesAmount, capacity);
+            if (canFill <= 0) return;
             // Hold until the bin has enough to fill the container completely
             if (vibesAmount < canFill) return;
             extractVibes(canFill, false);
-            handler.fill(
-                    new FluidStack(BETypeHelper.getFluid("positive_vibes"), canFill),
-                    IFluidHandler.FluidAction.EXECUTE);
+            cap.insert(0, vibesResource, canFill, null);
             ItemStack modified = cap.getContainer();
             transferContainer.setItem(0, ItemStack.EMPTY);
             transferContainer.setItem(1, modified != null ? modified : ItemStack.EMPTY);

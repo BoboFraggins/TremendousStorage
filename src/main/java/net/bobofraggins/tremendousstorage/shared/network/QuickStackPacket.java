@@ -11,9 +11,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /**
  * Client-to-server packet for the Quick Stack action.
@@ -65,7 +66,7 @@ public record QuickStackPacket(BlockPos pos, boolean isNetwork) implements Custo
         BlockEntity be = player.level().getBlockEntity(niPos);
         if (!(be instanceof NetworkInterfaceBlockEntity ni)) return;
 
-        IItemHandler handler = ni.getItemHandler();
+        ResourceHandler<ItemResource> handler = ni.getItemHandler();
         if (handler == null) return;
 
         boolean anyInserted = false;
@@ -77,8 +78,7 @@ public record QuickStackPacket(BlockPos pos, boolean isNetwork) implements Custo
             // Only transfer if this type already exists in the network
             if (!networkContains(handler, stack)) continue;
 
-            ItemStack remainder = handler.insertItem(0, stack.copy(), false);
-            int inserted = stack.getCount() - remainder.getCount();
+            int inserted = handler.insert(0, ItemResource.of(stack), stack.getCount(), null);
             if (inserted > 0) {
                 stack.shrink(inserted);
                 if (stack.isEmpty()) player.getInventory().setItem(invSlot, ItemStack.EMPTY);
@@ -88,9 +88,10 @@ public record QuickStackPacket(BlockPos pos, boolean isNetwork) implements Custo
 
         if (anyInserted) {
             player.getInventory().setChanged();
-            IItemHandler refreshed = ni.getItemHandler();
+            net.bobofraggins.tremendousstorage.shared.storage.KeyCounter refreshed = ni.getCachedInventory();
             if (refreshed != null) {
-                PacketDistributor.sendToPlayer(player, RequestSatContentsPacket.buildContentsPacket(refreshed));
+                PacketDistributor.sendToPlayer(
+                        player, RequestSatContentsPacket.buildContentsPacket(refreshed, ni.getFluidStorageKeys()));
             }
         }
     }
@@ -123,9 +124,10 @@ public record QuickStackPacket(BlockPos pos, boolean isNetwork) implements Custo
         return stack.isDamageableItem() || !stack.isComponentsPatchEmpty();
     }
 
-    private static boolean networkContains(IItemHandler handler, ItemStack stack) {
-        for (int h = 0; h < handler.getSlots(); h++) {
-            if (ItemStack.isSameItemSameComponents(handler.getStackInSlot(h), stack)) return true;
+    private static boolean networkContains(ResourceHandler<ItemResource> handler, ItemStack stack) {
+        ItemResource target = ItemResource.of(stack);
+        for (int h = 0; h < handler.size(); h++) {
+            if (target.equals(handler.getResource(h))) return true;
         }
         return false;
     }

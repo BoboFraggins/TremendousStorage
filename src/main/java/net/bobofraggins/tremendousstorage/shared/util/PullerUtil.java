@@ -7,7 +7,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 
@@ -17,11 +16,15 @@ public final class PullerUtil {
     private PullerUtil() {}
 
     /**
-     * Iterates over the enabled bits in {@code pullerSides}, resolves the adjacent
-     * item handler capability for each, and invokes {@code pullCallback} when present.
+     * Iterates over the enabled bits in {@code pullerSides}, resolves the adjacent item handler
+     * capability for each, and invokes {@code pullCallback} when present.
      */
     public static void tickPuller(
-            Level level, BlockPos pos, BlockState state, int pullerSides, Consumer<IItemHandler> pullCallback) {
+            Level level,
+            BlockPos pos,
+            BlockState state,
+            int pullerSides,
+            Consumer<ResourceHandler<ItemResource>> pullCallback) {
         Direction facing = state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)
                 ? state.getValue(BlockStateProperties.HORIZONTAL_FACING)
                 : Direction.NORTH;
@@ -32,7 +35,7 @@ public final class PullerUtil {
             ResourceHandler<ItemResource> cap =
                     level.getCapability(Capabilities.Item.BLOCK, adjacentPos, worldDir.getOpposite());
             if (cap == null) continue;
-            pullCallback.accept(IItemHandler.of(cap));
+            pullCallback.accept(cap);
         }
     }
 

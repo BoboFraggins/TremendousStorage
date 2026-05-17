@@ -3,41 +3,40 @@ package net.bobofraggins.tremendousstorage.storage.tube;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
-import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * A composite {@link IItemHandler} that presents all storage blocks in a tube network
- * as a single unified inventory.
+ * A composite {@link ResourceHandler}{@code <ItemResource>} that presents all storage blocks in a
+ * tube network as a single unified inventory.
  *
- * <p>Handlers are ordered highest-priority-first (by the caller). Insertion tries each
- * handler in order until the stack is fully consumed, regardless of the slot index supplied
- * by the caller. Extraction and read operations map a flat slot index to the correct
- * underlying handler.
+ * <p>Handlers are ordered highest-priority-first (by the caller). Insertion tries each handler in
+ * order until the stack is fully consumed, regardless of the slot index supplied by the caller.
+ * Extraction and read operations map a flat slot index to the correct underlying handler.
  *
- * <p>Slot counts in the underlying handlers are dynamic (Chest grows/shrinks
- * as items are added), so slot resolution is recalculated on each call.
+ * <p>Slot counts in the underlying handlers are dynamic (Chest grows/shrinks as items are
+ * added), so slot resolution is recalculated on each call.
  *
  * <p>Also holds a reference to the connected {@link NetworkInterfaceBlockEntity}.
  */
-public class NetworkItemHandler implements IItemHandler {
+public class NetworkItemHandler implements ResourceHandler<ItemResource> {
 
-    private final List<IItemHandler> handlers;
+    private final List<ResourceHandler<ItemResource>> handlers;
 
-    /** The NI that manages this network, or {@code null} if not found. */
     @Nullable
     private final NetworkInterfaceBlockEntity networkInterface;
 
-    public NetworkItemHandler(List<IItemHandler> handlers) {
+    public NetworkItemHandler(List<ResourceHandler<ItemResource>> handlers) {
         this(handlers, null);
     }
 
-    public NetworkItemHandler(List<IItemHandler> handlers, @Nullable NetworkInterfaceBlockEntity networkInterface) {
+    public NetworkItemHandler(
+            List<ResourceHandler<ItemResource>> handlers, @Nullable NetworkInterfaceBlockEntity networkInterface) {
         this.handlers = List.copyOf(handlers);
         this.networkInterface = networkInterface;
     }
 
-    /** Returns the Network Interface managing this network, or {@code null}. */
     @Nullable
     public NetworkInterfaceBlockEntity getNetworkInterface() {
         return networkInterface;
@@ -47,110 +46,106 @@ public class NetworkItemHandler implements IItemHandler {
     // Slot resolution
     // -------------------------------------------------------------------------
 
-    private record SlotRef(IItemHandler handler, int localSlot) {}
+    private record SlotRef(ResourceHandler<ItemResource> handler, int localSlot) {}
 
-    /**
-     * Maps a flat slot index across all handlers (in list order) to the specific
-     * (handler, localSlot) pair. Returns {@code null} if the index is out of range.
-     */
     @Nullable
     private SlotRef resolveSlot(int flatSlot) {
         if (flatSlot < 0) return null;
         int remaining = flatSlot;
-        for (IItemHandler handler : handlers) {
-            int slots = handler.getSlots();
-            if (remaining < slots) {
-                return new SlotRef(handler, remaining);
-            }
+        for (ResourceHandler<ItemResource> handler : handlers) {
+            int slots = handler.size();
+            if (remaining < slots) return new SlotRef(handler, remaining);
             remaining -= slots;
         }
         return null;
     }
 
     // -------------------------------------------------------------------------
-    // IItemHandler — metadata
+    // ResourceHandler — metadata
     // -------------------------------------------------------------------------
 
     @Override
-    public int getSlots() {
+    public int size() {
         int total = 0;
-        for (IItemHandler h : handlers) {
-            total += h.getSlots();
-        }
+        for (ResourceHandler<ItemResource> h : handlers) total += h.size();
         return total;
     }
 
     @Override
-    public int getSlotLimit(int slot) {
-        SlotRef ref = resolveSlot(slot);
-        return ref == null ? 0 : ref.handler().getSlotLimit(ref.localSlot());
+    public long getCapacityAsLong(int index, ItemResource resource) {
+        SlotRef ref = resolveSlot(index);
+        return ref == null ? 0 : ref.handler().getCapacityAsLong(ref.localSlot(), resource);
     }
 
     @Override
-    public boolean isItemValid(int slot, ItemStack stack) {
-        SlotRef ref = resolveSlot(slot);
-        return ref != null && ref.handler().isItemValid(ref.localSlot(), stack);
+    public boolean isValid(int index, ItemResource resource) {
+        SlotRef ref = resolveSlot(index);
+        return ref != null && ref.handler().isValid(ref.localSlot(), resource);
     }
 
     // -------------------------------------------------------------------------
-    // IItemHandler — read
+    // ResourceHandler — read
     // -------------------------------------------------------------------------
 
     @Override
-    public ItemStack getStackInSlot(int slot) {
-        SlotRef ref = resolveSlot(slot);
-        return ref == null ? ItemStack.EMPTY : ref.handler().getStackInSlot(ref.localSlot());
+    public ItemResource getResource(int index) {
+        SlotRef ref = resolveSlot(index);
+        return ref == null ? ItemResource.EMPTY : ref.handler().getResource(ref.localSlot());
+    }
+
+    @Override
+    public long getAmountAsLong(int index) {
+        SlotRef ref = resolveSlot(index);
+        return ref == null ? 0 : ref.handler().getAmountAsLong(ref.localSlot());
     }
 
     // -------------------------------------------------------------------------
-    // IItemHandler — insert (priority-ordered, ignores slot parameter)
+    // ResourceHandler — insert (priority-ordered, ignores slot parameter)
     // -------------------------------------------------------------------------
 
     /**
-     * Inserts {@code stack} into the network. The {@code slot} parameter is ignored;
-     * handlers are tried in priority order (highest first) until the stack is fully consumed.
-     *
-     * <p>The network decides which physical storage to fill, not the caller.
+     * Inserts {@code resource} into the network. The {@code index} parameter is ignored;
+     * handlers are tried in priority order (highest first) until the amount is fully consumed.
      */
     @Override
-    public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (stack.isEmpty()) return ItemStack.EMPTY;
-        ItemStack remaining = stack;
-        for (IItemHandler handler : handlers) {
-            remaining = tryInsertIntoHandler(handler, remaining, simulate);
-            if (remaining.isEmpty()) return ItemStack.EMPTY;
+    public int insert(int index, ItemResource resource, int amount, TransactionContext tx) {
+        if (resource.isEmpty() || amount <= 0) return 0;
+        int remaining = amount;
+        for (ResourceHandler<ItemResource> handler : handlers) {
+            remaining -= tryInsertIntoHandler(handler, resource, remaining, tx);
+            if (remaining <= 0) return amount;
         }
-        return remaining;
+        return amount - remaining;
     }
 
     /**
-     * Attempts to insert {@code stack} into every slot of {@code handler} in sequence.
-     * Returns whatever could not be inserted.
+     * Attempts to insert {@code resource} into every slot of {@code handler} in sequence.
+     * Returns total amount inserted.
      *
-     * <p>Special case: if the handler reports 0 slots (e.g. Chest when
-     * empty — its slot count equals the number of distinct item types stored), we still
-     * try slot 0 because ChestItemHandler ignores the slot parameter and
-     * routes through its own insertion logic.
+     * <p>Special case: if the handler reports 0 slots (e.g. Chest when empty), we still try
+     * slot 0 because ChestItemHandler ignores the slot parameter and routes through its own
+     * insertion logic.
      */
-    private static ItemStack tryInsertIntoHandler(IItemHandler handler, ItemStack stack, boolean simulate) {
-        ItemStack remaining = stack;
-        int slots = handler.getSlots();
-        for (int s = 0; s < slots && !remaining.isEmpty(); s++) {
-            remaining = handler.insertItem(s, remaining, simulate);
+    private static int tryInsertIntoHandler(
+            ResourceHandler<ItemResource> handler, ItemResource resource, int amount, TransactionContext tx) {
+        int remaining = amount;
+        int slots = handler.size();
+        for (int s = 0; s < slots && remaining > 0; s++) {
+            remaining -= handler.insert(s, resource, remaining, tx);
         }
-        if (slots == 0 && !remaining.isEmpty()) {
-            remaining = handler.insertItem(0, remaining, simulate);
+        if (slots == 0 && remaining > 0) {
+            remaining -= handler.insert(0, resource, remaining, tx);
         }
-        return remaining;
+        return amount - remaining;
     }
 
     // -------------------------------------------------------------------------
-    // IItemHandler — extract
+    // ResourceHandler — extract
     // -------------------------------------------------------------------------
 
     @Override
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        SlotRef ref = resolveSlot(slot);
-        return ref == null ? ItemStack.EMPTY : ref.handler().extractItem(ref.localSlot(), amount, simulate);
+    public int extract(int index, ItemResource resource, int amount, TransactionContext tx) {
+        SlotRef ref = resolveSlot(index);
+        return ref == null ? 0 : ref.handler().extract(ref.localSlot(), resource, amount, tx);
     }
 }

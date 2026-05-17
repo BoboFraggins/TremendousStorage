@@ -1,16 +1,17 @@
 package net.bobofraggins.tremendousstorage.storage.networkinterface;
 
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * Exposes the {@link NetworkInterfaceBlockEntity}'s energy buffer as an {@link IEnergyStorage}
+ * Exposes the {@link NetworkInterfaceBlockEntity}'s energy buffer as an {@link EnergyHandler}
  * capability.
  *
  * <p>The NI accepts energy from any adjacent energy pipe (Pipez, Mekanism cables,
  * Stirling Engine push, etc.). It does not allow extraction — the energy buffer is
  * internal-only.
  */
-public class NiEnergyHandler implements IEnergyStorage {
+public class NiEnergyHandler implements EnergyHandler {
 
     private final NetworkInterfaceBlockEntity be;
 
@@ -19,32 +20,22 @@ public class NiEnergyHandler implements IEnergyStorage {
     }
 
     @Override
-    public int receiveEnergy(int maxReceive, boolean simulate) {
-        return be.receiveEnergy(maxReceive, simulate);
+    public int insert(int amount, TransactionContext tx) {
+        return be.receiveEnergy(amount, false);
     }
 
     @Override
-    public int extractEnergy(int maxExtract, boolean simulate) {
+    public int extract(int amount, TransactionContext tx) {
         return 0; // cannot extract from the NI buffer externally
     }
 
     @Override
-    public int getEnergyStored() {
+    public long getAmountAsLong() {
         return be.getEnergyStored();
     }
 
     @Override
-    public int getMaxEnergyStored() {
+    public long getCapacityAsLong() {
         return NetworkInterfaceBlockEntity.MAX_ENERGY;
-    }
-
-    @Override
-    public boolean canExtract() {
-        return false;
-    }
-
-    @Override
-    public boolean canReceive() {
-        return true;
     }
 }

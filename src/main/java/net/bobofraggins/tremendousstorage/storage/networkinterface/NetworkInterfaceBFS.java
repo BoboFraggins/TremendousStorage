@@ -30,8 +30,6 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 import net.neoforged.neoforge.transfer.item.ItemResource;
@@ -52,7 +50,7 @@ public final class NetworkInterfaceBFS {
 
     private NetworkInterfaceBFS() {}
 
-    private record HandlerEntry(IItemHandler handler, Priority priority) {}
+    private record HandlerEntry(ResourceHandler<ItemResource> handler, Priority priority) {}
 
     /** FE/t cost per attached SAT (flat; SATs have no tier upgrades). */
     private static final int SAT_COST = 5;
@@ -73,7 +71,7 @@ public final class NetworkInterfaceBFS {
         // Connector blocks whose outgoing tube faces have already been enqueued
         Set<BlockPos> visitedConnectors = new HashSet<>();
         List<HandlerEntry> handlerEntries = new ArrayList<>();
-        List<IFluidHandler> tanks = new ArrayList<>();
+        List<ResourceHandler<FluidResource>> tanks = new ArrayList<>();
         int tubeCount = 0;
         List<String> storageKeys = new ArrayList<>(); // ordered by discovery
         int otherNiCount = 0;
@@ -197,17 +195,18 @@ public final class NetworkInterfaceBFS {
         // Sort handlers by priority
         handlerEntries.sort(Comparator.comparingInt(e -> -e.priority().ordinal())); // highest first
 
-        List<IItemHandler> insertOrder = new ArrayList<>(handlerEntries.size());
+        List<ResourceHandler<ItemResource>> insertOrder = new ArrayList<>(handlerEntries.size());
         for (HandlerEntry e : handlerEntries) insertOrder.add(e.handler());
 
         // Build priority buckets for two-phase insert (highest priority first via reverseOrder)
-        TreeMap<Integer, List<IItemHandler>> buckets = new TreeMap<>(Comparator.reverseOrder());
+        TreeMap<Integer, List<ResourceHandler<ItemResource>>> buckets = new TreeMap<>(Comparator.reverseOrder());
         for (HandlerEntry e : handlerEntries) {
             buckets.computeIfAbsent(e.priority().ordinal(), k -> new ArrayList<>())
                     .add(e.handler());
         }
-        NavigableMap<Integer, List<IItemHandler>> insertBuckets = new TreeMap<>(Comparator.reverseOrder());
-        for (Map.Entry<Integer, List<IItemHandler>> entry : buckets.entrySet()) {
+        NavigableMap<Integer, List<ResourceHandler<ItemResource>>> insertBuckets =
+                new TreeMap<>(Comparator.reverseOrder());
+        for (Map.Entry<Integer, List<ResourceHandler<ItemResource>>> entry : buckets.entrySet()) {
             insertBuckets.put(entry.getKey(), List.copyOf(entry.getValue()));
         }
 
@@ -254,7 +253,7 @@ public final class NetworkInterfaceBFS {
             Set<BlockPos> visitedConnectors,
             Set<BlockPos> collectedStorage,
             List<HandlerEntry> handlerEntries,
-            List<IFluidHandler> tanks,
+            List<ResourceHandler<FluidResource>> tanks,
             List<String> storageKeys,
             Deque<BlockPos> tubeQueue) {
         int feCost = 0;
@@ -292,7 +291,7 @@ public final class NetworkInterfaceBFS {
             Direction tubeDir,
             TubeBlockEntity tubeBE,
             List<HandlerEntry> handlerEntries,
-            List<IFluidHandler> tanks,
+            List<ResourceHandler<FluidResource>> tanks,
             List<String> storageKeys) {
 
         // Fetch block entity once and reuse for both priority resolution and UI key lookup
@@ -314,22 +313,20 @@ public final class NetworkInterfaceBFS {
         // Resolve item/fluid capabilities
         ResourceHandler<ItemResource> itemCap =
                 level.getCapability(Capabilities.Item.BLOCK, adjPos, tubeDir.getOpposite());
-        IItemHandler handler = itemCap != null ? IItemHandler.of(itemCap) : null;
         ResourceHandler<FluidResource> fluidCap =
                 level.getCapability(Capabilities.Fluid.BLOCK, adjPos, tubeDir.getOpposite());
-        IFluidHandler fluidHandler = fluidCap != null ? IFluidHandler.of(fluidCap) : null;
-        if (handler != null) {
+        if (itemCap != null) {
             Priority priority = resolvePriority(tubeBE, tubeDir.ordinal(), neighborBE);
-            handlerEntries.add(new HandlerEntry(handler, priority));
+            handlerEntries.add(new HandlerEntry(itemCap, priority));
             // Also expose fluid if the block has both item and fluid capabilities (e.g. Recycling Bin)
-            if (fluidHandler != null) {
-                handlerEntries.add(new HandlerEntry(new TankItemAdapter(fluidHandler), Priority.NORMAL));
-                tanks.add(fluidHandler);
+            if (fluidCap != null) {
+                handlerEntries.add(new HandlerEntry(new TankItemAdapter(fluidCap), Priority.NORMAL));
+                tanks.add(fluidCap);
             }
-        } else if (fluidHandler != null) {
+        } else if (fluidCap != null) {
             // Fluid-only block (e.g. Tank)
-            handlerEntries.add(new HandlerEntry(new TankItemAdapter(fluidHandler), Priority.NORMAL));
-            tanks.add(fluidHandler);
+            handlerEntries.add(new HandlerEntry(new TankItemAdapter(fluidCap), Priority.NORMAL));
+            tanks.add(fluidCap);
         }
 
         // Record block type for UI list

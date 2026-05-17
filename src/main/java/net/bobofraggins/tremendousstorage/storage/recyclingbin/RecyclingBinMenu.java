@@ -16,7 +16,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
@@ -123,9 +122,8 @@ public class RecyclingBinMenu extends AbstractContainerMenu {
         if (stack.isEmpty()) return false;
         ResourceHandler<FluidResource> cap = stack.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(stack));
         if (cap == null) return false;
-        IFluidHandler handler = IFluidHandler.of(cap);
-        for (int i = 0; i < handler.getTanks(); i++) {
-            if (!handler.getFluidInTank(i).isEmpty()) return false;
+        for (int i = 0; i < cap.size(); i++) {
+            if (!cap.getResource(i).isEmpty()) return false;
         }
         return true;
     }

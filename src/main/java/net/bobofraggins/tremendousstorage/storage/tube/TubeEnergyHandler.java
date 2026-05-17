@@ -1,21 +1,22 @@
 package net.bobofraggins.tremendousstorage.storage.tube;
 
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
  * Exposes a tube block entity's connected Network Interface energy buffer as an
- * {@link IEnergyStorage} capability.
+ * {@link EnergyHandler} capability.
  *
  * <p>This allows energy pipes (Pipez, Mekanism cables, etc.) adjacent to any tube in
  * the network to inject energy directly into the NI's buffer, even if they are not
  * physically adjacent to the NI block itself.
  *
- * <p>The handler supports {@code receiveEnergy} for external energy injection, and
- * {@code extractEnergy} for pulling <em>spare</em> energy — the amount above the NI's
+ * <p>The handler supports {@code insert} for external energy injection, and
+ * {@code extract} for pulling <em>spare</em> energy — the amount above the NI's
  * current-tick consumption reserve — allowing energy machines to draw from the network.
  */
-public class TubeEnergyHandler implements IEnergyStorage {
+public class TubeEnergyHandler implements EnergyHandler {
 
     private final TubeBlockEntity tubeBE;
 
@@ -31,41 +32,29 @@ public class TubeEnergyHandler implements IEnergyStorage {
     }
 
     @Override
-    public int receiveEnergy(int maxReceive, boolean simulate) {
+    public int insert(int amount, TransactionContext tx) {
         NetworkInterfaceBlockEntity ni = resolveNi();
         if (ni == null) return 0;
-        return ni.receiveEnergy(maxReceive, simulate);
+        return ni.receiveEnergy(amount, false);
     }
 
     @Override
-    public int extractEnergy(int maxExtract, boolean simulate) {
+    public int extract(int amount, TransactionContext tx) {
         NetworkInterfaceBlockEntity ni = resolveNi();
         if (ni == null) return 0;
         int spare = ni.getEnergyStored() - ni.getTotalConsumption();
         if (spare <= 0) return 0;
-        return ni.extractEnergyForDistribution(Math.min(maxExtract, spare), simulate);
+        return ni.extractEnergyForDistribution(Math.min(amount, spare), false);
     }
 
     @Override
-    public int getEnergyStored() {
+    public long getAmountAsLong() {
         NetworkInterfaceBlockEntity ni = resolveNi();
         return ni != null ? ni.getEnergyStored() : 0;
     }
 
     @Override
-    public int getMaxEnergyStored() {
+    public long getCapacityAsLong() {
         return NetworkInterfaceBlockEntity.MAX_ENERGY;
-    }
-
-    @Override
-    public boolean canExtract() {
-        NetworkInterfaceBlockEntity ni = resolveNi();
-        if (ni == null) return false;
-        return ni.getEnergyStored() > ni.getTotalConsumption();
-    }
-
-    @Override
-    public boolean canReceive() {
-        return true;
     }
 }

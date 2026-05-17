@@ -59,7 +59,10 @@ public record BarrelExtractPacket(BlockPos pos, boolean sneaking) implements Cus
                 if (hit.getType() != HitResult.Type.BLOCK || !hit.getBlockPos().equals(packet.pos())) return;
                 int slot = BarrelBlock.getCompactingSlot(hit, facing);
                 var handler = new CompactingBarrelItemHandler(be);
-                int amount = packet.sneaking() ? handler.getStackInSlot(slot).getMaxStackSize() : 1;
+                net.neoforged.neoforge.transfer.item.ItemResource slotRes = handler.getResource(slot);
+                int amount = packet.sneaking()
+                        ? (slotRes.isEmpty() ? 64 : slotRes.toStack(1).getMaxStackSize())
+                        : 1;
                 BarrelBlock.extractCompactingSlot(be, player, slot, amount);
             } else {
                 int amount = packet.sneaking() ? be.getStoredItem().getMaxStackSize() : 1;

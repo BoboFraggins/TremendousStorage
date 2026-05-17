@@ -31,10 +31,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
 
@@ -260,30 +256,34 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         NetworkScanResult scan = ni.getScan();
         if (scan == null) return false;
 
-        FluidStack wanted = new FluidStack(BETypeHelper.getFluid("positive_vibes"), VIBES_COST_MB);
         Set<BlockPos> checked = new HashSet<>();
 
         // Check positions adjacent to the NI itself and to each tube
         for (Direction dir : Direction.values()) {
             BlockPos neighbor = niPos.relative(dir);
-            if (checked.add(neighbor) && drainVibes(serverLevel, neighbor, wanted)) return true;
+            if (checked.add(neighbor) && drainVibes(serverLevel, neighbor)) return true;
         }
         for (BlockPos tube : scan.tubePositions()) {
             for (Direction dir : Direction.values()) {
                 BlockPos neighbor = tube.relative(dir);
-                if (checked.add(neighbor) && drainVibes(serverLevel, neighbor, wanted)) return true;
+                if (checked.add(neighbor) && drainVibes(serverLevel, neighbor)) return true;
             }
         }
         return false;
     }
 
-    private static boolean drainVibes(ServerLevel level, BlockPos pos, FluidStack wanted) {
+    private boolean drainVibes(ServerLevel level, BlockPos pos) {
         ResourceHandler<FluidResource> fluidCap = level.getCapability(Capabilities.Fluid.BLOCK, pos, null);
-        IFluidHandler fh = fluidCap != null ? IFluidHandler.of(fluidCap) : null;
-        if (fh == null) return false;
-        if (fh.drain(wanted, IFluidHandler.FluidAction.SIMULATE).getAmount() < wanted.getAmount()) return false;
-        fh.drain(wanted, IFluidHandler.FluidAction.EXECUTE);
-        return true;
+        if (fluidCap == null) return false;
+        FluidResource vibes = net.neoforged.neoforge.transfer.fluid.FluidResource.of(
+                net.bobofraggins.tremendousstorage.shared.register.Registration.POSITIVE_VIBES_SOURCE.get());
+        for (int i = 0; i < fluidCap.size(); i++) {
+            if (!vibes.equals(fluidCap.getResource(i))) continue;
+            if (fluidCap.getAmountAsLong(i) < VIBES_COST_MB) continue;
+            int extracted = fluidCap.extract(i, vibes, VIBES_COST_MB, null);
+            return extracted >= VIBES_COST_MB;
+        }
+        return false;
     }
 
     // -------------------------------------------------------------------------
@@ -315,26 +315,27 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     // Inventory
     // -------------------------------------------------------------------------
 
-    private final ItemStackHandler inventory = new ItemStackHandler(2) {
-        @Override
-        protected void onContentsChanged(int slot) {
-            setChanged();
-            if (slot == 0 && !getStackInSlot(0).isEmpty()) {
-                tryLink();
-            }
-        }
+    private final net.neoforged.neoforge.items.ItemStackHandler inventory =
+            new net.neoforged.neoforge.items.ItemStackHandler(2) {
+                @Override
+                protected void onContentsChanged(int slot) {
+                    setChanged();
+                    if (slot == 0 && !getStackInSlot(0).isEmpty()) {
+                        tryLink();
+                    }
+                }
 
-        @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
-            if (slot == 0) return stack.getItem() instanceof PersonalAccessTerminalItem;
-            return false; // slot 1 is output-only from external perspective
-        }
+                @Override
+                public boolean isItemValid(int slot, ItemStack stack) {
+                    if (slot == 0) return stack.getItem() instanceof PersonalAccessTerminalItem;
+                    return false;
+                }
 
-        @Override
-        public int getSlotLimit(int slot) {
-            return 1;
-        }
-    };
+                @Override
+                public int getSlotLimit(int slot) {
+                    return 1;
+                }
+            };
 
     public WirelessHubBlockEntity(BlockPos pos, BlockState state) {
         super(BETypeHelper.get("wireless_hub"), pos, state);
@@ -378,7 +379,7 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     // Inventory accessor (for WirelessHubMenu)
     // -------------------------------------------------------------------------
 
-    public IItemHandler getInventory() {
+    public net.neoforged.neoforge.items.ItemStackHandler getInventory() {
         return inventory;
     }
 

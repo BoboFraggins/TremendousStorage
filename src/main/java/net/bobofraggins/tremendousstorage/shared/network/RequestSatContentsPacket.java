@@ -20,9 +20,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /**
  * Client-to-server packet: request the current item list for a Storage Access Terminal.
@@ -94,15 +95,16 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
         }
     }
 
-    public static SatContentsPacket buildContentsPacket(IItemHandler handler) {
+    public static SatContentsPacket buildContentsPacket(ResourceHandler<ItemResource> handler) {
         // Aggregate by item type + components — O(n) with HashMap instead of O(n²)
         Map<StackKey, long[]> totals = new HashMap<>();
-        int slots = handler.getSlots();
-        for (int s = 0; s < slots; s++) {
-            ItemStack inSlot = handler.getStackInSlot(s);
-            if (inSlot.isEmpty()) continue;
+        for (int s = 0; s < handler.size(); s++) {
+            ItemResource res = handler.getResource(s);
+            if (res.isEmpty()) continue;
+            long amount = handler.getAmountAsLong(s);
+            ItemStack inSlot = res.toStack(1);
             StackKey key = StackKey.of(inSlot);
-            totals.computeIfAbsent(key, k -> new long[1])[0] += inSlot.getCount();
+            totals.computeIfAbsent(key, k -> new long[1])[0] += amount;
         }
 
         // Pre-compute display names and durability once to avoid re-materialising per comparison

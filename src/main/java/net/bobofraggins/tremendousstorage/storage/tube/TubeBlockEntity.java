@@ -20,7 +20,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 
@@ -153,9 +152,8 @@ public class TubeBlockEntity extends BlockEntity {
 
                 Direction dir = Direction.values()[i];
                 BlockPos neighborPos = pos.relative(dir);
-                ResourceHandler<ItemResource> neighborCap =
+                ResourceHandler<ItemResource> neighbor =
                         level.getCapability(Capabilities.Item.BLOCK, neighborPos, dir.getOpposite());
-                IItemHandler neighbor = neighborCap != null ? IItemHandler.of(neighborCap) : null;
                 if (neighbor == null) continue;
 
                 NetworkItemHandler network = be.getNetworkView();
@@ -179,22 +177,19 @@ public class TubeBlockEntity extends BlockEntity {
      * Empty filter passes all items.
      */
     private static void doImport(
-            IItemHandler source, NetworkItemHandler network, ItemStack[] filter, int transferAmount) {
+            ResourceHandler<ItemResource> source, NetworkItemHandler network, ItemStack[] filter, int transferAmount) {
         int remaining = transferAmount;
-        int slots = source.getSlots();
-        for (int s = 0; s < slots && remaining > 0; s++) {
-            ItemStack inSlot = source.getStackInSlot(s);
-            if (inSlot.isEmpty()) continue;
-            if (!passesFilter(inSlot, filter, true)) continue;
-
-            ItemStack extracted = source.extractItem(s, Math.min(inSlot.getCount(), remaining), true);
-            if (extracted.isEmpty()) continue;
-            ItemStack remainder = network.insertItem(0, extracted, true);
-            int canInsert = extracted.getCount() - remainder.getCount();
-            if (canInsert <= 0) continue;
-            source.extractItem(s, canInsert, false);
-            network.insertItem(0, extracted.copyWithCount(canInsert), false);
-            remaining -= canInsert;
+        for (int s = 0; s < source.size() && remaining > 0; s++) {
+            ItemResource res = source.getResource(s);
+            if (res.isEmpty()) continue;
+            ItemStack probe = res.toStack(1);
+            if (!passesFilter(probe, filter, true)) continue;
+            int available = (int) Math.min(source.getAmountAsLong(s), remaining);
+            if (available <= 0) continue;
+            int inserted = network.insert(0, res, available, null);
+            if (inserted <= 0) continue;
+            source.extract(s, res, inserted, null);
+            remaining -= inserted;
         }
     }
 
@@ -204,36 +199,33 @@ public class TubeBlockEntity extends BlockEntity {
      * Empty filter blocks all items.
      */
     private static void doExport(
-            NetworkItemHandler network, IItemHandler dest, ItemStack[] filter, int transferAmount) {
+            NetworkItemHandler network, ResourceHandler<ItemResource> dest, ItemStack[] filter, int transferAmount) {
         int remaining = transferAmount;
-        int slots = network.getSlots();
-        for (int s = 0; s < slots && remaining > 0; s++) {
-            ItemStack inSlot = network.getStackInSlot(s);
-            if (inSlot.isEmpty()) continue;
-            if (!passesFilter(inSlot, filter, false)) continue;
-
-            ItemStack extracted = network.extractItem(s, Math.min(inSlot.getCount(), remaining), true);
-            if (extracted.isEmpty()) continue;
-            ItemStack remainder = tryInsertAll(dest, extracted, true);
-            int canInsert = extracted.getCount() - remainder.getCount();
-            if (canInsert <= 0) break; // destination full
-            network.extractItem(s, canInsert, false);
-            tryInsertAll(dest, extracted.copyWithCount(canInsert), false);
-            remaining -= canInsert;
+        for (int s = 0; s < network.size() && remaining > 0; s++) {
+            ItemResource res = network.getResource(s);
+            if (res.isEmpty()) continue;
+            ItemStack probe = res.toStack(1);
+            if (!passesFilter(probe, filter, false)) continue;
+            int available = (int) Math.min(network.getAmountAsLong(s), remaining);
+            if (available <= 0) continue;
+            int inserted = tryInsertAll(dest, res, available);
+            if (inserted <= 0) break; // destination full
+            network.extract(s, res, inserted, null);
+            remaining -= inserted;
         }
     }
 
-    /** Attempts to insert {@code stack} into every slot of {@code handler}. Returns remainder. */
-    private static ItemStack tryInsertAll(IItemHandler handler, ItemStack stack, boolean simulate) {
-        ItemStack remaining = stack;
-        int slots = handler.getSlots();
-        for (int s = 0; s < slots && !remaining.isEmpty(); s++) {
-            remaining = handler.insertItem(s, remaining, simulate);
+    /** Attempts to insert {@code resource} into every slot of {@code handler}. Returns total inserted. */
+    private static int tryInsertAll(ResourceHandler<ItemResource> handler, ItemResource resource, int amount) {
+        int remaining = amount;
+        int slots = handler.size();
+        for (int s = 0; s < slots && remaining > 0; s++) {
+            remaining -= handler.insert(s, resource, remaining, null);
         }
-        if (slots == 0 && !remaining.isEmpty()) {
-            remaining = handler.insertItem(0, remaining, simulate);
+        if (slots == 0 && remaining > 0) {
+            remaining -= handler.insert(0, resource, remaining, null);
         }
-        return remaining;
+        return amount - remaining;
     }
 
     /**

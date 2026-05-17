@@ -34,8 +34,9 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /**
  * Menu for the Storage Access Terminal.
@@ -383,9 +384,13 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             if (hasNetwork() && player.level().isClientSide()) return ItemStack.EMPTY;
             if (hasNetwork() && !player.level().isClientSide()) {
                 if (getNiLevel(player).getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni) {
-                    IItemHandler handler = ni.getItemHandler();
+                    ResourceHandler<ItemResource> handler = ni.getItemHandler();
                     if (handler != null) {
-                        ItemStack remainder = handler.insertItem(0, stack, false);
+                        ItemResource resource = ItemResource.of(stack);
+                        int inserted = handler.insert(0, resource, stack.getCount(), null);
+                        ItemStack remainder = inserted >= stack.getCount()
+                                ? ItemStack.EMPTY
+                                : stack.copyWithCount(stack.getCount() - inserted);
                         slot.set(remainder);
                         if (hasCraftingUpgrade) slotsChanged(craftSlots);
                         // Refresh the client's network grid
@@ -441,7 +446,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     private void refillCraftGridFromNetwork(Player player, ItemStack[] gridSnapshot) {
         if (!hasCraftingUpgrade || !hasNetwork() || player.level().isClientSide()) return;
         if (!(getNiLevel(player).getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
-        IItemHandler handler = ni.getItemHandler();
+        ResourceHandler<ItemResource> handler = ni.getItemHandler();
         if (handler == null) return;
 
         boolean anyRefilled = false;
@@ -465,7 +470,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                     ItemStack extracted = tryExtractFromNetwork(handler, needed);
                     if (!extracted.isEmpty()) {
                         // Return the remainder (empty bucket) to the network
-                        handler.insertItem(0, current.copyWithCount(1), false);
+                        handler.insert(0, ItemResource.of(current), 1, null);
                         craftSlots.setItem(i, extracted);
                         anyRefilled = true;
                     }
@@ -479,7 +484,8 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     }
 
     /** Extracts one stack of {@code template} from the network and places it in craft slot {@code gridIndex}. */
-    private boolean extractFromNetworkIntoSlot(IItemHandler handler, ItemStack template, int gridIndex) {
+    private boolean extractFromNetworkIntoSlot(
+            ResourceHandler<ItemResource> handler, ItemStack template, int gridIndex) {
         ItemStack extracted = tryExtractFromNetwork(handler, template.copyWithCount(1));
         if (!extracted.isEmpty()) {
             craftSlots.setItem(gridIndex, extracted);
@@ -492,11 +498,13 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
      * Finds the first network slot containing an item matching {@code template} and extracts
      * up to one full stack from it. Returns the extracted stack, or {@link ItemStack#EMPTY}.
      */
-    private static ItemStack tryExtractFromNetwork(IItemHandler handler, ItemStack template) {
-        for (int slot = 0; slot < handler.getSlots(); slot++) {
-            if (!ItemStack.isSameItemSameComponents(handler.getStackInSlot(slot), template)) continue;
-            ItemStack extracted = handler.extractItem(slot, template.getMaxStackSize(), false);
-            if (!extracted.isEmpty()) return extracted;
+    private static ItemStack tryExtractFromNetwork(ResourceHandler<ItemResource> handler, ItemStack template) {
+        for (int slot = 0; slot < handler.size(); slot++) {
+            ItemResource res = handler.getResource(slot);
+            if (res.isEmpty()) continue;
+            if (!ItemStack.isSameItemSameComponents(res.toStack(1), template)) continue;
+            int extracted = handler.extract(slot, res, template.getMaxStackSize(), null);
+            if (extracted > 0) return res.toStack(extracted);
         }
         return ItemStack.EMPTY;
     }
@@ -515,14 +523,14 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     public void fillCraftingGridFromNetwork(ServerLevel level, CraftingRecipe recipe) {
         if (!hasCraftingUpgrade || niPos == null) return;
         if (!(level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
-        IItemHandler handler = ni.getItemHandler();
+        ResourceHandler<ItemResource> handler = ni.getItemHandler();
         if (handler == null) return;
 
         // Return current grid contents to the network.
         for (int i = 0; i < 9; i++) {
             ItemStack current = craftSlots.getItem(i);
             if (!current.isEmpty()) {
-                handler.insertItem(0, current, false);
+                handler.insert(0, ItemResource.of(current), current.getCount(), null);
                 craftSlots.setItem(i, ItemStack.EMPTY);
             }
         }
@@ -559,12 +567,15 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         slotsChanged(craftSlots);
     }
 
-    private static ItemStack extractOneFromNetwork(IItemHandler handler, Ingredient ingredient) {
+    private static ItemStack extractOneFromNetwork(ResourceHandler<ItemResource> handler, Ingredient ingredient) {
         if (ingredient.isEmpty()) return ItemStack.EMPTY;
-        for (int s = 0; s < handler.getSlots(); s++) {
-            ItemStack inSlot = handler.getStackInSlot(s);
-            if (!inSlot.isEmpty() && ingredient.test(inSlot)) {
-                return handler.extractItem(s, 1, false);
+        for (int s = 0; s < handler.size(); s++) {
+            ItemResource res = handler.getResource(s);
+            if (res.isEmpty()) continue;
+            ItemStack inSlot = res.toStack(1);
+            if (ingredient.test(inSlot)) {
+                int extracted = handler.extract(s, res, 1, null);
+                return extracted > 0 ? res.toStack(extracted) : ItemStack.EMPTY;
             }
         }
         return ItemStack.EMPTY;

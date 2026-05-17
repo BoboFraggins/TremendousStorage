@@ -35,7 +35,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /** Stores up to {@value #SLOT_COUNT} Manila Folder stacks. */
 public class FilingCabinetBlockEntity extends BlockEntity
@@ -339,15 +340,18 @@ public class FilingCabinetBlockEntity extends BlockEntity
         PullerUtil.tickPuller(level, pos, state, pullerSides, this::pullFromHandler);
     }
 
-    private void pullFromHandler(IItemHandler handler) {
-        for (int s = 0; s < handler.getSlots(); s++) {
-            ItemStack simulated = handler.extractItem(s, PULL_AMOUNT, true);
-            if (simulated.isEmpty()) continue;
-            ItemStack remainder = pullerAbsorb(simulated, PULL_AMOUNT, true);
-            int canInsert = simulated.getCount() - remainder.getCount();
+    private void pullFromHandler(ResourceHandler<ItemResource> handler) {
+        for (int s = 0; s < handler.size(); s++) {
+            ItemResource res = handler.getResource(s);
+            if (res.isEmpty()) continue;
+            int available = (int) Math.min(handler.getAmountAsLong(s), PULL_AMOUNT);
+            if (available <= 0) continue;
+            ItemStack probe = res.toStack(available);
+            ItemStack remainder = pullerAbsorb(probe, available, true);
+            int canInsert = available - remainder.getCount();
             if (canInsert <= 0) continue;
-            ItemStack extracted = handler.extractItem(s, canInsert, false);
-            if (!extracted.isEmpty()) pullerAbsorb(extracted, canInsert, false);
+            int extracted = handler.extract(s, res, canInsert, null);
+            if (extracted > 0) pullerAbsorb(res.toStack(extracted), extracted, false);
             break;
         }
     }

@@ -19,7 +19,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 
@@ -89,10 +88,9 @@ public final class TubeNetwork {
                     if (faceAttachment == AttachmentType.NONE || faceAttachment == AttachmentType.STORAGE_INTERFACE) {
                         ResourceHandler<ItemResource> cap =
                                 level.getCapability(Capabilities.Item.BLOCK, neighborPos, dir.getOpposite());
-                        IItemHandler handler = cap != null ? IItemHandler.of(cap) : null;
-                        if (handler != null) {
+                        if (cap != null) {
                             Priority priority = resolvePriority(level, neighborPos, tubeBE, dir.ordinal());
-                            entries.add(new HandlerEntry(handler, priority));
+                            entries.add(new HandlerEntry(cap, priority));
                         }
                     }
 
@@ -121,10 +119,8 @@ public final class TubeNetwork {
         // Sort highest-priority first (HIGHEST.ordinal() == 4, LOWEST == 0)
         entries.sort(Comparator.comparingInt(e -> -e.priority().ordinal()));
 
-        List<IItemHandler> handlers = new ArrayList<>(entries.size());
-        for (HandlerEntry e : entries) {
-            handlers.add(e.handler());
-        }
+        List<ResourceHandler<ItemResource>> handlers = new ArrayList<>(entries.size());
+        for (HandlerEntry e : entries) handlers.add(e.handler());
         return new NetworkItemHandler(handlers, foundNi);
     }
 
@@ -152,5 +148,5 @@ public final class TubeNetwork {
         return Priority.NORMAL;
     }
 
-    private record HandlerEntry(IItemHandler handler, Priority priority) {}
+    private record HandlerEntry(ResourceHandler<ItemResource> handler, Priority priority) {}
 }

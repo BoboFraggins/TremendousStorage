@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.transfer.energy.EnergyHandler;
 
 /**
@@ -32,7 +31,7 @@ import net.neoforged.neoforge.transfer.energy.EnergyHandler;
  * </ul>
  *
  * <p>Stores up to 100,000 FE internally and pushes energy to all adjacent blocks that expose an
- * {@link IEnergyStorage} capability.
+ * {@link EnergyHandler} capability.
  *
  * <p>Client-side, {@link #animationTicks} advances while {@link #heated} is true, driving the
  * flywheel animation in {@link StirlingEngineRenderer}.
@@ -98,9 +97,9 @@ public class StirlingEngineBlockEntity extends BlockEntity {
         for (Direction dir : Direction.values()) {
             BlockPos adjPos = worldPosition.relative(dir);
             EnergyHandler storage = level.getCapability(Capabilities.Energy.BLOCK, adjPos, dir.getOpposite());
-            if (storage == null || storage.getCapacityAsInt() <= storage.getAmountAsInt()) continue;
+            if (storage == null) continue;
             int toSend = Math.min(energyStored, (int) tier.getScaledCapacity(BASE_PUSH_PER_TICK));
-            int accepted = IEnergyStorage.of(storage).receiveEnergy(toSend, false);
+            int accepted = storage.insert(toSend, null);
             energyStored -= accepted;
             if (energyStored <= 0) break;
         }
@@ -176,7 +175,7 @@ public class StirlingEngineBlockEntity extends BlockEntity {
     }
 
     @Override
-    protected void loadAdditional(ValueInput input) {
+    public void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
         tier = StorageTier.fromId(input.getStringOr("Tier", ""));
         energyStored = input.getIntOr("EnergyStored", 0);
@@ -189,7 +188,10 @@ public class StirlingEngineBlockEntity extends BlockEntity {
 
     @Override
     public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-        return saveWithoutMetadata(registries);
+        CompoundTag tag = new CompoundTag();
+        tag.putString("Tier", tier.getId());
+        tag.putBoolean("Heated", heated);
+        return tag;
     }
 
     @Override

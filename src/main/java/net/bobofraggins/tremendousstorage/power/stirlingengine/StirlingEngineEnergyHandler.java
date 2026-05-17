@@ -1,9 +1,10 @@
 package net.bobofraggins.tremendousstorage.power.stirlingengine;
 
-import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
-/** Exposes the Stirling Engine's internal energy buffer as an {@link IEnergyStorage} capability. */
-public class StirlingEngineEnergyHandler implements IEnergyStorage {
+/** Exposes the Stirling Engine's internal energy buffer as an {@link EnergyHandler} capability. */
+public class StirlingEngineEnergyHandler implements EnergyHandler {
 
     private final StirlingEngineBlockEntity be;
 
@@ -12,36 +13,26 @@ public class StirlingEngineEnergyHandler implements IEnergyStorage {
     }
 
     @Override
-    public int receiveEnergy(int maxReceive, boolean simulate) {
-        return 0;
+    public int insert(int amount, TransactionContext tx) {
+        return 0; // Stirling Engine only produces energy; no external insertion
     }
 
     @Override
-    public int extractEnergy(int maxExtract, boolean simulate) {
-        int amount = Math.min(maxExtract, be.getEnergyStored());
-        if (!simulate && amount > 0) {
-            be.extractEnergy(amount);
+    public int extract(int amount, TransactionContext tx) {
+        int toExtract = Math.min(amount, be.getEnergyStored());
+        if (toExtract > 0) {
+            be.extractEnergy(toExtract);
         }
-        return amount;
+        return toExtract;
     }
 
     @Override
-    public int getEnergyStored() {
+    public long getAmountAsLong() {
         return be.getEnergyStored();
     }
 
     @Override
-    public int getMaxEnergyStored() {
+    public long getCapacityAsLong() {
         return be.getMaxEnergy();
-    }
-
-    @Override
-    public boolean canExtract() {
-        return true;
-    }
-
-    @Override
-    public boolean canReceive() {
-        return false;
     }
 }

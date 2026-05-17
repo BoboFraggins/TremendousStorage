@@ -3,7 +3,6 @@ package net.bobofraggins.tremendousstorage.storage.tank;
 import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsMenu;
-import net.bobofraggins.tremendousstorage.shared.util.LegacyFluidHandlerWrapper;
 import net.bobofraggins.tremendousstorage.shared.util.PullerUtil;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkListable;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NiLink;
@@ -34,7 +33,6 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
@@ -270,18 +268,18 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
             BlockPos adjacentPos = pos.relative(worldDir);
             ResourceHandler<FluidResource> fluidCap =
                     level.getCapability(Capabilities.Fluid.BLOCK, adjacentPos, worldDir.getOpposite());
-            IFluidHandler handler = fluidCap != null ? IFluidHandler.of(fluidCap) : null;
-            if (handler == null) continue;
-            for (int t = 0; t < handler.getTanks(); t++) {
-                FluidStack fluid = handler.getFluidInTank(t);
-                if (fluid.isEmpty()) continue;
-                if (!storedFluid.isEmpty() && !FluidStack.isSameFluidSameComponents(storedFluid, fluid)) continue;
+            if (fluidCap == null) continue;
+            for (int t = 0; t < fluidCap.size(); t++) {
+                FluidResource res = fluidCap.getResource(t);
+                if (res.isEmpty()) continue;
+                FluidStack fluidCheck = res.toStack(1);
+                if (!storedFluid.isEmpty() && !FluidStack.isSameFluidSameComponents(storedFluid, fluidCheck)) continue;
                 long space = getCapacity() - amount;
                 if (space <= 0) return;
                 int toPull = (int) Math.min(PULL_AMOUNT_MB, Math.min(space, Integer.MAX_VALUE));
-                FluidStack drained = handler.drain(fluid.copyWithAmount(toPull), IFluidHandler.FluidAction.EXECUTE);
-                if (!drained.isEmpty()) {
-                    insert(drained, drained.getAmount(), false);
+                int drained = fluidCap.extract(t, res, toPull, null);
+                if (drained > 0) {
+                    insert(res.toStack(drained), drained, false);
                 }
                 break; // one tank per side per tick
             }
@@ -297,17 +295,17 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
             if (stack.isEmpty()) continue;
             ItemStack stackCopy = stack.copy();
             var rawFluidCap = stackCopy.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(stackCopy));
-            if (!(rawFluidCap instanceof LegacyFluidHandlerWrapper fluidWrapper)) continue;
-            IFluidHandler handler = IFluidHandler.of(fluidWrapper);
-            FluidStack contained = handler.getFluidInTank(0);
-            if (contained.isEmpty()) continue;
+            if (!(rawFluidCap instanceof TankItemFluidHandler cap)) continue;
+            net.neoforged.neoforge.transfer.fluid.FluidResource containedRes = cap.getResource(0);
+            if (containedRes.isEmpty()) continue;
+            FluidStack contained = containedRes.toStack(1);
             if (!storedFluid.isEmpty() && !FluidStack.isSameFluidSameComponents(storedFluid, contained)) continue;
             long space = getCapacity() - amount;
-            int toDrain = (int) Math.min(contained.getAmount(), Math.min(space, Integer.MAX_VALUE));
-            FluidStack drained = handler.drain(toDrain, IFluidHandler.FluidAction.EXECUTE);
-            if (drained.isEmpty()) continue;
-            insert(drained, drained.getAmount(), false);
-            ItemStack remainder = fluidWrapper.getContainer();
+            int toDrain = (int) Math.min(cap.getAmountAsLong(0), Math.min(space, Integer.MAX_VALUE));
+            int drained = cap.extract(0, containedRes, toDrain, null);
+            if (drained <= 0) continue;
+            insert(containedRes.toStack(drained), drained, false);
+            ItemStack remainder = cap.getContainer();
             if (remainder == null || remainder.isEmpty()) {
                 entity.discard();
             } else {
@@ -354,42 +352,39 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
 
         ItemStack inputCopy = input.copy();
         var rawCap = inputCopy.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(inputCopy));
-        if (!(rawCap instanceof LegacyFluidHandlerWrapper fluidWrapper)) return;
-        IFluidHandler handler = IFluidHandler.of(fluidWrapper);
+        if (!(rawCap instanceof TankItemFluidHandler cap)) return;
 
-        FluidStack contained = handler.getFluidInTank(0);
+        FluidResource containedRes = cap.getResource(0);
+        long containedAmt = cap.getAmountAsLong(0);
 
-        if (!contained.isEmpty()) {
+        if (!containedRes.isEmpty() && containedAmt > 0) {
             // Item has fluid → insert into tank (must match locked type)
+            FluidStack contained = containedRes.toStack(1);
             if (!storedFluid.isEmpty() && !FluidStack.isSameFluidSameComponents(storedFluid, contained)) return;
-            int fluidAmt = contained.getAmount();
             long space = getCapacity() - amount;
-            // Attempt up to the available space (or the full amount when voiding excess).
-            int toDrain = voidExcess ? fluidAmt : (int) Math.min(fluidAmt, space);
+            int toDrain = voidExcess
+                    ? (int) Math.min(containedAmt, Integer.MAX_VALUE)
+                    : (int) Math.min(containedAmt, Math.min(space, Integer.MAX_VALUE));
             if (toDrain <= 0) return;
-            // Simulate to verify the item can actually release this amount.
-            // All-or-nothing handlers (e.g. buckets) will return more than we asked for when
-            // doing a partial request — in that case block until the tank has enough space.
-            FluidStack simDrained = handler.drain(toDrain, IFluidHandler.FluidAction.SIMULATE);
-            if (simDrained.isEmpty()) return;
-            if (!voidExcess && simDrained.getAmount() > space) return;
-            FluidStack drained = handler.drain(simDrained.getAmount(), IFluidHandler.FluidAction.EXECUTE);
-            if (drained.isEmpty()) return;
-            insert(drained, drained.getAmount(), false);
-            ItemStack modified = fluidWrapper.getContainer();
+            int drained = cap.extract(0, containedRes, toDrain, null);
+            if (drained <= 0) return;
+            insert(containedRes.toStack(drained), drained, false);
+            ItemStack modified = cap.getContainer();
             transferContainer.setItem(0, ItemStack.EMPTY);
             transferContainer.setItem(1, modified != null ? modified : ItemStack.EMPTY);
         } else {
             // Item is empty → fill from tank
             if (storedFluid.isEmpty() || amount == 0) return;
-            int tryFill = (int) Math.min(amount, Integer.MAX_VALUE);
-            int canFill = handler.fill(storedFluid.copyWithAmount(tryFill), IFluidHandler.FluidAction.SIMULATE);
-            if (canFill <= 0) return; // item doesn't accept this fluid type
+            FluidResource storedRes = FluidResource.of(storedFluid);
+            if (!cap.isValid(0, storedRes)) return; // item doesn't accept this fluid type
+            long capacity = cap.getCapacityAsLong(0, storedRes);
+            int canFill = (int) Math.min(amount, capacity);
+            if (canFill <= 0) return;
             // Hold until tank has enough to fill the container completely
             if (amount < canFill) return;
             extract(canFill, false);
-            handler.fill(storedFluid.copyWithAmount(canFill), IFluidHandler.FluidAction.EXECUTE);
-            ItemStack modified = fluidWrapper.getContainer();
+            cap.insert(0, storedRes, canFill, null);
+            ItemStack modified = cap.getContainer();
             transferContainer.setItem(0, ItemStack.EMPTY);
             transferContainer.setItem(1, modified != null ? modified : ItemStack.EMPTY);
         }

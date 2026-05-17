@@ -10,9 +10,10 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /**
  * Client-to-server packet: insert a player inventory slot's stack into the network.
@@ -59,12 +60,15 @@ public record SatInsertPacket(BlockPos niPos, int playerSlot) implements CustomP
             BlockEntity be = player.level().getBlockEntity(packet.niPos());
             if (!(be instanceof NetworkInterfaceBlockEntity ni)) return;
 
-            IItemHandler handler = ni.getItemHandler();
+            ResourceHandler<ItemResource> handler = ni.getItemHandler();
             if (handler == null) return;
 
             // Insert the stack into the network; remainder goes back to source
             ItemStack toInsert = inSlot.copy();
-            ItemStack remainder = handler.insertItem(0, toInsert, false);
+            int inserted = handler.insert(0, ItemResource.of(toInsert), toInsert.getCount(), null);
+            ItemStack remainder = inserted >= toInsert.getCount()
+                    ? ItemStack.EMPTY
+                    : toInsert.copyWithCount(toInsert.getCount() - inserted);
             if (slot == -1) {
                 player.containerMenu.setCarried(remainder);
             } else {
@@ -73,9 +77,10 @@ public record SatInsertPacket(BlockPos niPos, int playerSlot) implements CustomP
             }
 
             // Refresh client's item list
-            IItemHandler refreshedHandler = ni.getItemHandler();
-            if (refreshedHandler != null) {
-                PacketDistributor.sendToPlayer(player, RequestSatContentsPacket.buildContentsPacket(refreshedHandler));
+            net.bobofraggins.tremendousstorage.shared.storage.KeyCounter refreshed = ni.getCachedInventory();
+            if (refreshed != null) {
+                PacketDistributor.sendToPlayer(
+                        player, RequestSatContentsPacket.buildContentsPacket(refreshed, ni.getFluidStorageKeys()));
             }
         });
     }

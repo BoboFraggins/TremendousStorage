@@ -20,10 +20,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 /**
  * Client-to-server packet: extract items of a specific type from the network.
@@ -72,13 +72,14 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount, boo
             BlockEntity be = player.level().getBlockEntity(packet.niPos());
             if (!(be instanceof NetworkInterfaceBlockEntity ni)) return;
 
-            IItemHandler handler = ni.getItemHandler();
+            ResourceHandler<ItemResource> handler = ni.getItemHandler();
             if (handler == null) return;
 
             ItemStack carried = player.containerMenu.getCarried();
             int remaining = packet.amount();
             ItemStack result = ItemStack.EMPTY;
             boolean anyFluidExtracted = false;
+            ItemResource targetResource = ItemResource.of(packet.target());
 
             // Use direct slot iteration when available to avoid O(H) resolveSlot per slot.
             Iterable<?> slotSource = handler instanceof NiItemHandler nhi ? nhi.slots() : null;
@@ -87,40 +88,43 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount, boo
                 for (Object obj : slotSource) {
                     if (remaining <= 0) break;
                     NiItemHandler.SlotView view = (NiItemHandler.SlotView) obj;
-                    ItemStack inSlot = view.handler().getStackInSlot(view.localSlot());
-                    if (inSlot.isEmpty() || !ItemStack.isSameItemSameComponents(inSlot, packet.target())) continue;
+                    ItemResource res = view.handler().getResource(view.localSlot());
+                    if (res.isEmpty()) continue;
 
                     if (view.isFluid()) {
+                        if (!res.equals(targetResource)) continue;
                         if (carried.isEmpty() || !carried.is(Items.BUCKET)) break;
                         int toExtract = Math.min(remaining, carried.getCount());
-                        ItemStack extracted = view.handler().extractItem(view.localSlot(), toExtract, false);
-                        if (extracted.isEmpty()) continue;
-                        carried.shrink(extracted.getCount());
+                        int extracted = view.handler().extract(view.localSlot(), res, toExtract, null);
+                        if (extracted <= 0) continue;
+                        carried.shrink(extracted);
                         if (carried.isEmpty()) player.containerMenu.setCarried(ItemStack.EMPTY);
                         else player.containerMenu.setCarried(carried);
-                        remaining -= extracted.getCount();
-                        if (result.isEmpty()) result = extracted;
-                        else result.grow(extracted.getCount());
+                        remaining -= extracted;
+                        if (result.isEmpty()) result = res.toStack(extracted);
+                        else result.grow(extracted);
                         anyFluidExtracted = true;
                     } else {
-                        int toExtract = Math.min(remaining, inSlot.getCount());
-                        ItemStack extracted = view.handler().extractItem(view.localSlot(), toExtract, false);
-                        if (extracted.isEmpty()) continue;
-                        remaining -= extracted.getCount();
-                        if (result.isEmpty()) result = extracted;
-                        else result.grow(extracted.getCount());
+                        if (!res.equals(targetResource)) continue;
+                        long available = view.handler().getAmountAsLong(view.localSlot());
+                        int toExtract = (int) Math.min(remaining, available);
+                        int extracted = view.handler().extract(view.localSlot(), res, toExtract, null);
+                        if (extracted <= 0) continue;
+                        remaining -= extracted;
+                        if (result.isEmpty()) result = res.toStack(extracted);
+                        else result.grow(extracted);
                     }
                 }
             } else {
-                for (int s = 0; s < handler.getSlots() && remaining > 0; s++) {
-                    ItemStack inSlot = handler.getStackInSlot(s);
-                    if (inSlot.isEmpty() || !ItemStack.isSameItemSameComponents(inSlot, packet.target())) continue;
-                    int toExtract = Math.min(remaining, inSlot.getCount());
-                    ItemStack extracted = handler.extractItem(s, toExtract, false);
-                    if (extracted.isEmpty()) continue;
-                    remaining -= extracted.getCount();
-                    if (result.isEmpty()) result = extracted;
-                    else result.grow(extracted.getCount());
+                for (int s = 0; s < handler.size() && remaining > 0; s++) {
+                    ItemResource res = handler.getResource(s);
+                    if (res.isEmpty() || !res.equals(targetResource)) continue;
+                    int toExtract = (int) Math.min(remaining, handler.getAmountAsLong(s));
+                    int extracted = handler.extract(s, res, toExtract, null);
+                    if (extracted <= 0) continue;
+                    remaining -= extracted;
+                    if (result.isEmpty()) result = res.toStack(extracted);
+                    else result.grow(extracted);
                 }
             }
 
@@ -128,8 +132,8 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount, boo
             if (!result.isEmpty()) {
                 if (packet.toCursor() && player.containerMenu.getCarried().isEmpty()) {
                     player.containerMenu.setCarried(result);
-                } else {
-                    ItemHandlerHelper.giveItemToPlayer(player, result);
+                } else if (!player.addItem(result)) {
+                    player.drop(result, false);
                 }
             }
 

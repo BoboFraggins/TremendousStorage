@@ -10,7 +10,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
@@ -77,7 +76,7 @@ public record LocalStorageInteractPacket(BlockPos pos, boolean isBulk, int typeI
                     if (packet.toCursor()) {
                         player.containerMenu.setCarried(result);
                     } else {
-                        ItemHandlerHelper.giveItemToPlayer(player, result);
+                        if (!player.addItem(result)) player.drop(result, false);
                     }
                 }
             }

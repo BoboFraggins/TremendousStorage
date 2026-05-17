@@ -37,7 +37,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 public class BarrelBlockEntity extends BlockEntity implements MenuProvider, NetworkListable {
 
@@ -341,24 +342,28 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
         }
     }
 
-    private void pullFromHandler(IItemHandler handler) {
+    private void pullFromHandler(ResourceHandler<ItemResource> handler) {
         CompactingBarrelItemHandler compact = compactingUpgrade ? new CompactingBarrelItemHandler(this) : null;
-        for (int s = 0; s < handler.getSlots(); s++) {
-            ItemStack sim = handler.extractItem(s, PULL_AMOUNT, true);
-            if (sim.isEmpty()) continue;
-            int canInsert = simulatePullInsert(compact, sim);
+        for (int s = 0; s < handler.size(); s++) {
+            ItemResource res = handler.getResource(s);
+            if (res.isEmpty()) continue;
+            int available = (int) Math.min(handler.getAmountAsLong(s), PULL_AMOUNT);
+            if (available <= 0) continue;
+            ItemStack probe = res.toStack(available);
+            int canInsert = simulatePullInsert(compact, probe);
             if (canInsert <= 0) continue;
-            ItemStack extracted = handler.extractItem(s, canInsert, false);
-            if (!extracted.isEmpty()) doPullInsert(compact, extracted);
+            int extracted = handler.extract(s, res, canInsert, null);
+            if (extracted > 0) doPullInsert(compact, res.toStack(extracted));
             break;
         }
     }
 
     private int simulatePullInsert(CompactingBarrelItemHandler compact, ItemStack stack) {
         if (compact != null) {
+            net.neoforged.neoforge.transfer.item.ItemResource resource =
+                    net.neoforged.neoforge.transfer.item.ItemResource.of(stack);
             for (int ts = 0; ts < 3; ts++) {
-                ItemStack rem = compact.insertItem(ts, stack.copy(), true);
-                int n = stack.getCount() - (rem.isEmpty() ? 0 : rem.getCount());
+                int n = compact.simulateInsert(ts, resource, stack.getCount());
                 if (n > 0) return n;
             }
             return 0;
@@ -368,8 +373,11 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
 
     private void doPullInsert(CompactingBarrelItemHandler compact, ItemStack stack) {
         if (compact != null) {
+            net.neoforged.neoforge.transfer.item.ItemResource resource =
+                    net.neoforged.neoforge.transfer.item.ItemResource.of(stack);
             for (int ts = 0; ts < 3 && !stack.isEmpty(); ts++) {
-                stack = compact.insertItem(ts, stack, false);
+                int inserted = compact.insert(ts, resource, stack.getCount(), null);
+                if (inserted > 0) stack.shrink(inserted);
             }
         } else {
             insert(stack, stack.getCount(), false);

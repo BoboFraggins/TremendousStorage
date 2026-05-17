@@ -5,20 +5,20 @@ import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * {@link IFluidHandlerItem} capability for the Tank block item.
+ * {@link ResourceHandler}{@code <FluidResource>} capability for the Tank block item.
  *
- * <p>Reads and writes fluid state via the {@link TankContents} data component.
- * Capacity is derived from the tier stored in {@code minecraft:block_entity_data}.
+ * <p>Reads and writes fluid state via the {@link TankContents} data component. Capacity is derived
+ * from the tier stored in {@code minecraft:block_entity_data}.
  *
- * <p>The handler works on a copy of the item stack; after calling {@link #fill} or
- * {@link #drain(int, FluidAction)} the caller must replace the player's held item with
- * {@link #getContainer()}. {@link net.neoforged.neoforge.fluids.FluidUtil} handles this
- * automatically.
+ * <p>The handler works on a copy of the item stack. After calling {@link #insert} or
+ * {@link #extract} the caller can retrieve the updated stack via {@link #getContainer()}.
  */
-public class TankItemFluidHandler implements IFluidHandlerItem {
+public class TankItemFluidHandler implements ResourceHandler<FluidResource> {
 
     private final ItemStack container;
 
@@ -26,14 +26,9 @@ public class TankItemFluidHandler implements IFluidHandlerItem {
         this.container = stack.copy();
     }
 
-    @Override
     public ItemStack getContainer() {
         return container;
     }
-
-    // -------------------------------------------------------------------------
-    // Helpers
-    // -------------------------------------------------------------------------
 
     private TankContents contents() {
         TankContents c = container.get(Registration.TANK_CONTENTS.get());
@@ -47,71 +42,56 @@ public class TankItemFluidHandler implements IFluidHandlerItem {
         return tier.getScaledCapacity(TankBlockEntity.BASE_CAPACITY);
     }
 
-    // -------------------------------------------------------------------------
-    // IFluidHandler
-    // -------------------------------------------------------------------------
-
     @Override
-    public int getTanks() {
+    public int size() {
         return 1;
     }
 
     @Override
-    public FluidStack getFluidInTank(int tank) {
+    public FluidResource getResource(int index) {
         TankContents c = contents();
-        if (c.storedFluid().isEmpty() || c.amount() == 0) return FluidStack.EMPTY;
-        return c.storedFluid().copyWithAmount((int) Math.min(c.amount(), Integer.MAX_VALUE));
+        return (c.storedFluid().isEmpty() || c.amount() == 0) ? FluidResource.EMPTY : FluidResource.of(c.storedFluid());
     }
 
     @Override
-    public int getTankCapacity(int tank) {
-        return (int) Math.min(capacityLong(), Integer.MAX_VALUE);
+    public long getAmountAsLong(int index) {
+        return contents().amount();
     }
 
     @Override
-    public boolean isFluidValid(int tank, FluidStack stack) {
-        if (stack.isEmpty()) return false;
-        TankContents c = contents();
-        return c.storedFluid().isEmpty() || FluidStack.isSameFluidSameComponents(c.storedFluid(), stack);
+    public long getCapacityAsLong(int index, FluidResource resource) {
+        return capacityLong();
     }
 
     @Override
-    public int fill(FluidStack resource, FluidAction action) {
-        if (resource.isEmpty()) return 0;
+    public boolean isValid(int index, FluidResource resource) {
+        if (resource.isEmpty()) return false;
         TankContents c = contents();
-        if (!c.storedFluid().isEmpty() && !FluidStack.isSameFluidSameComponents(c.storedFluid(), resource)) return 0;
+        return c.storedFluid().isEmpty() || resource.matches(c.storedFluid());
+    }
+
+    @Override
+    public int insert(int index, FluidResource resource, int amount, TransactionContext tx) {
+        if (!isValid(index, resource) || amount <= 0) return 0;
+        TankContents c = contents();
         long space = capacityLong() - c.amount();
-        int toFill = (int) Math.min(resource.getAmount(), Math.min(space, Integer.MAX_VALUE));
+        int toFill = (int) Math.min(amount, Math.min(space, Integer.MAX_VALUE));
         if (toFill <= 0) return 0;
-        if (action.execute()) {
-            FluidStack newType = c.storedFluid().isEmpty() ? resource.copyWithAmount(1) : c.storedFluid();
-            container.set(
-                    Registration.TANK_CONTENTS.get(), new TankContents(newType, c.amount() + toFill, c.bucketMode()));
-        }
+        FluidStack newType = c.storedFluid().isEmpty() ? resource.toStack(1) : c.storedFluid();
+        container.set(Registration.TANK_CONTENTS.get(), new TankContents(newType, c.amount() + toFill, c.bucketMode()));
         return toFill;
     }
 
     @Override
-    public FluidStack drain(FluidStack resource, FluidAction action) {
-        if (resource.isEmpty()) return FluidStack.EMPTY;
+    public int extract(int index, FluidResource resource, int amount, TransactionContext tx) {
+        if (resource.isEmpty() || amount <= 0) return 0;
         TankContents c = contents();
-        if (c.storedFluid().isEmpty() || !FluidStack.isSameFluidSameComponents(c.storedFluid(), resource))
-            return FluidStack.EMPTY;
-        return drain(resource.getAmount(), action);
-    }
-
-    @Override
-    public FluidStack drain(int maxDrain, FluidAction action) {
-        TankContents c = contents();
-        if (c.storedFluid().isEmpty() || c.amount() == 0) return FluidStack.EMPTY;
-        int toDrain = (int) Math.min(maxDrain, Math.min(c.amount(), Integer.MAX_VALUE));
-        if (toDrain <= 0) return FluidStack.EMPTY;
-        FluidStack result = c.storedFluid().copyWithAmount(toDrain);
-        if (action.execute()) {
-            container.set(
-                    Registration.TANK_CONTENTS.get(),
-                    new TankContents(c.storedFluid(), c.amount() - toDrain, c.bucketMode()));
-        }
-        return result;
+        if (c.storedFluid().isEmpty() || !resource.matches(c.storedFluid())) return FluidStack.EMPTY.getAmount();
+        int toDrain = (int) Math.min(amount, Math.min(c.amount(), Integer.MAX_VALUE));
+        if (toDrain <= 0) return 0;
+        container.set(
+                Registration.TANK_CONTENTS.get(),
+                new TankContents(c.storedFluid(), c.amount() - toDrain, c.bucketMode()));
+        return toDrain;
     }
 }

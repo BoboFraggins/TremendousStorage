@@ -11,7 +11,6 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
@@ -90,7 +89,7 @@ public record BackpackInteractPacket(
                 if (packet.toCursor()) {
                     player.containerMenu.setCarried(extracted);
                 } else {
-                    ItemHandlerHelper.giveItemToPlayer(player, extracted);
+                    if (!player.addItem(extracted)) player.drop(extracted, false);
                 }
             }
         });

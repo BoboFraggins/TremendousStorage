@@ -9,33 +9,35 @@ import net.bobofraggins.tremendousstorage.storage.manillafolder.FolderContents;
 import net.bobofraggins.tremendousstorage.storage.manillafolder.ManillaFolderItem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * Exposes the Filing Cabinet's folder contents as an {@link IItemHandler} for use by hoppers,
- * pipes, and any mod that reads inventories via the NeoForge capability system.
+ * Exposes the Filing Cabinet's folder contents as a {@link ResourceHandler}{@code <ItemResource>}
+ * for use by hoppers, pipes, and any mod that reads inventories via the NeoForge capability system.
  *
  * <p>Slot model: 8 slots, one per folder slot. Each slot presents the <em>stored item</em>
- * inside the folder — not the folder item itself. External automation sees the cabinet as a
- * plain 8-slot inventory where each slot holds the items stored in the corresponding folder.
+ * inside the folder — not the folder item itself.
  *
  * <p>Insert rules:
  * <ol>
  *   <li>Damageable items are always rejected.
- *   <li>If the slot has no folder, the stack is returned unchanged.
+ *   <li>If the slot has no folder, nothing is inserted.
  *   <li>If the folder is locked to a matching item, items are inserted up to remaining capacity.
  *   <li>If the folder is unlocked (empty), it is locked to this item type and items are inserted.
- *   <li>If the folder is locked to a different item, the stack is returned unchanged.
+ *   <li>If the folder is locked to a different item, nothing is inserted.
  * </ol>
  *
  * <p>Extract rules:
  * <ol>
- *   <li>If the slot has no folder, is unlocked, or has count == 0, EMPTY is returned.
+ *   <li>If the slot has no folder, is unlocked, or has count == 0, returns 0.
  *   <li>Up to {@code min(amount, maxStackSize, count)} items are extracted.
  *   <li>The folder remains locked to its item type even when drained to count 0.
  * </ol>
  */
-public class FilingCabinetItemHandler implements IItemHandler, IKeyCounterContributor, IPreferredStorage {
+public class FilingCabinetItemHandler
+        implements ResourceHandler<ItemResource>, IKeyCounterContributor, IPreferredStorage {
 
     private final FilingCabinetBlockEntity be;
 
@@ -43,13 +45,11 @@ public class FilingCabinetItemHandler implements IItemHandler, IKeyCounterContri
         this.be = be;
     }
 
-    /** Returns the server if the BE's level is a server level, else null. */
     private MinecraftServer server() {
         if (be.getLevel() instanceof net.minecraft.server.level.ServerLevel sl) return sl.getServer();
         return null;
     }
 
-    /** Gets the live folder contents, routing through EnderFolderStorage for Ender Folders. */
     private FolderContents getContents(ItemStack folder) {
         if (folder.getItem() instanceof EnderFolderItem) {
             return EnderFolderItem.getLiveContents(folder, server());
@@ -57,7 +57,6 @@ public class FilingCabinetItemHandler implements IItemHandler, IKeyCounterContri
         return ManillaFolderItem.getContents(folder);
     }
 
-    /** Writes updated folder contents, propagating to linked items for Ender Folders. */
     private ItemStack setContents(ItemStack folder, FolderContents fc) {
         if (folder.getItem() instanceof EnderFolderItem) {
             ItemStack copy = folder.copyWithCount(1);
@@ -68,112 +67,108 @@ public class FilingCabinetItemHandler implements IItemHandler, IKeyCounterContri
     }
 
     // -------------------------------------------------------------------------
-    // IItemHandler — metadata
+    // ResourceHandler — metadata
     // -------------------------------------------------------------------------
 
     @Override
-    public int getSlots() {
+    public int size() {
         return FilingCabinetBlockEntity.SLOT_COUNT;
     }
 
     @Override
-    public int getSlotLimit(int slot) {
-        ItemStack folder = be.getFolder(slot);
-        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) {
-            return 0;
-        }
-        long capacity = ManillaFolderItem.getCapacity(folder);
-        return (int) Math.min(Integer.MAX_VALUE, capacity);
+    public long getCapacityAsLong(int index, ItemResource resource) {
+        ItemStack folder = be.getFolder(index);
+        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) return 0;
+        return ManillaFolderItem.getCapacity(folder);
     }
 
     @Override
-    public boolean isItemValid(int slot, ItemStack stack) {
-        if (stack.isEmpty() || stack.isDamageableItem()) return false;
-        ItemStack folder = be.getFolder(slot);
+    public boolean isValid(int index, ItemResource resource) {
+        if (resource.isEmpty() || resource.toStack(1).isDamageableItem()) return false;
+        ItemStack folder = be.getFolder(index);
         if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) return false;
         FolderContents contents = getContents(folder);
-        return contents.accepts(stack);
+        return contents.accepts(resource.toStack(1));
     }
 
     // -------------------------------------------------------------------------
-    // IItemHandler — read
+    // ResourceHandler — read
     // -------------------------------------------------------------------------
 
     @Override
-    public ItemStack getStackInSlot(int slot) {
-        ItemStack folder = be.getFolder(slot);
-        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) {
-            return ItemStack.EMPTY;
-        }
+    public ItemResource getResource(int index) {
+        ItemStack folder = be.getFolder(index);
+        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) return ItemResource.EMPTY;
         FolderContents contents = getContents(folder);
-        if (contents.isEmpty() || contents.count() == 0) return ItemStack.EMPTY;
-        ItemStack stored = contents.storedItem().get();
-        return stored.copyWithCount((int) Math.min(Integer.MAX_VALUE, contents.count()));
+        if (contents.isEmpty() || contents.count() == 0) return ItemResource.EMPTY;
+        return contents.storedItem().map(ItemResource::of).orElse(ItemResource.EMPTY);
+    }
+
+    @Override
+    public long getAmountAsLong(int index) {
+        ItemStack folder = be.getFolder(index);
+        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) return 0;
+        FolderContents contents = getContents(folder);
+        if (contents.isEmpty()) return 0;
+        return contents.count();
     }
 
     // -------------------------------------------------------------------------
-    // IItemHandler — insert
+    // ResourceHandler — insert
     // -------------------------------------------------------------------------
 
     @Override
-    public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (stack.isEmpty()) return ItemStack.EMPTY;
-        if (stack.isDamageableItem()) return stack; // rule 1: reject damageable
+    public int insert(int index, ItemResource resource, int amount, TransactionContext tx) {
+        if (resource.isEmpty() || amount <= 0) return 0;
+        ItemStack stack = resource.toStack(1);
+        if (stack.isDamageableItem()) return 0;
 
-        ItemStack folder = be.getFolder(slot);
-        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) {
-            return stack; // rule 2: no folder here
-        }
+        ItemStack folder = be.getFolder(index);
+        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) return 0;
 
         FolderContents contents = getContents(folder);
         long capacity = ManillaFolderItem.getCapacity(folder);
 
-        // Rule 4: unlocked folder — lock it to this item type first
         if (contents.isEmpty()) {
             contents = new FolderContents(java.util.Optional.of(stack.copyWithCount(1)), 0L, contents.tier());
         } else if (!contents.accepts(stack)) {
-            return stack; // rule 5: locked to a different item
+            return 0;
         }
 
-        // Rules 3 & 4: insert up to remaining capacity
-        FolderContents.InsertResult result = contents.insert(stack.getCount(), capacity);
+        FolderContents.InsertResult result = contents.insert(amount, capacity);
         int remainder = (int) result.remainder();
 
-        if (!simulate) {
-            be.notifyFolderContentsChanged(slot, setContents(folder, result.updated()));
-        }
+        be.notifyFolderContentsChanged(index, setContents(folder, result.updated()));
 
-        if (be.isVoidExcess()) return ItemStack.EMPTY;
-        return remainder == 0 ? ItemStack.EMPTY : stack.copyWithCount(remainder);
+        if (be.isVoidExcess()) return amount;
+        return amount - remainder;
     }
 
     // -------------------------------------------------------------------------
-    // IItemHandler — extract
+    // ResourceHandler — extract
     // -------------------------------------------------------------------------
 
     @Override
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (amount <= 0) return ItemStack.EMPTY;
+    public int extract(int index, ItemResource resource, int amount, TransactionContext tx) {
+        if (resource.isEmpty() || amount <= 0) return 0;
 
-        ItemStack folder = be.getFolder(slot);
-        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) {
-            return ItemStack.EMPTY;
-        }
+        ItemStack folder = be.getFolder(index);
+        if (folder.isEmpty() || !(folder.getItem() instanceof ManillaFolderItem)) return 0;
 
         FolderContents contents = getContents(folder);
-        if (contents.isEmpty() || contents.count() == 0) return ItemStack.EMPTY;
+        if (contents.isEmpty() || contents.count() == 0) return 0;
+        if (contents.storedItem().isEmpty()) return 0;
 
         ItemStack stored = contents.storedItem().get();
+        if (!ItemStack.isSameItemSameComponents(stored, resource.toStack(1))) return 0;
+
         long toExtract = Math.min(amount, Math.min(stored.getMaxStackSize(), contents.count()));
-        if (toExtract <= 0) return ItemStack.EMPTY;
+        if (toExtract <= 0) return 0;
 
-        if (!simulate) {
-            FolderContents.ExtractResult result = contents.extract(toExtract);
-            // Folder stays locked to its item type at count 0
-            be.notifyFolderContentsChanged(slot, setContents(folder, result.updated()));
-        }
+        FolderContents.ExtractResult result = contents.extract(toExtract);
+        be.notifyFolderContentsChanged(index, setContents(folder, result.updated()));
 
-        return stored.copyWithCount((int) toExtract);
+        return (int) toExtract;
     }
 
     // -------------------------------------------------------------------------

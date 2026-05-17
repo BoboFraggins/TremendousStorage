@@ -5,10 +5,13 @@ import net.bobofraggins.tremendousstorage.shared.storage.IPreferredStorage;
 import net.bobofraggins.tremendousstorage.shared.storage.KeyCounter;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * Exposes the Tremendous Chest as a dynamic-slot {@link IItemHandler} for automation.
+ * Exposes the Tremendous Chest as a dynamic-slot {@link ResourceHandler}{@code <ItemResource>} for
+ * automation.
  *
  * <p>Slot count equals the number of distinct item types currently stored. Each slot presents
  * up to {@code min(maxStackSize, count)} items of its type for extraction. Slot count changes
@@ -17,8 +20,8 @@ import net.neoforged.neoforge.items.IItemHandler;
  * <p>Insert rules:
  * <ol>
  *   <li>Damageable items and items with non-default component data are refused.
- *   <li>If the container is full (32,768 total items), the stack is returned unchanged.
- *   <li>Inserts up to remaining pool capacity; remainder is returned.
+ *   <li>If the container is full (32,768 total items), nothing is inserted.
+ *   <li>Inserts up to remaining pool capacity; returns amount inserted.
  * </ol>
  *
  * <p>Extract rules:
@@ -27,7 +30,7 @@ import net.neoforged.neoforge.items.IItemHandler;
  *   <li>When a type's count reaches zero its slot is removed.
  * </ol>
  */
-public class ChestItemHandler implements IItemHandler, IKeyCounterContributor, IPreferredStorage {
+public class ChestItemHandler implements ResourceHandler<ItemResource>, IKeyCounterContributor, IPreferredStorage {
 
     private final ChestBlockEntity be;
 
@@ -36,44 +39,54 @@ public class ChestItemHandler implements IItemHandler, IKeyCounterContributor, I
     }
 
     @Override
-    public int getSlots() {
+    public int size() {
         // Always expose at least one slot so hoppers can insert into an empty chest.
-        // insertItem ignores the slot index, so slot 0 is always valid for insertion.
         return Math.max(1, be.typeCount());
     }
 
     @Override
-    public int getSlotLimit(int slot) {
-        return (int) Math.min(Integer.MAX_VALUE, be.getCapacity());
+    public long getCapacityAsLong(int index, ItemResource resource) {
+        return be.getCapacity();
     }
 
     @Override
-    public boolean isItemValid(int slot, ItemStack stack) {
-        return be.acceptsItem(stack);
+    public boolean isValid(int index, ItemResource resource) {
+        return be.acceptsItem(resource.toStack(1));
     }
 
     @Override
-    public ItemStack getStackInSlot(int slot) {
-        ItemStack type = be.getType(slot);
-        if (type.isEmpty()) return ItemStack.EMPTY;
-        long count = be.getCount(slot);
-        if (count == 0) return ItemStack.EMPTY;
-        int visible = (int) Math.min(type.getMaxStackSize(), count);
-        return type.copyWithCount(visible);
+    public ItemResource getResource(int index) {
+        ItemStack type = be.getType(index);
+        if (type.isEmpty()) return ItemResource.EMPTY;
+        long count = be.getCount(index);
+        if (count == 0) return ItemResource.EMPTY;
+        return ItemResource.of(type);
     }
 
     @Override
-    public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (!be.acceptsItem(stack)) return stack;
-
-        long remainder = be.insert(stack, stack.getCount(), simulate);
-        if (remainder == stack.getCount()) return stack;
-        return remainder == 0 ? ItemStack.EMPTY : stack.copyWithCount((int) remainder);
+    public long getAmountAsLong(int index) {
+        ItemStack type = be.getType(index);
+        if (type.isEmpty()) return 0;
+        return be.getCount(index);
     }
 
     @Override
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        return be.extract(slot, amount, simulate);
+    public int insert(int index, ItemResource resource, int amount, TransactionContext tx) {
+        if (resource.isEmpty() || amount <= 0) return 0;
+        ItemStack stack = resource.toStack(amount);
+        if (!be.acceptsItem(stack)) return 0;
+        long remainder = be.insert(stack, amount, false);
+        return amount - (int) Math.min(remainder, amount);
+    }
+
+    @Override
+    public int extract(int index, ItemResource resource, int amount, TransactionContext tx) {
+        if (resource.isEmpty() || amount <= 0) return 0;
+        ItemStack typeInSlot = be.getType(index);
+        if (typeInSlot.isEmpty()) return 0;
+        if (!ItemStack.isSameItemSameComponents(typeInSlot, resource.toStack(1))) return 0;
+        ItemStack extracted = be.extract(index, amount, false);
+        return extracted.getCount();
     }
 
     @Override

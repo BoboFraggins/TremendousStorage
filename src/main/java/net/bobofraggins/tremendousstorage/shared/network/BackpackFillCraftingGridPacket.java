@@ -15,7 +15,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /**
@@ -69,7 +68,7 @@ public record BackpackFillCraftingGridPacket(int slotType, int slotIndex, String
             for (int i = 1; i <= 9; i++) {
                 ItemStack existing = menu.slots.get(i).getItem();
                 if (!existing.isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, existing.copy());
+                    if (!player.addItem(existing.copy())) player.drop(existing.copy(), false);
                     menu.slots.get(i).set(ItemStack.EMPTY);
                 }
             }

@@ -1,13 +1,18 @@
 package net.bobofraggins.tremendousstorage.storage.recyclingbin;
 
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
  * Item handler for the Recycling Bin. Accepts any item and destroys it,
  * generating 10 mB of Positive Vibes per item destroyed.
+ *
+ * <p>Empty fluid containers are routed to the fluid-fill slot (slot 0 of the transfer container)
+ * when that slot is available; otherwise they are voided like any other item.
  */
-public class RecyclingBinItemHandler implements IItemHandler {
+public class RecyclingBinItemHandler implements ResourceHandler<ItemResource> {
 
     private final RecyclingBinBlockEntity be;
 
@@ -16,49 +21,48 @@ public class RecyclingBinItemHandler implements IItemHandler {
     }
 
     @Override
-    public int getSlots() {
+    public int size() {
         return 1;
     }
 
     @Override
-    public ItemStack getStackInSlot(int slot) {
-        return ItemStack.EMPTY;
+    public ItemResource getResource(int index) {
+        return ItemResource.EMPTY;
     }
 
     @Override
-    public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-        if (stack.isEmpty()) return ItemStack.EMPTY;
-        if (RecyclingBinMenu.isEmptyFluidContainer(stack)) {
-            // Route to the fluid input slot if it's empty
-            if (be.transferContainer.getItem(0).isEmpty()) {
-                if (!simulate) {
-                    ItemStack toPlace = stack.copyWithCount(1);
-                    be.transferContainer.setItem(0, toPlace);
-                }
-                ItemStack remainder = stack.copy();
-                remainder.shrink(1);
-                return remainder.isEmpty() ? ItemStack.EMPTY : remainder;
-            }
-            // Fluid input occupied — void it
-        }
-        if (!simulate) {
-            be.onItemsDestroyed(stack.getCount());
-        }
-        return ItemStack.EMPTY;
+    public long getAmountAsLong(int index) {
+        return 0;
     }
 
     @Override
-    public ItemStack extractItem(int slot, int amount, boolean simulate) {
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    public int getSlotLimit(int slot) {
+    public long getCapacityAsLong(int index, ItemResource resource) {
         return 64;
     }
 
     @Override
-    public boolean isItemValid(int slot, ItemStack stack) {
+    public boolean isValid(int index, ItemResource resource) {
         return true;
+    }
+
+    @Override
+    public int insert(int index, ItemResource resource, int amount, TransactionContext tx) {
+        if (index != 0 || resource.isEmpty() || amount <= 0) return 0;
+        ItemStack stack = resource.toStack(1);
+        if (RecyclingBinMenu.isEmptyFluidContainer(stack)) {
+            if (be.transferContainer.getItem(0).isEmpty()) {
+                be.transferContainer.setItem(0, stack);
+                int destroyed = amount - 1;
+                if (destroyed > 0) be.onItemsDestroyed(destroyed);
+                return amount;
+            }
+        }
+        be.onItemsDestroyed(amount);
+        return amount;
+    }
+
+    @Override
+    public int extract(int index, ItemResource resource, int amount, TransactionContext tx) {
+        return 0;
     }
 }

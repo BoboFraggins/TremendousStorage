@@ -28,9 +28,6 @@ import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.storage.TieredBlockItem;
 import net.bobofraggins.tremendousstorage.shared.ui.PriorityControl;
 import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsMenu;
-import net.bobofraggins.tremendousstorage.shared.util.LegacyEnergyStorageWrapper;
-import net.bobofraggins.tremendousstorage.shared.util.LegacyFluidHandlerWrapper;
-import net.bobofraggins.tremendousstorage.shared.util.LegacyItemHandlerWrapper;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlock;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalMenu;
@@ -1338,89 +1335,49 @@ public final class Registration {
 
     private static void registerCapabilities(RegisterCapabilitiesEvent event) {
         event.registerBlockEntity(
-                Capabilities.Item.BLOCK,
-                BARREL_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(new CompactingBarrelItemHandler(be)));
+                Capabilities.Item.BLOCK, BARREL_BE_TYPE.get(), (be, side) -> new CompactingBarrelItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.Item.BLOCK,
-                ENDER_BARREL_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(new CompactingBarrelItemHandler(be)));
+                Capabilities.Item.BLOCK, ENDER_BARREL_BE_TYPE.get(), (be, side) -> new CompactingBarrelItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.Item.BLOCK,
                 ARMORY_CABINET_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(
-                        new net.bobofraggins.tremendousstorage.storage.chest.ChestItemHandler(be)));
+                (be, side) -> new net.bobofraggins.tremendousstorage.storage.chest.ChestItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.Item.BLOCK,
-                FILING_CABINET_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(new FilingCabinetItemHandler(be)));
+                Capabilities.Item.BLOCK, FILING_CABINET_BE_TYPE.get(), (be, side) -> new FilingCabinetItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.Item.BLOCK,
-                TREMENDOUS_CHEST_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(new ChestItemHandler(be)));
+                Capabilities.Item.BLOCK, TREMENDOUS_CHEST_BE_TYPE.get(), (be, side) -> new ChestItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.Item.BLOCK,
-                TREMENDOUS_BACKPACK_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(new ChestItemHandler(be)));
+                Capabilities.Item.BLOCK, TREMENDOUS_BACKPACK_BE_TYPE.get(), (be, side) -> new ChestItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.Item.BLOCK,
-                PICNIC_BASKET_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(new ChestItemHandler(be)));
+                Capabilities.Item.BLOCK, PICNIC_BASKET_BE_TYPE.get(), (be, side) -> new ChestItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.Item.BLOCK,
-                ENDER_PICNIC_BASKET_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(new ChestItemHandler(be)));
+                Capabilities.Item.BLOCK, ENDER_PICNIC_BASKET_BE_TYPE.get(), (be, side) -> new ChestItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.Item.BLOCK,
-                ENDER_TREMENDOUS_CHEST_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(new ChestItemHandler(be)));
+                Capabilities.Item.BLOCK, ENDER_TREMENDOUS_CHEST_BE_TYPE.get(), (be, side) -> new ChestItemHandler(be));
         event.registerBlockEntity(
                 Capabilities.Item.BLOCK,
                 ENDER_TREMENDOUS_BACKPACK_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(new ChestItemHandler(be)));
+                (be, side) -> new ChestItemHandler(be));
+        event.registerBlockEntity(Capabilities.Fluid.BLOCK, TANK_BE_TYPE.get(), (be, side) -> new TankFluidHandler(be));
         event.registerBlockEntity(
-                Capabilities.Fluid.BLOCK,
-                TANK_BE_TYPE.get(),
-                (be, side) -> new LegacyFluidHandlerWrapper(new TankFluidHandler(be)));
+                Capabilities.Fluid.BLOCK, ENDER_TANK_BE_TYPE.get(), (be, side) -> new TankFluidHandler(be));
+        event.registerItem(Capabilities.Fluid.ITEM, (stack, ctx) -> new TankItemFluidHandler(stack), TANK_ITEM.get());
+        event.registerBlockEntity(Capabilities.Item.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> be.getNetworkView());
         event.registerBlockEntity(
-                Capabilities.Fluid.BLOCK,
-                ENDER_TANK_BE_TYPE.get(),
-                (be, side) -> new LegacyFluidHandlerWrapper(new TankFluidHandler(be)));
-        event.registerItem(
-                Capabilities.Fluid.ITEM,
-                (stack, ctx) -> new LegacyFluidHandlerWrapper(new TankItemFluidHandler(stack)),
-                TANK_ITEM.get());
+                Capabilities.Energy.BLOCK, TUBE_BE_TYPE.get(), (be, side) -> new TubeEnergyHandler(be));
         event.registerBlockEntity(
-                Capabilities.Item.BLOCK,
-                TUBE_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(be.getNetworkView()));
+                Capabilities.Item.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getItemHandler());
         event.registerBlockEntity(
-                Capabilities.Energy.BLOCK,
-                TUBE_BE_TYPE.get(),
-                (be, side) -> new LegacyEnergyStorageWrapper(new TubeEnergyHandler(be)));
+                Capabilities.Fluid.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> be.getNiFluidHandler());
         event.registerBlockEntity(
-                Capabilities.Item.BLOCK,
-                NETWORK_INTERFACE_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(be.getItemHandler()));
-        event.registerBlockEntity(
-                Capabilities.Fluid.BLOCK,
-                NETWORK_INTERFACE_BE_TYPE.get(),
-                (be, side) -> new LegacyFluidHandlerWrapper(be.getNiFluidHandler()));
-        event.registerBlockEntity(
-                Capabilities.Energy.BLOCK,
-                NETWORK_INTERFACE_BE_TYPE.get(),
-                (be, side) -> new LegacyEnergyStorageWrapper(new NiEnergyHandler(be)));
+                Capabilities.Energy.BLOCK, NETWORK_INTERFACE_BE_TYPE.get(), (be, side) -> new NiEnergyHandler(be));
         event.registerBlockEntity(
                 Capabilities.Energy.BLOCK,
                 STIRLING_ENGINE_BE_TYPE.get(),
-                (be, side) -> new LegacyEnergyStorageWrapper(new StirlingEngineEnergyHandler(be)));
+                (be, side) -> new StirlingEngineEnergyHandler(be));
         event.registerBlockEntity(
-                Capabilities.Item.BLOCK,
-                RECYCLING_BIN_BE_TYPE.get(),
-                (be, side) -> new LegacyItemHandlerWrapper(new RecyclingBinItemHandler(be)));
+                Capabilities.Item.BLOCK, RECYCLING_BIN_BE_TYPE.get(), (be, side) -> new RecyclingBinItemHandler(be));
         event.registerBlockEntity(
-                Capabilities.Fluid.BLOCK,
-                RECYCLING_BIN_BE_TYPE.get(),
-                (be, side) -> new LegacyFluidHandlerWrapper(new RecyclingBinFluidHandler(be)));
+                Capabilities.Fluid.BLOCK, RECYCLING_BIN_BE_TYPE.get(), (be, side) -> new RecyclingBinFluidHandler(be));
     }
 }

@@ -1,16 +1,18 @@
 package net.bobofraggins.tremendousstorage.storage.barrel;
 
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
-import org.jetbrains.annotations.NotNull;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * Exposes the Barrel's single-type item storage as an {@link IItemHandler} capability.
+ * Exposes the Barrel's single-type item storage as a {@link ResourceHandler}{@code <ItemResource>}
+ * capability.
  *
  * <p>Presents one virtual slot representing the entire stored quantity, capped at the item's
  * max stack size per call. Insert and extract respect the barrel's lock and void-excess settings.
  */
-public class BarrelItemHandler implements IItemHandler {
+public class BarrelItemHandler implements ResourceHandler<ItemResource> {
 
     private final BarrelBlockEntity be;
 
@@ -19,41 +21,49 @@ public class BarrelItemHandler implements IItemHandler {
     }
 
     @Override
-    public int getSlots() {
+    public int size() {
         return 1;
     }
 
     @Override
-    public @NotNull ItemStack getStackInSlot(int slot) {
-        if (slot != 0 || !be.isLocked() || be.getCount() <= 0) return ItemStack.EMPTY;
-        ItemStack type = be.getStoredItem();
-        return type.copyWithCount((int) Math.min(be.getCount(), Integer.MAX_VALUE));
+    public ItemResource getResource(int index) {
+        if (index != 0 || !be.isLocked() || be.getCount() <= 0) return ItemResource.EMPTY;
+        return ItemResource.of(be.getStoredItem());
     }
 
     @Override
-    public @NotNull ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate) {
-        if (slot != 0 || stack.isEmpty()) return stack;
-        long remainder = be.insert(stack, stack.getCount(), simulate);
-        if (remainder <= 0) return ItemStack.EMPTY;
-        return stack.copyWithCount((int) Math.min(remainder, Integer.MAX_VALUE));
+    public long getAmountAsLong(int index) {
+        if (index != 0 || !be.isLocked()) return 0;
+        return be.getCount();
     }
 
     @Override
-    public @NotNull ItemStack extractItem(int slot, int amount, boolean simulate) {
-        if (slot != 0 || amount <= 0) return ItemStack.EMPTY;
-        int capped = Math.min(amount, be.isLocked() ? be.getStoredItem().getMaxStackSize() : 0);
-        return be.extract(capped, simulate);
-    }
-
-    @Override
-    public int getSlotLimit(int slot) {
+    public long getCapacityAsLong(int index, ItemResource resource) {
+        if (index != 0) return 0;
         return be.isLocked() ? be.getStoredItem().getMaxStackSize() : 64;
     }
 
     @Override
-    public boolean isItemValid(int slot, @NotNull ItemStack stack) {
-        if (stack.isEmpty()) return false;
+    public boolean isValid(int index, ItemResource resource) {
+        if (index != 0 || resource.isEmpty()) return false;
         if (!be.isLocked()) return true;
-        return ItemStack.isSameItemSameComponents(be.getStoredItem(), stack);
+        return ItemStack.isSameItemSameComponents(be.getStoredItem(), resource.toStack(1));
+    }
+
+    @Override
+    public int insert(int index, ItemResource resource, int amount, TransactionContext tx) {
+        if (index != 0 || resource.isEmpty() || amount <= 0) return 0;
+        long remainder = be.insert(resource.toStack(amount), amount, false);
+        return amount - (int) Math.min(remainder, amount);
+    }
+
+    @Override
+    public int extract(int index, ItemResource resource, int amount, TransactionContext tx) {
+        if (index != 0 || resource.isEmpty() || amount <= 0) return 0;
+        if (!be.isLocked() || be.getCount() <= 0) return 0;
+        if (!ItemStack.isSameItemSameComponents(be.getStoredItem(), resource.toStack(1))) return 0;
+        int capped = (int) Math.min(amount, be.getStoredItem().getMaxStackSize());
+        ItemStack extracted = be.extract(capped, false);
+        return extracted.getCount();
     }
 }

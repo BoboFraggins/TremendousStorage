@@ -25,6 +25,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
 
@@ -190,12 +191,12 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
         if (!be.isLocked()) return;
         // Locked (just now or previously): try to insert the held item into whichever slot matches
         var handler = new CompactingBarrelItemHandler(be);
+        ItemResource resource = ItemResource.of(stack);
         for (int s = 0; s < 3; s++) {
-            if (handler.isItemValid(s, stack)) {
-                ItemStack remainder = handler.insertItem(s, stack.copy(), false);
-                if (!player.isCreative()) {
-                    int consumed = stack.getCount() - (remainder.isEmpty() ? 0 : remainder.getCount());
-                    stack.shrink(consumed);
+            if (handler.isValid(s, resource)) {
+                int inserted = handler.insert(s, resource, stack.getCount(), null);
+                if (!player.isCreative() && inserted > 0) {
+                    stack.shrink(inserted);
                 }
                 return;
             }
@@ -205,9 +206,12 @@ public class BarrelBlock extends BaseEntityBlock implements NetworkConnector {
     static void extractCompactingSlot(BarrelBlockEntity be, Player player, int slot, int amount) {
         if (!be.isLocked()) return;
         var handler = new CompactingBarrelItemHandler(be);
-        ItemStack extracted = handler.extractItem(slot, amount, false);
-        if (!extracted.isEmpty() && !player.addItem(extracted)) {
-            player.drop(extracted, false);
+        ItemResource res = handler.getResource(slot);
+        if (res.isEmpty()) return;
+        int extracted = handler.extract(slot, res, amount, null);
+        if (extracted > 0) {
+            ItemStack extractedStack = res.toStack(extracted);
+            if (!player.addItem(extractedStack)) player.drop(extractedStack, false);
         }
     }
 
