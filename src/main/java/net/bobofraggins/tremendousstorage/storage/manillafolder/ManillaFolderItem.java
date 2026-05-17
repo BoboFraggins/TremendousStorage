@@ -62,6 +62,7 @@ public class ManillaFolderItem extends Item {
     // Tooltip
     // -------------------------------------------------------------------------
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

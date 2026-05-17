@@ -20,6 +20,7 @@ public class PicnicBasketBlockItem extends TieredBlockItem {
         this.tooltipKey = tooltipKey;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

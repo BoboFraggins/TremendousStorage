@@ -223,6 +223,7 @@ public class EnderFolderItem extends ManillaFolderItem {
     // Tooltip
     // -------------------------------------------------------------------------
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

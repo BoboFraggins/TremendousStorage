@@ -48,6 +48,7 @@ public class EnderStorageUpgradeItem extends BaseUpgradeItem {
         super();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

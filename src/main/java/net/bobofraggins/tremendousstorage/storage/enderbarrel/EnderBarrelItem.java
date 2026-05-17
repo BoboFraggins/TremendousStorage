@@ -16,6 +16,7 @@ public class EnderBarrelItem extends EnderTieredBlockItem {
         super(block, properties);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

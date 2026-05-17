@@ -16,6 +16,7 @@ public class ArmoryCabinetItem extends BlockItem {
         super(block, properties);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

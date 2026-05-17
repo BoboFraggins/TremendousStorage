@@ -24,6 +24,7 @@ public class BarrelItem extends TieredBlockItem {
         super(block, properties);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

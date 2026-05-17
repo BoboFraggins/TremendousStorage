@@ -62,6 +62,7 @@ public class TankItem extends TieredBlockItem {
     // Tooltip
     // -------------------------------------------------------------------------
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

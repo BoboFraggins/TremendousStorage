@@ -13,6 +13,7 @@ public class BrainItem extends Item {
         super(new Item.Properties());
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

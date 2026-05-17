@@ -29,6 +29,7 @@ public class EnderTankItem extends TankItem {
         return suffix.isEmpty() ? base : Component.empty().append(base).append(suffix);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

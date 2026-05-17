@@ -71,6 +71,7 @@ public class BackpackItem extends BlockItem {
         return sb.isEmpty() ? base : Component.empty().append(base).append(" (" + sb + ")");
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

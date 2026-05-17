@@ -100,6 +100,7 @@ public class ExperienceSyringeItem extends Item {
         return 7 + level * 2;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

@@ -71,6 +71,7 @@ public class VexRepellentPotionItem extends Item {
         return stack;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

@@ -47,6 +47,7 @@ public class PersonalAccessTerminalItem extends Item {
     // Tooltip
     // -------------------------------------------------------------------------
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,

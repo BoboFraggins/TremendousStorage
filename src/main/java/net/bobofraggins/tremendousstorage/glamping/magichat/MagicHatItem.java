@@ -176,6 +176,7 @@ public class MagicHatItem extends BlockItem {
                 .orElse(base);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void appendHoverText(
             ItemStack stack,
