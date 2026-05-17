@@ -88,7 +88,7 @@ public final class PicnicBasketItemUtils {
         var data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return false;
         RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
-        ListTag types = data.getUnsafe().getListOrEmpty("Types");
+        ListTag types = data.copyTagWithoutId().getListOrEmpty("Types");
         for (int i = 0; i < types.size(); i++) {
             ItemStack stored = ItemStack.OPTIONAL_CODEC
                     .parse(ops, types.getCompoundOrEmpty(i).getCompoundOrEmpty("Type"))
@@ -108,7 +108,7 @@ public final class PicnicBasketItemUtils {
         if (!toInsert.has(DataComponents.FOOD)) return 0;
 
         var data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag beTag = data != null ? data.getUnsafe() : new CompoundTag();
+        CompoundTag beTag = data != null ? data.copyTagWithoutId() : new CompoundTag();
 
         StorageTier tier = StorageTier.fromId(beTag.getStringOr("Tier", ""));
         long capacity = tier.getCapacity();
@@ -159,7 +159,7 @@ public final class PicnicBasketItemUtils {
         var data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return ItemStack.EMPTY;
 
-        CompoundTag beTag = data.getUnsafe();
+        CompoundTag beTag = data.copyTagWithoutId();
         RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
         ListTag types = beTag.getListOrEmpty("Types");
 
@@ -199,13 +199,13 @@ public final class PicnicBasketItemUtils {
     public static boolean readAutoFeed(ItemStack basketStack) {
         var data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return true;
-        return data.getUnsafe().getBooleanOr("AutoFeed", true);
+        return data.copyTagWithoutId().getBooleanOr("AutoFeed", true);
     }
 
     /** Writes the AutoFeed flag to the basket's BLOCK_ENTITY_DATA. */
     public static void writeAutoFeed(ItemStack basketStack, boolean autoFeed) {
         var data = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = data != null ? data.getUnsafe() : new CompoundTag();
+        CompoundTag tag = data != null ? data.copyTagWithoutId() : new CompoundTag();
         tag.putBoolean("AutoFeed", autoFeed);
         basketStack.set(
                 DataComponents.BLOCK_ENTITY_DATA, TypedEntityData.of(Registration.PICNIC_BASKET_BE_TYPE.get(), tag));

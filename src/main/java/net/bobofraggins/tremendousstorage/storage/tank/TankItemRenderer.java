@@ -32,7 +32,7 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
         StorageTier tier = StorageTier.WOOD;
         var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (customData != null) {
-            CompoundTag tag = customData.getUnsafe();
+            CompoundTag tag = customData.copyTagWithoutId();
             if (tag.contains("Tier")) {
                 tier = StorageTier.fromId(tag.getStringOr("Tier", ""));
             }

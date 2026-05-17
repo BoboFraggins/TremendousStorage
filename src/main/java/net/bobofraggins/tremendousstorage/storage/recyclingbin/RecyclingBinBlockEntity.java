@@ -150,7 +150,7 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
         super.applyImplicitComponents(input);
         var data = input.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data != null) {
-            net.minecraft.nbt.CompoundTag tag = data.getUnsafe();
+            net.minecraft.nbt.CompoundTag tag = data.copyTagWithoutId();
             if (tag.contains("Vibes")) vibesAmount = tag.getIntOr("Vibes", 0);
         }
     }

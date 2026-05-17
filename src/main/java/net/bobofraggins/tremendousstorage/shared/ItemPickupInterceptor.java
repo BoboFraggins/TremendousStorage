@@ -193,7 +193,7 @@ public final class ItemPickupInterceptor {
                 || !(stack.getItem() instanceof net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem))
             return false;
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.getUnsafe().getBooleanOr("MagnetUpgrade", false);
+        return data != null && data.copyTagWithoutId().getBooleanOr("MagnetUpgrade", false);
     }
 
     // -------------------------------------------------------------------------

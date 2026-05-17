@@ -38,7 +38,7 @@ public class TankItemFluidHandler implements ResourceHandler<FluidResource> {
     private long capacityLong() {
         var data = container.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return TankBlockEntity.BASE_CAPACITY;
-        StorageTier tier = StorageTier.fromId(data.getUnsafe().getStringOr("Tier", ""));
+        StorageTier tier = StorageTier.fromId(data.copyTagWithoutId().getStringOr("Tier", ""));
         return tier.getScaledCapacity(TankBlockEntity.BASE_CAPACITY);
     }
 

@@ -38,7 +38,7 @@ public class EnderBackpackItem extends BackpackItem {
             // (e.g. backpack was previously placed and broken before the component was set)
             var bedData = backpackStack.get(DataComponents.BLOCK_ENTITY_DATA);
             if (bedData != null) {
-                linkIdObj = bedData.getUnsafe().getLong("LinkId").orElse(null);
+                linkIdObj = bedData.copyTagWithoutId().getLong("LinkId").orElse(null);
             }
         }
         if (linkIdObj == null || linkIdObj == -1L) {

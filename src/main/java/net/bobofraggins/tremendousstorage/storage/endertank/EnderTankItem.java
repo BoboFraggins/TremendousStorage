@@ -51,7 +51,7 @@ public class EnderTankItem extends TankItem {
     private static long linkIdFromStack(ItemStack stack) {
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return -1L;
-        CompoundTag tag = data.getUnsafe();
+        CompoundTag tag = data.copyTagWithoutId();
         return tag.getLongOr(EnderTankBlockEntity.TAG_LINK_ID, -1L);
     }
 }

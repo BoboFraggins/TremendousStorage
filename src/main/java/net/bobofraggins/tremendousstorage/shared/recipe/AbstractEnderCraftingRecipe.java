@@ -108,7 +108,7 @@ public abstract class AbstractEnderCraftingRecipe implements CraftingRecipe {
     protected ItemStack makeSecondEnderItem(ItemStack second) {
         var data = second.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return second;
-        CompoundTag tag = data.getUnsafe().copy();
+        CompoundTag tag = data.copyTagWithoutId().copy();
         tag.remove("CraftingUpgrade");
         tag.remove("MagnetUpgrade");
         tag.remove("PullerUpgrade");

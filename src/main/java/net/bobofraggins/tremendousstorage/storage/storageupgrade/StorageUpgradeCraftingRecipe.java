@@ -228,7 +228,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
             return Boolean.TRUE.equals(stack.get(Registration.WIRELESS_SAT_HAS_CRAFTING_UPGRADE.get()));
         }
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.getUnsafe().getBooleanOr("CraftingUpgrade", false);
+        return data != null && data.copyTagWithoutId().getBooleanOr("CraftingUpgrade", false);
     }
 
     private static ItemStack applyCraftingUpgrade(ItemStack blockStack) {
@@ -246,7 +246,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
         }
         // Chest item: set CraftingUpgrade in block_entity_data
         var existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = existing != null ? existing.getUnsafe() : new CompoundTag();
+        CompoundTag tag = existing != null ? existing.copyTagWithoutId() : new CompoundTag();
         tag.putBoolean("CraftingUpgrade", true);
         ItemStack result = blockStack.copyWithCount(1);
         applyBeData(result, tag);
@@ -255,12 +255,12 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
 
     private static boolean alreadyHasHaarpUpgrade(ItemStack stack) {
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.getUnsafe().getBooleanOr("HaarpUpgrade", false);
+        return data != null && data.copyTagWithoutId().getBooleanOr("HaarpUpgrade", false);
     }
 
     private static ItemStack applyHaarpUpgrade(ItemStack hubStack) {
         var existing = hubStack.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = existing != null ? existing.getUnsafe() : new CompoundTag();
+        CompoundTag tag = existing != null ? existing.copyTagWithoutId() : new CompoundTag();
         tag.putBoolean("HaarpUpgrade", true);
         ItemStack result = hubStack.copyWithCount(1);
         applyBeData(result, tag);
@@ -273,12 +273,12 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
 
     private static boolean alreadyHasCompactingUpgrade(ItemStack stack) {
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.getUnsafe().getBooleanOr("CompactingUpgrade", false);
+        return data != null && data.copyTagWithoutId().getBooleanOr("CompactingUpgrade", false);
     }
 
     private static ItemStack applyCompactingUpgrade(ItemStack blockStack) {
         var existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = existing != null ? existing.getUnsafe() : new CompoundTag();
+        CompoundTag tag = existing != null ? existing.copyTagWithoutId() : new CompoundTag();
         tag.putBoolean("CompactingUpgrade", true);
         ItemStack result = blockStack.copyWithCount(1);
         applyBeData(result, tag);
@@ -296,12 +296,12 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
 
     private static boolean alreadyHasMagnetUpgrade(ItemStack stack) {
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.getUnsafe().getBooleanOr("MagnetUpgrade", false);
+        return data != null && data.copyTagWithoutId().getBooleanOr("MagnetUpgrade", false);
     }
 
     private static ItemStack applyMagnetUpgrade(ItemStack stack) {
         var existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = existing != null ? existing.getUnsafe() : new CompoundTag();
+        CompoundTag tag = existing != null ? existing.copyTagWithoutId() : new CompoundTag();
         tag.putBoolean("MagnetUpgrade", true);
         ItemStack result = stack.copyWithCount(1);
         applyBeData(result, tag);
@@ -324,12 +324,12 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
 
     private static boolean alreadyHasPullerUpgrade(ItemStack stack) {
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.getUnsafe().getBooleanOr("PullerUpgrade", false);
+        return data != null && data.copyTagWithoutId().getBooleanOr("PullerUpgrade", false);
     }
 
     private static ItemStack applyPullerUpgrade(ItemStack stack) {
         var existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = existing != null ? existing.getUnsafe() : new CompoundTag();
+        CompoundTag tag = existing != null ? existing.copyTagWithoutId() : new CompoundTag();
         tag.putBoolean("PullerUpgrade", true);
         ItemStack result = stack.copyWithCount(1);
         applyBeData(result, tag);
@@ -339,17 +339,17 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
     private static boolean isNetheriteTierItem(ItemStack stack) {
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return false;
-        return StorageTier.NETHERITE.getId().equals(data.getUnsafe().getStringOr("Tier", ""));
+        return StorageTier.NETHERITE.getId().equals(data.copyTagWithoutId().getStringOr("Tier", ""));
     }
 
     private static boolean alreadyHasInterdimensionalUpgrade(ItemStack stack) {
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        return data != null && data.getUnsafe().getBooleanOr("InterdimensionalUpgrade", false);
+        return data != null && data.copyTagWithoutId().getBooleanOr("InterdimensionalUpgrade", false);
     }
 
     private static ItemStack applyInterdimensionalUpgrade(ItemStack stack) {
         var existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = existing != null ? existing.getUnsafe() : new CompoundTag();
+        CompoundTag tag = existing != null ? existing.copyTagWithoutId() : new CompoundTag();
         tag.putBoolean("InterdimensionalUpgrade", true);
         ItemStack result = stack.copyWithCount(1);
         applyBeData(result, tag);
@@ -409,7 +409,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
         // Chest, tank, NI, and WirelessHub store tier in BLOCK_ENTITY_DATA under "Tier"
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data != null) {
-            CompoundTag tag = data.getUnsafe();
+            CompoundTag tag = data.copyTagWithoutId();
             if (tag.contains("Tier")) {
                 return StorageTier.fromId(tag.getStringOr("Tier", ""));
             }
@@ -436,7 +436,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
             result.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), current.withTier(upgradeItem.getToTier()));
             var existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
             if (existing != null) {
-                CompoundTag beTag = existing.getUnsafe();
+                CompoundTag beTag = existing.copyTagWithoutId();
                 beTag.putString("Tier", upgradeItem.getToTier().getId());
                 applyBeData(result, beTag);
             }
@@ -444,7 +444,7 @@ public class StorageUpgradeCraftingRecipe implements CraftingRecipe {
         }
         // Chest, tank, NI, and WirelessHub: update "Tier" in BLOCK_ENTITY_DATA (preserving LinkId and other data)
         var existing = blockStack.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = existing != null ? existing.getUnsafe() : new CompoundTag();
+        CompoundTag tag = existing != null ? existing.copyTagWithoutId() : new CompoundTag();
         tag.putString("Tier", upgradeItem.getToTier().getId());
         ItemStack result = blockStack.copyWithCount(1);
         applyBeData(result, tag);

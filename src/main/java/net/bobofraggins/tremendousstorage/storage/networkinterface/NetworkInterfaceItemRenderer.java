@@ -33,7 +33,7 @@ public class NetworkInterfaceItemRenderer implements SpecialModelRenderer<Storag
     public StorageTier extractArgument(ItemStack stack) {
         var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (customData != null) {
-            CompoundTag tag = customData.getUnsafe();
+            CompoundTag tag = customData.copyTagWithoutId();
             if (tag.contains("Tier")) {
                 return StorageTier.fromId(tag.getStringOr("Tier", ""));
             }

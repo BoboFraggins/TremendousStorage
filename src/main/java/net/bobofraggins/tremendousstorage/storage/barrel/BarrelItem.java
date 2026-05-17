@@ -58,7 +58,7 @@ public class BarrelItem extends TieredBlockItem {
 
         var bedData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (bedData != null) {
-            var tag = bedData.getUnsafe();
+            var tag = bedData.copyTagWithoutId();
             if (tag.getBooleanOr("CompactingUpgrade", false)) {
                 List<String> names = new ArrayList<>();
                 names.add(baseName);

@@ -110,7 +110,7 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
         }
         var registries = Minecraft.getInstance().level.registryAccess();
         RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
-        CompoundTag beTag = data.getUnsafe();
+        CompoundTag beTag = data.copyTagWithoutId();
         ListTag types = beTag.getListOrEmpty("Types");
         int n = types.size();
         List<ItemStack> stacks = new ArrayList<>(n);

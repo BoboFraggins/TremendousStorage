@@ -43,7 +43,7 @@ public class EnderBarrelCraftingRecipe extends AbstractEnderCraftingRecipe {
     protected long getExistingLinkId(ItemStack stack) {
         var existing = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (existing == null) return -1L;
-        CompoundTag tag = existing.getUnsafe();
+        CompoundTag tag = existing.copyTagWithoutId();
         return tag.getLongOr(EnderBarrelBlockEntity.TAG_LINK_ID, -1L);
     }
 
@@ -51,7 +51,7 @@ public class EnderBarrelCraftingRecipe extends AbstractEnderCraftingRecipe {
     protected ItemStack makeEnderItem(ItemStack base, long linkId) {
         ItemStack result = new ItemStack(Registration.ENDER_BARREL_ITEM.get());
         var existing = base.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = existing != null ? existing.getUnsafe() : new CompoundTag();
+        CompoundTag tag = existing != null ? existing.copyTagWithoutId() : new CompoundTag();
         tag.putLong(EnderBarrelBlockEntity.TAG_LINK_ID, linkId);
         TagValueOutput _tagOut = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
         _tagOut.store(tag);

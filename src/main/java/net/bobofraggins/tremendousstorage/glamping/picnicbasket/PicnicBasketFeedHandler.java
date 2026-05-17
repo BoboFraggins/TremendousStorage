@@ -101,7 +101,7 @@ public class PicnicBasketFeedHandler {
         var existing = basketStack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (existing == null) return;
 
-        CompoundTag beTag = existing.getUnsafe();
+        CompoundTag beTag = existing.copyTagWithoutId();
         // Default true: feed unless explicitly disabled
         if (!beTag.getBooleanOr("AutoFeed", true)) return;
         ListTag types = beTag.getListOrEmpty("Types");

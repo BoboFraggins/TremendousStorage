@@ -62,7 +62,7 @@ public class EnderBackpackCraftingRecipe extends AbstractEnderCraftingRecipe {
 
         // Copy or create block_entity_data (for when the ender backpack is placed as a block)
         var existing = base.get(DataComponents.BLOCK_ENTITY_DATA);
-        CompoundTag tag = existing != null ? existing.getUnsafe() : new CompoundTag();
+        CompoundTag tag = existing != null ? existing.copyTagWithoutId() : new CompoundTag();
         // If no block_entity_data but BackpackContents is present, seed it
         if (existing == null && contents != null) {
             tag.putString("Tier", contents.tier().getId());

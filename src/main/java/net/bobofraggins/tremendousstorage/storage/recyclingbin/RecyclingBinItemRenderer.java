@@ -39,7 +39,7 @@ public class RecyclingBinItemRenderer implements SpecialModelRenderer<Integer> {
     public Integer extractArgument(ItemStack stack) {
         var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (customData == null) return 0;
-        CompoundTag tag = customData.getUnsafe();
+        CompoundTag tag = customData.copyTagWithoutId();
         return tag.getInt("Vibes").orElse(0);
     }
 

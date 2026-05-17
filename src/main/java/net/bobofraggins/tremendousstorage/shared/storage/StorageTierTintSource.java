@@ -21,7 +21,7 @@ public record StorageTierTintSource() implements ItemTintSource {
     public int calculate(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity) {
         var customData = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (customData != null) {
-            CompoundTag tag = customData.getUnsafe();
+            CompoundTag tag = customData.copyTagWithoutId();
             if (tag.contains("Tier")) {
                 return StorageTier.fromId(tag.getStringOr("Tier", "")).getColor();
             }

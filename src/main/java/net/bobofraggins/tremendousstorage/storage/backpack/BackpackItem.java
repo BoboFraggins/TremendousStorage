@@ -58,7 +58,7 @@ public class BackpackItem extends BlockItem {
         // Magnet and Puller are stored in BLOCK_ENTITY_DATA (not BackpackContents)
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data != null) {
-            var tag = data.getUnsafe();
+            var tag = data.copyTagWithoutId();
             if (tag.getBooleanOr("MagnetUpgrade", false)) {
                 if (!sb.isEmpty()) sb.append('/');
                 sb.append("Magnet");

@@ -47,7 +47,7 @@ public class TieredBlockItem extends BlockItem {
                 interdimensional = false,
                 compacting = false;
         if (data != null) {
-            CompoundTag tag = data.getUnsafe();
+            CompoundTag tag = data.copyTagWithoutId();
             tier = StorageTier.fromId(tag.getStringOr("Tier", ""));
             crafting = tag.getBooleanOr("CraftingUpgrade", false);
             magnet = tag.getBooleanOr("MagnetUpgrade", false);

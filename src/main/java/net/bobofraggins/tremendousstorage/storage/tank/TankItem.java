@@ -89,7 +89,7 @@ public class TankItem extends TieredBlockItem {
     static long tierCapacity(ItemStack stack) {
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
         if (data == null) return TankBlockEntity.BASE_CAPACITY;
-        StorageTier tier = StorageTier.fromId(data.getUnsafe().getStringOr("Tier", ""));
+        StorageTier tier = StorageTier.fromId(data.copyTagWithoutId().getStringOr("Tier", ""));
         return tier.getScaledCapacity(TankBlockEntity.BASE_CAPACITY);
     }
 
