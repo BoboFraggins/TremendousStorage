@@ -108,6 +108,7 @@ public class ChestRenderer
         poseStack.popPose();
     }
 
+    @SuppressWarnings("deprecation")
     private static List<BlockStateModelPart> collectParts(BlockStateModel model, RandomSource random) {
         List<BlockStateModelPart> parts = new ArrayList<>();
         random.setSeed(42L);

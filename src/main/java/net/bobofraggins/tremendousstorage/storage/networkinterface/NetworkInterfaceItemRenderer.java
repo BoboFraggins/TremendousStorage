@@ -42,6 +42,7 @@ public class NetworkInterfaceItemRenderer implements SpecialModelRenderer<Storag
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void submit(
             @Nullable StorageTier tier,
             PoseStack poseStack,

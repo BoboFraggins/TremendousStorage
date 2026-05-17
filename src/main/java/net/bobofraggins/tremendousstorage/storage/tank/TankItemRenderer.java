@@ -41,6 +41,7 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void submit(
             @Nullable RenderData data,
             PoseStack poseStack,

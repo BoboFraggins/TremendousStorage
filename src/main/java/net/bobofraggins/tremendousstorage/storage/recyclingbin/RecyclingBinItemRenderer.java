@@ -44,6 +44,7 @@ public class RecyclingBinItemRenderer implements SpecialModelRenderer<Integer> {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void submit(
             @Nullable Integer vibes,
             PoseStack poseStack,

@@ -316,6 +316,7 @@ public class RecyclingBinRenderer
         poseStack.translate(-0.5, -0.5, -0.5);
     }
 
+    @SuppressWarnings("deprecation")
     private static List<BlockStateModelPart> collectParts(BlockStateModel model, RandomSource random) {
         List<BlockStateModelPart> parts = new ArrayList<>();
         random.setSeed(42L);
