@@ -43,8 +43,8 @@ public class EndCityModifier extends LootModifier {
             Map.entry("sharpness", 3),
             Map.entry("mending", 1));
 
-    public EndCityModifier(LootItemCondition[] conditions) {
-        super(conditions);
+    public EndCityModifier(LootItemCondition[] conditions, int priority) {
+        super(conditions, priority);
     }
 
     @Override

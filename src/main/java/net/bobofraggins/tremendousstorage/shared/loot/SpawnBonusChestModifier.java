@@ -22,8 +22,8 @@ public class SpawnBonusChestModifier extends LootModifier {
     public static final MapCodec<SpawnBonusChestModifier> CODEC =
             RecordCodecBuilder.mapCodec(inst -> codecStart(inst).apply(inst, SpawnBonusChestModifier::new));
 
-    public SpawnBonusChestModifier(LootItemCondition[] conditions) {
-        super(conditions);
+    public SpawnBonusChestModifier(LootItemCondition[] conditions, int priority) {
+        super(conditions, priority);
     }
 
     @Override

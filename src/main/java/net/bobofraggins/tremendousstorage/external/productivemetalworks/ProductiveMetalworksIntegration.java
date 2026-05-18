@@ -44,18 +44,17 @@ public class ProductiveMetalworksIntegration {
     public static final DeferredHolder<Fluid, MoltenLazuriteFluid.Flowing> MOLTEN_LAZURITE_FLOWING =
             FLUIDS.register("molten_lazurite_flowing", MoltenLazuriteFluid.Flowing::new);
 
-    public static final DeferredBlock<LiquidBlock> MOLTEN_LAZURITE_BLOCK = BLOCKS.register(
+    public static final DeferredBlock<LiquidBlock> MOLTEN_LAZURITE_BLOCK = BLOCKS.registerBlock(
             "molten_lazurite",
-            () -> new LiquidBlock(
-                    MOLTEN_LAZURITE_SOURCE.get(),
-                    BlockBehaviour.Properties.of()
-                            .noCollision()
-                            .strength(100f)
-                            .noLootTable()
-                            .liquid()
-                            .replaceable()
-                            .pushReaction(PushReaction.DESTROY)
-                            .lightLevel(state -> 15)));
+            props -> new LiquidBlock(MOLTEN_LAZURITE_SOURCE.get(), props),
+            () -> BlockBehaviour.Properties.of()
+                    .noCollision()
+                    .strength(100f)
+                    .noLootTable()
+                    .liquid()
+                    .replaceable()
+                    .pushReaction(PushReaction.DESTROY)
+                    .lightLevel(state -> 15));
 
     public static final DeferredHolder<Item, BucketItem> MOLTEN_LAZURITE_BUCKET = ITEMS.register(
             "molten_lazurite_bucket",

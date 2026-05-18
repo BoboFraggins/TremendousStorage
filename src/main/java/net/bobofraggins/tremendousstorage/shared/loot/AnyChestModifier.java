@@ -21,8 +21,8 @@ public class AnyChestModifier extends LootModifier {
     public static final MapCodec<AnyChestModifier> CODEC =
             RecordCodecBuilder.mapCodec(inst -> codecStart(inst).apply(inst, AnyChestModifier::new));
 
-    public AnyChestModifier(LootItemCondition[] conditions) {
-        super(conditions);
+    public AnyChestModifier(LootItemCondition[] conditions, int priority) {
+        super(conditions, priority);
     }
 
     @Override

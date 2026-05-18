@@ -326,13 +326,12 @@ public final class Registration {
     // Blocks + block entities
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<ArmoryCabinetBlock> ARMORY_CABINET = BLOCKS.register(
-            "armory_cabinet",
-            () -> new ArmoryCabinetBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<ArmoryCabinetBlock> ARMORY_CABINET =
+            BLOCKS.registerBlock("armory_cabinet", ArmoryCabinetBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(5.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> ARMORY_CABINET_ITEM =
             ITEMS.register("armory_cabinet", () -> new ArmoryCabinetItem(ARMORY_CABINET.get(), new Item.Properties()));
@@ -341,12 +340,11 @@ public final class Registration {
             ARMORY_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register(
                     "armory_cabinet", () -> new BlockEntityType<>(ArmoryCabinetBlockEntity::new, ARMORY_CABINET.get()));
 
-    public static final DeferredBlock<FilingCabinetBlock> FILING_CABINET = BLOCKS.register(
-            "filing_cabinet",
-            () -> new FilingCabinetBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<FilingCabinetBlock> FILING_CABINET =
+            BLOCKS.registerBlock("filing_cabinet", FilingCabinetBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(5.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
-                    .sound(SoundType.WOOD)));
+                    .sound(SoundType.WOOD));
 
     public static final DeferredHolder<Item, BlockItem> FILING_CABINET_ITEM =
             ITEMS.register("filing_cabinet", () -> new TieredBlockItem(FILING_CABINET.get(), new Item.Properties()));
@@ -355,13 +353,12 @@ public final class Registration {
             FILING_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register(
                     "filing_cabinet", () -> new BlockEntityType<>(FilingCabinetBlockEntity::new, FILING_CABINET.get()));
 
-    public static final DeferredBlock<ChestBlock> TREMENDOUS_CHEST = BLOCKS.register(
-            "chest",
-            () -> new ChestBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<ChestBlock> TREMENDOUS_CHEST =
+            BLOCKS.registerBlock("chest", ChestBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(5.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> TREMENDOUS_CHEST_ITEM =
             ITEMS.register("chest", () -> new ChestItem(TREMENDOUS_CHEST.get(), new Item.Properties()));
@@ -370,13 +367,12 @@ public final class Registration {
             BLOCK_ENTITY_TYPES.register(
                     "chest", () -> new BlockEntityType<>(ChestBlockEntity::new, TREMENDOUS_CHEST.get()));
 
-    public static final DeferredBlock<EnderChestBlock> ENDER_TREMENDOUS_CHEST = BLOCKS.register(
-            "ender_chest",
-            () -> new EnderChestBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<EnderChestBlock> ENDER_TREMENDOUS_CHEST =
+            BLOCKS.registerBlock("ender_chest", EnderChestBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(5.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> ENDER_TREMENDOUS_CHEST_ITEM = ITEMS.register(
             "ender_chest", () -> new EnderChestItem(ENDER_TREMENDOUS_CHEST.get(), new Item.Properties()));
@@ -386,23 +382,21 @@ public final class Registration {
                     "ender_chest",
                     () -> new BlockEntityType<>(EnderChestBlockEntity::new, ENDER_TREMENDOUS_CHEST.get()));
 
-    public static final DeferredBlock<BackpackBlock> TREMENDOUS_BACKPACK_BLOCK = BLOCKS.register(
-            "backpack",
-            () -> new BackpackBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<BackpackBlock> TREMENDOUS_BACKPACK_BLOCK =
+            BLOCKS.registerBlock("backpack", BackpackBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(2.0f, 1000.0f)
                     .sound(SoundType.WOOL)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BackpackBlockEntity>>
             TREMENDOUS_BACKPACK_BE_TYPE = BLOCK_ENTITY_TYPES.register(
                     "backpack", () -> new BlockEntityType<>(BackpackBlockEntity::new, TREMENDOUS_BACKPACK_BLOCK.get()));
 
-    public static final DeferredBlock<EnderBackpackBlock> ENDER_TREMENDOUS_BACKPACK_BLOCK = BLOCKS.register(
-            "ender_backpack",
-            () -> new EnderBackpackBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<EnderBackpackBlock> ENDER_TREMENDOUS_BACKPACK_BLOCK =
+            BLOCKS.registerBlock("ender_backpack", EnderBackpackBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(2.0f, 1000.0f)
                     .sound(SoundType.WOOL)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderBackpackBlockEntity>>
             ENDER_TREMENDOUS_BACKPACK_BE_TYPE = BLOCK_ENTITY_TYPES.register(
@@ -410,13 +404,13 @@ public final class Registration {
                     () -> new BlockEntityType<>(EnderBackpackBlockEntity::new, ENDER_TREMENDOUS_BACKPACK_BLOCK.get()));
 
     public static final DeferredBlock<net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlock>
-            PICNIC_BASKET_BLOCK = BLOCKS.register(
+            PICNIC_BASKET_BLOCK = BLOCKS.registerBlock(
                     "picnic_basket",
-                    () -> new net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlock(
-                            BlockBehaviour.Properties.of()
-                                    .strength(1.0f, 10.0f)
-                                    .sound(SoundType.WOOD)
-                                    .noOcclusion()));
+                    net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlock::new,
+                    () -> BlockBehaviour.Properties.of()
+                            .strength(1.0f, 10.0f)
+                            .sound(SoundType.WOOD)
+                            .noOcclusion());
 
     public static final DeferredHolder<
                     BlockEntityType<?>,
@@ -431,12 +425,11 @@ public final class Registration {
     // Barrel block + block entity
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<BarrelBlock> BARREL = BLOCKS.register(
-            "barrel",
-            () -> new BarrelBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<BarrelBlock> BARREL =
+            BLOCKS.registerBlock("barrel", BarrelBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(3.0f, 1000.0f)
                     .sound(SoundType.WOOD)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> BARREL_ITEM =
             ITEMS.register("barrel", () -> new BarrelItem(BARREL.get(), new Item.Properties()));
@@ -444,12 +437,11 @@ public final class Registration {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BarrelBlockEntity>> BARREL_BE_TYPE =
             BLOCK_ENTITY_TYPES.register("barrel", () -> new BlockEntityType<>(BarrelBlockEntity::new, BARREL.get()));
 
-    public static final DeferredBlock<EnderBarrelBlock> ENDER_BARREL = BLOCKS.register(
-            "ender_barrel",
-            () -> new EnderBarrelBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<EnderBarrelBlock> ENDER_BARREL =
+            BLOCKS.registerBlock("ender_barrel", EnderBarrelBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(3.0f, 1000.0f)
                     .sound(SoundType.WOOD)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> ENDER_BARREL_ITEM =
             ITEMS.register("ender_barrel", () -> new EnderBarrelItem(ENDER_BARREL.get(), new Item.Properties()));
@@ -503,13 +495,12 @@ public final class Registration {
         NETHERITE_TO_NETHER_STAR_STORAGE_UPGRADE
     };
 
-    public static final DeferredBlock<TankBlock> TANK = BLOCKS.register(
-            "tank",
-            () -> new TankBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<TankBlock> TANK =
+            BLOCKS.registerBlock("tank", TankBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(3.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.GLASS)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> TANK_ITEM =
             ITEMS.register("tank", () -> new TankItem(TANK.get(), new Item.Properties()));
@@ -517,13 +508,12 @@ public final class Registration {
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TankBlockEntity>> TANK_BE_TYPE =
             BLOCK_ENTITY_TYPES.register("tank", () -> new BlockEntityType<>(TankBlockEntity::new, TANK.get()));
 
-    public static final DeferredBlock<EnderTankBlock> ENDER_TANK = BLOCKS.register(
-            "ender_tank",
-            () -> new EnderTankBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<EnderTankBlock> ENDER_TANK =
+            BLOCKS.registerBlock("ender_tank", EnderTankBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(3.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.GLASS)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> ENDER_TANK_ITEM =
             ITEMS.register("ender_tank", () -> new EnderTankItem(ENDER_TANK.get(), new Item.Properties()));
@@ -536,13 +526,12 @@ public final class Registration {
     // Recycling Bin
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<RecyclingBinBlock> RECYCLING_BIN = BLOCKS.register(
-            "recycling_bin",
-            () -> new RecyclingBinBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<RecyclingBinBlock> RECYCLING_BIN =
+            BLOCKS.registerBlock("recycling_bin", RecyclingBinBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(3.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> RECYCLING_BIN_ITEM =
             ITEMS.registerSimpleBlockItem("recycling_bin", RECYCLING_BIN);
@@ -555,13 +544,12 @@ public final class Registration {
     // Lazurite bars
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<LazuriteBarsBlock> LAZURITE_BARS = BLOCKS.register(
-            "lazurite_bars",
-            () -> new LazuriteBarsBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<LazuriteBarsBlock> LAZURITE_BARS =
+            BLOCKS.registerBlock("lazurite_bars", LazuriteBarsBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(5.0f, 6.0f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> LAZURITE_BARS_ITEM =
             ITEMS.registerSimpleBlockItem("lazurite_bars", LAZURITE_BARS);
@@ -570,22 +558,20 @@ public final class Registration {
     // Lazurite ore + ingot
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<LazuriteOreBlock> LAZURITE_ORE = BLOCKS.register(
-            "lazurite_ore",
-            () -> new LazuriteOreBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<LazuriteOreBlock> LAZURITE_ORE =
+            BLOCKS.registerBlock("lazurite_ore", LazuriteOreBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(3.0f, 3.0f)
                     .requiresCorrectToolForDrops()
-                    .sound(SoundType.STONE)));
+                    .sound(SoundType.STONE));
 
     public static final DeferredHolder<Item, BlockItem> LAZURITE_ORE_ITEM =
             ITEMS.registerSimpleBlockItem("lazurite_ore", LAZURITE_ORE);
 
-    public static final DeferredBlock<LazuriteOreBlock> LAZURITE_DEEPSLATE_ORE = BLOCKS.register(
-            "lazurite_deepslate_ore",
-            () -> new LazuriteOreBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<LazuriteOreBlock> LAZURITE_DEEPSLATE_ORE =
+            BLOCKS.registerBlock("lazurite_deepslate_ore", LazuriteOreBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(4.5f, 3.0f)
                     .requiresCorrectToolForDrops()
-                    .sound(SoundType.DEEPSLATE)));
+                    .sound(SoundType.DEEPSLATE));
 
     public static final DeferredHolder<Item, BlockItem> LAZURITE_DEEPSLATE_ORE_ITEM =
             ITEMS.registerSimpleBlockItem("lazurite_deepslate_ore", LAZURITE_DEEPSLATE_ORE);
@@ -599,12 +585,11 @@ public final class Registration {
     public static final DeferredHolder<Item, Item> LAZURITE_NUGGET =
             ITEMS.register("lazurite_nugget", () -> new Item(new Item.Properties()));
 
-    public static final DeferredBlock<net.minecraft.world.level.block.Block> LAZURITE_BLOCK = BLOCKS.register(
-            "lazurite_block",
-            () -> new net.minecraft.world.level.block.Block(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<net.minecraft.world.level.block.Block> LAZURITE_BLOCK = BLOCKS.registerBlock(
+            "lazurite_block", net.minecraft.world.level.block.Block::new, () -> BlockBehaviour.Properties.of()
                     .strength(5.0f, 6.0f)
                     .requiresCorrectToolForDrops()
-                    .sound(SoundType.METAL)));
+                    .sound(SoundType.METAL));
 
     public static final DeferredHolder<Item, BlockItem> LAZURITE_BLOCK_ITEM =
             ITEMS.registerSimpleBlockItem("lazurite_block", LAZURITE_BLOCK);
@@ -613,10 +598,10 @@ public final class Registration {
     // Canvas block
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<net.minecraft.world.level.block.Block> CANVAS_BLOCK = BLOCKS.register(
+    public static final DeferredBlock<net.minecraft.world.level.block.Block> CANVAS_BLOCK = BLOCKS.registerBlock(
             "canvas_block",
-            () -> new net.minecraft.world.level.block.Block(
-                    BlockBehaviour.Properties.of().strength(0.5f, 0.5f).sound(SoundType.WOOL)));
+            net.minecraft.world.level.block.Block::new,
+            () -> BlockBehaviour.Properties.of().strength(0.5f, 0.5f).sound(SoundType.WOOL));
 
     public static final DeferredHolder<Item, BlockItem> CANVAS_BLOCK_ITEM =
             ITEMS.registerSimpleBlockItem("canvas_block", CANVAS_BLOCK);
@@ -665,17 +650,14 @@ public final class Registration {
     public static final DeferredHolder<net.minecraft.world.level.material.Fluid, HoneyFluid.Flowing> HONEY_FLOWING =
             FLUID_REGISTER.register("honey_flowing", HoneyFluid.Flowing::new);
 
-    public static final DeferredBlock<HoneyBlock> HONEY_FLUID_BLOCK = BLOCKS.register(
-            "honey_fluid",
-            () -> new HoneyBlock(
-                    HONEY_SOURCE.get(),
-                    BlockBehaviour.Properties.of()
-                            .noCollision()
-                            .strength(100f)
-                            .noLootTable()
-                            .liquid()
-                            .replaceable()
-                            .pushReaction(PushReaction.DESTROY)));
+    public static final DeferredBlock<HoneyBlock> HONEY_FLUID_BLOCK = BLOCKS.registerBlock(
+            "honey_fluid", props -> new HoneyBlock(HONEY_SOURCE.get(), props), () -> BlockBehaviour.Properties.of()
+                    .noCollision()
+                    .strength(100f)
+                    .noLootTable()
+                    .liquid()
+                    .replaceable()
+                    .pushReaction(PushReaction.DESTROY));
 
     public static final DeferredHolder<Item, BucketItem> HONEY_FLUID_BUCKET = ITEMS.register(
             "honey_fluid_bucket",
@@ -706,17 +688,17 @@ public final class Registration {
     public static final DeferredHolder<net.minecraft.world.level.material.Fluid, XpJuiceFluid.Flowing>
             XP_JUICE_FLOWING = FLUID_REGISTER.register("xp_juice_flowing", XpJuiceFluid.Flowing::new);
 
-    public static final DeferredBlock<net.minecraft.world.level.block.LiquidBlock> XP_JUICE_BLOCK = BLOCKS.register(
-            "xp_juice",
-            () -> new net.minecraft.world.level.block.LiquidBlock(
-                    XP_JUICE_SOURCE.get(),
-                    BlockBehaviour.Properties.of()
+    public static final DeferredBlock<net.minecraft.world.level.block.LiquidBlock> XP_JUICE_BLOCK =
+            BLOCKS.registerBlock(
+                    "xp_juice",
+                    props -> new net.minecraft.world.level.block.LiquidBlock(XP_JUICE_SOURCE.get(), props),
+                    () -> BlockBehaviour.Properties.of()
                             .noCollision()
                             .strength(100f)
                             .noLootTable()
                             .liquid()
                             .replaceable()
-                            .pushReaction(PushReaction.DESTROY)));
+                            .pushReaction(PushReaction.DESTROY));
 
     public static final DeferredHolder<Item, BucketItem> XP_JUICE_BUCKET = ITEMS.register(
             "xp_juice_bucket",
@@ -746,18 +728,17 @@ public final class Registration {
     public static final DeferredHolder<net.minecraft.world.level.material.Fluid, PositiveVibesFluid.Flowing>
             POSITIVE_VIBES_FLOWING = FLUID_REGISTER.register("positive_vibes_flowing", PositiveVibesFluid.Flowing::new);
 
-    public static final DeferredBlock<PositiveVibesBlock> POSITIVE_VIBES_BLOCK = BLOCKS.register(
+    public static final DeferredBlock<PositiveVibesBlock> POSITIVE_VIBES_BLOCK = BLOCKS.registerBlock(
             "positive_vibes",
-            () -> new PositiveVibesBlock(
-                    POSITIVE_VIBES_SOURCE.get(),
-                    BlockBehaviour.Properties.of()
-                            .noCollision()
-                            .strength(100f)
-                            .noLootTable()
-                            .liquid()
-                            .replaceable()
-                            .pushReaction(PushReaction.DESTROY)
-                            .lightLevel(state -> 8)));
+            props -> new PositiveVibesBlock(POSITIVE_VIBES_SOURCE.get(), props),
+            () -> BlockBehaviour.Properties.of()
+                    .noCollision()
+                    .strength(100f)
+                    .noLootTable()
+                    .liquid()
+                    .replaceable()
+                    .pushReaction(PushReaction.DESTROY)
+                    .lightLevel(state -> 8));
 
     public static final DeferredHolder<Item, ZombieBrainItem> ZOMBIE_BRAIN =
             ITEMS.register("zombie_brain", ZombieBrainItem::new);
@@ -795,12 +776,11 @@ public final class Registration {
             () -> new net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockItem(
                     PICNIC_BASKET_BLOCK.get(), "item.tremendousstorage.picnic_basket.tooltip"));
 
-    public static final DeferredBlock<EnderPicnicBasketBlock> ENDER_PICNIC_BASKET_BLOCK = BLOCKS.register(
-            "ender_picnic_basket",
-            () -> new EnderPicnicBasketBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<EnderPicnicBasketBlock> ENDER_PICNIC_BASKET_BLOCK = BLOCKS.registerBlock(
+            "ender_picnic_basket", EnderPicnicBasketBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(1.0f, 10.0f)
                     .sound(SoundType.WOOD)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> ENDER_PICNIC_BASKET_ITEM = ITEMS.register(
             "ender_picnic_basket",
@@ -823,10 +803,10 @@ public final class Registration {
     // Magic Hat
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<MagicHatBlock> MAGIC_HAT_BLOCK = BLOCKS.register(
+    public static final DeferredBlock<MagicHatBlock> MAGIC_HAT_BLOCK = BLOCKS.registerBlock(
             "magic_hat",
-            () -> new MagicHatBlock(
-                    BlockBehaviour.Properties.of().strength(0.5f).noOcclusion().sound(SoundType.WOOL)));
+            MagicHatBlock::new,
+            () -> BlockBehaviour.Properties.of().strength(0.5f).noOcclusion().sound(SoundType.WOOL));
 
     public static final DeferredHolder<Item, MagicHatItem> MAGIC_HAT_ITEM =
             ITEMS.register("magic_hat", () -> new MagicHatItem(MAGIC_HAT_BLOCK.get()));
@@ -866,12 +846,11 @@ public final class Registration {
             .levelDecreasePerBlock(1)
             .tickRate(30);
 
-    public static final DeferredBlock<PositiveVibesCauldronBlock> POSITIVE_VIBES_CAULDRON = BLOCKS.register(
-            "positive_vibes_cauldron",
-            () -> new PositiveVibesCauldronBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<PositiveVibesCauldronBlock> POSITIVE_VIBES_CAULDRON = BLOCKS.registerBlock(
+            "positive_vibes_cauldron", PositiveVibesCauldronBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(2f)
                     .sound(SoundType.METAL)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> POSITIVE_VIBES_CAULDRON_ITEM =
             ITEMS.registerSimpleBlockItem("positive_vibes_cauldron", POSITIVE_VIBES_CAULDRON);
@@ -880,14 +859,13 @@ public final class Registration {
     // Stirling Engine block + block entity
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<StirlingEngineBlock> STIRLING_ENGINE = BLOCKS.register(
-            "stirling_engine",
-            () -> new StirlingEngineBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<StirlingEngineBlock> STIRLING_ENGINE =
+            BLOCKS.registerBlock("stirling_engine", StirlingEngineBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(3f, 1000f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)
                     .noOcclusion()
-                    .lightLevel(state -> 7)));
+                    .lightLevel(state -> 7));
 
     public static final DeferredHolder<Item, BlockItem> STIRLING_ENGINE_ITEM = ITEMS.register(
             "stirling_engine", () -> new TieredBlockItem(STIRLING_ENGINE.get(), new Item.Properties().fireResistant()));
@@ -901,14 +879,13 @@ public final class Registration {
     // Network Interface block + block entity
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<NetworkInterfaceBlock> NETWORK_INTERFACE = BLOCKS.register(
-            "network_interface",
-            () -> new NetworkInterfaceBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<NetworkInterfaceBlock> NETWORK_INTERFACE =
+            BLOCKS.registerBlock("network_interface", NetworkInterfaceBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(5f, 1000f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)
                     .noOcclusion()
-                    .lightLevel(state -> 8)));
+                    .lightLevel(state -> 8));
 
     public static final DeferredHolder<Item, BlockItem> NETWORK_INTERFACE_ITEM = ITEMS.register(
             "network_interface", () -> new TieredBlockItem(NETWORK_INTERFACE.get(), new Item.Properties()));
@@ -922,13 +899,12 @@ public final class Registration {
     // Storage Access Terminal block
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<AccessTerminalBlock> STORAGE_ACCESS_TERMINAL = BLOCKS.register(
-            "storage_access_terminal",
-            () -> new AccessTerminalBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<AccessTerminalBlock> STORAGE_ACCESS_TERMINAL = BLOCKS.registerBlock(
+            "storage_access_terminal", AccessTerminalBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(2.5f, 1000f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.WOOD)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> STORAGE_ACCESS_TERMINAL_ITEM = ITEMS.register(
             "storage_access_terminal", () -> new TieredBlockItem(STORAGE_ACCESS_TERMINAL.get(), new Item.Properties()));
@@ -942,14 +918,13 @@ public final class Registration {
     // Wireless Hub block + block entity
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<WirelessHubBlock> WIRELESS_HUB = BLOCKS.register(
-            "wireless_hub",
-            () -> new WirelessHubBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<WirelessHubBlock> WIRELESS_HUB =
+            BLOCKS.registerBlock("wireless_hub", WirelessHubBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(2.5f, 1000f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)
                     .noOcclusion()
-                    .lightLevel(state -> 14)));
+                    .lightLevel(state -> 14));
 
     public static final DeferredHolder<Item, BlockItem> WIRELESS_HUB_ITEM =
             ITEMS.register("wireless_hub", () -> new TieredBlockItem(WIRELESS_HUB.get(), new Item.Properties()));
@@ -969,13 +944,12 @@ public final class Registration {
     // Tubes
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<TubeBlock> TUBE = BLOCKS.register(
-            "tube",
-            () -> new TubeBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<TubeBlock> TUBE =
+            BLOCKS.registerBlock("tube", TubeBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(1.5f, 6.0f)
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.METAL)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> TUBE_ITEM = ITEMS.registerSimpleBlockItem("tube", TUBE);
 
