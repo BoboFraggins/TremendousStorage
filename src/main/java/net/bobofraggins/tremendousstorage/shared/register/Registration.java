@@ -1103,38 +1103,21 @@ public final class Registration {
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderStorageRecipe>>
             FOLDER_STORAGE_RECIPE = RECIPE_SERIALIZERS.register(
-                    "folder_storage",
-                    () -> new RecipeSerializer<>(
-                            com.mojang.serialization.MapCodec.unit(FolderStorageRecipe::new),
-                            net.minecraft.network.codec.StreamCodec.unit(new FolderStorageRecipe())));
+                    "folder_storage", () -> singletonRecipeSerializer(new FolderStorageRecipe()));
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderExtractRecipe>>
             FOLDER_EXTRACT_RECIPE = RECIPE_SERIALIZERS.register(
-                    "folder_extract",
-                    () -> new RecipeSerializer<>(
-                            com.mojang.serialization.MapCodec.unit(FolderExtractRecipe::new),
-                            net.minecraft.network.codec.StreamCodec.unit(new FolderExtractRecipe())));
+                    "folder_extract", () -> singletonRecipeSerializer(new FolderExtractRecipe()));
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderMergeRecipe>> FOLDER_MERGE_RECIPE =
-            RECIPE_SERIALIZERS.register(
-                    "folder_merge",
-                    () -> new RecipeSerializer<>(
-                            com.mojang.serialization.MapCodec.unit(FolderMergeRecipe::new),
-                            net.minecraft.network.codec.StreamCodec.unit(new FolderMergeRecipe())));
+            RECIPE_SERIALIZERS.register("folder_merge", () -> singletonRecipeSerializer(new FolderMergeRecipe()));
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<FolderTapeRecipe>> FOLDER_TAPE_RECIPE =
-            RECIPE_SERIALIZERS.register(
-                    "folder_tape",
-                    () -> new RecipeSerializer<>(
-                            com.mojang.serialization.MapCodec.unit(FolderTapeRecipe::new),
-                            net.minecraft.network.codec.StreamCodec.unit(new FolderTapeRecipe())));
+            RECIPE_SERIALIZERS.register("folder_tape", () -> singletonRecipeSerializer(new FolderTapeRecipe()));
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<LazuriteRepairRecipe>>
             LAZURITE_REPAIR_RECIPE = RECIPE_SERIALIZERS.register(
-                    "lazurite_repair",
-                    () -> new RecipeSerializer<>(
-                            com.mojang.serialization.MapCodec.unit(LazuriteRepairRecipe::new),
-                            net.minecraft.network.codec.StreamCodec.unit(new LazuriteRepairRecipe())));
+                    "lazurite_repair", () -> singletonRecipeSerializer(new LazuriteRepairRecipe()));
 
     public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<EnderChestCraftingRecipe>>
             ENDER_CHEST_CRAFTING_RECIPE = RECIPE_SERIALIZERS.register(
@@ -1284,6 +1267,24 @@ public final class Registration {
                         // }
                     })
                     .build());
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    /**
+     * Creates a RecipeSerializer for a singleton (no-data) recipe type.
+     *
+     * <p>StreamCodec.unit requires reference equality when encoding — if the MapCodec creates a
+     * new instance during datapack load, encoding fails. This helper shares one instance between
+     * both codecs so the same object is always used for equality checks.
+     */
+    private static <R extends net.minecraft.world.item.crafting.Recipe<?>>
+            RecipeSerializer<R> singletonRecipeSerializer(R instance) {
+        return new RecipeSerializer<>(
+                com.mojang.serialization.MapCodec.unit(instance),
+                net.minecraft.network.codec.StreamCodec.unit(instance));
+    }
 
     // -------------------------------------------------------------------------
     // Registration helper called from the mod constructor
