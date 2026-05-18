@@ -29,8 +29,8 @@ public class VexRepellentPotionItem extends Item {
 
     private final int duration;
 
-    public VexRepellentPotionItem(int duration) {
-        super(new Item.Properties().stacksTo(1));
+    public VexRepellentPotionItem(int duration, Item.Properties properties) {
+        super(properties);
         this.duration = duration;
     }
 

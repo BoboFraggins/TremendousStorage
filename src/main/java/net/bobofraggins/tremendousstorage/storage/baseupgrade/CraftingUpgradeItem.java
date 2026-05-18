@@ -16,8 +16,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  */
 public class CraftingUpgradeItem extends Item {
 
-    public CraftingUpgradeItem() {
-        super(new Item.Properties());
+    public CraftingUpgradeItem(Item.Properties properties) {
+        super(properties);
     }
 
     @Override

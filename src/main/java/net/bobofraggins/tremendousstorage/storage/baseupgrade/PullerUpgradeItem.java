@@ -19,8 +19,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  */
 public class PullerUpgradeItem extends Item {
 
-    public PullerUpgradeItem() {
-        super(new Item.Properties());
+    public PullerUpgradeItem(Item.Properties properties) {
+        super(properties);
     }
 
     @Override

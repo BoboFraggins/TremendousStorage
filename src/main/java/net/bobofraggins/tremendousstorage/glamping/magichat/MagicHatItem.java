@@ -49,15 +49,15 @@ public class MagicHatItem extends BlockItem {
     static final Identifier LUCK_MODIFIER_ID =
             Identifier.fromNamespaceAndPath("tremendousstorage", "lucky_magic_hat_luck");
 
-    private static final ItemAttributeModifiers DEFAULT_MODIFIERS = ItemAttributeModifiers.builder()
+    public static final ItemAttributeModifiers DEFAULT_MODIFIERS = ItemAttributeModifiers.builder()
             .add(
                     Attributes.LUCK,
                     new AttributeModifier(LUCK_MODIFIER_ID, 2.0, AttributeModifier.Operation.ADD_VALUE),
                     EquipmentSlotGroup.HEAD)
             .build();
 
-    public MagicHatItem(Block block) {
-        super(block, new Item.Properties().stacksTo(1).attributes(DEFAULT_MODIFIERS));
+    public MagicHatItem(Block block, Item.Properties properties) {
+        super(block, properties);
     }
 
     // -------------------------------------------------------------------------

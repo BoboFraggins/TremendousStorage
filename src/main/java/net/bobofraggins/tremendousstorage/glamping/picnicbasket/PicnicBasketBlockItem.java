@@ -15,8 +15,8 @@ public class PicnicBasketBlockItem extends TieredBlockItem {
 
     private final String tooltipKey;
 
-    public PicnicBasketBlockItem(Block block, String tooltipKey) {
-        super(block, new Properties());
+    public PicnicBasketBlockItem(Block block, String tooltipKey, Item.Properties properties) {
+        super(block, properties);
         this.tooltipKey = tooltipKey;
     }
 

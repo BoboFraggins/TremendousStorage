@@ -333,8 +333,8 @@ public final class Registration {
                     .sound(SoundType.METAL)
                     .noOcclusion());
 
-    public static final DeferredHolder<Item, BlockItem> ARMORY_CABINET_ITEM =
-            ITEMS.register("armory_cabinet", () -> new ArmoryCabinetItem(ARMORY_CABINET.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> ARMORY_CABINET_ITEM = ITEMS.registerItem(
+            "armory_cabinet", props -> new ArmoryCabinetItem(ARMORY_CABINET.get(), props), Item.Properties::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ArmoryCabinetBlockEntity>>
             ARMORY_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register(
@@ -346,8 +346,8 @@ public final class Registration {
                     .requiresCorrectToolForDrops()
                     .sound(SoundType.WOOD));
 
-    public static final DeferredHolder<Item, BlockItem> FILING_CABINET_ITEM =
-            ITEMS.register("filing_cabinet", () -> new TieredBlockItem(FILING_CABINET.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> FILING_CABINET_ITEM = ITEMS.registerItem(
+            "filing_cabinet", props -> new TieredBlockItem(FILING_CABINET.get(), props), Item.Properties::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FilingCabinetBlockEntity>>
             FILING_CABINET_BE_TYPE = BLOCK_ENTITY_TYPES.register(
@@ -361,7 +361,7 @@ public final class Registration {
                     .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> TREMENDOUS_CHEST_ITEM =
-            ITEMS.register("chest", () -> new ChestItem(TREMENDOUS_CHEST.get(), new Item.Properties()));
+            ITEMS.registerItem("chest", props -> new ChestItem(TREMENDOUS_CHEST.get(), props), Item.Properties::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ChestBlockEntity>> TREMENDOUS_CHEST_BE_TYPE =
             BLOCK_ENTITY_TYPES.register(
@@ -374,8 +374,8 @@ public final class Registration {
                     .sound(SoundType.METAL)
                     .noOcclusion());
 
-    public static final DeferredHolder<Item, BlockItem> ENDER_TREMENDOUS_CHEST_ITEM = ITEMS.register(
-            "ender_chest", () -> new EnderChestItem(ENDER_TREMENDOUS_CHEST.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> ENDER_TREMENDOUS_CHEST_ITEM = ITEMS.registerItem(
+            "ender_chest", props -> new EnderChestItem(ENDER_TREMENDOUS_CHEST.get(), props), Item.Properties::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderChestBlockEntity>>
             ENDER_TREMENDOUS_CHEST_BE_TYPE = BLOCK_ENTITY_TYPES.register(
@@ -432,7 +432,7 @@ public final class Registration {
                     .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> BARREL_ITEM =
-            ITEMS.register("barrel", () -> new BarrelItem(BARREL.get(), new Item.Properties()));
+            ITEMS.registerItem("barrel", props -> new BarrelItem(BARREL.get(), props), Item.Properties::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<BarrelBlockEntity>> BARREL_BE_TYPE =
             BLOCK_ENTITY_TYPES.register("barrel", () -> new BlockEntityType<>(BarrelBlockEntity::new, BARREL.get()));
@@ -443,8 +443,8 @@ public final class Registration {
                     .sound(SoundType.WOOD)
                     .noOcclusion());
 
-    public static final DeferredHolder<Item, BlockItem> ENDER_BARREL_ITEM =
-            ITEMS.register("ender_barrel", () -> new EnderBarrelItem(ENDER_BARREL.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> ENDER_BARREL_ITEM = ITEMS.registerItem(
+            "ender_barrel", props -> new EnderBarrelItem(ENDER_BARREL.get(), props), Item.Properties::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderBarrelBlockEntity>>
             ENDER_BARREL_BE_TYPE = BLOCK_ENTITY_TYPES.register(
@@ -454,35 +454,43 @@ public final class Registration {
     // Storage upgrade items
     // -------------------------------------------------------------------------
 
-    public static final DeferredHolder<Item, StorageUpgradeItem> WOOD_TO_COPPER_STORAGE_UPGRADE = ITEMS.register(
+    public static final DeferredHolder<Item, StorageUpgradeItem> WOOD_TO_COPPER_STORAGE_UPGRADE = ITEMS.registerItem(
             "wood_to_copper_storage_upgrade",
-            () -> new StorageUpgradeItem(StorageTier.WOOD, StorageTier.COPPER, new Item.Properties()));
+            props -> new StorageUpgradeItem(StorageTier.WOOD, StorageTier.COPPER, props),
+            Item.Properties::new);
 
-    public static final DeferredHolder<Item, StorageUpgradeItem> COPPER_TO_IRON_STORAGE_UPGRADE = ITEMS.register(
+    public static final DeferredHolder<Item, StorageUpgradeItem> COPPER_TO_IRON_STORAGE_UPGRADE = ITEMS.registerItem(
             "copper_to_iron_storage_upgrade",
-            () -> new StorageUpgradeItem(StorageTier.COPPER, StorageTier.IRON, new Item.Properties()));
+            props -> new StorageUpgradeItem(StorageTier.COPPER, StorageTier.IRON, props),
+            Item.Properties::new);
 
-    public static final DeferredHolder<Item, StorageUpgradeItem> IRON_TO_GOLD_STORAGE_UPGRADE = ITEMS.register(
+    public static final DeferredHolder<Item, StorageUpgradeItem> IRON_TO_GOLD_STORAGE_UPGRADE = ITEMS.registerItem(
             "iron_to_gold_storage_upgrade",
-            () -> new StorageUpgradeItem(StorageTier.IRON, StorageTier.GOLD, new Item.Properties()));
+            props -> new StorageUpgradeItem(StorageTier.IRON, StorageTier.GOLD, props),
+            Item.Properties::new);
 
-    public static final DeferredHolder<Item, StorageUpgradeItem> GOLD_TO_DIAMOND_STORAGE_UPGRADE = ITEMS.register(
+    public static final DeferredHolder<Item, StorageUpgradeItem> GOLD_TO_DIAMOND_STORAGE_UPGRADE = ITEMS.registerItem(
             "gold_to_diamond_storage_upgrade",
-            () -> new StorageUpgradeItem(StorageTier.GOLD, StorageTier.DIAMOND, new Item.Properties()));
+            props -> new StorageUpgradeItem(StorageTier.GOLD, StorageTier.DIAMOND, props),
+            Item.Properties::new);
 
-    public static final DeferredHolder<Item, StorageUpgradeItem> DIAMOND_TO_EMERALD_STORAGE_UPGRADE = ITEMS.register(
-            "diamond_to_emerald_storage_upgrade",
-            () -> new StorageUpgradeItem(StorageTier.DIAMOND, StorageTier.EMERALD, new Item.Properties()));
+    public static final DeferredHolder<Item, StorageUpgradeItem> DIAMOND_TO_EMERALD_STORAGE_UPGRADE =
+            ITEMS.registerItem(
+                    "diamond_to_emerald_storage_upgrade",
+                    props -> new StorageUpgradeItem(StorageTier.DIAMOND, StorageTier.EMERALD, props),
+                    Item.Properties::new);
 
-    public static final DeferredHolder<Item, StorageUpgradeItem> EMERALD_TO_NETHERITE_STORAGE_UPGRADE = ITEMS.register(
-            "emerald_to_netherite_storage_upgrade",
-            () -> new StorageUpgradeItem(StorageTier.EMERALD, StorageTier.NETHERITE, new Item.Properties()));
+    public static final DeferredHolder<Item, StorageUpgradeItem> EMERALD_TO_NETHERITE_STORAGE_UPGRADE =
+            ITEMS.registerItem(
+                    "emerald_to_netherite_storage_upgrade",
+                    props -> new StorageUpgradeItem(StorageTier.EMERALD, StorageTier.NETHERITE, props),
+                    Item.Properties::new);
 
     public static final DeferredHolder<Item, StorageUpgradeItem> NETHERITE_TO_NETHER_STAR_STORAGE_UPGRADE =
-            ITEMS.register(
+            ITEMS.registerItem(
                     "netherite_to_nether_star_storage_upgrade",
-                    () -> new StorageUpgradeItem(
-                            StorageTier.NETHERITE, StorageTier.NETHER_STAR, true, new Item.Properties()));
+                    props -> new StorageUpgradeItem(StorageTier.NETHERITE, StorageTier.NETHER_STAR, true, props),
+                    Item.Properties::new);
 
     @SuppressWarnings("unchecked")
     public static final DeferredHolder<Item, StorageUpgradeItem>[] STORAGE_UPGRADES = new DeferredHolder[] {
@@ -503,7 +511,7 @@ public final class Registration {
                     .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> TANK_ITEM =
-            ITEMS.register("tank", () -> new TankItem(TANK.get(), new Item.Properties()));
+            ITEMS.registerItem("tank", props -> new TankItem(TANK.get(), props), Item.Properties::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TankBlockEntity>> TANK_BE_TYPE =
             BLOCK_ENTITY_TYPES.register("tank", () -> new BlockEntityType<>(TankBlockEntity::new, TANK.get()));
@@ -516,7 +524,7 @@ public final class Registration {
                     .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> ENDER_TANK_ITEM =
-            ITEMS.register("ender_tank", () -> new EnderTankItem(ENDER_TANK.get(), new Item.Properties()));
+            ITEMS.registerItem("ender_tank", props -> new EnderTankItem(ENDER_TANK.get(), props), Item.Properties::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderTankBlockEntity>> ENDER_TANK_BE_TYPE =
             BLOCK_ENTITY_TYPES.register(
@@ -576,14 +584,11 @@ public final class Registration {
     public static final DeferredHolder<Item, BlockItem> LAZURITE_DEEPSLATE_ORE_ITEM =
             ITEMS.registerSimpleBlockItem("lazurite_deepslate_ore", LAZURITE_DEEPSLATE_ORE);
 
-    public static final DeferredHolder<Item, Item> RAW_LAZURITE =
-            ITEMS.register("raw_lazurite", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> RAW_LAZURITE = ITEMS.registerItem("raw_lazurite", Item::new);
 
-    public static final DeferredHolder<Item, Item> LAZURITE_INGOT =
-            ITEMS.register("lazurite_ingot", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> LAZURITE_INGOT = ITEMS.registerItem("lazurite_ingot", Item::new);
 
-    public static final DeferredHolder<Item, Item> LAZURITE_NUGGET =
-            ITEMS.register("lazurite_nugget", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> LAZURITE_NUGGET = ITEMS.registerItem("lazurite_nugget", Item::new);
 
     public static final DeferredBlock<net.minecraft.world.level.block.Block> LAZURITE_BLOCK = BLOCKS.registerBlock(
             "lazurite_block", net.minecraft.world.level.block.Block::new, () -> BlockBehaviour.Properties.of()
@@ -610,30 +615,34 @@ public final class Registration {
     // Lazurite tools
     // -------------------------------------------------------------------------
 
-    public static final DeferredHolder<Item, Item> LAZURITE_PICKAXE = ITEMS.register(
+    public static final DeferredHolder<Item, Item> LAZURITE_PICKAXE = ITEMS.registerItem(
             "lazurite_pickaxe",
-            () -> new Item(LazuriteTier.INSTANCE.applyToolProperties(
-                    new Item.Properties(),
+            props -> new Item(LazuriteTier.INSTANCE.applyToolProperties(
+                    props,
                     net.minecraft.tags.BlockTags.MINEABLE_WITH_PICKAXE,
                     1.0f,
                     -2.8f,
-                    LazuriteTier.INSTANCE.speed())));
+                    LazuriteTier.INSTANCE.speed())),
+            Item.Properties::new);
 
-    public static final DeferredHolder<Item, AxeItem> LAZURITE_AXE = ITEMS.register(
-            "lazurite_axe", () -> new AxeItem(LazuriteTier.INSTANCE, 4.0f, -3.3f, new Item.Properties()));
+    public static final DeferredHolder<Item, AxeItem> LAZURITE_AXE = ITEMS.registerItem(
+            "lazurite_axe", props -> new AxeItem(LazuriteTier.INSTANCE, 4.0f, -3.3f, props), Item.Properties::new);
 
-    public static final DeferredHolder<Item, ShovelItem> LAZURITE_SHOVEL = ITEMS.register(
-            "lazurite_shovel", () -> new ShovelItem(LazuriteTier.INSTANCE, 1.5f, -3.0f, new Item.Properties()));
+    public static final DeferredHolder<Item, ShovelItem> LAZURITE_SHOVEL = ITEMS.registerItem(
+            "lazurite_shovel",
+            props -> new ShovelItem(LazuriteTier.INSTANCE, 1.5f, -3.0f, props),
+            Item.Properties::new);
 
-    public static final DeferredHolder<Item, Item> LAZURITE_SWORD = ITEMS.register(
+    public static final DeferredHolder<Item, Item> LAZURITE_SWORD = ITEMS.registerItem(
             "lazurite_sword",
-            () -> new Item(LazuriteTier.INSTANCE.applySwordProperties(new Item.Properties(), 3.0f, -2.4f)));
+            props -> new Item(LazuriteTier.INSTANCE.applySwordProperties(props, 3.0f, -2.4f)),
+            Item.Properties::new);
 
-    public static final DeferredHolder<Item, HoeItem> LAZURITE_HOE = ITEMS.register(
-            "lazurite_hoe", () -> new HoeItem(LazuriteTier.INSTANCE, -2.0f, -1.0f, new Item.Properties()));
+    public static final DeferredHolder<Item, HoeItem> LAZURITE_HOE = ITEMS.registerItem(
+            "lazurite_hoe", props -> new HoeItem(LazuriteTier.INSTANCE, -2.0f, -1.0f, props), Item.Properties::new);
 
     public static final DeferredHolder<Item, LazuritePaxelItem> LAZURITE_PAXEL =
-            ITEMS.register("lazurite_paxel", () -> new LazuritePaxelItem(new Item.Properties()));
+            ITEMS.registerItem("lazurite_paxel", LazuritePaxelItem::new);
 
     // -------------------------------------------------------------------------
     // Honey fluid type + fluids + fluid block + bucket
@@ -659,10 +668,10 @@ public final class Registration {
                     .replaceable()
                     .pushReaction(PushReaction.DESTROY));
 
-    public static final DeferredHolder<Item, BucketItem> HONEY_FLUID_BUCKET = ITEMS.register(
+    public static final DeferredHolder<Item, BucketItem> HONEY_FLUID_BUCKET = ITEMS.registerItem(
             "honey_fluid_bucket",
-            () -> new BucketItem(
-                    HONEY_SOURCE.get(), new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
+            props -> new BucketItem(HONEY_SOURCE.get(), props),
+            () -> new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET));
 
     /** Shared properties object for the Honey Source + Flowing fluids. */
     public static final BaseFlowingFluid.Properties HONEY_FLUID_PROPS = new BaseFlowingFluid.Properties(
@@ -700,10 +709,10 @@ public final class Registration {
                             .replaceable()
                             .pushReaction(PushReaction.DESTROY));
 
-    public static final DeferredHolder<Item, BucketItem> XP_JUICE_BUCKET = ITEMS.register(
+    public static final DeferredHolder<Item, BucketItem> XP_JUICE_BUCKET = ITEMS.registerItem(
             "xp_juice_bucket",
-            () -> new BucketItem(
-                    XP_JUICE_SOURCE.get(), new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
+            props -> new BucketItem(XP_JUICE_SOURCE.get(), props),
+            () -> new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET));
 
     public static final BaseFlowingFluid.Properties XP_JUICE_FLUID_PROPS = new BaseFlowingFluid.Properties(
                     XP_JUICE_TYPE, () -> XP_JUICE_SOURCE.get(), () -> XP_JUICE_FLOWING.get())
@@ -741,40 +750,39 @@ public final class Registration {
                     .lightLevel(state -> 8));
 
     public static final DeferredHolder<Item, ZombieBrainItem> ZOMBIE_BRAIN =
-            ITEMS.register("zombie_brain", ZombieBrainItem::new);
+            ITEMS.registerItem("zombie_brain", ZombieBrainItem::new);
 
-    public static final DeferredHolder<Item, BrainItem> BRAIN = ITEMS.register("brain", BrainItem::new);
+    public static final DeferredHolder<Item, BrainItem> BRAIN = ITEMS.registerItem("brain", BrainItem::new);
 
     private static final FoodProperties SNACK_FOOD =
             new FoodProperties.Builder().nutrition(2).saturationModifier(0.25f).build();
 
     public static final DeferredHolder<Item, Item> GRAHAM_CRACKER =
-            ITEMS.register("graham_cracker", () -> new Item(new Item.Properties().food(SNACK_FOOD)));
+            ITEMS.registerItem("graham_cracker", Item::new, () -> new Item.Properties().food(SNACK_FOOD));
 
     public static final DeferredHolder<Item, Item> CHOCOLATE_BAR =
-            ITEMS.register("chocolate_bar", () -> new Item(new Item.Properties().food(SNACK_FOOD)));
+            ITEMS.registerItem("chocolate_bar", Item::new, () -> new Item.Properties().food(SNACK_FOOD));
 
     public static final DeferredHolder<Item, Item> MARSHMALLOW =
-            ITEMS.register("marshmallow", () -> new Item(new Item.Properties().food(SNACK_FOOD)));
+            ITEMS.registerItem("marshmallow", Item::new, () -> new Item.Properties().food(SNACK_FOOD));
 
     public static final DeferredHolder<Item, Item> TOASTED_MARSHMALLOW =
-            ITEMS.register("toasted_marshmallow", () -> new Item(new Item.Properties().food(SNACK_FOOD)));
+            ITEMS.registerItem("toasted_marshmallow", Item::new, () -> new Item.Properties().food(SNACK_FOOD));
 
-    public static final DeferredHolder<Item, Item> SMORE = ITEMS.register(
-            "smore",
-            () -> new Item(new Item.Properties()
+    public static final DeferredHolder<Item, Item> SMORE =
+            ITEMS.registerItem("smore", Item::new, () -> new Item.Properties()
                     .food(new FoodProperties.Builder()
                             .nutrition(10)
                             .saturationModifier(0.25f)
-                            .build())));
+                            .build()));
 
-    public static final DeferredHolder<Item, Item> CANVAS =
-            ITEMS.register("canvas", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> CANVAS = ITEMS.registerItem("canvas", Item::new);
 
-    public static final DeferredHolder<Item, BlockItem> PICNIC_BASKET_ITEM = ITEMS.register(
+    public static final DeferredHolder<Item, BlockItem> PICNIC_BASKET_ITEM = ITEMS.registerItem(
             "picnic_basket",
-            () -> new net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockItem(
-                    PICNIC_BASKET_BLOCK.get(), "item.tremendousstorage.picnic_basket.tooltip"));
+            props -> new net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockItem(
+                    PICNIC_BASKET_BLOCK.get(), "item.tremendousstorage.picnic_basket.tooltip", props),
+            Item.Properties::new);
 
     public static final DeferredBlock<EnderPicnicBasketBlock> ENDER_PICNIC_BASKET_BLOCK = BLOCKS.registerBlock(
             "ender_picnic_basket", EnderPicnicBasketBlock::new, () -> BlockBehaviour.Properties.of()
@@ -782,10 +790,11 @@ public final class Registration {
                     .sound(SoundType.WOOD)
                     .noOcclusion());
 
-    public static final DeferredHolder<Item, BlockItem> ENDER_PICNIC_BASKET_ITEM = ITEMS.register(
+    public static final DeferredHolder<Item, BlockItem> ENDER_PICNIC_BASKET_ITEM = ITEMS.registerItem(
             "ender_picnic_basket",
-            () -> new net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockItem(
-                    ENDER_PICNIC_BASKET_BLOCK.get(), "item.tremendousstorage.ender_picnic_basket.tooltip"));
+            props -> new net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBlockItem(
+                    ENDER_PICNIC_BASKET_BLOCK.get(), "item.tremendousstorage.ender_picnic_basket.tooltip", props),
+            Item.Properties::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<EnderPicnicBasketBlockEntity>>
             ENDER_PICNIC_BASKET_BE_TYPE = BLOCK_ENTITY_TYPES.register(
@@ -797,7 +806,7 @@ public final class Registration {
     // -------------------------------------------------------------------------
 
     public static final DeferredHolder<Item, DankFannyPackItem> DANK_FANNY_PACK =
-            ITEMS.register("dank_fanny_pack", DankFannyPackItem::new);
+            ITEMS.registerItem("dank_fanny_pack", DankFannyPackItem::new, () -> new Item.Properties().stacksTo(1));
 
     // -------------------------------------------------------------------------
     // Magic Hat
@@ -808,34 +817,43 @@ public final class Registration {
             MagicHatBlock::new,
             () -> BlockBehaviour.Properties.of().strength(0.5f).noOcclusion().sound(SoundType.WOOL));
 
-    public static final DeferredHolder<Item, MagicHatItem> MAGIC_HAT_ITEM =
-            ITEMS.register("magic_hat", () -> new MagicHatItem(MAGIC_HAT_BLOCK.get()));
+    public static final DeferredHolder<Item, MagicHatItem> MAGIC_HAT_ITEM = ITEMS.registerItem(
+            "magic_hat", props -> new MagicHatItem(MAGIC_HAT_BLOCK.get(), props), () -> new Item.Properties()
+                    .stacksTo(1)
+                    .attributes(net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatItem.DEFAULT_MODIFIERS));
 
     public static DeferredHolder<Item, TremendousStorageGuideItem> TREMENDOUS_STORAGE_GUIDE = null;
 
-    public static final DeferredHolder<Item, BackpackItem> TREMENDOUS_BACKPACK =
-            ITEMS.register("backpack", () -> new BackpackItem(TREMENDOUS_BACKPACK_BLOCK.get()));
+    public static final DeferredHolder<Item, BackpackItem> TREMENDOUS_BACKPACK = ITEMS.registerItem(
+            "backpack", props -> new BackpackItem(TREMENDOUS_BACKPACK_BLOCK.get(), props), () -> new Item.Properties()
+                    .stacksTo(1));
 
-    public static final DeferredHolder<Item, EnderBackpackItem> ENDER_TREMENDOUS_BACKPACK_ITEM =
-            ITEMS.register("ender_backpack", () -> new EnderBackpackItem(ENDER_TREMENDOUS_BACKPACK_BLOCK.get()));
+    public static final DeferredHolder<Item, EnderBackpackItem> ENDER_TREMENDOUS_BACKPACK_ITEM = ITEMS.registerItem(
+            "ender_backpack",
+            props -> new EnderBackpackItem(ENDER_TREMENDOUS_BACKPACK_BLOCK.get(), props),
+            () -> new Item.Properties().stacksTo(1));
 
     public static final DeferredHolder<Item, Item> POSITIVE_VIBES_BOTTLE =
-            ITEMS.register("positive_vibes_bottle", () -> new Item(new Item.Properties()));
+            ITEMS.registerItem("positive_vibes_bottle", Item::new);
 
-    public static final DeferredHolder<Item, VexRepellentPotionItem> VEX_REPELLENT_POTION =
-            ITEMS.register("vex_repellent_potion", () -> new VexRepellentPotionItem(1 * 60 * 20));
+    public static final DeferredHolder<Item, VexRepellentPotionItem> VEX_REPELLENT_POTION = ITEMS.registerItem(
+            "vex_repellent_potion", props -> new VexRepellentPotionItem(1 * 60 * 20, props), () -> new Item.Properties()
+                    .stacksTo(1));
 
-    public static final DeferredHolder<Item, VexRepellentPotionItem> VEX_REPELLENT_POTION_EXTENDED =
-            ITEMS.register("vex_repellent_potion_extended", () -> new VexRepellentPotionItem(3 * 60 * 20));
+    public static final DeferredHolder<Item, VexRepellentPotionItem> VEX_REPELLENT_POTION_EXTENDED = ITEMS.registerItem(
+            "vex_repellent_potion_extended",
+            props -> new VexRepellentPotionItem(3 * 60 * 20, props),
+            () -> new Item.Properties().stacksTo(1));
 
-    public static final DeferredHolder<Item, VexRepellentPotionItem> VEX_REPELLENT_POTION_LONG =
-            ITEMS.register("vex_repellent_potion_long", () -> new VexRepellentPotionItem(8 * 60 * 20));
+    public static final DeferredHolder<Item, VexRepellentPotionItem> VEX_REPELLENT_POTION_LONG = ITEMS.registerItem(
+            "vex_repellent_potion_long",
+            props -> new VexRepellentPotionItem(8 * 60 * 20, props),
+            () -> new Item.Properties().stacksTo(1));
 
-    public static final DeferredHolder<Item, BucketItem> POSITIVE_VIBES_BUCKET = ITEMS.register(
+    public static final DeferredHolder<Item, BucketItem> POSITIVE_VIBES_BUCKET = ITEMS.registerItem(
             "positive_vibes_bucket",
-            () -> new BucketItem(
-                    POSITIVE_VIBES_SOURCE.get(),
-                    new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
+            props -> new BucketItem(POSITIVE_VIBES_SOURCE.get(), props),
+            () -> new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET));
 
     /** Shared properties object for the Positive Vibes Source + Flowing fluids. */
     public static final BaseFlowingFluid.Properties POSITIVE_VIBES_FLUID_PROPS = new BaseFlowingFluid.Properties(
@@ -867,8 +885,9 @@ public final class Registration {
                     .noOcclusion()
                     .lightLevel(state -> 7));
 
-    public static final DeferredHolder<Item, BlockItem> STIRLING_ENGINE_ITEM = ITEMS.register(
-            "stirling_engine", () -> new TieredBlockItem(STIRLING_ENGINE.get(), new Item.Properties().fireResistant()));
+    public static final DeferredHolder<Item, BlockItem> STIRLING_ENGINE_ITEM = ITEMS.registerItem(
+            "stirling_engine", props -> new TieredBlockItem(STIRLING_ENGINE.get(), props), () -> new Item.Properties()
+                    .fireResistant());
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<StirlingEngineBlockEntity>>
             STIRLING_ENGINE_BE_TYPE = BLOCK_ENTITY_TYPES.register(
@@ -887,8 +906,8 @@ public final class Registration {
                     .noOcclusion()
                     .lightLevel(state -> 8));
 
-    public static final DeferredHolder<Item, BlockItem> NETWORK_INTERFACE_ITEM = ITEMS.register(
-            "network_interface", () -> new TieredBlockItem(NETWORK_INTERFACE.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> NETWORK_INTERFACE_ITEM = ITEMS.registerItem(
+            "network_interface", props -> new TieredBlockItem(NETWORK_INTERFACE.get(), props), Item.Properties::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<NetworkInterfaceBlockEntity>>
             NETWORK_INTERFACE_BE_TYPE = BLOCK_ENTITY_TYPES.register(
@@ -906,8 +925,10 @@ public final class Registration {
                     .sound(SoundType.WOOD)
                     .noOcclusion());
 
-    public static final DeferredHolder<Item, BlockItem> STORAGE_ACCESS_TERMINAL_ITEM = ITEMS.register(
-            "storage_access_terminal", () -> new TieredBlockItem(STORAGE_ACCESS_TERMINAL.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> STORAGE_ACCESS_TERMINAL_ITEM = ITEMS.registerItem(
+            "storage_access_terminal",
+            props -> new TieredBlockItem(STORAGE_ACCESS_TERMINAL.get(), props),
+            Item.Properties::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<AccessTerminalBlockEntity>>
             STORAGE_ACCESS_TERMINAL_BE_TYPE = BLOCK_ENTITY_TYPES.register(
@@ -926,8 +947,8 @@ public final class Registration {
                     .noOcclusion()
                     .lightLevel(state -> 14));
 
-    public static final DeferredHolder<Item, BlockItem> WIRELESS_HUB_ITEM =
-            ITEMS.register("wireless_hub", () -> new TieredBlockItem(WIRELESS_HUB.get(), new Item.Properties()));
+    public static final DeferredHolder<Item, BlockItem> WIRELESS_HUB_ITEM = ITEMS.registerItem(
+            "wireless_hub", props -> new TieredBlockItem(WIRELESS_HUB.get(), props), Item.Properties::new);
 
     public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WirelessHubBlockEntity>>
             WIRELESS_HUB_BE_TYPE = BLOCK_ENTITY_TYPES.register(
@@ -937,8 +958,8 @@ public final class Registration {
     // Wireless SAT item
     // -------------------------------------------------------------------------
 
-    public static final DeferredHolder<Item, PersonalAccessTerminalItem> WIRELESS_SAT =
-            ITEMS.register("wireless_sat", PersonalAccessTerminalItem::new);
+    public static final DeferredHolder<Item, PersonalAccessTerminalItem> WIRELESS_SAT = ITEMS.registerItem(
+            "wireless_sat", PersonalAccessTerminalItem::new, () -> new Item.Properties().stacksTo(1));
 
     // -------------------------------------------------------------------------
     // Tubes
@@ -1022,57 +1043,59 @@ public final class Registration {
     // -------------------------------------------------------------------------
 
     public static final DeferredHolder<Item, StorageInterfaceItem> STORAGE_INTERFACE =
-            ITEMS.register("storage_interface", StorageInterfaceItem::new);
+            ITEMS.registerItem("storage_interface", StorageInterfaceItem::new);
 
     public static final DeferredHolder<Item, ImportInterfaceItem> IMPORT_INTERFACE =
-            ITEMS.register("import_interface", ImportInterfaceItem::new);
+            ITEMS.registerItem("import_interface", ImportInterfaceItem::new);
 
     public static final DeferredHolder<Item, ExportInterfaceItem> EXPORT_INTERFACE =
-            ITEMS.register("export_interface", ExportInterfaceItem::new);
+            ITEMS.registerItem("export_interface", ExportInterfaceItem::new);
 
     // -------------------------------------------------------------------------
     // Items — whiteout tape
     // -------------------------------------------------------------------------
 
     public static final DeferredHolder<Item, WhiteoutTapeItem> WHITEOUT_TAPE =
-            ITEMS.register("whiteout_tape", WhiteoutTapeItem::new);
+            ITEMS.registerItem("whiteout_tape", WhiteoutTapeItem::new, () -> new Item.Properties()
+                    .stacksTo(1)
+                    .durability(WhiteoutTapeItem.MAX_DURABILITY));
 
     public static final DeferredHolder<Item, BaseUpgradeItem> BASE_UPGRADE =
-            ITEMS.register("base_upgrade", BaseUpgradeItem::new);
+            ITEMS.registerItem("base_upgrade", BaseUpgradeItem::new);
 
     public static final DeferredHolder<Item, CraftingUpgradeItem> CRAFTING_UPGRADE =
-            ITEMS.register("crafting_upgrade", CraftingUpgradeItem::new);
+            ITEMS.registerItem("crafting_upgrade", CraftingUpgradeItem::new);
 
     public static final DeferredHolder<Item, EnderStorageUpgradeItem> ENDER_STORAGE_UPGRADE =
-            ITEMS.register("ender_storage_upgrade", EnderStorageUpgradeItem::new);
+            ITEMS.registerItem("ender_storage_upgrade", EnderStorageUpgradeItem::new);
 
     public static final DeferredHolder<Item, MagnetUpgradeItem> MAGNET_UPGRADE =
-            ITEMS.register("magnet_upgrade", MagnetUpgradeItem::new);
+            ITEMS.registerItem("magnet_upgrade", MagnetUpgradeItem::new);
 
     public static final DeferredHolder<Item, HaarpUpgradeItem> HAARP_UPGRADE =
-            ITEMS.register("haarp_upgrade", HaarpUpgradeItem::new);
+            ITEMS.registerItem("haarp_upgrade", HaarpUpgradeItem::new);
 
     public static final DeferredHolder<Item, PullerUpgradeItem> PULLER_UPGRADE =
-            ITEMS.register("puller_upgrade", PullerUpgradeItem::new);
+            ITEMS.registerItem("puller_upgrade", PullerUpgradeItem::new);
 
     public static final DeferredHolder<Item, InterdimensionalUpgradeItem> INTERDIMENSIONAL_UPGRADE =
-            ITEMS.register("interdimensional_upgrade", InterdimensionalUpgradeItem::new);
+            ITEMS.registerItem("interdimensional_upgrade", InterdimensionalUpgradeItem::new);
 
     public static final DeferredHolder<Item, CompactingUpgradeItem> COMPACTING_UPGRADE =
-            ITEMS.register("compacting_upgrade", CompactingUpgradeItem::new);
+            ITEMS.registerItem("compacting_upgrade", CompactingUpgradeItem::new);
 
-    public static final DeferredHolder<Item, ExperienceSyringeItem> EXPERIENCE_SYRINGE =
-            ITEMS.register("experience_syringe", ExperienceSyringeItem::new);
+    public static final DeferredHolder<Item, ExperienceSyringeItem> EXPERIENCE_SYRINGE = ITEMS.registerItem(
+            "experience_syringe", ExperienceSyringeItem::new, () -> new Item.Properties().stacksTo(1));
 
     // -------------------------------------------------------------------------
     // Items — Manila Folder and Ender Folder (single items; tier in FolderContents)
     // -------------------------------------------------------------------------
 
     public static final DeferredHolder<Item, ManillaFolderItem> MANILA_FOLDER =
-            ITEMS.register("manila_folder", () -> new ManillaFolderItem(new Item.Properties()));
+            ITEMS.registerItem("manila_folder", ManillaFolderItem::new);
 
     public static final DeferredHolder<Item, EnderFolderItem> ENDER_FOLDER =
-            ITEMS.register("ender_folder", () -> new EnderFolderItem(new Item.Properties()));
+            ITEMS.registerItem("ender_folder", EnderFolderItem::new);
 
     // -------------------------------------------------------------------------
     // Recipe serializers
@@ -1159,8 +1182,7 @@ public final class Registration {
     // -------------------------------------------------------------------------
 
     /** Invisible item whose sole purpose is to provide the creative tab icon texture. */
-    public static final DeferredHolder<Item, Item> CREATIVE_TAB_ICON =
-            ITEMS.register("creative_tab", () -> new Item(new Item.Properties()));
+    public static final DeferredHolder<Item, Item> CREATIVE_TAB_ICON = ITEMS.registerItem("creative_tab", Item::new);
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> TREMENDOUSSTORAGE_TAB =
             CREATIVE_MODE_TABS.register("tremendousstorage", () -> CreativeModeTab.builder()
@@ -1269,7 +1291,9 @@ public final class Registration {
 
     public static void register(IEventBus modEventBus) {
         if (ModList.get().isLoaded("patchouli")) {
-            TREMENDOUS_STORAGE_GUIDE = ITEMS.register("tremendous_storage_guide", TremendousStorageGuideItem::new);
+            TREMENDOUS_STORAGE_GUIDE = ITEMS.registerItem(
+                    "tremendous_storage_guide", TremendousStorageGuideItem::new, () -> new Item.Properties()
+                            .stacksTo(1));
         }
         BLOCKS.register(modEventBus);
         ITEMS.register(modEventBus);

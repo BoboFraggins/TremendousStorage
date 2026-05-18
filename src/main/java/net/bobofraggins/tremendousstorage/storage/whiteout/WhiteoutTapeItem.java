@@ -35,8 +35,8 @@ public class WhiteoutTapeItem extends Item {
 
     public static final int MAX_DURABILITY = 32;
 
-    public WhiteoutTapeItem() {
-        super(new Item.Properties().stacksTo(1).durability(MAX_DURABILITY));
+    public WhiteoutTapeItem(Item.Properties properties) {
+        super(properties);
     }
 
     @Override

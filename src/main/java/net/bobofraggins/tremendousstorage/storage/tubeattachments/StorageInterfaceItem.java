@@ -8,7 +8,7 @@ import net.minecraft.world.item.Item;
  */
 public class StorageInterfaceItem extends Item {
 
-    public StorageInterfaceItem() {
-        super(new Item.Properties());
+    public StorageInterfaceItem(Item.Properties properties) {
+        super(properties);
     }
 }

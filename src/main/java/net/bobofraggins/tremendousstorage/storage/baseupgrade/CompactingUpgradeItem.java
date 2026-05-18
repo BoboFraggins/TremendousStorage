@@ -8,8 +8,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class CompactingUpgradeItem extends Item {
 
-    public CompactingUpgradeItem() {
-        super(new Item.Properties());
+    public CompactingUpgradeItem(Item.Properties properties) {
+        super(properties);
     }
 
     @Override

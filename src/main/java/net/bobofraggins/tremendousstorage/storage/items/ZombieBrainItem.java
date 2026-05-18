@@ -9,8 +9,8 @@ import net.minecraft.world.item.component.TooltipDisplay;
 
 /** A brain harvested from a zombie. 1-in-8 chance drop from any Zombie subtype. */
 public class ZombieBrainItem extends Item {
-    public ZombieBrainItem() {
-        super(new Item.Properties());
+    public ZombieBrainItem(Item.Properties properties) {
+        super(properties);
     }
 
     @SuppressWarnings("deprecation")

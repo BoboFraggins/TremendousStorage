@@ -23,8 +23,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  */
 public class MagnetUpgradeItem extends Item {
 
-    public MagnetUpgradeItem() {
-        super(new Item.Properties());
+    public MagnetUpgradeItem(Item.Properties properties) {
+        super(properties);
     }
 
     @SuppressWarnings("deprecation")

@@ -16,8 +16,8 @@ import net.minecraft.world.level.Level;
 /** The Dank Fanny Pack — a wearable belt curio that opens a Filing Cabinet UI when used. */
 public class DankFannyPackItem extends Item {
 
-    public DankFannyPackItem() {
-        super(new Item.Properties().stacksTo(1));
+    public DankFannyPackItem(Item.Properties properties) {
+        super(properties);
     }
 
     // -------------------------------------------------------------------------

@@ -9,8 +9,8 @@ import net.minecraft.world.item.component.TooltipDisplay;
 
 /** A healed brain, created by dipping a Zombie Brain into a Positive Vibes cauldron. */
 public class BrainItem extends Item {
-    public BrainItem() {
-        super(new Item.Properties());
+    public BrainItem(Item.Properties properties) {
+        super(properties);
     }
 
     @SuppressWarnings("deprecation")

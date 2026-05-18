@@ -30,8 +30,8 @@ public class ExperienceSyringeItem extends Item {
         return (int) Math.min((long) mb * XP_PER_BUCKET / 1000, CAPACITY);
     }
 
-    public ExperienceSyringeItem() {
-        super(new Properties().stacksTo(1));
+    public ExperienceSyringeItem(Item.Properties properties) {
+        super(properties);
     }
 
     /**

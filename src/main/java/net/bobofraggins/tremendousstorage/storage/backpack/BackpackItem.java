@@ -39,8 +39,8 @@ import net.minecraft.world.level.block.Block;
  */
 public class BackpackItem extends BlockItem {
 
-    public BackpackItem(Block block) {
-        super(block, new Item.Properties().stacksTo(1));
+    public BackpackItem(Block block, Item.Properties properties) {
+        super(block, properties);
     }
 
     @Override

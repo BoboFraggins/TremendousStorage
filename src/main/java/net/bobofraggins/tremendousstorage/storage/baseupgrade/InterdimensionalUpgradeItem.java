@@ -20,8 +20,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  */
 public class InterdimensionalUpgradeItem extends Item {
 
-    public InterdimensionalUpgradeItem() {
-        super(new Item.Properties());
+    public InterdimensionalUpgradeItem(Item.Properties properties) {
+        super(properties);
     }
 
     @Override

@@ -30,12 +30,11 @@ public class GlampingRegistration {
     // Tent block
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<TentBlock> TENT = BLOCKS.register(
-            "tent",
-            () -> new TentBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<TentBlock> TENT =
+            BLOCKS.registerBlock("tent", TentBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(0.5f, 0.5f)
                     .sound(SoundType.WOOL)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> TENT_ITEM = ITEMS.registerSimpleBlockItem("tent", TENT);
 
@@ -46,12 +45,11 @@ public class GlampingRegistration {
     // Tent door block
     // -------------------------------------------------------------------------
 
-    public static final DeferredBlock<TentDoorBlock> TENT_DOOR = BLOCKS.register(
-            "tent_door",
-            () -> new TentDoorBlock(BlockBehaviour.Properties.of()
+    public static final DeferredBlock<TentDoorBlock> TENT_DOOR =
+            BLOCKS.registerBlock("tent_door", TentDoorBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(-1.0f, 3600000.0f)
                     .sound(SoundType.WOOL)
-                    .noOcclusion()));
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> TENT_DOOR_ITEM =
             ITEMS.registerSimpleBlockItem("tent_door", TENT_DOOR);

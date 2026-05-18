@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
@@ -22,8 +23,8 @@ import net.minecraft.world.level.block.Block;
  */
 public class EnderBackpackItem extends BackpackItem {
 
-    public EnderBackpackItem(Block block) {
-        super(block);
+    public EnderBackpackItem(Block block, Item.Properties properties) {
+        super(block, properties);
     }
 
     // -------------------------------------------------------------------------

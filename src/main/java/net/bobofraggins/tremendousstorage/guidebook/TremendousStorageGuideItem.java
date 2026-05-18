@@ -15,8 +15,8 @@ public class TremendousStorageGuideItem extends Item {
 
     private static final Identifier BOOK_ID = Identifier.fromNamespaceAndPath("tremendousstorage", "guide");
 
-    public TremendousStorageGuideItem() {
-        super(new Item.Properties().stacksTo(1));
+    public TremendousStorageGuideItem(Item.Properties properties) {
+        super(properties);
     }
 
     @Override

@@ -19,8 +19,8 @@ import net.minecraft.world.item.context.UseOnContext;
  */
 public class HaarpUpgradeItem extends Item {
 
-    public HaarpUpgradeItem() {
-        super(new Item.Properties());
+    public HaarpUpgradeItem(Item.Properties properties) {
+        super(properties);
     }
 
     @SuppressWarnings("deprecation")

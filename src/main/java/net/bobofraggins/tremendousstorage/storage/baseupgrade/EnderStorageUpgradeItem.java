@@ -44,8 +44,8 @@ public class EnderStorageUpgradeItem extends BaseUpgradeItem {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    public EnderStorageUpgradeItem() {
-        super();
+    public EnderStorageUpgradeItem(Item.Properties properties) {
+        super(properties);
     }
 
     @SuppressWarnings("deprecation")

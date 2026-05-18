@@ -32,8 +32,8 @@ import net.minecraft.world.level.Level;
  */
 public class PersonalAccessTerminalItem extends Item {
 
-    public PersonalAccessTerminalItem() {
-        super(new Item.Properties().stacksTo(1));
+    public PersonalAccessTerminalItem(Item.Properties properties) {
+        super(properties);
     }
 
     @Override
