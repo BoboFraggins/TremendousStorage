@@ -9,15 +9,11 @@
   },
   "outputs": [
     {
-      "item": {
-        "item": "tremendousstorage:raw_lazurite"
-      },
+      "item": "tremendousstorage:raw_lazurite",
       "chance": 0.4
     },
     {
-      "item": {
-        "item": "productivebees:wax"
-      }
+      "item": "productivebees:wax"
     }
   ],
   "neoforge:conditions": [

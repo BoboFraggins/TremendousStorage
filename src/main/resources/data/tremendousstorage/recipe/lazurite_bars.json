@@ -5,8 +5,11 @@
     "III"
   ],
   "key": {
-    "I": { "item": "tremendousstorage:lazurite_ingot" }
+    "I": "tremendousstorage:lazurite_ingot"
   },
-  "result": { "id": "tremendousstorage:lazurite_bars", "count": 16 },
+  "result": {
+    "id": "tremendousstorage:lazurite_bars",
+    "count": 16
+  },
   "category": "misc"
 }

@@ -6,15 +6,9 @@
     "LLL"
   ],
   "key": {
-    "L": {
-      "item": "tremendousstorage:lazurite_ingot"
-    },
-    "E": {
-      "item": "minecraft:ender_pearl"
-    },
-    "C": {
-      "item": "minecraft:chest"
-    }
+    "L": "tremendousstorage:lazurite_ingot",
+    "E": "minecraft:ender_pearl",
+    "C": "minecraft:chest"
   },
   "result": {
     "id": "tremendousstorage:wireless_sat",

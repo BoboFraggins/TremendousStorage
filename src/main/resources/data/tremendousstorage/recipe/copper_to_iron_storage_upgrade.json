@@ -6,8 +6,8 @@
     "III"
   ],
   "key": {
-    "I": { "item": "minecraft:iron_ingot" },
-    "B": { "item": "tremendousstorage:base_upgrade" }
+    "I": "minecraft:iron_ingot",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:copper_to_iron_storage_upgrade",

@@ -6,8 +6,8 @@
     "EEE"
   ],
   "key": {
-    "E": { "item": "minecraft:emerald" },
-    "B": { "item": "tremendousstorage:base_upgrade" }
+    "E": "minecraft:emerald",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:diamond_to_emerald_storage_upgrade",

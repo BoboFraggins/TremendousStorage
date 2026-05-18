@@ -2,58 +2,58 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     [
-      { "item": "minecraft:short_grass" },
-      { "item": "minecraft:tall_grass" },
-      { "item": "minecraft:fern" },
-      { "item": "minecraft:large_fern" }
+      "minecraft:short_grass",
+      "minecraft:tall_grass",
+      "minecraft:fern",
+      "minecraft:large_fern"
     ],
     [
-      { "item": "minecraft:short_grass" },
-      { "item": "minecraft:tall_grass" },
-      { "item": "minecraft:fern" },
-      { "item": "minecraft:large_fern" }
+      "minecraft:short_grass",
+      "minecraft:tall_grass",
+      "minecraft:fern",
+      "minecraft:large_fern"
     ],
     [
-      { "item": "minecraft:short_grass" },
-      { "item": "minecraft:tall_grass" },
-      { "item": "minecraft:fern" },
-      { "item": "minecraft:large_fern" }
+      "minecraft:short_grass",
+      "minecraft:tall_grass",
+      "minecraft:fern",
+      "minecraft:large_fern"
     ],
     [
-      { "item": "minecraft:short_grass" },
-      { "item": "minecraft:tall_grass" },
-      { "item": "minecraft:fern" },
-      { "item": "minecraft:large_fern" }
+      "minecraft:short_grass",
+      "minecraft:tall_grass",
+      "minecraft:fern",
+      "minecraft:large_fern"
     ],
     [
-      { "item": "minecraft:short_grass" },
-      { "item": "minecraft:tall_grass" },
-      { "item": "minecraft:fern" },
-      { "item": "minecraft:large_fern" }
+      "minecraft:short_grass",
+      "minecraft:tall_grass",
+      "minecraft:fern",
+      "minecraft:large_fern"
     ],
     [
-      { "item": "minecraft:short_grass" },
-      { "item": "minecraft:tall_grass" },
-      { "item": "minecraft:fern" },
-      { "item": "minecraft:large_fern" }
+      "minecraft:short_grass",
+      "minecraft:tall_grass",
+      "minecraft:fern",
+      "minecraft:large_fern"
     ],
     [
-      { "item": "minecraft:short_grass" },
-      { "item": "minecraft:tall_grass" },
-      { "item": "minecraft:fern" },
-      { "item": "minecraft:large_fern" }
+      "minecraft:short_grass",
+      "minecraft:tall_grass",
+      "minecraft:fern",
+      "minecraft:large_fern"
     ],
     [
-      { "item": "minecraft:short_grass" },
-      { "item": "minecraft:tall_grass" },
-      { "item": "minecraft:fern" },
-      { "item": "minecraft:large_fern" }
+      "minecraft:short_grass",
+      "minecraft:tall_grass",
+      "minecraft:fern",
+      "minecraft:large_fern"
     ],
     [
-      { "item": "minecraft:short_grass" },
-      { "item": "minecraft:tall_grass" },
-      { "item": "minecraft:fern" },
-      { "item": "minecraft:large_fern" }
+      "minecraft:short_grass",
+      "minecraft:tall_grass",
+      "minecraft:fern",
+      "minecraft:large_fern"
     ]
   ],
   "result": {

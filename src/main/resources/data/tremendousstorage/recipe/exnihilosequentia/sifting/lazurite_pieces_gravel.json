@@ -1,19 +1,35 @@
 {
   "type": "exnihilosequentia:sifting",
-  "input": {
-    "item": "minecraft:gravel"
-  },
+  "input": "minecraft:gravel",
   "result": {
     "id": "tremendousstorage:lazurite_pieces",
     "count": 1
   },
   "waterlogged": false,
   "rolls": [
-    { "mesh": "string",    "chance": 0.03 },
-    { "mesh": "flint",     "chance": 0.04 },
-    { "mesh": "iron",      "chance": 0.06 },
-    { "mesh": "diamond",   "chance": 0.08 },
-    { "mesh": "emerald",   "chance": 0.10 },
-    { "mesh": "netherite", "chance": 0.12 }
+    {
+      "mesh": "string",
+      "chance": 0.03
+    },
+    {
+      "mesh": "flint",
+      "chance": 0.04
+    },
+    {
+      "mesh": "iron",
+      "chance": 0.06
+    },
+    {
+      "mesh": "diamond",
+      "chance": 0.08
+    },
+    {
+      "mesh": "emerald",
+      "chance": 0.1
+    },
+    {
+      "mesh": "netherite",
+      "chance": 0.12
+    }
   ]
 }

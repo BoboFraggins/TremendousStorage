@@ -6,9 +6,7 @@
     " L "
   ],
   "key": {
-    "L": {
-      "item": "tremendousstorage:lazurite_ingot"
-    }
+    "L": "tremendousstorage:lazurite_ingot"
   },
   "result": {
     "id": "tremendousstorage:tube",

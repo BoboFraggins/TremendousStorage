@@ -6,24 +6,12 @@
     "BCB"
   ],
   "key": {
-    "B": {
-      "item": "tremendousstorage:lazurite_bars"
-    },
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "S": {
-      "item": "minecraft:iron_sword"
-    },
-    "V": {
-      "tag": "c:chests"
-    },
-    "P": {
-      "item": "minecraft:iron_pickaxe"
-    },
-    "C": {
-      "item": "minecraft:copper_ingot"
-    }
+    "B": "tremendousstorage:lazurite_bars",
+    "I": "minecraft:iron_ingot",
+    "S": "minecraft:iron_sword",
+    "V": "#c:chests",
+    "P": "minecraft:iron_pickaxe",
+    "C": "minecraft:copper_ingot"
   },
   "result": {
     "id": "tremendousstorage:armory_cabinet",

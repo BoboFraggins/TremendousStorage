@@ -5,9 +5,7 @@
     "xx"
   ],
   "key": {
-    "x": {
-      "item": "tremendousstorage:lazurite_pieces"
-    }
+    "x": "tremendousstorage:lazurite_pieces"
   },
   "result": {
     "id": "tremendousstorage:raw_lazurite",

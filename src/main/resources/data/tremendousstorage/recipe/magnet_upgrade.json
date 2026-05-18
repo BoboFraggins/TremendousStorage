@@ -6,15 +6,9 @@
     "III"
   ],
   "key": {
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "B": {
-      "item": "tremendousstorage:base_upgrade"
-    }
+    "R": "minecraft:redstone",
+    "I": "minecraft:iron_ingot",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:magnet_upgrade",

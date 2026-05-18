@@ -6,15 +6,9 @@
     "CRC"
   ],
   "key": {
-    "C": {
-      "item": "minecraft:chorus_fruit"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "B": {
-      "item": "tremendousstorage:base_upgrade"
-    }
+    "C": "minecraft:chorus_fruit",
+    "R": "minecraft:redstone",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:haarp_upgrade",

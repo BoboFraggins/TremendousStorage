@@ -1,12 +1,7 @@
 {
   "type": "industrialforegoing:laser_drill_ore",
-  "catalyst": {
-    "item": "industrialforegoing:blue_laser_lens"
-  },
-  "output": {
-    "count": 1,
-    "item": "tremendousstorage:raw_lazurite"
-  },
+  "catalyst": "industrialforegoing:blue_laser_lens",
+  "output": "tremendousstorage:raw_lazurite",
   "rarity": [
     {
       "biome_filter": {

@@ -6,8 +6,8 @@
     "DDD"
   ],
   "key": {
-    "D": { "item": "minecraft:diamond" },
-    "B": { "item": "tremendousstorage:base_upgrade" }
+    "D": "minecraft:diamond",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:gold_to_diamond_storage_upgrade",

@@ -6,12 +6,8 @@
     " I "
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "B": {
-      "item": "minecraft:blue_dye"
-    }
+    "I": "minecraft:iron_ingot",
+    "B": "minecraft:blue_dye"
   },
   "result": {
     "id": "tremendousstorage:import_interface",

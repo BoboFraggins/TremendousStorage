@@ -6,10 +6,10 @@
     "SCS"
   ],
   "key": {
-    "S": { "item": "minecraft:stick" },
-    "L": { "item": "minecraft:leather" },
-    "C": { "item": "tremendousstorage:canvas" },
-    "W": { "item": "minecraft:chest" }
+    "S": "minecraft:stick",
+    "L": "minecraft:leather",
+    "C": "tremendousstorage:canvas",
+    "W": "minecraft:chest"
   },
   "result": {
     "id": "tremendousstorage:backpack",

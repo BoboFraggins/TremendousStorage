@@ -6,8 +6,8 @@
     "GGG"
   ],
   "key": {
-    "G": { "item": "minecraft:gold_ingot" },
-    "B": { "item": "tremendousstorage:base_upgrade" }
+    "G": "minecraft:gold_ingot",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:iron_to_gold_storage_upgrade",

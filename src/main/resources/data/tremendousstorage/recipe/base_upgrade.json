@@ -6,15 +6,9 @@
     "RLR"
   ],
   "key": {
-    "L": {
-      "item": "tremendousstorage:lazurite_ingot"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "C": {
-      "item": "minecraft:chest"
-    }
+    "L": "tremendousstorage:lazurite_ingot",
+    "R": "minecraft:redstone",
+    "C": "minecraft:chest"
   },
   "result": {
     "id": "tremendousstorage:base_upgrade",

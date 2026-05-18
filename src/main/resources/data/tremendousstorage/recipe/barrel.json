@@ -6,9 +6,9 @@
     "IBI"
   ],
   "key": {
-    "I": { "item": "tremendousstorage:lazurite_bars" },
-    "B": { "item": "tremendousstorage:lazurite_ingot" },
-    "C": { "item": "minecraft:barrel" }
+    "I": "tremendousstorage:lazurite_bars",
+    "B": "tremendousstorage:lazurite_ingot",
+    "C": "minecraft:barrel"
   },
   "result": {
     "id": "tremendousstorage:barrel",

@@ -6,12 +6,8 @@
     "III"
   ],
   "key": {
-    "I": {
-      "item": "tremendousstorage:lazurite_bars"
-    },
-    "C": {
-      "item": "minecraft:chest"
-    }
+    "I": "tremendousstorage:lazurite_bars",
+    "C": "minecraft:chest"
   },
   "result": {
     "id": "tremendousstorage:filing_cabinet",

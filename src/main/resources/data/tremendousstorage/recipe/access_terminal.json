@@ -6,11 +6,11 @@
     "BBB"
   ],
   "key": {
-    "S": { "item": "minecraft:stick" },
-    "G": { "tag": "c:glass_blocks" },
-    "L": { "item": "tremendousstorage:lazurite_ingot" },
-    "C": { "item": "minecraft:chest" },
-    "B": { "tag": "minecraft:wooden_buttons" }
+    "S": "minecraft:stick",
+    "G": "#c:glass_blocks",
+    "L": "tremendousstorage:lazurite_ingot",
+    "C": "minecraft:chest",
+    "B": "#minecraft:wooden_buttons"
   },
   "result": {
     "id": "tremendousstorage:storage_access_terminal",

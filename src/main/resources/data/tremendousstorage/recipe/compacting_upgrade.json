@@ -6,15 +6,9 @@
     "IRI"
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "B": {
-      "item": "tremendousstorage:base_upgrade"
-    }
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:redstone",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:compacting_upgrade",

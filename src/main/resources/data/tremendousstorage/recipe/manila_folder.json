@@ -6,9 +6,7 @@
     "PPP"
   ],
   "key": {
-    "P": {
-      "item": "minecraft:paper"
-    }
+    "P": "minecraft:paper"
   },
   "result": {
     "id": "tremendousstorage:manila_folder",

@@ -6,7 +6,7 @@
     "CCC"
   ],
   "key": {
-    "C": { "item": "tremendousstorage:canvas" }
+    "C": "tremendousstorage:canvas"
   },
   "result": {
     "id": "tremendousstorage:canvas_block",

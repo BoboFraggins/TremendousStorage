@@ -6,8 +6,8 @@
     "SSS"
   ],
   "key": {
-    "S": { "item": "minecraft:sugar" },
-    "B": { "item": "tremendousstorage:positive_vibes_bucket" }
+    "S": "minecraft:sugar",
+    "B": "tremendousstorage:positive_vibes_bucket"
   },
   "result": {
     "id": "tremendousstorage:marshmallow",

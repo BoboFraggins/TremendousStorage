@@ -6,15 +6,9 @@
     "BP "
   ],
   "key": {
-    "P": {
-      "item": "minecraft:paper"
-    },
-    "S": {
-      "item": "minecraft:slime_ball"
-    },
-    "B": {
-      "item": "minecraft:white_dye"
-    }
+    "P": "minecraft:paper",
+    "S": "minecraft:slime_ball",
+    "B": "minecraft:white_dye"
   },
   "result": {
     "id": "tremendousstorage:whiteout_tape",

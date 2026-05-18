@@ -6,8 +6,8 @@
     "NNN"
   ],
   "key": {
-    "N": { "item": "minecraft:nether_star" },
-    "B": { "item": "tremendousstorage:base_upgrade" }
+    "N": "minecraft:nether_star",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:netherite_to_nether_star_storage_upgrade",

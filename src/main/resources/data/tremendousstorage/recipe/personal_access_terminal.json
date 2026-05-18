@@ -1,12 +1,8 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    {
-      "item": "minecraft:ender_pearl"
-    },
-    {
-      "item": "tremendousstorage:access_terminal"
-    }
+    "minecraft:ender_pearl",
+    "tremendousstorage:access_terminal"
   ],
   "result": {
     "id": "tremendousstorage:personal_access_terminal",

@@ -6,10 +6,10 @@
     "LTL"
   ],
   "key": {
-    "B": { "item": "tremendousstorage:lazurite_bars" },
-    "P": { "item": "minecraft:ender_pearl" },
-    "L": { "item": "tremendousstorage:lazurite_ingot" },
-    "T": { "item": "tremendousstorage:tube" }
+    "B": "tremendousstorage:lazurite_bars",
+    "P": "minecraft:ender_pearl",
+    "L": "tremendousstorage:lazurite_ingot",
+    "T": "tremendousstorage:tube"
   },
   "result": {
     "id": "tremendousstorage:wireless_hub",

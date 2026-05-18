@@ -6,9 +6,7 @@
     }
   ],
   "type": "mysticalagriculture:reprocessor",
-  "input": {
-    "item": "tremendousstorage:lazurite_seeds"
-  },
+  "input": "tremendousstorage:lazurite_seeds",
   "result": {
     "count": 2,
     "id": "tremendousstorage:lazurite_essence"

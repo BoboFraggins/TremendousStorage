@@ -6,18 +6,10 @@
     "LAL"
   ],
   "key": {
-    "L": {
-      "item": "tremendousstorage:lazurite_bars"
-    },
-    "A": {
-      "item": "minecraft:apple"
-    },
-    "B": {
-      "item": "minecraft:bread"
-    },
-    "C": {
-      "item": "minecraft:chest"
-    }
+    "L": "tremendousstorage:lazurite_bars",
+    "A": "minecraft:apple",
+    "B": "minecraft:bread",
+    "C": "minecraft:chest"
   },
   "result": {
     "id": "tremendousstorage:picnic_basket",

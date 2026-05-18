@@ -1,8 +1,11 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    { "item": "tremendousstorage:lazurite_ingot" }
+    "tremendousstorage:lazurite_ingot"
   ],
-  "result": { "id": "tremendousstorage:lazurite_nugget", "count": 9 },
+  "result": {
+    "id": "tremendousstorage:lazurite_nugget",
+    "count": 9
+  },
   "category": "misc"
 }

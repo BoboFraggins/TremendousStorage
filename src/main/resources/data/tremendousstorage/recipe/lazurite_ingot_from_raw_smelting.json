@@ -1,7 +1,9 @@
 {
   "type": "minecraft:smelting",
-  "ingredient": { "item": "tremendousstorage:raw_lazurite" },
-  "result": { "id": "tremendousstorage:lazurite_ingot" },
+  "ingredient": "tremendousstorage:raw_lazurite",
+  "result": {
+    "id": "tremendousstorage:lazurite_ingot"
+  },
   "experience": 0.7,
   "cookingtime": 200,
   "category": "misc"

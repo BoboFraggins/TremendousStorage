@@ -6,9 +6,9 @@
     "RCR"
   ],
   "key": {
-    "R": { "item": "minecraft:redstone" },
-    "C": { "item": "minecraft:crafting_table" },
-    "B": { "item": "tremendousstorage:base_upgrade" }
+    "R": "minecraft:redstone",
+    "C": "minecraft:crafting_table",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:crafting_upgrade",

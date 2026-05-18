@@ -6,15 +6,9 @@
     "III"
   ],
   "key": {
-    "H": {
-      "item": "minecraft:hopper"
-    },
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "B": {
-      "item": "tremendousstorage:base_upgrade"
-    }
+    "H": "minecraft:hopper",
+    "I": "minecraft:iron_ingot",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:puller_upgrade",

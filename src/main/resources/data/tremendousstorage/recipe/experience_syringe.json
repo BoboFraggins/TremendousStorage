@@ -1,9 +1,9 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    { "item": "minecraft:bucket" },
-    { "item": "minecraft:glass" },
-    { "item": "tremendousstorage:lazurite_ingot" }
+    "minecraft:bucket",
+    "minecraft:glass",
+    "tremendousstorage:lazurite_ingot"
   ],
   "result": {
     "id": "tremendousstorage:experience_syringe",

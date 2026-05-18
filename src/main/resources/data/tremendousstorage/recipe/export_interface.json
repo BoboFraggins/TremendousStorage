@@ -6,12 +6,8 @@
     " I "
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "R": {
-      "item": "minecraft:red_dye"
-    }
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:red_dye"
   },
   "result": {
     "id": "tremendousstorage:export_interface",

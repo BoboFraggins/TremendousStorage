@@ -4,8 +4,8 @@
     "CLC"
   ],
   "key": {
-    "C": { "item": "tremendousstorage:canvas" },
-    "L": { "item": "minecraft:leather" }
+    "C": "tremendousstorage:canvas",
+    "L": "minecraft:leather"
   },
   "result": {
     "id": "tremendousstorage:dank_fanny_pack",

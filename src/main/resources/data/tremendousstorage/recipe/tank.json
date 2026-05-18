@@ -6,15 +6,9 @@
     " B "
   ],
   "key": {
-    "G": {
-      "item": "minecraft:glass"
-    },
-    "J": {
-      "item": "tremendousstorage:chest"
-    },
-    "B": {
-      "item": "minecraft:bucket"
-    }
+    "G": "minecraft:glass",
+    "J": "tremendousstorage:chest",
+    "B": "minecraft:bucket"
   },
   "result": {
     "id": "tremendousstorage:tank",

@@ -6,12 +6,8 @@
     " I "
   ],
   "key": {
-    "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "R": {
-      "item": "minecraft:comparator"
-    }
+    "I": "minecraft:iron_ingot",
+    "R": "minecraft:comparator"
   },
   "result": {
     "id": "tremendousstorage:storage_interface",

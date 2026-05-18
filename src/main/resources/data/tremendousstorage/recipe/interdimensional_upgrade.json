@@ -6,15 +6,9 @@
     "ERE"
   ],
   "key": {
-    "E": {
-      "item": "minecraft:ender_eye"
-    },
-    "R": {
-      "item": "minecraft:redstone"
-    },
-    "B": {
-      "item": "tremendousstorage:base_upgrade"
-    }
+    "E": "minecraft:ender_eye",
+    "R": "minecraft:redstone",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:interdimensional_upgrade",

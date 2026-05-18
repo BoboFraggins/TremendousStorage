@@ -3,18 +3,14 @@
   "ingredient": "tremendousstorage:lazurite",
   "results": [
     {
-      "item": {
-        "type": "productivebees:component",
-        "components": {
-          "productivebees:bee_type": "tremendousstorage:lazurite"
-        },
-        "items": "productivebees:configurable_honeycomb"
-      }
+      "type": "productivebees:component",
+      "components": {
+        "productivebees:bee_type": "tremendousstorage:lazurite"
+      },
+      "items": "productivebees:configurable_honeycomb"
     },
     {
-      "item": {
-        "tag": "c:pollens"
-      },
+      "item": "#c:pollens",
       "chance": 0.05
     }
   ],

@@ -6,8 +6,8 @@
     "NNN"
   ],
   "key": {
-    "N": { "item": "minecraft:netherite_ingot" },
-    "B": { "item": "tremendousstorage:base_upgrade" }
+    "N": "minecraft:netherite_ingot",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:emerald_to_netherite_storage_upgrade",

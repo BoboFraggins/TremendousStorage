@@ -6,8 +6,8 @@
     " S"
   ],
   "key": {
-    "I": { "item": "tremendousstorage:lazurite_ingot" },
-    "S": { "item": "minecraft:stick" }
+    "I": "tremendousstorage:lazurite_ingot",
+    "S": "minecraft:stick"
   },
   "result": {
     "id": "tremendousstorage:lazurite_hoe",

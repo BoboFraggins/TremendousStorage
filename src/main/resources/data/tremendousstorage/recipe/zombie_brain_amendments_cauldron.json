@@ -5,7 +5,7 @@
     "id": "tremendousstorage:positive_vibes"
   },
   "input_items": [
-    {"item": "tremendousstorage:zombie_brain"}
+    "tremendousstorage:zombie_brain"
   ],
   "output_item": {
     "id": "tremendousstorage:brain",

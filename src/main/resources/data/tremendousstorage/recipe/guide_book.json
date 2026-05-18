@@ -1,8 +1,8 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    { "item": "minecraft:book" },
-    { "item": "tremendousstorage:lazurite_ingot" }
+    "minecraft:book",
+    "tremendousstorage:lazurite_ingot"
   ],
   "result": {
     "id": "tremendousstorage:tremendous_storage_guide",

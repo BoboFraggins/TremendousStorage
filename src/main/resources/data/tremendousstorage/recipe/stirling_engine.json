@@ -6,18 +6,10 @@
     "WIL"
   ],
   "key": {
-    "I": {
-      "item": "tremendousstorage:lazurite_nugget"
-    },
-    "S": {
-      "item": "minecraft:stick"
-    },
-    "W": {
-      "item": "minecraft:water_bucket"
-    },
-    "L": {
-      "item": "minecraft:lava_bucket"
-    }
+    "I": "tremendousstorage:lazurite_nugget",
+    "S": "minecraft:stick",
+    "W": "minecraft:water_bucket",
+    "L": "minecraft:lava_bucket"
   },
   "result": {
     "id": "tremendousstorage:stirling_engine",

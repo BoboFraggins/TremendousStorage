@@ -6,9 +6,9 @@
     "DCD"
   ],
   "key": {
-    "C": { "item": "tremendousstorage:canvas" },
-    "B": { "item": "minecraft:experience_bottle" },
-    "D": { "item": "minecraft:black_dye" }
+    "C": "tremendousstorage:canvas",
+    "B": "minecraft:experience_bottle",
+    "D": "minecraft:black_dye"
   },
   "result": {
     "id": "tremendousstorage:magic_hat",

@@ -1,6 +1,6 @@
 {
   "type": "minecraft:campfire_cooking",
-  "ingredient": { "item": "tremendousstorage:marshmallow" },
+  "ingredient": "tremendousstorage:marshmallow",
   "result": {
     "id": "tremendousstorage:toasted_marshmallow"
   },

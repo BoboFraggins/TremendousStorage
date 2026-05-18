@@ -6,8 +6,8 @@
     "CCC"
   ],
   "key": {
-    "C": { "item": "minecraft:copper_ingot" },
-    "B": { "item": "tremendousstorage:base_upgrade" }
+    "C": "minecraft:copper_ingot",
+    "B": "tremendousstorage:base_upgrade"
   },
   "result": {
     "id": "tremendousstorage:wood_to_copper_storage_upgrade",

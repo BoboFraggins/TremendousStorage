@@ -6,10 +6,10 @@
     "CCC"
   ],
   "key": {
-    "C": { "item": "tremendousstorage:canvas_block" },
-    "B": { "tag": "minecraft:beds" },
-    "F": { "item": "minecraft:campfire" },
-    "L": { "item": "minecraft:lantern" }
+    "C": "tremendousstorage:canvas_block",
+    "B": "#minecraft:beds",
+    "F": "minecraft:campfire",
+    "L": "minecraft:lantern"
   },
   "result": {
     "id": "tremendousstorage:tent",

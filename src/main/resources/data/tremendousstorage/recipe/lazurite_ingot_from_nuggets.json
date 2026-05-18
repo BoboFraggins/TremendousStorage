@@ -6,8 +6,11 @@
     "NNN"
   ],
   "key": {
-    "N": { "item": "tremendousstorage:lazurite_nugget" }
+    "N": "tremendousstorage:lazurite_nugget"
   },
-  "result": { "id": "tremendousstorage:lazurite_ingot", "count": 1 },
+  "result": {
+    "id": "tremendousstorage:lazurite_ingot",
+    "count": 1
+  },
   "category": "misc"
 }
