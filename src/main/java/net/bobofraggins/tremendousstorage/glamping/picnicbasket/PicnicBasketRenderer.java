@@ -132,6 +132,15 @@ public class PicnicBasketRenderer
         return parts;
     }
 
+    private static float directionShade(Direction dir) {
+        return switch (dir) {
+            case DOWN -> 0.5f;
+            case UP -> 1.0f;
+            case NORTH, SOUTH -> 0.8f;
+            default -> 0.6f;
+        };
+    }
+
     private static void renderModel(
             VertexConsumer consumer,
             PoseStack.Pose pose,
@@ -141,16 +150,20 @@ public class PicnicBasketRenderer
         for (BlockStateModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
+                    float shade = quad.materialInfo().shade() ? directionShade(dir) : 1f;
+                    int rgb = (int) (shade * 255);
                     QuadInstance qi = new QuadInstance();
-                    qi.setColor(0xFFFFFFFF);
+                    qi.setColor((0xFF << 24) | (rgb << 16) | (rgb << 8) | rgb);
                     qi.setLightCoords(packedLight);
                     qi.setOverlayCoords(overlay);
                     consumer.putBakedQuad(pose, quad, qi);
                 }
             }
             for (var quad : part.getQuads(null)) {
+                float shade = quad.materialInfo().shade() ? directionShade(quad.direction()) : 1f;
+                int rgb = (int) (shade * 255);
                 QuadInstance qi = new QuadInstance();
-                qi.setColor(0xFFFFFFFF);
+                qi.setColor((0xFF << 24) | (rgb << 16) | (rgb << 8) | rgb);
                 qi.setLightCoords(packedLight);
                 qi.setOverlayCoords(overlay);
                 consumer.putBakedQuad(pose, quad, qi);
