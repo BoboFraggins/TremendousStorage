@@ -1,5 +1,8 @@
 package net.bobofraggins.tremendousstorage.storage.barrel;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,6 +27,9 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  */
 public record BarrelExtractPacket(BlockPos pos, boolean sneaking) implements CustomPacketPayload {
 
+    private static final Map<UUID, Long> lastExtract = new ConcurrentHashMap<>();
+    private static final int COOLDOWN_TICKS = 5;
+
     public static final Type<BarrelExtractPacket> TYPE =
             new Type<>(Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "barrel_extract"));
 
@@ -43,6 +49,10 @@ public record BarrelExtractPacket(BlockPos pos, boolean sneaking) implements Cus
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
             Level level = player.level();
+            long now = level.getGameTime();
+            Long last = lastExtract.get(player.getUUID());
+            if (last != null && now - last < COOLDOWN_TICKS) return;
+            lastExtract.put(player.getUUID(), now);
             BlockState state = level.getBlockState(packet.pos());
             if (!(state.getBlock() instanceof BarrelBlock)) return;
             if (!(level.getBlockEntity(packet.pos()) instanceof BarrelBlockEntity be)) return;

@@ -239,6 +239,14 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         int button = event.button();
 
         shiftDragSlot = null;
+        if (QuickStackClientEvents.quickStackMatchesMouse(button) && menu.hasNetwork()) {
+            ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getNiPos(), true));
+            return true;
+        }
+        if (QuickStackClientEvents.cycleSortMatchesMouse(button)) {
+            cycleSortMode();
+            return true;
+        }
         if (configDrawer.mouseClicked(mouseX, mouseY, button)) return true;
         if (dialog.mouseClicked(mouseX, mouseY, button)) return true;
         return super.mouseClicked(event, consumed);

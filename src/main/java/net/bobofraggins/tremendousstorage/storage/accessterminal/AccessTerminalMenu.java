@@ -393,7 +393,8 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                                 : stack.copyWithCount(stack.getCount() - inserted);
                         slot.set(remainder);
                         if (hasCraftingUpgrade) slotsChanged(craftSlots);
-                        // Refresh the client's network grid
+                        // Force cache rebuild so the refresh packet reflects the just-inserted items
+                        ni.markContentsDirty();
                         KeyCounter inventory = ni.getCachedInventory();
                         if (inventory != null && player instanceof ServerPlayer sp) {
                             PacketDistributor.sendToPlayer(

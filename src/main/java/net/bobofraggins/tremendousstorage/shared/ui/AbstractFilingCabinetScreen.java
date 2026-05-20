@@ -75,6 +75,10 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         int button = event.button();
 
         shiftDragSlot = null;
+        if (QuickStackClientEvents.quickStackMatchesMouse(button)) {
+            ClientPacketDistributor.sendToServer(new QuickStackFilingCabinetPacket());
+            return true;
+        }
         if (configDrawer.mouseClicked(mouseX, mouseY, button)) return true;
         return super.mouseClicked(event, consumed);
     }

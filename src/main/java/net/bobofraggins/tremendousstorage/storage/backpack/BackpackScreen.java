@@ -230,6 +230,11 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
         int button = event.button();
 
         shiftDragSlot = null;
+        if (QuickStackClientEvents.quickStackMatchesMouse(button)) {
+            ClientPacketDistributor.sendToServer(
+                    new BackpackQuickStackPacket(menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId()));
+            return true;
+        }
         if (configDrawer.mouseClicked(mouseX, mouseY, button)) return true;
         if (dialog.mouseClicked(mouseX, mouseY, button)) return true;
         return super.mouseClicked(event, consumed);

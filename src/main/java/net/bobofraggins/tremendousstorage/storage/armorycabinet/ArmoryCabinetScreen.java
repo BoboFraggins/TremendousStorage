@@ -180,6 +180,10 @@ public class ArmoryCabinetScreen extends AbstractContainerScreen<ArmoryCabinetMe
         int button = event.button();
 
         shiftDragSlot = null;
+        if (QuickStackClientEvents.quickStackMatchesMouse(button)) {
+            ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false));
+            return true;
+        }
         if (configDrawer.mouseClicked(mouseX, mouseY, button)) return true;
         if (dialog.mouseClicked(mouseX, mouseY, button)) return true;
         return super.mouseClicked(event, consumed);

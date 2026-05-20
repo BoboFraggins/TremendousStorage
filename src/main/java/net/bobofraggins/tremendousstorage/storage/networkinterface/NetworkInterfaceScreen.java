@@ -118,6 +118,10 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         double mouseY = event.y();
         int button = event.button();
 
+        if (QuickStackClientEvents.quickStackMatchesMouse(button) && menu.isNetworkValid()) {
+            ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), true));
+            return true;
+        }
         if (button == 0 && isInScrollbar(mouseX, mouseY)) {
             draggingScrollbar = true;
             scrollToY(mouseY);

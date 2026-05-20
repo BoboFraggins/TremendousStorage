@@ -69,7 +69,7 @@ public class HaarpWeatherPane implements IDialogPane {
 
         // Header
         Component header = Component.translatable("screen.tremendousstorage.haarp.weather_mode");
-        g.text(font, header, (width - font.width(header)) / 2, HEADER_Y, 0x404040, false);
+        g.text(font, header, (width - font.width(header)) / 2, HEADER_Y, 0xFF404040, false);
 
         // Radio rows
         for (int i = 0; i < MODES.length; i++) {
@@ -86,7 +86,7 @@ public class HaarpWeatherPane implements IDialogPane {
 
             // Label
             Component label = Component.translatable(MODE_KEYS[i]);
-            g.text(font, label, LABEL_LEFT, rowY, 0x404040, false);
+            g.text(font, label, LABEL_LEFT, rowY, 0xFF404040, false);
         }
     }
 
