@@ -3,6 +3,7 @@ package net.bobofraggins.tremendousstorage.storage.backpack;
 import com.mojang.serialization.MapCodec;
 import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.ProblemReporter;
@@ -36,7 +37,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * sounds, and animates its flap. Contents are saved to the dropped item when broken, and
  * restored when placed from an item that carries NBT data.
  */
-public class BackpackBlock extends BaseEntityBlock {
+public class BackpackBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<BackpackBlock> CODEC = simpleCodec(BackpackBlock::new);
     public static final Property<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
@@ -80,7 +81,7 @@ public class BackpackBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        return RenderShape.INVISIBLE;
     }
 
     @Override

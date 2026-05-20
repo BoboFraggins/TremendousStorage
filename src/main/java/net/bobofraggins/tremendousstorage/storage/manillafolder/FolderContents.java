@@ -87,6 +87,30 @@ public record FolderContents(Optional<ItemStack> storedItem, long count, Storage
 
     public record ExtractResult(FolderContents updated, long extracted) {}
 
+    // -------------------------------------------------------------------------
+    // equals / hashCode — ItemStack doesn't override equals(), so record
+    // auto-generation would use reference equality for storedItem.  We need
+    // structural comparison instead.
+    // -------------------------------------------------------------------------
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof FolderContents other)) return false;
+        if (count != other.count) return false;
+        if (tier != other.tier) return false;
+        if (storedItem.isPresent() != other.storedItem.isPresent()) return false;
+        return storedItem.isEmpty() || ItemStack.isSameItemSameComponents(storedItem.get(), other.storedItem.get());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Long.hashCode(count);
+        result = 31 * result + tier.hashCode();
+        result = 31 * result + (storedItem.isPresent() ? ItemStack.hashItemAndComponents(storedItem.get()) : 0);
+        return result;
+    }
+
     /**
      * Checks whether this folder is compatible with the given stack (same item, ignoring count).
      */

@@ -55,13 +55,10 @@ public class FolderExtractionSlot extends Slot {
         return contents != null && contents.count() > 0 && contents.storedItem().isPresent();
     }
 
-    /**
-     * No-op — extraction is handled exclusively by {@link #remove} and {@link #extractAmount}.
-     * The server-to-client slot sync calls this; the client reads state directly from the folder
-     * slot instead.
-     */
     @Override
-    public void set(ItemStack stack) {}
+    public void set(ItemStack stack) {
+        super.set(stack);
+    }
 
     @Override
     public ItemStack remove(int amount) {

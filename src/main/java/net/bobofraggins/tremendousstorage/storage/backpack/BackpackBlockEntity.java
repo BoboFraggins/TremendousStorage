@@ -1,14 +1,18 @@
 package net.bobofraggins.tremendousstorage.storage.backpack;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -54,6 +58,30 @@ public class BackpackBlockEntity extends ChestBlockEntity {
             }
         };
         return new ChestMenu(id, inv, worldPosition, data, hasCraftingUpgrade());
+    }
+
+    // -------------------------------------------------------------------------
+    // Item ↔ block entity component sync
+    // -------------------------------------------------------------------------
+
+    /**
+     * Writes the current inventory into {@link BackpackContents} so items survive a
+     * place-and-break cycle without needing the block entity data to be present.
+     */
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder components) {
+        super.collectImplicitComponents(components);
+        List<BackpackContents.Entry> entries = new ArrayList<>();
+        for (int i = 0; i < typeCount(); i++) {
+            ItemStack type = getType(i);
+            long count = getCount(i);
+            if (!type.isEmpty() && count > 0) {
+                entries.add(new BackpackContents.Entry(type, count));
+            }
+        }
+        components.set(
+                BackpackContents.type(),
+                new BackpackContents(entries, getTier(), getPriority(), getSortMode(), hasCraftingUpgrade()));
     }
 
     // -------------------------------------------------------------------------

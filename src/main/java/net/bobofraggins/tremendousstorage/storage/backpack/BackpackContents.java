@@ -8,6 +8,7 @@ import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -33,6 +34,10 @@ public final class BackpackContents {
 
         public static final StreamCodec<RegistryFriendlyByteBuf, Entry> STREAM_CODEC = StreamCodec.composite(
                 ItemStack.OPTIONAL_STREAM_CODEC, Entry::type, ByteBufCodecs.VAR_LONG, Entry::count, Entry::new);
+    }
+
+    public static DataComponentType<BackpackContents> type() {
+        return net.bobofraggins.tremendousstorage.shared.register.Registration.TREMENDOUS_BACKPACK_CONTENTS.get();
     }
 
     public static final BackpackContents EMPTY =

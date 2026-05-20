@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.ProblemReporter;
@@ -47,7 +48,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * Only the LOWER half has a {@link ArmoryCabinetBlockEntity}. Accepts only items that have
  * durability or are tagged as tools, weapons, or armor.
  */
-public class ArmoryCabinetBlock extends BaseEntityBlock {
+public class ArmoryCabinetBlock extends BaseEntityBlock implements NetworkConnector {
 
     public static final MapCodec<ArmoryCabinetBlock> CODEC = simpleCodec(ArmoryCabinetBlock::new);
 
@@ -105,7 +106,7 @@ public class ArmoryCabinetBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        return RenderShape.INVISIBLE;
     }
 
     @Override

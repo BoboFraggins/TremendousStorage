@@ -1,9 +1,13 @@
 package net.bobofraggins.tremendousstorage.storage.enderbackpack;
 
+import net.bobofraggins.tremendousstorage.shared.config.SortMode;
+import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
 import net.bobofraggins.tremendousstorage.storage.backpack.BackpackItem;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -51,6 +55,24 @@ public class EnderBackpackItem extends BackpackItem {
 
         BackpackContents contents =
                 backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+        // Recover tier/priority/sortMode/craftingUpgrade from BLOCK_ENTITY_DATA when the backpack
+        // was placed as a block and broken (TREMENDOUS_BACKPACK_CONTENTS not yet set on old items).
+        if (contents == BackpackContents.EMPTY) {
+            var bedData = backpackStack.get(DataComponents.BLOCK_ENTITY_DATA);
+            if (bedData != null) {
+                CompoundTag beTag = bedData.copyTagWithoutId();
+                StorageTier tier = StorageTier.fromId(beTag.getStringOr("Tier", ""));
+                Priority priority = Priority.fromOrdinal(beTag.getIntOr("Priority", 0));
+                SortMode sortMode;
+                try {
+                    sortMode = SortMode.valueOf(beTag.getStringOr("SortMode", "AMOUNT"));
+                } catch (IllegalArgumentException e) {
+                    sortMode = SortMode.AMOUNT;
+                }
+                boolean craftingUpgrade = beTag.getBooleanOr("CraftingUpgrade", false);
+                contents = new BackpackContents(java.util.List.of(), tier, priority, sortMode, craftingUpgrade);
+            }
+        }
 
         // Sync FROM storage (or seed storage if this is first open)
         EnderBackpackStorage storage =

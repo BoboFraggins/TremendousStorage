@@ -71,8 +71,6 @@ public class TubeRenderer
     private static final Identifier ATTACH_STORAGE_TEXTURE =
             Identifier.fromNamespaceAndPath("tremendousstorage", "block/attachment_storage");
 
-    private static final Identifier BLOCKS_ATLAS = Identifier.withDefaultNamespace("textures/atlas/blocks.png");
-
     /** Small offset to prevent Z-fighting with adjacent block faces. */
     private static final float EPS = 1e-4f;
 
@@ -133,17 +131,20 @@ public class TubeRenderer
     public void submit(State state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraState) {
         if (!(state.blockState.getBlock() instanceof TubeBlock)) return;
 
-        var atlas = Minecraft.getInstance().getAtlasManager().getAtlasOrThrow(BLOCKS_ATLAS);
-        TextureAtlasSprite sprite = atlas.getSprite(TUBE_TEXTURE);
-        TextureAtlasSprite tubeFace0 = atlas.getSprite(TUBE_FACE_0);
-        TextureAtlasSprite tubeFace1 = atlas.getSprite(TUBE_FACE_1);
-        TextureAtlasSprite tubeFace2adj = atlas.getSprite(TUBE_FACE_2ADJ);
-        TextureAtlasSprite tubeFace2opp = atlas.getSprite(TUBE_FACE_2OPP);
-        TextureAtlasSprite tubeFace3 = atlas.getSprite(TUBE_FACE_3);
-        TextureAtlasSprite tubeFace4 = atlas.getSprite(TUBE_FACE_4);
-        TextureAtlasSprite importSprite = atlas.getSprite(ATTACH_IMPORT_TEXTURE);
-        TextureAtlasSprite exportSprite = atlas.getSprite(ATTACH_EXPORT_TEXTURE);
-        TextureAtlasSprite storageSprite = atlas.getSprite(ATTACH_STORAGE_TEXTURE);
+        net.minecraft.client.renderer.texture.TextureAtlas blockAtlas =
+                (net.minecraft.client.renderer.texture.TextureAtlas) Minecraft.getInstance()
+                        .getTextureManager()
+                        .getTexture(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS);
+        TextureAtlasSprite sprite = blockAtlas.getSprite(TUBE_TEXTURE);
+        TextureAtlasSprite tubeFace0 = blockAtlas.getSprite(TUBE_FACE_0);
+        TextureAtlasSprite tubeFace1 = blockAtlas.getSprite(TUBE_FACE_1);
+        TextureAtlasSprite tubeFace2adj = blockAtlas.getSprite(TUBE_FACE_2ADJ);
+        TextureAtlasSprite tubeFace2opp = blockAtlas.getSprite(TUBE_FACE_2OPP);
+        TextureAtlasSprite tubeFace3 = blockAtlas.getSprite(TUBE_FACE_3);
+        TextureAtlasSprite tubeFace4 = blockAtlas.getSprite(TUBE_FACE_4);
+        TextureAtlasSprite importSprite = blockAtlas.getSprite(ATTACH_IMPORT_TEXTURE);
+        TextureAtlasSprite exportSprite = blockAtlas.getSprite(ATTACH_EXPORT_TEXTURE);
+        TextureAtlasSprite storageSprite = blockAtlas.getSprite(ATTACH_STORAGE_TEXTURE);
 
         int light = state.lightCoords;
         int overlay = net.minecraft.client.renderer.texture.OverlayTexture.NO_OVERLAY;

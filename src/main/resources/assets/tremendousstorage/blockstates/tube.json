@@ -1,0 +1,5 @@
+{
+  "multipart": [
+    { "apply": { "model": "tremendousstorage:block/tube_particle" } }
+  ]
+}

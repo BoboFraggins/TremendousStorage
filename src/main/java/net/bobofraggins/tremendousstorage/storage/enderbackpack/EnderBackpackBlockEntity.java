@@ -1,17 +1,22 @@
 package net.bobofraggins.tremendousstorage.storage.enderbackpack;
 
+import java.util.ArrayList;
+import java.util.List;
 import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackContents;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestMenu;
 import net.bobofraggins.tremendousstorage.storage.enderchest.EnderChestBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -89,6 +94,30 @@ public class EnderBackpackBlockEntity extends EnderChestBlockEntity {
         return server == null
                 ? lastKnownVersion
                 : EnderBackpackStorage.get(server).getVersion(linkId);
+    }
+
+    // -------------------------------------------------------------------------
+    // Item ↔ block entity component sync
+    // -------------------------------------------------------------------------
+
+    /**
+     * Writes current inventory and settings into {@link BackpackContents} so tier, crafting
+     * upgrade, priority, and sort mode survive a place-and-break cycle.
+     */
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder components) {
+        super.collectImplicitComponents(components);
+        List<BackpackContents.Entry> entries = new ArrayList<>();
+        for (int i = 0; i < typeCount(); i++) {
+            ItemStack type = getType(i);
+            long count = getCount(i);
+            if (!type.isEmpty() && count > 0) {
+                entries.add(new BackpackContents.Entry(type, count));
+            }
+        }
+        components.set(
+                BackpackContents.type(),
+                new BackpackContents(entries, getTier(), getPriority(), getSortMode(), hasCraftingUpgrade()));
     }
 
     // -------------------------------------------------------------------------

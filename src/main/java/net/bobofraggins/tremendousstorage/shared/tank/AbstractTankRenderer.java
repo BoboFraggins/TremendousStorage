@@ -98,12 +98,10 @@ public abstract class AbstractTankRenderer<T extends BlockEntity>
         }
     }
 
-    private static final Identifier BLOCKS_ATLAS = Identifier.withDefaultNamespace("textures/atlas/blocks.png");
-
     protected static TextureAtlasSprite sprite(Identifier loc) {
-        return Minecraft.getInstance()
-                .getAtlasManager()
-                .getAtlasOrThrow(BLOCKS_ATLAS)
+        return ((net.minecraft.client.renderer.texture.TextureAtlas) Minecraft.getInstance()
+                        .getTextureManager()
+                        .getTexture(net.minecraft.client.renderer.texture.TextureAtlas.LOCATION_BLOCKS))
                 .getSprite(loc);
     }
 
