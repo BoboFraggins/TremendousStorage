@@ -43,14 +43,17 @@ public record OpenPicnicBasketPacket(int slotType, int slotIndex, String slotId)
     public static void handle(OpenPicnicBasketPacket packet, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             if (!(ctx.player() instanceof ServerPlayer player)) return;
-            ItemStack basketStack = PicnicBasketItemUtils.getBasketStack(
-                    player, packet.slotType(), packet.slotIndex(), packet.slotId());
-            if (basketStack.isEmpty()) return;
-            player.openMenu(new Provider(packet.slotType(), packet.slotIndex(), packet.slotId()), buf -> {
-                buf.writeInt(packet.slotType());
-                buf.writeInt(packet.slotIndex());
-                buf.writeUtf(packet.slotId());
-            });
+            openUi(player, packet.slotType(), packet.slotIndex(), packet.slotId());
+        });
+    }
+
+    public static void openUi(ServerPlayer player, int slotType, int slotIndex, String slotId) {
+        ItemStack basketStack = PicnicBasketItemUtils.getBasketStack(player, slotType, slotIndex, slotId);
+        if (basketStack.isEmpty()) return;
+        player.openMenu(new Provider(slotType, slotIndex, slotId), buf -> {
+            buf.writeInt(slotType);
+            buf.writeInt(slotIndex);
+            buf.writeUtf(slotId);
         });
     }
 

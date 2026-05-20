@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.glamping.dankfannypack;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import net.bobofraggins.tremendousstorage.shared.input.TremendousStorageKeys;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.KeyMapping;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -11,6 +12,7 @@ import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyModifier;
 import net.neoforged.neoforge.common.NeoForge;
 import org.lwjgl.glfw.GLFW;
+import top.theillusivec4.curios.api.client.ICurioRenderer;
 
 /** Client-only mod-bus events for the Dank Fanny Pack. */
 public final class DankFannyPackClientEvents {
@@ -28,7 +30,7 @@ public final class DankFannyPackClientEvents {
                 KeyModifier.ALT,
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_D,
-                net.minecraft.client.KeyMapping.Category.MISC);
+                TremendousStorageKeys.CATEGORY);
         event.register(OPEN_DANK_FANNY_PACK);
     }
 
@@ -40,5 +42,6 @@ public final class DankFannyPackClientEvents {
     @SubscribeEvent
     public static void onClientSetup(FMLClientSetupEvent event) {
         NeoForge.EVENT_BUS.register(DankFannyPackClientTickHandler.class);
+        ICurioRenderer.register(Registration.DANK_FANNY_PACK.get(), DankFannyPackCurioRenderer::new);
     }
 }

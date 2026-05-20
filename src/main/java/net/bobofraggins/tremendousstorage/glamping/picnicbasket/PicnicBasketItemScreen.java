@@ -1,19 +1,23 @@
 package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import javax.annotation.Nullable;
+import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.bobofraggins.tremendousstorage.shared.ui.ConfigDrawer;
 import net.bobofraggins.tremendousstorage.shared.ui.Dialog;
 import net.bobofraggins.tremendousstorage.shared.ui.LocalInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.PlayerInventoryPane;
 import net.bobofraggins.tremendousstorage.shared.ui.SearchBoxWidget;
+import net.bobofraggins.tremendousstorage.shared.ui.SortPane;
 import net.bobofraggins.tremendousstorage.shared.util.SearchSync;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
@@ -40,6 +44,8 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
     private final ConfigDrawer configDrawer;
     private SearchBoxWidget searchBox;
 
+    private SortMode sortMode = SortMode.AMOUNT;
+
     @Nullable
     private Slot shiftDragSlot;
 
@@ -53,17 +59,22 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
         super(menu, inv, title, dialog_.totalWidth(), dialog_.totalHeight());
         inventoryPane = inventoryPane_;
         dialog = dialog_;
-        configDrawer = new ConfigDrawer(new AutoFeedPane(
-                () -> {
-                    ItemStack basket = getCurrentBasketStack();
-                    return basket.isEmpty() || PicnicBasketItemUtils.readAutoFeed(basket);
-                },
-                () -> {
-                    ItemStack basket = getCurrentBasketStack();
-                    if (basket.isEmpty()) return;
-                    boolean current = PicnicBasketItemUtils.readAutoFeed(basket);
-                    ClientPacketDistributor.sendToServer(new PicnicBasketItemAutoFeedPacket(
-                            menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), !current));
+        configDrawer = new ConfigDrawer(
+                new AutoFeedPane(
+                        () -> {
+                            ItemStack basket = getCurrentBasketStack();
+                            return basket.isEmpty() || PicnicBasketItemUtils.readAutoFeed(basket);
+                        },
+                        () -> {
+                            ItemStack basket = getCurrentBasketStack();
+                            if (basket.isEmpty()) return;
+                            boolean current = PicnicBasketItemUtils.readAutoFeed(basket);
+                            ClientPacketDistributor.sendToServer(new PicnicBasketItemAutoFeedPacket(
+                                    menu.getSlotType(), menu.getSlotIndex(), menu.getSlotId(), !current));
+                        }),
+                new SortPane(() -> sortMode, newMode -> {
+                    sortMode = newMode;
+                    refreshInventory();
                 }));
     }
 
@@ -126,7 +137,31 @@ public class PicnicBasketItemScreen extends AbstractContainerScreen<PicnicBasket
                 counts.add(entry.getLongOr("Count", 0L));
             }
         }
-        inventoryPane.setContents(stacks, counts);
+        List<Integer> order = new ArrayList<>(n);
+        for (int i = 0; i < n; i++) order.add(i);
+        order.sort(buildComparator(stacks, counts));
+        List<ItemStack> sorted = new ArrayList<>(n);
+        List<Long> sortedCounts = new ArrayList<>(n);
+        for (int i : order) {
+            sorted.add(stacks.get(i));
+            sortedCounts.add(counts.get(i));
+        }
+        int[] sortedToOriginal = order.stream().mapToInt(i -> i).toArray();
+        inventoryPane.setContents(sorted, sortedCounts, sortedToOriginal);
+    }
+
+    private Comparator<Integer> buildComparator(List<ItemStack> stacks, List<Long> counts) {
+        return switch (sortMode) {
+            case NAME -> Comparator.comparing(i -> stacks.get(i).getHoverName().getString());
+            case MOD -> Comparator.<Integer, String>comparing(i -> {
+                        var key = BuiltInRegistries.ITEM.getKey(stacks.get(i).getItem());
+                        return key != null ? key.getNamespace() : "";
+                    })
+                    .thenComparing(i -> stacks.get(i).getHoverName().getString());
+            default -> Comparator.comparingLong((Integer i) -> counts.get(i))
+                    .reversed()
+                    .thenComparing(i -> stacks.get(i).getHoverName().getString());
+        };
     }
 
     private ItemStack getCurrentBasketStack() {

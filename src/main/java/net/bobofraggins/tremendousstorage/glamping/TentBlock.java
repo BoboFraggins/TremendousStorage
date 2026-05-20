@@ -163,6 +163,9 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
         if (!(level.getBlockEntity(footPos) instanceof TentBlockEntity be)) return InteractionResult.PASS;
 
         // Store where the player is now so the tent door can bring them back.
+        // Use the tent's facing to compute the exit yRot (face away from the tent on return).
+        Direction tentFacing = state.getValue(FACING);
+        float exitYRot = directionToYRot(tentFacing.getOpposite());
         GlampingWorldData data = GlampingWorldData.getOrCreate(server);
         data.storeReturnTarget(
                 serverPlayer.getUUID(),
@@ -170,8 +173,8 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
                 serverPlayer.getX(),
                 serverPlayer.getY(),
                 serverPlayer.getZ(),
-                serverPlayer.getYRot(),
-                serverPlayer.getXRot());
+                exitYRot,
+                0f);
 
         BlockPos campOrigin;
         if (be.hasCamp()) {
@@ -192,8 +195,8 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
         double tx = campOrigin.getX() + GlampingDimension.CAMP_SIZE / 2 + 0.5;
         double ty = campOrigin.getY();
         double tz = campOrigin.getZ() + GlampingDimension.CAMP_SIZE - 2 + 0.5;
-        serverPlayer.teleportTo(
-                glampingLevel, tx, ty, tz, Set.<Relative>of(), serverPlayer.getYRot(), serverPlayer.getXRot(), false);
+        // Face north (away from the TentDoor, which is always on the south wall).
+        serverPlayer.teleportTo(glampingLevel, tx, ty, tz, Set.<Relative>of(), 180f, 0f, false);
 
         return InteractionResult.SUCCESS;
     }
@@ -268,6 +271,16 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
                 slotZ * GlampingDimension.CAMP_SPACING);
     }
 
+    private static float directionToYRot(Direction dir) {
+        return switch (dir) {
+            case SOUTH -> 0f;
+            case WEST -> 90f;
+            case NORTH -> 180f;
+            case EAST -> 270f;
+            default -> 0f;
+        };
+    }
+
     private static final Identifier CAMP_STRUCTURE =
             Identifier.fromNamespaceAndPath(TremendousStorage.MODID, "glamping_camp");
 
@@ -275,11 +288,11 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
      * The structure's (0,0,0) corner is offset from campOrigin by this amount so that the
      * template tent door aligns with the camp's expected door position.
      *
-     * <p>Template door is at relative position (12,16,31) within the 25×32×32 structure.
-     * Camp door is placed at campOrigin.offset(8, 0, 15), so structure origin =
-     * campOrigin.offset(8-12, 0-16, 15-31) = campOrigin.offset(-4, -16, -16).
+     * <p>Template door (lower half) is at relative position (14,6,25) within the 32×14×32 structure.
+     * Camp door is at campOrigin.offset(8, 0, 15), so structure origin =
+     * campOrigin.offset(8-14, 0-6, 15-25) = campOrigin.offset(-6, -6, -10).
      */
-    private static final BlockPos STRUCTURE_OFFSET = new BlockPos(-4, -16, -16);
+    private static final BlockPos STRUCTURE_OFFSET = new BlockPos(-6, -6, -10);
 
     private static void carveSpace(ServerLevel level, BlockPos campOrigin) {
         Optional<StructureTemplate> template = level.getStructureManager().get(CAMP_STRUCTURE);

@@ -3,10 +3,8 @@ package net.bobofraggins.tremendousstorage.glamping;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.CanContinueSleepingEvent;
 import net.neoforged.neoforge.event.entity.player.CanPlayerSleepEvent;
@@ -61,9 +59,8 @@ public class GlampingEvents {
         if (!player.level().dimension().equals(GlampingDimension.KEY)) return;
         MinecraftServer server = ((net.minecraft.server.level.ServerLevel) player.level()).getServer();
         if (server == null) return;
-        ServerLevel overworld = server.getLevel(Level.OVERWORLD);
-        if (overworld != null) {
-            ((net.minecraft.world.level.storage.ServerLevelData) overworld.getLevelData()).setDayTimeFraction(0.0f);
-        }
+        net.minecraft.world.clock.ServerClockManager clockManager = server.clockManager();
+        var overworldClock = server.registryAccess().getOrThrow(net.minecraft.world.clock.WorldClocks.OVERWORLD);
+        clockManager.moveToTimeMarker(overworldClock, net.minecraft.world.clock.ClockTimeMarkers.WAKE_UP_FROM_SLEEP);
     }
 }

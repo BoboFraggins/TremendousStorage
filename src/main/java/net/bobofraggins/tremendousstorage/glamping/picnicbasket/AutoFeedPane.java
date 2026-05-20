@@ -51,7 +51,7 @@ public class AutoFeedPane implements IDialogPane {
     public void render(
             GuiGraphicsExtractor graphics, Font font, int width, int localMouseX, int localMouseY, float partialTick) {
         Component label = Component.translatable("screen.tremendousstorage.auto_feed_label");
-        graphics.text(font, label, (width - font.width(label)) / 2, LABEL_Y, 0x404040, false);
+        graphics.text(font, label, (width - font.width(label)) / 2, LABEL_Y, 0xFF404040, false);
 
         int toggleX = (width - TOGGLE_W) / 2;
         Identifier tex = stateGetter.getAsBoolean() ? TOGGLE_ON : TOGGLE_OFF;

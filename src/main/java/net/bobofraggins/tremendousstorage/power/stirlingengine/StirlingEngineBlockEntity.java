@@ -99,7 +99,11 @@ public class StirlingEngineBlockEntity extends BlockEntity {
             EnergyHandler storage = level.getCapability(Capabilities.Energy.BLOCK, adjPos, dir.getOpposite());
             if (storage == null) continue;
             int toSend = Math.min(energyStored, (int) tier.getScaledCapacity(BASE_PUSH_PER_TICK));
-            int accepted = storage.insert(toSend, null);
+            int accepted;
+            try (var tx = net.neoforged.neoforge.transfer.transaction.Transaction.openRoot()) {
+                accepted = storage.insert(toSend, tx);
+                tx.commit();
+            }
             energyStored -= accepted;
             if (energyStored <= 0) break;
         }

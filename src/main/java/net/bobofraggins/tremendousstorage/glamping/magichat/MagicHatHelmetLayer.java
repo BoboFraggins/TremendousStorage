@@ -40,7 +40,7 @@ public class MagicHatHelmetLayer extends RenderLayer<AvatarRenderState, PlayerMo
         getParentModel().head.translateAndRotate(poseStack);
         poseStack.mulPose(Axis.YP.rotationDegrees(180f));
         poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
-        poseStack.translate(0.0, 1.0, 0.0);
+        poseStack.translate(0.0, -0.25, 0.0);
 
         ItemStackRenderState irs = new ItemStackRenderState();
         Minecraft.getInstance()

@@ -62,7 +62,7 @@ public class TentDoorBlock extends Block {
                     spawn.getZ() + 0.5,
                     Set.<Relative>of(),
                     serverPlayer.getYRot(),
-                    serverPlayer.getXRot(),
+                    0f,
                     false);
         } else {
             ServerLevel returnLevel = server.getLevel(target.dimension());

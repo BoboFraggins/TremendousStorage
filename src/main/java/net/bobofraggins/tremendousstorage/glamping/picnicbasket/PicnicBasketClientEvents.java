@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.glamping.picnicbasket;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import net.bobofraggins.tremendousstorage.shared.input.TremendousStorageKeys;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
@@ -29,7 +30,7 @@ public final class PicnicBasketClientEvents {
                 KeyModifier.NONE,
                 InputConstants.Type.KEYSYM,
                 InputConstants.UNKNOWN.getValue(),
-                net.minecraft.client.KeyMapping.Category.MISC);
+                TremendousStorageKeys.CATEGORY);
         event.register(OPEN_PICNIC_BASKET);
     }
 
