@@ -39,30 +39,27 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
 
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(FolderDataProvider.INSTANCE, FilingCabinetBlockEntity.class);
+        registration.registerBlockDataProvider(FolderServerProvider.INSTANCE, FilingCabinetBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        registration.registerBlockComponent(FolderDataProvider.INSTANCE, FilingCabinetBlock.class);
+        registration.registerBlockComponent(FolderClientProvider.INSTANCE, FilingCabinetBlock.class);
     }
 
     // -------------------------------------------------------------------------
-    // Combined server data provider + client component provider
+    // Server-side data provider
     // -------------------------------------------------------------------------
 
-    enum FolderDataProvider implements IBlockComponentProvider, snownee.jade.api.IServerDataProvider<BlockAccessor> {
+    enum FolderServerProvider implements snownee.jade.api.IServerDataProvider<BlockAccessor> {
         INSTANCE;
 
         private static final String KEY_ITEMS = "Items";
-
-        // -- Server side: copy the BE's NBT into the Jade data tag --
 
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
             if (!(accessor.getBlockEntity() instanceof FilingCabinetBlockEntity be)) return;
 
-            // Summarise each slot: store the stored-item type and total count from FolderContents
             ListTag list = new ListTag();
             for (int i = 0; i < FilingCabinetBlockEntity.SLOT_COUNT; i++) {
                 ItemStack folder = be.getFolder(i);
@@ -79,7 +76,6 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
                                 .toString());
                 entry.putLong("count", contents.count());
                 entry.putLong("capacity", ManillaFolderItem.getCapacity(folder));
-                // Serialize the full ItemStack so we can reconstruct it client-side for the icon
                 net.minecraft.nbt.Tag stackTag = net.minecraft.world.item.ItemStack.OPTIONAL_CODEC
                         .encodeStart(
                                 accessor.getLevel().registryAccess().createSerializationContext(NbtOps.INSTANCE),
@@ -96,8 +92,16 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
         public Identifier getUid() {
             return FILING_CABINET_PROVIDER;
         }
+    }
 
-        // -- Client side: render the tooltip --
+    // -------------------------------------------------------------------------
+    // Client-side component provider
+    // -------------------------------------------------------------------------
+
+    enum FolderClientProvider implements IBlockComponentProvider {
+        INSTANCE;
+
+        private static final String KEY_ITEMS = "Items";
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
@@ -124,9 +128,13 @@ public class FilingCabinetJadePlugin implements IWailaPlugin {
                         formatCount(capacity)));
             }
         }
+
+        @Override
+        public Identifier getUid() {
+            return FILING_CABINET_PROVIDER;
+        }
     }
 
-    /** Formats a count as e.g. "4k" when ≥ 1000, or the exact number otherwise. */
     public static String formatCount(long n) {
         return CountFormat.format(n);
     }

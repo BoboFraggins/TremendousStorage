@@ -344,7 +344,8 @@ public final class Registration {
             BLOCKS.registerBlock("filing_cabinet", FilingCabinetBlock::new, () -> BlockBehaviour.Properties.of()
                     .strength(5.0f, 1000.0f)
                     .requiresCorrectToolForDrops()
-                    .sound(SoundType.WOOD));
+                    .sound(SoundType.WOOD)
+                    .noOcclusion());
 
     public static final DeferredHolder<Item, BlockItem> FILING_CABINET_ITEM = ITEMS.registerItem(
             "filing_cabinet", props -> new TieredBlockItem(FILING_CABINET.get(), props), Item.Properties::new);

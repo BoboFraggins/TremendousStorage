@@ -74,7 +74,7 @@ public class WirelessHubBlock extends BaseEntityBlock implements NetworkConnecto
     @Override
     public RenderShape getRenderShape(BlockState state) {
         // All geometry (base, rods, arc) is drawn by WirelessHubRenderer; JSON provides particle only.
-        return RenderShape.MODEL;
+        return RenderShape.INVISIBLE;
     }
 
     @Override

@@ -271,7 +271,7 @@ public class TubeBlock extends BaseEntityBlock {
 
     @Override
     public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.MODEL;
+        return RenderShape.INVISIBLE;
     }
 
     // -------------------------------------------------------------------------

@@ -22,20 +22,20 @@ public class TubeJadePlugin implements IWailaPlugin {
 
     static final Identifier TUBE_PROVIDER = Identifier.fromNamespaceAndPath("tremendousstorage", "tube_info");
 
+    private static final String KEY_HAS_ATTACHMENT = "HasAttachment";
+
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(TubeDataProvider.INSTANCE, TubeBlockEntity.class);
+        registration.registerBlockDataProvider(TubeServerProvider.INSTANCE, TubeBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        registration.registerBlockComponent(TubeDataProvider.INSTANCE, TubeBlock.class);
+        registration.registerBlockComponent(TubeClientProvider.INSTANCE, TubeBlock.class);
     }
 
-    enum TubeDataProvider implements IBlockComponentProvider, snownee.jade.api.IServerDataProvider<BlockAccessor> {
+    enum TubeServerProvider implements snownee.jade.api.IServerDataProvider<BlockAccessor> {
         INSTANCE;
-
-        private static final String KEY_HAS_ATTACHMENT = "HasAttachment";
 
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
@@ -55,10 +55,19 @@ public class TubeJadePlugin implements IWailaPlugin {
         public Identifier getUid() {
             return TUBE_PROVIDER;
         }
+    }
+
+    enum TubeClientProvider implements IBlockComponentProvider {
+        INSTANCE;
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             // No additional tooltip content needed currently
+        }
+
+        @Override
+        public Identifier getUid() {
+            return TUBE_PROVIDER;
         }
     }
 }

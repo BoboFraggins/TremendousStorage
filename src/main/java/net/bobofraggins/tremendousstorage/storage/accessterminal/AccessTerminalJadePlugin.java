@@ -24,20 +24,20 @@ public class AccessTerminalJadePlugin implements IWailaPlugin {
 
     static final Identifier SAT_PROVIDER = Identifier.fromNamespaceAndPath("tremendousstorage", "sat_network_validity");
 
+    private static final String KEY_VALID = "NetworkValid";
+
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(SatDataProvider.INSTANCE, AccessTerminalBlock.class);
+        registration.registerBlockDataProvider(SatServerProvider.INSTANCE, AccessTerminalBlock.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        registration.registerBlockComponent(SatDataProvider.INSTANCE, AccessTerminalBlock.class);
+        registration.registerBlockComponent(SatClientProvider.INSTANCE, AccessTerminalBlock.class);
     }
 
-    enum SatDataProvider implements IBlockComponentProvider, snownee.jade.api.IServerDataProvider<BlockAccessor> {
+    enum SatServerProvider implements snownee.jade.api.IServerDataProvider<BlockAccessor> {
         INSTANCE;
-
-        private static final String KEY_VALID = "NetworkValid";
 
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
@@ -58,6 +58,10 @@ public class AccessTerminalJadePlugin implements IWailaPlugin {
         public Identifier getUid() {
             return SAT_PROVIDER;
         }
+    }
+
+    enum SatClientProvider implements IBlockComponentProvider {
+        INSTANCE;
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
@@ -66,6 +70,11 @@ public class AccessTerminalJadePlugin implements IWailaPlugin {
                 tooltip.add(Component.translatable("jade.tremendousstorage.network_interface.invalid")
                         .withStyle(net.minecraft.ChatFormatting.RED));
             }
+        }
+
+        @Override
+        public Identifier getUid() {
+            return SAT_PROVIDER;
         }
     }
 }

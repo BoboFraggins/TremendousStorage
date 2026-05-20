@@ -23,20 +23,20 @@ public class NetworkInterfaceJadePlugin implements IWailaPlugin {
     static final Identifier NI_PROVIDER =
             Identifier.fromNamespaceAndPath("tremendousstorage", "network_interface_status");
 
+    private static final String KEY_VALID = "NetworkValid";
+
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(NiDataProvider.INSTANCE, NetworkInterfaceBlockEntity.class);
+        registration.registerBlockDataProvider(NiServerProvider.INSTANCE, NetworkInterfaceBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        registration.registerBlockComponent(NiDataProvider.INSTANCE, NetworkInterfaceBlock.class);
+        registration.registerBlockComponent(NiClientProvider.INSTANCE, NetworkInterfaceBlock.class);
     }
 
-    enum NiDataProvider implements IBlockComponentProvider, snownee.jade.api.IServerDataProvider<BlockAccessor> {
+    enum NiServerProvider implements snownee.jade.api.IServerDataProvider<BlockAccessor> {
         INSTANCE;
-
-        private static final String KEY_VALID = "NetworkValid";
 
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
@@ -48,6 +48,10 @@ public class NetworkInterfaceJadePlugin implements IWailaPlugin {
         public Identifier getUid() {
             return NI_PROVIDER;
         }
+    }
+
+    enum NiClientProvider implements IBlockComponentProvider {
+        INSTANCE;
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
@@ -57,6 +61,11 @@ public class NetworkInterfaceJadePlugin implements IWailaPlugin {
                 tooltip.add(Component.translatable("jade.tremendousstorage.network_interface.invalid")
                         .withStyle(net.minecraft.ChatFormatting.RED));
             }
+        }
+
+        @Override
+        public Identifier getUid() {
+            return NI_PROVIDER;
         }
     }
 }

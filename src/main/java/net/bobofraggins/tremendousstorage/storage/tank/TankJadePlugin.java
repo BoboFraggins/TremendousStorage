@@ -25,22 +25,26 @@ public class TankJadePlugin implements IWailaPlugin {
 
     static final Identifier TANK_PROVIDER = Identifier.fromNamespaceAndPath("tremendousstorage", "tank");
 
+    private static final String KEY_AMOUNT = "Amount";
+    private static final String KEY_CAPACITY = "Capacity";
+    private static final String KEY_FLUID = "Fluid";
+
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(TankDataProvider.INSTANCE, TankBlockEntity.class);
+        registration.registerBlockDataProvider(TankServerProvider.INSTANCE, TankBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        registration.registerBlockComponent(TankDataProvider.INSTANCE, TankBlock.class);
+        registration.registerBlockComponent(TankClientProvider.INSTANCE, TankBlock.class);
     }
 
-    enum TankDataProvider implements IBlockComponentProvider, snownee.jade.api.IServerDataProvider<BlockAccessor> {
-        INSTANCE;
+    // -------------------------------------------------------------------------
+    // Server-side data provider
+    // -------------------------------------------------------------------------
 
-        private static final String KEY_AMOUNT = "Amount";
-        private static final String KEY_CAPACITY = "Capacity";
-        private static final String KEY_FLUID = "Fluid";
+    enum TankServerProvider implements snownee.jade.api.IServerDataProvider<BlockAccessor> {
+        INSTANCE;
 
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
@@ -62,6 +66,14 @@ public class TankJadePlugin implements IWailaPlugin {
         public Identifier getUid() {
             return TANK_PROVIDER;
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Client-side component provider
+    // -------------------------------------------------------------------------
+
+    enum TankClientProvider implements IBlockComponentProvider {
+        INSTANCE;
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
@@ -87,6 +99,11 @@ public class TankJadePlugin implements IWailaPlugin {
                     CountFormat.format(amount),
                     CountFormat.format(capacity),
                     fluid.getHoverName()));
+        }
+
+        @Override
+        public Identifier getUid() {
+            return TANK_PROVIDER;
         }
     }
 }

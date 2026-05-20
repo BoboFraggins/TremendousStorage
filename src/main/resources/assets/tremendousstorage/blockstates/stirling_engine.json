@@ -1,5 +1,5 @@
 {
   "variants": {
-    "": { "model": "tremendousstorage:block/stirling_engine" }
+    "": { "model": "tremendousstorage:block/stirling_engine_particle" }
   }
 }

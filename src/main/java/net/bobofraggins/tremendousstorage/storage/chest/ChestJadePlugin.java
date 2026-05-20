@@ -23,21 +23,21 @@ public class ChestJadePlugin implements IWailaPlugin {
 
     static final Identifier CHEST_PROVIDER = Identifier.fromNamespaceAndPath("tremendousstorage", "chest");
 
+    private static final String KEY_TOTAL = "Total";
+    private static final String KEY_CAPACITY = "Capacity";
+
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(ContainerDataProvider.INSTANCE, ChestBlockEntity.class);
+        registration.registerBlockDataProvider(ChestServerProvider.INSTANCE, ChestBlockEntity.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
-        registration.registerBlockComponent(ContainerDataProvider.INSTANCE, ChestBlock.class);
+        registration.registerBlockComponent(ChestClientProvider.INSTANCE, ChestBlock.class);
     }
 
-    enum ContainerDataProvider implements IBlockComponentProvider, snownee.jade.api.IServerDataProvider<BlockAccessor> {
+    enum ChestServerProvider implements snownee.jade.api.IServerDataProvider<BlockAccessor> {
         INSTANCE;
-
-        private static final String KEY_TOTAL = "Total";
-        private static final String KEY_CAPACITY = "Capacity";
 
         @Override
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
@@ -50,6 +50,10 @@ public class ChestJadePlugin implements IWailaPlugin {
         public Identifier getUid() {
             return CHEST_PROVIDER;
         }
+    }
+
+    enum ChestClientProvider implements IBlockComponentProvider {
+        INSTANCE;
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
@@ -65,6 +69,11 @@ public class ChestJadePlugin implements IWailaPlugin {
                     "jade.tremendousstorage.chest.total",
                     CountFormat.format(total),
                     CountFormat.format(data.getLongOr(KEY_CAPACITY, 0L))));
+        }
+
+        @Override
+        public Identifier getUid() {
+            return CHEST_PROVIDER;
         }
     }
 }

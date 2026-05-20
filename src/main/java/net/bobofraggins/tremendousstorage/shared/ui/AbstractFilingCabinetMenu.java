@@ -101,7 +101,9 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
                     folderSlots[i],
                     col,
                     FOLDER_Y_START + row * 18,
-                    ((net.minecraft.server.level.ServerLevel) playerInv.player.level()).getServer()));
+                    playerInv.player.level() instanceof net.minecraft.server.level.ServerLevel sl
+                            ? sl.getServer()
+                            : null));
         }
 
         // Slots 16-42: player main inventory (centred: (176-162)/2 = 7 px)
@@ -166,9 +168,10 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
                     ItemStack folderItem = folderSlot.getItem();
                     if (folderItem.isEmpty() || !(folderItem.getItem() instanceof ManillaFolderItem)) continue;
                     boolean isEnder = folderItem.getItem() instanceof EnderFolderItem;
+                    net.minecraft.server.MinecraftServer srv =
+                            player.level() instanceof net.minecraft.server.level.ServerLevel sl ? sl.getServer() : null;
                     FolderContents contents = isEnder
-                            ? EnderFolderItem.getLiveContents(
-                                    folderItem, ((net.minecraft.server.level.ServerLevel) player.level()).getServer())
+                            ? EnderFolderItem.getLiveContents(folderItem, srv)
                             : ManillaFolderItem.getContents(folderItem);
                     if (contents.isEmpty() || !contents.accepts(stack)) continue;
                     FolderContents.InsertResult result =
@@ -177,10 +180,7 @@ public abstract class AbstractFilingCabinetMenu extends AbstractContainerMenu {
                     if (inserted <= 0) continue;
                     ItemStack updatedFolder = folderItem.copy();
                     if (isEnder) {
-                        EnderFolderItem.setLiveContents(
-                                updatedFolder,
-                                result.updated(),
-                                ((net.minecraft.server.level.ServerLevel) player.level()).getServer());
+                        EnderFolderItem.setLiveContents(updatedFolder, result.updated(), srv);
                     } else {
                         updatedFolder = ManillaFolderItem.setContents(updatedFolder, result.updated());
                     }
