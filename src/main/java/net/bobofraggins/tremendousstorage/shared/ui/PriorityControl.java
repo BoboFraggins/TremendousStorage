@@ -115,7 +115,7 @@ public class PriorityControl extends AbstractContainerMenu implements IDialogPan
 
         // "Priority:" label, centred
         Component priorityLabel = Component.translatable("screen.tremendousstorage.priority_label");
-        graphics.text(font, priorityLabel, (width - font.width(priorityLabel)) / 2, LABEL_Y, 0x404040, false);
+        graphics.text(font, priorityLabel, (width - font.width(priorityLabel)) / 2, LABEL_Y, 0xFF404040, false);
 
         // ▼ button
         boolean downActive = selected > 0;
@@ -133,7 +133,7 @@ public class PriorityControl extends AbstractContainerMenu implements IDialogPan
         String name = Component.translatable(current.translationKey()).getString();
         int nameX = LBL_X + (LBL_W - font.width(name)) / 2;
         int nameY = ROW_Y + (BTN_H - 8) / 2;
-        graphics.text(font, name, nameX, nameY, 0x404040, false);
+        graphics.text(font, name, nameX, nameY, 0xFF404040, false);
     }
 
     @Override
@@ -177,6 +177,6 @@ public class PriorityControl extends AbstractContainerMenu implements IDialogPan
         // Label centred
         int lx = x + (w - font.width(label)) / 2;
         int ly = y + (h - 8) / 2;
-        graphics.text(font, label, lx, ly, active ? 0x404040 : 0x707070, false);
+        graphics.text(font, label, lx, ly, active ? 0xFF404040 : 0xFF707070, false);
     }
 }

@@ -27,7 +27,7 @@ public final class QuickStackClientEvents {
                 KeyModifier.NONE,
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_KP_ADD,
-                net.minecraft.client.KeyMapping.Category.MISC);
+                TremendousStorageKeys.CATEGORY);
         event.register(QUICK_STACK);
 
         CYCLE_SORT = new KeyMapping(
@@ -36,7 +36,7 @@ public final class QuickStackClientEvents {
                 KeyModifier.NONE,
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_UNKNOWN,
-                net.minecraft.client.KeyMapping.Category.MISC);
+                TremendousStorageKeys.CATEGORY);
         event.register(CYCLE_SORT);
     }
 }

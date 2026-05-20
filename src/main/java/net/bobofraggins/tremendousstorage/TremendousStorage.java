@@ -23,12 +23,13 @@ import net.bobofraggins.tremendousstorage.storage.items.PositiveVibesEffectHandl
 import net.bobofraggins.tremendousstorage.storage.items.VexRepellentBrewingRecipes;
 import net.bobofraggins.tremendousstorage.storage.items.VexRepellentEffectHandler;
 import net.bobofraggins.tremendousstorage.storage.items.ZombieBrainDropHandler;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
@@ -63,7 +64,11 @@ public class TremendousStorage {
         NeoForge.EVENT_BUS.register(ItemPickupInterceptor.class);
 
         // ── Client-only event registrations ──────────────────────────────────────
-        modEventBus.addListener((FMLClientSetupEvent event) -> ClientEventRegistrar.register(modEventBus));
+        // Must run during construction (not deferred to FMLClientSetupEvent) so that
+        // RegisterKeyMappingsEvent — which fires before FMLClientSetupEvent — is not missed.
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
+            ClientEventRegistrar.register(modEventBus);
+        }
 
         if (ModList.get().isLoaded("productivemetalworks")) {
             ProductiveMetalworksIntegration.register(modEventBus);

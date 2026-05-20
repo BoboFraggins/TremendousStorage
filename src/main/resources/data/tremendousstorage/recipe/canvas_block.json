@@ -1,9 +1,8 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "CCC",
-    "CCC",
-    "CCC"
+    "CC",
+    "CC"
   ],
   "key": {
     "C": "tremendousstorage:canvas"

@@ -58,11 +58,11 @@ public final class PositiveVibesInteractions {
             return InteractionResult.SUCCESS;
         });
 
-        // 3. Positive Vibes cauldron + Zombie Brain → Brain in hand, cauldron emptied
+        // 3. Positive Vibes cauldron + Zombie Brain → Brain added to inventory, cauldron emptied
         CAULDRON_INTERACTIONS.put(Registration.ZOMBIE_BRAIN.get(), (state, level, pos, player, hand, stack) -> {
             if (!level.isClientSide()) {
                 stack.shrink(1);
-                player.setItemInHand(hand, new ItemStack(Registration.BRAIN.get()));
+                player.addItem(new ItemStack(Registration.BRAIN.get()));
                 level.setBlockAndUpdate(pos, Blocks.CAULDRON.defaultBlockState());
                 level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
             }

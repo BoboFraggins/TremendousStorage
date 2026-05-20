@@ -74,7 +74,7 @@ public class PriorityPane implements IDialogPane {
         int lblX = rowX + BTN_W + GAP;
 
         Component priorityLabel = Component.translatable("screen.tremendousstorage.priority_label");
-        graphics.text(font, priorityLabel, (width - font.width(priorityLabel)) / 2, LABEL_Y, 0x404040, false);
+        graphics.text(font, priorityLabel, (width - font.width(priorityLabel)) / 2, LABEL_Y, 0xFF404040, false);
 
         boolean canDown = selected > 0;
         boolean canUp = selected < Priority.VALUES.length - 1;
@@ -94,7 +94,7 @@ public class PriorityPane implements IDialogPane {
         String name = Component.translatable(current.translationKey()).getString();
         int nameX = lblX + (LBL_W - font.width(name)) / 2;
         int nameY = ROW_Y + (BTN_H - 8) / 2;
-        graphics.text(font, name, nameX, nameY, 0x404040, false);
+        graphics.text(font, name, nameX, nameY, 0xFF404040, false);
     }
 
     @Override

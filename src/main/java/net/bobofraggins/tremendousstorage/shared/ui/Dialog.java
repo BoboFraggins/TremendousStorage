@@ -241,7 +241,7 @@ public class Dialog {
                 CORNER);
 
         // ── Title left-aligned in title bar ──────────────────────────────────
-        graphics.text(font, title, x + 8, y + 6, 0x404040, false);
+        graphics.text(font, title, x + 8, y + 6, 0xFF404040, false);
 
         // Render each pane translated to its local origin
         for (int i = 0; i < panes.size(); i++) {

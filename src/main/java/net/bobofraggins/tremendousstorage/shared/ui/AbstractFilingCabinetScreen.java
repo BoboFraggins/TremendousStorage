@@ -188,7 +188,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
             ItemStack stack = slot.getItem();
             graphics.item(stack, x, y);
             long count = stack.getCount();
-            if (count > 1) renderSizeLabel(graphics, font, x, y, CountFormat.format(count), 0xFFFFFF);
+            if (count > 1) renderSizeLabel(graphics, font, x, y, CountFormat.format(count), 0xFFFFFFFF);
             if (hoveredSlot == slot) {
                 graphics.fillGradient(x, y, x + 16, y + 16, -2130706433, -2130706433);
             }
@@ -216,7 +216,7 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         float textX = (x + offset + 16f + 2f - font.width(text) * scale) * scaleInv;
         float textY = (y + offset + 10f) * scaleInv;
 
-        graphics.text(font, text, (int) (textX + 1f), (int) (textY + 1f), 0x414141, false);
+        graphics.text(font, text, (int) (textX + 1f), (int) (textY + 1f), 0xFF414141, false);
         graphics.text(font, text, (int) textX, (int) textY, color, false);
 
         graphics.pose().popMatrix();

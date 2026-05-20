@@ -64,7 +64,7 @@ public class SortPane implements IDialogPane {
         int lblX = rowX + BTN_W + GAP;
 
         Component label = Component.translatable("screen.tremendousstorage.sort_label");
-        graphics.text(font, label, (width - font.width(label)) / 2, LABEL_Y, 0x404040, false);
+        graphics.text(font, label, (width - font.width(label)) / 2, LABEL_Y, 0xFF404040, false);
 
         Identifier leftTex = isInButton(localMouseX, localMouseY, leftBtnX) ? BTN_LEFT_FOCUSED : BTN_LEFT;
         Identifier rightTex = isInButton(localMouseX, localMouseY, rightBtnX) ? BTN_RIGHT_FOCUSED : BTN_RIGHT;
@@ -76,7 +76,7 @@ public class SortPane implements IDialogPane {
         String name = getter.get().displayName();
         int nameX = lblX + (LBL_W - font.width(name)) / 2;
         int nameY = ROW_Y + (BTN_H - 8) / 2;
-        graphics.text(font, name, nameX, nameY, 0x404040, false);
+        graphics.text(font, name, nameX, nameY, 0xFF404040, false);
     }
 
     @Override
