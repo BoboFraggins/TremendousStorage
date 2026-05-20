@@ -30,6 +30,10 @@ public class WirelessHubRenderer
             new StandaloneModelKey<>(() -> "tremendousstorage:block/wireless_hub_base");
     public static final StandaloneModelKey<BlockStateModel> DISH_MODEL =
             new StandaloneModelKey<>(() -> "tremendousstorage:block/wireless_hub_dish");
+    public static final StandaloneModelKey<BlockStateModel> BASE_HIGHLIGHT_MODEL =
+            new StandaloneModelKey<>(() -> "tremendousstorage:block/wireless_hub_highlight");
+    public static final StandaloneModelKey<BlockStateModel> DISH_HIGHLIGHT_MODEL =
+            new StandaloneModelKey<>(() -> "tremendousstorage:block/wireless_hub_dish_highlight");
 
     private static final float PIVOT = 0.5f;
 
@@ -75,6 +79,8 @@ public class WirelessHubRenderer
         Minecraft mc = Minecraft.getInstance();
         BlockStateModel baseModel = mc.getModelManager().getStandaloneModel(BASE_MODEL);
         BlockStateModel dishModel = mc.getModelManager().getStandaloneModel(DISH_MODEL);
+        BlockStateModel baseHighlightModel = mc.getModelManager().getStandaloneModel(BASE_HIGHLIGHT_MODEL);
+        BlockStateModel dishHighlightModel = mc.getModelManager().getStandaloneModel(DISH_HIGHLIGHT_MODEL);
         int packedLight = state.lightCoords;
         float r = state.r, g = state.g, b = state.b;
         RandomSource random = RandomSource.create();
@@ -86,6 +92,11 @@ public class WirelessHubRenderer
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
                 (pose, consumer) -> renderModel(consumer, pose, baseParts, r, g, b, packedLight));
+        List<BlockStateModelPart> baseHighlightParts = collectParts(baseHighlightModel, random);
+        collector.submitCustomGeometry(
+                poseStack,
+                net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
+                (pose, consumer) -> renderHighlight(consumer, pose, baseHighlightParts, r, g, b, packedLight));
         poseStack.popPose();
 
         poseStack.pushPose();
@@ -100,6 +111,11 @@ public class WirelessHubRenderer
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
                 (pose, consumer) -> renderModel(consumer, pose, dishParts, r, g, b, packedLight));
+        List<BlockStateModelPart> dishHighlightParts = collectParts(dishHighlightModel, random);
+        collector.submitCustomGeometry(
+                poseStack,
+                net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
+                (pose, consumer) -> renderHighlight(consumer, pose, dishHighlightParts, r, g, b, packedLight));
         poseStack.popPose();
     }
 
@@ -119,6 +135,52 @@ public class WirelessHubRenderer
         return parts;
     }
 
+    private static void renderHighlight(
+            VertexConsumer consumer,
+            PoseStack.Pose pose,
+            List<BlockStateModelPart> parts,
+            float r,
+            float g,
+            float b,
+            int packedLight) {
+        int overlay = OverlayTexture.NO_OVERLAY;
+        for (BlockStateModelPart part : parts) {
+            for (Direction dir : Direction.values()) {
+                for (var quad : part.getQuads(dir)) {
+                    float shade = quad.materialInfo().shade() ? directionShade(dir) : 1f;
+                    QuadInstance qi = new QuadInstance();
+                    qi.setColor((0xFF << 24)
+                            | ((int) (r * shade * 255) << 16)
+                            | ((int) (g * shade * 255) << 8)
+                            | (int) (b * shade * 255));
+                    qi.setLightCoords(packedLight);
+                    qi.setOverlayCoords(overlay);
+                    consumer.putBakedQuad(pose, quad, qi);
+                }
+            }
+            for (var quad : part.getQuads(null)) {
+                float shade = quad.materialInfo().shade() ? directionShade(quad.direction()) : 1f;
+                QuadInstance qi = new QuadInstance();
+                qi.setColor((0xFF << 24)
+                        | ((int) (r * shade * 255) << 16)
+                        | ((int) (g * shade * 255) << 8)
+                        | (int) (b * shade * 255));
+                qi.setLightCoords(packedLight);
+                qi.setOverlayCoords(overlay);
+                consumer.putBakedQuad(pose, quad, qi);
+            }
+        }
+    }
+
+    private static float directionShade(Direction dir) {
+        return switch (dir) {
+            case DOWN -> 0.5f;
+            case UP -> 1.0f;
+            case NORTH, SOUTH -> 0.8f;
+            case EAST, WEST -> 0.6f;
+        };
+    }
+
     private static void renderModel(
             VertexConsumer consumer,
             PoseStack.Pose pose,
@@ -131,22 +193,34 @@ public class WirelessHubRenderer
         for (BlockStateModelPart part : parts) {
             for (Direction dir : Direction.values()) {
                 for (var quad : part.getQuads(dir)) {
-                    int color = quad.materialInfo().tintIndex() >= 0
-                            ? (0xFF000000 | ((int) (r * 255) << 16) | ((int) (g * 255) << 8) | (int) (b * 255))
-                            : 0xFFFFFFFF;
+                    float shade = quad.materialInfo().shade() ? directionShade(dir) : 1f;
+                    float qr, qg, qb;
+                    if (quad.materialInfo().tintIndex() >= 0) {
+                        qr = r * shade;
+                        qg = g * shade;
+                        qb = b * shade;
+                    } else {
+                        qr = qg = qb = shade;
+                    }
                     QuadInstance qi = new QuadInstance();
-                    qi.setColor(color);
+                    qi.setColor((0xFF << 24) | ((int) (qr * 255) << 16) | ((int) (qg * 255) << 8) | (int) (qb * 255));
                     qi.setLightCoords(packedLight);
                     qi.setOverlayCoords(overlay);
                     consumer.putBakedQuad(pose, quad, qi);
                 }
             }
             for (var quad : part.getQuads(null)) {
-                int color = quad.materialInfo().tintIndex() >= 0
-                        ? (0xFF000000 | ((int) (r * 255) << 16) | ((int) (g * 255) << 8) | (int) (b * 255))
-                        : 0xFFFFFFFF;
+                float shade = quad.materialInfo().shade() ? directionShade(quad.direction()) : 1f;
+                float qr, qg, qb;
+                if (quad.materialInfo().tintIndex() >= 0) {
+                    qr = r * shade;
+                    qg = g * shade;
+                    qb = b * shade;
+                } else {
+                    qr = qg = qb = shade;
+                }
                 QuadInstance qi = new QuadInstance();
-                qi.setColor(color);
+                qi.setColor((0xFF << 24) | ((int) (qr * 255) << 16) | ((int) (qg * 255) << 8) | (int) (qb * 255));
                 qi.setLightCoords(packedLight);
                 qi.setOverlayCoords(overlay);
                 consumer.putBakedQuad(pose, quad, qi);

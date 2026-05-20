@@ -178,19 +178,21 @@ public abstract class AbstractFilingCabinetScreen<M extends AbstractFilingCabine
         if (slot instanceof FolderExtractionSlot extractSlot && extractSlot.isGhost()) {
             ItemStack ghost = extractSlot.getGhostItem();
             if (!ghost.isEmpty()) {
-                graphics.item(ghost, x, y);
-                graphics.fill(x, y, x + 16, y + 16, 0x80000000);
+                int sx = slot.x, sy = slot.y;
+                graphics.item(ghost, sx, sy);
+                graphics.fill(sx, sy, sx + 16, sy + 16, 0x80000000);
             }
             return;
         }
 
         if (slot instanceof FolderExtractionSlot && slot.hasItem()) {
+            int sx = slot.x, sy = slot.y;
             ItemStack stack = slot.getItem();
-            graphics.item(stack, x, y);
+            graphics.item(stack, sx, sy);
             long count = stack.getCount();
-            if (count > 1) renderSizeLabel(graphics, font, x, y, CountFormat.format(count), 0xFFFFFFFF);
+            if (count > 1) renderSizeLabel(graphics, font, sx, sy, CountFormat.format(count), 0xFFFFFFFF);
             if (hoveredSlot == slot) {
-                graphics.fillGradient(x, y, x + 16, y + 16, -2130706433, -2130706433);
+                graphics.fillGradient(sx, sy, sx + 16, sy + 16, -2130706433, -2130706433);
             }
             return;
         }

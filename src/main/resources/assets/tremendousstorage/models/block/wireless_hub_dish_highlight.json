@@ -1,0 +1,86 @@
+{
+  "textures": {
+    "white": "minecraft:block/white_concrete",
+    "particle": "tremendousstorage:block/wireless_hub_texture"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        9,
+        -1
+      ],
+      "to": [
+        9,
+        11,
+        0
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          5,
+          7
+        ],
+        "axis": "x",
+        "angle": 22.5,
+        "rescale": false
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#white"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#white"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#white"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#white"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#white"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#white"
+        }
+      }
+    }
+  ]
+}

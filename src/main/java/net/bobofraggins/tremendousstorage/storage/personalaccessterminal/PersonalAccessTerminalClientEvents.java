@@ -48,6 +48,14 @@ public final class PersonalAccessTerminalClientEvents {
                 WirelessHubRenderer.DISH_MODEL,
                 SimpleUnbakedStandaloneModel.blockStateModel(
                         Identifier.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_dish")));
+        event.register(
+                WirelessHubRenderer.BASE_HIGHLIGHT_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_highlight")));
+        event.register(
+                WirelessHubRenderer.DISH_HIGHLIGHT_MODEL,
+                SimpleUnbakedStandaloneModel.blockStateModel(
+                        Identifier.fromNamespaceAndPath("tremendousstorage", "block/wireless_hub_dish_highlight")));
     }
 
     @SubscribeEvent
