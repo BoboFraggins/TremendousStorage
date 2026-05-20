@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.backpack;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import net.bobofraggins.tremendousstorage.shared.input.TremendousStorageKeys;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
@@ -14,6 +15,7 @@ import net.neoforged.neoforge.client.model.standalone.SimpleUnbakedStandaloneMod
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
 import net.neoforged.neoforge.client.settings.KeyModifier;
 import org.lwjgl.glfw.GLFW;
+import top.theillusivec4.curios.api.client.ICurioRenderer;
 
 /** Client-only mod-bus events for the Tremendous Backpack — keybind, screen, BESR, and worn layer. */
 public final class BackpackClientEvents {
@@ -25,13 +27,14 @@ public final class BackpackClientEvents {
 
     @SubscribeEvent
     public static void onRegisterKeyMappings(RegisterKeyMappingsEvent event) {
+        event.registerCategory(TremendousStorageKeys.CATEGORY);
         OPEN_TREMENDOUS_BACKPACK = new KeyMapping(
                 "key.tremendousstorage.open_backpack",
                 KeyConflictContext.IN_GAME,
                 KeyModifier.NONE,
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_B,
-                net.minecraft.client.KeyMapping.Category.MISC);
+                TremendousStorageKeys.CATEGORY);
         event.register(OPEN_TREMENDOUS_BACKPACK);
     }
 
@@ -60,5 +63,8 @@ public final class BackpackClientEvents {
     }
 
     @SubscribeEvent
-    public static void onClientSetup(FMLClientSetupEvent event) {}
+    public static void onClientSetup(FMLClientSetupEvent event) {
+        ICurioRenderer.register(Registration.TREMENDOUS_BACKPACK.get(), BackpackCurioRenderer::new);
+        ICurioRenderer.register(Registration.ENDER_TREMENDOUS_BACKPACK_ITEM.get(), BackpackCurioRenderer::new);
+    }
 }

@@ -118,7 +118,7 @@ public class TankItemRenderer implements SpecialModelRenderer<TankItemRenderer.R
         final int overlayF = packedOverlay;
         collector.submitCustomGeometry(
                 poseStack,
-                Sheets.translucentItemSheet(),
+                Sheets.translucentBlockSheet(),
                 (pose, vc) -> TankRenderer.renderCubeFill(
                         vc, pose.pose(), ffrF, ffgF, ffbF, ffaF, flF, overlayF, uL, vT, uR, vB, fillTop));
     }

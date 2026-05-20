@@ -249,9 +249,13 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
         if (input.isEmpty()) return;
         if (!transferContainer.getItem(1).isEmpty()) return; // output slot occupied
 
-        ItemStack inputCopy = input.copy();
-        var rawCap = inputCopy.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(inputCopy));
-        if (!(rawCap instanceof net.bobofraggins.tremendousstorage.storage.tank.TankItemFluidHandler cap)) return;
+        net.minecraft.world.SimpleContainer tmpContainer = new net.minecraft.world.SimpleContainer(input.copy());
+        net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.item.ItemResource> wrapper =
+                net.neoforged.neoforge.transfer.item.VanillaContainerWrapper.of(tmpContainer);
+        net.neoforged.neoforge.transfer.access.ItemAccess itemAccess =
+                ItemAccess.forHandlerIndex(wrapper, 0).oneByOne();
+        var cap = input.getCapability(Capabilities.Fluid.ITEM, itemAccess);
+        if (cap == null) return;
 
         FluidResource containedRes = cap.getResource(0);
         long containedAmt = cap.getAmountAsLong(0);
@@ -265,9 +269,8 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
             if (space < amt) return; // hold until there is room for the full amount
             cap.extract(0, containedRes, amt, null);
             addVibes(amt);
-            ItemStack modified = cap.getContainer();
             transferContainer.setItem(0, ItemStack.EMPTY);
-            transferContainer.setItem(1, modified != null ? modified : ItemStack.EMPTY);
+            transferContainer.setItem(1, tmpContainer.getItem(0));
         } else {
             // Item is empty → fill it with Positive Vibes from the recycling bin
             if (vibesAmount == 0) return;
@@ -280,9 +283,8 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
             if (vibesAmount < canFill) return;
             extractVibes(canFill, false);
             cap.insert(0, vibesResource, canFill, null);
-            ItemStack modified = cap.getContainer();
             transferContainer.setItem(0, ItemStack.EMPTY);
-            transferContainer.setItem(1, modified != null ? modified : ItemStack.EMPTY);
+            transferContainer.setItem(1, tmpContainer.getItem(0));
         }
     }
 

@@ -115,7 +115,7 @@ public class RecyclingBinItemRenderer implements SpecialModelRenderer<Integer> {
         final int ffrF = fr, ffgF = fg, ffbF = fb, ffaF = fa, flF = fluidLight, ovF = packedOverlay;
         collector.submitCustomGeometry(
                 poseStack,
-                Sheets.translucentItemSheet(),
+                Sheets.translucentBlockSheet(),
                 (pose, vc) -> RecyclingBinRenderer.renderFluidGeometry(
                         vc, pose.pose(), ffrF, ffgF, ffbF, ffaF, flF, ovF, uL, uR, vT, vB, fillTop));
     }

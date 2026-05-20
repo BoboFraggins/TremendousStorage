@@ -51,7 +51,7 @@ public class ClearTankPane implements IDialogPane {
         Component label = Component.translatable("screen.tremendousstorage.clear_tank_contents");
         int textX = btnX + (BTN_W - font.width(label)) / 2;
         int textY = BTN_Y + (BTN_H - font.lineHeight) / 2;
-        graphics.text(font, label, textX, textY, 0x404040, false);
+        graphics.text(font, label, textX, textY, 0xFF404040, false);
     }
 
     @Override

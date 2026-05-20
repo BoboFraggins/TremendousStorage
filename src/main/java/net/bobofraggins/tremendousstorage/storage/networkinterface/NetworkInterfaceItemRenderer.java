@@ -120,7 +120,7 @@ public class NetworkInterfaceItemRenderer implements SpecialModelRenderer<Storag
         final int ffrF = fr, ffgF = fg, ffbF = fb, ffaF = fa, flF = fluidLight, ovF = packedOverlay;
         collector.submitCustomGeometry(
                 poseStack,
-                Sheets.translucentItemSheet(),
+                Sheets.translucentBlockSheet(),
                 (pose, vc) -> TankRenderer.renderCubeFill(
                         vc, pose.pose(), ffrF, ffgF, ffbF, ffaF, flF, ovF, uL, vT, uR, vB, fillTop));
 

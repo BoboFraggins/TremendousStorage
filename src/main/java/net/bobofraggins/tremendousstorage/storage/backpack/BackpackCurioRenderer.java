@@ -21,7 +21,7 @@ import top.theillusivec4.curios.api.client.ICurioRenderer;
  */
 public class BackpackCurioRenderer implements ICurioRenderer {
 
-    private static final ItemDisplayContext WORN_CONTEXT = ItemDisplayContext.valueOf("TREMENDOUSSTORAGE_WORN");
+    private static final ItemDisplayContext WORN_CONTEXT = ItemDisplayContext.NONE;
 
     private static final float Y_OFFSET = -0.25f;
     private static final float Z_OFFSET = -0.3f;

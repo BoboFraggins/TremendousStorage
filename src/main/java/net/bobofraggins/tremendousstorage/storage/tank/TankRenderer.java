@@ -97,7 +97,7 @@ public class TankRenderer extends AbstractTankRenderer<TankBlockEntity> {
             poseStack.pushPose();
             collector.submitCustomGeometry(
                     poseStack,
-                    Sheets.translucentItemSheet(),
+                    Sheets.translucentBlockSheet(),
                     (pose, vc) -> renderCubeFill(
                             vc, pose.pose(), fr, fg, fb, fa, fluidLight, overlayFinal, uL, vT, uR, vB, fillTop));
             poseStack.popPose();

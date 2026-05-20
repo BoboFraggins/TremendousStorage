@@ -84,7 +84,8 @@ public class RecyclingBinRenderer
             default -> 0f;
         };
         state.openFraction = Mth.lerp(partialTick, be.prevLidAngle, be.lidAngle);
-        state.fillFraction = (float) be.getVibesAmount() / RecyclingBinBlockEntity.FLUID_CAPACITY_MB;
+        int vibesAmount = be.getVibesAmount();
+        state.fillFraction = (float) vibesAmount / RecyclingBinBlockEntity.FLUID_CAPACITY_MB;
     }
 
     @Override
@@ -130,53 +131,58 @@ public class RecyclingBinRenderer
         poseStack.popPose();
 
         // Fluid fill
-        float fill = Math.max(0.01f, state.fillFraction);
-        float fillTop = FLUID_FLOOR + fill * FLUID_H;
+        try {
+            float fill = Math.max(0.01f, state.fillFraction);
+            float fillTop = FLUID_FLOOR + fill * FLUID_H;
 
-        net.minecraft.client.renderer.block.FluidModel fluidModel_ = net.minecraft.client.Minecraft.getInstance()
-                .getModelManager()
-                .getFluidStateModelSet()
-                .get(net.bobofraggins.tremendousstorage.shared.register.Registration.POSITIVE_VIBES_SOURCE
-                        .get()
-                        .defaultFluidState());
-        TextureAtlasSprite sprite = fluidModel_.stillMaterial().sprite();
-        int tint = fluidModel_.fluidTintSource() != null
-                ? fluidModel_
-                        .fluidTintSource()
-                        .colorAsStack(new net.neoforged.neoforge.fluids.FluidStack(
-                                Registration.POSITIVE_VIBES_SOURCE.get(), 1))
-                : 0xFFFFFFFF;
-        int fr = (tint >> 16) & 0xFF;
-        int fg = (tint >> 8) & 0xFF;
-        int fb = tint & 0xFF;
-        int fa = (tint >> 24) & 0xFF;
-        if (fa == 0) fa = 77;
-        int fluidLight = Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0 ? 0xF000F0 : light;
-        float uL = sprite.getU0(), uR = sprite.getU1();
-        float vT = sprite.getV0(), vB = Mth.lerp(fill, sprite.getV0(), sprite.getV1());
+            net.minecraft.client.renderer.block.FluidModel fluidModel_ = Minecraft.getInstance()
+                    .getModelManager()
+                    .getFluidStateModelSet()
+                    .get(Registration.POSITIVE_VIBES_SOURCE.get().defaultFluidState());
+            if (fluidModel_ == null) return;
+            var stillMat = fluidModel_.stillMaterial();
+            if (stillMat == null) return;
+            TextureAtlasSprite sprite = stillMat.sprite();
+            if (sprite == null) return;
+            int tint = fluidModel_.fluidTintSource() != null
+                    ? fluidModel_
+                            .fluidTintSource()
+                            .colorAsStack(new net.neoforged.neoforge.fluids.FluidStack(
+                                    Registration.POSITIVE_VIBES_SOURCE.get(), 1))
+                    : 0xFFFFFFFF;
+            int fr = (tint >> 16) & 0xFF;
+            int fg = (tint >> 8) & 0xFF;
+            int fb = tint & 0xFF;
+            int fa = (tint >> 24) & 0xFF;
+            if (fa == 0) fa = 77;
+            int fluidLight = Registration.POSITIVE_VIBES_TYPE.get().getLightLevel() > 0 ? 0xF000F0 : light;
+            float uL = sprite.getU0(), uR = sprite.getU1();
+            float vT = sprite.getV0(), vB = Mth.lerp(fill, sprite.getV0(), sprite.getV1());
 
-        final int ffrFinal = fr, ffgFinal = fg, ffbFinal = fb, ffaFinal = fa, fluidLightFinal = fluidLight;
-        final int overlayFinal = overlay;
-        poseStack.pushPose();
-        applyFacingRotation(poseStack, yRot);
-        collector.submitCustomGeometry(
-                poseStack,
-                Sheets.translucentItemSheet(),
-                (pose, vc) -> renderFluidGeometry(
-                        vc,
-                        pose.pose(),
-                        ffrFinal,
-                        ffgFinal,
-                        ffbFinal,
-                        ffaFinal,
-                        fluidLightFinal,
-                        overlayFinal,
-                        uL,
-                        uR,
-                        vT,
-                        vB,
-                        fillTop));
-        poseStack.popPose();
+            final int ffrFinal = fr, ffgFinal = fg, ffbFinal = fb, ffaFinal = fa, fluidLightFinal = fluidLight;
+            final int overlayFinal = overlay;
+            poseStack.pushPose();
+            applyFacingRotation(poseStack, yRot);
+            collector.submitCustomGeometry(
+                    poseStack,
+                    Sheets.translucentBlockSheet(),
+                    (pose, vc) -> renderFluidGeometry(
+                            vc,
+                            pose.pose(),
+                            ffrFinal,
+                            ffgFinal,
+                            ffbFinal,
+                            ffaFinal,
+                            fluidLightFinal,
+                            overlayFinal,
+                            uL,
+                            uR,
+                            vT,
+                            vB,
+                            fillTop));
+            poseStack.popPose();
+        } catch (Exception ignored) {
+        }
     }
 
     static void renderFluidGeometry(

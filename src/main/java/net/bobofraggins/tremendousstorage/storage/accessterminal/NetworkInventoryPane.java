@@ -544,10 +544,10 @@ public class NetworkInventoryPane implements IDialogPane {
                 }
 
                 if (count == 0) {
-                    renderSizeLabel(graphics, font, sx, sy, "0", 0xFF5555);
+                    renderSizeLabel(graphics, font, sx, sy, "0", 0xFFFF5555);
                 } else {
                     String label = fluid ? formatFluidCount(count) : count > 1 ? CountFormat.format(count) : null;
-                    if (label != null) renderSizeLabel(graphics, font, sx, sy, label, 0xFFFFFF);
+                    if (label != null) renderSizeLabel(graphics, font, sx, sy, label, 0xFFFFFFFF);
                 }
             }
         }
@@ -589,7 +589,7 @@ public class NetworkInventoryPane implements IDialogPane {
         float textX = (x + offset + 16f + 2f - font.width(text) * scale) * scaleInv;
         float textY = (y + offset + 10f) * scaleInv;
 
-        graphics.text(font, text, (int) (textX + 1f), (int) (textY + 1f), 0x414141, false);
+        graphics.text(font, text, (int) (textX + 1f), (int) (textY + 1f), 0xFF414141, false);
         graphics.text(font, text, (int) textX, (int) textY, color, false);
 
         graphics.pose().popMatrix();

@@ -81,13 +81,12 @@ public class ChestRenderer
         poseStack.translate(0.5, 0.5, 0.5);
         poseStack.mulPose(Axis.YP.rotationDegrees(yRot));
         poseStack.translate(-0.5, -0.5, -0.5);
-        final var bodyPose = poseStack.last();
         final List<BlockStateModelPart> bodyParts = collectParts(bodyModel, random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
                 (pose, consumer) ->
-                        renderQuadsWithShading(consumer, bodyPose, bodyParts, r, g, b, packedLight, packedOverlay));
+                        renderQuadsWithShading(consumer, pose, bodyParts, r, g, b, packedLight, packedOverlay));
         poseStack.popPose();
 
         // Lid
@@ -98,13 +97,12 @@ public class ChestRenderer
         poseStack.translate(0.0, 9.0 / 16.0, 15.0 / 16.0);
         poseStack.mulPose(Axis.XP.rotationDegrees(state.lidAngle * 90f));
         poseStack.translate(0.0, -9.0 / 16.0, -15.0 / 16.0);
-        final var lidPose = poseStack.last();
         final List<BlockStateModelPart> lidParts = collectParts(lidModel, random);
         collector.submitCustomGeometry(
                 poseStack,
                 net.minecraft.client.renderer.Sheets.cutoutBlockSheet(),
                 (pose, consumer) ->
-                        renderQuadsWithShading(consumer, lidPose, lidParts, r, g, b, packedLight, packedOverlay));
+                        renderQuadsWithShading(consumer, pose, lidParts, r, g, b, packedLight, packedOverlay));
         poseStack.popPose();
     }
 

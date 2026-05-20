@@ -68,10 +68,12 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
         }
     };
 
-    /** Type key — always has amount=1. EMPTY means unlocked. */
-    private FluidStack storedFluid = FluidStack.EMPTY;
+    /** Type key — always has amount=1. EMPTY means unlocked. Package-private for TankFluidHandler snapshot journal. */
+    FluidStack storedFluid = FluidStack.EMPTY;
 
-    private long amount = 0L;
+    /** Package-private for TankFluidHandler snapshot journal. */
+    long amount = 0L;
+
     private boolean voidExcess = false;
     private StorageTier tier = StorageTier.WOOD;
 
@@ -218,7 +220,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
      * <p>Saves NBT, notifies the NI that contents changed, and syncs to clients.
      * Does NOT invalidate capabilities or the NI topology cache.
      */
-    private void notifyFluidChanged() {
+    void notifyFluidChanged() {
         super.setChanged();
         if (level instanceof ServerLevel sl) {
             niLink.notifyChanged(sl, worldPosition, getBlockState());
@@ -350,9 +352,15 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
         if (input.isEmpty()) return;
         if (!transferContainer.getItem(1).isEmpty()) return; // output blocked
 
-        ItemStack inputCopy = input.copy();
-        var rawCap = inputCopy.getCapability(Capabilities.Fluid.ITEM, ItemAccess.forStack(inputCopy));
-        if (!(rawCap instanceof TankItemFluidHandler cap)) return;
+        // Use a single-slot SimpleContainer backed ItemAccess so that fluid operations that
+        // change the item type (e.g. empty bucket → water bucket) are reflected in the container.
+        net.minecraft.world.SimpleContainer tmpContainer = new net.minecraft.world.SimpleContainer(input.copy());
+        net.neoforged.neoforge.transfer.ResourceHandler<net.neoforged.neoforge.transfer.item.ItemResource> wrapper =
+                net.neoforged.neoforge.transfer.item.VanillaContainerWrapper.of(tmpContainer);
+        net.neoforged.neoforge.transfer.access.ItemAccess itemAccess =
+                ItemAccess.forHandlerIndex(wrapper, 0).oneByOne();
+        var cap = input.getCapability(Capabilities.Fluid.ITEM, itemAccess);
+        if (cap == null) return;
 
         FluidResource containedRes = cap.getResource(0);
         long containedAmt = cap.getAmountAsLong(0);
@@ -369,24 +377,21 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
             int drained = cap.extract(0, containedRes, toDrain, null);
             if (drained <= 0) return;
             insert(containedRes.toStack(drained), drained, false);
-            ItemStack modified = cap.getContainer();
             transferContainer.setItem(0, ItemStack.EMPTY);
-            transferContainer.setItem(1, modified != null ? modified : ItemStack.EMPTY);
+            transferContainer.setItem(1, tmpContainer.getItem(0));
         } else {
             // Item is empty → fill from tank
             if (storedFluid.isEmpty() || amount == 0) return;
             FluidResource storedRes = FluidResource.of(storedFluid);
-            if (!cap.isValid(0, storedRes)) return; // item doesn't accept this fluid type
+            if (!cap.isValid(0, storedRes)) return;
             long capacity = cap.getCapacityAsLong(0, storedRes);
             int canFill = (int) Math.min(amount, capacity);
             if (canFill <= 0) return;
-            // Hold until tank has enough to fill the container completely
             if (amount < canFill) return;
             extract(canFill, false);
             cap.insert(0, storedRes, canFill, null);
-            ItemStack modified = cap.getContainer();
             transferContainer.setItem(0, ItemStack.EMPTY);
-            transferContainer.setItem(1, modified != null ? modified : ItemStack.EMPTY);
+            transferContainer.setItem(1, tmpContainer.getItem(0));
         }
     }
 

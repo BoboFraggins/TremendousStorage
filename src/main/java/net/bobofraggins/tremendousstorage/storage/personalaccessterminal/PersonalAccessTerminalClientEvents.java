@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.storage.personalaccessterminal;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import net.bobofraggins.tremendousstorage.shared.input.TremendousStorageKeys;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubRenderer;
 import net.bobofraggins.tremendousstorage.storage.wirelesshub.WirelessHubScreen;
@@ -57,7 +58,7 @@ public final class PersonalAccessTerminalClientEvents {
                 KeyModifier.CONTROL,
                 InputConstants.Type.KEYSYM,
                 GLFW.GLFW_KEY_E,
-                net.minecraft.client.KeyMapping.Category.MISC);
+                TremendousStorageKeys.CATEGORY);
         event.register(OPEN_WIRELESS_SAT);
     }
 

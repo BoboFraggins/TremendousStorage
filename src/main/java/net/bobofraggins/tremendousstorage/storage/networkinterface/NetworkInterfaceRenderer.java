@@ -99,7 +99,7 @@ public class NetworkInterfaceRenderer extends AbstractTankRenderer<NetworkInterf
         float fillTop = state.fillTop;
         collector.submitCustomGeometry(
                 poseStack,
-                Sheets.translucentItemSheet(),
+                Sheets.translucentBlockSheet(),
                 (pose, vc) -> TankRenderer.renderCubeFill(
                         vc, pose.pose(), fr, fg, fb, fa, fluidLight, packedOverlay, uL, vT, uR, vB, fillTop));
     }

@@ -206,7 +206,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
                 valid
                         ? "screen.tremendousstorage.network_interface.valid"
                         : "screen.tremendousstorage.network_interface.invalid");
-        int statusColor = valid ? 0x006600 : 0xAA0000;
+        int statusColor = valid ? 0xFF006600 : 0xFFAA0000;
         graphics.text(font, statusText, x + (BG_WIDTH - font.width(statusText)) / 2, y + 18, statusColor, false);
 
         // List area separator
@@ -234,7 +234,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
                     : key;
 
             int rowY = y + LIST_Y_START + i * ROW_HEIGHT;
-            graphics.text(font, displayStr, x + 6, rowY, 0x404040, false);
+            graphics.text(font, displayStr, x + 6, rowY, 0xFF404040, false);
         }
 
         graphics.disableScissor();
@@ -243,7 +243,7 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
         if (entries.isEmpty()) {
             String emptyMsg = "No blocks connected";
             graphics.text(
-                    font, emptyMsg, x + (BG_WIDTH - font.width(emptyMsg)) / 2, y + LIST_Y_START + 4, 0x808080, false);
+                    font, emptyMsg, x + (BG_WIDTH - font.width(emptyMsg)) / 2, y + LIST_Y_START + 4, 0xFF808080, false);
         }
 
         // Scrollbar track: sunken 3D bevel matching the network inventory pane
