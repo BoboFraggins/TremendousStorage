@@ -506,7 +506,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             ItemResource res = handler.getResource(slot);
             if (res.isEmpty()) continue;
             if (!ItemStack.isSameItemSameComponents(res.toStack(1), template)) continue;
-            int extracted = handler.extract(slot, res, template.getMaxStackSize(), null);
+            int extracted = handler.extract(slot, res, 1, null);
             if (extracted > 0) return res.toStack(extracted);
         }
         return ItemStack.EMPTY;
@@ -647,7 +647,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                 for (int j = 0; j < player.getInventory().getContainerSize(); j++) {
                     ItemStack inv = player.getInventory().getItem(j);
                     if (!inv.isEmpty() && ItemStack.isSameItemSameComponents(inv, snap)) {
-                        craftSlots.setItem(i, inv.split(Math.min(inv.getCount(), snap.getMaxStackSize())));
+                        craftSlots.setItem(i, inv.split(1));
                         anyRefilled = true;
                         break;
                     }

@@ -53,6 +53,7 @@ public class BarrelScreen extends AbstractContainerScreen<BarrelMenu> {
     public void extractContents(GuiGraphicsExtractor gfx, int mx, int my, float partialTick) {
         dialog.render(gfx, font, title, mx, my, partialTick);
         configDrawer.render(gfx, font, mx, my, partialTick);
+        configDrawer.renderTab(gfx, mx, my);
         super.extractContents(gfx, mx, my, partialTick);
     }
 

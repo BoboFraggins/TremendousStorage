@@ -224,11 +224,17 @@ public final class BackpackContents {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (!(obj instanceof BackpackContents other)) return false;
-        return tier == other.tier
-                && priority == other.priority
-                && sortMode == other.sortMode
-                && hasCraftingUpgrade == other.hasCraftingUpgrade
-                && entries.size() == other.entries.size();
+        if (tier != other.tier
+                || priority != other.priority
+                || sortMode != other.sortMode
+                || hasCraftingUpgrade != other.hasCraftingUpgrade
+                || entries.size() != other.entries.size()) return false;
+        for (int i = 0; i < entries.size(); i++) {
+            Entry a = entries.get(i);
+            Entry b = other.entries.get(i);
+            if (a.count() != b.count() || !ItemStack.isSameItemSameComponents(a.type(), b.type())) return false;
+        }
+        return true;
     }
 
     @Override
@@ -237,7 +243,10 @@ public final class BackpackContents {
         r = 31 * r + priority.hashCode();
         r = 31 * r + sortMode.hashCode();
         r = 31 * r + Boolean.hashCode(hasCraftingUpgrade);
-        r = 31 * r + entries.size();
+        for (Entry e : entries) {
+            r = 31 * r + Long.hashCode(e.count());
+            r = 31 * r + ItemStack.hashItemAndComponents(e.type());
+        }
         return r;
     }
 

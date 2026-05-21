@@ -322,7 +322,7 @@ public class ChestMenu extends AbstractContainerMenu {
             if (current.isEmpty()) {
                 for (int t = 0; t < be.typeCount(); t++) {
                     if (ItemStack.isSameItemSameComponents(be.getType(t), snap)) {
-                        ItemStack extracted = be.extract(t, snap.getMaxStackSize(), false);
+                        ItemStack extracted = be.extract(t, 1, false);
                         if (!extracted.isEmpty()) {
                             craftSlots.setItem(i, extracted);
                             anyRefilled = true;
@@ -361,7 +361,7 @@ public class ChestMenu extends AbstractContainerMenu {
                 for (int j = 0; j < player.getInventory().getContainerSize(); j++) {
                     ItemStack inv = player.getInventory().getItem(j);
                     if (!inv.isEmpty() && ItemStack.isSameItemSameComponents(inv, snap)) {
-                        craftSlots.setItem(i, inv.split(Math.min(inv.getCount(), snap.getMaxStackSize())));
+                        craftSlots.setItem(i, inv.split(1));
                         anyRefilled = true;
                         break;
                     }

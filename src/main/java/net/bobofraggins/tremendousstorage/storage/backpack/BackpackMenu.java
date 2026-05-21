@@ -345,7 +345,7 @@ public class BackpackMenu extends AbstractContainerMenu {
             if (current.isEmpty()) {
                 for (int t = 0; t < contents.typeCount(); t++) {
                     if (ItemStack.isSameItemSameComponents(contents.getType(t), snap)) {
-                        Object[] result = contents.withExtracted(t, snap.getMaxStackSize());
+                        Object[] result = contents.withExtracted(t, 1);
                         ItemStack extracted = (ItemStack) result[0];
                         if (!extracted.isEmpty()) {
                             contents = (BackpackContents) result[1];
@@ -393,7 +393,7 @@ public class BackpackMenu extends AbstractContainerMenu {
                 for (int j = 0; j < player.getInventory().getContainerSize(); j++) {
                     ItemStack inv = player.getInventory().getItem(j);
                     if (!inv.isEmpty() && ItemStack.isSameItemSameComponents(inv, snap)) {
-                        craftSlots.setItem(i, inv.split(Math.min(inv.getCount(), snap.getMaxStackSize())));
+                        craftSlots.setItem(i, inv.split(1));
                         anyRefilled = true;
                         break;
                     }
