@@ -153,7 +153,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             this.hotbarEnd = 46;
 
             // Slot 0: craft result
-            addSlot(new ResultSlot(
+            addSlot(new RefillResultSlot(
                     inv.player, craftSlots, resultSlots, 0, AccessTerminalLayout.CRAFTING_RESULT_X, craftingY + S));
 
             // Slots 1-9: 3×3 crafting grid
@@ -370,11 +370,8 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             else slot.setChanged();
 
             if (stack.getCount() == copy.getCount()) return ItemStack.EMPTY;
-            slot.onTake(player, stack);
+            slot.onTake(player, stack); // RefillResultSlot.onTake handles grid refill
             player.drop(stack, false);
-
-            // Refill depleted craft slots from the network
-            refillCraftGridFromNetwork(player, gridSnapshot);
 
             return copy;
         } else if (index >= invStart && index < hotbarEnd) {
@@ -612,6 +609,68 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                 lastSentRevision = rev;
             }
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // Craft-grid auto-refill
+    // -------------------------------------------------------------------------
+
+    /**
+     * Result slot that snapshots the craft grid before {@code super.onTake} consumes ingredients,
+     * then refills any emptied slots — network first, player inventory second.
+     */
+    private class RefillResultSlot extends ResultSlot {
+        RefillResultSlot(Player p, CraftingContainer craft, ResultContainer result, int idx, int x, int y) {
+            super(p, craft, result, idx, x, y);
+        }
+
+        @Override
+        public void onTake(Player player, ItemStack stack) {
+            ItemStack[] snapshot = new ItemStack[9];
+            for (int i = 0; i < 9; i++) snapshot[i] = craftSlots.getItem(i).copy();
+            super.onTake(player, stack);
+            refillCraftGridFromNetwork(player, snapshot);
+            refillCraftGridFromInventory(player, snapshot);
+        }
+    }
+
+    /** Refills any craft-grid slot that was consumed and not yet restored from the network. */
+    private void refillCraftGridFromInventory(Player player, ItemStack[] snapshot) {
+        if (player.level().isClientSide()) return;
+        boolean anyRefilled = false;
+        for (int i = 0; i < 9; i++) {
+            ItemStack current = craftSlots.getItem(i);
+            ItemStack snap = snapshot[i];
+            if (snap.isEmpty()) continue;
+            if (current.isEmpty()) {
+                // Normal case: ingredient fully consumed — find a replacement in inventory.
+                for (int j = 0; j < player.getInventory().getContainerSize(); j++) {
+                    ItemStack inv = player.getInventory().getItem(j);
+                    if (!inv.isEmpty() && ItemStack.isSameItemSameComponents(inv, snap)) {
+                        craftSlots.setItem(i, inv.split(Math.min(inv.getCount(), snap.getMaxStackSize())));
+                        anyRefilled = true;
+                        break;
+                    }
+                }
+            } else {
+                // Container-item case: vanilla left a crafting remainder (e.g. empty bucket).
+                // If the remainder matches, swap it for the full item from inventory.
+                ItemStack remainder = snap.getItem().getCraftingRemainder(snap).create();
+                if (!remainder.isEmpty() && ItemStack.isSameItemSameComponents(current, remainder)) {
+                    for (int j = 0; j < player.getInventory().getContainerSize(); j++) {
+                        ItemStack inv = player.getInventory().getItem(j);
+                        if (!inv.isEmpty() && ItemStack.isSameItemSameComponents(inv, snap)) {
+                            ItemStack extracted = inv.split(1);
+                            if (!player.addItem(current)) player.drop(current, false);
+                            craftSlots.setItem(i, extracted);
+                            anyRefilled = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (anyRefilled) slotsChanged(craftSlots);
     }
 
     // -------------------------------------------------------------------------

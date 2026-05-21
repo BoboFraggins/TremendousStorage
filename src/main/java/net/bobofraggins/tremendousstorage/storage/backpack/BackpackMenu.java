@@ -128,7 +128,7 @@ public class BackpackMenu extends AbstractContainerMenu {
             int craftY = 29 + rows * 18; // title(17) + blank(7) + inventoryPane gap(5) = 29
 
             // Slot 0: craft result (row-1 position, x=120 — matches CraftingGridPane.RESULT_LOCAL_Y)
-            addSlot(new ResultSlot(playerInv.player, craftSlots, resultSlots, 0, 120, craftY + 18));
+            addSlot(new RefillResultSlot(playerInv.player, craftSlots, resultSlots, 0, 120, craftY + 18));
 
             // Slots 1-9: 3×3 crafting grid
             for (int row = 0; row < 3; row++) {
@@ -310,5 +310,110 @@ public class BackpackMenu extends AbstractContainerMenu {
         if (stack.getCount() == original.getCount()) return ItemStack.EMPTY;
         slot.onTake(player, stack);
         return original;
+    }
+
+    // -------------------------------------------------------------------------
+    // Craft-grid auto-refill
+    // -------------------------------------------------------------------------
+
+    private class RefillResultSlot extends ResultSlot {
+        RefillResultSlot(Player p, CraftingContainer craft, ResultContainer result, int idx, int x, int y) {
+            super(p, craft, result, idx, x, y);
+        }
+
+        @Override
+        public void onTake(Player player, ItemStack stack) {
+            ItemStack[] snapshot = new ItemStack[9];
+            for (int i = 0; i < 9; i++) snapshot[i] = craftSlots.getItem(i).copy();
+            super.onTake(player, stack);
+            refillCraftGridFromBackpack(player, snapshot);
+            refillCraftGridFromInventory(player, snapshot);
+        }
+    }
+
+    private void refillCraftGridFromBackpack(Player player, ItemStack[] snapshot) {
+        if (player.level().isClientSide()) return;
+        ItemStack backpackStack = BackpackItem.getBackpackStack(player, slotType, slotIndex, slotId);
+        if (backpackStack.isEmpty()) return;
+        BackpackContents contents =
+                backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+        boolean anyRefilled = false;
+        for (int i = 0; i < 9; i++) {
+            ItemStack current = craftSlots.getItem(i);
+            ItemStack snap = snapshot[i];
+            if (snap.isEmpty()) continue;
+            if (current.isEmpty()) {
+                for (int t = 0; t < contents.typeCount(); t++) {
+                    if (ItemStack.isSameItemSameComponents(contents.getType(t), snap)) {
+                        Object[] result = contents.withExtracted(t, snap.getMaxStackSize());
+                        ItemStack extracted = (ItemStack) result[0];
+                        if (!extracted.isEmpty()) {
+                            contents = (BackpackContents) result[1];
+                            craftSlots.setItem(i, extracted);
+                            anyRefilled = true;
+                        }
+                        break;
+                    }
+                }
+            } else {
+                ItemStack remainder = snap.getItem().getCraftingRemainder(snap).create();
+                if (!remainder.isEmpty() && ItemStack.isSameItemSameComponents(current, remainder)) {
+                    for (int t = 0; t < contents.typeCount(); t++) {
+                        if (ItemStack.isSameItemSameComponents(contents.getType(t), snap)) {
+                            Object[] result = contents.withExtracted(t, 1);
+                            ItemStack extracted = (ItemStack) result[0];
+                            if (!extracted.isEmpty()) {
+                                contents = (BackpackContents) result[1];
+                                Object[] ins = contents.withInserted(current.copyWithCount(1), 1);
+                                contents = (BackpackContents) ins[1];
+                                craftSlots.setItem(i, extracted);
+                                anyRefilled = true;
+                            }
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (anyRefilled) {
+            backpackStack.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), contents);
+            BackpackItem.setBackpackStack(player, backpackStack, slotType, slotIndex, slotId);
+            slotsChanged(craftSlots);
+        }
+    }
+
+    protected void refillCraftGridFromInventory(Player player, ItemStack[] snapshot) {
+        if (player.level().isClientSide()) return;
+        boolean anyRefilled = false;
+        for (int i = 0; i < 9; i++) {
+            ItemStack current = craftSlots.getItem(i);
+            ItemStack snap = snapshot[i];
+            if (snap.isEmpty()) continue;
+            if (current.isEmpty()) {
+                for (int j = 0; j < player.getInventory().getContainerSize(); j++) {
+                    ItemStack inv = player.getInventory().getItem(j);
+                    if (!inv.isEmpty() && ItemStack.isSameItemSameComponents(inv, snap)) {
+                        craftSlots.setItem(i, inv.split(Math.min(inv.getCount(), snap.getMaxStackSize())));
+                        anyRefilled = true;
+                        break;
+                    }
+                }
+            } else {
+                ItemStack remainder = snap.getItem().getCraftingRemainder(snap).create();
+                if (!remainder.isEmpty() && ItemStack.isSameItemSameComponents(current, remainder)) {
+                    for (int j = 0; j < player.getInventory().getContainerSize(); j++) {
+                        ItemStack inv = player.getInventory().getItem(j);
+                        if (!inv.isEmpty() && ItemStack.isSameItemSameComponents(inv, snap)) {
+                            ItemStack extracted = inv.split(1);
+                            if (!player.addItem(current)) player.drop(current, false);
+                            craftSlots.setItem(i, extracted);
+                            anyRefilled = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        if (anyRefilled) slotsChanged(craftSlots);
     }
 }
