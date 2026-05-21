@@ -50,6 +50,20 @@ public class BarrelItemHandler implements ResourceHandler<ItemResource> {
         return ItemStack.isSameItemSameComponents(be.getStoredItem(), resource.toStack(1));
     }
 
+    /**
+     * Returns how many of {@code amount} items would actually end up stored in the barrel
+     * (i.e. respecting physical capacity, ignoring the void-excess "claim all" shortcut).
+     *
+     * <p>Used by {@link net.bobofraggins.tremendousstorage.storage.networkinterface.NiItemHandler}
+     * so that a full void-excess barrel does not swallow a network insert that could otherwise
+     * flow to a lower-priority storage with real space.
+     */
+    public int getHonestInsertableAmount(int amount) {
+        if (!be.isVoidExcess()) return amount;
+        long space = be.getCapacity() - be.getCount();
+        return (int) Math.min(amount, Math.max(0L, space));
+    }
+
     @Override
     public int insert(int index, ItemResource resource, int amount, TransactionContext tx) {
         if (index != 0 || resource.isEmpty() || amount <= 0) return 0;

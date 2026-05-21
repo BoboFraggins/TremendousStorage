@@ -50,7 +50,16 @@ public final class NetworkInterfaceBFS {
 
     private NetworkInterfaceBFS() {}
 
-    private record HandlerEntry(ResourceHandler<ItemResource> handler, Priority priority) {}
+    /**
+     * @param noInsert when {@code true} the handler is included in the insert-order list (so the
+     *     NI can read its contents and extract from it) but excluded from the priority-bucket map
+     *     used for automatic insertion. Set for {@link AttachmentType#PASSIVE_INTERFACE} faces.
+     */
+    private record HandlerEntry(ResourceHandler<ItemResource> handler, Priority priority, boolean noInsert) {
+        HandlerEntry(ResourceHandler<ItemResource> handler, Priority priority) {
+            this(handler, priority, false);
+        }
+    }
 
     /** FE/t cost per attached SAT (flat; SATs have no tier upgrades). */
     private static final int SAT_COST = 5;
@@ -198,11 +207,14 @@ public final class NetworkInterfaceBFS {
         List<ResourceHandler<ItemResource>> insertOrder = new ArrayList<>(handlerEntries.size());
         for (HandlerEntry e : handlerEntries) insertOrder.add(e.handler());
 
-        // Build priority buckets for two-phase insert (highest priority first via reverseOrder)
+        // Build priority buckets for two-phase insert (highest priority first via reverseOrder).
+        // Passive-interface handlers are excluded so the NI never auto-inserts into them.
         TreeMap<Integer, List<ResourceHandler<ItemResource>>> buckets = new TreeMap<>(Comparator.reverseOrder());
         for (HandlerEntry e : handlerEntries) {
-            buckets.computeIfAbsent(e.priority().ordinal(), k -> new ArrayList<>())
-                    .add(e.handler());
+            if (!e.noInsert()) {
+                buckets.computeIfAbsent(e.priority().ordinal(), k -> new ArrayList<>())
+                        .add(e.handler());
+            }
         }
         NavigableMap<Integer, List<ResourceHandler<ItemResource>>> insertBuckets =
                 new TreeMap<>(Comparator.reverseOrder());
@@ -317,8 +329,13 @@ public final class NetworkInterfaceBFS {
                 level.getCapability(Capabilities.Fluid.BLOCK, adjPos, tubeDir.getOpposite());
         if (itemCap != null) {
             Priority priority = resolvePriority(tubeBE, tubeDir.ordinal(), neighborBE);
-            handlerEntries.add(new HandlerEntry(itemCap, priority));
-            // Also expose fluid if the block has both item and fluid capabilities (e.g. Recycling Bin)
+            // Blocks that expose both item AND fluid capabilities (e.g. Recycling Bin) are on
+            // the network for their fluid only. Their item slot is marked no-insert so the NI
+            // never automatically sends items there — it may be a void sink that destroys them.
+            // Players can still route items in manually via a hopper or similar.
+            boolean itemIsPassive = (fluidCap != null);
+            handlerEntries.add(new HandlerEntry(itemCap, priority, itemIsPassive));
+            // Also expose fluid so it is visible in the terminal (e.g. for weather control)
             if (fluidCap != null) {
                 handlerEntries.add(new HandlerEntry(new TankItemAdapter(fluidCap), Priority.NORMAL));
                 tanks.add(fluidCap);

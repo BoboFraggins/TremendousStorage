@@ -387,13 +387,18 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                     ResourceHandler<ItemResource> handler = ni.getItemHandler();
                     if (handler != null) {
                         ItemResource resource = ItemResource.of(stack);
+                        // NiItemHandler now returns honest counts (void-excess barrels are capped
+                        // to actual space, so items fall through to real storage rather than
+                        // being silently destroyed). If nothing was stored, return empty so that
+                        // AbstractContainerMenu.doClick's shift-click loop terminates instead of
+                        // spinning and calling buildContentsPacket hundreds of times.
                         int inserted = handler.insert(0, resource, stack.getCount(), null);
+                        if (inserted == 0) return ItemStack.EMPTY;
                         ItemStack remainder = inserted >= stack.getCount()
                                 ? ItemStack.EMPTY
                                 : stack.copyWithCount(stack.getCount() - inserted);
                         slot.set(remainder);
                         if (hasCraftingUpgrade) slotsChanged(craftSlots);
-                        // Force cache rebuild so the refresh packet reflects the just-inserted items
                         ni.markContentsDirty();
                         KeyCounter inventory = ni.getCachedInventory();
                         if (inventory != null && player instanceof ServerPlayer sp) {
@@ -528,12 +533,17 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         if (handler == null) return;
 
         // Return current grid contents to the network.
+        // NiItemHandler now returns honest counts, so any items the network cannot actually
+        // store (all storages full or refusing) are returned to the player rather than lost.
         for (int i = 0; i < 9; i++) {
             ItemStack current = craftSlots.getItem(i);
-            if (!current.isEmpty()) {
-                handler.insert(0, ItemResource.of(current), current.getCount(), null);
-                craftSlots.setItem(i, ItemStack.EMPTY);
+            if (current.isEmpty()) continue;
+            int returned = handler.insert(0, ItemResource.of(current), current.getCount(), null);
+            if (returned < current.getCount()) {
+                ItemStack leftover = current.copyWithCount(current.getCount() - returned);
+                if (!player.addItem(leftover)) player.drop(leftover, false);
             }
+            craftSlots.setItem(i, ItemStack.EMPTY);
         }
 
         // Place ingredients from the network into the grid.

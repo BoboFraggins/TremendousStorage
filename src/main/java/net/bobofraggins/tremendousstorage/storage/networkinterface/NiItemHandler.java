@@ -6,6 +6,7 @@ import java.util.NavigableMap;
 import java.util.NoSuchElementException;
 import net.bobofraggins.tremendousstorage.shared.storage.IPreferredStorage;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageKey;
+import net.bobofraggins.tremendousstorage.storage.barrel.BarrelItemHandler;
 import net.bobofraggins.tremendousstorage.storage.tank.TankItemAdapter;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
@@ -186,6 +187,13 @@ public class NiItemHandler implements ResourceHandler<ItemResource> {
 
     private static int tryInsertIntoHandler(
             ResourceHandler<ItemResource> handler, ItemResource resource, int amount, TransactionContext tx) {
+        // For void-excess barrels, cap the insert to actual physical space so that items which
+        // won't fit don't get "accepted" and silently destroyed — they fall through to the next
+        // storage instead (e.g. a chest with real space at a lower priority bucket).
+        if (handler instanceof BarrelItemHandler barrelHandler) {
+            amount = barrelHandler.getHonestInsertableAmount(amount);
+            if (amount <= 0) return 0;
+        }
         int remaining = amount;
         int slots = handler.size();
         for (int s = 0; s < slots && remaining > 0; s++) {
