@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "GPR",
+    "PPP",
+    "PPP"
+  ],
+  "key": {
+    "G": "minecraft:green_dye",
+    "P": "minecraft:paper",
+    "R": "minecraft:red_dye"
+  },
+  "result": {
+    "id": "tremendousstorage:present",
+    "count": 1
+  },
+  "category": "misc"
+}
