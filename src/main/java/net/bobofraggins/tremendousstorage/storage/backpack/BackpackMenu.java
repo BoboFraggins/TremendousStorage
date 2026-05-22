@@ -277,6 +277,17 @@ public class BackpackMenu extends AbstractContainerMenu {
             if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
             else slot.setChanged();
             slot.onTake(player, stack);
+            // Client-side: updateCraftResult doesn't run, so the result slot stays empty
+            // after onTake. Predict the same result if the grid was refilled so that
+            // doClick's shift-click loop continues. The server sends the actual result.
+            if (player.level().isClientSide()) {
+                for (int i = 0; i < 9; i++) {
+                    if (!craftSlots.getItem(i).isEmpty()) {
+                        resultSlots.setItem(0, original.copyWithCount(1));
+                        break;
+                    }
+                }
+            }
             return original;
         }
 
@@ -335,7 +346,6 @@ public class BackpackMenu extends AbstractContainerMenu {
     }
 
     private void refillCraftGridFromBackpack(Player player, ItemStack[] snapshot) {
-        if (player.level().isClientSide()) return;
         ItemStack backpackStack = BackpackItem.getBackpackStack(player, slotType, slotIndex, slotId);
         if (backpackStack.isEmpty()) return;
         BackpackContents contents =
@@ -380,13 +390,14 @@ public class BackpackMenu extends AbstractContainerMenu {
         }
         if (anyRefilled) {
             backpackStack.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), contents);
-            BackpackItem.setBackpackStack(player, backpackStack, slotType, slotIndex, slotId);
+            if (!player.level().isClientSide()) {
+                BackpackItem.setBackpackStack(player, backpackStack, slotType, slotIndex, slotId);
+            }
             slotsChanged(craftSlots);
         }
     }
 
     protected void refillCraftGridFromInventory(Player player, ItemStack[] snapshot) {
-        if (player.level().isClientSide()) return;
         boolean anyRefilled = false;
         for (int i = 0; i < 9; i++) {
             ItemStack current = craftSlots.getItem(i);
