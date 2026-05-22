@@ -4,6 +4,7 @@ import net.bobofraggins.tremendousstorage.glamping.dankfannypack.DankFannyPackCl
 import net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatClientEvents;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClientEvents;
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketClientTickHandler;
+import net.bobofraggins.tremendousstorage.glamping.present.PresentClientEvents;
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineClientEvents;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
 import net.bobofraggins.tremendousstorage.storage.armorycabinet.ArmoryCabinetClientEvents;
@@ -59,6 +60,7 @@ public final class ClientEventRegistrar {
         modBus.register(HoneyClientEvents.class);
         modBus.register(DankFannyPackClientEvents.class);
         modBus.register(MagicHatClientEvents.class);
+        modBus.register(PresentClientEvents.class);
         modBus.register(PositiveVibesClientEvents.class);
 
         modBus.register(XpJuiceClientEvents.class);

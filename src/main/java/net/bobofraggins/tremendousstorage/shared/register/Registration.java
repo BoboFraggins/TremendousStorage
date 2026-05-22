@@ -823,6 +823,27 @@ public final class Registration {
                     .stacksTo(1)
                     .attributes(net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatItem.DEFAULT_MODIFIERS));
 
+    public static final DeferredBlock<net.bobofraggins.tremendousstorage.glamping.present.PresentBlock> PRESENT =
+            BLOCKS.registerBlock(
+                    "present",
+                    net.bobofraggins.tremendousstorage.glamping.present.PresentBlock::new,
+                    () -> BlockBehaviour.Properties.of()
+                            .strength(3.0f, 1000.0f)
+                            .sound(SoundType.WOOD)
+                            .noOcclusion());
+
+    public static final DeferredHolder<Item, BlockItem> PRESENT_ITEM =
+            ITEMS.registerItem("present", props -> new BlockItem(PRESENT.get(), props), Item.Properties::new);
+
+    public static final DeferredHolder<
+                    BlockEntityType<?>,
+                    BlockEntityType<net.bobofraggins.tremendousstorage.glamping.present.PresentBlockEntity>>
+            PRESENT_BE_TYPE = BLOCK_ENTITY_TYPES.register(
+                    "present",
+                    () -> new BlockEntityType<>(
+                            net.bobofraggins.tremendousstorage.glamping.present.PresentBlockEntity::new,
+                            PRESENT.get()));
+
     public static DeferredHolder<Item, TremendousStorageGuideItem> TREMENDOUS_STORAGE_GUIDE = null;
 
     public static final DeferredHolder<Item, BackpackItem> TREMENDOUS_BACKPACK = ITEMS.registerItem(
