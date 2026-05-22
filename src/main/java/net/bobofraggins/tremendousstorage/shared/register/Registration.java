@@ -832,8 +832,10 @@ public final class Registration {
                             .sound(SoundType.WOOD)
                             .noOcclusion());
 
-    public static final DeferredHolder<Item, BlockItem> PRESENT_ITEM =
-            ITEMS.registerItem("present", props -> new BlockItem(PRESENT.get(), props), Item.Properties::new);
+    public static final DeferredHolder<Item, BlockItem> PRESENT_ITEM = ITEMS.registerItem(
+            "present",
+            props -> new net.bobofraggins.tremendousstorage.glamping.present.PresentBlockItem(PRESENT.get(), props),
+            Item.Properties::new);
 
     public static final DeferredHolder<
                     BlockEntityType<?>,
