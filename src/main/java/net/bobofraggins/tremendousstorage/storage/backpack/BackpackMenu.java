@@ -330,7 +330,6 @@ public class BackpackMenu extends AbstractContainerMenu {
             refillCraftGridFromInventory(player, snapshot);
             if (!player.level().isClientSide()) {
                 for (int i = 1; i <= 9; i++) setRemoteSlot(i, ItemStack.EMPTY);
-                broadcastChanges();
             }
         }
     }

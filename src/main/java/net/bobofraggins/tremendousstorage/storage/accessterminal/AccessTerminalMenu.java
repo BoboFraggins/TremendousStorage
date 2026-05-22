@@ -651,11 +651,12 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             refillCraftGridFromInventory(player, snapshot);
             if (!player.level().isClientSide()) {
                 // The client optimistically emptied the ingredient slots when the craft result
-                // was taken. remoteSlots still tracks the pre-craft items, so broadcastChanges()
-                // would see no delta and not re-sync. Force it by marking slots 1-9 as empty
-                // (matching what the client believes) so broadcastChanges() sends the refilled items.
+                // was taken. remoteSlots still tracks the pre-craft items, so the server's
+                // automatic broadcastChanges() (called after click processing completes) would
+                // see no delta and skip re-syncing. Mark slots 1-9 as empty so broadcastChanges
+                // detects the refilled items and sends updates. Do NOT call broadcastChanges()
+                // here — calling it mid-loop breaks shift-click multi-craft.
                 for (int i = 1; i <= 9; i++) setRemoteSlot(i, ItemStack.EMPTY);
-                broadcastChanges();
             }
         }
     }
