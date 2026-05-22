@@ -39,6 +39,7 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 public class BarrelBlockEntity extends BlockEntity implements MenuProvider, NetworkListable {
 
@@ -352,7 +353,11 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
             ItemStack probe = res.toStack(available);
             int canInsert = simulatePullInsert(compact, probe);
             if (canInsert <= 0) continue;
-            int extracted = handler.extract(s, res, canInsert, null);
+            int extracted;
+            try (Transaction tx = Transaction.openRoot()) {
+                extracted = handler.extract(s, res, canInsert, tx);
+                if (extracted > 0) tx.commit();
+            }
             if (extracted > 0) doPullInsert(compact, res.toStack(extracted));
             break;
         }

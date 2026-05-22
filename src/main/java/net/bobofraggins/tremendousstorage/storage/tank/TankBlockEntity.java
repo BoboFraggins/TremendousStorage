@@ -36,6 +36,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.access.ItemAccess;
 import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 /**
  * Stores a single fluid type. Capacity starts at {@value #BASE_CAPACITY} mB (16 buckets) at
@@ -279,7 +280,11 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
                 long space = getCapacity() - amount;
                 if (space <= 0) return;
                 int toPull = (int) Math.min(PULL_AMOUNT_MB, Math.min(space, Integer.MAX_VALUE));
-                int drained = fluidCap.extract(t, res, toPull, null);
+                int drained;
+                try (Transaction tx = Transaction.openRoot()) {
+                    drained = fluidCap.extract(t, res, toPull, tx);
+                    if (drained > 0) tx.commit();
+                }
                 if (drained > 0) {
                     insert(res.toStack(drained), drained, false);
                 }
@@ -304,7 +309,11 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
             if (!storedFluid.isEmpty() && !FluidStack.isSameFluidSameComponents(storedFluid, contained)) continue;
             long space = getCapacity() - amount;
             int toDrain = (int) Math.min(cap.getAmountAsLong(0), Math.min(space, Integer.MAX_VALUE));
-            int drained = cap.extract(0, containedRes, toDrain, null);
+            int drained;
+            try (Transaction tx = Transaction.openRoot()) {
+                drained = cap.extract(0, containedRes, toDrain, tx);
+                if (drained > 0) tx.commit();
+            }
             if (drained <= 0) continue;
             insert(containedRes.toStack(drained), drained, false);
             ItemStack remainder = cap.getContainer();
@@ -374,7 +383,11 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
                     ? (int) Math.min(containedAmt, Integer.MAX_VALUE)
                     : (int) Math.min(containedAmt, Math.min(space, Integer.MAX_VALUE));
             if (toDrain <= 0) return;
-            int drained = cap.extract(0, containedRes, toDrain, null);
+            int drained;
+            try (Transaction tx = Transaction.openRoot()) {
+                drained = cap.extract(0, containedRes, toDrain, tx);
+                if (drained > 0) tx.commit();
+            }
             if (drained <= 0) return;
             insert(containedRes.toStack(drained), drained, false);
             transferContainer.setItem(0, ItemStack.EMPTY);

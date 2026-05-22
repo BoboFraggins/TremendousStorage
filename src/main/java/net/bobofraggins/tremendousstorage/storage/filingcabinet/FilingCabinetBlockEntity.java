@@ -37,6 +37,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 /** Stores up to {@value #SLOT_COUNT} Manila Folder stacks. */
 public class FilingCabinetBlockEntity extends BlockEntity
@@ -350,7 +351,11 @@ public class FilingCabinetBlockEntity extends BlockEntity
             ItemStack remainder = pullerAbsorb(probe, available, true);
             int canInsert = available - remainder.getCount();
             if (canInsert <= 0) continue;
-            int extracted = handler.extract(s, res, canInsert, null);
+            int extracted;
+            try (Transaction tx = Transaction.openRoot()) {
+                extracted = handler.extract(s, res, canInsert, tx);
+                if (extracted > 0) tx.commit();
+            }
             if (extracted > 0) pullerAbsorb(res.toStack(extracted), extracted, false);
             break;
         }

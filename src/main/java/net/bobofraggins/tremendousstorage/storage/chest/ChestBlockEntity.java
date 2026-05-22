@@ -45,6 +45,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 /**
  * Stores items in a shared pool across any number of distinct types.
@@ -508,7 +509,11 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
             long remainder = insert(probe, available, true);
             int canInsert = (int) (available - remainder);
             if (canInsert <= 0) continue;
-            int extracted = handler.extract(s, res, canInsert, null);
+            int extracted;
+            try (Transaction tx = Transaction.openRoot()) {
+                extracted = handler.extract(s, res, canInsert, tx);
+                if (extracted > 0) tx.commit();
+            }
             if (extracted > 0) insert(res.toStack(extracted), extracted, false);
             break;
         }
