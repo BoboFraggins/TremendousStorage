@@ -37,6 +37,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 /**
  * Menu for the Storage Access Terminal.
@@ -389,7 +390,11 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                         // being silently destroyed). If nothing was stored, return empty so that
                         // AbstractContainerMenu.doClick's shift-click loop terminates instead of
                         // spinning and calling buildContentsPacket hundreds of times.
-                        int inserted = handler.insert(0, resource, stack.getCount(), null);
+                        int inserted;
+                        try (Transaction tx = Transaction.openRoot()) {
+                            inserted = handler.insert(0, resource, stack.getCount(), tx);
+                            tx.commit();
+                        }
                         if (inserted == 0) return ItemStack.EMPTY;
                         ItemStack remainder = inserted >= stack.getCount()
                                 ? ItemStack.EMPTY
@@ -473,7 +478,10 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                     ItemStack extracted = tryExtractFromNetwork(handler, needed);
                     if (!extracted.isEmpty()) {
                         // Return the remainder (empty bucket) to the network
-                        handler.insert(0, ItemResource.of(current), 1, null);
+                        try (Transaction tx = Transaction.openRoot()) {
+                            handler.insert(0, ItemResource.of(current), 1, tx);
+                            tx.commit();
+                        }
                         craftSlots.setItem(i, extracted);
                         anyRefilled = true;
                     }
@@ -506,7 +514,11 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             ItemResource res = handler.getResource(slot);
             if (res.isEmpty()) continue;
             if (!ItemStack.isSameItemSameComponents(res.toStack(1), template)) continue;
-            int extracted = handler.extract(slot, res, 1, null);
+            int extracted;
+            try (Transaction tx = Transaction.openRoot()) {
+                extracted = handler.extract(slot, res, 1, tx);
+                if (extracted > 0) tx.commit();
+            }
             if (extracted > 0) return res.toStack(extracted);
         }
         return ItemStack.EMPTY;
@@ -535,7 +547,11 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         for (int i = 0; i < 9; i++) {
             ItemStack current = craftSlots.getItem(i);
             if (current.isEmpty()) continue;
-            int returned = handler.insert(0, ItemResource.of(current), current.getCount(), null);
+            int returned;
+            try (Transaction tx = Transaction.openRoot()) {
+                returned = handler.insert(0, ItemResource.of(current), current.getCount(), tx);
+                tx.commit();
+            }
             if (returned < current.getCount()) {
                 ItemStack leftover = current.copyWithCount(current.getCount() - returned);
                 if (!player.addItem(leftover)) player.drop(leftover, false);
@@ -580,11 +596,13 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         for (int s = 0; s < handler.size(); s++) {
             ItemResource res = handler.getResource(s);
             if (res.isEmpty()) continue;
-            ItemStack inSlot = res.toStack(1);
-            if (ingredient.test(inSlot)) {
-                int extracted = handler.extract(s, res, 1, null);
-                return extracted > 0 ? res.toStack(extracted) : ItemStack.EMPTY;
+            if (!ingredient.test(res.toStack(1))) continue;
+            int extracted;
+            try (Transaction tx = Transaction.openRoot()) {
+                extracted = handler.extract(s, res, 1, tx);
+                if (extracted > 0) tx.commit();
             }
+            if (extracted > 0) return res.toStack(extracted);
         }
         return ItemStack.EMPTY;
     }
@@ -631,6 +649,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             super.onTake(player, stack);
             refillCraftGridFromNetwork(player, snapshot);
             refillCraftGridFromInventory(player, snapshot);
+            if (!player.level().isClientSide()) broadcastChanges();
         }
     }
 

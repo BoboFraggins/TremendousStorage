@@ -308,6 +308,7 @@ public class ChestMenu extends AbstractContainerMenu {
             super.onTake(player, stack);
             refillCraftGridFromChest(player, snapshot);
             refillCraftGridFromInventory(player, snapshot);
+            if (!player.level().isClientSide()) broadcastChanges();
         }
     }
 

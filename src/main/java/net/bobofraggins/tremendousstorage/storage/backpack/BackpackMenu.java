@@ -328,6 +328,7 @@ public class BackpackMenu extends AbstractContainerMenu {
             super.onTake(player, stack);
             refillCraftGridFromBackpack(player, snapshot);
             refillCraftGridFromInventory(player, snapshot);
+            if (!player.level().isClientSide()) broadcastChanges();
         }
     }
 
