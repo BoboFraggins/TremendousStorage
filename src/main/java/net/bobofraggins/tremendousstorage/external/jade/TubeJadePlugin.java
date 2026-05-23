@@ -12,8 +12,6 @@ import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlock;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlock;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
-import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackBlock;
-import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlock;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlock;
@@ -38,7 +36,6 @@ public class TubeJadePlugin implements IWailaPlugin {
         reg.registerBlockDataProvider(PresentJadeDataProvider.INSTANCE, PresentBlockEntity.class);
         reg.registerBlockDataProvider(TubeJadeDataProvider.INSTANCE, TubeBlockEntity.class);
         reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, BackpackBlockEntity.class);
-        reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, EnderBackpackBlockEntity.class);
         reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, BarrelBlockEntity.class);
         reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, ChestBlockEntity.class);
         reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, TankBlockEntity.class);
@@ -54,7 +51,6 @@ public class TubeJadePlugin implements IWailaPlugin {
         reg.registerBlockComponent(PresentJadeComponentProvider.INSTANCE, PresentBlock.class);
         reg.registerBlockComponent(TubeJadeComponentProvider.INSTANCE, TubeBlock.class);
         reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, BackpackBlock.class);
-        reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, EnderBackpackBlock.class);
         reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, BarrelBlock.class);
         reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, ChestBlock.class);
         reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, TankBlock.class);
