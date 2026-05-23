@@ -2,8 +2,10 @@ package net.bobofraggins.tremendousstorage.external.jade;
 
 import net.bobofraggins.tremendousstorage.power.stirlingengine.StirlingEngineBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.accessterminal.AccessTerminalBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.backpack.BackpackBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.barrel.BarrelBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.chest.ChestBlockEntity;
+import net.bobofraggins.tremendousstorage.storage.enderbackpack.EnderBackpackBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.filingcabinet.FilingCabinetBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity;
@@ -31,7 +33,17 @@ public enum StorageTierJadeDataProvider implements IServerDataProvider<BlockAcce
     @Override
     public void appendServerData(CompoundTag data, BlockAccessor accessor) {
         BlockEntity be = accessor.getBlockEntity();
-        if (be instanceof ChestBlockEntity chest) {
+        if (be instanceof BackpackBlockEntity backpack) {
+            data.putString("StorageTier", backpack.getTier().getId());
+            if (backpack.hasCraftingUpgrade()) data.putBoolean("CraftingUpgrade", true);
+            if (backpack.hasMagnetUpgrade()) data.putBoolean("MagnetUpgrade", true);
+            if (backpack.hasPullerUpgrade()) data.putBoolean("PullerUpgrade", true);
+        } else if (be instanceof EnderBackpackBlockEntity enderBackpack) {
+            data.putString("StorageTier", enderBackpack.getTier().getId());
+            if (enderBackpack.hasCraftingUpgrade()) data.putBoolean("CraftingUpgrade", true);
+            if (enderBackpack.hasMagnetUpgrade()) data.putBoolean("MagnetUpgrade", true);
+            if (enderBackpack.hasPullerUpgrade()) data.putBoolean("PullerUpgrade", true);
+        } else if (be instanceof ChestBlockEntity chest) {
             data.putString("StorageTier", chest.getTier().getId());
             if (chest.hasCraftingUpgrade()) data.putBoolean("CraftingUpgrade", true);
             if (chest.hasMagnetUpgrade()) data.putBoolean("MagnetUpgrade", true);
