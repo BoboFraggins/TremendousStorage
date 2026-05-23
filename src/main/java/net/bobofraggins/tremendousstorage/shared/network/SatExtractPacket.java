@@ -24,6 +24,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.fluid.FluidUtil;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 /**
  * Client-to-server packet: extract items of a specific type from the network.
@@ -84,48 +85,51 @@ public record SatExtractPacket(BlockPos niPos, ItemStack target, int amount, boo
             // Use direct slot iteration when available to avoid O(H) resolveSlot per slot.
             Iterable<?> slotSource = handler instanceof NiItemHandler nhi ? nhi.slots() : null;
 
-            if (slotSource != null) {
-                for (Object obj : slotSource) {
-                    if (remaining <= 0) break;
-                    NiItemHandler.SlotView view = (NiItemHandler.SlotView) obj;
-                    ItemResource res = view.handler().getResource(view.localSlot());
-                    if (res.isEmpty()) continue;
+            try (Transaction tx = Transaction.openRoot()) {
+                if (slotSource != null) {
+                    for (Object obj : slotSource) {
+                        if (remaining <= 0) break;
+                        NiItemHandler.SlotView view = (NiItemHandler.SlotView) obj;
+                        ItemResource res = view.handler().getResource(view.localSlot());
+                        if (res.isEmpty()) continue;
 
-                    if (view.isFluid()) {
-                        if (!res.equals(targetResource)) continue;
-                        if (carried.isEmpty() || !carried.is(Items.BUCKET)) break;
-                        int toExtract = Math.min(remaining, carried.getCount());
-                        int extracted = view.handler().extract(view.localSlot(), res, toExtract, null);
-                        if (extracted <= 0) continue;
-                        carried.shrink(extracted);
-                        if (carried.isEmpty()) player.containerMenu.setCarried(ItemStack.EMPTY);
-                        else player.containerMenu.setCarried(carried);
-                        remaining -= extracted;
-                        if (result.isEmpty()) result = res.toStack(extracted);
-                        else result.grow(extracted);
-                        anyFluidExtracted = true;
-                    } else {
-                        if (!res.equals(targetResource)) continue;
-                        long available = view.handler().getAmountAsLong(view.localSlot());
-                        int toExtract = (int) Math.min(remaining, available);
-                        int extracted = view.handler().extract(view.localSlot(), res, toExtract, null);
+                        if (view.isFluid()) {
+                            if (!res.equals(targetResource)) continue;
+                            if (carried.isEmpty() || !carried.is(Items.BUCKET)) break;
+                            int toExtract = Math.min(remaining, carried.getCount());
+                            int extracted = view.handler().extract(view.localSlot(), res, toExtract, tx);
+                            if (extracted <= 0) continue;
+                            carried.shrink(extracted);
+                            if (carried.isEmpty()) player.containerMenu.setCarried(ItemStack.EMPTY);
+                            else player.containerMenu.setCarried(carried);
+                            remaining -= extracted;
+                            if (result.isEmpty()) result = res.toStack(extracted);
+                            else result.grow(extracted);
+                            anyFluidExtracted = true;
+                        } else {
+                            if (!res.equals(targetResource)) continue;
+                            long available = view.handler().getAmountAsLong(view.localSlot());
+                            int toExtract = (int) Math.min(remaining, available);
+                            int extracted = view.handler().extract(view.localSlot(), res, toExtract, tx);
+                            if (extracted <= 0) continue;
+                            remaining -= extracted;
+                            if (result.isEmpty()) result = res.toStack(extracted);
+                            else result.grow(extracted);
+                        }
+                    }
+                } else {
+                    for (int s = 0; s < handler.size() && remaining > 0; s++) {
+                        ItemResource res = handler.getResource(s);
+                        if (res.isEmpty() || !res.equals(targetResource)) continue;
+                        int toExtract = (int) Math.min(remaining, handler.getAmountAsLong(s));
+                        int extracted = handler.extract(s, res, toExtract, tx);
                         if (extracted <= 0) continue;
                         remaining -= extracted;
                         if (result.isEmpty()) result = res.toStack(extracted);
                         else result.grow(extracted);
                     }
                 }
-            } else {
-                for (int s = 0; s < handler.size() && remaining > 0; s++) {
-                    ItemResource res = handler.getResource(s);
-                    if (res.isEmpty() || !res.equals(targetResource)) continue;
-                    int toExtract = (int) Math.min(remaining, handler.getAmountAsLong(s));
-                    int extracted = handler.extract(s, res, toExtract, null);
-                    if (extracted <= 0) continue;
-                    remaining -= extracted;
-                    if (result.isEmpty()) result = res.toStack(extracted);
-                    else result.grow(extracted);
-                }
+                tx.commit();
             }
 
             // Route to cursor or directly to inventory
