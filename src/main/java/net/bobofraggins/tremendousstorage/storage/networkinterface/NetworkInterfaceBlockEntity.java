@@ -335,6 +335,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
             boolean wasPowered = powered;
             powered = energyStored >= cost;
             if (powered) energyStored -= cost;
+            else energyStored = 0;
             totalConsumption = cost;
             if (powered != wasPowered) setChanged();
             return;
@@ -345,6 +346,8 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         boolean nowPowered = energyStored >= cost;
         if (nowPowered) {
             energyStored -= cost;
+        } else {
+            energyStored = 0; // drain residual so buffer reads 0 when unpowered
         }
         powered = nowPowered;
         totalConsumption = cost;

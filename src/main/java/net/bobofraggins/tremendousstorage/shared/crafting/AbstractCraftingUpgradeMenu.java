@@ -1,6 +1,5 @@
 package net.bobofraggins.tremendousstorage.shared.crafting;
 
-import com.mojang.logging.LogUtils;
 import java.util.Optional;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
@@ -38,8 +37,6 @@ import net.minecraft.world.level.Level;
  * </ul>
  */
 public abstract class AbstractCraftingUpgradeMenu extends AbstractContainerMenu {
-
-    private static final org.slf4j.Logger LOGGER = LogUtils.getLogger();
 
     protected final boolean hasCraftingUpgrade;
 
@@ -145,22 +142,12 @@ public abstract class AbstractCraftingUpgradeMenu extends AbstractContainerMenu 
         ItemStack result = ItemStack.EMPTY;
         Optional<RecipeHolder<CraftingRecipe>> optional =
                 ((ServerLevel) level).getServer().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, input, level);
-        LOGGER.info(
-                "[CraftResult] recipe found={} inputSize={} class={}",
-                optional.isPresent(),
-                input.size(),
-                getClass().getSimpleName());
         if (optional.isPresent()) {
             RecipeHolder<CraftingRecipe> holder = optional.get();
             ItemStack assembled = holder.value().assemble(input);
-            LOGGER.info(
-                    "[CraftResult] assembled={} enabled={}",
-                    assembled.isEmpty() ? "EMPTY" : assembled.toString(),
-                    assembled.isItemEnabled(level.enabledFeatures()));
             if (assembled.isItemEnabled(level.enabledFeatures())) result = assembled;
             resultSlots.setRecipeUsed(holder);
         }
-        LOGGER.info("[CraftResult] setting slot 0 to {}", result.isEmpty() ? "EMPTY" : result.toString());
         resultSlots.setItem(0, result);
         setRemoteSlot(0, result);
         sp.connection.send(new net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket(
@@ -242,8 +229,6 @@ public abstract class AbstractCraftingUpgradeMenu extends AbstractContainerMenu 
                             total += inv.getCount();
                         }
                     }
-                    LOGGER.info(
-                            "[predict] total={} maxStack={} original={}", total, original.getMaxStackSize(), original);
                     if (total < original.getMaxStackSize()) {
                         resultSlots.setItem(0, original.copy());
                     }
@@ -259,10 +244,6 @@ public abstract class AbstractCraftingUpgradeMenu extends AbstractContainerMenu 
             return original;
         }
         serverShiftClickCrafted += original.getCount();
-        LOGGER.info(
-                "[quickMove] serverShiftClickCrafted={} maxStack={}",
-                serverShiftClickCrafted,
-                original.getMaxStackSize());
         return serverShiftClickCrafted < original.getMaxStackSize() ? original : ItemStack.EMPTY;
     }
 
@@ -279,14 +260,9 @@ public abstract class AbstractCraftingUpgradeMenu extends AbstractContainerMenu 
         public void onTake(Player player, ItemStack stack) {
             // Fire crafting sounds, achievements, and recipe-book tracking on both sides
             // so the client hears the craft sound and the recipe book stays in sync.
-            LOGGER.info(
-                    "[onTake] checkTakeAchievements, clientSide={}",
-                    player.level().isClientSide());
             checkTakeAchievements(stack);
 
             if (player.level().isClientSide()) return;
-
-            LOGGER.info("[onTake] server block reached, taken={}", stack.isEmpty() ? "EMPTY" : stack.toString());
             ServerLevel serverLevel = (ServerLevel) player.level();
 
             // Snapshot the grid before consumption so the refiller knows what types to
@@ -335,17 +311,6 @@ public abstract class AbstractCraftingUpgradeMenu extends AbstractContainerMenu 
             primary.commit(player);
             CraftingGridRefiller.refillFrom(new InventoryRefillSource(player), craftSlots, snapshot);
             refilling = false;
-
-            StringBuilder gridState = new StringBuilder();
-            for (int i = 0; i < 9; i++) {
-                ItemStack s = craftSlots.getItem(i);
-                gridState
-                        .append(i)
-                        .append(":")
-                        .append(s.isEmpty() ? "empty" : s.getItem().toString())
-                        .append(" ");
-            }
-            LOGGER.info("[onTake] grid after refill: {}", gridState.toString().trim());
 
             // One coherent sync: result slot then grid slots.
             slotsChanged(craftSlots);

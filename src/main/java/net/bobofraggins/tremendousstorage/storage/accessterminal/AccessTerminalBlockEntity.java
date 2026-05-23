@@ -131,7 +131,8 @@ public class AccessTerminalBlockEntity extends BlockEntity implements NiCacheHol
         BlockPos niPos = getOrFindNiPos(serverLevel);
         boolean active = niPos != null
                 && level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni
-                && ni.isNetworkValid();
+                && ni.isNetworkValid()
+                && ni.isPowered();
 
         BlockState state = getBlockState();
         if (state.getValue(AccessTerminalBlock.ACTIVE) != active) {
