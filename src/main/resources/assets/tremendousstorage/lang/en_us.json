@@ -115,6 +115,7 @@
   "item.tremendousstorage.magic_hat.tooltip_capture": "Right-click a mob to capture it.",
   "item.tremendousstorage.magic_hat.tooltip_release": "Right-click to release.",
   "block.tremendousstorage.present": "Present",
+  "item.tremendousstorage.present": "Present",
   "item.tremendousstorage.present.tooltip_wrap": "Right-click a block to wrap it.",
   "item.tremendousstorage.present.tooltip_unwrap": "Shift-right-click to unwrap in place.",
   "block.tremendousstorage.positive_vibes": "Positive Vibes",

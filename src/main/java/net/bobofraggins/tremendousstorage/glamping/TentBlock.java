@@ -112,11 +112,23 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
         level.setBlock(headPos, state.setValue(PART, BedPart.HEAD), Block.UPDATE_ALL);
         state.updateNeighbourShapes(level, pos, Block.UPDATE_ALL);
 
-        // Copy the item's custom name into the FOOT block entity so it survives the
-        // place/break cycle.
-        if (level.getBlockEntity(pos) instanceof TentBlockEntity be) {
-            Component name = stack.get(DataComponents.CUSTOM_NAME);
-            be.setTentName(name != null ? name.getString() : null);
+        if (!(level.getBlockEntity(pos) instanceof TentBlockEntity be)) return;
+
+        Component name = stack.get(DataComponents.CUSTOM_NAME);
+        be.setTentName(name != null ? name.getString() : null);
+
+        // Derive and carve the camp at placement time so the location is fixed
+        // regardless of whether the player renames the tent before entering it.
+        MinecraftServer server = ((ServerLevel) level).getServer();
+        if (server == null) return;
+        ServerLevel glampingLevel = server.getLevel(GlampingDimension.KEY);
+        if (glampingLevel == null) return;
+        BlockPos campOrigin = deriveOrigin(be.getTentName());
+        be.setCampOrigin(campOrigin);
+        GlampingWorldData data = GlampingWorldData.getOrCreate(server);
+        if (!data.isClaimed(campOrigin)) {
+            data.claimCamp(campOrigin);
+            carveSpace(glampingLevel, campOrigin);
         }
     }
 
@@ -180,14 +192,14 @@ public class TentBlock extends HorizontalDirectionalBlock implements EntityBlock
         if (be.hasCamp()) {
             campOrigin = be.getCampOrigin();
         } else {
-            // First use — derive the camp location from the name seed.
+            // Fallback: camp should have been carved at placement time, but derive it
+            // now if somehow the block entity was placed without going through setPlacedBy.
             campOrigin = deriveOrigin(be.getTentName());
             be.setCampOrigin(campOrigin);
             if (!data.isClaimed(campOrigin)) {
                 data.claimCamp(campOrigin);
                 carveSpace(glampingLevel, campOrigin);
             }
-            // If already claimed the space already exists — just land there.
         }
 
         // Land the player centered in the block directly inside the tent door.

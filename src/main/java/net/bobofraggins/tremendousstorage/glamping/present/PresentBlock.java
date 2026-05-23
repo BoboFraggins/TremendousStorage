@@ -108,7 +108,13 @@ public class PresentBlock extends BaseEntityBlock {
             }
         }
 
-        Block.popResource(level, pos, new ItemStack(Registration.PRESENT_ITEM.get()));
+        ItemStack presentItem = new ItemStack(Registration.PRESENT_ITEM.get());
+        // useWithoutItem means main hand is empty — put it there directly.
+        if (player.getMainHandItem().isEmpty()) {
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, presentItem);
+        } else if (!player.addItem(presentItem)) {
+            Block.popResource(level, pos, presentItem);
+        }
         return InteractionResult.SUCCESS;
     }
 

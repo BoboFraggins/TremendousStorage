@@ -80,16 +80,16 @@ public record BackpackFillCraftingGridPacket(int slotType, int slotIndex, String
                 ItemStack wantedStack = wanted.get(i);
                 if (wantedStack.isEmpty()) continue;
 
-                // Try player inventory first
-                ItemStack found = takeFromInventory(player.getInventory(), wantedStack);
+                // Try backpack contents first, then player inventory
+                ItemStack found = ItemStack.EMPTY;
+                int idx = findInContents(contents, wantedStack);
+                if (idx >= 0) {
+                    Object[] result = contents.withExtracted(idx, 1);
+                    found = (ItemStack) result[0];
+                    contents = (BackpackContents) result[1];
+                }
                 if (found.isEmpty()) {
-                    // Try backpack contents
-                    int idx = findInContents(contents, wantedStack);
-                    if (idx >= 0) {
-                        Object[] result = contents.withExtracted(idx, 1);
-                        found = (ItemStack) result[0];
-                        contents = (BackpackContents) result[1];
-                    }
+                    found = takeFromInventory(player.getInventory(), wantedStack);
                 }
 
                 if (!found.isEmpty()) {

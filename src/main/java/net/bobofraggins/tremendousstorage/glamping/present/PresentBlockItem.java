@@ -116,11 +116,17 @@ public class PresentBlockItem extends BlockItem {
                 data.copyTag().getCompoundOrEmpty(WRAPPED_STATE_KEY).getString("Name");
         return blockId.flatMap(id -> Optional.ofNullable(Identifier.tryParse(id)))
                 .map(rl -> BuiltInRegistries.BLOCK.getValue(rl))
-                .map(block -> (Component) Component.empty()
-                        .append(base)
-                        .append(" (")
-                        .append(block.getName())
-                        .append(")"))
+                .map(block -> {
+                    net.minecraft.world.item.Item item = block.asItem();
+                    Component wrappedName = item == net.minecraft.world.item.Items.AIR
+                            ? block.getName()
+                            : item.getName(new ItemStack(item));
+                    return (Component) Component.empty()
+                            .append(base)
+                            .append(" (")
+                            .append(wrappedName)
+                            .append(")");
+                })
                 .orElse(base);
     }
 

@@ -69,7 +69,9 @@ Your linked storage system can deliver meals directly to you from anywhere in th
 
 ### Present
 
-Wrap a block and give it to that special person. Ah, who can forget the childhood joy of unwrapping their first Blaze Spawner?
+Wrap a block and give it to that special person. Maybe your friend has always wanted that special budding amethyst in their base?
+
+Ah, who can forget the childhood joy of unwrapping that box to discover their first Blaze Spawner?
 
 ---
 
@@ -146,6 +148,19 @@ Keep those pesky unstackable items organized, accessible, and dramatically displ
 Not every item deserves to continue existing.
 
 The Recycling Bin turns that unwanted junk, overflow materials, and the consequences of your automation experiments into a pleasant smelling liquid.
+
+---
+
+### Upgrades
+
+Tremendous Storage comes with a variety of upgrades that can be combined in interesting and useful ways.
+
+* Crafting Upgrade: Add a crafting grid to almost any inventory
+* Ender Upgrade: Turns most storages into linked copies
+* Tier Upgrades: Incrementally turn a good sized storage into a ridiculous one
+* H.A.A.R.P. Upgrade: Control the weather using the end product of recycling
+* Magnet Upgrade: When matching entities spawn, automatically pick them up and move them to the inventory
+* Interdimensional Upgrade: Allows your Personal Access Terminal to link up cross dimensionally (assuming its Network Interface is chunk loaded)
 
 ---
 

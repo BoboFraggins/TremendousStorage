@@ -2,8 +2,11 @@ package net.bobofraggins.tremendousstorage.storage.accessterminal;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageClientConfig;
+import net.bobofraggins.tremendousstorage.shared.crafting.AbstractCraftingUpgradeMenu;
+import net.bobofraggins.tremendousstorage.shared.crafting.CraftingRefillSource;
 import net.bobofraggins.tremendousstorage.shared.network.RequestSatContentsPacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.KeyCounter;
@@ -20,12 +23,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.inventory.ResultContainer;
-import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -55,23 +54,12 @@ import net.neoforged.neoforge.transfer.transaction.Transaction;
  * <p>The network item list is NOT backed by real slots — it is rendered and interacted
  * with as a custom overlay in {@link AccessTerminalScreen}, using packets.
  */
-public class AccessTerminalMenu extends AbstractContainerMenu {
+public class AccessTerminalMenu extends AbstractCraftingUpgradeMenu {
 
-    private final boolean hasCraftingUpgrade;
+    private final BlockPos satPos;
 
-    // Slot indices — depend on hasCraftingUpgrade
-    private final int resultSlot; // -1 when no crafting
-    private final int craftStart; // -1 when no crafting
-    private final int craftEnd; // -1 when no crafting
-    private final int invStart;
-    private final int invEnd;
-    private final int hotbarStart;
-    private final int hotbarEnd;
-
-    private final CraftingContainer craftSlots;
-    private final ResultContainer resultSlots;
-    private final ContainerLevelAccess access;
-    private final Player player;
+    @Nullable
+    private final BlockPos niPos;
 
     // Recipe disambiguation — server-side only
     private List<RecipeHolder<CraftingRecipe>> matchingRecipes = new ArrayList<>();
@@ -83,21 +71,14 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     @Nullable
     private Identifier pendingPinRecipeId = null;
 
-    private final BlockPos satPos;
-
-    @Nullable
-    private final BlockPos niPos;
-
     /** Last cache revision we sent to this player; -1 = never sent. */
     private long lastSentRevision = -1;
 
     // -------------------------------------------------------------------------
-    // Server-side constructor (called by Provider)
+    // Constructors
     // -------------------------------------------------------------------------
 
-    /**
-     * Server-side constructor. Uses the default row count (slot positions are unused server-side).
-     */
+    /** Server-side constructor. Uses the default row count. */
     public AccessTerminalMenu(
             int id, Inventory inv, BlockPos satPos, @Nullable BlockPos niPos, boolean hasCraftingUpgrade) {
         this(id, inv, satPos, niPos, hasCraftingUpgrade, TremendousStorageClientConfig.ROWS_SCALE_4_PLUS_DEFAULT);
@@ -117,80 +98,45 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
                 TremendousStorageClientConfig.computeVisibleRows(hasCraftingUpgrade));
     }
 
-    /**
-     * Internal constructor that computes all slot Y positions from the given network grid row
-     * count.
-     *
-     * <p>With crafting: title(17) + networkPane(rows×18+5) + craftingPane(58) + playerInv
-     * → craftingY = 22 + rows×18; fixed 58-px offsets to player inv and hotbar.
-     * <p>Without crafting: crafting pane is omitted; player inv follows directly after network pane.
-     */
     private AccessTerminalMenu(
             int id, Inventory inv, BlockPos satPos, @Nullable BlockPos niPos, boolean hasCraftingUpgrade, int rows) {
-        super(Registration.STORAGE_ACCESS_TERMINAL_MENU.get(), id);
+        super(
+                Registration.STORAGE_ACCESS_TERMINAL_MENU.get(),
+                id,
+                inv.player,
+                hasCraftingUpgrade,
+                ContainerLevelAccess.create(inv.player.level(), satPos),
+                hasCraftingUpgrade ? 10 : 0,
+                hasCraftingUpgrade ? 37 : 27,
+                hasCraftingUpgrade ? 37 : 27,
+                hasCraftingUpgrade ? 46 : 36);
         this.satPos = satPos;
         this.niPos = niPos;
-        this.hasCraftingUpgrade = hasCraftingUpgrade;
-        this.player = inv.player;
-        this.access = ContainerLevelAccess.create(inv.player.level(), satPos);
 
         final int S = AccessTerminalLayout.SLOT_SIZE;
         int networkPaneBottom = AccessTerminalLayout.TITLE_H + rows * S + 5;
         int playerInvY;
 
         if (hasCraftingUpgrade) {
-            this.craftSlots = new TransientCraftingContainer(this, 3, 3);
-            this.resultSlots = new ResultContainer();
-
             int craftingY = networkPaneBottom;
             playerInvY = craftingY + (AccessTerminalLayout.PLAYER_INV_Y - AccessTerminalLayout.CRAFTING_Y);
-
-            this.resultSlot = 0;
-            this.craftStart = 1;
-            this.craftEnd = 10;
-            this.invStart = 10;
-            this.invEnd = 37;
-            this.hotbarStart = 37;
-            this.hotbarEnd = 46;
-
-            // Slot 0: craft result
-            addSlot(new RefillResultSlot(
-                    inv.player, craftSlots, resultSlots, 0, AccessTerminalLayout.CRAFTING_RESULT_X, craftingY + S));
-
-            // Slots 1-9: 3×3 crafting grid
-            for (int row = 0; row < 3; row++) {
-                for (int col = 0; col < 3; col++) {
-                    addSlot(new Slot(
-                            craftSlots,
-                            col + row * 3,
-                            AccessTerminalLayout.CRAFTING_GRID_X + col * S,
-                            craftingY + row * S));
-                }
-            }
-
+            addCraftingSlots(
+                    AccessTerminalLayout.CRAFTING_RESULT_X,
+                    craftingY + S,
+                    AccessTerminalLayout.CRAFTING_GRID_X,
+                    craftingY,
+                    S);
             addDataSlots(recipeData);
         } else {
-            this.craftSlots = null;
-            this.resultSlots = null;
             playerInvY = networkPaneBottom + 20;
-
-            this.resultSlot = -1;
-            this.craftStart = -1;
-            this.craftEnd = -1;
-            this.invStart = 0;
-            this.invEnd = 27;
-            this.hotbarStart = 27;
-            this.hotbarEnd = 36;
         }
 
-        // Player main inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 addSlot(new Slot(
                         inv, col + row * 9 + 9, AccessTerminalLayout.PLAYER_INV_X + col * S, playerInvY + row * S));
             }
         }
-
         int hotbarY = playerInvY + (AccessTerminalLayout.HOTBAR_Y - AccessTerminalLayout.PLAYER_INV_Y);
         for (int col = 0; col < 9; col++) {
             addSlot(new Slot(inv, col, AccessTerminalLayout.HOTBAR_X + col * S, hotbarY));
@@ -214,22 +160,32 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         return niPos != null;
     }
 
-    public boolean hasCraftingUpgrade() {
-        return hasCraftingUpgrade;
-    }
-
     public int getMatchingRecipeCount() {
         return recipeData.get(0);
     }
 
     // -------------------------------------------------------------------------
-    // Crafting
+    // Crafting — primary source and result override
     // -------------------------------------------------------------------------
 
     @Override
-    public void slotsChanged(net.minecraft.world.Container inventory) {
-        if (!hasCraftingUpgrade) return;
-        access.execute((level, pos) -> updateCraftingResult(level));
+    protected CraftingRefillSource createPrimarySource(Player player) {
+        return new NetworkRefillSource(player);
+    }
+
+    /** Uses the player-selected recipe rather than the first match, so disambiguation survives ingredient consumption. */
+    @Override
+    protected Optional<RecipeHolder<CraftingRecipe>> getActiveRecipe(CraftingInput input, Level level) {
+        if (!matchingRecipes.isEmpty()) {
+            return Optional.of(matchingRecipes.get(Math.min(selectedRecipeIndex, matchingRecipes.size() - 1)));
+        }
+        return Optional.empty();
+    }
+
+    /** Overrides the default recipe lookup to add multi-recipe disambiguation. */
+    @Override
+    protected void doUpdateCraftResult(Level level) {
+        updateCraftingResult(level);
     }
 
     /**
@@ -242,7 +198,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         if (level.isClientSide()) return;
         CraftingInput input = craftSlots.asCraftInput();
 
-        List<RecipeHolder<CraftingRecipe>> newMatches = ((net.minecraft.server.level.ServerLevel) level)
+        List<RecipeHolder<CraftingRecipe>> newMatches = ((ServerLevel) level)
                 .getServer().getRecipeManager().recipeMap().byType(RecipeType.CRAFTING).stream()
                         .filter(h -> h.value().matches(input, level))
                         .toList();
@@ -272,7 +228,6 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         updateResultSlot(level);
     }
 
-    /** Assembles the result from the currently selected recipe and sends it to the client. */
     private void updateResultSlot(Level level) {
         if (level.isClientSide()) return;
         CraftingInput input = craftSlots.asCraftInput();
@@ -280,12 +235,9 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         ItemStack result = ItemStack.EMPTY;
         if (!matchingRecipes.isEmpty()) {
             RecipeHolder<CraftingRecipe> holder = matchingRecipes.get(selectedRecipeIndex);
-            if (resultSlots.setRecipeUsed(serverPlayer, holder)) {
-                ItemStack assembled = holder.value().assemble(input);
-                if (assembled.isItemEnabled(level.enabledFeatures())) {
-                    result = assembled;
-                }
-            }
+            ItemStack assembled = holder.value().assemble(input);
+            if (assembled.isItemEnabled(level.enabledFeatures())) result = assembled;
+            resultSlots.setRecipeUsed(holder);
         }
         resultSlots.setItem(0, result);
         setRemoteSlot(0, result);
@@ -303,8 +255,8 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     }
 
     /**
-     * Cycles the selected recipe by {@code direction} (+1 = next, -1 = previous), wrapping
-     * around. Called by {@link net.bobofraggins.tremendousstorage.shared.network.CycleRecipePacket}.
+     * Cycles the selected recipe by {@code direction} (+1 = next, -1 = previous).
+     * Called by {@link net.bobofraggins.tremendousstorage.shared.network.CycleRecipePacket}.
      */
     public void handleCycleRecipe(int direction) {
         if (matchingRecipes.isEmpty()) return;
@@ -313,7 +265,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     }
 
     /**
-     * Pins a specific recipe to be selected on the next {@link #updateCraftingResult} call.
+     * Pins a specific recipe to be selected on the next {@link #doUpdateCraftResult} call.
      * Used by JEI/EMI/REI transfer handlers so the chosen recipe survives the
      * {@link #slotsChanged} that fires after the grid is filled.
      */
@@ -321,13 +273,9 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
         pendingPinRecipeId = id;
     }
 
-    @Override
-    public void removed(Player player) {
-        super.removed(player);
-        if (hasCraftingUpgrade) {
-            access.execute((level, pos) -> clearContainer(player, craftSlots));
-        }
-    }
+    // -------------------------------------------------------------------------
+    // Lifecycle
+    // -------------------------------------------------------------------------
 
     @Override
     public boolean stillValid(Player player) {
@@ -336,60 +284,36 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
 
     /**
      * Returns the {@link Level} in which the Network Interface lives.
-     * Subclasses may override to redirect lookups to a different dimension
-     * (e.g. the Wireless SAT when the player is cross-dimension).
+     * Subclasses may override to redirect lookups to a different dimension.
      */
     protected Level getNiLevel(Player player) {
         return player.level();
     }
 
     // -------------------------------------------------------------------------
-    // Shift-click: between result/crafting/inventory; network insert via packet
+    // Shift-click
     // -------------------------------------------------------------------------
 
     @Override
     public ItemStack quickMoveStack(Player player, int index) {
-        ItemStack copy = ItemStack.EMPTY;
         Slot slot = slots.get(index);
-        if (slot == null || !slot.hasItem()) return copy;
+        if (slot == null || !slot.hasItem()) return ItemStack.EMPTY;
+
+        if (hasCraftingUpgrade && index == 0) {
+            return quickMoveResult(player, slot);
+        }
 
         ItemStack stack = slot.getItem();
-        copy = stack.copy();
+        ItemStack copy = stack.copy();
 
-        if (hasCraftingUpgrade && index == resultSlot) {
-            // Snapshot the craft grid before ingredients are consumed by onTake
-            ItemStack[] gridSnapshot = new ItemStack[9];
-            for (int i = 0; i < 9; i++) {
-                gridSnapshot[i] = craftSlots.getItem(i).copy();
-            }
-
-            // Shift-click result: move to inventory
-            if (!moveItemStackTo(stack, invStart, hotbarEnd, true)) return ItemStack.EMPTY;
-            slot.onQuickCraft(stack, copy);
-
-            if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
-            else slot.setChanged();
-
-            if (stack.getCount() == copy.getCount()) return ItemStack.EMPTY;
-            slot.onTake(player, stack); // RefillResultSlot.onTake handles grid refill
-            player.drop(stack, false);
-
-            return copy;
-        } else if (index >= invStart && index < hotbarEnd) {
+        if (index >= invStart && index < hotbarEnd) {
             // Shift-click player slot: try network first, then swap between inv/hotbar.
-            // Skip client-side prediction when network is present — server inserts into network,
-            // but client would predict a vanilla inv↔hotbar swap, causing a flicker.
             if (hasNetwork() && player.level().isClientSide()) return ItemStack.EMPTY;
             if (hasNetwork() && !player.level().isClientSide()) {
                 if (getNiLevel(player).getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni) {
                     ResourceHandler<ItemResource> handler = ni.getItemHandler();
                     if (handler != null) {
                         ItemResource resource = ItemResource.of(stack);
-                        // NiItemHandler now returns honest counts (void-excess barrels are capped
-                        // to actual space, so items fall through to real storage rather than
-                        // being silently destroyed). If nothing was stored, return empty so that
-                        // AbstractContainerMenu.doClick's shift-click loop terminates instead of
-                        // spinning and calling buildContentsPacket hundreds of times.
                         int inserted;
                         try (Transaction tx = Transaction.openRoot()) {
                             inserted = handler.insert(0, resource, stack.getCount(), tx);
@@ -418,7 +342,7 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
             } else {
                 if (!moveItemStackTo(stack, invStart, invEnd, false)) return ItemStack.EMPTY;
             }
-        } else if (hasCraftingUpgrade && index >= craftStart && index < craftEnd) {
+        } else if (hasCraftingUpgrade && index >= 1 && index < 10) {
             if (!moveItemStackTo(stack, invStart, hotbarEnd, false)) return ItemStack.EMPTY;
         }
 
@@ -427,188 +351,11 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
 
         if (stack.getCount() == copy.getCount()) return ItemStack.EMPTY;
         slot.onTake(player, stack);
-        if (index == resultSlot) player.drop(stack, false);
         return copy;
     }
 
-    @Override
-    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot) {
-        if (hasCraftingUpgrade && slot.container == resultSlots) return false;
-        return super.canTakeItemForPickAll(stack, slot);
-    }
-
     // -------------------------------------------------------------------------
-    // Network auto-refill
-    // -------------------------------------------------------------------------
-
-    /**
-     * After a craft result is taken, refill any depleted craft grid slot from the network.
-     *
-     * <p>For each of the 9 grid slots: if the slot is now empty but the pre-craft snapshot
-     * had an item there, pull one stack of that item type from the network and place it.
-     * Triggers {@link #slotsChanged} so the result slot updates immediately.
-     *
-     * @param player       the crafting player (used to get the server level)
-     * @param gridSnapshot copies of each craft slot taken just before {@code onTake} ran
-     */
-    private void refillCraftGridFromNetwork(Player player, ItemStack[] gridSnapshot) {
-        if (!hasCraftingUpgrade || !hasNetwork() || player.level().isClientSide()) return;
-        if (!(getNiLevel(player).getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
-        ResourceHandler<ItemResource> handler = ni.getItemHandler();
-        if (handler == null) return;
-
-        boolean anyRefilled = false;
-        for (int i = 0; i < 9; i++) {
-            ItemStack snap = gridSnapshot[i];
-            if (snap.isEmpty()) continue; // slot was empty before craft, nothing to refill
-
-            ItemStack current = craftSlots.getItem(i);
-
-            if (current.isEmpty()) {
-                // Normal case: ingredient was fully consumed — pull a fresh stack from network
-                anyRefilled |= extractFromNetworkIntoSlot(handler, snap, i);
-            } else if (!snap.getItem().getCraftingRemainder(snap).create().isEmpty()) {
-                // Container item case (e.g. lava bucket → empty bucket):
-                // onTake placed the remainder (empty bucket) back in the slot.
-                // If that remainder matches what's there now, swap it for a full one.
-                ItemStack remainder = snap.getItem().getCraftingRemainder(snap).create();
-                if (!remainder.isEmpty() && ItemStack.isSameItemSameComponents(current, remainder)) {
-                    // Try to extract the full item (e.g. lava bucket) from the network
-                    ItemStack needed = snap.copyWithCount(1);
-                    ItemStack extracted = tryExtractFromNetwork(handler, needed);
-                    if (!extracted.isEmpty()) {
-                        // Return the remainder (empty bucket) to the network
-                        try (Transaction tx = Transaction.openRoot()) {
-                            handler.insert(0, ItemResource.of(current), 1, tx);
-                            tx.commit();
-                        }
-                        craftSlots.setItem(i, extracted);
-                        anyRefilled = true;
-                    }
-                }
-            }
-        }
-
-        if (anyRefilled) {
-            slotsChanged(craftSlots);
-        }
-    }
-
-    /** Extracts one stack of {@code template} from the network and places it in craft slot {@code gridIndex}. */
-    private boolean extractFromNetworkIntoSlot(
-            ResourceHandler<ItemResource> handler, ItemStack template, int gridIndex) {
-        ItemStack extracted = tryExtractFromNetwork(handler, template.copyWithCount(1));
-        if (!extracted.isEmpty()) {
-            craftSlots.setItem(gridIndex, extracted);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Finds the first network slot containing an item matching {@code template} and extracts
-     * up to one full stack from it. Returns the extracted stack, or {@link ItemStack#EMPTY}.
-     */
-    private static ItemStack tryExtractFromNetwork(ResourceHandler<ItemResource> handler, ItemStack template) {
-        for (int slot = 0; slot < handler.size(); slot++) {
-            ItemResource res = handler.getResource(slot);
-            if (res.isEmpty()) continue;
-            if (!ItemStack.isSameItemSameComponents(res.toStack(1), template)) continue;
-            int extracted;
-            try (Transaction tx = Transaction.openRoot()) {
-                extracted = handler.extract(slot, res, 1, tx);
-                if (extracted > 0) tx.commit();
-            }
-            if (extracted > 0) return res.toStack(extracted);
-        }
-        return ItemStack.EMPTY;
-    }
-
-    // -------------------------------------------------------------------------
-    // Recipe viewer fill (EMI / REI)
-    // -------------------------------------------------------------------------
-
-    /**
-     * Fills the crafting grid with ingredients for {@code recipe}, pulling items from the network.
-     *
-     * <p>Any existing grid contents that do not match the new recipe are returned to the network
-     * first. For shaped recipes the ingredients are placed in the recipe's natural top-left
-     * position; shapeless recipes fill slots 0–8 in order.
-     */
-    public void fillCraftingGridFromNetwork(ServerLevel level, CraftingRecipe recipe) {
-        if (!hasCraftingUpgrade || niPos == null) return;
-        if (!(level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
-        ResourceHandler<ItemResource> handler = ni.getItemHandler();
-        if (handler == null) return;
-
-        // Return current grid contents to the network.
-        // NiItemHandler now returns honest counts, so any items the network cannot actually
-        // store (all storages full or refusing) are returned to the player rather than lost.
-        for (int i = 0; i < 9; i++) {
-            ItemStack current = craftSlots.getItem(i);
-            if (current.isEmpty()) continue;
-            int returned;
-            try (Transaction tx = Transaction.openRoot()) {
-                returned = handler.insert(0, ItemResource.of(current), current.getCount(), tx);
-                tx.commit();
-            }
-            if (returned < current.getCount()) {
-                ItemStack leftover = current.copyWithCount(current.getCount() - returned);
-                if (!player.addItem(leftover)) player.drop(leftover, false);
-            }
-            craftSlots.setItem(i, ItemStack.EMPTY);
-        }
-
-        // Place ingredients from the network into the grid.
-        var placementInfo = recipe.placementInfo();
-        var compactIngredients = placementInfo.ingredients();
-        var slotMapping = placementInfo.slotsToIngredientIndex();
-        if (recipe instanceof ShapedRecipe shaped) {
-            int w = shaped.getWidth();
-            int h = shaped.getHeight();
-            for (int row = 0; row < h; row++) {
-                for (int col = 0; col < w; col++) {
-                    int recipeIdx = row * w + col;
-                    int gridIdx = row * 3 + col;
-                    if (recipeIdx < slotMapping.size()) {
-                        int ingredIdx = slotMapping.getInt(recipeIdx);
-                        if (ingredIdx >= 0 && ingredIdx < compactIngredients.size()) {
-                            craftSlots.setItem(
-                                    gridIdx, extractOneFromNetwork(handler, compactIngredients.get(ingredIdx)));
-                        }
-                    }
-                }
-            }
-        } else {
-            for (int i = 0; i < Math.min(slotMapping.size(), 9); i++) {
-                int ingredIdx = slotMapping.getInt(i);
-                if (ingredIdx >= 0 && ingredIdx < compactIngredients.size()) {
-                    craftSlots.setItem(i, extractOneFromNetwork(handler, compactIngredients.get(ingredIdx)));
-                }
-            }
-        }
-
-        slotsChanged(craftSlots);
-    }
-
-    private static ItemStack extractOneFromNetwork(ResourceHandler<ItemResource> handler, Ingredient ingredient) {
-        if (ingredient.isEmpty()) return ItemStack.EMPTY;
-        for (int s = 0; s < handler.size(); s++) {
-            ItemResource res = handler.getResource(s);
-            if (res.isEmpty()) continue;
-            if (!ingredient.test(res.toStack(1))) continue;
-            int extracted;
-            try (Transaction tx = Transaction.openRoot()) {
-                extracted = handler.extract(s, res, 1, tx);
-                if (extracted > 0) tx.commit();
-            }
-            if (extracted > 0) return res.toStack(extracted);
-        }
-        return ItemStack.EMPTY;
-    }
-
-    // -------------------------------------------------------------------------
-    // Push-based real-time network inventory updates (Phase 7+8)
+    // Push-based real-time network inventory updates
     // -------------------------------------------------------------------------
 
     @Override
@@ -630,74 +377,153 @@ public class AccessTerminalMenu extends AbstractContainerMenu {
     }
 
     // -------------------------------------------------------------------------
-    // Craft-grid auto-refill
+    // Recipe viewer fill (JEI / EMI / REI)
     // -------------------------------------------------------------------------
 
     /**
-     * Result slot that snapshots the craft grid before {@code super.onTake} consumes ingredients,
-     * then refills any emptied slots — network first, player inventory second.
+     * Fills the crafting grid with ingredients for {@code recipe}, pulling items from the network
+     * first and then falling back to the player's inventory for any slots the network could not fill.
      */
-    private class RefillResultSlot extends ResultSlot {
-        RefillResultSlot(Player p, CraftingContainer craft, ResultContainer result, int idx, int x, int y) {
-            super(p, craft, result, idx, x, y);
-        }
+    public void fillCraftingGridFromNetwork(ServerLevel level, CraftingRecipe recipe) {
+        if (!hasCraftingUpgrade || niPos == null) return;
+        if (!(level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return;
+        ResourceHandler<ItemResource> handler = ni.getItemHandler();
+        if (handler == null) return;
 
-        @Override
-        public void onTake(Player player, ItemStack stack) {
-            ItemStack[] snapshot = new ItemStack[9];
-            for (int i = 0; i < 9; i++) snapshot[i] = craftSlots.getItem(i).copy();
-            super.onTake(player, stack);
-            refillCraftGridFromNetwork(player, snapshot);
-            refillCraftGridFromInventory(player, snapshot);
-            if (!player.level().isClientSide()) {
-                // The client optimistically emptied the ingredient slots when the craft result
-                // was taken. remoteSlots still tracks the pre-craft items, so the server's
-                // automatic broadcastChanges() (called after click processing completes) would
-                // see no delta and skip re-syncing. Mark slots 1-9 as empty so broadcastChanges
-                // detects the refilled items and sends updates. Do NOT call broadcastChanges()
-                // here — calling it mid-loop breaks shift-click multi-craft.
-                for (int i = 1; i <= 9; i++) setRemoteSlot(i, ItemStack.EMPTY);
-            }
-        }
-    }
-
-    /** Refills any craft-grid slot that was consumed and not yet restored from the network. */
-    private void refillCraftGridFromInventory(Player player, ItemStack[] snapshot) {
-        if (player.level().isClientSide()) return;
-        boolean anyRefilled = false;
+        // Return current grid contents to the network
         for (int i = 0; i < 9; i++) {
             ItemStack current = craftSlots.getItem(i);
-            ItemStack snap = snapshot[i];
-            if (snap.isEmpty()) continue;
-            if (current.isEmpty()) {
-                // Normal case: ingredient fully consumed — find a replacement in inventory.
-                for (int j = 0; j < player.getInventory().getContainerSize(); j++) {
-                    ItemStack inv = player.getInventory().getItem(j);
-                    if (!inv.isEmpty() && ItemStack.isSameItemSameComponents(inv, snap)) {
-                        craftSlots.setItem(i, inv.split(1));
-                        anyRefilled = true;
-                        break;
-                    }
+            if (current.isEmpty()) continue;
+            int returned;
+            try (Transaction tx = Transaction.openRoot()) {
+                returned = handler.insert(0, ItemResource.of(current), current.getCount(), tx);
+                tx.commit();
+            }
+            if (returned < current.getCount()) {
+                ItemStack leftover = current.copyWithCount(current.getCount() - returned);
+                if (!player.addItem(leftover)) player.drop(leftover, false);
+            }
+            craftSlots.setItem(i, ItemStack.EMPTY);
+        }
+
+        Ingredient[] slotIngredients = buildSlotIngredients(recipe);
+
+        // First pass: extract from network
+        for (int i = 0; i < 9; i++) {
+            if (slotIngredients[i] != null && !slotIngredients[i].isEmpty()) {
+                craftSlots.setItem(i, extractOneFromNetwork(handler, slotIngredients[i]));
+            }
+        }
+
+        // Second pass: fill remaining empty slots from player inventory
+        for (int i = 0; i < 9; i++) {
+            if (!craftSlots.getItem(i).isEmpty()) continue;
+            if (slotIngredients[i] == null || slotIngredients[i].isEmpty()) continue;
+            Ingredient ing = slotIngredients[i];
+            for (int j = 0; j < player.getInventory().getContainerSize(); j++) {
+                ItemStack inv = player.getInventory().getItem(j);
+                if (!inv.isEmpty() && ing.test(inv)) {
+                    craftSlots.setItem(i, inv.split(1));
+                    break;
                 }
-            } else {
-                // Container-item case: vanilla left a crafting remainder (e.g. empty bucket).
-                // If the remainder matches, swap it for the full item from inventory.
-                ItemStack remainder = snap.getItem().getCraftingRemainder(snap).create();
-                if (!remainder.isEmpty() && ItemStack.isSameItemSameComponents(current, remainder)) {
-                    for (int j = 0; j < player.getInventory().getContainerSize(); j++) {
-                        ItemStack inv = player.getInventory().getItem(j);
-                        if (!inv.isEmpty() && ItemStack.isSameItemSameComponents(inv, snap)) {
-                            ItemStack extracted = inv.split(1);
-                            if (!player.addItem(current)) player.drop(current, false);
-                            craftSlots.setItem(i, extracted);
-                            anyRefilled = true;
-                            break;
+            }
+        }
+
+        slotsChanged(craftSlots);
+    }
+
+    private static Ingredient[] buildSlotIngredients(CraftingRecipe recipe) {
+        Ingredient[] result = new Ingredient[9];
+        var placementInfo = recipe.placementInfo();
+        var compactIngredients = placementInfo.ingredients();
+        var slotMapping = placementInfo.slotsToIngredientIndex();
+        if (recipe instanceof ShapedRecipe shaped) {
+            int w = shaped.getWidth();
+            int h = shaped.getHeight();
+            for (int row = 0; row < h; row++) {
+                for (int col = 0; col < w; col++) {
+                    int recipeIdx = row * w + col;
+                    int gridIdx = row * 3 + col;
+                    if (recipeIdx < slotMapping.size()) {
+                        int ingredIdx = slotMapping.getInt(recipeIdx);
+                        if (ingredIdx >= 0 && ingredIdx < compactIngredients.size()) {
+                            result[gridIdx] = compactIngredients.get(ingredIdx);
                         }
                     }
                 }
             }
+        } else {
+            for (int i = 0; i < Math.min(slotMapping.size(), 9); i++) {
+                int ingredIdx = slotMapping.getInt(i);
+                if (ingredIdx >= 0 && ingredIdx < compactIngredients.size()) {
+                    result[i] = compactIngredients.get(ingredIdx);
+                }
+            }
         }
-        if (anyRefilled) slotsChanged(craftSlots);
+        return result;
+    }
+
+    private static ItemStack extractOneFromNetwork(ResourceHandler<ItemResource> handler, Ingredient ingredient) {
+        if (ingredient.isEmpty()) return ItemStack.EMPTY;
+        for (int s = 0; s < handler.size(); s++) {
+            ItemResource res = handler.getResource(s);
+            if (res.isEmpty()) continue;
+            if (!ingredient.test(res.toStack(1))) continue;
+            int extracted;
+            try (Transaction tx = Transaction.openRoot()) {
+                extracted = handler.extract(s, res, 1, tx);
+                if (extracted > 0) tx.commit();
+            }
+            if (extracted > 0) return res.toStack(extracted);
+        }
+        return ItemStack.EMPTY;
+    }
+
+    private static ItemStack tryExtractFromNetwork(ResourceHandler<ItemResource> handler, ItemStack template) {
+        for (int slot = 0; slot < handler.size(); slot++) {
+            ItemResource res = handler.getResource(slot);
+            if (res.isEmpty()) continue;
+            if (!ItemStack.isSameItemSameComponents(res.toStack(1), template)) continue;
+            int extracted;
+            try (Transaction tx = Transaction.openRoot()) {
+                extracted = handler.extract(slot, res, 1, tx);
+                if (extracted > 0) tx.commit();
+            }
+            if (extracted > 0) return res.toStack(extracted);
+        }
+        return ItemStack.EMPTY;
+    }
+
+    // -------------------------------------------------------------------------
+    // Network refill source
+    // -------------------------------------------------------------------------
+
+    private class NetworkRefillSource implements CraftingRefillSource {
+        @Nullable
+        private final ResourceHandler<ItemResource> handler;
+
+        NetworkRefillSource(Player player) {
+            NetworkInterfaceBlockEntity ni = null;
+            if (niPos != null && getNiLevel(player).getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity n) {
+                ni = n;
+            }
+            this.handler = ni != null ? ni.getItemHandler() : null;
+        }
+
+        @Override
+        public ItemStack extractOne(ItemStack template) {
+            if (handler == null) return ItemStack.EMPTY;
+            return tryExtractFromNetwork(handler, template.copyWithCount(1));
+        }
+
+        @Override
+        public void returnOne(ItemStack stack) {
+            if (handler == null) return;
+            try (Transaction tx = Transaction.openRoot()) {
+                handler.insert(0, ItemResource.of(stack), 1, tx);
+                tx.commit();
+            }
+        }
     }
 
     // -------------------------------------------------------------------------

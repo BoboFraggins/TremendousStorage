@@ -177,7 +177,7 @@ public class NetworkInventoryPane implements IDialogPane {
                     lastShiftDragSlot = idx;
                 } else {
                     int amount = (button == 1)
-                            ? (int) Math.max(1, Math.min(totalCount, (maxStack + 1) / 2))
+                            ? Math.max(1, (int) Math.min(totalCount, maxStack) / 2)
                             : (int) Math.min(totalCount, maxStack);
                     ClientPacketDistributor.sendToServer(
                             new SatExtractPacket(menu.getNiPos(), target.copyWithCount(1), amount, true));

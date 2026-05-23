@@ -821,7 +821,16 @@ public final class Registration {
     public static final DeferredHolder<Item, MagicHatItem> MAGIC_HAT_ITEM = ITEMS.registerItem(
             "magic_hat", props -> new MagicHatItem(MAGIC_HAT_BLOCK.get(), props), () -> new Item.Properties()
                     .stacksTo(1)
-                    .attributes(net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatItem.DEFAULT_MODIFIERS));
+                    .attributes(net.bobofraggins.tremendousstorage.glamping.magichat.MagicHatItem.DEFAULT_MODIFIERS)
+                    .component(
+                            net.minecraft.core.component.DataComponents.EQUIPPABLE,
+                            net.minecraft.world.item.equipment.Equippable.builder(
+                                            net.minecraft.world.entity.EquipmentSlot.HEAD)
+                                    .setAsset(net.minecraft.resources.ResourceKey.create(
+                                            net.minecraft.world.item.equipment.EquipmentAssets.ROOT_ID,
+                                            net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                                                    TremendousStorage.MODID, "magic_hat")))
+                                    .build()));
 
     public static final DeferredBlock<net.bobofraggins.tremendousstorage.glamping.present.PresentBlock> PRESENT =
             BLOCKS.registerBlock(

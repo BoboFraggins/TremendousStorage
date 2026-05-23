@@ -3,6 +3,7 @@
   "values": [
     "tremendousstorage:barrel",
     "tremendousstorage:ender_barrel",
-    "tremendousstorage:canvas_block"
+    "tremendousstorage:canvas_block",
+    "tremendousstorage:present"
   ]
 }

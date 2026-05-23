@@ -3,21 +3,19 @@ package net.bobofraggins.tremendousstorage.glamping.magichat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.player.PlayerModel;
-import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
-public class MagicHatHelmetLayer extends RenderLayer<AvatarRenderState, PlayerModel> {
+public class MagicHatHelmetLayer<S extends HumanoidRenderState, M extends HumanoidModel<S>> extends RenderLayer<S, M> {
 
-    public MagicHatHelmetLayer(RenderLayerParent<AvatarRenderState, PlayerModel> renderer) {
+    public MagicHatHelmetLayer(RenderLayerParent<S, M> renderer) {
         super(renderer);
     }
 
@@ -26,21 +24,18 @@ public class MagicHatHelmetLayer extends RenderLayer<AvatarRenderState, PlayerMo
             PoseStack poseStack,
             SubmitNodeCollector collector,
             int packedLight,
-            AvatarRenderState renderState,
+            S renderState,
             float yRot,
             float xRot) {
 
-        AbstractClientPlayer player = Minecraft.getInstance().player;
-        if (player == null) return;
-
-        ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
+        ItemStack helmet = renderState.headEquipment;
         if (!(helmet.getItem() instanceof MagicHatItem)) return;
 
         poseStack.pushPose();
         getParentModel().head.translateAndRotate(poseStack);
         poseStack.mulPose(Axis.YP.rotationDegrees(180f));
         poseStack.mulPose(Axis.ZP.rotationDegrees(180f));
-        poseStack.translate(0.0, -0.25, 0.0);
+        poseStack.translate(0.0, 1.0, 0.0);
 
         ItemStackRenderState irs = new ItemStackRenderState();
         Minecraft.getInstance()

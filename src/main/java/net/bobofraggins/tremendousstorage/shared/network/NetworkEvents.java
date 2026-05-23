@@ -107,5 +107,9 @@ public final class NetworkEvents {
                 net.bobofraggins.tremendousstorage.shared.network.BackpackFillCraftingGridPacket.TYPE,
                 net.bobofraggins.tremendousstorage.shared.network.BackpackFillCraftingGridPacket.STREAM_CODEC,
                 net.bobofraggins.tremendousstorage.shared.network.BackpackFillCraftingGridPacket::handle);
+        registrar.playToServer(
+                ChestFillCraftingGridPacket.TYPE,
+                ChestFillCraftingGridPacket.STREAM_CODEC,
+                ChestFillCraftingGridPacket::handle);
     }
 }

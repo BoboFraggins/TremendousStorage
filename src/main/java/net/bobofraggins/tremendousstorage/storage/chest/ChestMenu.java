@@ -1,28 +1,18 @@
 package net.bobofraggins.tremendousstorage.storage.chest;
 
-import java.util.Optional;
 import net.bobofraggins.tremendousstorage.shared.config.TremendousStorageClientConfig;
+import net.bobofraggins.tremendousstorage.shared.crafting.AbstractCraftingUpgradeMenu;
+import net.bobofraggins.tremendousstorage.shared.crafting.CraftingRefillSource;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.inventory.ResultContainer;
-import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 /**
@@ -42,24 +32,11 @@ import net.minecraft.world.level.block.entity.BlockEntity;
  *   <li>[37..45] Player hotbar (9 slots)
  * </ul>
  */
-public class ChestMenu extends AbstractContainerMenu {
+public class ChestMenu extends AbstractCraftingUpgradeMenu {
 
     private final BlockPos pos;
     private final ContainerData data;
-    private final boolean hasCraftingUpgrade;
     private final boolean hasPullerUpgrade;
-
-    // Crafting containers — non-null only when hasCraftingUpgrade is true
-    private final CraftingContainer craftSlots;
-    private final ResultContainer resultSlots;
-    private final ContainerLevelAccess access;
-    private final Player player;
-
-    // Slot index ranges — adjusted per hasCraftingUpgrade
-    private final int invStart;
-    private final int invEnd;
-    private final int hotbarStart;
-    private final int hotbarEnd;
 
     /** Server-side constructor. Uses the default row count. */
     public ChestMenu(int id, Inventory inv, BlockPos pos, ContainerData data, boolean hasCraftingUpgrade) {
@@ -104,65 +81,44 @@ public class ChestMenu extends AbstractContainerMenu {
             boolean hasCraftingUpgrade,
             boolean hasPullerUpgrade,
             int rows) {
-        super(Registration.TREMENDOUS_CHEST_MENU.get(), id);
+        super(
+                Registration.TREMENDOUS_CHEST_MENU.get(),
+                id,
+                inv.player,
+                hasCraftingUpgrade,
+                ContainerLevelAccess.create(inv.player.level(), pos),
+                hasCraftingUpgrade ? 10 : 0,
+                hasCraftingUpgrade ? 37 : 27,
+                hasCraftingUpgrade ? 37 : 27,
+                hasCraftingUpgrade ? 46 : 36);
         this.pos = pos;
         this.data = data;
-        this.hasCraftingUpgrade = hasCraftingUpgrade;
         this.hasPullerUpgrade = hasPullerUpgrade;
-        this.player = inv.player;
-        this.access = ContainerLevelAccess.create(inv.player.level(), pos);
 
-        // When the crafting upgrade is present the CraftingGridPane replaces the blank(20) spacer,
-        // so craftY is 20 px earlier than playerInvY in the no-crafting layout.
         int playerInvY;
-
         if (hasCraftingUpgrade) {
-            this.craftSlots = new TransientCraftingContainer(this, 3, 3);
-            this.resultSlots = new ResultContainer();
-
             int craftY = 29 + rows * 18; // title(17) + blank(7) + inventoryPane gap(5) = 29
-
-            // Slot 0: craft result (row-1 position, x=120 — matches CraftingGridPane.RESULT_LOCAL_Y)
-            addSlot(new RefillResultSlot(inv.player, craftSlots, resultSlots, 0, 120, craftY + 18));
-
-            // Slots 1-9: 3×3 crafting grid
-            for (int row = 0; row < 3; row++) {
-                for (int col = 0; col < 3; col++) {
-                    addSlot(new Slot(craftSlots, col + row * 3, 30 + col * 18, craftY + row * 18));
-                }
-            }
-
-            // Player inventory starts after the crafting pane (3 × 18 + 4 px gap = 58)
+            addCraftingSlots(120, craftY + 18, 30, craftY, 18);
             playerInvY = craftY + 3 * 18 + 4;
-            this.invStart = 10;
-            this.invEnd = 37;
-            this.hotbarStart = 37;
-            this.hotbarEnd = 46;
         } else {
-            this.craftSlots = null;
-            this.resultSlots = null;
             playerInvY = 49 + rows * 18; // title(17) + blank(7) + inventoryPane gap(5) + blank(20) = 49
-            this.invStart = 0;
-            this.invEnd = 27;
-            this.hotbarStart = 27;
-            this.hotbarEnd = 36;
         }
 
         int hotbarY = playerInvY + 58;
-
-        // Player main inventory
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
                 addSlot(new Slot(inv, col + row * 9 + 9, 20 + col * 18, playerInvY + row * 18));
             }
         }
-        // Player hotbar
         for (int col = 0; col < 9; col++) {
             addSlot(new Slot(inv, col, 20 + col * 18, hotbarY));
         }
-
         addDataSlots(data);
     }
+
+    // -------------------------------------------------------------------------
+    // Accessors
+    // -------------------------------------------------------------------------
 
     public BlockPos getPos() {
         return pos;
@@ -172,68 +128,30 @@ public class ChestMenu extends AbstractContainerMenu {
         return data.get(0);
     }
 
-    public boolean hasCraftingUpgrade() {
-        return hasCraftingUpgrade;
-    }
-
     public boolean hasPullerUpgrade() {
         return hasPullerUpgrade;
     }
 
     // -------------------------------------------------------------------------
-    // Crafting
+    // Crafting — primary source
     // -------------------------------------------------------------------------
 
     @Override
-    public void slotsChanged(net.minecraft.world.Container inventory) {
-        if (!hasCraftingUpgrade) return;
-        access.execute((level, p) -> updateCraftResult(this, level, player, craftSlots, resultSlots));
+    protected CraftingRefillSource createPrimarySource(Player player) {
+        return new ChestRefillSource();
     }
 
-    private static void updateCraftResult(
-            AbstractContainerMenu menu,
-            Level level,
-            Player player,
-            CraftingContainer craftSlots,
-            ResultContainer resultSlots) {
-        if (level.isClientSide()) return;
-        CraftingInput input = craftSlots.asCraftInput();
-        ServerPlayer sp = (ServerPlayer) player;
-        ItemStack result = ItemStack.EMPTY;
-        Optional<RecipeHolder<CraftingRecipe>> optional = ((net.minecraft.server.level.ServerLevel) level)
-                .getServer()
-                .getRecipeManager()
-                .getRecipeFor(RecipeType.CRAFTING, input, level);
-        if (optional.isPresent()) {
-            RecipeHolder<CraftingRecipe> holder = optional.get();
-            if (resultSlots.setRecipeUsed(sp, holder)) {
-                ItemStack assembled = holder.value().assemble(input);
-                if (assembled.isItemEnabled(level.enabledFeatures())) result = assembled;
-            }
-        }
-        resultSlots.setItem(0, result);
-        menu.setRemoteSlot(0, result);
-        sp.connection.send(new net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket(
-                menu.containerId, menu.incrementStateId(), 0, result));
-    }
+    // -------------------------------------------------------------------------
+    // Lifecycle
+    // -------------------------------------------------------------------------
 
     @Override
-    public void removed(Player player) {
-        super.removed(player);
-        if (hasCraftingUpgrade) {
-            access.execute((level, p) -> clearContainer(player, craftSlots));
-        }
+    protected void onCraftingMenuRemoved(Player player) {
         if (!player.level().isClientSide()) {
             if (player.level().getBlockEntity(pos) instanceof ChestBlockEntity be) {
                 be.stopOpen(player);
             }
         }
-    }
-
-    @Override
-    public boolean canTakeItemForPickAll(ItemStack stack, Slot slot) {
-        if (hasCraftingUpgrade && slot.container == resultSlots) return false;
-        return super.canTakeItemForPickAll(stack, slot);
     }
 
     @Override
@@ -250,18 +168,12 @@ public class ChestMenu extends AbstractContainerMenu {
         Slot slot = slots.get(index);
         if (slot == null || !slot.hasItem()) return ItemStack.EMPTY;
 
+        if (hasCraftingUpgrade && index == 0) {
+            return quickMoveResult(player, slot);
+        }
+
         ItemStack stack = slot.getItem();
         ItemStack original = stack.copy();
-
-        if (hasCraftingUpgrade && index == 0) {
-            // Craft result → inventory
-            if (!moveItemStackTo(stack, invStart, hotbarEnd, true)) return ItemStack.EMPTY;
-            slot.onQuickCraft(stack, original);
-            if (stack.isEmpty()) slot.setByPlayer(ItemStack.EMPTY);
-            else slot.setChanged();
-            slot.onTake(player, stack);
-            return original;
-        }
 
         if (hasCraftingUpgrade && index >= 1 && index < 10) {
             // Craft grid → inventory
@@ -287,104 +199,25 @@ public class ChestMenu extends AbstractContainerMenu {
     }
 
     // -------------------------------------------------------------------------
-    // Craft-grid auto-refill
+    // Chest refill source
     // -------------------------------------------------------------------------
 
-    private class RefillResultSlot extends ResultSlot {
-        RefillResultSlot(
-                net.minecraft.world.entity.player.Player p,
-                CraftingContainer craft,
-                net.minecraft.world.inventory.ResultContainer result,
-                int idx,
-                int x,
-                int y) {
-            super(p, craft, result, idx, x, y);
+    private class ChestRefillSource implements CraftingRefillSource {
+        @Override
+        public ItemStack extractOne(ItemStack template) {
+            if (!(player.level().getBlockEntity(pos) instanceof ChestBlockEntity be)) return ItemStack.EMPTY;
+            for (int t = 0; t < be.typeCount(); t++) {
+                if (ItemStack.isSameItemSameComponents(be.getType(t), template)) {
+                    return be.extract(t, 1, false);
+                }
+            }
+            return ItemStack.EMPTY;
         }
 
         @Override
-        public void onTake(net.minecraft.world.entity.player.Player player, ItemStack stack) {
-            ItemStack[] snapshot = new ItemStack[9];
-            for (int i = 0; i < 9; i++) snapshot[i] = craftSlots.getItem(i).copy();
-            super.onTake(player, stack);
-            refillCraftGridFromChest(player, snapshot);
-            refillCraftGridFromInventory(player, snapshot);
-            if (!player.level().isClientSide()) {
-                for (int i = 1; i <= 9; i++) setRemoteSlot(i, ItemStack.EMPTY);
-            }
+        public void returnOne(ItemStack stack) {
+            if (!(player.level().getBlockEntity(pos) instanceof ChestBlockEntity be)) return;
+            be.insert(stack, 1, false);
         }
-    }
-
-    private void refillCraftGridFromChest(net.minecraft.world.entity.player.Player player, ItemStack[] snapshot) {
-        if (player.level().isClientSide()) return;
-        if (!(player.level().getBlockEntity(pos) instanceof ChestBlockEntity be)) return;
-        boolean anyRefilled = false;
-        for (int i = 0; i < 9; i++) {
-            ItemStack current = craftSlots.getItem(i);
-            ItemStack snap = snapshot[i];
-            if (snap.isEmpty()) continue;
-            if (current.isEmpty()) {
-                for (int t = 0; t < be.typeCount(); t++) {
-                    if (ItemStack.isSameItemSameComponents(be.getType(t), snap)) {
-                        ItemStack extracted = be.extract(t, 1, false);
-                        if (!extracted.isEmpty()) {
-                            craftSlots.setItem(i, extracted);
-                            anyRefilled = true;
-                        }
-                        break;
-                    }
-                }
-            } else {
-                ItemStack remainder = snap.getItem().getCraftingRemainder(snap).create();
-                if (!remainder.isEmpty() && ItemStack.isSameItemSameComponents(current, remainder)) {
-                    for (int t = 0; t < be.typeCount(); t++) {
-                        if (ItemStack.isSameItemSameComponents(be.getType(t), snap)) {
-                            ItemStack extracted = be.extract(t, 1, false);
-                            if (!extracted.isEmpty()) {
-                                be.insert(current.copyWithCount(1), 1, false);
-                                craftSlots.setItem(i, extracted);
-                                anyRefilled = true;
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        if (anyRefilled) slotsChanged(craftSlots);
-    }
-
-    private void refillCraftGridFromInventory(net.minecraft.world.entity.player.Player player, ItemStack[] snapshot) {
-        if (player.level().isClientSide()) return;
-        boolean anyRefilled = false;
-        for (int i = 0; i < 9; i++) {
-            ItemStack current = craftSlots.getItem(i);
-            ItemStack snap = snapshot[i];
-            if (snap.isEmpty()) continue;
-            if (current.isEmpty()) {
-                for (int j = 0; j < player.getInventory().getContainerSize(); j++) {
-                    ItemStack inv = player.getInventory().getItem(j);
-                    if (!inv.isEmpty() && ItemStack.isSameItemSameComponents(inv, snap)) {
-                        craftSlots.setItem(i, inv.split(1));
-                        anyRefilled = true;
-                        break;
-                    }
-                }
-            } else {
-                ItemStack remainder = snap.getItem().getCraftingRemainder(snap).create();
-                if (!remainder.isEmpty() && ItemStack.isSameItemSameComponents(current, remainder)) {
-                    for (int j = 0; j < player.getInventory().getContainerSize(); j++) {
-                        ItemStack inv = player.getInventory().getItem(j);
-                        if (!inv.isEmpty() && ItemStack.isSameItemSameComponents(inv, snap)) {
-                            ItemStack extracted = inv.split(1);
-                            if (!player.addItem(current)) player.drop(current, false);
-                            craftSlots.setItem(i, extracted);
-                            anyRefilled = true;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        if (anyRefilled) slotsChanged(craftSlots);
     }
 }
