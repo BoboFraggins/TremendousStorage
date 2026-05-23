@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
+import net.bobofraggins.tremendousstorage.storage.networkinterface.NetworkInterfaceBlockEntity;
 import net.bobofraggins.tremendousstorage.storage.tube.NetworkConnector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -148,13 +149,20 @@ public class AccessTerminalBlock extends BaseEntityBlock implements NetworkConne
         if (level.isClientSide()) return InteractionResult.SUCCESS;
 
         BlockPos niPos = AccessTerminalBFS.findNI((ServerLevel) level, pos);
+        if (niPos == null) return InteractionResult.CONSUME;
+        if (!(level.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni
+                && ni.isNetworkValid()
+                && ni.isPowered())) {
+            return InteractionResult.CONSUME;
+        }
+
         boolean craftingUpgrade =
                 level.getBlockEntity(pos) instanceof AccessTerminalBlockEntity be && be.hasCraftingUpgrade();
 
         player.openMenu(new AccessTerminalMenu.Provider(pos, niPos, craftingUpgrade), buf -> {
             buf.writeBlockPos(pos);
-            buf.writeBoolean(niPos != null);
-            if (niPos != null) buf.writeBlockPos(niPos);
+            buf.writeBoolean(true);
+            buf.writeBlockPos(niPos);
             buf.writeBoolean(craftingUpgrade);
         });
         return InteractionResult.SUCCESS;
