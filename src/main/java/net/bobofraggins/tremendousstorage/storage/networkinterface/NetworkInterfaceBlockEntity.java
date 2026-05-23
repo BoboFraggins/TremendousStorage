@@ -296,9 +296,6 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         if (!simulate && available > 0) {
             energyStored -= available;
             super.setChanged();
-            if (level != null) {
-                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-            }
         }
         return available;
     }
@@ -307,6 +304,11 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
      * Receives energy into the NI's buffer. Called by external energy sources
      * (Stirling Engine push, energy pipe injection, etc.).
      * Returns the amount actually accepted.
+     *
+     * <p>Does NOT call {@link #setChanged()} (which would null the cached scan) or
+     * {@code sendBlockUpdated} (which would cascade through adjacent tubes back to
+     * {@link NetworkInterfaceBlock#neighborChanged} and null the scan every tick).
+     * Energy-level changes are not topology changes and do not require a BFS rebuild.
      */
     public int receiveEnergy(int maxReceive, boolean simulate) {
         int space = MAX_ENERGY - energyStored;
@@ -314,9 +316,6 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         if (!simulate && accepted > 0) {
             energyStored += accepted;
             super.setChanged();
-            if (level != null) {
-                level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-            }
         }
         return accepted;
     }
