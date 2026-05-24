@@ -55,7 +55,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     protected boolean hasPullerUpgrade = false;
     protected int pullerSides = 0;
     protected int pullerTickCounter = 0;
-    protected Priority priority = Priority.NORMAL;
+    protected Priority priority = Priority.HIGH;
 
     private static final int PULL_TICKS = 4;
     private static final int PULL_AMOUNT = 4;
@@ -588,7 +588,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
             compactTier2Item = input.read("Compact2", ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
             compactTier2Ratio = input.getIntOr("Compact2Ratio", 0);
         }
-        priority = Priority.fromOrdinal(input.getIntOr(TAG_PRIORITY, 0));
+        priority = Priority.fromOrdinal(input.getIntOr(TAG_PRIORITY, Priority.HIGH.ordinal()));
     }
 
     // -------------------------------------------------------------------------
