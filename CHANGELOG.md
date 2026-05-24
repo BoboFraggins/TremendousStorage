@@ -3,7 +3,7 @@
 ## 26.1.2.2
 
 * Adjust default priorities of storage containers
-* Add Curio slot for the Personal Access Terminal
+* Add Curio slots for the Personal Access Terminal and Picnic Basket
 * Move some strings out of code and into the US English localization file
 * Add clear crafting grid button
 * Add error when attempting to upgrade a non-netherite tier Wireless Hub to work interdimensionally
