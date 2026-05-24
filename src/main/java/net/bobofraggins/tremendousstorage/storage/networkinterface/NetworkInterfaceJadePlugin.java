@@ -1,5 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.networkinterface;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -15,7 +16,8 @@ import snownee.jade.api.config.IPluginConfig;
 /**
  * Jade (WAILA) plugin for the Network Interface.
  *
- * <p>Appends the network validity status.
+ * <p>Shows network power draw, active/inactive status, and a "Network Invalid" warning when
+ * more than one Network Interface is present on the same network.
  */
 @WailaPlugin
 public class NetworkInterfaceJadePlugin implements IWailaPlugin {
@@ -24,6 +26,8 @@ public class NetworkInterfaceJadePlugin implements IWailaPlugin {
             Identifier.fromNamespaceAndPath("tremendousstorage", "network_interface_status");
 
     private static final String KEY_VALID = "NetworkValid";
+    private static final String KEY_POWERED = "Powered";
+    private static final String KEY_FE_PER_TICK = "FePerTick";
 
     @Override
     public void register(IWailaCommonRegistration registration) {
@@ -42,6 +46,9 @@ public class NetworkInterfaceJadePlugin implements IWailaPlugin {
         public void appendServerData(CompoundTag data, BlockAccessor accessor) {
             if (!(accessor.getBlockEntity() instanceof NetworkInterfaceBlockEntity be)) return;
             data.putBoolean(KEY_VALID, be.isNetworkValid());
+            data.putBoolean(KEY_POWERED, be.isPowered());
+            NetworkScanResult scan = be.getScan();
+            data.putInt(KEY_FE_PER_TICK, scan != null ? scan.totalFePerTick() : be.getBaseFePerTick());
         }
 
         @Override
@@ -57,9 +64,23 @@ public class NetworkInterfaceJadePlugin implements IWailaPlugin {
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
             CompoundTag data = accessor.getServerData();
             boolean valid = data.getBooleanOr(KEY_VALID, false);
+
             if (!valid) {
                 tooltip.add(Component.translatable("jade.tremendousstorage.network_interface.invalid")
-                        .withStyle(net.minecraft.ChatFormatting.RED));
+                        .withStyle(ChatFormatting.RED));
+                return;
+            }
+
+            int fePerTick = data.getIntOr(KEY_FE_PER_TICK, 0);
+            tooltip.add(Component.translatable("jade.tremendousstorage.network_interface.power_draw", fePerTick));
+
+            boolean powered = data.getBooleanOr(KEY_POWERED, false);
+            if (powered) {
+                tooltip.add(Component.translatable("jade.tremendousstorage.network_interface.active")
+                        .withStyle(ChatFormatting.GREEN));
+            } else {
+                tooltip.add(Component.translatable("jade.tremendousstorage.network_interface.inactive")
+                        .withStyle(ChatFormatting.RED));
             }
         }
 
