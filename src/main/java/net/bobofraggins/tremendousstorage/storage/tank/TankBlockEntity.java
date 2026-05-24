@@ -1,5 +1,6 @@
 package net.bobofraggins.tremendousstorage.storage.tank;
 
+import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.shared.register.BETypeHelper;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.bobofraggins.tremendousstorage.shared.ui.TankSettingsMenu;
@@ -77,6 +78,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
 
     private boolean voidExcess = false;
     private StorageTier tier = StorageTier.WOOD;
+    private Priority priority = Priority.HIGH;
 
     private boolean hasPullerUpgrade = false;
     private boolean hasMagnetUpgrade = false;
@@ -148,6 +150,15 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
 
     public void setVoidExcess(boolean voidExcess) {
         this.voidExcess = voidExcess;
+        setChanged();
+    }
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(Priority priority) {
+        this.priority = priority;
         setChanged();
     }
 
@@ -436,7 +447,11 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
         ContainerData data = new ContainerData() {
             @Override
             public int get(int index) {
-                return index == 0 ? (voidExcess ? 1 : 0) : 0;
+                return switch (index) {
+                    case 0 -> voidExcess ? 1 : 0;
+                    case 1 -> priority.ordinal();
+                    default -> 0;
+                };
             }
 
             @Override
@@ -444,7 +459,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
 
             @Override
             public int getCount() {
-                return 1;
+                return 2;
             }
         };
         return new TankSettingsMenu(id, inv, worldPosition, data, transferContainer, hasPullerUpgrade);
@@ -458,6 +473,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     private static final String TAG_AMOUNT = "Amount";
     private static final String TAG_VOID_EXCESS = "VoidExcess";
     private static final String TAG_TIER = "Tier";
+    private static final String TAG_PRIORITY = "Priority";
     private static final String TAG_TRANSFER = "Transfer";
 
     @Override
@@ -469,6 +485,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
         output.putLong(TAG_AMOUNT, amount);
         output.putBoolean(TAG_VOID_EXCESS, voidExcess);
         output.putString(TAG_TIER, tier.getId());
+        output.putInt(TAG_PRIORITY, priority.ordinal());
         if (hasMagnetUpgrade) output.putBoolean("MagnetUpgrade", true);
         if (hasPullerUpgrade) {
             output.putBoolean("PullerUpgrade", true);
@@ -486,6 +503,7 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
         super.loadAdditional(input);
         voidExcess = input.getBooleanOr(TAG_VOID_EXCESS, false);
         tier = StorageTier.fromId(input.getStringOr(TAG_TIER, ""));
+        priority = Priority.fromOrdinal(input.getIntOr(TAG_PRIORITY, Priority.HIGH.ordinal()));
         hasMagnetUpgrade = input.getBooleanOr("MagnetUpgrade", false);
         hasPullerUpgrade = input.getBooleanOr("PullerUpgrade", false);
         pullerSides = input.getIntOr("PullerSides", 0);

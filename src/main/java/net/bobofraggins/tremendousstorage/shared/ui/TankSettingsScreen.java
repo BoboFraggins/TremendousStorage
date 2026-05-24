@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
 import net.bobofraggins.tremendousstorage.shared.network.ClearTankContentsPacket;
+import net.bobofraggins.tremendousstorage.shared.network.SetPriorityPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetVoidExcessPacket;
 import net.bobofraggins.tremendousstorage.storage.tank.ClearTankPane;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -51,6 +52,9 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
         super(menu, inv, title, dialog_.totalWidth(), dialog_.totalHeight());
         dialog = dialog_;
 
+        PriorityPane priorityPane = new PriorityPane(
+                () -> menu.getPriority().ordinal(),
+                p -> ClientPacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p)));
         VoidExcessPane voidPane = new VoidExcessPane(
                 menu::isVoidExcess,
                 () -> ClientPacketDistributor.sendToServer(
@@ -58,9 +62,9 @@ public class TankSettingsScreen extends AbstractContainerScreen<TankSettingsMenu
         ClearTankPane clearPane = new ClearTankPane(
                 () -> ClientPacketDistributor.sendToServer(new ClearTankContentsPacket(menu.getPos())));
         if (menu.hasPullerUpgrade()) {
-            configDrawer = new ConfigDrawer(voidPane, clearPane, new PullerSidesPane(menu.getPos()));
+            configDrawer = new ConfigDrawer(priorityPane, voidPane, clearPane, new PullerSidesPane(menu.getPos()));
         } else {
-            configDrawer = new ConfigDrawer(voidPane, clearPane);
+            configDrawer = new ConfigDrawer(priorityPane, voidPane, clearPane);
         }
     }
 

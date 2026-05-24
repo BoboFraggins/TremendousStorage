@@ -367,6 +367,8 @@ public final class NetworkInterfaceBFS {
         if (neighborBE instanceof FilingCabinetBlockEntity fc) return fc.getPriority();
         if (neighborBE instanceof ChestBlockEntity bs) return bs.getPriority();
         if (neighborBE instanceof BarrelBlockEntity bb) return bb.getPriority();
+        if (neighborBE instanceof net.bobofraggins.tremendousstorage.storage.tank.TankBlockEntity tank)
+            return tank.getPriority();
         return Priority.NORMAL;
     }
 }

@@ -1,5 +1,6 @@
 package net.bobofraggins.tremendousstorage.shared.ui;
 
+import net.bobofraggins.tremendousstorage.shared.priority.Priority;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -101,7 +102,7 @@ public class TankSettingsMenu extends AbstractContainerMenu {
 
     /** Client-side constructor — reads BlockPos and puller flag from network buffer. */
     public TankSettingsMenu(int windowId, Inventory inv, FriendlyByteBuf buf) {
-        this(windowId, inv, buf.readBlockPos(), new SimpleContainerData(1), new SimpleContainer(2), buf.readBoolean());
+        this(windowId, inv, buf.readBlockPos(), new SimpleContainerData(2), new SimpleContainer(2), buf.readBoolean());
     }
 
     public BlockPos getPos() {
@@ -110,6 +111,10 @@ public class TankSettingsMenu extends AbstractContainerMenu {
 
     public boolean isVoidExcess() {
         return data.get(0) == 1;
+    }
+
+    public Priority getPriority() {
+        return Priority.fromOrdinal(data.get(1));
     }
 
     public boolean hasPullerUpgrade() {
