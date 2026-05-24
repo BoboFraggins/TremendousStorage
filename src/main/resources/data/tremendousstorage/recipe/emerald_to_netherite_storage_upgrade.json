@@ -1,14 +1,9 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "NNN",
-    "NBN",
-    "NNN"
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "tremendousstorage:base_upgrade",
+    "minecraft:netherite_ingot"
   ],
-  "key": {
-    "N": "minecraft:netherite_ingot",
-    "B": "tremendousstorage:base_upgrade"
-  },
   "result": {
     "id": "tremendousstorage:emerald_to_netherite_storage_upgrade",
     "count": 1
