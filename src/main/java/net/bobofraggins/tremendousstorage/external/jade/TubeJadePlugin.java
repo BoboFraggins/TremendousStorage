@@ -44,6 +44,7 @@ public class TubeJadePlugin implements IWailaPlugin {
         reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, AccessTerminalBlockEntity.class);
         reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, NetworkInterfaceBlockEntity.class);
         reg.registerBlockDataProvider(StorageTierJadeDataProvider.INSTANCE, StirlingEngineBlockEntity.class);
+        reg.registerBlockDataProvider(StirlingEngineJadeDataProvider.INSTANCE, StirlingEngineBlockEntity.class);
     }
 
     @Override
@@ -59,5 +60,6 @@ public class TubeJadePlugin implements IWailaPlugin {
         reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, AccessTerminalBlock.class);
         reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, NetworkInterfaceBlock.class);
         reg.registerBlockComponent(StorageTierJadeComponentProvider.INSTANCE, StirlingEngineBlock.class);
+        reg.registerBlockComponent(StirlingEngineJadeComponentProvider.INSTANCE, StirlingEngineBlock.class);
     }
 }

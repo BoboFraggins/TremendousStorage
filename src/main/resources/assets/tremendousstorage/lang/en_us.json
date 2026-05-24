@@ -96,6 +96,7 @@
   "screen.tremendousstorage.haarp.thunderstorm": "Thunderstorm",
   "block.tremendousstorage.stirling_engine": "Stirling Engine",
   "item.tremendousstorage.stirling_engine": "Stirling Engine",
+  "jade.tremendousstorage.stirling_engine.generating": "Generating %1$s FE/t",
   "jade.tremendousstorage.stirling_engine.hint": "Place Above Heat Source",
   "jade.tremendousstorage.stirling_engine.stored": "%1$s / %2$s FE",
   "jade.tremendousstorage.not_enough_power": "Not Enough Power",

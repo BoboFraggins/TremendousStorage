@@ -4,6 +4,7 @@
 
 * Add storage counts to storage inventory screens
 * Make durability repair of lazurite tools with an ingot be based off of original ingredients rather than automatically 100%
+* Add power generation indiciator to Stirling Engine
 
 ## 26.1.2.2
 
