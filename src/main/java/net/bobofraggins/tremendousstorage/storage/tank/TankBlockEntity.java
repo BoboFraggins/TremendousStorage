@@ -436,9 +436,9 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     protected String buildSuffix(boolean ender) {
         return new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
                 .tier(tier)
-                .addIf(ender, "Ender")
-                .addIf(hasMagnetUpgrade, "Magnet")
-                .addIf(hasPullerUpgrade, "Puller")
+                .addIf(ender, "upgrade.tremendousstorage.ender")
+                .addIf(hasMagnetUpgrade, "upgrade.tremendousstorage.magnet")
+                .addIf(hasPullerUpgrade, "upgrade.tremendousstorage.puller")
                 .toString();
     }
 

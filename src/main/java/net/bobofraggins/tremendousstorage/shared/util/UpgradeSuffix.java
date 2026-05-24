@@ -1,6 +1,7 @@
 package net.bobofraggins.tremendousstorage.shared.util;
 
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
+import net.minecraft.network.chat.Component;
 
 /**
  * Fluent builder for the upgrade-label suffix appended to block names.
@@ -9,8 +10,8 @@ import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
  * <pre>{@code
  * String suffix = new UpgradeSuffix()
  *         .tier(tier)
- *         .addIf(hasCraftingUpgrade, "Crafting")
- *         .addIf(hasMagnetUpgrade,   "Magnet")
+ *         .addIf(hasCraftingUpgrade, "upgrade.tremendousstorage.crafting")
+ *         .addIf(hasMagnetUpgrade,   "upgrade.tremendousstorage.magnet")
  *         .toString(); // "" or " (Copper/Crafting/Magnet)"
  * }</pre>
  */
@@ -24,9 +25,13 @@ public final class UpgradeSuffix {
         return this;
     }
 
-    /** Appends {@code label} when {@code condition} is {@code true}. */
-    public UpgradeSuffix addIf(boolean condition, String label) {
-        if (condition) append(label);
+    /**
+     * Resolves {@code translationKey} and appends it when {@code condition} is {@code true}.
+     *
+     * <p>Pass a full i18n key such as {@code "upgrade.tremendousstorage.crafting"}.
+     */
+    public UpgradeSuffix addIf(boolean condition, String translationKey) {
+        if (condition) append(Component.translatable(translationKey).getString());
         return this;
     }
 

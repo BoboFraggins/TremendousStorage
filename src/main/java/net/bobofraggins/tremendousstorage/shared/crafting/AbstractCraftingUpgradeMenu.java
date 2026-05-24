@@ -198,6 +198,47 @@ public abstract class AbstractCraftingUpgradeMenu extends AbstractContainerMenu 
     protected void onCraftingMenuRemoved(Player player) {}
 
     // -------------------------------------------------------------------------
+    // Clear-grid action
+    // -------------------------------------------------------------------------
+
+    /**
+     * Clears all nine crafting grid slots. When {@code toStorage} is {@code true} each
+     * item is first offered to {@link #returnToStorage}; any leftover (and all items when
+     * {@code toStorage} is {@code false}) are added to the player's inventory, dropping on
+     * the ground if the inventory is full.
+     *
+     * <p>Called server-side by
+     * {@link net.bobofraggins.tremendousstorage.shared.network.ClearCraftingGridPacket}.
+     */
+    public void clearCraftingGrid(Player player, boolean toStorage) {
+        if (!hasCraftingUpgrade) return;
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = craftSlots.getItem(i);
+            if (stack.isEmpty()) continue;
+            craftSlots.setItem(i, ItemStack.EMPTY);
+            ItemStack remainder = toStorage ? returnToStorage(player, stack) : stack;
+            if (!remainder.isEmpty() && !player.addItem(remainder)) {
+                player.drop(remainder, false);
+            }
+        }
+        slotsChanged(craftSlots);
+    }
+
+    /**
+     * Attempts to return {@code stack} to the backing storage for this menu.
+     *
+     * <p>The default implementation cannot return items to storage and returns
+     * {@code stack} unchanged so the caller falls back to player inventory.
+     * Subclasses (chest, backpack, access terminal) override this.
+     *
+     * @return the leftover items that could not be stored (may be {@code stack}
+     *         unchanged, a smaller stack, or {@link ItemStack#EMPTY})
+     */
+    protected ItemStack returnToStorage(Player player, ItemStack stack) {
+        return stack;
+    }
+
+    // -------------------------------------------------------------------------
     // Shared result-slot shift-click logic
     // -------------------------------------------------------------------------
 

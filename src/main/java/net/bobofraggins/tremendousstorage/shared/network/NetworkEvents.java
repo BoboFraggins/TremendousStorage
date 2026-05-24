@@ -111,5 +111,7 @@ public final class NetworkEvents {
                 ChestFillCraftingGridPacket.TYPE,
                 ChestFillCraftingGridPacket.STREAM_CODEC,
                 ChestFillCraftingGridPacket::handle);
+        registrar.playToServer(
+                ClearCraftingGridPacket.TYPE, ClearCraftingGridPacket.STREAM_CODEC, ClearCraftingGridPacket::handle);
     }
 }

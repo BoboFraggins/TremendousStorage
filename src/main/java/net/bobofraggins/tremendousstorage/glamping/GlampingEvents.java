@@ -27,10 +27,11 @@ public class GlampingEvents {
         ItemStack stack = event.getCrafting();
         if (!stack.is(GlampingRegistration.TENT.get().asItem())) return;
 
-        String playerName = event.getEntity().getName().getString();
+        Component playerName = event.getEntity().getName();
         stack.set(
                 DataComponents.CUSTOM_NAME,
-                Component.literal(playerName + "'s Tent").withStyle(s -> s.withItalic(false)));
+                Component.translatable("event.tremendousstorage.tent_name", playerName)
+                        .withStyle(s -> s.withItalic(false)));
     }
 
     /** Beds in the Glamping Dimension are always usable, regardless of time of day or nearby mobs. */

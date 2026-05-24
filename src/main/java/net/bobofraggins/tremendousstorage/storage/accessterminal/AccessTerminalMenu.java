@@ -274,6 +274,27 @@ public class AccessTerminalMenu extends AbstractCraftingUpgradeMenu {
     }
 
     // -------------------------------------------------------------------------
+    // Clear-grid — return to network storage
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected ItemStack returnToStorage(Player player, ItemStack stack) {
+        if (niPos == null) return stack;
+        Level niLevel = getNiLevel(player);
+        if (!(niLevel.getBlockEntity(niPos) instanceof NetworkInterfaceBlockEntity ni)) return stack;
+        ResourceHandler<ItemResource> handler = ni.getItemHandler();
+        if (handler == null) return stack;
+        ItemResource resource = ItemResource.of(stack);
+        int inserted;
+        try (Transaction tx = Transaction.openRoot()) {
+            inserted = handler.insert(0, resource, stack.getCount(), tx);
+            tx.commit();
+        }
+        if (inserted > 0) ni.markContentsDirty();
+        return inserted >= stack.getCount() ? ItemStack.EMPTY : stack.copyWithCount(stack.getCount() - inserted);
+    }
+
+    // -------------------------------------------------------------------------
     // Lifecycle
     // -------------------------------------------------------------------------
 

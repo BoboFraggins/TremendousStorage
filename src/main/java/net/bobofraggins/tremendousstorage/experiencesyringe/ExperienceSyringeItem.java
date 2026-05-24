@@ -111,8 +111,9 @@ public class ExperienceSyringeItem extends Item {
         int stored = stack.getOrDefault(Registration.EXPERIENCE_SYRINGE_STORED_XP, 0);
         int storedMb = xpToMb(stored);
         int capacityMb = xpToMb(CAPACITY);
-        tooltipAdder.accept(Component.literal(storedMb + " / " + capacityMb + " mB  (" + stored + " XP)")
-                .withStyle(stored == 0 ? ChatFormatting.DARK_GRAY : ChatFormatting.GREEN));
+        tooltipAdder.accept(
+                Component.translatable("item.tremendousstorage.experience_syringe.stored", storedMb, capacityMb, stored)
+                        .withStyle(stored == 0 ? ChatFormatting.DARK_GRAY : ChatFormatting.GREEN));
     }
 
     @Override

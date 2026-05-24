@@ -11,6 +11,7 @@ import net.bobofraggins.tremendousstorage.glamping.picnicbasket.PicnicBasketBloc
 import net.bobofraggins.tremendousstorage.glamping.picnicbasket.SetAutoFeedPacket;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
+import net.bobofraggins.tremendousstorage.shared.network.ClearCraftingGridPacket;
 import net.bobofraggins.tremendousstorage.shared.network.LocalStorageInteractPacket;
 import net.bobofraggins.tremendousstorage.shared.network.QuickStackPacket;
 import net.bobofraggins.tremendousstorage.shared.network.SetPriorityPacket;
@@ -51,6 +52,10 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
     private final LocalInventoryPane inventoryPane;
     private final Dialog dialog;
     private final ConfigDrawer configDrawer;
+
+    @Nullable
+    private final CraftingGridPane craftingGridPane;
+
     private SearchBoxWidget searchBox;
 
     @Nullable
@@ -62,11 +67,13 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
     public ChestScreen(ChestMenu menu, Inventory inv, Component title) {
         LocalInventoryPane inventoryPane_ = new LocalInventoryPane();
         Dialog dialog_;
+        CraftingGridPane craftingGridPane_ = null;
         if (menu.hasCraftingUpgrade()) {
+            craftingGridPane_ = new CraftingGridPane();
             dialog_ = new Dialog(
                     Dialog.blankPane(PlayerInventoryPane.WIDTH, 7),
                     inventoryPane_,
-                    new CraftingGridPane(),
+                    craftingGridPane_,
                     new PlayerInventoryPane());
         } else {
             dialog_ = new Dialog(
@@ -78,6 +85,7 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
         super(menu, inv, title, dialog_.totalWidth(), dialog_.totalHeight());
         inventoryPane = inventoryPane_;
         dialog = dialog_;
+        craftingGridPane = craftingGridPane_;
         List<IDialogPane> drawerPanes = new java.util.ArrayList<>();
         drawerPanes.add(new PriorityPane(
                 menu::getPriority, p -> ClientPacketDistributor.sendToServer(new SetPriorityPacket(menu.getPos(), p))));
@@ -143,6 +151,29 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
                 Identifier.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack"),
                 Identifier.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack_focused"),
                 () -> ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false))));
+
+        if (craftingGridPane != null) {
+            int btnX = leftPos + craftingGridPane.clearButtonLocalX();
+            int btnY = dialog.getPaneAbsY(2);
+            addRenderableWidget(new PressableIconButton(
+                    btnX,
+                    btnY,
+                    CraftingGridPane.BUTTON_SIZE,
+                    CraftingGridPane.BUTTON_SIZE,
+                    Identifier.fromNamespaceAndPath("tremendousstorage", "widget/button_clear"),
+                    Identifier.fromNamespaceAndPath("tremendousstorage", "widget/button_clear_focused"),
+                    () -> {
+                        boolean shift = com.mojang.blaze3d.platform.InputConstants.isKeyDown(
+                                        net.minecraft.client.Minecraft.getInstance()
+                                                .getWindow(),
+                                        com.mojang.blaze3d.platform.InputConstants.KEY_LSHIFT)
+                                || com.mojang.blaze3d.platform.InputConstants.isKeyDown(
+                                        net.minecraft.client.Minecraft.getInstance()
+                                                .getWindow(),
+                                        com.mojang.blaze3d.platform.InputConstants.KEY_RSHIFT);
+                        ClientPacketDistributor.sendToServer(new ClearCraftingGridPacket(!shift));
+                    }));
+        }
     }
 
     @Override
@@ -214,6 +245,18 @@ public class ChestScreen extends AbstractContainerScreen<ChestMenu> {
         if (QuickStackClientEvents.QUICK_STACK != null && QuickStackClientEvents.QUICK_STACK.matches(event)) {
             ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getPos(), false));
             return true;
+        }
+        if (menu.hasCraftingUpgrade()) {
+            if (QuickStackClientEvents.CLEAR_GRID_TO_STORAGE != null
+                    && QuickStackClientEvents.CLEAR_GRID_TO_STORAGE.matches(event)) {
+                ClientPacketDistributor.sendToServer(new ClearCraftingGridPacket(true));
+                return true;
+            }
+            if (QuickStackClientEvents.CLEAR_GRID_TO_INVENTORY != null
+                    && QuickStackClientEvents.CLEAR_GRID_TO_INVENTORY.matches(event)) {
+                ClientPacketDistributor.sendToServer(new ClearCraftingGridPacket(false));
+                return true;
+            }
         }
         return super.keyPressed(event);
     }

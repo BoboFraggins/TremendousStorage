@@ -245,7 +245,9 @@ public class NetworkInterfaceScreen extends AbstractContainerScreen<NetworkInter
 
         // Empty state
         if (entries.isEmpty()) {
-            String emptyMsg = "No blocks connected";
+            String emptyMsg = net.minecraft.network.chat.Component.translatable(
+                            "screen.tremendousstorage.network_interface.no_blocks")
+                    .getString();
             graphics.text(
                     font, emptyMsg, x + (BG_WIDTH - font.width(emptyMsg)) / 2, y + LIST_Y_START + 4, 0xFF808080, false);
         }

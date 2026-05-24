@@ -19,6 +19,12 @@ public final class QuickStackClientEvents {
     /** Keybind to cycle the network grid sort mode while a storage terminal is open. Unbound by default. */
     public static MouseAwareKeyMapping CYCLE_SORT;
 
+    /** Keybind to clear the crafting grid back to storage while a crafting upgrade screen is open. Default: X. */
+    public static MouseAwareKeyMapping CLEAR_GRID_TO_STORAGE;
+
+    /** Keybind to clear the crafting grid to the player's inventory. Unbound by default. */
+    public static MouseAwareKeyMapping CLEAR_GRID_TO_INVENTORY;
+
     /** Returns true when {@link #QUICK_STACK} is set to {@code button} and that mouse button was pressed. */
     public static boolean quickStackMatchesMouse(int button) {
         return QUICK_STACK != null && QUICK_STACK.matchesMouse(button);
@@ -48,6 +54,24 @@ public final class QuickStackClientEvents {
                 GLFW.GLFW_KEY_UNKNOWN,
                 TremendousStorageKeys.CATEGORY);
         event.register(CYCLE_SORT);
+
+        CLEAR_GRID_TO_STORAGE = new MouseAwareKeyMapping(
+                "key.tremendousstorage.clear_grid_to_storage",
+                KeyConflictContext.GUI,
+                KeyModifier.NONE,
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_X,
+                TremendousStorageKeys.CATEGORY);
+        event.register(CLEAR_GRID_TO_STORAGE);
+
+        CLEAR_GRID_TO_INVENTORY = new MouseAwareKeyMapping(
+                "key.tremendousstorage.clear_grid_to_inventory",
+                KeyConflictContext.GUI,
+                KeyModifier.NONE,
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_UNKNOWN,
+                TremendousStorageKeys.CATEGORY);
+        event.register(CLEAR_GRID_TO_INVENTORY);
     }
 
     /** {@link KeyMapping} subclass that exposes a mouse-button match check via the protected {@code key} field. */

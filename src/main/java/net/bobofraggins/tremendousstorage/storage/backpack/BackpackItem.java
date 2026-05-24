@@ -51,9 +51,9 @@ public class BackpackItem extends BlockItem {
         var tag = data != null ? data.copyTagWithoutId() : null;
         String suffix = new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
                 .tier(contents.tier())
-                .addIf(contents.hasCraftingUpgrade(), "Crafting")
-                .addIf(tag != null && tag.getBooleanOr("MagnetUpgrade", false), "Magnet")
-                .addIf(tag != null && tag.getBooleanOr("PullerUpgrade", false), "Puller")
+                .addIf(contents.hasCraftingUpgrade(), "upgrade.tremendousstorage.crafting")
+                .addIf(tag != null && tag.getBooleanOr("MagnetUpgrade", false), "upgrade.tremendousstorage.magnet")
+                .addIf(tag != null && tag.getBooleanOr("PullerUpgrade", false), "upgrade.tremendousstorage.puller")
                 .toString();
         return suffix.isEmpty() ? base : Component.empty().append(base).append(suffix);
     }

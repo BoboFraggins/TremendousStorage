@@ -81,7 +81,9 @@ public class SearchBoxWidget {
 
         // Hint text
         if (editBox.getValue().isEmpty() && !editBox.isFocused()) {
-            graphics.text(font, "Search...", bx + MARGIN, by + (HEIGHT - font.lineHeight) / 2 + 1, 0xFFAAAAAA, false);
+            String hint = net.minecraft.network.chat.Component.translatable("screen.tremendousstorage.search_hint")
+                    .getString();
+            graphics.text(font, hint, bx + MARGIN, by + (HEIGHT - font.lineHeight) / 2 + 1, 0xFFAAAAAA, false);
         }
     }
 }

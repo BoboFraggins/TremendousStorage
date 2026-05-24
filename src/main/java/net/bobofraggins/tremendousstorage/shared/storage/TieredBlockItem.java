@@ -59,13 +59,13 @@ public class TieredBlockItem extends BlockItem {
         }
         return new UpgradeSuffix()
                 .tier(tier)
-                .addIf(ender, "Ender")
-                .addIf(crafting, "Crafting")
-                .addIf(magnet, "Magnet")
-                .addIf(puller, "Puller")
-                .addIf(haarp, "Haarp")
-                .addIf(interdimensional, "Interdimensional")
-                .addIf(compacting, "Compacting")
+                .addIf(ender, "upgrade.tremendousstorage.ender")
+                .addIf(crafting, "upgrade.tremendousstorage.crafting")
+                .addIf(magnet, "upgrade.tremendousstorage.magnet")
+                .addIf(puller, "upgrade.tremendousstorage.puller")
+                .addIf(haarp, "upgrade.tremendousstorage.haarp")
+                .addIf(interdimensional, "upgrade.tremendousstorage.interdimensional")
+                .addIf(compacting, "upgrade.tremendousstorage.compacting")
                 .toString();
     }
 }

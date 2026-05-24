@@ -414,10 +414,10 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
     protected String buildSuffix(boolean ender) {
         return new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
                 .tier(tier)
-                .addIf(ender, "Ender")
-                .addIf(hasCraftingUpgrade, "Crafting")
-                .addIf(hasMagnetUpgrade, "Magnet")
-                .addIf(hasPullerUpgrade, "Puller")
+                .addIf(ender, "upgrade.tremendousstorage.ender")
+                .addIf(hasCraftingUpgrade, "upgrade.tremendousstorage.crafting")
+                .addIf(hasMagnetUpgrade, "upgrade.tremendousstorage.magnet")
+                .addIf(hasPullerUpgrade, "upgrade.tremendousstorage.puller")
                 .toString();
     }
 

@@ -5,6 +5,7 @@ import java.util.Locale;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.config.SortMode;
 import net.bobofraggins.tremendousstorage.shared.input.QuickStackClientEvents;
+import net.bobofraggins.tremendousstorage.shared.network.ClearCraftingGridPacket;
 import net.bobofraggins.tremendousstorage.shared.network.CycleRecipePacket;
 import net.bobofraggins.tremendousstorage.shared.network.QuickStackPacket;
 import net.bobofraggins.tremendousstorage.shared.network.RequestSatContentsPacket;
@@ -53,6 +54,10 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     private final NetworkInventoryPane networkPane;
     private final Dialog dialog;
     private final ConfigDrawer configDrawer;
+
+    @Nullable
+    private final CraftingGridPane craftingGridPane;
+
     private SearchBoxWidget searchBox;
 
     @Nullable
@@ -71,11 +76,12 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
     public AccessTerminalScreen(AccessTerminalMenu menu, Inventory inv, Component title) {
         NetworkInventoryPane networkPane_ = new NetworkInventoryPane(menu);
         Dialog dialog_;
+        CraftingGridPane craftingGridPane_ = null;
         if (menu.hasCraftingUpgrade()) {
+            craftingGridPane_ =
+                    new CraftingGridPane(AccessTerminalLayout.CRAFTING_GRID_X, AccessTerminalLayout.CRAFTING_RESULT_X);
             dialog_ = new Dialog(
-                    networkPane_,
-                    new CraftingGridPane(AccessTerminalLayout.CRAFTING_GRID_X, AccessTerminalLayout.CRAFTING_RESULT_X),
-                    new PlayerInventoryPane(AccessTerminalLayout.PLAYER_INV_X));
+                    networkPane_, craftingGridPane_, new PlayerInventoryPane(AccessTerminalLayout.PLAYER_INV_X));
         } else {
             dialog_ = new Dialog(
                     networkPane_,
@@ -85,6 +91,7 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         super(menu, inv, title, dialog_.totalWidth(), dialog_.totalHeight());
         networkPane = networkPane_;
         dialog = dialog_;
+        craftingGridPane = craftingGridPane_;
         configDrawer = new ConfigDrawer(new SortPane(networkPane_::getSortMode, newMode -> {
             networkPane_.setSortMode(newMode);
             ClientPacketDistributor.sendToServer(new SetSortModePacket(menu.getSatPos(), newMode));
@@ -132,6 +139,29 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
                 Identifier.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack"),
                 Identifier.fromNamespaceAndPath("tremendousstorage", "widget/button_quick_stack_focused"),
                 () -> ClientPacketDistributor.sendToServer(new QuickStackPacket(menu.getNiPos(), true))));
+
+        if (craftingGridPane != null) {
+            int btnX = leftPos + craftingGridPane.clearButtonLocalX();
+            int btnY = dialog.getPaneAbsY(1);
+            addRenderableWidget(new PressableIconButton(
+                    btnX,
+                    btnY,
+                    CraftingGridPane.BUTTON_SIZE,
+                    CraftingGridPane.BUTTON_SIZE,
+                    Identifier.fromNamespaceAndPath("tremendousstorage", "widget/button_clear"),
+                    Identifier.fromNamespaceAndPath("tremendousstorage", "widget/button_clear_focused"),
+                    () -> {
+                        boolean shift = com.mojang.blaze3d.platform.InputConstants.isKeyDown(
+                                        net.minecraft.client.Minecraft.getInstance()
+                                                .getWindow(),
+                                        com.mojang.blaze3d.platform.InputConstants.KEY_LSHIFT)
+                                || com.mojang.blaze3d.platform.InputConstants.isKeyDown(
+                                        net.minecraft.client.Minecraft.getInstance()
+                                                .getWindow(),
+                                        com.mojang.blaze3d.platform.InputConstants.KEY_RSHIFT);
+                        ClientPacketDistributor.sendToServer(new ClearCraftingGridPacket(!shift));
+                    }));
+        }
 
         if (menu.hasCraftingUpgrade()) {
             // Up/down arrows above and below the crafting arrow for recipe cycling.
@@ -228,6 +258,18 @@ public class AccessTerminalScreen extends AbstractContainerScreen<AccessTerminal
         if (QuickStackClientEvents.CYCLE_SORT != null && QuickStackClientEvents.CYCLE_SORT.matches(event)) {
             cycleSortMode();
             return true;
+        }
+        if (menu.hasCraftingUpgrade()) {
+            if (QuickStackClientEvents.CLEAR_GRID_TO_STORAGE != null
+                    && QuickStackClientEvents.CLEAR_GRID_TO_STORAGE.matches(event)) {
+                ClientPacketDistributor.sendToServer(new ClearCraftingGridPacket(true));
+                return true;
+            }
+            if (QuickStackClientEvents.CLEAR_GRID_TO_INVENTORY != null
+                    && QuickStackClientEvents.CLEAR_GRID_TO_INVENTORY.matches(event)) {
+                ClientPacketDistributor.sendToServer(new ClearCraftingGridPacket(false));
+                return true;
+            }
         }
         return super.keyPressed(event);
     }

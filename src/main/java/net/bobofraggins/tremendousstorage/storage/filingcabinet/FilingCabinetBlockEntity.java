@@ -434,15 +434,13 @@ public class FilingCabinetBlockEntity extends BlockEntity
 
     @Override
     public String getNetworkName() {
-        StringBuilder sb = new StringBuilder();
-        if (hasMagnetUpgrade) sb.append("Magnet");
-        if (hasPullerUpgrade) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Puller");
-        }
         String base =
                 Component.translatable("block.tremendousstorage.filing_cabinet").getString();
-        return sb.isEmpty() ? base : base + " (" + sb + ")";
+        return base
+                + new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
+                        .addIf(hasMagnetUpgrade, "upgrade.tremendousstorage.magnet")
+                        .addIf(hasPullerUpgrade, "upgrade.tremendousstorage.puller")
+                        .toString();
     }
 
     @Override

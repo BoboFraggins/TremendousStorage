@@ -18,6 +18,8 @@ public class CraftingGridPane implements IDialogPane {
 
     public static final int SLOT_SIZE = 18;
     public static final int CRAFTING_ROWS = 3;
+    /** Pixel size of the clear-grid button (square). */
+    public static final int BUTTON_SIZE = 10;
 
     /** Height of this pane: 3 rows of slots + 4 px gap before player inventory. */
     public static final int HEIGHT = CRAFTING_ROWS * SLOT_SIZE + 4;
@@ -41,6 +43,14 @@ public class CraftingGridPane implements IDialogPane {
     private final int craftingGridX;
     private final int resultX;
     private final int arrowX;
+
+    /**
+     * Pane-local X of the clear-grid button: 2 px to the right of the crafting grid's
+     * right edge. The button is top-aligned (pane-local Y = 0).
+     */
+    public int clearButtonLocalX() {
+        return craftingGridX + CRAFTING_ROWS * SLOT_SIZE + 2;
+    }
 
     public CraftingGridPane() {
         this(30, 120);

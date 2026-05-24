@@ -400,8 +400,8 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
         return base
                 + new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
                         .tier(tier)
-                        .addIf(hasHaarpUpgrade(), "Haarp")
-                        .addIf(hasInterdimensionalUpgrade(), "Interdimensional")
+                        .addIf(hasHaarpUpgrade(), "upgrade.tremendousstorage.haarp")
+                        .addIf(hasInterdimensionalUpgrade(), "upgrade.tremendousstorage.interdimensional")
                         .toString();
     }
 

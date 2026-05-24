@@ -293,8 +293,8 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     protected String buildSuffix(boolean ender) {
         return new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
                 .tier(tier)
-                .addIf(ender, "Ender")
-                .addIf(compactingUpgrade, "Compacting")
+                .addIf(ender, "upgrade.tremendousstorage.ender")
+                .addIf(compactingUpgrade, "upgrade.tremendousstorage.compacting")
                 .toString();
     }
 

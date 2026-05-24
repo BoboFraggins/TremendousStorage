@@ -2,24 +2,19 @@ package net.bobofraggins.tremendousstorage.shared.config;
 
 /** Sort mode for the network item grid. Cycles through Amount → Name → Mod → … */
 public enum SortMode {
-    AMOUNT("Amount", "Amt"),
-    NAME("Name", "Name"),
-    MOD("Mod", "Mod");
+    AMOUNT("sort.tremendousstorage.amount"),
+    NAME("sort.tremendousstorage.name"),
+    MOD("sort.tremendousstorage.mod");
 
-    private final String displayName;
-    private final String shortLabel;
+    private final String translationKey;
 
-    SortMode(String displayName, String shortLabel) {
-        this.displayName = displayName;
-        this.shortLabel = shortLabel;
+    SortMode(String translationKey) {
+        this.translationKey = translationKey;
     }
 
+    /** Returns the localised display name for this sort mode. */
     public String displayName() {
-        return displayName;
-    }
-
-    public String shortLabel() {
-        return shortLabel;
+        return net.minecraft.network.chat.Component.translatable(translationKey).getString();
     }
 
     public SortMode next() {

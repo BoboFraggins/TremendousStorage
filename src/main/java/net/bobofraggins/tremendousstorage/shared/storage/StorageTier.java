@@ -44,16 +44,10 @@ public enum StorageTier implements net.minecraft.util.StringRepresentable {
         return capacity;
     }
 
-    /** Returns a human-readable name with title-case and spaces, e.g. {@code "Nether Star"}. */
+    /** Returns the localised display name, e.g. {@code "Nether Star"} in English. */
     public String getDisplayName() {
-        String[] parts = id.split("_");
-        StringBuilder sb = new StringBuilder();
-        for (String part : parts) {
-            if (!sb.isEmpty()) sb.append(' ');
-            sb.append(Character.toUpperCase(part.charAt(0)));
-            sb.append(part.substring(1));
-        }
-        return sb.toString();
+        return net.minecraft.network.chat.Component.translatable("tier.tremendousstorage." + id)
+                .getString();
     }
 
     /** ARGB color for {@code IBlockColor}/{@code IItemColor} tinting. */

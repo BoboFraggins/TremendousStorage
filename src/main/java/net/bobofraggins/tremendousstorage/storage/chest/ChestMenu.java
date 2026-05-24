@@ -199,6 +199,17 @@ public class ChestMenu extends AbstractCraftingUpgradeMenu {
     }
 
     // -------------------------------------------------------------------------
+    // Clear-grid — return to chest storage
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected ItemStack returnToStorage(Player player, ItemStack stack) {
+        if (!(player.level().getBlockEntity(pos) instanceof ChestBlockEntity be)) return stack;
+        long remainder = be.insert(stack, stack.getCount(), false);
+        return remainder <= 0 ? ItemStack.EMPTY : stack.copyWithCount((int) remainder);
+    }
+
+    // -------------------------------------------------------------------------
     // Chest refill source
     // -------------------------------------------------------------------------
 

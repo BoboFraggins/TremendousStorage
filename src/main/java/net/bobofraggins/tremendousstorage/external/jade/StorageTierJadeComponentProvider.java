@@ -42,12 +42,12 @@ public enum StorageTierJadeComponentProvider implements IComponentProvider<Block
         if (hasUpgrades) {
             String suffix = new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
                     .tier(tier)
-                    .addIf(crafting, "Crafting")
-                    .addIf(magnet, "Magnet")
-                    .addIf(puller, "Puller")
-                    .addIf(haarp, "Haarp")
-                    .addIf(interdimensional, "Interdimensional")
-                    .addIf(compacting, "Compacting")
+                    .addIf(crafting, "upgrade.tremendousstorage.crafting")
+                    .addIf(magnet, "upgrade.tremendousstorage.magnet")
+                    .addIf(puller, "upgrade.tremendousstorage.puller")
+                    .addIf(haarp, "upgrade.tremendousstorage.haarp")
+                    .addIf(interdimensional, "upgrade.tremendousstorage.interdimensional")
+                    .addIf(compacting, "upgrade.tremendousstorage.compacting")
                     .toString();
             Component baseName = Component.translatable(accessor.getBlock().getDescriptionId());
             tooltip.remove(JadeIds.MC_BLOCK_DISPLAY);

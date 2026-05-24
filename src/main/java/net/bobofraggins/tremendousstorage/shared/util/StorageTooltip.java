@@ -56,7 +56,8 @@ public final class StorageTooltip {
                     .withStyle(ChatFormatting.GRAY));
         }
         if (entries.size() > MAX_LINES) {
-            tooltipAdder.accept(Component.literal("...").withStyle(ChatFormatting.GRAY));
+            tooltipAdder.accept(Component.translatable("item.tremendousstorage.storage.tooltip_more")
+                    .withStyle(ChatFormatting.GRAY));
         }
     }
 }

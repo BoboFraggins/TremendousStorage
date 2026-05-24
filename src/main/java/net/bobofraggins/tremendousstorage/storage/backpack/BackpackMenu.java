@@ -223,6 +223,27 @@ public class BackpackMenu extends AbstractCraftingUpgradeMenu {
     }
 
     // -------------------------------------------------------------------------
+    // Clear-grid — return to backpack storage
+    // -------------------------------------------------------------------------
+
+    @Override
+    protected ItemStack returnToStorage(Player player, ItemStack stack) {
+        ItemStack backpackStack = BackpackItem.getBackpackStack(player, slotType, slotIndex, slotId);
+        if (backpackStack.isEmpty()) return stack;
+        BackpackContents current =
+                backpackStack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
+        Object[] result = current.withInserted(stack, stack.getCount());
+        long remainder = (long) result[0];
+        BackpackContents updated = (BackpackContents) result[1];
+        int moved = (int) (stack.getCount() - remainder);
+        if (moved > 0) {
+            backpackStack.set(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), updated);
+            BackpackItem.setBackpackStack(player, backpackStack, slotType, slotIndex, slotId);
+        }
+        return remainder <= 0 ? ItemStack.EMPTY : stack.copyWithCount((int) remainder);
+    }
+
+    // -------------------------------------------------------------------------
     // Backpack refill source
     // -------------------------------------------------------------------------
 
