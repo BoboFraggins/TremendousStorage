@@ -44,6 +44,18 @@ public enum StorageTier implements net.minecraft.util.StringRepresentable {
         return capacity;
     }
 
+    /** Returns a human-readable name with title-case and spaces, e.g. {@code "Nether Star"}. */
+    public String getDisplayName() {
+        String[] parts = id.split("_");
+        StringBuilder sb = new StringBuilder();
+        for (String part : parts) {
+            if (!sb.isEmpty()) sb.append(' ');
+            sb.append(Character.toUpperCase(part.charAt(0)));
+            sb.append(part.substring(1));
+        }
+        return sb.toString();
+    }
+
     /** ARGB color for {@code IBlockColor}/{@code IItemColor} tinting. */
     public int getColor() {
         return color;

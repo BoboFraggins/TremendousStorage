@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.network.OpenBackpackPacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
-import net.bobofraggins.tremendousstorage.shared.storage.TieredBlockItem;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -50,7 +49,7 @@ public class BackpackItem extends BlockItem {
                 stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
         StringBuilder sb = new StringBuilder();
         StorageTier tier = contents.tier();
-        if (tier != StorageTier.WOOD) sb.append(TieredBlockItem.capitalize(tier.getId()));
+        if (tier != StorageTier.WOOD) sb.append(tier.getDisplayName());
         if (contents.hasCraftingUpgrade()) {
             if (!sb.isEmpty()) sb.append('/');
             sb.append("Crafting");

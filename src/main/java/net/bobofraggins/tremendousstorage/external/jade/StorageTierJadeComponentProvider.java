@@ -1,7 +1,6 @@
 package net.bobofraggins.tremendousstorage.external.jade;
 
 import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
-import net.bobofraggins.tremendousstorage.shared.storage.TieredBlockItem;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -42,7 +41,7 @@ public enum StorageTierJadeComponentProvider implements IComponentProvider<Block
 
         if (hasUpgrades) {
             StringBuilder sb = new StringBuilder();
-            if (tier != StorageTier.WOOD) sb.append(TieredBlockItem.capitalize(tier.getId()));
+            if (tier != StorageTier.WOOD) sb.append(tier.getDisplayName());
             if (crafting) {
                 if (!sb.isEmpty()) sb.append('/');
                 sb.append("Crafting");

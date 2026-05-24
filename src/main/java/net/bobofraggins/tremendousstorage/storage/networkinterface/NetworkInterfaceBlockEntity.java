@@ -437,9 +437,7 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         String base = Component.translatable("screen.tremendousstorage.network_interface")
                 .getString();
         if (tier == StorageTier.WOOD) return base;
-        String label =
-                Character.toUpperCase(tier.getId().charAt(0)) + tier.getId().substring(1);
-        return base + " (" + label + ")";
+        return base + " (" + tier.getDisplayName() + ")";
     }
 
     @Override

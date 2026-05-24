@@ -293,8 +293,7 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     protected String buildSuffix(boolean ender) {
         StringBuilder sb = new StringBuilder();
         if (tier != StorageTier.WOOD) {
-            sb.append(Character.toUpperCase(tier.getId().charAt(0)))
-                    .append(tier.getId().substring(1));
+            sb.append(tier.getDisplayName());
         }
         if (ender) {
             if (!sb.isEmpty()) sb.append('/');

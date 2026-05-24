@@ -397,8 +397,7 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
     public String getNetworkName() {
         StringBuilder sb = new StringBuilder();
         if (tier != StorageTier.WOOD) {
-            sb.append(Character.toUpperCase(tier.getId().charAt(0)))
-                    .append(tier.getId().substring(1));
+            sb.append(tier.getDisplayName());
         }
         if (hasHaarpUpgrade()) {
             if (!sb.isEmpty()) sb.append('/');

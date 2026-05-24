@@ -57,7 +57,7 @@ public class TieredBlockItem extends BlockItem {
             compacting = tag.getBooleanOr("CompactingUpgrade", false);
         }
         StringBuilder sb = new StringBuilder();
-        if (tier != StorageTier.WOOD) sb.append(capitalize(tier.getId()));
+        if (tier != StorageTier.WOOD) sb.append(tier.getDisplayName());
         if (ender) {
             if (!sb.isEmpty()) sb.append('/');
             sb.append("Ender");
