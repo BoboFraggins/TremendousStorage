@@ -212,7 +212,13 @@ public class ConfigDrawer {
      * Renders the tab that protrudes from the dialog's left edge. Call this <em>after</em> the
      * main dialog so the tab appears on top of both the drawer body and the dialog background.
      */
+    /** Returns {@code true} when there is at least one pane to show. */
+    public boolean hasContent() {
+        return !panes.isEmpty();
+    }
+
     public void renderTab(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        if (panes.isEmpty()) return;
         renderTab(graphics, mouseX, mouseY, getProgress(System.currentTimeMillis()));
     }
 
@@ -284,6 +290,7 @@ public class ConfigDrawer {
      * @return {@code true} if consumed
      */
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (panes.isEmpty()) return false;
         if (showTabButton) {
             int tabX = dialogX - TAB_W + 5 - Math.round((WIDTH + TAB_W + 2) * getProgress(System.currentTimeMillis()));
             if (mouseX >= tabX
