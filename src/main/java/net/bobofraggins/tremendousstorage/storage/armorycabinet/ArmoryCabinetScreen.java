@@ -116,6 +116,7 @@ public class ArmoryCabinetScreen extends AbstractContainerScreen<ArmoryCabinetMe
         var be = Minecraft.getInstance().level.getBlockEntity(menu.getPos());
         if (!(be instanceof ChestBlockEntity bulk)) {
             inventoryPane.setContents(List.of(), List.of());
+            inventoryPane.setCapacity(0);
             return;
         }
         int n = bulk.typeCount();
@@ -136,6 +137,7 @@ public class ArmoryCabinetScreen extends AbstractContainerScreen<ArmoryCabinetMe
         }
         int[] sortedToOriginal = order.stream().mapToInt(i -> i).toArray();
         inventoryPane.setContents(sorted, sortedCounts, sortedToOriginal);
+        inventoryPane.setCapacity(bulk.getCapacity());
     }
 
     private Comparator<Integer> buildComparator(List<ItemStack> stacks, List<Long> counts) {

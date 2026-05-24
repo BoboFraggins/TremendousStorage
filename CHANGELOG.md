@@ -1,5 +1,10 @@
 # Tremendous Storage
 
+## 26.1.2.3
+
+* Add storage counts to storage inventory screens
+* Make durability repair of lazurite tools with an ingot be based off of original ingredients rather than automatically 100%
+
 ## 26.1.2.2
 
 * Adjust default priorities of storage containers
@@ -7,6 +12,7 @@
 * Move some strings out of code and into the US English localization file
 * Add clear crafting grid button
 * Add error when attempting to upgrade a non-netherite tier Wireless Hub to work interdimensionally
+* Disable the ability to wrap double chests and beds in presents
 
 ## 26.1.2.1
 

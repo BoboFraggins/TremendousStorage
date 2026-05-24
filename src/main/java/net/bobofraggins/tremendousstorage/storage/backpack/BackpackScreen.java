@@ -183,6 +183,7 @@ public class BackpackScreen extends AbstractContainerScreen<BackpackMenu> {
         }
         int[] sortedToOriginal = order.stream().mapToInt(i -> i).toArray();
         inventoryPane.setContents(sorted, sortedCounts, sortedToOriginal);
+        inventoryPane.setCapacity(contents.getCapacity());
     }
 
     /**

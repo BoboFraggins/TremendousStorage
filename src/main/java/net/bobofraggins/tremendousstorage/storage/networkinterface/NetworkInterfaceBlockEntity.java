@@ -171,6 +171,22 @@ public class NetworkInterfaceBlockEntity extends BlockEntity implements MenuProv
         return keys;
     }
 
+    /**
+     * Returns the total item capacity across all connected storages that contribute a capacity
+     * (currently only chests). Barrels, tanks, and filing cabinets return 0 and are excluded.
+     */
+    public long getTotalNetworkCapacity() {
+        NetworkScanResult scan = getScan();
+        if (scan == null) return 0;
+        long total = 0;
+        for (ResourceHandler<ItemResource> handler : scan.insertOrder()) {
+            if (handler instanceof IKeyCounterContributor contributor) {
+                total += contributor.getItemCapacity();
+            }
+        }
+        return total;
+    }
+
     // -------------------------------------------------------------------------
     // Aggregate item cache
     // -------------------------------------------------------------------------

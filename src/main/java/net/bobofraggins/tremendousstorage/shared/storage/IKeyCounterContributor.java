@@ -7,4 +7,14 @@ package net.bobofraggins.tremendousstorage.shared.storage;
  */
 public interface IKeyCounterContributor {
     void contributeToKeyCounter(KeyCounter kc);
+
+    /**
+     * Returns the total item capacity contributed by this storage for the inventory counter
+     * display. Returns {@code 0} by default; only block entities with a meaningful item capacity
+     * (e.g. {@link net.bobofraggins.tremendousstorage.storage.chest.ChestItemHandler}) override
+     * this.
+     */
+    default long getItemCapacity() {
+        return 0;
+    }
 }

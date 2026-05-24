@@ -51,18 +51,19 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
 
             BlockEntity be = player.level().getBlockEntity(packet.niPos());
             if (!(be instanceof NetworkInterfaceBlockEntity ni)) {
-                PacketDistributor.sendToPlayer(player, new SatContentsPacket(List.of(), List.of(), Set.of()));
+                PacketDistributor.sendToPlayer(player, new SatContentsPacket(List.of(), List.of(), Set.of(), 0L));
                 return;
             }
 
             KeyCounter inventory = ni.getCachedInventory();
             if (inventory == null) {
-                PacketDistributor.sendToPlayer(player, new SatContentsPacket(List.of(), List.of(), Set.of()));
+                PacketDistributor.sendToPlayer(player, new SatContentsPacket(List.of(), List.of(), Set.of(), 0L));
                 return;
             }
 
             Set<StorageKey> fluidKeys = ni.getFluidStorageKeys();
-            PacketDistributor.sendToPlayer(player, buildContentsPacket(inventory, fluidKeys));
+            long capacity = ni.getTotalNetworkCapacity();
+            PacketDistributor.sendToPlayer(player, buildContentsPacket(inventory, fluidKeys, capacity));
         });
     }
 
@@ -128,12 +129,12 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
             stacks.add(entry.stack());
             counts.add(entry.count());
         }
-        return new SatContentsPacket(List.copyOf(stacks), List.copyOf(counts), Set.of());
+        return new SatContentsPacket(List.copyOf(stacks), List.copyOf(counts), Set.of(), 0L);
     }
 
     /** Builds a {@link SatContentsPacket} from a pre-aggregated {@link KeyCounter}. */
     public static SatContentsPacket buildContentsPacket(KeyCounter inventory) {
-        return buildContentsPacket(inventory, Set.of());
+        return buildContentsPacket(inventory, Set.of(), 0L);
     }
 
     /**
@@ -141,6 +142,15 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
      * entries whose {@link StorageKey} appears in {@code fluidKeys} as fluid-backed.
      */
     public static SatContentsPacket buildContentsPacket(KeyCounter inventory, Set<StorageKey> fluidKeys) {
+        return buildContentsPacket(inventory, fluidKeys, 0L);
+    }
+
+    /**
+     * Builds a {@link SatContentsPacket} from a pre-aggregated {@link KeyCounter}, tagging
+     * fluid-backed entries and including the total network capacity.
+     */
+    public static SatContentsPacket buildContentsPacket(
+            KeyCounter inventory, Set<StorageKey> fluidKeys, long capacity) {
         record Entry(ItemStack stack, long count, String name, int durability) {}
         List<Entry> entries = new ArrayList<>();
         for (Object2LongMap.Entry<StorageKey> e : inventory.allEntries()) {
@@ -167,6 +177,6 @@ public record RequestSatContentsPacket(BlockPos niPos) implements CustomPacketPa
                 fluidIndices.add(i);
             }
         }
-        return new SatContentsPacket(List.copyOf(stacks), List.copyOf(counts), Set.copyOf(fluidIndices));
+        return new SatContentsPacket(List.copyOf(stacks), List.copyOf(counts), Set.copyOf(fluidIndices), capacity);
     }
 }

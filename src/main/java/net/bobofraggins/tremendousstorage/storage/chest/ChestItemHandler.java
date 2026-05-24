@@ -50,6 +50,11 @@ public class ChestItemHandler implements ResourceHandler<ItemResource>, IKeyCoun
     }
 
     @Override
+    public long getItemCapacity() {
+        return be.getCapacity();
+    }
+
+    @Override
     public boolean isValid(int index, ItemResource resource) {
         return be.acceptsItem(resource.toStack(1));
     }

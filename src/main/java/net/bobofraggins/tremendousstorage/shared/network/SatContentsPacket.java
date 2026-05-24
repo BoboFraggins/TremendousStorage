@@ -26,7 +26,8 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
  * and {@link #PENDING_FLUID_INDICES};
  * {@link net.bobofraggins.tremendousstorage.shared.ui.AccessTerminalScreen} polls these each tick.
  */
-public record SatContentsPacket(List<ItemStack> stacks, List<Long> counts, Set<Integer> fluidIndices)
+public record SatContentsPacket(
+        List<ItemStack> stacks, List<Long> counts, Set<Integer> fluidIndices, long totalCapacity)
         implements CustomPacketPayload {
 
     public static final Type<SatContentsPacket> TYPE =
@@ -56,14 +57,18 @@ public record SatContentsPacket(List<ItemStack> stacks, List<Long> counts, Set<I
                 return out;
             });
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, SatContentsPacket> STREAM_CODEC = StreamCodec.composite(
-            ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()),
-            SatContentsPacket::stacks,
-            LONG_LIST_CODEC,
-            SatContentsPacket::counts,
-            INT_SET_CODEC,
-            SatContentsPacket::fluidIndices,
-            SatContentsPacket::new);
+    public static final StreamCodec<RegistryFriendlyByteBuf, SatContentsPacket> STREAM_CODEC = StreamCodec.of(
+            (buf, pkt) -> {
+                ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buf, pkt.stacks());
+                LONG_LIST_CODEC.encode(buf, pkt.counts());
+                INT_SET_CODEC.encode(buf, pkt.fluidIndices());
+                buf.writeVarLong(pkt.totalCapacity());
+            },
+            buf -> new SatContentsPacket(
+                    ItemStack.OPTIONAL_STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buf),
+                    LONG_LIST_CODEC.decode(buf),
+                    INT_SET_CODEC.decode(buf),
+                    buf.readVarLong()));
 
     @Override
     public Type<SatContentsPacket> type() {
@@ -79,11 +84,15 @@ public record SatContentsPacket(List<ItemStack> stacks, List<Long> counts, Set<I
     /** Indices (into the sorted stacks list) that are fluid-backed and require a bucket to extract. */
     public static volatile Set<Integer> PENDING_FLUID_INDICES = Set.of();
 
+    /** Total item capacity of the network, summed across all connected chests. */
+    public static volatile long PENDING_CAPACITY = 0L;
+
     public static void handle(SatContentsPacket packet, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
             PENDING_STACKS = List.copyOf(packet.stacks());
             PENDING_COUNTS = List.copyOf(packet.counts());
             PENDING_FLUID_INDICES = Set.copyOf(packet.fluidIndices());
+            PENDING_CAPACITY = packet.totalCapacity();
         });
     }
 }

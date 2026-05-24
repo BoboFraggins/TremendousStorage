@@ -27,6 +27,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.storage.TagValueOutput;
 
 public class PresentBlockItem extends BlockItem {
@@ -159,7 +161,32 @@ public class PresentBlockItem extends BlockItem {
         if (state.isAir()) return false;
         if (state.getBlock() instanceof PresentBlock) return false;
         if (state.getDestroySpeed(level, pos) < 0) return false;
+        if (isMultiBlock(state)) return false;
         return true;
+    }
+
+    /**
+     * Returns true when {@code state} is part of a structure that occupies more than one block
+     * position, making it unsafe to wrap in a Present (would leave orphaned block halves or
+     * cause item duplication with shared inventories).
+     *
+     * <ul>
+     *   <li>Double chests — {@link ChestType} is LEFT or RIGHT (single chests are safe)
+     *   <li>Beds — have a {@code BED_PART} property (HEAD / FOOT)
+     *   <li>Doors and tall plants — have a {@code DOUBLE_BLOCK_HALF} property (UPPER / LOWER)
+     * </ul>
+     */
+    private static boolean isMultiBlock(BlockState state) {
+        // Double chests share an inventory across two positions; single chests are fine
+        if (state.hasProperty(BlockStateProperties.CHEST_TYPE)
+                && state.getValue(BlockStateProperties.CHEST_TYPE) != ChestType.SINGLE) {
+            return true;
+        }
+        // Beds occupy two horizontal block positions (head + foot)
+        if (state.hasProperty(BlockStateProperties.BED_PART)) return true;
+        // Doors and tall plants occupy two vertical block positions (upper + lower)
+        if (state.hasProperty(BlockStateProperties.DOUBLE_BLOCK_HALF)) return true;
+        return false;
     }
 
     private static CompoundTag captureBlockEntity(Level level, BlockPos pos) {

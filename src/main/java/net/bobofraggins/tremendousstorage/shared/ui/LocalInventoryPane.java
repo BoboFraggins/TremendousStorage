@@ -91,6 +91,9 @@ public class LocalInventoryPane implements IDialogPane {
     private int scrollOffset = 0;
     private boolean draggingScrollbar = false;
 
+    /** Total item capacity of the backing storage; shown in the counter row. */
+    private long capacity = 0;
+
     /**
      * Original server-side indices already extracted in the current shift-drag session.
      * Cleared on mouseReleased and at the start of each new mouseClicked.
@@ -139,6 +142,11 @@ public class LocalInventoryPane implements IDialogPane {
 
     public void setClickHandler(GridClickHandler handler) {
         this.clickHandler = handler;
+    }
+
+    /** Sets the total item capacity displayed in the counter row. */
+    public void setCapacity(long capacity) {
+        this.capacity = capacity;
     }
 
     /**
@@ -286,8 +294,20 @@ public class LocalInventoryPane implements IDialogPane {
         return TremendousStorageClientConfig.getVisibleRows();
     }
 
+    /** Number of rows used for item display — one less than total to leave room for the counter. */
+    private int itemRows() {
+        return visibleRows() - 1;
+    }
+
     private int gridStartY() {
         return GRID_Y;
+    }
+
+    /** Sum of all (unfiltered) item counts; shown as the "current" figure in the counter row. */
+    private long totalStored() {
+        long sum = 0;
+        for (long c : allCounts) sum += c;
+        return sum;
     }
 
     private void applyFilter() {
@@ -318,12 +338,12 @@ public class LocalInventoryPane implements IDialogPane {
         return localX >= GRID_X
                 && localX < GRID_X + AccessTerminalLayout.NETWORK_W
                 && localY >= startY
-                && localY < startY + visibleRows() * AccessTerminalLayout.SLOT_SIZE;
+                && localY < startY + itemRows() * AccessTerminalLayout.SLOT_SIZE;
     }
 
     private boolean isInScrollbar(double localX, double localY) {
         int startY = gridStartY();
-        int barH = visibleRows() * AccessTerminalLayout.SLOT_SIZE;
+        int barH = itemRows() * AccessTerminalLayout.SLOT_SIZE;
         return localX >= SCROLLBAR_X
                 && localX < AccessTerminalLayout.BG_WIDTH
                 && localY >= startY
@@ -332,7 +352,7 @@ public class LocalInventoryPane implements IDialogPane {
 
     /** Maps a pane-local Y coordinate inside the scrollbar track to a scroll offset. */
     private void scrollToY(double localY) {
-        int rows = visibleRows();
+        int rows = itemRows();
         int barH = rows * AccessTerminalLayout.SLOT_SIZE;
         int totalRows = Math.max(
                 (displayStacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
@@ -348,15 +368,16 @@ public class LocalInventoryPane implements IDialogPane {
     private void clampScroll() {
         int totalRows =
                 (displayStacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS;
-        int maxScroll = Math.max(0, totalRows - visibleRows());
+        int maxScroll = Math.max(0, totalRows - itemRows());
         scrollOffset = Math.max(0, Math.min(scrollOffset, maxScroll));
     }
 
     private void drawGrid(GuiGraphicsExtractor graphics, Font font) {
-        int rows = visibleRows();
+        int itemRowCount = itemRows();
         int startY = gridStartY();
 
-        for (int row = 0; row < rows; row++) {
+        // Slot backgrounds for item rows
+        for (int row = 0; row < itemRowCount; row++) {
             graphics.blit(
                     RenderPipelines.GUI_TEXTURED,
                     BG_TEXTURE,
@@ -370,10 +391,13 @@ public class LocalInventoryPane implements IDialogPane {
                     256);
         }
 
+        // Counter row — dark bar with stored/capacity text
+        drawCounter(graphics, font, startY, itemRowCount);
+
         if (displayStacks.isEmpty()) return;
 
         int firstIdx = scrollOffset * AccessTerminalLayout.NETWORK_COLS;
-        for (int row = 0; row < rows; row++) {
+        for (int row = 0; row < itemRowCount; row++) {
             for (int col = 0; col < AccessTerminalLayout.NETWORK_COLS; col++) {
                 int idx = firstIdx + row * AccessTerminalLayout.NETWORK_COLS + col;
                 if (idx >= displayStacks.size()) return;
@@ -390,8 +414,16 @@ public class LocalInventoryPane implements IDialogPane {
         }
     }
 
+    private void drawCounter(GuiGraphicsExtractor graphics, Font font, int startY, int itemRowCount) {
+        int counterY = startY + itemRowCount * AccessTerminalLayout.SLOT_SIZE;
+        String text = CountFormat.format(totalStored()) + " / " + CountFormat.format(capacity);
+        int textX = GRID_X + (AccessTerminalLayout.NETWORK_W - font.width(text)) / 2;
+        int textY = counterY + (AccessTerminalLayout.SLOT_SIZE - font.lineHeight) / 2 + 1;
+        graphics.text(font, text, textX, textY, 0xFF404040, false);
+    }
+
     private void drawScrollbar(GuiGraphicsExtractor graphics) {
-        int rows = visibleRows();
+        int rows = itemRows();
         int barY = gridStartY();
         int barH = rows * AccessTerminalLayout.SLOT_SIZE;
 
@@ -406,7 +438,7 @@ public class LocalInventoryPane implements IDialogPane {
 
         int totalRows = Math.max(
                 (displayStacks.size() + AccessTerminalLayout.NETWORK_COLS - 1) / AccessTerminalLayout.NETWORK_COLS, 1);
-        boolean canScroll = totalRows > rows;
+        boolean canScroll = totalRows > rows; // rows = itemRows() here
 
         int thumbX = trackX + 1;
         int thumbY;
