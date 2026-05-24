@@ -1,0 +1,7 @@
+{
+  "size": 1,
+  "order": 25,
+  "icon": "tremendousstorage:slot/personal_access_terminal",
+  "add_cosmetic": false,
+  "validators": ["curios:tag"]
+}

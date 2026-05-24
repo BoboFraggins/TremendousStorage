@@ -2,7 +2,6 @@
   "replace": false,
   "values": [
     "tremendousstorage:backpack",
-    "tremendousstorage:ender_backpack",
-    "tremendousstorage:wireless_sat"
+    "tremendousstorage:ender_backpack"
   ]
 }

@@ -1,7 +1,6 @@
 {
   "replace": false,
   "values": [
-    "tremendousstorage:wireless_sat",
     "tremendousstorage:picnic_basket",
     "tremendousstorage:ender_picnic_basket"
   ]
