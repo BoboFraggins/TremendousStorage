@@ -151,6 +151,7 @@
   "block.tremendousstorage.wireless_hub": "Wireless Hub",
   "item.tremendousstorage.wireless_hub": "Wireless Hub",
   "item.tremendousstorage.wireless_sat": "Personal Access Terminal",
+  "curios.identifier.personal_access_terminal": "Personal Access Terminal",
   "screen.tremendousstorage.wireless_hub": "Wireless Hub",
   "screen.tremendousstorage.wireless_hub.unlinked": "Unlinked",
   "screen.tremendousstorage.wireless_hub.linked": "Linked",
