@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.bobofraggins.tremendousstorage.shared.network.OpenBackpackPacket;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
-import net.bobofraggins.tremendousstorage.shared.storage.StorageTier;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,27 +46,16 @@ public class BackpackItem extends BlockItem {
         Component base = super.getName(stack);
         BackpackContents contents =
                 stack.getOrDefault(Registration.TREMENDOUS_BACKPACK_CONTENTS.get(), BackpackContents.EMPTY);
-        StringBuilder sb = new StringBuilder();
-        StorageTier tier = contents.tier();
-        if (tier != StorageTier.WOOD) sb.append(tier.getDisplayName());
-        if (contents.hasCraftingUpgrade()) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Crafting");
-        }
         // Magnet and Puller are stored in BLOCK_ENTITY_DATA (not BackpackContents)
         var data = stack.get(DataComponents.BLOCK_ENTITY_DATA);
-        if (data != null) {
-            var tag = data.copyTagWithoutId();
-            if (tag.getBooleanOr("MagnetUpgrade", false)) {
-                if (!sb.isEmpty()) sb.append('/');
-                sb.append("Magnet");
-            }
-            if (tag.getBooleanOr("PullerUpgrade", false)) {
-                if (!sb.isEmpty()) sb.append('/');
-                sb.append("Puller");
-            }
-        }
-        return sb.isEmpty() ? base : Component.empty().append(base).append(" (" + sb + ")");
+        var tag = data != null ? data.copyTagWithoutId() : null;
+        String suffix = new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
+                .tier(contents.tier())
+                .addIf(contents.hasCraftingUpgrade(), "Crafting")
+                .addIf(tag != null && tag.getBooleanOr("MagnetUpgrade", false), "Magnet")
+                .addIf(tag != null && tag.getBooleanOr("PullerUpgrade", false), "Puller")
+                .toString();
+        return suffix.isEmpty() ? base : Component.empty().append(base).append(suffix);
     }
 
     @SuppressWarnings("deprecation")

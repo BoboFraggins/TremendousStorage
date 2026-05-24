@@ -291,19 +291,11 @@ public class BarrelBlockEntity extends BlockEntity implements MenuProvider, Netw
     }
 
     protected String buildSuffix(boolean ender) {
-        StringBuilder sb = new StringBuilder();
-        if (tier != StorageTier.WOOD) {
-            sb.append(tier.getDisplayName());
-        }
-        if (ender) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Ender");
-        }
-        if (compactingUpgrade) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Compacting");
-        }
-        return sb.isEmpty() ? "" : " (" + sb + ")";
+        return new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
+                .tier(tier)
+                .addIf(ender, "Ender")
+                .addIf(compactingUpgrade, "Compacting")
+                .toString();
     }
 
     @Override

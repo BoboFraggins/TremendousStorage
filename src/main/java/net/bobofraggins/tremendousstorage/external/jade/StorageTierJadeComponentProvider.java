@@ -40,35 +40,18 @@ public enum StorageTierJadeComponentProvider implements IComponentProvider<Block
                 tier != StorageTier.WOOD || crafting || magnet || puller || haarp || interdimensional || compacting;
 
         if (hasUpgrades) {
-            StringBuilder sb = new StringBuilder();
-            if (tier != StorageTier.WOOD) sb.append(tier.getDisplayName());
-            if (crafting) {
-                if (!sb.isEmpty()) sb.append('/');
-                sb.append("Crafting");
-            }
-            if (magnet) {
-                if (!sb.isEmpty()) sb.append('/');
-                sb.append("Magnet");
-            }
-            if (puller) {
-                if (!sb.isEmpty()) sb.append('/');
-                sb.append("Puller");
-            }
-            if (haarp) {
-                if (!sb.isEmpty()) sb.append('/');
-                sb.append("Haarp");
-            }
-            if (interdimensional) {
-                if (!sb.isEmpty()) sb.append('/');
-                sb.append("Interdimensional");
-            }
-            if (compacting) {
-                if (!sb.isEmpty()) sb.append('/');
-                sb.append("Compacting");
-            }
+            String suffix = new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
+                    .tier(tier)
+                    .addIf(crafting, "Crafting")
+                    .addIf(magnet, "Magnet")
+                    .addIf(puller, "Puller")
+                    .addIf(haarp, "Haarp")
+                    .addIf(interdimensional, "Interdimensional")
+                    .addIf(compacting, "Compacting")
+                    .toString();
             Component baseName = Component.translatable(accessor.getBlock().getDescriptionId());
             tooltip.remove(JadeIds.MC_BLOCK_DISPLAY);
-            tooltip.add(0, Component.empty().append(baseName).append(" (" + sb + ")"));
+            tooltip.add(0, Component.empty().append(baseName).append(suffix));
         }
     }
 }

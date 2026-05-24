@@ -423,23 +423,12 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
     }
 
     protected String buildSuffix(boolean ender) {
-        StringBuilder sb = new StringBuilder();
-        if (tier != StorageTier.WOOD) {
-            sb.append(tier.getDisplayName());
-        }
-        if (ender) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Ender");
-        }
-        if (hasMagnetUpgrade) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Magnet");
-        }
-        if (hasPullerUpgrade) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Puller");
-        }
-        return sb.isEmpty() ? "" : " (" + sb + ")";
+        return new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
+                .tier(tier)
+                .addIf(ender, "Ender")
+                .addIf(hasMagnetUpgrade, "Magnet")
+                .addIf(hasPullerUpgrade, "Puller")
+                .toString();
     }
 
     @Override

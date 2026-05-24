@@ -1,5 +1,6 @@
 package net.bobofraggins.tremendousstorage.shared.storage;
 
+import net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -56,41 +57,15 @@ public class TieredBlockItem extends BlockItem {
             interdimensional = tag.getBooleanOr("InterdimensionalUpgrade", false);
             compacting = tag.getBooleanOr("CompactingUpgrade", false);
         }
-        StringBuilder sb = new StringBuilder();
-        if (tier != StorageTier.WOOD) sb.append(tier.getDisplayName());
-        if (ender) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Ender");
-        }
-        if (crafting) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Crafting");
-        }
-        if (magnet) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Magnet");
-        }
-        if (puller) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Puller");
-        }
-        if (haarp) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Haarp");
-        }
-        if (interdimensional) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Interdimensional");
-        }
-        if (compacting) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Compacting");
-        }
-        return sb.isEmpty() ? "" : " (" + sb + ")";
-    }
-
-    public static String capitalize(String s) {
-        if (s.isEmpty()) return s;
-        return Character.toUpperCase(s.charAt(0)) + s.substring(1);
+        return new UpgradeSuffix()
+                .tier(tier)
+                .addIf(ender, "Ender")
+                .addIf(crafting, "Crafting")
+                .addIf(magnet, "Magnet")
+                .addIf(puller, "Puller")
+                .addIf(haarp, "Haarp")
+                .addIf(interdimensional, "Interdimensional")
+                .addIf(compacting, "Compacting")
+                .toString();
     }
 }

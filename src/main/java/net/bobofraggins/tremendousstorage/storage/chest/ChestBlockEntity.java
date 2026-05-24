@@ -412,27 +412,13 @@ public class ChestBlockEntity extends BlockEntity implements MenuProvider, NiCac
 
     /** Builds the " (Tier/Ender/Crafting/Magnet/Puller)" suffix. Pass {@code ender=true} for ender variants. */
     protected String buildSuffix(boolean ender) {
-        StringBuilder sb = new StringBuilder();
-        if (tier != StorageTier.WOOD) {
-            sb.append(tier.getDisplayName());
-        }
-        if (ender) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Ender");
-        }
-        if (hasCraftingUpgrade) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Crafting");
-        }
-        if (hasMagnetUpgrade) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Magnet");
-        }
-        if (hasPullerUpgrade) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Puller");
-        }
-        return sb.isEmpty() ? "" : " (" + sb + ")";
+        return new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
+                .tier(tier)
+                .addIf(ender, "Ender")
+                .addIf(hasCraftingUpgrade, "Crafting")
+                .addIf(hasMagnetUpgrade, "Magnet")
+                .addIf(hasPullerUpgrade, "Puller")
+                .toString();
     }
 
     @Override

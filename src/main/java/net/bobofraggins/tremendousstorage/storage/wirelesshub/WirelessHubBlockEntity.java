@@ -395,21 +395,14 @@ public class WirelessHubBlockEntity extends BlockEntity implements MenuProvider,
 
     @Override
     public String getNetworkName() {
-        StringBuilder sb = new StringBuilder();
-        if (tier != StorageTier.WOOD) {
-            sb.append(tier.getDisplayName());
-        }
-        if (hasHaarpUpgrade()) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Haarp");
-        }
-        if (hasInterdimensionalUpgrade()) {
-            if (!sb.isEmpty()) sb.append('/');
-            sb.append("Interdimensional");
-        }
         String base =
                 Component.translatable("screen.tremendousstorage.wireless_hub").getString();
-        return sb.isEmpty() ? base : base + " (" + sb + ")";
+        return base
+                + new net.bobofraggins.tremendousstorage.shared.util.UpgradeSuffix()
+                        .tier(tier)
+                        .addIf(hasHaarpUpgrade(), "Haarp")
+                        .addIf(hasInterdimensionalUpgrade(), "Interdimensional")
+                        .toString();
     }
 
     @Override
