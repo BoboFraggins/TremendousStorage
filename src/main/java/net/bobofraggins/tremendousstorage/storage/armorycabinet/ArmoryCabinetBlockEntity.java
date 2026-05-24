@@ -131,7 +131,7 @@ public class ArmoryCabinetBlockEntity extends ChestBlockEntity {
 
     public ArmoryCabinetBlockEntity(BlockPos pos, BlockState state) {
         super(BETypeHelper.get("armory_cabinet"), pos, state);
-        setPriority(Priority.HIGH);
+        setPriority(Priority.NORMAL);
     }
 
     // -------------------------------------------------------------------------
