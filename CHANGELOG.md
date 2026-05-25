@@ -1,5 +1,10 @@
 # Tremendous Storage
 
+## 26.1.2.4
+
+* Add lazurite seeds and essence for Mystical Agriculture
+* Fix issue where draining syringe to tank leaves juice in syringe
+
 ## 26.1.2.3
 
 * Add storage counts to storage inventory screens

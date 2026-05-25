@@ -21,9 +21,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 // Exclude integration files for dependencies not yet available for 26.1.2
 sourceSets.main.java.exclude(
     '**/external/create/**',
-    '**/external/mekanism/**',
-    '**/external/mysticalagriculture/**',
-    '**/lazurite/LazuriteCropPlugin.java'
+    '**/external/mekanism/**'
 )
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
@@ -119,8 +117,8 @@ dependencies {
     compileOnly "top.theillusivec4.curios:curios-neoforge:15.0.0-beta.2+26.1.2:api"
     //compileOnly "mekanism:Mekanism:1.21.1-10.7.15.81:api"
     //compileOnly "com.hollingsworth.ars_nouveau:ars_nouveau-1.21.1:5.11.2.1298"
-    //compileOnly "com.blakebr0.cucumber:Cucumber:1.21.1-8.0.15"
-    //compileOnly "com.blakebr0.mysticalagriculture:MysticalAgriculture:1.21.1-8.0.23"
+    compileOnly "com.blakebr0.cucumber:Cucumber:26.1.2-9.0.2"
+    compileOnly "com.blakebr0.mysticalagriculture:MysticalAgriculture:26.1.2-9.0.3"
     //compileOnly("curse.maven:create-328085:7408951") { transitive = false }
     //compileOnly "maven.modrinth:emi:${emi_version}"
     //compileOnly "me.shedaniel:RoughlyEnoughItems-neoforge:${rei_version}"

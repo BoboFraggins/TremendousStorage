@@ -379,7 +379,10 @@ public class TankBlockEntity extends BlockEntity implements MenuProvider, Networ
                 net.neoforged.neoforge.transfer.item.VanillaContainerWrapper.of(tmpContainer);
         net.neoforged.neoforge.transfer.access.ItemAccess itemAccess =
                 ItemAccess.forHandlerIndex(wrapper, 0).oneByOne();
-        var cap = input.getCapability(Capabilities.Fluid.ITEM, itemAccess);
+        // Obtain the capability from the copy in tmpContainer (not from input) so that handlers
+        // which mutate their wrapped stack in place (e.g. ExperienceSyringeFluidHandler) update
+        // tmpContainer's slot directly, making the output stack reflect the post-drain state.
+        var cap = tmpContainer.getItem(0).getCapability(Capabilities.Fluid.ITEM, itemAccess);
         if (cap == null) return;
 
         FluidResource containedRes = cap.getResource(0);

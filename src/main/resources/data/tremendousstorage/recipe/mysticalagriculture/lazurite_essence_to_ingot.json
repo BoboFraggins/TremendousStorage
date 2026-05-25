@@ -7,15 +7,15 @@
   ],
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    "tremendousstorage:lazurite_essence",
-    "tremendousstorage:lazurite_essence",
-    "tremendousstorage:lazurite_essence",
-    "tremendousstorage:lazurite_essence",
-    "tremendousstorage:lazurite_essence",
-    "tremendousstorage:lazurite_essence",
-    "tremendousstorage:lazurite_essence",
-    "tremendousstorage:lazurite_essence",
-    "tremendousstorage:lazurite_essence"
+    "mysticalagriculture:lazurite_essence",
+    "mysticalagriculture:lazurite_essence",
+    "mysticalagriculture:lazurite_essence",
+    "mysticalagriculture:lazurite_essence",
+    "mysticalagriculture:lazurite_essence",
+    "mysticalagriculture:lazurite_essence",
+    "mysticalagriculture:lazurite_essence",
+    "mysticalagriculture:lazurite_essence",
+    "mysticalagriculture:lazurite_essence"
   ],
   "result": {
     "id": "tremendousstorage:lazurite_ingot",

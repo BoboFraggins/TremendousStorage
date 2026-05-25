@@ -1,6 +1,6 @@
 package net.bobofraggins.tremendousstorage.shared.register;
 
-// import com.blakebr0.mysticalagriculture.api.MysticalAgricultureAPI; // disabled - not available on 1.21.4
+import com.blakebr0.mysticalagriculture.api.MysticalAgricultureAPI;
 import net.bobofraggins.tremendousstorage.TremendousStorage;
 import net.bobofraggins.tremendousstorage.experiencesyringe.ExperienceSyringeItem;
 import net.bobofraggins.tremendousstorage.external.exdeorum.ExDeorumIntegration;
@@ -1288,16 +1288,15 @@ public final class Registration {
                         output.accept(VEX_REPELLENT_POTION_EXTENDED.get());
                         output.accept(VEX_REPELLENT_POTION_LONG.get());
 
-                        // if (ModList.get().isLoaded("mysticalagriculture")) { // disabled - not available on 1.21.4
-                        //     var lazurite = MysticalAgricultureAPI.getCropRegistry()
-                        //             .getCropById(
-                        //                     Identifier.fromNamespaceAndPath(TremendousStorage.MODID,
-                        // "lazurite"));
-                        //     if (lazurite != null) {
-                        //         output.accept(lazurite.getSeedsItem());
-                        //         output.accept(lazurite.getEssenceItem());
-                        //     }
-                        // }
+                        if (ModList.get().isLoaded("mysticalagriculture")) {
+                            var lazurite = MysticalAgricultureAPI.getCropRegistry()
+                                    .getCropById(net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                                            TremendousStorage.MODID, "lazurite"));
+                            if (lazurite != null) {
+                                output.accept(lazurite.getSeedsItem());
+                                output.accept(lazurite.getEssenceItem());
+                            }
+                        }
                     })
                     .build());
 

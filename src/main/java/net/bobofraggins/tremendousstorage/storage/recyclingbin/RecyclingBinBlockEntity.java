@@ -254,7 +254,9 @@ public class RecyclingBinBlockEntity extends BlockEntity implements MenuProvider
                 net.neoforged.neoforge.transfer.item.VanillaContainerWrapper.of(tmpContainer);
         net.neoforged.neoforge.transfer.access.ItemAccess itemAccess =
                 ItemAccess.forHandlerIndex(wrapper, 0).oneByOne();
-        var cap = input.getCapability(Capabilities.Fluid.ITEM, itemAccess);
+        // Obtain the capability from the copy in tmpContainer so that handlers which mutate their
+        // wrapped stack in place update tmpContainer's slot directly (see TankBlockEntity).
+        var cap = tmpContainer.getItem(0).getCapability(Capabilities.Fluid.ITEM, itemAccess);
         if (cap == null) return;
 
         FluidResource containedRes = cap.getResource(0);
