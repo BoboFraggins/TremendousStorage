@@ -3,6 +3,8 @@ package net.bobofraggins.tremendousstorage.storage.items;
 import net.bobofraggins.tremendousstorage.shared.register.Registration;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.cauldron.CauldronInteractions;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -64,6 +66,7 @@ public final class PositiveVibesInteractions {
                 stack.shrink(1);
                 player.addItem(new ItemStack(Registration.BRAIN.get()));
                 level.setBlockAndUpdate(pos, Blocks.CAULDRON.defaultBlockState());
+                level.playSound(null, pos, SoundEvents.BUCKET_FILL, SoundSource.BLOCKS, 1.0f, 1.0f);
                 level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
             }
             return InteractionResult.SUCCESS;

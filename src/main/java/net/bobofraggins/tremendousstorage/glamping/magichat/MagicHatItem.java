@@ -40,7 +40,7 @@ import net.minecraft.world.phys.Vec3;
  * a full {@link Entity#save(CompoundTag)} round-trip stored in {@link DataComponents#CUSTOM_DATA}.
  *
  * <p>When the hat contains a mob, right-clicking on a block face or in air releases it ~1.5
- * blocks in front of the player. Block placement is suppressed while a mob is stored.
+ * blocks in front of the player. Block placement is always suppressed.
  */
 public class MagicHatItem extends BlockItem {
 
@@ -107,7 +107,7 @@ public class MagicHatItem extends BlockItem {
             }
             return InteractionResult.SUCCESS;
         }
-        return super.useOn(ctx);
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -119,8 +119,7 @@ public class MagicHatItem extends BlockItem {
             }
             return InteractionResult.SUCCESS;
         }
-        // No mob stored — fall through to block placement (BlockItem.use)
-        return super.use(level, player, hand);
+        return InteractionResult.PASS;
     }
 
     private static void releaseMob(ItemStack stack, Player player, Level level) {
