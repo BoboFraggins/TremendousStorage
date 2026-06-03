@@ -31,19 +31,19 @@ public class MekanismIntegration {
             "clean_lazurite", () -> new Chemical(ChemicalBuilder.cleanSlurry().tint(LAZURITE_TINT)));
 
     public static final DeferredHolder<Item, Item> LAZURITE_DUST =
-            ITEMS.register("lazurite_dust", () -> new Item(new Item.Properties()));
+            ITEMS.registerItem("lazurite_dust", Item::new, Item.Properties::new);
 
     public static final DeferredHolder<Item, Item> LAZURITE_DIRTY_DUST =
-            ITEMS.register("lazurite_dirty_dust", () -> new Item(new Item.Properties()));
+            ITEMS.registerItem("lazurite_dirty_dust", Item::new, Item.Properties::new);
 
     public static final DeferredHolder<Item, Item> LAZURITE_CLUMP =
-            ITEMS.register("lazurite_clump", () -> new Item(new Item.Properties()));
+            ITEMS.registerItem("lazurite_clump", Item::new, Item.Properties::new);
 
     public static final DeferredHolder<Item, Item> LAZURITE_SHARD =
-            ITEMS.register("lazurite_shard", () -> new Item(new Item.Properties()));
+            ITEMS.registerItem("lazurite_shard", Item::new, Item.Properties::new);
 
     public static final DeferredHolder<Item, Item> LAZURITE_CRYSTAL =
-            ITEMS.register("lazurite_crystal", () -> new Item(new Item.Properties()));
+            ITEMS.registerItem("lazurite_crystal", Item::new, Item.Properties::new);
 
     public static void register(IEventBus modBus) {
         CHEMICALS.register(modBus);

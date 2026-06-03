@@ -4,6 +4,7 @@
 
 * Add lazurite seeds and essence for Mystical Agriculture
 * Fix issue where draining syringe to tank leaves juice in syringe
+* Fix crash with Productive Metalworks
 
 ## 26.1.2.3
 

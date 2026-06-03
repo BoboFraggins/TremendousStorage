@@ -16,7 +16,7 @@ public class ExDeorumIntegration {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(TremendousStorage.MODID);
 
     public static final DeferredHolder<Item, Item> LAZURITE_ORE_CHUNK =
-            ITEMS.register("lazurite_ore_chunk", () -> new Item(new Item.Properties()));
+            ITEMS.registerItem("lazurite_ore_chunk", Item::new, Item.Properties::new);
 
     public static void register(IEventBus modBus) {
         ITEMS.register(modBus);

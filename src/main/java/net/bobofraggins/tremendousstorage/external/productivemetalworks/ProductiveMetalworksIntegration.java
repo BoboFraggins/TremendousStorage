@@ -56,11 +56,11 @@ public class ProductiveMetalworksIntegration {
                     .pushReaction(PushReaction.DESTROY)
                     .lightLevel(state -> 15));
 
-    public static final DeferredHolder<Item, BucketItem> MOLTEN_LAZURITE_BUCKET = ITEMS.register(
+    public static final DeferredHolder<Item, BucketItem> MOLTEN_LAZURITE_BUCKET = ITEMS.registerItem(
             "molten_lazurite_bucket",
-            () -> new BucketItem(
-                    MOLTEN_LAZURITE_SOURCE.get(),
-                    new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
+            props -> new BucketItem(
+                    MOLTEN_LAZURITE_SOURCE.get(), props.stacksTo(1).craftRemainder(Items.BUCKET)),
+            Item.Properties::new);
 
     /** Shared properties object for the Molten Lazurite Source + Flowing fluids. */
     public static final BaseFlowingFluid.Properties MOLTEN_LAZURITE_FLUID_PROPS = new BaseFlowingFluid.Properties(

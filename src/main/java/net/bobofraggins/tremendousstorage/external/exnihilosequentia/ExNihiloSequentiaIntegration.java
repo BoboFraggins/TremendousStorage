@@ -16,7 +16,7 @@ public class ExNihiloSequentiaIntegration {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(TremendousStorage.MODID);
 
     public static final DeferredHolder<Item, Item> LAZURITE_PIECES =
-            ITEMS.register("lazurite_pieces", () -> new Item(new Item.Properties()));
+            ITEMS.registerItem("lazurite_pieces", Item::new, Item.Properties::new);
 
     public static void register(IEventBus modBus) {
         ITEMS.register(modBus);
